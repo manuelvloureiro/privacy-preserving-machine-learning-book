@@ -1,12 +1,12 @@
 # Exercises: The definition of differential privacy
 
-Exercises for [The definition of differential privacy](../../book-full/part03-dp-foundations/01-definition.md), each with a worked solution. Try each exercise before opening its solution. The script `code/part03-dp-foundations/solutions_definition.py` computes every number quoted here; run it with `uv run python code/part03-dp-foundations/solutions_definition.py`.
+Exercises for [the definition of differential privacy](../../book-full/part03-dp-foundations/01-definition.md), each with a worked solution. Try each exercise before opening its solution. The script `code/part03-dp-foundations/solutions_definition.py` computes every number quoted here; run it with `uv run python code/part03-dp-foundations/solutions_definition.py`.
 
-The solutions use the chapter's notation. Differential privacy (DP) is defined by @eq-dpdef-def: $\Pr[M(D) \in S] \le e^\varepsilon\Pr[M(D') \in S] + \delta$ for all neighbours $D \simeq D'$ and all events $S$. $P = M(D)$ and $Q = M(D')$, and $L_{D,D'} = \ln(p/q)$ is the privacy loss. Randomized response at level $\varepsilon$ reports the truth with probability $t = e^\varepsilon/(1 + e^\varepsilon)$.
+The solutions use the chapter's notation. Differential privacy (DP) is defined by @eq-dpdef-def: $\Pr[M(D) \in S] \le e^\varepsilon\Pr[M(D') \in S] + \delta$ for all neighbours $D \sim D'$ and all events $S$. $P = M(D)$ and $Q = M(D')$, and $L_{D,D'} = \ln(p/q)$ is the privacy loss. Randomized response at level $\varepsilon$ reports the truth with probability $t = e^\varepsilon/(1 + e^\varepsilon)$.
 
 ## Randomized response with $k$ answers {#sec-sol-dpdef-1}
 
-> **Exercise 1.** **Randomized response with $k$ answers.** A person holds one of $k$ values. Report the true value with probability $e^\varepsilon/(e^\varepsilon + k - 1)$ and each other value with probability $1/(e^\varepsilon + k - 1)$. Show that this is $\varepsilon$-DP, and that $k = 2$ gives randomized response. *Check: at $k = 4$, $\varepsilon = 1$, the truth is reported with probability 0.4754.* *(Fact 1)*
+> **Exercise 1.** **Randomized response with $k$ answers.** A person holds one of $k$ values. Report the true value with probability $e^\varepsilon/(e^\varepsilon + k - 1)$ and each other value with probability $1/(e^\varepsilon + k - 1)$. Show that this is $\varepsilon$-DP, and that $k = 2$ gives randomized response. *Check: at $k = 4$, $\varepsilon = 1$, the truth is reported with probability 0.4754.* *(@prp-dpdef-pointwise)*
 
 ::: {.callout-tip collapse="true" title="Solution"}
 1. **It is a distribution.** For a true value $v$, the probabilities are one value $e^\varepsilon/(e^\varepsilon + k - 1)$ and $k - 1$ values $1/(e^\varepsilon + k - 1)$. They sum to $(e^\varepsilon + k - 1)/(e^\varepsilon + k - 1) = 1$.
@@ -15,7 +15,7 @@ The solutions use the chapter's notation. Differential privacy (DP) is defined b
     - $y = v$: probability $e^\varepsilon/c$ under $v$, $1/c$ under $v'$ (it is an "other" value for $v'$), with $c = e^\varepsilon + k - 1$. Ratio $e^\varepsilon$.
     - $y = v'$: $1/c$ against $e^\varepsilon/c$. Ratio $e^{-\varepsilon}$.
     - Any other $y$: $1/c$ against $1/c$. Ratio 1.
-4. **Fact 1.** The largest ratio over outcomes, in either order, is $e^\varepsilon$, so the largest ratio over events is too. The mechanism is $\varepsilon$-DP, and no smaller $\varepsilon$ works, because the outcome $y = v$ attains $e^\varepsilon$.
+4. **Outcomes decide.** The largest ratio over outcomes, in either order, is $e^\varepsilon$, so by @prp-dpdef-pointwise the largest ratio over events is too. The mechanism is $\varepsilon$-DP, and no smaller $\varepsilon$ works, because the outcome $y = v$ attains $e^\varepsilon$.
 5. **$k = 2$.** The truth has probability $e^\varepsilon/(e^\varepsilon + 1) = t$ and the other value $1/(e^\varepsilon + 1) = 1 - t$: randomized response.
 
 @tbl-sol-dpdef-krr gives the probabilities, and the smallest $\varepsilon$ found by computing the max-divergence between the output distributions of every pair of true values.
@@ -36,7 +36,7 @@ The solutions use the chapter's notation. Differential privacy (DP) is defined b
 > **Exercise 2.** **From add/remove to replace with $\delta$.** Show that $(\varepsilon, \delta)$-DP under add/remove implies $(2\varepsilon, (1 + e^\varepsilon)\delta)$-DP under replace. *Hint: chain @eq-dpdef-def through $D \setminus \{x\}$ as in @eq-dpdef-replace and keep track of the $\delta$ terms.* *Check: $\varepsilon = 1$, $\delta = 10^{-6}$ gives $(2, 3.718\times10^{-6})$.* *(Neighbouring relations)*
 
 ::: {.callout-tip collapse="true" title="Solution"}
-1. **The path.** $D$ has record $x$ where $D'$ has $x'$. Let $D_0 = D \setminus \{x\} = D' \setminus \{x'\}$. Then $D \simeq D_0$ and $D_0 \simeq D'$ under add/remove.
+1. **The path.** Use the two-step path $D$, $D_0 = D \setminus \{x\}$, $D'$ of the proof of @prp-dpdef-replace, whose two steps are add/remove neighbours.
 2. **First step.** For any event $S$, $\Pr[M(D) \in S] \le e^\varepsilon\Pr[M(D_0) \in S] + \delta$.
 3. **Second step.** $\Pr[M(D_0) \in S] \le e^\varepsilon\Pr[M(D') \in S] + \delta$.
 4. **Substitute 3 into 2.** $\Pr[M(D) \in S] \le e^\varepsilon\big(e^\varepsilon\Pr[M(D') \in S] + \delta\big) + \delta = e^{2\varepsilon}\Pr[M(D') \in S] + (1 + e^\varepsilon)\delta$. The $\delta$ of the second step is multiplied by $e^\varepsilon$ because it sits inside the first step's ratio.
@@ -70,7 +70,7 @@ The solutions use the chapter's notation. Differential privacy (DP) is defined b
 1. **The output distribution factors.** Given Alice's bit $x$, the $k$ reports are independent, so $p(y_1, \dots, y_k \mid x) = \prod_i p(y_i \mid x)$.
 2. **The privacy loss adds.** $L(y) = \sum_i\ln\frac{p(y_i \mid 1)}{p(y_i \mid 0)}$, and each term is $+\varepsilon_0$ (report 1) or $-\varepsilon_0$ (report 0).
 3. **The largest loss.** All $k$ reports equal to 1 give $L = k\varepsilon_0$. Unlike the $n$-person case of the chapter, the $k$ factors do not cancel, because all of them depend on the same bit. The script computes the max-divergence of the joint distributions: 1.0986, 2.1972 and 3.2958 for $k = 1, 2, 3$, equal to $k\ln 3$.
-4. **The posterior.** By Fact 4, the posterior odds are the prior odds times $e^{L} = 3^k$. From prior odds 1, they are $3^k$, so the posterior is $3^k/(3^k + 1)$: 0.75, 0.9 and $27/28 = 0.9643$ for $k = 1, 2, 3$.
+4. **The posterior.** By step 1 of the proof of @thm-dpdef-posterior, the posterior odds are the prior odds times $e^{L} = 3^k$. From prior odds 1, they are $3^k$, so the posterior is $3^k/(3^k + 1)$: 0.75, 0.9 and $27/28 = 0.9643$ for $k = 1, 2, 3$.
 
 *Re-randomizing the same answer spends the budget again: the losses add, which is basic composition in [Post-processing, group privacy and composition](../../book-full/part03-dp-foundations/02-properties.md). Practical randomized response memoizes one noisy answer per person and reuses it.*
 :::

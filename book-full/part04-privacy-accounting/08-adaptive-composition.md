@@ -32,7 +32,7 @@ Both need theorems of their own, and the tool behind all of them is the same. Tr
 
 ## Toolkit: stopping a supermartingale
 
-Each derivation below reuses three facts. The first says that stopping early does not change how you compute the loss. The second says that stopping early cannot raise the mean of a supermartingale. The third turns the second into a bound on the whole path of the process. The first is Fact 2 of [Composition](../part03-dp-foundations/04-composition.md), restated for a stopped run; the other two are proved here.
+Each derivation below reuses three facts. The first says that stopping early does not change how you compute the loss. The second says that stopping early cannot raise the mean of a supermartingale. The third turns the second into a bound on the whole path of the process. The first is @lem-comp-sum of [Composition](../part03-dp-foundations/04-composition.md), restated for a stopped run; the other two are proved here.
 
 ### Fact 1 — The loss of a stopped run is the sum of the losses of the steps it ran
 

@@ -32,10 +32,10 @@ The solutions use the chapter's notation. The universe has $N$ possible records,
 
 ## The learning rate in the mistake bound {#sec-sol-qr-3}
 
-> **Exercise 3.** **The learning rate in the mistake bound.** In the derivation of @eq-qr-mistakes, keep a general learning rate $\eta < \alpha$ instead of $\alpha/2$. Show that the number of corrections satisfies $U < \ln N/(\eta(\alpha - \eta))$, and that $\eta = \alpha/2$ minimizes this bound. *Check: for $N = 256$ and $\alpha = 0.05$, the bound is 8,872 at $\eta = 0.025$ and 11,830 at both $\eta = 0.0125$ and $\eta = 0.0375$.* *(Regret to mistakes)*
+> **Exercise 3.** **The learning rate in the mistake bound.** In the proof of @thm-qr-mistakes, keep a general learning rate $\eta < \alpha$ instead of $\alpha/2$. Show that the number of corrections satisfies $U < \ln N/(\eta(\alpha - \eta))$, and that $\eta = \alpha/2$ minimizes this bound. *Check: for $N = 256$ and $\alpha = 0.05$, the bound is 8,872 at $\eta = 0.025$ and 11,830 at both $\eta = 0.0125$ and $\eta = 0.0375$.* *(Regret to mistakes)*
 
 ::: {.callout-tip collapse="true" title="Solution"}
-1. **The same two bounds on the regret.** Each correction has regret more than $\alpha$, so after $U$ corrections the total is more than $\alpha U$. The regret bound @eq-qr-regret, applied to those $U$ rounds ($T = U$), gives at most $\eta U + \ln N/\eta$.
+1. **The same two bounds on the regret.** As in steps 1 and 2 of @thm-qr-mistakes, each correction has regret more than $\alpha$, so after $U$ corrections the total is more than $\alpha U$. The regret bound @eq-qr-regret, applied to those $U$ rounds ($T = U$), gives at most $\eta U + \ln N/\eta$.
 2. **Solve for $U$.** $\alpha U < \eta U + \ln N/\eta$ gives $(\alpha - \eta)U < \ln N/\eta$, so $U < \ln N/(\eta(\alpha - \eta))$ for $\eta < \alpha$.
 3. **The best learning rate.** The bound is smallest when $\eta(\alpha - \eta)$ is largest. That product is a downward parabola in $\eta$ with roots at 0 and $\alpha$, so its maximum is at the midpoint $\eta = \alpha/2$, where it equals $\alpha^2/4$. The bound is then $4\ln N/\alpha^2$.
 4. **Numbers.** With $\ln 256 = 5.545$ and $\alpha = 0.05$: at $\eta = 0.025$ the bound is $5.545/(0.025 \times 0.025) = 8872$. At $\eta = 0.0125$ or $0.0375$ the product is $0.0125 \times 0.0375$ in both cases, and the bound is 11,830.
@@ -45,7 +45,7 @@ The solutions use the chapter's notation. The universe has $N$ possible records,
 
 ## The pure-DP sample size {#sec-sol-qr-4}
 
-> **Exercise 4.** **The pure-DP sample size.** Under pure DP each step gets $\varepsilon_0 = \varepsilon/(2T)$, and the error bound @eq-qr-pmw becomes $A/\sqrt T + CT$ with $A = 2\sqrt{\ln N}$ and $C = 4L/(n\varepsilon)$. The term $L$ grows with $T$ only through a logarithm, so treat it as a constant. Find the $T$ that minimizes the bound, show that the minimum is $3(4L\ln N/(n\varepsilon))^{1/3}$, and deduce $n = 108L\ln N/(\alpha^3\varepsilon)$. *Check: for $N = 2^{20}$, $|\mathcal Q| = 10^6$, $\alpha = 0.05$ and $\varepsilon = 1$, a search over $T$ that lets $L$ vary needs $5.14\times10^8$ records, at $T = 48{,}610$ and $L = 42.78$. The closed form with that $L$ gives $5.12\times10^8$.* *(Balancing two terms)*
+> **Exercise 4.** **The pure-DP sample size.** Under pure DP each step gets $\varepsilon_0 = \varepsilon/(2T)$, and the error bound @eq-qr-pmw of @thm-qr-pmw becomes $A/\sqrt T + CT$ with $A = 2\sqrt{\ln N}$ and $C = 4L/(n\varepsilon)$. The term $L$ grows with $T$ only through a logarithm, so treat it as a constant. Find the $T$ that minimizes the bound, show that the minimum is $3(4L\ln N/(n\varepsilon))^{1/3}$, and deduce $n = 108L\ln N/(\alpha^3\varepsilon)$. *Check: for $N = 2^{20}$, $|\mathcal Q| = 10^6$, $\alpha = 0.05$ and $\varepsilon = 1$, a search over $T$ that lets $L$ vary needs $5.14\times10^8$ records, at $T = 48{,}610$ and $L = 42.78$. The closed form with that $L$ gives $5.12\times10^8$.* *(Balancing two terms)*
 
 ::: {.callout-tip collapse="true" title="Solution"}
 1. **The derivative.** The derivative of $A T^{-1/2} + CT$ with respect to $T$ is $-\frac A2T^{-3/2} + C$. It is zero at $T^{3/2} = A/(2C)$, that is $T = (A/(2C))^{2/3}$, and the function is convex, so this is the minimum.
@@ -54,7 +54,7 @@ The solutions use the chapter's notation. The universe has $N$ possible records,
 4. **Records.** Setting this equal to $\alpha$ and cubing, $\alpha^3 = 27 \times 4L\ln N/(n\varepsilon)$, so $n = 108L\ln N/(\alpha^3\varepsilon)$.
 5. **Numbers.** The script searches over $T$, recomputing $L$ for each, and finds $5.14\times10^8$ records at $T = 48{,}610$, where $L = \ln 10^6 + 2\ln(2 \times 48{,}610/0.05) = 42.78$ with $\beta = 0.05$. The closed form with that $L$ gives $108 \times 42.78 \times \ln 2^{20}/0.05^3 = 5.12\times10^8$. The same search under approximate DP, as in @tbl-qr-records, needs $1.56\times10^7$ records, about 33 times fewer.
 
-*Pure DP pays $\alpha^{-3}$ where approximate DP pays $\alpha^{-2}$, because basic composition charges each round $1/T$ of the budget, while advanced composition charges only about $1/\sqrt T$. It is the same $\sqrt k$ saving as in [Advanced and optimal composition](../../book-full/part03-dp-foundations/04-composition.md).*
+*Pure DP pays $\alpha^{-3}$ where approximate DP (@cor-qr-pmw-n) pays $\alpha^{-2}$, because basic composition charges each round $1/T$ of the budget, while advanced composition charges only about $1/\sqrt T$. It is the same $\sqrt k$ saving as in [Advanced and optimal composition](../../book-full/part03-dp-foundations/04-composition.md).*
 :::
 
 ## A small dataset by sampling {#sec-sol-qr-5}
@@ -63,7 +63,7 @@ The solutions use the chapter's notation. The universe has $N$ possible records,
 
 ::: {.callout-tip collapse="true" title="Solution"}
 1. **The size.** $m = \lceil2\ln(2 \times 6560)/0.1^2\rceil = \lceil200\ln 13{,}120\rceil = \lceil1896.4\rceil = 1897$.
-2. **Why it works.** For one query, a sample's answer is an average of $m$ independent values in $[0, 1]$ with mean equal to the true answer. Hoeffding's inequality says that such an average is off by more than $s$ with probability at most $2e^{-2ms^2}$, which at $s = \alpha/2$ is $2e^{-m\alpha^2/2}$. With $m = 1897$ this is $2e^{-9.485} = 1.52\times10^{-4}$, and the union bound over 6,560 queries gives at most 0.997, which is below 1.
+2. **Why it works.** @lem-qr-small-exists shows that one query of a sample of $m$ records is off by more than $\alpha/2$ with probability at most $2e^{-m\alpha^2/2}$, by Hoeffding's inequality. With $m = 1897$ this is $2e^{-9.485} = 1.52\times10^{-4}$, and the union bound over 6,560 queries gives at most 0.997, which is below 1.
 3. **The check.** The script draws 200 samples of 1,897 records from the example's histogram and computes each sample's largest error over the 6,560 queries. The average is 0.0261 and the largest is 0.0451, so every sample is within 0.05.
 4. **Fewer records.** With 200 records instead, the average largest error is 0.0834, and only 1% of samples stay within 0.05.
 

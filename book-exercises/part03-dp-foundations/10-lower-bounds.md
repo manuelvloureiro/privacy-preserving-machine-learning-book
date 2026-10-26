@@ -11,8 +11,8 @@ The solutions use the chapter's notation. $M$ is a differential privacy (DP) mec
 ::: {.callout-tip collapse="true" title="Solution"}
 1. **The candidates.** For each $x \ne x_0$ there is one dataset $D_x$, so $m = N - 1$. Each is $k$ replacements away from $D_0$.
 2. **Their histograms.** $h(D_x) = (n - k)e_{x_0} + k\,e_x$. For $x \ne y$, the two histograms agree in bin $x_0$ and differ by $k$ in bins $x$ and $y$, so $\|h(D_x) - h(D_y)\|_\infty = k$.
-3. **Disjoint regions.** As in the chapter, the $\ell_\infty$ balls of radius $\alpha$ around them are disjoint when $k > 2\alpha$. Take $k = \lfloor2\alpha\rfloor + 1 \le 2\alpha + 1$.
-4. **Packing lemma** with $m = N - 1$: $2\alpha + 1 \ge \ln((N - 1)(1 - \beta))/\varepsilon$, which rearranges to the claim.
+3. **Disjoint regions.** As in step 3 of the proof of @thm-lower-histogram, the $\ell_\infty$ balls of radius $\alpha$ around them are disjoint when $k > 2\alpha$. Take $k = \lfloor2\alpha\rfloor + 1 \le 2\alpha + 1$.
+4. **@lem-lower-packing** with $m = N - 1$: $2\alpha + 1 \ge \ln((N - 1)(1 - \beta))/\varepsilon$, which rearranges to the claim.
 5. **The number.** $\ln(N - 1)$ and $\ln N$ differ by about $1/N = 10^{-6}$, so the bound is 6.3821 under both relations.
 6. **The upper bound doubles.** Replacing a record lowers one count by 1 and raises another by 1, so the $\ell_1$ sensitivity is 2 and the Laplace scale is $2/\varepsilon$. Every quantile of the largest noise over the bins scales with it: $2\times16.79 = 33.57$ (the script computes $2 \times 16.785\ldots$ before rounding).
 
@@ -24,12 +24,10 @@ The solutions use the chapter's notation. $M$ is a differential privacy (DP) mec
 > **Exercise 2.** **What packing can force under approximate DP.** Starting from @eq-lower-group, show that $m$ disjoint regions force $m\big(e^{-k\varepsilon}(1 - \beta) - k\,e^{-\varepsilon}\delta\big) \le 1$, and that as $m \to \infty$ this forces only $e^{-k\varepsilon}(1 - \beta) \le k\,e^{-\varepsilon}\delta$. *Check: at $\varepsilon = 1$, $\delta = 10^{-6}$, $\beta = 0.05$ the limit is $k = 12.26$, so the forced integer group distance is 13 for $m = 2^{20}$ and for $m = 2^{1000}$ alike, against $\ln(1/\delta)/\varepsilon = 13.82$.* *(Group privacy, packing)*
 
 ::: {.callout-tip collapse="true" title="Solution"}
-1. **Group privacy for each region.** @eq-lower-group with $D = D_i$, $D'' = D_0$ and $S = G_i$: $1 - \beta \le e^{k\varepsilon}\Pr[M(D_0) \in G_i] + \delta_k$.
-2. **Solve for the share of $D_0$:** $\Pr[M(D_0) \in G_i] \ge e^{-k\varepsilon}(1 - \beta) - e^{-k\varepsilon}\delta_k$.
-3. **Bound the $\delta$ term.** $e^{-k\varepsilon}\delta_k = \delta\sum_{j=0}^{k-1}e^{(j - k)\varepsilon}$. Each of the $k$ terms is at most the largest, $e^{-\varepsilon}$ (at $j = k - 1$), so $e^{-k\varepsilon}\delta_k \le k\,e^{-\varepsilon}\delta$.
-4. **Sum over the disjoint regions:** $1 \ge \sum_i\Pr[M(D_0) \in G_i] \ge m\big(e^{-k\varepsilon}(1 - \beta) - k\,e^{-\varepsilon}\delta\big)$.
-5. **The limit.** Call the bracket the floor. If it is positive, step 4 fails for large enough $m$, so an accurate mechanism must have a $k$ where the floor is $\le 0$. As $m \to \infty$, that is all step 4 says: $e^{-k\varepsilon}(1 - \beta) \le k\,e^{-\varepsilon}\delta$.
-6. **The numbers.** Bisection finds the floor's zero at $k = 12.26$. At $k = 12$ the floor is $0.95e^{-12} - 12e^{-1}\times10^{-6} = 5.83\times10^{-6} - 4.41\times10^{-6} = 1.42\times10^{-6}$, and $m = 2^{20} \approx 1.05\times10^6$ makes $m$ times it 1.49, more than 1. So $k \le 12$ is impossible and $k \ge 13$ is forced. At $k = 13$ the floor is already negative, so no larger $m$, not even $2^{1000}$, forces more.
+1. **The share of each region.** Step 1 of the proof of @prp-lower-packing-approx, stopped before the last bound $e^{-\varepsilon} \le 1$, gives $\Pr[M(D_0) \in G_i] \ge e^{-k\varepsilon}(1 - \beta) - k\,e^{-\varepsilon}\delta$.
+2. **Sum over the disjoint regions:** $1 \ge \sum_i\Pr[M(D_0) \in G_i] \ge m\big(e^{-k\varepsilon}(1 - \beta) - k\,e^{-\varepsilon}\delta\big)$.
+3. **The limit.** Call the bracket the floor. If it is positive, step 2 fails for large enough $m$, so an accurate mechanism must have a $k$ where the floor is $\le 0$. As $m \to \infty$, that is all step 2 says: $e^{-k\varepsilon}(1 - \beta) \le k\,e^{-\varepsilon}\delta$.
+4. **The numbers.** Bisection finds the floor's zero at $k = 12.26$. At $k = 12$ the floor is $0.95e^{-12} - 12e^{-1}\times10^{-6} = 5.83\times10^{-6} - 4.41\times10^{-6} = 1.42\times10^{-6}$, and $m = 2^{20} \approx 1.05\times10^6$ makes $m$ times it 1.49, more than 1. So $k \le 12$ is impossible and $k \ge 13$ is forced. At $k = 13$ the floor is already negative, so no larger $m$, not even $2^{1000}$, forces more.
 
 *Under approximate DP, packing hits a ceiling near $\ln(1/\delta)/\varepsilon$ that no number of candidates can lift. The ceiling is 12.26 rather than 13.82 because the $\delta$ term carries the factor $k$, which costs a further $\ln k/\varepsilon$.*
 :::
@@ -104,14 +102,13 @@ Work with one coordinate and drop the index $j$. Given $p$, the dataset, the ref
 
 ## Reconstruction implies $\varepsilon$ {#sec-sol-lower-7}
 
-> **Exercise 7.** **Reconstruction implies $\varepsilon$.** A reconstruction attack recovers 90% of a database of uniform bits from a release claimed to be $(\varepsilon, 10^{-6})$-DP. What is the smallest $\varepsilon$ the claim can have? *Check: $\varepsilon \ge \ln\big((0.9 - 10^{-6})/0.1\big) = 2.1972$; at 99% it is 4.5951.* *(Fact 3)*
+> **Exercise 7.** **Reconstruction implies $\varepsilon$.** A reconstruction attack recovers 90% of a database of uniform bits from a release claimed to be $(\varepsilon, 10^{-6})$-DP. What is the smallest $\varepsilon$ the claim can have? *Check: $\varepsilon \ge \ln\big((0.9 - 10^{-6})/0.1\big) = 2.1972$; at 99% it is 4.5951.* *(Bit guessing, @thm-lower-dn)*
 
 ::: {.callout-tip collapse="true" title="Solution"}
-1. **The bound on recovery.** By @eq-lower-dn, an $(\varepsilon, \delta)$-DP release lets any reconstruction recover a fraction of at most $(e^\varepsilon + \delta)/(e^\varepsilon + 1)$ of uniform bits, in expectation.
-2. **Solve for $\varepsilon$.** $r(e^\varepsilon + 1) \le e^\varepsilon + \delta$ rearranges to $e^\varepsilon(1 - r) \ge r - \delta$, so $\varepsilon \ge \ln\frac{r - \delta}{1 - r}$.
-3. **$r = 0.9$:** $\ln(0.899999/0.1) = \ln 9.0000 = 2.1972$.
-4. **$r = 0.99$:** $\ln(0.989999/0.01) = \ln 99.0 = 4.5951$.
-5. **Conversely,** at $\varepsilon = 1$ no attack can recover more than $(e + 10^{-6})/(e + 1) = 0.7311$ of the bits.
+1. **The bound.** By @thm-lower-dn, recovering a fraction $r$ of uniform bits from an $(\varepsilon, \delta)$-DP release proves $\varepsilon \ge \ln\frac{r - \delta}{1 - r}$ (@eq-lower-dn).
+2. **$r = 0.9$:** $\ln(0.899999/0.1) = \ln 9.0000 = 2.1972$.
+3. **$r = 0.99$:** $\ln(0.989999/0.01) = \ln 99.0 = 4.5951$.
+4. **Conversely,** at $\varepsilon = 1$ no attack can recover more than $(e + 10^{-6})/(e + 1) = 0.7311$ of the bits.
 
 *Each extra "nine" in the recovery rate adds about $\ln 10 = 2.3$ to the $\varepsilon$ the attack proves. The $10^{-6}$ barely matters here; $\delta$ would need to be comparable to $1 - r$ to change the answer.*
 :::

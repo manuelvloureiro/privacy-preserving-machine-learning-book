@@ -46,24 +46,24 @@ uv run python code/part03-dp-foundations/laplace_gaussian.py
 
 ## Notation
 
-The chapters share the conventions in @tbl-dp-notation, set in [The definition of differential privacy](01-definition.md) and fixed for the whole book. The next part uses the same notation. There the noise multiplier, the noise standard deviation per unit of sensitivity, is usually written $\sigma$; it equals the standard deviation when the sensitivity is 1.
+The chapters share the conventions in @tbl-dp-notation, set in [the definition of differential privacy](01-definition.md) and fixed for the whole book. The next part uses the same notation. There the noise multiplier, the noise standard deviation per unit of sensitivity, is usually written $\sigma$; it equals the standard deviation when the sensitivity is 1.
 
 | Symbol | Meaning |
 | --- | --- |
 | $D = (x_1, \dots, x_n)$, $\mathcal X$ | A dataset of $n$ records, each from the data universe $\mathcal X$, so $D \in \mathcal X^n$ |
 | $M$; $M_1, \dots, M_k$ | A mechanism, a randomized algorithm whose privacy is analysed; $k$ mechanisms in a composition |
 | $y \in \mathcal Y$, $S \subseteq \mathcal Y$ | An output, the output space and an event; $Y = M(D)$ is the random output |
-| $D \simeq D'$ | Neighbouring datasets: by default one is the other with one record added or removed; "replace one record" is named explicitly when used |
+| $D \sim D'$ | Neighbouring datasets: by default one is the other with one record added or removed; "replace one record" is named explicitly when used |
 | $D' = D \cup \{x\}$ | Under add/remove, $D'$ is the dataset that contains the record $x$ and $D$ the one without it. A membership test says "$D'$" when it guesses that the record is in; its false positive rate is the chance of saying "$D'$" when the data were $D$, and its true positive rate the chance of saying "$D'$" when they were $D'$ |
 | $\varepsilon$, $\delta$ | The privacy parameters: $\varepsilon$-DP is pure DP, $(\varepsilon, \delta)$-DP approximate DP |
 | $f$; $\Delta_1 f$, $\Delta_2 f$ | A query $f\colon \mathcal X^n \to \mathbb R^d$ with output dimension $d$; its $\ell_1$ and $\ell_2$ sensitivities, written $\Delta f$ when the norm is clear |
 | $L_{D,D'}(y) = \ln\frac{p_{M(D)}(y)}{p_{M(D')}(y)}$ | The privacy loss of output $y$; $L = L_{D,D'}(Y)$ with $Y \sim M(D)$ is the privacy loss random variable |
-| $E_\gamma(P \,\|\, Q)$, $\delta(\varepsilon)$ | The hockey-stick divergence at level $\gamma \ge 1$; $(\varepsilon,\delta)$-DP means $E_{e^\varepsilon}(M(D) \,\|\, M(D')) \le \delta$ for all $D \simeq D'$, and the privacy profile $\delta(\varepsilon)$ is the smallest such $\delta$ |
+| $E_\gamma(P \,\|\, Q)$, $\delta(\varepsilon)$ | The hockey-stick divergence at level $\gamma \ge 1$; $(\varepsilon,\delta)$-DP means $E_{e^\varepsilon}(M(D) \,\|\, M(D')) \le \delta$ for all $D \sim D'$, and the privacy profile $\delta(\varepsilon)$ is the smallest such $\delta$ |
 | $\mathrm{Lap}(b)$, $\mathcal N(0, \sigma^2)$ | Laplace noise with scale $b = \Delta_1 f/\varepsilon$; normal noise with standard deviation $\sigma$ |
 | $r \in \mathcal R$, $u(D, r)$, $\Delta u$ | The exponential mechanism's candidates, its score function and the score's sensitivity |
 | $\mathcal Q$, $\tau$, $\bot$, $\top$ | A workload of counting queries; the sparse vector technique's threshold and its answers "below" and "above" |
 | $(\alpha, \beta)$ | An $(\alpha, \beta)$-accurate mechanism errs by at most $\alpha$ with probability at least $1 - \beta$; $\beta$ is a failure probability |
-| $a$, $b$ | The type I and type II errors of a test, its false positive and false negative rates |
+| $\mathrm{FPR}$, $\mathrm{FNR}$ | A test's false positive and false negative rates, its type I and type II errors, written $\alpha$ and $\beta$ on a page without an accuracy guarantee |
 | $R\colon \mathcal X \to \mathcal Y$, $\varepsilon_0$ | A local randomizer and its privacy parameter |
 
 : Notation shared by the chapters of this part and the next. {#tbl-dp-notation}

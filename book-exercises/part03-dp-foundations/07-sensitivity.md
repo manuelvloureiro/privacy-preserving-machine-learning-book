@@ -26,7 +26,7 @@ The solutions use the chapter's notation. Datasets have a fixed size $n$, neighb
 ::: {.callout-tip collapse="true" title="Solution"}
 1. **Find the maximum.** Let $g(u) = \gamma u^{\gamma-1}/(1 + u^\gamma)$. It is 0 at $u = 0$ (for $\gamma > 1$) and tends to 0 as $u \to \infty$, so its maximum is at a critical point. By the quotient rule, $g'(u) = 0$ when
 $$(\gamma - 1)u^{\gamma-2}(1 + u^\gamma) = \gamma u^{\gamma-1}\cdot u^{\gamma-1}\quad\Longleftrightarrow\quad(\gamma - 1)(1 + u^\gamma) = \gamma u^\gamma\quad\Longleftrightarrow\quad u^\gamma = \gamma - 1.$$
-2. **Evaluate.** There $1 + u^\gamma = \gamma$, so $g = u^{\gamma-1} = (\gamma - 1)^{(\gamma-1)/\gamma}$. A numerical maximum on a fine grid agrees (@tbl-sol-sensitivity-sliding).
+2. **Evaluate.** There $1 + u^\gamma = \gamma$, so $g = u^{\gamma-1} = (\gamma - 1)^{(\gamma-1)/\gamma}$. A numerical maximum on a fine grid agrees (@tbl-sol-sens-sliding).
 
 | $\gamma$ | $(\gamma - 1)^{(\gamma-1)/\gamma}$ | Numerical maximum | Bound used in the chapter |
 | --- | --- | --- | --- |
@@ -34,9 +34,9 @@ $$(\gamma - 1)u^{\gamma-2}(1 + u^\gamma) = \gamma u^{\gamma-1}\cdot u^{\gamma-1}
 | 3 | 1.5874 | 1.5874 | 3 |
 | 4 | 2.2795 | 2.2795 | 4 |
 
-: The sliding constant $\sup_u \gamma u^{\gamma-1}/(1 + u^\gamma)$ for three tail exponents, against the bound $\gamma$. {#tbl-sol-sensitivity-sliding}
+: The sliding constant $\sup_u \gamma u^{\gamma-1}/(1 + u^\gamma)$ for three tail exponents, against the bound $\gamma$. {#tbl-sol-sens-sliding}
 
-3. **Redo the privacy loss.** In step 4 of the chapter's derivation, the mean value theorem now gives a sliding term of at most $c_\gamma\alpha$ with $c_\gamma = (\gamma - 1)^{(\gamma-1)/\gamma}$. The scale term ($\beta$) and the dilation term ($\gamma\beta$) are unchanged. So the condition becomes $c_\gamma\alpha + (\gamma + 1)\beta \le \varepsilon$.
+3. **Redo the privacy loss.** In step 4 of the proof of @thm-sens-cauchy, the mean value theorem now gives a sliding term of at most $c_\gamma\alpha$ with $c_\gamma = (\gamma - 1)^{(\gamma-1)/\gamma}$. The scale term ($\beta$) and the dilation term ($\gamma\beta$) are unchanged. So the condition becomes $c_\gamma\alpha + (\gamma + 1)\beta \le \varepsilon$.
 4. **The Cauchy.** With $\gamma = 2$, $c_2 = 1$ and $\beta = \varepsilon/6$: $\alpha \le \varepsilon - 3\varepsilon/6 = \varepsilon/2$.
 5. **The median age.** $S^*_{1/6} = 0.1632$ does not change, since $\beta$ did not. The noise scale $S^*/\alpha$ goes from $6S^*/\varepsilon = 0.979$ to $2S^*/\varepsilon = 0.326$, three times smaller.
 
@@ -48,8 +48,8 @@ $$(\gamma - 1)u^{\gamma-2}(1 + u^\gamma) = \gamma u^{\gamma-1}\cdot u^{\gamma-1}
 > **Exercise 3.** **Other quantiles.** Generalize @eq-sens-median-ak to the $r$-th order statistic and compute the smooth sensitivity of the 90th percentile ($r = 901$) of the 1,001 ages with $\beta = 1/6$. Why is it larger than the median's although its local sensitivity is smaller? *Check: $\mathrm{LS} = 0.0114$, $S^* = 0.2666$ at $k = 7$.* *(Smooth sensitivity)*
 
 ::: {.callout-tip collapse="true" title="Solution"}
-1. **Local sensitivity.** Replacing one record moves the $r$-th order statistic to anywhere in $[x_{r-1}, x_{r+1}]$ (Fact 4 of the chapter with $j = r$, and the same two replacements, by 0 and by $\Lambda$, attain both ends). So $\mathrm{LS}_r(D) = \max(x_r - x_{r-1}, x_{r+1} - x_r)$.
-2. **Distance $k$.** The derivation of the median formula used the rank $m$ only through "exactly $m$ values are at or below the order statistic". Replacing $m$ by $r$ everywhere gives
+1. **Local sensitivity.** Replacing one record moves the $r$-th order statistic to anywhere in $[x_{r-1}, x_{r+1}]$ (@lem-sens-order with $k = 1$ and $j = r$, and the replacements by 0 and by $\Lambda$ of the proof of @prp-sens-median-ls attain both ends). So $\mathrm{LS}_r(D) = \max(x_r - x_{r-1}, x_{r+1} - x_r)$.
+2. **Distance $k$.** The proof of @prp-sens-median-ak used the rank $m$ only through "exactly $m$ values are at or below the order statistic". Replacing $m$ by $r$ everywhere gives
 $$A^{(k)}_r(D) = \max_{0 \le t \le k+1}\big(x_{r+t} - x_{r+t-k-1}\big),$$
 with the same padding: the windows now slide around rank $r$. The script's function `order_stat_a_profile` takes $r$ as a parameter, and the median is the case $r = (n + 1)/2$.
 3. **Compute.** For the ages, $x_{901} = 55.21$, $\mathrm{LS} = 0.0114$, and $S^*_{1/6} = 0.2666$ at $k = 7$. The median has $\mathrm{LS} = 0.1386$ but $S^*_{1/6} = 0.1632$, also at $k = 7$. With Cauchy noise the 90th percentile gets scale $6S^*/\varepsilon = 1.599$.
@@ -106,7 +106,7 @@ with the same padding: the windows now slide around rank $r$. The script's funct
 
 ::: {.callout-tip collapse="true" title="Solution"}
 1. **$D$, distance 0.** $n = 5$, $m = 3$, so $\mathrm{LS}(D) = \max(x_3 - x_2, x_4 - x_3) = \max(0, 0) = 0$.
-2. **$D$, distance $k \ge 1$.** With $k = 1$ the windows are $x_3 - x_1 = 0$, $x_4 - x_2 = 0$ and $x_5 - x_3 = 100$, so $A^{(1)} = 100$: replace $x_4 = 0$ by 100 and the median sits at the bottom of a gap of 100. Since $A^{(k)} \le \Lambda = 100$, $A^{(k)} = 100$ for all $k \ge 1$ (@tbl-sol-sensitivity-degenerate).
+2. **$D$, distance $k \ge 1$.** With $k = 1$ the windows are $x_3 - x_1 = 0$, $x_4 - x_2 = 0$ and $x_5 - x_3 = 100$, so $A^{(1)} = 100$: replace $x_4 = 0$ by 100 and the median sits at the bottom of a gap of 100. Since $A^{(k)} \le \Lambda = 100$, $A^{(k)} = 100$ for all $k \ge 1$ (@tbl-sol-sens-degenerate).
 3. **$D'$.** Already $\mathrm{LS}(D') = x_4 - x_3 = 100$, so $A^{(k)} = 100$ for every $k$.
 
 | $k$ | 0 | 1 | 2 | 3 | 4 | 5 |
@@ -114,11 +114,11 @@ with the same padding: the windows now slide around rank $r$. The script's funct
 | $A^{(k)}(D)$ | 0 | 100 | 100 | 100 | 100 | 100 |
 | $A^{(k)}(D')$ | 100 | 100 | 100 | 100 | 100 | 100 |
 
-: $A^{(k)}$ for the degenerate pair $D = (0, 0, 0, 0, 100)$ and $D' = (0, 0, 0, 100, 100)$ with $\Lambda = 100$. {#tbl-sol-sensitivity-degenerate}
+: $A^{(k)}$ for the degenerate pair $D = (0, 0, 0, 0, 100)$ and $D' = (0, 0, 0, 100, 100)$ with $\Lambda = 100$. {#tbl-sol-sens-degenerate}
 
 4. **Smooth sensitivities.** For $D'$ the maximum of $e^{-k/6}\times100$ is at $k = 0$: $S^*(D') = 100$. For $D$ the $k = 0$ term is 0, and the largest of the rest is at $k = 1$: $S^*(D) = 100e^{-1/6} = 84.648$.
 5. **The ratio** is $100/84.648 = 1.1814 = e^{1/6}$, exactly the largest ratio smoothness allows.
-6. **Why it is tight.** $D$'s largest discounted term is $D'$ itself, one step away. So $S^*(D)$ is $S^*(D')$ discounted by exactly one factor $e^{-\beta}$, which is step 2 of the chapter's smoothness proof holding with equality.
+6. **Why it is tight.** $D$'s largest discounted term is $D'$ itself, one step away. So $S^*(D)$ is $S^*(D')$ discounted by exactly one factor $e^{-\beta}$, which is step 2 of the proof of @prp-sens-smooth-bound holding with equality.
 
 *Compare with local sensitivity, which jumps from 0 to 100 on this pair and makes the release on $D$ deterministic. Smooth sensitivity sees $D'$ coming and already adds noise of scale 84.6/α on $D$.*
 :::
@@ -128,9 +128,9 @@ with the same padding: the windows now slide around rank $r$. The script's funct
 > **Exercise 8.** **Inverse sensitivity for a quantile.** Generalize @eq-sens-inverse-median from the median to the $r$-th order statistic: show that a candidate $t$ in the gap $(x_i, x_{i+1})$ needs $r - i$ changes when $i < r$ and $i - r + 1$ when $i \ge r$. Then release the 90th percentile of the ages ($r = 901$) with $\varepsilon = 1$ and compare its median absolute error with the smooth-sensitivity noise scale of Exercise 3. *Check: 0.1592 years, against 1.599; for $r = 501$ the formula gives back the chapter's 0.0783.* *(Inverse sensitivity)*
 
 ::: {.callout-tip collapse="true" title="Solution"}
-1. **Above the target rank.** Take $t$ in $(x_i, x_{i+1})$ with $i \ge r$, so $i$ values lie below $t$. For the $r$-th smallest value of a dataset to be $t$, at most $r - 1$ values can lie below $t$ and one must equal $t$. Each change removes at most one value from below $t$, so at least $i - r + 1$ changes are needed. That many suffice: move one value from below $t$ to $t$ and the other $i - r$ to $\Lambda$.
+1. **Above the target rank.** Step 1 of the proof of @prp-sens-inverse-median used the rank $m$ only as the number of values at or below the target. With $r$ in its place, a candidate $t$ in $(x_i, x_{i+1})$ with $i \ge r$ needs exactly $i - r + 1$ changes.
 2. **Below the target rank.** Take $t$ in $(x_i, x_{i+1})$ with $i < r$, so $n - i$ values lie above $t$. The $r$-th smallest equals $t$ only if at most $n - r$ values lie above $t$, and one equals $t$. So at least $(n - i) - (n - r) = r - i$ changes are needed, and moving one value from above $t$ to $t$ and the rest to 0 shows they suffice. For $r = m$ this is @eq-sens-inverse-median, without the reflection argument, which needed $n + 1 = 2m$.
-3. **Privacy.** Each count is a distance to a set of datasets, so Fact 3 gives sensitivity 1 and the release is the chapter's exponential mechanism, $\varepsilon$-DP for every $r$.
+3. **Privacy.** Each count is a distance to a set of datasets, so it has sensitivity 1 by @lem-sens-distance, and the release is $\varepsilon$-DP for every $r$ by @thm-sens-inverse.
 4. **The numbers.** The script weights each gap by its length times $e^{-\varepsilon\,\mathrm{len}/2}$, with $\varepsilon = 1$, and finds the median of the distance from $x_{901}$ by bisection. The median absolute error is 0.1592 years, against the noise scale 1.599 of smooth sensitivity with Cauchy noise, which is also its median absolute error, since a standard Cauchy variable has median absolute value 1. At $r = 501$ the same code gives 0.0783, the chapter's value for the median.
 
 *The 90th percentile sits where the ages are sparser than at the median, so its gaps are wider and its error is about twice the median's. Smooth sensitivity loses by a factor of ten here, as it did at the median.*
@@ -141,7 +141,7 @@ with the same padding: the windows now slide around rank $r$. The script's funct
 > **Exercise 9.** **The stable mode under add/remove.** Under add/remove neighbours, one dataset has one more record than the other. Show that $s(D) = \max(0, g - 1)$, with $g$ the lead of the mode, works for the stability-based release of the mode, and find the smallest lead that answers with probability 0.95 at $\varepsilon = 1$ and $\delta = 10^{-6}$. Why is it about half the 35 records needed under replacement? *Check: a lead of 18 records; at a lead of 20 the release answers with probability 0.9972 under add/remove, and 0.004052 under replacement.* *(Stability-based release)*
 
 ::: {.callout-tip collapse="true" title="Solution"}
-1. **Sensitivity.** Adding or removing one record changes one count by 1. The largest and second-largest counts then each move by at most 1, and since only one count changes, at most one of them moves. So the lead moves by at most 1, and so does $\max(0, g - 1)$.
+1. **Sensitivity.** The proof follows that of @prp-sens-mode. Adding or removing one record changes one count by 1. The largest and second-largest counts then each move by at most 1, and since only one count changes, at most one of them moves. So the lead moves by at most 1, and so does $\max(0, g - 1)$.
 2. **Zero where the answer can flip.** If $g \ge 2$, one change leaves the old mode ahead by at least $g - 1 \ge 1$, so the mode cannot change. A dataset whose neighbour has a different mode therefore has $g \le 1$, where $s = 0$.
 3. **The lead for 0.95.** The release answers when $s + \mathrm{Lap}(1/\varepsilon) > \ln(1/\delta)/\varepsilon = 13.82$. For $s$ above the threshold the probability is $1 - \frac12e^{-(s - 13.82)}$, which reaches 0.95 at $s = 13.82 + \ln 10 = 16.12$. So $g - 1 \ge 17$, and the script confirms that the smallest lead is 18.
 4. **At a lead of 20.** Add/remove gives $s = 19$ and probability 0.9972. Replacement gives $s = \lceil 20/2\rceil - 1 = 9$, below the threshold, and probability 0.004052.

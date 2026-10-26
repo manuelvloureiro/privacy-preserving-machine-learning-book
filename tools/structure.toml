@@ -35,16 +35,6 @@ legacy = [
   "part02-attacks/08-syntactic-anonymity.md",
   "part02-attacks/09-reconstruction.md",
   "part03-dp-foundations/00-introduction.md",
-  "part03-dp-foundations/01-definition.md",
-  "part03-dp-foundations/02-properties.md",
-  "part03-dp-foundations/04-composition.md",
-  "part03-dp-foundations/05-selection.md",
-  "part03-dp-foundations/06-query-release.md",
-  "part03-dp-foundations/07-sensitivity.md",
-  "part03-dp-foundations/08-discrete-mechanisms.md",
-  "part03-dp-foundations/09-trust-models.md",
-  "part03-dp-foundations/10-lower-bounds.md",
-  "part03-dp-foundations/11-mean-estimation.md",
   "part04-privacy-accounting/00-introduction.md",
   "part04-privacy-accounting/01-renyi-dp.md",
   "part04-privacy-accounting/02-rdp-conversions.md",
@@ -89,6 +79,14 @@ pages = [
   { glob = "index.md", skeleton = "preface" },
   { glob = "part*/00-introduction.md", skeleton = "part-page" },
   { glob = "part*/[0-9][0-9]-*.md", skeleton = "course-chapter" },
+]
+legacy = []
+
+[books.book-opendp]
+pages = [
+  { glob = "index.md", skeleton = "preface" },
+  { glob = "part*/00-introduction.md", skeleton = "part-page" },
+  { glob = "part*/[0-9][0-9]-*.md", skeleton = "opendp-chapter" },
 ]
 legacy = []
 
@@ -170,6 +168,20 @@ forbid_bold_results = true
 tables_captioned = true
 summary_table = "tbl-{prefix}-summary"
 max_words = 7000
+
+# An OpenDP chapter (AGENTS.md, The OpenDP book): an opening without a heading that names the chapter's script,
+# one ## per topic with the chapter's prefix, each built around code a test has run, then Summary and References.
+[skeletons.opendp-chapter]
+opening = true
+tail = ["Summary", "References"]
+forbidden_h2 = ["Why this matters", "Toolkit", "Cheat sheet", "Check yourself", "Further reading", "Notes", "Exercises"]
+forbidden_h3 = ["Context", "Statement", "Derivation", "Interpretation", "Check yourself"]
+section_ids = "sec"
+labels_use_prefix = true
+tables_captioned = true
+summary_table = "tbl-{prefix}-summary"
+max_words = 4000
+max_section_words = 1500
 
 [skeletons.note]
 single_title = false

@@ -1,6 +1,6 @@
 # Exercises: The Laplace and Gaussian mechanisms
 
-Exercises for [The Laplace and Gaussian mechanisms](../../book-full/part03-dp-foundations/03-laplace-gaussian.md), each with a worked solution. Try each exercise before opening its solution. The script `code/part03-dp-foundations/solutions_laplace_gaussian.py` computes every number quoted here; run it with `uv run python code/part03-dp-foundations/solutions_laplace_gaussian.py`.
+Exercises for [the Laplace and Gaussian mechanisms](../../book-full/part03-dp-foundations/03-laplace-gaussian.md), each with a worked solution. Try each exercise before opening its solution. The script `code/part03-dp-foundations/solutions_laplace_gaussian.py` computes every number quoted here; run it with `uv run python code/part03-dp-foundations/solutions_laplace_gaussian.py`.
 
 The solutions use the chapter's notation. Guarantees are differential privacy (DP) guarantees; $\Delta_1$ and $\Delta_2$ are the $\ell_1$ and $\ell_2$ sensitivities; $\mu = \Delta_2/\sigma$ for the Gaussian mechanism; $\Phi$ and $\varphi$ are the standard normal distribution function and density; and $\delta_\mu(\varepsilon) = \Phi(\frac\mu2 - \frac\varepsilon\mu) - e^\varepsilon\Phi(-\frac\mu2 - \frac\varepsilon\mu)$ is the exact privacy profile of the Gaussian mechanism (@eq-lg-analytic).
 

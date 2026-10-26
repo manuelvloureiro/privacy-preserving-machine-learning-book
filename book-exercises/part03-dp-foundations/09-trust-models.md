@@ -30,7 +30,7 @@ $$p - q = \frac{u - v}{(1+u)(1+v)}, \qquad q(1-q) = \frac{v}{(1+v)^2}.$$
 2. **The variance in one variable.** Dividing, the factors $(1+v)^2$ cancel:
 $$\frac{q(1-q)}{(p-q)^2} = \frac{v(1+u)^2}{(u-v)^2} = \frac{v(1 + av)^2}{(a-1)^2v^2} = \frac{(1 + av)^2}{(a-1)^2\,v}.$$
 3. **Minimize over $v > 0$.** The derivative of $(1 + av)^2/v$ is $\big(2av(1 + av) - (1 + av)^2\big)/v^2 = (1 + av)(av - 1)/v^2$. It is negative for $av < 1$ and positive for $av > 1$, so the minimum is at $av = 1$, that is $u = 1$, that is $p = \frac12$. Then $q = v/(1+v) = 1/(a + 1)$: optimized unary encoding.
-4. **The minimum value.** At $av = 1$, $(1 + 1)^2/((a-1)^2/a) = 4a/(a-1)^2$, the formula of the chapter.
+4. **The minimum value.** At $av = 1$, $(1 + 1)^2/((a-1)^2/a) = 4a/(a-1)^2$, the optimized rare-value variance of @prp-trust-schemes.
 5. **Check at $\varepsilon_0 = 1$.** $4e/(e-1)^2 = 3.6827$. A grid search over $p \in (0.25, 0.75]$ finds the minimum at $p = 0.5000$ with the same value. @tbl-sol-trust-unary shows the curve around it; it is symmetric in $p \leftrightarrow 1 - p$ because $(1 + av)^2/v$ takes the same value at $v$ and at $1/(a^2v)$. The symmetric choice $p = e^{1/2}/(e^{1/2} + 1) = 0.6225$ gives 3.9177.
 
 | $p$ | 0.3 | 0.4 | 0.5 | 0.6 | 0.7 |
@@ -48,7 +48,7 @@ $$\frac{q(1-q)}{(p-q)^2} = \frac{v(1+u)^2}{(u-v)^2} = \frac{v(1 + av)^2}{(a-1)^2
 > **Exercise 3.** **How many people?** At $\varepsilon = 1$, how many people does randomized response need to estimate a fraction with standard deviation 0.001, and how many does the central Laplace mechanism need? *Check: 920,674 local and 1,415 central.* *(Variance formulas)*
 
 ::: {.callout-tip collapse="true" title="Solution"}
-1. **Local.** The standard deviation is $\sqrt{e^\varepsilon/(n(e^\varepsilon - 1)^2)}$. Setting it to at most $0.001$ and solving for $n$: $n \ge \frac{e^\varepsilon}{(e^\varepsilon - 1)^2}\cdot10^6$. At $\varepsilon = 1$ the factor is $e/(e-1)^2 = 0.9207$, so $n \ge 920{,}674$ (rounding up).
+1. **Local.** By @prp-trust-rr the standard deviation is $\sqrt{e^\varepsilon/(n(e^\varepsilon - 1)^2)}$. Setting it to at most $0.001$ and solving for $n$: $n \ge \frac{e^\varepsilon}{(e^\varepsilon - 1)^2}\cdot10^6$. At $\varepsilon = 1$ the factor is $e/(e-1)^2 = 0.9207$, so $n \ge 920{,}674$ (rounding up).
 2. **Central.** Under replace, the count of ones has sensitivity 1, and $\mathrm{Lap}(1/\varepsilon)$ on the count gives a fraction with standard deviation $\sqrt2/(n\varepsilon)$. Setting it to at most $0.001$: $n \ge \sqrt2\times1000 = 1414.2$, so $n \ge 1{,}415$.
 3. **Compare.** The ratio is about 650. Halving the target standard deviation multiplies the local requirement by 4 but the central one only by 2: the $\sqrt n$ gap seen from the side of sample sizes.
 
@@ -75,7 +75,7 @@ $$\frac{q(1-q)}{(p-q)^2} = \frac{v(1+u)^2}{(u-v)^2} = \frac{v(1 + av)^2}{(a-1)^2
 ::: {.callout-tip collapse="true" title="Solution"}
 1. **Split the multiset.** The shuffled output is the multiset union of the $n - m$ honest reports and the $m$ adversarial ones. The adversary chose its own reports, so it knows them.
 2. **The full output is a post-processing of the honest part.** Given the honest multiset $H$, the adversary's view is $H \cup A$, where $A$ is a fixed (or independently random) multiset that does not depend on the honest records. A function of $H$ and independent randomness is post-processing ([Post-processing, group privacy and composition](../../book-full/part03-dp-foundations/02-properties.md)).
-3. **The honest part is a shuffle of $n - m$ reports.** Its neighbouring datasets replace one honest record, and Theorem 3.1 applies with $n - m$ people, under its condition with $n - m$.
+3. **The honest part is a shuffle of $n - m$ reports.** Its neighbouring datasets replace one honest record, and @thm-trust-fmt applies with $n - m$ people, under its condition with $n - m$.
 4. **So the guarantee for an honest person** is @eq-trust-fmt evaluated at $n - m$. It cannot be better: the adversary can always remove its own reports, so they hide nobody.
 5. **Numbers.** With $m = 0$: $n = 10{,}000$, $\varepsilon = 0.5009$ (condition: $\varepsilon_0 \le 3.763$). With $m = 5{,}000$: $5{,}000$ honest people, $\varepsilon = 0.6535$ (condition: $\varepsilon_0 \le 3.070$). With $m = 9{,}000$ only 1,000 honest people remain, the condition allows only $\varepsilon_0 \le 1.460$, and the theorem says nothing at $\varepsilon_0 = 2$.
 
@@ -102,8 +102,8 @@ $$\mathbb E[e^{\lambda(G_i - G'_i)}] = (1 - b\lambda)^{-1/n}(1 + b\lambda)^{-1/n
 > **Exercise 7.** **Planning for dropouts.** 100 clients calibrate distributed Gaussian noise for $(1, 10^{-6})$ with $\Delta_2 = \sqrt2$. If 30% drop out after the noise was planned, what $\varepsilon$ results? How much noise per client keeps $\varepsilon = 1$ if up to 30% may drop out? *Check: $\varepsilon = 1.212$; per-client $\sigma = 0.714$ instead of 0.597.* *(Gaussian calibration)*
 
 ::: {.callout-tip collapse="true" title="Solution"}
-1. **Planned noise.** The exact Gaussian calibration at $(1, 10^{-6})$ and $\Delta_2 = \sqrt2$ gives total $\sigma = 5.975$, so each of the 100 clients adds $\mathcal N(0, \sigma^2/100)$, standard deviation 0.597.
-2. **Thirty clients drop out.** The sum now has 70 shares, total variance $0.7\sigma^2$, and the Gaussian mechanism with noise $\sigma\sqrt{0.7}$ is $(1.212, 10^{-6})$-DP: about 21% more $\varepsilon$ than promised. The guarantee falls to $\varepsilon = 2$ only when the honest fraction drops to 0.279.
+1. **Planned noise.** As in @exm-trust-clients, the exact Gaussian calibration at $(1, 10^{-6})$ and $\Delta_2 = \sqrt2$ gives total $\sigma = 5.975$, so each of the 100 clients adds $\mathcal N(0, \sigma^2/100)$, standard deviation 0.597.
+2. **Thirty clients drop out.** The sum now has 70 shares, total variance $0.7\sigma^2$, and by @prp-trust-distributed the Gaussian mechanism with noise $\sigma\sqrt{0.7}$ is $(1.212, 10^{-6})$-DP: about 21% more $\varepsilon$ than promised. The guarantee falls to $\varepsilon = 2$ only when the honest fraction drops to 0.279.
 3. **Over-provision.** To keep total variance $\sigma^2$ with only 70 shares, each client adds $\sigma^2/70$: standard deviation $5.975/\sqrt{70} = 0.714$.
 4. **The cost.** If nobody drops out, the sum carries $100/70 = 1.429$ times the variance needed, so the error is $\sqrt{1.429} = 1.20$ times the central one.
 
@@ -115,7 +115,7 @@ $$\mathbb E[e^{\lambda(G_i - G'_i)}] = (1 - b\lambda)^{-1/n}(1 + b\lambda)^{-1/n
 > **Exercise 8.** **Averaging fresh reports.** A person reports the same bit every day by randomized response at $\varepsilon_0 = \ln 3$, with fresh randomness each day. An observer starts with even odds. What is the observer's probability that the bit is 1 after 7 ones in 10 days, and after 5 ones in 10 days? After how many days is the majority of the reports wrong with probability below 1%? What changes if the report is memoized? *Check: 0.9878 and 0.5000; 19 days; memoized, the majority stays wrong with probability 0.25.* *(likelihood ratios, binomial tails)*
 
 ::: {.callout-tip collapse="true" title="Solution"}
-1. **The likelihood ratio.** Each report equals the bit with probability $t = e^{\varepsilon_0}/(1 + e^{\varepsilon_0}) = 3/4$, independently. A sequence with $k$ ones has probability $t^k(1 - t)^{T - k}$ if the bit is 1 and $(1 - t)^kt^{T - k}$ if it is 0. Their ratio is $(t/(1 - t))^{2k - T} = 3^{2k - T}$, the statement of @sec-trust-repeated.
+1. **The likelihood ratio.** By @prp-trust-fresh, a sequence with $k$ ones in $T$ days has likelihood ratio $e^{\varepsilon_0(2k - T)} = 3^{2k - T}$ between bit 1 and bit 0.
 2. **The posterior.** Bayes' rule multiplies the prior odds by the likelihood ratio. With even prior odds and $k = 7$, $T = 10$, the odds are $3^4 = 81$, so the probability is $81/82 = 0.9878$. With $k = 5$ the ratio is $3^0 = 1$, and the probability stays at 0.5000: a balanced sequence says nothing.
 3. **The majority.** The majority is wrong when more than half of the $T$ reports are flipped, and a tie is broken by a fair coin. The number of flipped reports is binomial with $T$ trials and probability $\frac14$. Computing the tail day by day, it first falls below 0.1 after 7 days, where it is 0.07056. It falls below 0.01 after 19 days, at 0.008903, and below 0.001 after 33 days, at 0.000951.
 4. **Memoized.** With a memoized report, every day repeats the first report. The majority is then just that report, which is wrong with probability $1 - t = 0.25$ however many days pass.
@@ -144,7 +144,7 @@ $$\mathbb E[e^{\lambda(G_i - G'_i)}] = (1 - b\lambda)^{-1/n}(1 + b\lambda)^{-1/n
 > **Exercise 10.** **How many buckets?** Local hashing has the rare-value variance of @eq-trust-lh. Find the best integer number of buckets at $\varepsilon_0 = 1$ and $\varepsilon_0 = 2$, compare its variance with optimized unary encoding and with $k$-ary randomized response over $k = 1{,}000$ values, and say how many bits the bucket takes. *Check: $w = 4$ gives 3.6917 against 3.6827; $w = 8$ gives 0.7246 against 0.7241; $k$-ary randomized response gives 338.9 and 24.6.* *(optimizing a variance over an integer)*
 
 ::: {.callout-tip collapse="true" title="Solution"}
-1. **The continuous optimum.** Writing $u = w - 1$, the variance is proportional to $(e^{\varepsilon_0} + u)^2/u = e^{2\varepsilon_0}/u + 2e^{\varepsilon_0} + u$. This is convex in $u$ and smallest at $u = e^{\varepsilon_0}$, as step 4 of the derivation in @sec-trust-heavy shows, so the best real $w$ is $e^{\varepsilon_0} + 1$.
+1. **The continuous optimum.** Writing $u = w - 1$, the variance is proportional to $e^{2\varepsilon_0}/u + 2e^{\varepsilon_0} + u$. This is convex in $u$, and by @prp-trust-lh it is smallest at $u = e^{\varepsilon_0}$, so the best real $w$ is $e^{\varepsilon_0} + 1$.
 2. **Round to an integer.** A convex function is smallest at one of the two integers around its minimum. At $\varepsilon_0 = 1$, $e + 1 = 3.718$, and the variance is 3.7701 at $w = 3$, 3.6917 at $w = 4$ and 3.8218 at $w = 5$. So $w = 4$, two bits. At $\varepsilon_0 = 2$, $e^2 + 1 = 8.389$, and the variance is 0.7246 at $w = 8$ against 0.7252 at $w = 9$. So $w = 8$, three bits.
 3. **Against the other oracles.** Optimized unary encoding gives 3.6827 and 0.7241, a fraction of a percent better, but with a report of one bit per value. By contrast, $k$-ary randomized response over 1,000 values gives 338.9 and 24.6, because it spreads its signal over the whole domain.
 
@@ -156,7 +156,7 @@ $$\mathbb E[e^{\lambda(G_i - G'_i)}] = (1 - b\lambda)^{-1/n}(1 + b\lambda)^{-1/n
 > **Exercise 11.** **A year of $\alpha$-point rounding.** Under $\alpha$-point rounding with $m = 1{,}440$ minutes and $\varepsilon_0 = 1$, each person's daily minutes wobble uniformly by up to $\pm s$ around their own level, independently each day. What fraction of people change their report at least once in 365 days, for $s = 15$ and $s = 60$? With output perturbation at a flip probability $\kappa$ of 0.1, 0.2 or 0.3, what does one round cost, and what does each day on which the kept bit changes cost? *Check: 0.0126 and 0.0503; one round 0.776, 0.569 and 0.374; per change 2.197, 1.386 and 0.847.* *(order statistics, the formula for output perturbation)*
 
 ::: {.callout-tip collapse="true" title="Solution"}
-1. **When a report can change.** By item 3 of @sec-trust-repeated, a person's report changes only if the two kept bits differ and the threshold $m - \alpha$ falls between the smallest and largest value they take. The bits differ with probability $1 - 2e/(e + 1)^2 = 0.6068$. The threshold is uniform on $(0, m]$ and independent of the values, so given the band it falls inside with probability equal to the band's width divided by $m$.
+1. **When a report can change.** By item 3 of @prp-trust-alpha, a person's report changes only if the two kept bits differ and the threshold $m - \alpha$ falls between the smallest and largest value they take. The bits differ with probability $1 - 2e/(e + 1)^2 = 0.6068$. The threshold is uniform on $(0, m]$ and independent of the values, so given the band it falls inside with probability equal to the band's width divided by $m$.
 2. **The expected width.** For $T$ independent uniforms on $[-s, s]$, the expected largest minus the expected smallest is $2s(T - 1)/(T + 1)$, because the order statistics of uniforms split the interval into $T + 1$ gaps of equal expected size. With $T = 365$ this is $2s \times 364/366$.
 3. **The fractions.** For $s = 15$, $0.6068 \times 30 \times 364/366 / 1{,}440 = 0.0126$. For $s = 60$, four times the width gives 0.0503. Over a year, about one person in 80 with a steady habit ever changes their report.
 4. **Output perturbation.** @eq-trust-op at $\varepsilon_0 = 1$ gives 0.776, 0.569 and 0.374 for $\kappa = 0.1$, 0.2 and 0.3. Each day on which the kept bit changes contributes at most $\ln((1 - \kappa)/\kappa)$, which is 2.197, 1.386 and 0.847.

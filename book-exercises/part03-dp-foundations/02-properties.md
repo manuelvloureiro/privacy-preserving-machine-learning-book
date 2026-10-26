@@ -2,14 +2,14 @@
 
 Exercises for [Post-processing, group privacy and composition](../../book-full/part03-dp-foundations/02-properties.md), each with a worked solution. Try each exercise before opening its solution. The script `code/part03-dp-foundations/solutions_properties.py` computes every number quoted here; run it with `uv run python code/part03-dp-foundations/solutions_properties.py`.
 
-The solutions use the chapter's notation. $M$ is a mechanism, $D \simeq D'$ neighbouring datasets, $P = M(D)$ and $Q = M(D')$, and $L_{D,D'}(y) = \ln\frac{p(y)}{q(y)}$ the privacy loss. Differential privacy (DP) at level $(\varepsilon, \delta)$ means $\Pr_P[S] \le e^\varepsilon \Pr_Q[S] + \delta$ for every event $S$ and every ordered neighbouring pair. Randomized response at $\varepsilon_0 = \ln 3$ reports the true bit with probability $\frac34$. Logarithms are natural.
+The solutions use the chapter's notation. $M$ is a mechanism, $D \sim D'$ neighbouring datasets, $P = M(D)$ and $Q = M(D')$, and $L_{D,D'}(y) = \ln\frac{p(y)}{q(y)}$ the privacy loss. Differential privacy (DP) at level $(\varepsilon, \delta)$ means $\Pr_P[S] \le e^\varepsilon \Pr_Q[S] + \delta$ for every event $S$ and every ordered neighbouring pair. Randomized response at $\varepsilon_0 = \ln 3$ reports the true bit with probability $\frac34$. Logarithms are natural.
 
 ## Majority of three answers {#sec-sol-dpprop-1}
 
 > **Exercise 1.** **Majority of three answers.** A person gives three randomized-response answers at $\varepsilon_0 = \ln 3$ each, and only the majority of the three is published. By composition and post-processing it is $3\ln 3$-DP. Find its exact $\varepsilon$. *Check: $\Pr[\text{majority} = 1 \mid \text{bit } 1] = \frac{54}{64}$, so $\varepsilon = \ln 5.4 = 1.6864$.* *(Post-processing, composition)*
 
 ::: {.callout-tip collapse="true" title="Solution"}
-1. **The bound.** The three answers are $3\ln 3$-DP by basic composition, and the majority is a deterministic function of them, so it is $3\ln 3 = 3.2958$-DP by post-processing.
+1. **The bound.** The three answers are $3\ln 3$-DP by @thm-dpprop-basic, and the majority is a deterministic function of them, so it is $3\ln 3 = 3.2958$-DP by @thm-dpprop-post.
 2. **Under bit 1** ($D$), each answer is 1 with probability $\frac34$, independently. The majority is 1 when at least two answers are 1:
 $$\Pr[\text{maj} = 1 \mid 1] = \Big(\frac34\Big)^3 + 3\Big(\frac34\Big)^2\frac14 = \frac{27}{64} + \frac{27}{64} = \frac{54}{64} = 0.84375.$$
 3. **Under bit 0** ($D'$), each answer is 1 with probability $\frac14$:
@@ -51,7 +51,7 @@ For $\varepsilon = 0.5$, $\delta = 10^{-5}$ and $K = 10$, $a_0 = 2.272 \times 10
 
 ::: {.callout-tip collapse="true" title="Solution"}
 1. **User-level neighbours are at record distance at most 5.** Removing one user removes at most 5 records, one at a time, so the two datasets are joined by a path of at most 5 record-level steps.
-2. **Group privacy** with $k = 5$:
+2. **Group privacy** (@thm-dpprop-group) with $k = 5$:
 $$\varepsilon_5 = 5 \times 0.2 = 1, \qquad \delta_5 = 10^{-7}\,\frac{e^{1} - 1}{e^{0.2} - 1} = 10^{-7} \times \frac{1.71828}{0.22140} = 7.761 \times 10^{-7}.$$
 (A user with fewer records is at a shorter distance, and the guarantee only gets better.)
 3. **Composition at the user level.** Ten runs with fresh noise, each $(1, 7.761 \times 10^{-7})$-DP for user-level neighbours, are $(10, 7.761 \times 10^{-6})$-DP by @eq-dpprop-basic.
@@ -69,7 +69,7 @@ Write $c_i$ for the count in bin $i$ and $y_i = c_i + Z_i$ for the released nois
 **Add/remove.**
 
 1. Adding a record raises one count, say $c_1$, by 1. The other bins have the same distribution under $D$ and $D'$.
-2. By Fact 3 of the chapter, $L(y) = \frac{|y_1 - c_1 - 1| - |y_1 - c_1|}{b} + 0$. Its largest absolute value is $1/b$, reached for every $y_1 \le c_1$.
+2. By @lem-dpprop-add, $L(y) = \frac{|y_1 - c_1 - 1| - |y_1 - c_1|}{b} + 0$. Its largest absolute value is $1/b$, reached for every $y_1 \le c_1$.
 
 **Replace across bins.**
 
@@ -86,12 +86,12 @@ The script computes the exact pure $\varepsilon$ of two bins with rounded Laplac
 
 ## Shared noise {#sec-sol-dpprop-5}
 
-> **Exercise 5.** **Shared noise.** For the two counts $c_1(D) + Z$ and $c_2(D) + Z$ of @sec-dpprop-limits, show that $E_{e^\varepsilon}(P\|Q) = 1$ for every $\varepsilon$, where $P$ and $Q$ are the distributions of the pair under $D$ and $D'$. Then find the exact pure $\varepsilon$ of the pair when the noise is fresh. *Check: $\varepsilon = 1$ with fresh $\mathrm{Lap}(0, 1)$ noise.* *(Composition, hockey-stick)*
+> **Exercise 5.** **Shared noise.** For the two counts $c_1(D) + Z$ and $c_2(D) + Z$ of @prp-dpprop-shared, show that $E_{e^\varepsilon}(P\|Q) = 1$ for every $\varepsilon$, where $P$ and $Q$ are the distributions of the pair under $D$ and $D'$. Then find the exact pure $\varepsilon$ of the pair when the noise is fresh. *Check: $\varepsilon = 1$ with fresh $\mathrm{Lap}(0, 1)$ noise.* *(Composition, hockey-stick)*
 
 ::: {.callout-tip collapse="true" title="Solution"}
 **Shared noise.**
 
-1. **Disjoint supports.** Under $D$ every released pair $(u, v)$ satisfies $u - v = c$, where $c = c_1(D) - c_2(D)$. Under $D'$ every pair satisfies $u - v = c - 1$. Let $A = \{(u, v) : u - v = c\}$. Then $\Pr_P[A] = 1$ and $\Pr_Q[A] = 0$.
+1. **Disjoint supports.** The proof of @prp-dpprop-shared shows that the event $A = \{(u, v) : u - v = c\}$, with $c = c_1(D) - c_2(D)$, has $\Pr_P[A] = 1$ and $\Pr_Q[A] = 0$.
 2. **The hockey-stick is at least 1.** $E_{e^\varepsilon}(P\|Q) = \max_S[\Pr_P[S] - e^\varepsilon \Pr_Q[S]] \ge \Pr_P[A] - e^\varepsilon \Pr_Q[A] = 1$.
 3. **And at most 1,** since $\sum(p - e^\varepsilon q)_+ \le \sum p = 1$. So it is exactly 1 for every $\varepsilon$, and the pair is not $(\varepsilon, \delta)$-DP for any $\delta < 1$.
 
@@ -100,7 +100,7 @@ The script represents the difference $u - v$ as a point mass at $c$ under $D$ an
 **Fresh noise.** The pair is $(c_1(D) + Z_1, c_2(D) + Z_2)$ with independent $Z_1, Z_2$.
 
 1. Removing Alice lowers $c_1$ by 1 and leaves $c_2$ unchanged, so the second coordinate has the same distribution under $D$ and $D'$.
-2. By Fact 3 of the chapter, the privacy loss is the loss of the first coordinate, a $\mathrm{Lap}(0, 1)$ count against its shift by 1, whose largest absolute value is 1.
+2. By @lem-dpprop-add, the privacy loss is the loss of the first coordinate, a $\mathrm{Lap}(0, 1)$ count against its shift by 1, whose largest absolute value is 1.
 3. So the pair is exactly 1-DP; the script gets $1.0000$ with rounded Laplace noise.
 
 *Each count alone is 1-DP in both cases. With shared noise, the pair is not DP at all; with fresh noise, it is 1-DP, and even 2-DP by basic composition if both counts depended on Alice.*
@@ -113,13 +113,13 @@ The script represents the difference $u - v$ as a point mass at $c$ under $D$ an
 ::: {.callout-tip collapse="true" title="Solution"}
 **A tail bound on the loss gives $(\varepsilon, \delta)$.**
 
-1. **The worst event** for $E_{e^\varepsilon}(P\|Q)$ is $B = \{y : p(y) > e^\varepsilon q(y)\} = \{L > \varepsilon\}$ (Fact 3 of [Divergences](../../book-full/part01-prerequisites/03-divergences.md)).
+1. **The worst event** for $E_{e^\varepsilon}(P\|Q)$ is $B = \{y : p(y) > e^\varepsilon q(y)\} = \{L > \varepsilon\}$, by step 2 of the proof of @lem-dpprop-tests with $g$ the indicator of $B$.
 2. **Drop the negative term:** $E_{e^\varepsilon}(P\|Q) = \Pr_P[B] - e^\varepsilon \Pr_Q[B] \le \Pr_P[B] = \Pr_P[L > \varepsilon] \le \delta$.
 3. This holds for every ordered pair, which is the hockey-stick form of $(\varepsilon, \delta)$-DP.
 
 **The mean of the loss.** For one answer under $D$ (bit 1), the loss is $+\varepsilon_0$ with probability $t = \frac{e^{\varepsilon_0}}{1 + e^{\varepsilon_0}}$ and $-\varepsilon_0$ with probability $1 - t$. Its mean is $\varepsilon_0(2t - 1)$, and
 $$2t - 1 = \frac{e^{\varepsilon_0} - 1}{e^{\varepsilon_0} + 1} = \tanh(\varepsilon_0/2).$$
-For $k$ independent answers (Fact 3 of the chapter) the mean is $k\varepsilon_0\tanh(\varepsilon_0/2)$. At $\varepsilon_0 = 0.1$, $t = 0.5250$ and $2t - 1 = \tanh(0.05) = 0.04996$, so for $k = 1000$ the mean is 4.996.
+For $k$ independent answers the losses add (@lem-dpprop-add), so the mean is $k\varepsilon_0\tanh(\varepsilon_0/2)$. At $\varepsilon_0 = 0.1$, $t = 0.5250$ and $2t - 1 = \tanh(0.05) = 0.04996$, so for $k = 1000$ the mean is 4.996.
 
 **Hoeffding.**
 
@@ -141,7 +141,7 @@ $$\Pr[L - \mathbb E[L] \ge s] \le \exp\Big(-\frac{2s^2}{k(2\varepsilon_0)^2}\Big
 **The bound.**
 
 1. **Write it as an adaptive composition of three steps.** Step $i$ looks at the previous answers. If one of them is 1, it outputs "stopped", which does not depend on the data (0-DP). Otherwise it asks a fresh randomized-response question ($\ln 3$-DP). For every fixed previous output, step $i$ is at most $\ln 3$-DP.
-2. **Adaptive composition** gives $3\ln 3$ for the transcript of three steps.
+2. **Adaptive composition** (@thm-dpprop-basic) gives $3\ln 3$ for the transcript of three steps.
 3. **The published count is a function of the transcript,** so post-processing keeps $3\ln 3$.
 
 **The exact $\varepsilon$.** Let $s$ be the probability that one answer is 1: $s = \frac34$ under bit 1 and $\frac14$ under bit 0. Stopping after answer $i$ means $i - 1$ zeros and then a 1, with probability $(1 - s)^{i-1}s$; no 1 in three answers has probability $(1 - s)^3$. @tbl-sol-dpprop-ask lists the four outputs.

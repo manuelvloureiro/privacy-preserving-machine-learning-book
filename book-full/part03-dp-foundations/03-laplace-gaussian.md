@@ -10,13 +10,13 @@ The running example is the hospital's count: 1,234 of its $n = 10{,}000$ patient
 
 ## Sensitivity {#sec-lg-sensitivity}
 
-To hide one record, the noise has to cover the largest change one record can make to the answer. That change is the sensitivity, and it is the first thing to compute for any release. It depends on the query, on the norm you measure the change in, and on the neighbouring relation of [The definition of differential privacy](01-definition.md): under **add/remove** a neighbour has one record more or less, so the dataset size changes, and under **replace** one record is swapped for another, so the size $n$ is fixed and public.
+To hide one record, the noise has to cover the largest change one record can make to the answer. That change is the sensitivity, and it is the first thing to compute for any release. It depends on the query, on the norm you measure the change in, and on the neighbouring relation of [the definition of differential privacy](01-definition.md): under **add/remove** a neighbour has one record more or less, so the dataset size changes, and under **replace** one record is swapped for another, so the size $n$ is fixed and public.
 
 For a vector answer you need a way to measure a change, and two are used. The $\ell_1$ norm $\|v\|_1 = \sum_i|v_i|$ is the total change summed over coordinates, and Laplace noise is calibrated to it. The $\ell_2$ norm $\|v\|_2 = \sqrt{\sum_iv_i^2}$ is the straight-line length, and Gaussian noise is calibrated to it.
 
 ::: {#def-lg-sensitivity name="Sensitivity"}
 Let $f\colon \mathcal X^n \to \mathbb R^d$ be a query with values in $\mathbb R^d$. For $p \in \{1, 2\}$, the **$\ell_p$ sensitivity** of $f$ is the largest distance between its answers on two neighbouring datasets,
-$$\Delta_pf = \max_{D \simeq D'}\big\|f(D) - f(D')\big\|_p.$$
+$$\Delta_pf = \max_{D \sim D'}\big\|f(D) - f(D')\big\|_p.$$
 :::
 
 The two sensitivities are never far apart, and how far depends on how one record's change spreads over the coordinates. The next result says exactly how far, and @sec-lg-high-dim turns it into the rule for choosing between the two mechanisms.
@@ -67,7 +67,7 @@ The hospital also releases the mean age of its $n = 10{,}000$ patients, with age
 
 The Laplace mechanism is the first mechanism to try (Dwork, McSherry, Nissim & Smith 2006). It adds independent Laplace noise to each coordinate, with scale proportional to the $\ell_1$ sensitivity. @sec-apx-cal-laplace in the appendices derives the same result from scratch for a single count, with every number shown.
 
-Everything rests on the **privacy loss** of [The definition of differential privacy](01-definition.md). For an output $y$, it is the log of how much more likely $y$ is when the data are $D$ than when they are $D'$,
+Everything rests on the **privacy loss** of [the definition of differential privacy](01-definition.md). For an output $y$, it is the log of how much more likely $y$ is when the data are $D$ than when they are $D'$,
 $$L_{D,D'}(y) = \ln\frac{p_{M(D)}(y)}{p_{M(D')}(y)},$$
 where $p_{M(D)}$ is the density of the published output on dataset $D$. Write $P$ and $Q$ for the two output distributions $M(D)$ and $M(D')$. That chapter proved that a mechanism whose loss is at most $\varepsilon$ at every output, for every neighbouring pair, is $\varepsilon$-DP, in its section on pure DP being pointwise. The Laplace mechanism is proved private exactly this way.
 
@@ -96,7 +96,7 @@ The scale is the smallest that works in general: for a count, $\mathrm{Lap}(b)$ 
 ::: {.proof}
 The plan is to write the privacy loss down and bound it at every output by the triangle inequality, then to read the error off the Laplace distribution, and finally to exhibit an event on which the privacy bound is reached.
 
-1. *Write the two densities.* Fix $D \simeq D'$ and write $a = f(D)$ and $a' = f(D')$ for the two true answers. The coordinates of the noise are independent, so the density of $M(D)$ at $y$ is the product $\prod_i\frac{1}{2b}e^{-|y_i - a_i|/b}$, and that of $M(D')$ is the same with $a'$ in place of $a$.
+1. *Write the two densities.* Fix $D \sim D'$ and write $a = f(D)$ and $a' = f(D')$ for the two true answers. The coordinates of the noise are independent, so the density of $M(D)$ at $y$ is the product $\prod_i\frac{1}{2b}e^{-|y_i - a_i|/b}$, and that of $M(D')$ is the same with $a'$ in place of $a$.
 2. *Take the log-ratio.* The constants $\frac1{2b}$ cancel, and the log of a product of exponentials is the sum of the exponents, so
 $$L_{D,D'}(y) = \frac1b\sum_{i=1}^d\big(|y_i - a'_i| - |y_i - a_i|\big).$$
 3. *Bound each term.* The distance from $y_i$ to $a'_i$ is at most the distance from $y_i$ to $a_i$ plus the distance from $a_i$ to $a'_i$, by the triangle inequality $|y_i - a'_i| \le |y_i - a_i| + |a_i - a'_i|$. So each term of the sum is at most $|a_i - a'_i|$, whatever $y$ is.
@@ -349,7 +349,7 @@ uv run python code/part03-dp-foundations/laplace_gaussian.py
 
 | Result | Statement | Use |
 | --- | --- | --- |
-| @def-lg-sensitivity | $\Delta_pf = \max_{D \simeq D'}\Vert f(D) - f(D')\Vert_p$ | Compute it first, from the domain, and say which neighbouring relation it is for |
+| @def-lg-sensitivity | $\Delta_pf = \max_{D \sim D'}\Vert f(D) - f(D')\Vert_p$ | Compute it first, from the domain, and say which neighbouring relation it is for |
 | @prp-lg-norms | $\Delta_2f \le \Delta_1f \le \sqrt d\,\Delta_2f$ | Sparse queries sit at the left end, dense ones at the right |
 | @prp-lg-standard-queries | Count 1; sum in $[0, B]$: $B$; mean with public $n$: $B/n$; histogram 1, or 2 and $\sqrt2$ under replace | Calibrating every release |
 | @lem-lg-shift | $E_\gamma(M(D)\Vert M(D')) = E_\gamma(Z\Vert Z + v)$ | Only the shift matters, so analyse the noise against a shifted copy of itself |
