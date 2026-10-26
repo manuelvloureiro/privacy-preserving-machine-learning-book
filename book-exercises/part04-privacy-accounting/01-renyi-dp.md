@@ -1,21 +1,21 @@
 # Exercises: Rényi differential privacy
 
-Exercises for [Rényi differential privacy](../../book-full/part04-privacy-accounting/01-renyi-dp.md), each with a worked solution. Try each exercise before opening its solution. The script `code/part04-privacy-accounting/solutions_renyi_dp.py` computes every number quoted here; run it with `uv run python code/part04-privacy-accounting/solutions_renyi_dp.py`.
+Exercises for [Rényi differential privacy](../../book-full/part04-privacy-accounting/01-renyi-dp.md), each with a worked solution. Try each exercise before opening its solution. The script `code/part04-privacy-accounting/solutions_renyi_dp.py` computes every number quoted here; run it with `uv run python code/part04-privacy-accounting/solutions_renyi_dp.py`. The check values of Exercises 6 and 7 are printed by the chapter's script, `code/part04-privacy-accounting/renyi_dp.py`.
 
 The solutions use the chapter's notation. Rényi differential privacy (RDP) is tracked by the curve $\varepsilon(\alpha)$ of a mechanism $M$; $P = M(D)$ and $Q = M(D')$ are its outputs on neighbours, $r = p/q$ the likelihood ratio and $L = \ln r$ the privacy loss. Differential privacy (DP) without qualifier means $(\varepsilon, \delta)$-DP. The Kullback–Leibler (KL) divergence is the limit of $D_\alpha$ as $\alpha \to 1$. Logarithms are natural, and $\delta = 10^{-5}$ throughout.
 
 ## Randomized response at order 2 {#sec-sol-rdp-1}
 
-> **Exercise 1.** **Randomized response at order 2.** Show that $\varepsilon(2) = \ln\big(1 + \chi^2(P\|Q)\big)$ for randomized response, with $\chi^2(P\|Q) = \frac{(2p - 1)^2}{p(1 - p)}$. *Check: 0.8473 for $p = 0.75$ and 0.1542 for $p = 0.6$.* For $p = \frac12 + \gamma$ with small $\gamma$, show $\varepsilon(2) \approx 16\gamma^2$ and KL $\approx 8\gamma^2$. *(Special orders of the Rényi divergence)*
+> **Exercise 1.** **Randomized response at order 2.** Show that $\varepsilon(2) = \ln\big(1 + \chi^2(P\|Q)\big)$ for randomized response with truth probability $t$, with $\chi^2(P\|Q) = \frac{(2t - 1)^2}{t(1 - t)}$. *Check: 0.8473 for $t = 0.75$ and 0.1542 for $t = 0.6$.* For $t = \frac12 + \gamma$ with small $\gamma$, show $\varepsilon(2) \approx 16\gamma^2$ and KL $\approx 8\gamma^2$. *(Special orders of the Rényi divergence)*
 
 ::: {.callout-tip collapse="true" title="Solution"}
-1. **Order 2 is the second moment of the likelihood ratio.** By Fact 1 of the chapter at $\alpha = 2$, $e^{D_2(P\|Q)} = \mathbb E_Q[r^2]$. Write $r^2 = 1 + 2(r - 1) + (r - 1)^2$ and use $\mathbb E_Q[r] = 1$: $\mathbb E_Q[r^2] = 1 + \mathbb E_Q[(r - 1)^2] = 1 + \chi^2(P\|Q)$, with $\chi^2 = \sum_y (p(y) - q(y))^2/q(y)$.
-2. **The two outputs of randomized response.** From @tbl-rdp-rr, $p(y) - q(y) = \pm(2p - 1)$ on the two outputs, where $p$ is the keep-probability, and $q(y)$ is $1 - p$ on one output and $p$ on the other. So
-$$\chi^2 = \frac{(2p-1)^2}{1 - p} + \frac{(2p-1)^2}{p} = \frac{(2p - 1)^2}{p(1-p)}.$$
-3. **Check.** For $p = 0.75$: $\chi^2 = 0.25/0.1875 = 1.3333$, and $\ln 2.3333 = 0.8473$, the value of @tbl-rdp-rr-orders. For $p = 0.6$: $\chi^2 = 0.04/0.24 = 0.1667$, and $\ln 1.1667 = 0.1542$.
-4. **Small $\gamma$, order 2.** With $p = \frac12 + \gamma$, $2p - 1 = 2\gamma$ and $p(1 - p) = \frac14 - \gamma^2$. So $\chi^2 = \frac{4\gamma^2}{1/4 - \gamma^2} = 16\gamma^2 + O(\gamma^4)$, and $\ln(1 + x) = x + O(x^2)$ gives $\varepsilon(2) = 16\gamma^2 + O(\gamma^4)$.
-5. **Small $\gamma$, KL.** The KL divergence is $\mathbb E_P[L] = p\ln\frac{p}{1-p} + (1 - p)\ln\frac{1-p}{p} = (2p - 1)\ln\frac{p}{1-p}$. Here $\ln\frac{1/2 + \gamma}{1/2 - \gamma} = \ln(1 + 2\gamma) - \ln(1 - 2\gamma) = 4\gamma + O(\gamma^3)$. So KL $= 2\gamma \cdot 4\gamma + O(\gamma^4) = 8\gamma^2 + O(\gamma^4)$.
-6. **Numerically**, at $p = 0.55$ ($\gamma = 0.05$): $\varepsilon(2) = 0.03961$ against $16\gamma^2 = 0.04000$, and KL $= 0.02007$ against $8\gamma^2 = 0.02000$.
+1. **Order 2 is the second moment of the likelihood ratio.** By @eq-rdp-moment at $\alpha = 2$, $e^{D_2(P\|Q)} = \mathbb E_Q[r^2]$. Write $r^2 = 1 + 2(r - 1) + (r - 1)^2$ and use $\mathbb E_Q[r] = 1$ (@lem-div-change-of-measure): $\mathbb E_Q[r^2] = 1 + \mathbb E_Q[(r - 1)^2] = 1 + \chi^2(P\|Q)$, with $\chi^2 = \sum_y (p(y) - q(y))^2/q(y)$.
+2. **The two outputs of randomized response.** From @tbl-rdp-rr, $p(y) - q(y) = \pm(2t - 1)$ on the two outputs, and $q(y)$ is $1 - t$ on one output and $t$ on the other. So
+$$\chi^2 = \frac{(2t-1)^2}{1 - t} + \frac{(2t-1)^2}{t} = \frac{(2t - 1)^2}{t(1-t)}.$$
+3. **Check.** For $t = 0.75$: $\chi^2 = 0.25/0.1875 = 1.3333$, and $\ln 2.3333 = 0.8473$, the value of @tbl-rdp-rr-orders. For $t = 0.6$: $\chi^2 = 0.04/0.24 = 0.1667$, and $\ln 1.1667 = 0.1542$.
+4. **Small $\gamma$, order 2.** With $t = \frac12 + \gamma$, $2t - 1 = 2\gamma$ and $t(1 - t) = \frac14 - \gamma^2$. So $\chi^2 = \frac{4\gamma^2}{1/4 - \gamma^2} = 16\gamma^2 + O(\gamma^4)$, and $\ln(1 + x) = x + O(x^2)$ gives $\varepsilon(2) = 16\gamma^2 + O(\gamma^4)$.
+5. **Small $\gamma$, KL.** The KL divergence is $\mathbb E_P[L] = t\ln\frac{t}{1-t} + (1 - t)\ln\frac{1-t}{t} = (2t - 1)\ln\frac{t}{1-t}$. Here $\ln\frac{1/2 + \gamma}{1/2 - \gamma} = \ln(1 + 2\gamma) - \ln(1 - 2\gamma) = 4\gamma + O(\gamma^3)$. So KL $= 2\gamma \cdot 4\gamma + O(\gamma^4) = 8\gamma^2 + O(\gamma^4)$.
+6. **Numerically**, at $t = 0.55$ ($\gamma = 0.05$): $\varepsilon(2) = 0.03961$ against $16\gamma^2 = 0.04000$, and KL $= 0.02007$ against $8\gamma^2 = 0.02000$.
 
 *For a weak mechanism the curve is about $\alpha$ times the KL divergence at moderate orders: $\varepsilon(2) \approx 2\,$KL. A curve that is linear in $\alpha$ is what [Concentrated DP](../../book-full/part04-privacy-accounting/03-concentrated-dp.md) builds on.*
 :::
@@ -42,7 +42,7 @@ $$\chi^2 = \frac{(2p-1)^2}{1 - p} + \frac{(2p-1)^2}{p} = \frac{(2p - 1)^2}{p(1-p
 1. **Rewrite the moment in RDP terms.** By @eq-rdp-moments, $K(\lambda) = \lambda\,\varepsilon(\lambda + 1)$. With $\alpha = \lambda + 1$, the exponent is $K(\lambda) - \lambda\varepsilon = (\alpha - 1)\big(\varepsilon(\alpha) - \varepsilon\big)$.
 2. **Solve Mironov's conversion for $\delta$.** At order $\alpha$, @eq-rdp-mironov says $\varepsilon = \varepsilon(\alpha) + \ln(1/\delta)/(\alpha - 1)$. Solving, $\ln\delta = (\alpha - 1)\big(\varepsilon(\alpha) - \varepsilon\big)$, which is the exponent of step 1. So at each order the two bounds are the same pair $(\varepsilon, \delta)$, read in opposite directions.
 3. **The two optimizations agree.** Abadi et al. fix $\varepsilon$ and choose $\lambda$ to make $\delta$ smallest; Mironov fixes $\delta$ and chooses $\alpha$ to make $\varepsilon$ smallest. Both search the same family of valid pairs. The script checks a round trip: Mironov's best $\varepsilon$ for $\sigma = 1$ is 5.2985 (at $\alpha = 5.8$), and the tail bound at that $\varepsilon$ returns $\delta = 1.000 \times 10^{-5}$ at $\lambda = 4.8$, the same order.
-4. **The Gaussian in closed form.** With $\sigma = 1$, $K(\lambda) = \lambda(\lambda + 1)/2$ (the chapter's Gaussian example with $\mu = 1$). The exponent $\lambda(\lambda + 1)/2 - \lambda\varepsilon$ has derivative $\lambda + \frac12 - \varepsilon$, which vanishes at $\lambda^* = \varepsilon - \frac12$.
+4. **The Gaussian in closed form.** With $\sigma = 1$, $K(\lambda) = \lambda(\lambda + 1)/2$ (@exm-rdp-moments with $\mu = 1$). The exponent $\lambda(\lambda + 1)/2 - \lambda\varepsilon$ has derivative $\lambda + \frac12 - \varepsilon$, which vanishes at $\lambda^* = \varepsilon - \frac12$.
 5. **Substitute:** $\lambda^*(\lambda^* + 1)/2 - \lambda^*\varepsilon = (\varepsilon - \tfrac12)\big[\tfrac12(\varepsilon + \tfrac12) - \varepsilon\big] = -\tfrac12(\varepsilon - \tfrac12)^2$. So $\delta = \exp\big(-(\varepsilon - \tfrac12)^2/2\big)$.
 6. **Check.** At $\varepsilon = 3$: $\lambda^* = 2.5$ and $\delta = e^{-3.125} = 4.394 \times 10^{-2}$; the grid search finds the same $\lambda$, because $\alpha = 3.5$ is on the grid. At $\varepsilon = 4$: $\lambda^* = 3.5$ and $\delta = 2.187 \times 10^{-3}$.
 
@@ -54,7 +54,7 @@ $$\chi^2 = \frac{(2p-1)^2}{1 - p} + \frac{(2p-1)^2}{p} = \frac{(2p - 1)^2}{p(1-p
 > **Exercise 4.** **The weak triangle inequality on three Gaussians.** Take $P = \mathcal N(0, 1)$, $R = \mathcal N(0.5, 1)$, $Q = \mathcal N(1.5, 1)$ and $\alpha = 3$. Evaluate both sides of @eq-rdp-weak-triangle for $u = 2$, $u = 1.5$ and $u = 3$. *Check: left side 3.3750; right sides 3.4375, 4.1562 and 3.5000.* Then minimize the right side over $u$ for the shifts $s_1$ from $P$ to $R$ and $s_2$ from $R$ to $Q$. *Check: the best exponent is $u^* = 1 + \frac{s_2(\alpha - 1)}{\alpha s_1} = 2.3333$, where the right side equals the left side, 3.3750.* Explain the equality through the equality case of Hölder's inequality. *(Hölder's inequality)*
 
 ::: {.callout-tip collapse="true" title="Solution"}
-Unit-variance normals with shift $s$ have $D_\alpha = \alpha s^2/2$ (@eq-gauss-renyi). Here $s_1 = 0.5$, $s_2 = 1$ and the total shift is $s_1 + s_2 = 1.5$.
+Unit-variance normals with shift $s$ have $D_\alpha = \alpha s^2/2$ (@eq-div-gauss-renyi). Here $s_1 = 0.5$, $s_2 = 1$ and the total shift is $s_1 + s_2 = 1.5$.
 
 1. **Left side.** $D_3(P\|Q) = 3 \times 1.5^2/2 = 3.3750$.
 2. **$u = 2$, $v = 2$.** The orders are $u\alpha = 6$ and $v(\alpha - 1) + 1 = 5$. The right side is $\frac{3 - 1/2}{2}\cdot\frac{6 \times 0.25}{2} + \frac{5 \times 1}{2} = 1.25 \times 0.75 + 2.5 = 3.4375$.
@@ -63,7 +63,7 @@ Unit-variance normals with shift $s$ have $D_\alpha = \alpha s^2/2$ (@eq-gauss-r
 5. **The right side as a function of $u$.** With $v = u/(u - 1)$,
 $$\mathrm{RHS}(u) = \frac{\alpha u - 1}{u(\alpha - 1)}\cdot\frac{u\alpha s_1^2}{2} + \Big(\frac{u}{u-1}(\alpha - 1) + 1\Big)\frac{s_2^2}{2} = \frac{\alpha(\alpha u - 1)s_1^2}{2(\alpha - 1)} + \Big(1 + \frac{(\alpha - 1)u}{u - 1}\Big)\frac{s_2^2}{2}.$$
 6. **Minimize.** $\frac{\mathrm d}{\mathrm d u}\frac{u}{u - 1} = -\frac{1}{(u-1)^2}$, so the derivative is $\frac{\alpha^2s_1^2}{2(\alpha - 1)} - \frac{(\alpha - 1)s_2^2}{2(u - 1)^2}$. It vanishes at $(u - 1)^2 = \frac{(\alpha - 1)^2s_2^2}{\alpha^2s_1^2}$, that is, $u^* = 1 + \frac{s_2(\alpha - 1)}{\alpha s_1} = 1 + \frac{2}{1.5} = 2.3333$, with $v^* = 1.75$. The orders become 7 and 4.5, and the right side is 3.3750, equal to the left side.
-7. **Why equality is possible.** Hölder's inequality $\mathbb E_R[XY] \le (\mathbb E_RX^u)^{1/u}(\mathbb E_RY^v)^{1/v}$ is an equality exactly when $X^u$ is a constant multiple of $Y^v$. Here $X = (p/r)^\alpha$ and $Y = (r/q)^{\alpha - 1}$. For normals with equal variance, $\ln(p/r)$ and $\ln(r/q)$ are both linear in $y$, with slopes proportional to $-s_1$ and $-s_2$. So $X^u = cY^v$ holds when the slopes match, $u\alpha s_1 = v(\alpha - 1)s_2$. With $v = u/(u - 1)$ this gives $(u - 1)\alpha s_1 = (\alpha - 1)s_2$, the same $u^*$ as step 6.
+7. **Why equality is possible.** Hölder's inequality $\mathbb E_R[XY] \le (\mathbb E_RX^u)^{1/u}(\mathbb E_RY^v)^{1/v}$ is an equality exactly when $X^u$ is a constant multiple of $Y^v$. Here $X = (p/p_R)^\alpha$ and $Y = (p_R/q)^{\alpha - 1}$, as in the proof of @lem-rdp-weak-triangle, where $p_R$ is the density of $R$. For normals with equal variance, $\ln(p/p_R)$ and $\ln(p_R/q)$ are both linear in $y$, with slopes proportional to $-s_1$ and $-s_2$. So $X^u = cY^v$ holds when the slopes match, $u\alpha s_1 = v(\alpha - 1)s_2$. With $v = u/(u - 1)$ this gives $(u - 1)\alpha s_1 = (\alpha - 1)s_2$, the same $u^*$ as step 6.
 
 *The weak triangle inequality loses nothing for Gaussians when $u$ is tuned to the two shifts. The fixed choice $u = 2$ is what group privacy uses, and its loss is small (3.4375 against 3.3750 here).*
 :::
@@ -79,4 +79,30 @@ $$\mathrm{RHS}(u) = \frac{\alpha u - 1}{u(\alpha - 1)}\cdot\frac{u\alpha s_1^2}{
 4. **Remedy.** Add larger orders (1024, 2048, ...) when the noise is large, or optimize $\alpha$ continuously when the curve has a closed form. Both converted values are still well above the exact $\varepsilon = 0.01251$ of this mechanism; that remaining slack is the conversion's, not the grid's.
 
 *A fixed grid is a convenience for adding curves of different mechanisms. Check that the chosen order is not at the edge of the grid; if it is, the grid is too short.*
+:::
+
+## Composing two Gaussian curves {#sec-sol-rdp-6}
+
+> **Exercise 6.** **Composing two Gaussian curves.** Two Gaussian mechanisms with sensitivity 1 and RDP curves $\alpha/8$ and $\alpha/2$ are run on the same dataset. Which single Gaussian mechanism has the same composed curve? *Check: noise multiplier $\sigma = 0.8944$.* *(Composition, the Gaussian curve)*
+
+::: {.callout-tip collapse="true" title="Solution"}
+1. **Read the noise multipliers.** By @eq-rdp-gauss a curve $\alpha/(2\sigma^2)$ belongs to the noise multiplier $\sigma$, so $\alpha/8$ is $\sigma = 2$ and $\alpha/2$ is $\sigma = 1$.
+2. **Compose.** By @thm-rdp-composition the curves add, with equality because the two noises are independent:
+$$\frac\alpha8 + \frac\alpha2 = \frac{5\alpha}{8}.$$
+3. **Match one Gaussian.** Setting $\alpha/(2\sigma^2) = 5\alpha/8$ gives $\sigma^2 = 0.8$, so $\sigma = \sqrt{0.8} = 0.8944$.
+4. **The rule behind it.** The curve is proportional to $1/\sigma^2$, so composing Gaussians adds the values $1/\sigma^2$: here $\frac14 + 1 = 1.25 = 1/0.8$. The composed mechanism is less noisy than either step.
+
+*Composed Gaussian steps are one Gaussian step whose $1/\sigma^2$ is the sum of theirs; $k$ equal steps give $\sigma/\sqrt k$.*
+:::
+
+## Converting one point of a curve {#sec-sol-rdp-7}
+
+> **Exercise 7.** **Converting one point of a curve.** A mechanism is known only to be $(10, 0.5)$-RDP. What $(\varepsilon, 10^{-5})$-DP guarantee does @thm-rdp-conversion give? *Check: $\varepsilon = 1.7792$.* *(Conversion)*
+
+::: {.callout-tip collapse="true" title="Solution"}
+1. **The tail term.** With $\delta = 10^{-5}$, $\ln(1/\delta) = 11.5129$, and at order 10 the tail term of @eq-rdp-mironov is $11.5129/9 = 1.2792$.
+2. **Add the RDP value.** The guarantee is $\varepsilon = 0.5 + 1.2792 = 1.7792$.
+3. **Reading it.** The tail term is more than twice the RDP value, so most of the cost is the price of $\delta$. A mechanism that is also RDP at higher orders, with values not much above 0.5, would convert to a smaller $\varepsilon$, which is why accountants keep the whole curve.
+
+*One point of a curve gives one valid $(\varepsilon, \delta)$ pair; the whole curve lets the conversion choose the order.*
 :::

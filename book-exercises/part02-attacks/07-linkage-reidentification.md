@@ -22,14 +22,14 @@ The same formula in the other direction: the toy release of the chapter, with cl
 
 ## Bits for a target uniqueness {#sec-sol-link-2}
 
-> **Exercise 2.** **Bits for a target uniqueness.** Under uniform cells, how many bits beyond $\log_2n$ does it take to make a fraction $f$ of the population unique? Evaluate for 8 billion people at $f = 0.5$ and $0.99$, and show that at exactly $\log_2n$ bits the fraction tends to $e^{-1}$ as $n \to \infty$. *Check: 33.4 and 39.5 bits.* *(Fact 2, uniform cells)*
+> **Exercise 2.** **Bits for a target uniqueness.** Under uniform cells, how many bits beyond $\log_2n$ does it take to make a fraction $f$ of the population unique? Evaluate for 8 billion people at $f = 0.5$ and $0.99$, and show that at exactly $\log_2n$ bits the fraction tends to $e^{-1}$ as $n \to \infty$. *Check: 33.4 and 39.5 bits.* *(@lem-link-power, uniform cells)*
 
 ::: {.callout-tip collapse="true" title="Solution"}
 1. **The fraction.** With $K = 2^b$ uniform cells, @eq-link-uniform gives $f \approx e^{-n/K}$.
 2. **Solve for $K$.** $n/K = \ln(1/f)$, so $K = n/\ln(1/f)$.
 3. **Take $\log_2$.** $b = \log_2n - \log_2\ln(1/f) = \log_2 n + \log_2\frac{1}{\ln(1/f)}$. The excess over $\log_2n$ does not depend on $n$.
 4. **Evaluate.** $\log_2(8\times10^9) = 32.9$. At $f = 0.5$, $\log_2(1/\ln 2) = 0.53$, so $b = 33.4$. At $f = 0.99$, $\ln(1/0.99) = 0.01005$ and $\log_2(1/0.01005) = 6.64$, so $b = 39.5$.
-5. **At $b = \log_2 n$.** Then $K = n$ and the exact fraction is $(1 - 1/n)^{n-1}$. By Fact 2 it lies between $e^{-(n-1)/(n-1)} = e^{-1}$ and $e^{-(n-1)/n}$, and both tend to $e^{-1}$. Numerically: 0.3874 for $n = 10$, 0.3697 for $n = 100$, and 0.3679 $= e^{-1}$ to four decimals for $n = 10^4$ and $8\times10^9$.
+5. **At $b = \log_2 n$.** Then $K = n$ and the exact fraction is $(1 - 1/n)^{n-1}$. By @lem-link-power it lies between $e^{-(n-1)/(n-1)} = e^{-1}$ and $e^{-(n-1)/n}$, and both tend to $e^{-1}$. Numerically: 0.3874 for $n = 10$, 0.3697 for $n = 100$, and 0.3679 $= e^{-1}$ to four decimals for $n = 10^4$ and $8\times10^9$.
 
 *Six and a half bits beyond $\log_2 n$ make 99% of a population unique, whatever its size: about two extra attributes of the kind in the chapter's census.*
 :::
@@ -41,7 +41,7 @@ The same formula in the other direction: the toy release of the chapter, with cl
 ::: {.callout-tip collapse="true" title="Solution"}
 1. **Indicators.** Let $Y_{ij} = \mathbf 1[\text{persons } i \text{ and } j \text{ share a cell}]$ for each of the $\binom n2$ pairs. The number of sharing pairs is $\sum_{i<j}Y_{ij}$.
 2. **One pair.** Persons $i$ and $j$ are independent, so $\Pr[Y_{ij} = 1] = \sum_c\Pr[i \in c]\Pr[j \in c] = \sum_cp_c^2$.
-3. **Linearity** (Fact 1): the expected number of sharing pairs is $\binom n2\sum_cp_c^2$.
+3. **Linearity** (@lem-dist-moment-rules): the expected number of sharing pairs is $\binom n2\sum_cp_c^2$.
 4. **Union bound.** "Somebody shares a cell" is the event that some $Y_{ij} = 1$, and $\Pr[\bigcup_{i<j}\{Y_{ij} = 1\}] \le \sum_{i<j}\Pr[Y_{ij} = 1] = \binom n2\sum_cp_c^2$. (Equivalently, Markov's inequality applied to the number of sharing pairs.)
 5. **The example.** 730 equally likely cells give $\sum_cp_c^2 = 1/730$, and $\binom{30}{2} = 435$, so the bound is $435/730 = 0.596$. The exact probability, $1 - \prod_{i<30}(1 - i/730)$ as in the birthday bound of [Cryptography basics](../../book-full/part01-prerequisites/08-crypto-basics.md), is 0.4534, and the lower bound $1 - e^{-0.5959} = 0.4489$.
 
@@ -72,10 +72,10 @@ With birthdays alone (365 cells), the union bound is 1.192, useless as a probabi
 > **Exercise 5.** **How many rare items.** Each auxiliary item is rated by 1% of 480,189 users, and agreements are independent. What is the smallest number of items for which the expected number of unrelated records agreeing on all of them is below 0.01? With that many items, $\rho = 0$, and exactly one record agreeing on all of them, what is the posterior probability that this record is the target, if the target is in the release with prior probability $\frac12$? *Check: 4 items, 0.0048 expected false matches, posterior 0.9952.* *(Bits, Bayes)*
 
 ::: {.callout-tip collapse="true" title="Solution"}
-1. **Expected false matches.** An unrelated record agrees on all $m$ items with probability $0.01^m$, so the expected number among $n = 480{,}189$ records is $n\cdot0.01^m$.
+1. **Expected false matches.** By @prp-link-false-matches with $s_i = 0.01$ for each of $m$ items, the expected number among $n = 480{,}189$ records is $n\cdot0.01^m$.
 2. **Solve.** $m = 3$ gives 0.48 and $m = 4$ gives 0.0048, so $m = 4$. In bits: each item carries $\log_2 100 = 6.64$ bits, and four carry 26.6, which exceeds $\log_2 n = 18.9$ by more than the 6.64 bits needed to push the expected false matches below 0.01.
 3. **Likelihood ratios.** With $\rho = 0$, a record that misses an item cannot be the target, so its likelihood ratio is 0. The one agreeing record has $\mathrm{LR} = \prod_i(1/s_i) = 100^4 = 10^8$.
-4. **Posterior with a prior.** From the chapter's interpretation of @eq-link-posterior, with prior $\pi$ that the target is in the release,
+4. **Posterior with a prior.** Extend @prp-link-lr by one more explanation, "the target is not in the release", with prior $1 - \pi$, and give each record prior $\pi/n$. Under the new explanation every record is unrelated, so its likelihood, divided by $\prod_jP_0(j)$ as in step 5 of that proof, is 1. Bayes' rule then gives
 $$\Pr[\text{target} = t \mid \text{data}] = \frac{\pi\,\mathrm{LR}(t)}{\pi\sum_j\mathrm{LR}(j) + (1 - \pi)n} = \frac{10^8/2}{10^8/2 + 480{,}189/2} = 0.9952.$$
 5. **The role of the prior.** With $\pi = 0.01$, say if the adversary merely suspects the target used the service, the posterior is 0.6778. The same match is much weaker evidence when the target is unlikely to be in the data at all.
 
@@ -104,9 +104,9 @@ $$\Pr[\text{target} = t \mid \text{data}] = \frac{\pi\,\mathrm{LR}(t)}{\pi\sum_j
 
 ::: {.callout-tip collapse="true" title="Solution"}
 1. **Condition on the second largest.** Let $x$ be the value of the second-largest score. Given $x$, exactly one score exceeds $x$, and (by independence and symmetry) it is distributed as a single exponential score conditioned to exceed $x$.
-2. **Memorylessness.** For an exponential $S$ with mean $\mu$, $\Pr[S > x + g \mid S > x] = e^{-(x+g)/\mu}/e^{-x/\mu} = e^{-g/\mu}$. So, given $x$, the gap $s_1 - x$ is exponential with mean $\mu$.
+2. **Memorylessness.** For an exponential $S$ with mean $\mu$, $\Pr[S > x + g \mid S > x] = e^{-(x+g)/\mu}/e^{-x/\mu} = e^{-g/\mu}$. So, given $x$, the gap $\mathrm{top}_1 - x$ is exponential with mean $\mu$.
 3. **Remove the conditioning.** The conditional law in step 2 does not depend on $x$, so the gap is exponential with mean $\mu$ unconditionally, and independent of $x$. Nothing depended on $n$.
-4. **The test.** For large $n$ the sample standard deviation of the scores is close to $\mu$, so $\Pr[(s_1 - s_2)/\sigma \ge \tau] \approx \Pr[\text{gap} \ge \tau\mu] = e^{-\tau}$. At $\tau = 1.5$ that is 0.2231. A simulation with $n = 1000$ and 20,000 trials gives 0.2257.
+4. **The test.** For large $n$ the sample standard deviation of the scores is close to $\mu$, so $\Pr[(\mathrm{top}_1 - \mathrm{top}_2)/\sigma \ge \tau] \approx \Pr[\text{gap} \ge \tau\mu] = e^{-\tau}$. At $\tau = 1.5$ that is 0.2231. A simulation with $n = 1000$ and 20,000 trials gives 0.2257.
 5. **Normal scores.** With standard normal scores, the gap between the top two shrinks with $n$, roughly like an exponential with mean $1/\sqrt{2\ln n}$ (the normal tail near its maximum behaves like an exponential with that rate). The approximation gives $e^{-1.5\sqrt{2\ln 1000}} = 0.0038$, and the simulation 0.0024.
 
 So the same threshold $\tau = 1.5$ falsely matches about one outsider in five when null scores have an exponential tail, and about one in 400 when they are normal. The chapter's ratings experiment, with 26.3% of outsiders matched, sits on the exponential side: its scores are sums of a few weighted agreements, mostly zero, with a long right tail.

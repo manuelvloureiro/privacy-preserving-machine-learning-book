@@ -6,10 +6,10 @@ The solutions use the chapter's notation. A mechanism is $\rho$-zero-concentrate
 
 ## Laplace in a zCDP budget {#sec-sol-cdp-1}
 
-> **Exercise 1.** **Laplace in a zCDP budget.** The Laplace mechanism with scale $b$ on a sensitivity-1 query is $\varepsilon$-DP with $\varepsilon = 1/b$. Using its exact RDP curve (@eq-laplace-renyi with $t = \varepsilon$), find numerically the smallest $\rho$ for $\varepsilon = 1$, and compare it with $\varepsilon^2/2$ and with randomized response at the same $\varepsilon$. *Check: the smallest $\rho$ is the KL divergence $t + e^{-t} - 1 = 0.3679$, reached as $\alpha \to 1$.* *(Pure DP to zCDP, tightness)*
+> **Exercise 1.** **Laplace in a zCDP budget.** The Laplace mechanism with scale $b$ on a sensitivity-1 query is $\varepsilon$-DP with $\varepsilon = 1/b$. Using its exact RDP curve (@eq-div-laplace-renyi with $t = \varepsilon$), find numerically the smallest $\rho$ for $\varepsilon = 1$, and compare it with $\varepsilon^2/2$ and with randomized response at the same $\varepsilon$. *Check: the smallest $\rho$ is the KL divergence $t + e^{-t} - 1 = 0.3679$, reached as $\alpha \to 1$.* *(Pure DP to zCDP, tightness)*
 
 ::: {.callout-tip collapse="true" title="Solution"}
-1. **The curve.** The outputs on neighbours are $\mathrm{Lap}(0, b)$ and $\mathrm{Lap}(1, b)$, a shift of $t = 1/b = \varepsilon$ scale units. By @eq-laplace-renyi,
+1. **The curve.** The outputs on neighbours are $\mathrm{Lap}(0, b)$ and $\mathrm{Lap}(1, b)$, a shift of $t = 1/b = \varepsilon$ scale units. By @eq-div-laplace-renyi,
 $$\varepsilon(\alpha) = \frac{1}{\alpha - 1}\ln\left(\frac{\alpha}{2\alpha - 1}e^{(\alpha - 1)t} + \frac{\alpha - 1}{2\alpha - 1}e^{-\alpha t}\right).$$
 The script evaluates it in log space, so large orders do not overflow.
 2. **The smallest $\rho$ is the largest ratio.** $\varepsilon(\alpha) \le \rho\alpha$ for all $\alpha$ exactly when $\rho \ge \sup_{\alpha > 1}\varepsilon(\alpha)/\alpha$. @tbl-sol-cdp-laplace evaluates the ratio at $t = 1$.
@@ -26,7 +26,7 @@ The script evaluates it in log space, so large orders do not overflow.
 3. **The ratio is largest as $\alpha \to 1$.** There $\varepsilon(\alpha) \to D_{\mathrm{KL}} = t + e^{-t} - 1$ (the KL divergence of the Laplace pair, from [Divergences](../../book-full/part01-prerequisites/03-divergences.md)), and $\alpha \to 1$. On the fine grid of orders the maximum of $\varepsilon(\alpha)/\alpha$ is $0.3679$, equal to the KL divergence $0.3679$.
 4. **Compare.** The general bound is $\varepsilon^2/2 = 0.5000$; randomized response at $\varepsilon = 1$ needs $\varepsilon\tanh(\varepsilon/2) = 0.4621$; the Laplace mechanism only $0.3679$.
 
-*The general $\varepsilon^2/2$ is a convenient upper bound, not the cost of any mechanism at fixed $\varepsilon$. Every $\varepsilon$-DP mechanism is a post-processing of randomized response ([Composition](../../book-full/part03-dp-foundations/04-composition.md)), so none needs more than randomized response's $\varepsilon\tanh(\varepsilon/2) = 0.4621$ at $\varepsilon = 1$ (@eq-cdp-pure-sharp). The Laplace mechanism, whose privacy loss reaches $\pm\varepsilon$ only in its tails, needs $0.3679$. Charging it $\varepsilon^2/2$ is safe but overcharges by a factor $0.5000/0.3679 = 1.36$; the sharp $\varepsilon\tanh(\varepsilon/2)$ still overcharges by $0.4621/0.3679 = 1.26$.*
+*The general $\varepsilon^2/2$ of @thm-cdp-pure is a convenient upper bound, not the cost of any mechanism at fixed $\varepsilon$. Every $\varepsilon$-DP mechanism is a post-processing of randomized response (@thm-comp-worst), so none needs more than randomized response's $\varepsilon\tanh(\varepsilon/2) = 0.4621$ at $\varepsilon = 1$ (@thm-cdp-pure-sharp). The Laplace mechanism, whose privacy loss reaches $\pm\varepsilon$ only in its tails, needs $0.3679$. Charging it $\varepsilon^2/2$ is safe but overcharges by a factor $0.5000/0.3679 = 1.36$; the sharp $\varepsilon\tanh(\varepsilon/2)$ still overcharges by $0.4621/0.3679 = 1.26$.*
 :::
 
 ## Calibrating σ for many steps {#sec-sol-cdp-2}
@@ -70,10 +70,10 @@ The Hölder exponents are $u = \frac{m\alpha - 1}{\alpha(m - 1)} = \frac32$ and 
 > **Exercise 4.** **A mixed pipeline.** A pipeline runs 20 propose-test-release steps, each $(0.25, 10^{-8})$-DP, and 50 Gaussian steps with $\sigma = 5$. Find its $\rho$, its $\delta_a$, and $\varepsilon$ at total $\delta = 10^{-5}$ with the improved conversion. *Check: $\rho = 1.625$.* *(Approximate zCDP)*
 
 ::: {.callout-tip collapse="true" title="Solution"}
-1. **Each stability step.** An $(\varepsilon, \delta)$-DP step is $\delta$-approximately $(\varepsilon^2/2)$-zCDP, so each costs $\rho = 0.25^2/2 = 0.03125$ and fails with probability $10^{-8}$.
+1. **Each stability step.** An $(\varepsilon, \delta)$-DP step is $\delta$-approximately $(\varepsilon^2/2)$-zCDP (@prp-cdp-approx, part 1), so each costs $\rho = 0.25^2/2 = 0.03125$ and fails with probability $10^{-8}$.
 2. **Each Gaussian step** costs $1/(2 \cdot 25) = 0.020$ and never fails.
 3. **Compose.** $\rho = 20 \times 0.03125 + 50 \times 0.020 = 1.6250$ and $\delta_a = 1 - (1 - 10^{-8})^{20} = 2.0000 \times 10^{-7}$.
-4. **Convert.** Spend the rest of the $\delta$ on the conversion: $\delta' = 10^{-5} - \delta_a$. The improved conversion at $\rho = 1.625$ and this $\delta'$ gives $\varepsilon = 9.463$, at total $\delta = \delta_a + \delta' = 10^{-5}$ (the third property of the approximate zCDP section, its conversion, which allows $\delta_a + (1 - \delta_a)\delta' \le 10^{-5}$).
+4. **Convert.** Spend the rest of the $\delta$ on the conversion: $\delta' = 10^{-5} - \delta_a$. The improved conversion at $\rho = 1.625$ and this $\delta'$ gives $\varepsilon = 9.463$, at total $\delta = \delta_a + \delta' = 10^{-5}$ (@prp-cdp-approx, part 3, which allows $\delta_a + (1 - \delta_a)\delta' \le 10^{-5}$).
 5. **Compare.** Treating the two kinds of steps separately, the Gaussians alone ($\rho = 1$) convert to $\varepsilon = 7.084$ at $\delta = 10^{-5} - 2 \times 10^{-7} = 9.8 \times 10^{-6}$, and basic composition of the stability steps adds $20 \times 0.25 = 5$, for $12.084$.
 
 *Twenty steps of $\varepsilon = 0.25$ cost 5 under basic composition but only $\rho = 0.625$ in the zCDP ledger, because they compose like Gaussian steps. That is the point of approximate zCDP.*
@@ -95,15 +95,24 @@ The Hölder exponents are $u = \frac{m\alpha - 1}{\alpha(m - 1)} = \frac32$ and 
 
 ## The tCDP conversion {#sec-sol-cdp-6}
 
-> **Exercise 6.** **The tCDP conversion.** Derive @eq-cdp-tcdp-conv and apply it to $10{,}000$ steps of the running example with $\omega = 4$ and $\omega = 8$, saying which branch applies. *Check: $7.469$ and $8.289$.* *(Constrained optimization over $\alpha$)*
+> **Exercise 6.** **The tCDP conversion.** Apply the conversion @eq-cdp-tcdp-conv of truncated concentrated DP (tCDP) to $10{,}000$ steps of the running example with $\omega = 4$ and $\omega = 8$, saying which branch applies and where the unconstrained best order lies. *Check: $7.469$ and $8.289$.* *(Constrained optimization over $\alpha$)*
 
 ::: {.callout-tip collapse="true" title="Solution"}
-1. **Admissible orders.** $(\rho, \omega)$-truncated concentrated DP (tCDP) bounds $D_\alpha$ by $\rho\alpha$ for $\alpha \in (1, \omega)$, and at $\alpha = \omega$ too, because $D_\alpha$ is non-decreasing and lower semicontinuous in $\alpha$, so $D_\omega \le \lim_{\alpha \uparrow \omega}D_\alpha \le \rho\omega$. Mironov's conversion at any such order gives $g(\alpha) = \rho\alpha + \ell/(\alpha - 1)$.
-2. **The unconstrained minimum.** $g$ is convex with minimizer $\alpha^* = 1 + \sqrt{\ell/\rho}$ and minimum $\rho + 2\sqrt{\rho\ell}$ (the chapter's conversion section).
-3. **First branch.** If $\alpha^* \le \omega$, which is $\ell \le (\omega - 1)^2\rho$, the minimizer is admissible.
-4. **Second branch.** Otherwise $g' < 0$ on all of $(1, \omega]$ (a convex function decreases before its minimizer), so the best admissible order is $\omega$: $\varepsilon = \rho\omega + \ell/(\omega - 1)$.
-5. **$\omega = 4$.** Per step $\rho = 9.0789 \times 10^{-5}$ (chapter, @tbl-cdp-tcdp), so $10{,}000$ steps give $\rho = 0.9079$. Then $(\omega - 1)^2\rho = 8.171 < \ell = 11.5129$: second branch, $\varepsilon = 7.469$. The unconstrained minimizer $\alpha^* = 4.561$ lies beyond $\omega$.
-6. **$\omega = 8$.** $\rho = 1.1171$ and $(\omega - 1)^2\rho = 54.736 \ge \ell$: first branch, with $\alpha^* = 4.210 \le 8$, and $\varepsilon = 8.289$.
+1. **The rule.** By @prp-cdp-tcdp, the first branch of @eq-cdp-tcdp-conv applies when the unconstrained best order $\alpha^* = 1 + \sqrt{\ell/\rho}$ is at most $\omega$, that is when $\ell \le (\omega - 1)^2\rho$. Otherwise the best admissible order is $\omega$ itself.
+2. **$\omega = 4$.** Per step $\rho = 9.0789 \times 10^{-5}$ (chapter, @tbl-cdp-tcdp), so $10{,}000$ steps give $\rho = 0.9079$. Then $(\omega - 1)^2\rho = 8.171 < \ell = 11.5129$: second branch, $\varepsilon = 7.469$. The unconstrained minimizer $\alpha^* = 4.561$ lies beyond $\omega$.
+3. **$\omega = 8$.** $\rho = 1.1171$ and $(\omega - 1)^2\rho = 54.736 \ge \ell$: first branch, with $\alpha^* = 4.210 \le 8$, and $\varepsilon = 8.289$.
 
 *A larger $\omega$ makes more orders available but forces a larger slope, because the line has to clear the curve on more orders. Here the slope wins, and the smaller truncation point gives the better $\varepsilon$.*
+:::
+
+## A line for a 5-DP mechanism {#sec-sol-cdp-7}
+
+> **Exercise 7.** **A line for a 5-DP mechanism.** A mechanism is $5$-DP. Find the $\rho$ that @thm-cdp-pure and @thm-cdp-pure-sharp charge for it, find the order at which each line $\rho\alpha$ reaches the pure-DP cap $\varepsilon = 5$ of @eq-cdp-pure, and say how an accountant should describe the mechanism. *Check: $\rho = 12.5$ and $4.9331$; the sharp line reaches the cap at $\alpha = 1.0136$.* *(Pure DP to zCDP, the cap on the RDP curve)*
+
+::: {.callout-tip collapse="true" title="Solution"}
+1. **The general constant.** @thm-cdp-pure charges $\varepsilon^2/2 = 25/2 = 12.5$. The line $12.5\alpha$ is above 5 at every order $\alpha > 1$, because $12.5 > 5$ already at $\alpha = 1$. So it is worse than the cap everywhere.
+2. **The sharp constant.** @thm-cdp-pure-sharp charges $\varepsilon\tanh(\varepsilon/2) = 5\tanh(2.5) = 4.9331$. This line starts just below the cap and reaches it where $4.9331\alpha = 5$, at $\alpha = 5/4.9331 = 1.0136$.
+3. **What the accountant should keep.** Above $\alpha = 1.0136$ the cap $\varepsilon = 5$ is below both lines, and the exact curve of randomized response, which bounds every $5$-DP mechanism (@thm-cdp-pure-sharp), is lower still. Converting either line back gives a worse guarantee than the one you started with. The simple conversion @eq-cdp-simple returns $\rho$ plus a positive term, and $\rho = 4.9331$ is already within $0.07$ of 5, so the result exceeds 5 for every $\delta < 1$.
+
+*For a large $\varepsilon$, as in local DP, describe the mechanism by its RDP curve or by $\varepsilon$ itself, never by a single $\rho$. A line through the origin cannot follow a curve that flattens almost at once.*
 :::

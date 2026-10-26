@@ -9,7 +9,7 @@ The notation is the chapter's: $n$ records, classes $E$, $P_E$ a class's distrib
 > **Exercise 1.** **Bits for 10-anonymity.** For a population of $n = 10^6$ in uniform cells, how many bits of quasi-identifier can a release keep if at most 1% of records may fall in classes smaller than 10? Compute $\lambda_k/k$ for $k = 2$, 10 and 100, and explain why it tends to 1. *Check: $\lambda_{10} = 17.40$, 15.81 bits.* *(Poisson tails)*
 
 ::: {.callout-tip collapse="true" title="Solution"}
-1. **The condition.** By @eq-anon-k-violate, the fraction of records in classes smaller than 10 is $\Pr[\mathrm{Poisson}(\lambda) \le 8]$ with $\lambda = n/K$. It falls as $\lambda$ grows.
+1. **The condition.** By @prp-anon-k-violate, the fraction of records in classes smaller than 10 is $\Pr[\mathrm{Poisson}(\lambda) \le 8]$ with $\lambda = n/K$. It falls as $\lambda$ grows.
 2. **Solve for $\lambda$.** Bisection on $\Pr[\mathrm{Poisson}(\lambda) \le 8] = 0.01$ gives $\lambda_{10} = 17.40$. It does not depend on $n$.
 3. **Convert to bits.** $K = n/\lambda_{10}$, so $b = \log_2 n - \log_2\lambda_{10} = 19.93 - 4.12 = 15.81$ bits.
 4. **The ratio.** $\lambda_2 = 4.61$, $\lambda_{10} = 17.40$ and $\lambda_{100} = 123.61$, so $\lambda_k/k = 2.30$, 1.74 and 1.24.
@@ -26,7 +26,7 @@ The notation is the chapter's: $n$ records, classes $E$, $P_E$ a class's distrib
 1. **The entropy.** The class has $H(\rho) = -\rho\log_2\rho - (1 - \rho)\log_2\frac{1 - \rho}{7}$ bits. At $\rho = \frac18$ this is $\log_2 8 = 3$ bits, and it falls to 0 as $\rho \to 1$.
 2. **Solve $H(\rho) = \log_2 3 = 1.5850$.** $H$ decreases in $\rho$ on $[\frac18, 1)$, so bisection gives the largest share, $\rho = 0.733$.
 3. **Recursive diversity.** The tail beyond the two most common values is the 6 smallest counts, a share $6(1 - \rho)/7$. Recursive $(c, 3)$-diversity requires $\rho < c \cdot 6(1 - \rho)/7$. With $c = 2$ this is $7\rho < 12(1 - \rho)$, that is $\rho < 12/19 = 0.632$.
-4. **The comparison.** The entropy 3-diverse class with $\rho = 0.733$ is recursive $(c, 3)$-diverse only for $c > 7\rho/(6(1 - \rho)) = 3.21$, where the bound of @eq-anon-recursive is $c/(1 + c) = 0.762$.
+4. **The comparison.** The entropy 3-diverse class with $\rho = 0.733$ is recursive $(c, 3)$-diverse only for $c > 7\rho/(6(1 - \rho)) = 3.21$, where the bound of @prp-anon-recursive is $c/(1 + c) = 0.762$.
 
 *Entropy 3-diversity sounds like "about as uncertain as three equally likely values", yet it allows one value in almost three quarters of the class. The entropy counts the spread of the rare values, which the adversary does not care about.*
 :::
@@ -62,14 +62,14 @@ The probability rises with $m$: with more possible values, two random wrong sets
 
 ## Mondrian class sizes {#sec-sol-anon-5}
 
-> **Exercise 5.** **Mondrian class sizes.** Show that if no two records share a value on any quasi-identifier, every Mondrian class has between $k$ and $2k - 1$ records, and deduce that the linkage success lies in $[1/(2k-1), 1/k]$. Explain why the hospital table has classes larger than $2k - 1$. *Check: at $k = 5$, linkage between 0.1111 and 0.2000.* *(Medians, @eq-anon-k-link)*
+> **Exercise 5.** **Mondrian class sizes.** Show that if no two records share a value on any quasi-identifier, every Mondrian class has between $k$ and $2k - 1$ records, and deduce that the linkage success lies in $[1/(2k-1), 1/k]$. Explain why the hospital table has classes larger than $2k - 1$. *Check: at $k = 5$, linkage between 0.1111 and 0.2000.* *(Medians, @prp-anon-k-link)*
 
 ::: {.callout-tip collapse="true" title="Solution"}
 1. **Classes are at least $k$.** The whole table has at least $k$ records, and a split is made only when both halves have at least $k$. By induction, every class does.
 2. **What a split does.** With no ties, splitting a box of $s$ records at the median puts $\lfloor s/2\rfloor$ records on one side and $\lceil s/2\rceil$ on the other (or $\lfloor s/2\rfloor + 1$ and $\lceil s/2\rceil - 1$, the other choice of side for the median, which is never more balanced).
 3. **When a split is allowed.** It is allowed exactly when the smaller side has at least $k$, that is $\lfloor s/2\rfloor \ge k$, that is $s \ge 2k$. Every box of $2k$ or more records has a quasi-identifier with a positive range, because no two records tie, so it is split.
 4. **So classes are at most $2k - 1$.** A box that is not split has $s \le 2k - 1$.
-5. **The linkage success.** With $J$ classes of sizes between $k$ and $2k - 1$, $Jk \le n \le J(2k - 1)$, so $1/(2k - 1) \le J/n \le 1/k$. The lower end is attained when every class has exactly $2k - 1$ records. At $k = 5$ that is $[0.1111, 0.2000]$.
+5. **The linkage success.** The upper end, $J/n \le 1/k$, is @prp-anon-k-link. The same count with classes of at most $2k - 1$ records gives $n \le J(2k - 1)$, so $J/n \ge 1/(2k - 1)$. The lower end is attained when every class has exactly $2k - 1$ records. At $k = 5$ that is $[0.1111, 0.2000]$.
 6. **Ties.** Ages are whole years and sex has two values, so many records share values. A box in which, say, 12 patients share an age and sex, and whose ZIP codes cannot be split into two halves of at least 5, stays whole. On a fresh draw of the hospital table, Mondrian's classes have sizes 5 to 12 at $k = 5$ and 10 to 21 at $k = 10$. Still, 97.7% and 98.5% of classes are within $[k, 2k - 1]$, and the linkage success, 0.1525 and 0.0738, is inside the interval.
 
 *Mondrian keeps classes between $k$ and $2k - 1$ when values are distinct, so its linkage success is within a factor of 2 of the bound $1/k$. With ties, classes can be larger than $2k - 1$.*
