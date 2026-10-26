@@ -16,7 +16,7 @@ and no adversary that sees only the quasi-identifiers can do better. This is the
 
 On real populations, most people are unique. From the 1990 census, Latanya Sweeney estimated that 87% of Americans were unique on ZIP code, birth date and sex.
 
-To see how fast uniqueness grows on a real table, the script [practitioner_table_risk.py](../../code/part02-attacks/practitioner_table_risk.py) takes Adult, the 48,842 people of the 1994 US Current Population Survey in the UCI repository. Adult has no ZIP code or birth date, so the script starts from age, sex and race. It then adds one quasi-identifier at a time, with native country as the only geography. For each set it prints the share of unique records, the share in classes smaller than 5, the smallest class size and $J/n$.
+To see how fast uniqueness grows on a real table, the script [practitioner_table_risk.py](../../code/part02-attacks/practitioner_table_risk.py) takes Adult, the 48,842 people of the 1994 US Current Population Survey in the UCI repository. Adult has no ZIP code or birth date, so the script starts from age, sex and race. It then adds one quasi-identifier at a time, with native country as the only geography. For each set it prints the share of unique records, the share in classes smaller than 5, the smallest class size and $J/n$. The counts are plain Polars group-bys, because no maintained Python package computes them, while ARX in Java and sdcMicro in R do.
 
 ```{.python excerpt="qi-uniqueness"}
 n = df.height

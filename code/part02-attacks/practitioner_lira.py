@@ -1,25 +1,36 @@
-"""Membership inference on your own classifier: the free check, then LiRA with shadow models.
+"""Membership inference on your own classifier: the free check, ART's shadow-model attack, then LiRA.
 
     uv run python code/part02-attacks/practitioner_lira.py
     uv run python code/part02-attacks/practitioner_lira.py --models 16    # fewer shadow models, faster
 
 The workflow of the practitioner edition's risk-assessment chapter (book-practitioner/part02-attacks/
-10-risk-assessment.md, steps 2 and 3), and the `lira-scores` excerpt of 02-membership-inference.md.
+10-risk-assessment.md, steps 2 and 3), and the `lira-shadows` and `art-shadow-attack` excerpts of
+02-membership-inference.md.
 
 Data: the handwritten digits bundled with scikit-learn, `sklearn.datasets.load_digits` (1,797 images of 8 x 8
 pixels, 10 classes; the test set of the UCI "Optical Recognition of Handwritten Digits" dataset, Alpaydin & Kaynak,
 1998; licence CC BY 4.0, shipped with scikit-learn under its BSD licence). No download.
 
-Model: StandardScaler then LogisticRegression(C=10, max_iter=2000). K = 64 models (16 with --models 16) are trained
-on Bernoulli-1/2 subsets of the 1,797 images: each image is in each model's training set with probability 1/2,
-independently. Each model in turn is the target, and the other K - 1 are its shadow models. So every
+Model: StandardScaler then LogisticRegression(C=10, max_iter=2000), wrapped in the Adversarial Robustness Toolbox's
+(ART's) `SklearnClassifier`, which trains it and returns its probabilities. K = 64 models (16 with --models 16) are
+trained on Bernoulli-1/2 subsets of the 1,797 images: each image is in each model's training set with probability
+1/2, independently. Each model in turn is the target, and the other K - 1 are its shadow models. So every
 (target model, image) pair is one trial of the membership game, about 57,000 member and 57,000 non-member pairs.
 
+What is a library and what is not. ART 1.20.1 runs the two attacks it implements: `MembershipInferenceBlackBoxRuleBased`
+("member if correctly classified") on the first target, and the shadow-model attack of Shokri et al. (2017), whose
+four shadow models ART's `ShadowModels` trains on random halves of the images and whose attack model (ART's default
+random forest, seeded through NumPy's global generator) `MembershipInferenceBlackBox` fits on their outputs; that
+one attack model then scores every target. The LiRA score, which no maintained library provides, comes from
+code/practitioner_privacy_tests.py (`lira_scores`, after TensorFlow Privacy's `privacy_tests`). scikit-learn reads
+the ROC curve and SciPy's `binomtest` gives the exact intervals.
+
 It prints, with seed 0, every number the chapter quotes:
-- the free check: train and test accuracy of the first target and the average gap over all K targets, and the
-  loss attack (one threshold on the confidence, no shadow models);
-- AUC and TPR at FPR 1e-3 and 1e-2 for the loss attack, offline LiRA, online LiRA and online LiRA with a global
-  variance, read from sklearn.metrics.roc_curve as the best TPR among thresholds whose FPR is at most the target;
+- the free check: train and test accuracy of the first target and the average gap over all K targets, ART's
+  rule-based attack on the first target, and the loss attack (one threshold on the confidence, no shadow models);
+- AUC and TPR at FPR 1e-3 and 1e-2 for the loss attack, ART's shadow-model attack, offline LiRA, online LiRA and
+  online LiRA with a global variance, read from sklearn.metrics.roc_curve as the best TPR among thresholds whose FPR
+  is at most the target;
 - at each target FPR, the true and false positive counts behind each TPR, with exact (Clopper-Pearson) 95%
   intervals from scipy.stats.binomtest, the point estimate ln(TPR/FPR) of epsilon (not a certified
   bound: the pairs share models, so they are not independent trials), and whether the
@@ -39,16 +50,28 @@ os.environ.setdefault("OPENBLAS_NUM_THREADS", "1")
 
 import argparse
 import math
+import sys
 from dataclasses import dataclass
+from pathlib import Path
 
 import numpy as np
+from art.attacks.inference.membership_inference import (
+    MembershipInferenceBlackBox,
+    MembershipInferenceBlackBoxRuleBased,
+    ShadowModels,
+)
+from art.estimators.classification import SklearnClassifier
+from art.estimators.classification.scikitlearn import ScikitlearnClassifier
 from numpy.typing import NDArray
-from scipy.stats import binomtest, norm
+from scipy.stats import binomtest
 from sklearn.datasets import load_digits
 from sklearn.linear_model import LogisticRegression
 from sklearn.metrics import auc, roc_curve
 from sklearn.pipeline import make_pipeline
 from sklearn.preprocessing import StandardScaler
+
+sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
+from practitioner_privacy_tests import lira_scores as lira_target
 
 Array = NDArray[np.float64]
 IntArray = NDArray[np.int64]
@@ -58,6 +81,7 @@ N_MODELS = 64
 TARGET_FPRS = (1e-3, 1e-2)
 BLOCK_FACTOR = 10  # step 1: block when the TPR's lower bound exceeds 10 x the FPR
 N_EXPOSED = 10
+N_ART_SHADOWS = 4  # shadow models of ART's attack, each on a random half of the images
 
 
 # ---------------------------------------------------------------------------
@@ -70,31 +94,42 @@ class Models:
     member: Mask  # (K, n): image i is in model k's training set
     phi: Array  # (K, n): logit of model k's confidence on image i's true label
     confidence: Array  # (K, n): model k's probability of image i's true label
+    probs: Array  # (K, n, classes): model k's probabilities on image i, what the API returns
     train_acc: Array  # (K,)
     test_acc: Array  # (K,): accuracy on the images model k did not train on
+    first: ScikitlearnClassifier  # model 0, the first target, as ART wraps it
+
+
+def recipe() -> ScikitlearnClassifier:
+    """The training recipe, untrained, wrapped for ART: every target and shadow model is a copy of it."""
+    return SklearnClassifier(make_pipeline(StandardScaler(), LogisticRegression(C=10, max_iter=2000)))
 
 
 def train_models(x: Array, y: IntArray, n_models: int, rng: np.random.Generator) -> Models:
     n = len(y)
+    onehot = np.eye(int(y.max()) + 1)[y]  # ART takes one-hot labels
+    probs = np.empty((n_models, n, onehot.shape[1]))
     phi = np.empty((n_models, n))
     confidence = np.empty((n_models, n))
     train_acc = np.empty(n_models)
     test_acc = np.empty(n_models)
+    models: list[ScikitlearnClassifier] = []
     # excerpt: lira-shadows
     # Each image is in each model's training set with probability 1/2.
     member = rng.random((n_models, n)) < 0.5
     for k in range(n_models):
-        model = make_pipeline(StandardScaler(), LogisticRegression(C=10, max_iter=2000))
-        model.fit(x[member[k]], y[member[k]])
-        # The attacker sees the probabilities the model returns, here for every image.
-        p = model.predict_proba(x)[np.arange(n), y]  # confidence on the true label
-        p = np.clip(p, 1e-15, 1 - 1e-15)  # keep the logit finite
+        model = recipe()  # a fresh, untrained copy of the target's recipe
+        model.fit(x[member[k]], onehot[member[k]])
+        probs[k] = model.predict(x)  # the probabilities the attacker sees, for every image
+        p = np.clip(probs[k, np.arange(n), y], 1e-15, 1 - 1e-15)  # confidence on the true label
         phi[k] = np.log(p) - np.log(1 - p)  # its logit, close to Gaussian over retrainings
         confidence[k] = p
         # end excerpt
-        train_acc[k] = model.score(x[member[k]], y[member[k]])
-        test_acc[k] = model.score(x[~member[k]], y[~member[k]])
-    return Models(member, phi, confidence, train_acc, test_acc)
+        models.append(model)
+        predicted = probs[k].argmax(axis=1)
+        train_acc[k] = float(np.mean(np.equal(predicted[member[k]], y[member[k]])))
+        test_acc[k] = float(np.mean(np.equal(predicted[~member[k]], y[~member[k]])))
+    return Models(member, phi, confidence, probs, train_acc, test_acc, models[0])
 
 
 # ---------------------------------------------------------------------------
@@ -111,25 +146,6 @@ def in_out_stats(phi: Array, member: Mask) -> tuple[Array, Array, Array, Array]:
     return mu_in, mu_out, sd_in, sd_out
 
 
-def lira_target(phi: Array, shadow_phi: Array, shadow_member: Mask, global_variance: bool) -> tuple[Array, Array]:
-    """Online and offline LiRA scores of every image on one target model, from its shadow models."""
-    # excerpt: lira-scores
-    # Fit a Gaussian to each image's φ over the shadows that trained on it (IN) and those that did not (OUT).
-    phi_in = np.where(shadow_member, shadow_phi, np.nan)  # NaN where the shadow did not train on the image
-    phi_out = np.where(~shadow_member, shadow_phi, np.nan)
-    mu_in, sd_in = np.nanmean(phi_in, axis=0), np.nanstd(phi_in, axis=0, ddof=1)
-    mu_out, sd_out = np.nanmean(phi_out, axis=0), np.nanstd(phi_out, axis=0, ddof=1)
-    if global_variance:  # one spread shared by all images: steadier with few shadow models
-        sd_in = np.full_like(sd_in, np.sqrt(np.nanmean(sd_in**2)))
-        sd_out = np.full_like(sd_out, np.sqrt(np.nanmean(sd_out**2)))
-    # Online: how much more likely the target's φ is under the image's IN fit than under its OUT fit.
-    online = norm.logpdf(phi, loc=mu_in, scale=sd_in) - norm.logpdf(phi, loc=mu_out, scale=sd_out)
-    # Offline (OUT shadows only): how many OUT standard deviations φ lies above the OUT mean.
-    offline = (phi - mu_out) / sd_out
-    # end excerpt
-    return online, offline
-
-
 def lira_scores(models: Models, global_variance: bool = False) -> tuple[Array, Array]:
     """Online and offline LiRA scores, (K, n): model k is the target, the other K - 1 its shadow models."""
     n_models = len(models.phi)
@@ -139,6 +155,31 @@ def lira_scores(models: Models, global_variance: bool = False) -> tuple[Array, A
         shadows = np.delete(np.arange(n_models), k)
         online[k], offline[k] = lira_target(models.phi[k], models.phi[shadows], models.member[shadows], global_variance)
     return online, offline
+
+
+def art_shadow_attack(models: Models, x: Array, y: IntArray, seed: int) -> Array:
+    """Shokri et al.'s attack with ART: shadow models, an attack model on their outputs, a score per pair."""
+    onehot = np.eye(models.probs.shape[2])[y]
+    np.random.seed(seed)  # ART builds its random forest unseeded, from NumPy's global generator
+    # excerpt: art-shadow-attack
+    # ART copies the target's recipe and trains each shadow on a random half of the images.
+    shadows = ShadowModels(models.first, num_shadow_models=N_ART_SHADOWS, random_state=seed)
+    (x_in, y_in, pred_in), (x_out, y_out, pred_out) = shadows.generate_shadow_dataset(x, onehot)
+    # One attack model learns "member" from a shadow's probabilities and the true label.
+    attack = MembershipInferenceBlackBox(models.first, attack_model_type="rf")
+    attack.fit(x_in, y_in, x_out, y_out, pred=pred_in, test_pred=pred_out)
+    # The same attack model scores every target's probabilities on every image.
+    scores = [attack.infer(x, onehot, pred=p, probabilities=True)[:, 0] for p in models.probs]
+    # end excerpt
+    return np.stack(scores)
+
+
+def rule_based_advantage(models: Models, x: Array, y: IntArray) -> tuple[float, float]:
+    """ART's "member if correctly classified" on the first target: its TPR and FPR."""
+    attack = MembershipInferenceBlackBoxRuleBased(models.first)
+    said_member = attack.infer(x, np.eye(models.probs.shape[2])[y]).astype(bool)
+    member = models.member[0]
+    return float(said_member[member].mean()), float(said_member[~member].mean())
 
 
 # ---------------------------------------------------------------------------
@@ -257,6 +298,9 @@ def report(n_models: int, seed: int) -> None:
     print(f"target 0: train accuracy={models.train_acc[0]:.4f}  test accuracy={models.test_acc[0]:.4f}")
     gap = models.train_acc - models.test_acc
     print(f"train-test gap, mean over {n_models} targets={gap.mean():.4f}")
+    # ART's rule-based attack says "member" whenever the target classifies the image correctly.
+    tpr, fpr = rule_based_advantage(models, x, y)
+    print(f"ART rule-based attack on target 0: TPR={tpr:.4f}  FPR={fpr:.4f}  advantage={tpr - fpr:.4f}")
     # The loss attack: say "member" when the loss on the true label is low, for every image alike.
     loss = np.log(models.confidence)  # minus the cross-entropy loss
     for target_fpr in (1e-3, 1e-2):
@@ -264,12 +308,14 @@ def report(n_models: int, seed: int) -> None:
         print(f"loss attack at FPR {target_fpr:g}: TPR={r.tpr:.4f}")
     # end excerpt
 
+    shadow_attack = art_shadow_attack(models, x, y, seed)
     online, offline = lira_scores(models)
     online_global, _ = lira_scores(models, global_variance=True)
     # With few shadow models an image can lack two IN or two OUT shadows, and its fit is undefined: drop the pair.
     keep = np.isfinite(online) & np.isfinite(offline) & np.isfinite(online_global)
     attacks = {
         "loss attack": loss[keep],
+        "ART shadow-model attack": shadow_attack[keep],
         "LiRA offline": offline[keep],
         "LiRA online": online[keep],
         "LiRA online, global variance": online_global[keep],

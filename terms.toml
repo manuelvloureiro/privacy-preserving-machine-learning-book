@@ -15,16 +15,21 @@
 index_skip_pages = []
 
 [acronyms]
+ACS = { expansion = "American Community Survey", expand = false }
 AEAD = "authenticated encryption with associated data"
 AI = { expansion = "artificial intelligence", expand = false }
 API = { expansion = "application programming interface", expand = false }
+ART = "Adversarial Robustness Toolbox"
 AUC = "area under the curve"
+BLEU = { expansion = "bilingual evaluation understudy, a score for generated text", expand = false }
 BSC = "binary symmetric channel"
 CCPA = { expansion = "California Consumer Privacy Act", expand = false }
 CDF = "cumulative distribution function"
+CSV = { expansion = "comma-separated values", expand = false }
 CDP = "concentrated differential privacy"
 CI = "continuous integration"
 CLT = "central limit theorem"
+COVID = { expansion = "coronavirus disease, as in COVID-19", expand = false }
 CPA = "chosen-plaintext attack"
 CPRA = { expansion = "California Privacy Rights Act", expand = false }
 CPU = { expansion = "central processing unit", expand = false }
@@ -37,6 +42,7 @@ DPIA = "data protection impact assessment"
 EMD = "earth mover's distance"
 ERM = "empirical risk minimization"
 FFT = "fast Fourier transform"
+FID = { expansion = "Fréchet inception distance", expand = false }
 FL = "federated learning"
 FNR = "false negative rate"
 FPR = "false positive rate"
@@ -47,15 +53,20 @@ GD = "gradient descent"
 GDP = "Gaussian differential privacy"
 GDPR = { expansion = "General Data Protection Regulation", expand = false }
 GPAI = { expansion = "general-purpose AI", expand = false }
+GPS = { expansion = "Global Positioning System", expand = false }
 GPU = { expansion = "graphics processing unit", expand = false }
 HE = "homomorphic encryption"
 HIPAA = { expansion = "Health Insurance Portability and Accountability Act", expand = false }
 HIV = { expansion = "human immunodeficiency virus", expand = false }
 HMAC = "hash-based message authentication code"
+ICU = "intensive-care unit"
 IID = "independent and identically distributed"
 IND = { expansion = "indistinguishability, as in IND-CPA", expand = false }
 IP = { expansion = "Internet Protocol, as in IP address", expand = false }
+JSON = { expansion = "JavaScript Object Notation", expand = false }
 KL = "Kullback–Leibler"
+LFS = "Labour Force Survey"
+PCA = "principal component analysis"
 LLM = "large language model"
 LP = "linear programming"
 LR = "likelihood ratio"
@@ -84,6 +95,7 @@ PRF = "pseudorandom function"
 PRG = "pseudorandom generator"
 PRP = "pseudorandom permutation"
 PRV = "privacy loss random variable"
+PUMS = { expansion = "Public Use Microdata Sample", expand = false }
 QIF = "quantitative information flow"
 RAG = "retrieval-augmented generation"
 RDP = "Rényi differential privacy"
@@ -95,6 +107,7 @@ SGD = "stochastic gradient descent"
 SIMD = "single instruction, multiple data"
 SISA = "sharded, isolated, sliced and aggregated training"
 SIVP = "shortest independent vectors problem"
+SNAP = "Stanford Network Analysis Project"
 SNARK = "succinct non-interactive argument of knowledge"
 SQL = { expansion = "Structured Query Language", expand = false }
 STARK = "scalable transparent argument of knowledge"
@@ -104,20 +117,21 @@ TLS = "Transport Layer Security"
 TPR = "true positive rate"
 TSTR = "train on synthetic, test on real"
 TV = "total variation"
+UK = { expansion = "United Kingdom", expand = false }
 XOR = { expansion = "exclusive or", expand = false }
 ZIP = { expansion = "Zone Improvement Plan code, the US postal code", expand = false }
 
 
 [names]
-venues = ["AAAI", "ACL", "AISTATS", "ASIACCS", "ASIACRYPT", "CACM", "CCS", "COLT", "CRYPTO", "CSF", "CUP", "EMNLP", "EUROCRYPT", "FOCS",
+venues = ["AAAI", "ACL", "AISTATS", "ALT", "ASIACCS", "ASIACRYPT", "CACM", "CCS", "COLT", "CRYPTO", "CSF", "CUP", "ECML", "EMNLP", "EUROCRYPT", "FOCS",
           "HDSR", "ICDE", "ICFP", "ICLR", "INLG", "ICML", "IEEE", "ISIT", "ITCS", "JACM", "JAIR", "JCSS", "JMLR", "JPC", "JRSS", "JSAC", "KDD",
-          "LICS", "MFPS", "NDSS", "OOPSLA", "PETS", "PLDI", "PNAS", "PODS", "POPL", "SIAM", "SIGMOD",
+          "LICS", "MFPS", "NDSS", "OOPSLA", "PETS", "PKDD", "PLDI", "PNAS", "PODS", "POPL", "PVLDB", "SIAM", "SIGMOD",
           "SODA", "STOC", "TCC", "TKDD", "TMLR", "TODS", "TPDP", "USENIX", "VLDB"]
-organizations = ["ACM", "CS", "DPC", "EDPB", "EU", "HHS", "IBM", "ICO", "IEC", "ISO", "NIST", "NVIDIA", "SRI", "UCI", "UCLA", "US", "SP"]
-tools_and_schemes = ["ABY3", "AES", "AIM", "ARX", "BERT", "BFV", "BGV", "CIFAR", "CKKS", "CTGAN", "EZKL", "FIPS", "GAZELLE",
-                     "GGM", "GPT", "IN", "OR", "JAX", "JOLT", "KEM", "MNIST", "MP", "MST", "MUSE", "OUT", "PGM", "RAPPOR", "SDV", "SEAL", "SEV", "SGX", "SHA", "SHA256", "MD5",
-                     "SNP", "SPDZ", "TDX", "TF", "TFHE", "TOFU", "URL", "WMDP",
-                     "BSD", "CC", "BY", "FFT", "FLARE", "MIT", "README"]  # licences, a paper title, a product, a file
+organizations = ["ACM", "AWS", "CMU", "CS", "DPC", "EDPB", "EU", "HHS", "IBM", "ICO", "IEC", "IPUMS", "ISO", "NIST", "NVIDIA", "ONS", "PSCR", "SRI", "UCI", "UCLA", "ULB", "US", "SP"]
+tools_and_schemes = ["ABY3", "AES", "AIM", "ARX", "BERT", "BFV", "BGV", "CIFAR", "CKKS", "CRC", "CTGAN", "DART", "DAS", "DPSDA", "E2E", "EMNIST", "EZKL", "FEMNIST", "FIPS", "FLAIR", "GAP", "GAZELLE", "GLUE",
+                     "GGM", "GPT", "ILSVRC", "IN", "ISOLET", "OR", "JAX", "JFT", "JOLT", "KEM", "LEAF", "MERF", "MIMIC", "MNIST", "MNLI", "MP", "MSNBC", "MST", "MUSE", "NLG", "NLTCS", "OUT", "PE", "PGM", "PUDF", "QNLI", "QQP", "RAP", "RAPPOR", "SDV", "SEAL", "SEV", "SGX", "SHA", "SHA256", "MD5",
+                     "SIPP", "SNP", "SPDZ", "SST", "SVHN", "TDX", "TF", "TFF", "TFHE", "TOFU", "URL", "WILDS", "WMDP",
+                     "BSD", "CC", "CC0", "BY", "NC", "SA", "ODC", "FFT", "FLARE", "MIT", "README"]  # licences, a paper title, a product, a file
 
 [index]
 # Probability and concentration
@@ -128,7 +142,6 @@ tools_and_schemes = ["ABY3", "AES", "AIM", "ARX", "BERT", "BFV", "BGV", "CIFAR",
 "normal distribution" = ["Gaussian distribution"]
 "moment generating function" = ["MGF"]
 "variance" = []
-"kurtosis" = []
 "central limit theorem" = ["CLT"]
 "Markov's inequality" = ["Markov inequality"]
 "Chebyshev's inequality" = ["Chebyshev inequality"]

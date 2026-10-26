@@ -83,10 +83,12 @@ So treat $\tau_b$ as a safe default, not as the best width. A narrower range usu
 
 ## Code
 
-The snippet computes the records a bounded mean needs and the default clipping width for heavy tails. Setting the RMSE formula equal to $\alpha$ and multiplying by $n^2$ gives a quadratic in $n$, whose positive root the first function rounds up.
+The snippet computes the records a bounded mean needs, checks its noise with OpenDP, and computes the default clipping width for heavy tails. Setting the RMSE formula equal to $\alpha$ and multiplying by $n^2$ gives a quadratic in $n$, whose positive root the first function rounds up.
 
 ```python
 from math import ceil, sqrt
+
+import opendp.prelude as dp
 
 
 def records_for_bounded_mean(alpha: float, sd: float, width: float, eps: float) -> int:
@@ -100,9 +102,13 @@ def heavy_tail_width(n: int, eps: float, sd: float) -> float:
     return sd * sqrt(n * eps / (2 * sqrt(2)))
 
 
-print(records_for_bounded_mean(0.05, 0.5, 1.0, 1.0))  # 108
+n = records_for_bounded_mean(0.05, 0.5, 1.0, 1.0)
+print(n)  # 108
+print(f"{dp.laplacian_scale_to_accuracy(1.0 / (n * 1.0), alpha=0.05):.4f}")  # 0.0277
 print(f"{heavy_tail_width(1000, 1.0, 1.0):.2f}")  # 18.80
 ```
+
+OpenDP states accuracy differently, as a half-width that the noise stays within with a chosen probability. Its `laplacian_scale_to_accuracy` turns the scale $w/(n\varepsilon)$ at the planned 108 records into the noise's half-width at 95% confidence, which the snippet prints. When your target is such a half-width rather than an RMSE, `accuracy_to_laplacian_scale` gives the scale instead. Setting $w/(n\varepsilon)$ equal to it then gives the records the noise needs, before sampling adds its share.
 
 ## Cheat sheet
 

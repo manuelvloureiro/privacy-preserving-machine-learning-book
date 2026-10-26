@@ -10,7 +10,7 @@ What matters throughout is how a detector does when false alarms must be rare, w
 
 The default assumption, called the **null hypothesis** $H_0$, is that the observation comes from a distribution $P$, such as a fraud model's scores for normal transactions. The **alternative hypothesis** $H_1$ is that it comes from a distribution $Q$, such as its scores for fraudulent ones. A **test** decides whether to reject the null, which here means flagging the transaction.
 
-A test can make two kinds of mistake. Flagging a normal case is a false positive, and its probability is the **false positive rate (FPR)**, written $a$. Missing a real case is a false negative, with probability $b$, the **false negative rate (FNR)**. The share of real cases caught, $1 - b$, is the **true positive rate (TPR)**.
+A test can make two kinds of mistake. Flagging a normal case is a false positive, and its probability is the **false positive rate (FPR)**, written $\alpha$. Missing a real case is a false negative, with probability $\beta$, the **false negative rate (FNR)**. The share of real cases caught, $1 - \beta$, is the **true positive rate (TPR)**.
 
 Lowering a test's threshold catches more real cases but raises more false alarms. So you fix a budget for the FPR first, called the **level**, and then find the test with the highest TPR, or **power**, within it.
 
@@ -28,9 +28,9 @@ To say how hard it is to tell $P$ from $Q$, record the best FNR at every level. 
 
 ## The Gaussian trade-off curve {#sec-ht-gaussian}
 
-A common pair is a score that is normal under both hypotheses, with the same spread, scaled so that normal cases have mean 0 and standard deviation 1. Write $\mu$ for the distance between the two centres in standard deviations, and $\Phi$ for the standard normal cumulative distribution function. The best test thresholds at $\Phi^{-1}(1 - a)$, and its FNR at level $a$ is the Gaussian trade-off function
-$$G_\mu(a) = \Phi\big(\Phi^{-1}(1 - a) - \mu\big).$$ {#eq-ht-gaussian-tradeoff}
-In SciPy this is `norm.cdf(norm.isf(alpha) - mu)`, with `isf` because `norm.ppf(1 - alpha)` loses the digits that matter at a tiny $a$. So a single number $\mu$ fixes the best TPR at every FPR. Turned around, a measured pair gives $\mu = \Phi^{-1}(1 - a) + \Phi^{-1}(\mathrm{TPR})$, `norm.isf(alpha) + norm.ppf(tpr)`. If that estimate changes with $a$, the scores are not of this shape.
+A common pair is a score that is normal under both hypotheses, with the same spread, scaled so that normal cases have mean 0 and standard deviation 1. Write $\mu$ for the distance between the two centres in standard deviations, and $\Phi$ for the standard normal cumulative distribution function. The best test thresholds at $\Phi^{-1}(1 - \alpha)$, and its FNR at level $\alpha$ is the Gaussian trade-off function
+$$G_\mu(\alpha) = \Phi\big(\Phi^{-1}(1 - \alpha) - \mu\big).$$ {#eq-ht-gaussian-tradeoff}
+In SciPy this is `norm.cdf(norm.isf(alpha) - mu)`, with `isf` because `norm.ppf(1 - alpha)` loses the digits that matter at a tiny $\alpha$. So a single number $\mu$ fixes the best TPR at every FPR. Turned around, a measured pair gives $\mu = \Phi^{-1}(1 - \alpha) + \Phi^{-1}(\mathrm{TPR})$, `norm.isf(alpha) + norm.ppf(tpr)`. If that estimate changes with $\alpha$, the scores are not of this shape.
 
 For example, take $\mu = 2$. At an FPR of 5%, the best test has a TPR of 0.6388. At an FPR of $10^{-3}$, it drops to 0.1378.
 
@@ -70,18 +70,18 @@ The same rule applies to an alarm, whose likelihood ratio is the TPR divided by 
 
 You measure a detector's FPR by counting false positives among $n$ test negatives. If each negative is flagged independently with the same small probability, the count $k$ is binomial and fluctuates by about $\sqrt k$.
 
-The **Clopper–Pearson interval** gives the range of true rates that make the observed count unsurprising. Write $1 - \beta$ for the confidence level, so that $\beta$ is the probability that the interval misses the true rate. Its lower end $l$ and upper end $u$ solve
-$$\Pr[\mathrm{Bin}(n, l) \ge k] = \frac\beta2, \qquad \Pr[\mathrm{Bin}(n, u) \le k] = \frac\beta2.$$
-It is exact, because it uses the binomial itself, and conservative, because it covers the true rate at least $1 - \beta$ of the time. In SciPy, `binomtest(k, n).proportion_ci(method="exact")` computes it.
+The **Clopper–Pearson interval** gives the range of true rates that make the observed count unsurprising. Write $1 - \alpha$ for the confidence level, so that $\alpha$ is the probability that the interval misses the true rate. Its lower end $l$ and upper end $u$ solve
+$$\Pr[\mathrm{Bin}(n, l) \ge k] = \frac\alpha2, \qquad \Pr[\mathrm{Bin}(n, u) \le k] = \frac\alpha2.$$
+It is exact, because it uses the binomial itself, and conservative, because it covers the true rate at least $1 - \alpha$ of the time. In SciPy, `binomtest(k, n).proportion_ci(method="exact")` computes it.
 
 To claim that an FPR is below a target, you need only the upper end, and passing `alternative="less"` to `binomtest` gives that one-sided bound. With no events at all, the one-sided 95% bound is about $3/n$, the **rule of three**. Computed exactly, certifying an FPR below $10^{-3}$ takes 2,995 negatives with no false positive.
 
-These intervals are wide. Even 10 false positives in 10,000 negatives give the interval $[0.00048, 0.00184]$, from about half to almost twice the observed rate. About 100 events pin a rate to within about 20%. So measuring an FPR of $a$ takes on the order of $100/a$ negatives. The **Wald interval**, which treats the count as normal, fails here: it is too narrow and collapses to $[0, 0]$ with no events.
+These intervals are wide. Even 10 false positives in 10,000 negatives give the interval $[0.00048, 0.00184]$, from about half to almost twice the observed rate. About 100 events pin a rate to within about 20%. So measuring an FPR of $p$ takes on the order of $100/p$ negatives. The **Wald interval**, which treats the count as normal, fails here: it is too narrow and collapses to $[0, 0]$ with no events.
 
 ## Evaluating a detector at a low false positive rate {#sec-ht-recipe}
 
 1. Fix the target FPRs, such as $10^{-2}$ and $10^{-3}$.
-2. Plan the trials with about $100/a$ negatives for a target FPR $a$.
+2. Plan the trials with about $100/p$ negatives for a target FPR $p$.
 3. Choose the threshold on the negatives of one split and measure the rates on another, because a threshold tuned on the evaluation set looks better there than it is. The calibration split needs as many negatives, since below one over their number `np.quantile` only interpolates between the top scores.
 4. Report the TPR and FPR measured at that threshold, with Clopper–Pearson intervals on both, and the full ROC curve on log–log axes. A TPR read off the test split's ROC curve is optimistic, because it picks its threshold on the test data.
 5. Compare two detectors at the same FPR, never by AUC or accuracy alone, and on a shared evaluation set check the gap with McNemar's test, `binomtest(m1, m1 + m2, 0.5)`, where $m_1$ and $m_2$ count the positives that only one of them catches.
@@ -118,7 +118,7 @@ The detector catches 56 of the 63 malignant test cases, a TPR of 0.889 with a 95
 | Question | Answer |
 | --- | --- |
 | What is the best test? | Threshold the likelihood ratio, per group if groups score differently (Neyman–Pearson) |
-| How good can any test be? | The trade-off curve; normal pair $G_\mu(a) = \Phi(\Phi^{-1}(1 - a) - \mu)$ |
+| How good can any test be? | The trade-off curve; normal pair $G_\mu(\alpha) = \Phi(\Phi^{-1}(1 - \alpha) - \mu)$ |
 | What does a capped ratio allow? | $\mathrm{TPR} \le e^\kappa\,\mathrm{FPR}$ |
 | What do accuracy and advantage measure? | Best advantage $=$ TV, one point of the curve |
 | Why is AUC not enough? | Equal AUC can hide a 12-fold gap in TPR at an FPR of $10^{-3}$ |
@@ -129,7 +129,7 @@ The detector catches 56 of the 63 malignant test cases, a TPR of 0.889 with a 95
 
 **Rules of thumb**
 
-- Plan for $100/a$ negatives, and use Clopper–Pearson, never Wald.
+- Plan for $100/p$ negatives, and use Clopper–Pearson, never Wald.
 - Report TPR at fixed low FPRs on log–log axes, never AUC alone.
 
 ## References

@@ -67,22 +67,17 @@ Solving these two inequalities for $\varepsilon$ turns measured rates into a low
 $$\varepsilon_{\mathrm{lo}} = \max\Big\{\ln\frac{\underline{\mathrm{TPR}} - \delta}{\overline{\mathrm{FPR}}},\ \ln\frac{1 - \overline{\mathrm{FPR}} - \delta}{1 - \underline{\mathrm{TPR}}}\Big\}.$$ {#eq-audit-eps-lo}
 The bound needs independent trials, and a threshold chosen on other trials than those it counts, since one tuned on the counted trials would inflate the bound.
 
-SciPy computes it in a few lines, since a Clopper–Pearson bound is a quantile of a beta distribution. Suppose an attack catches the canary in 500 of 1,000 runs that include it, and raises one false alarm in 1,000 runs without it.
+SciPy's `binomtest(k, n).proportion_ci(method="exact")` gives the Clopper–Pearson intervals. No maintained package computes the bound itself, so the script imports `eps_lower_bound` from the book's helper module, [practitioner_privacy_tests.py](../../code/practitioner_privacy_tests.py). The same module holds the bound on $\mu$ above and the one-run audit below. Suppose an attack catches the canary in 500 of 1,000 runs that include it, and raises one false alarm in 1,000 runs without it.
 
-```python
-from math import log
+```{.python excerpt="audit-eps-bound"}
+for false_pos, true_pos in ((1, 500), (0, 1_000)):  # out of 1,000 runs without and with the canary
+    eps_lo = eps_lower_bound(false_pos, true_pos, 1_000, DELTA)
+    print(f"FP {false_pos}/1000  TP {true_pos}/1000: certified eps lower bound {eps_lo:.2f}")
+```
 
-from scipy.stats import beta
-
-
-def eps_lower_bound(fp: int, tp: int, n: int, delta: float, level: float = 0.05) -> float:
-    fpr_hi = beta.ppf(1 - level / 2, fp + 1, n - fp)  # one-sided Clopper-Pearson upper bound
-    tpr_lo = beta.ppf(level / 2, tp, n - tp + 1)  # one-sided Clopper-Pearson lower bound
-    return max(log((tpr_lo - delta) / fpr_hi), log((1 - fpr_hi - delta) / (1 - tpr_lo)))
-
-
-print(f"{eps_lower_bound(1, 500, 1_000, 1e-5):.2f}")  # 4.43
-print(f"{eps_lower_bound(0, 1_000, 1_000, 1e-5):.2f}")  # 5.60
+```text
+FP 1/1000  TP 500/1000: certified eps lower bound 4.43
+FP 0/1000  TP 1000/1000: certified eps lower bound 5.60
 ```
 
 The raw rates alone would suggest 6.21, but confidence is expensive, and the certified bound is only 4.43. Even a perfect attack certifies only 5.60 from 1,000 trials per hypothesis, so never expect an end-to-end audit to certify the whole of a large claim. Even a **white-box** attacker, who sees every intermediate model, certifies only 3.63 in the full edition against a claimed 6.71.

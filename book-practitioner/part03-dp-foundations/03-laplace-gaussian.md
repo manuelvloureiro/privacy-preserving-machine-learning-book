@@ -6,12 +6,12 @@ Suppose you run a hospital database and want to publish how many patients have d
 
 Both compute the exact answer of a query $f$ on the dataset $D$. They then add fresh random noise, written $Z$, so that the mechanism publishes
 $$M(D) = f(D) + Z.$$
-Three decisions fix the whole mechanism. The **sensitivity**, how far one record can move the answer, is what the noise must hide. The noise distribution sets the kind of guarantee, since Laplace noise gives pure DP while Gaussian noise needs a small slack $\delta$. And a calibration formula sets the amount of noise for a target $\varepsilon$, through the privacy loss of [The definition of differential privacy](01-definition.md#sec-dpdef-divergences).
+Three decisions fix the whole mechanism. The **sensitivity**, how far one record can move the answer, is what the noise must hide. The noise distribution sets the kind of guarantee, since Laplace noise gives pure DP while Gaussian noise needs a small slack $\delta$. And a calibration formula sets the amount of noise for a target $\varepsilon$, through the privacy loss of [the definition of differential privacy](01-definition.md#sec-dpdef-divergences).
 
 ## Sensitivity {#sec-lg-sensitivity}
 
-The noise must cover the largest change that one record can make to the answer. A query often returns a vector of $d$ numbers, such as the bins of a histogram, so you need a size for a change to a vector. Laplace noise uses the $\ell_1$ norm, the sum of the absolute changes. Gaussian noise uses the $\ell_2$ norm, the square root of the sum of the squared changes. Writing $D \simeq D'$ for a pair of neighbours, the **$\ell_p$ sensitivity** of the query is the largest change between their answers,
-$$\Delta_pf = \max_{D \simeq D'}\big\|f(D) - f(D')\big\|_p, \qquad p \in \{1, 2\}.$$
+The noise must cover the largest change that one record can make to the answer. A query often returns a vector of $d$ numbers, such as the bins of a histogram, so you need a size for a change to a vector. Laplace noise uses the $\ell_1$ norm, the sum of the absolute changes. Gaussian noise uses the $\ell_2$ norm, the square root of the sum of the squared changes. Writing $D \sim D'$ for a pair of neighbours, the **$\ell_p$ sensitivity** of the query is the largest change between their answers,
+$$\Delta_pf = \max_{D \sim D'}\big\|f(D) - f(D')\big\|_p, \qquad p \in \{1, 2\}.$$
 The two are equal when one record moves a single coordinate. When it moves all $d$ of them, the $\ell_1$ sensitivity can be up to $\sqrt d$ times the $\ell_2$ one.
 
 The sensitivity also depends on the neighbouring relation. Under add/remove one dataset has one record more than the other, and under replace one record is swapped for another, so the size $n$ is public. Write $B$ for the largest value a record may take after clipping, which the next paragraphs explain. @tbl-lg-sensitivity then gives the standard queries.

@@ -22,7 +22,20 @@ On the digits, averaged over the 64 target models, the gap is 0.0422.
 
 So a large gap shows a leak at no cost. But **a small gap does not mean a private model**, because the gap is an average over records, and an average hides who is exposed. The loss attack, which flags every record whose loss falls below one threshold, shows why. On the digits, at an FPR of $10^{-3}$, it reaches a TPR of 0.0009. That is no higher than its FPR, so it does no better than a coin weighted to say "member" one time in a thousand.
 
-The classic attack of Shokri et al. (2017) uses shadow models to learn one rule for all records, so it too fails at a low FPR.
+The classic attack of Shokri et al. (2017) uses shadow models to learn one rule for all records. The Adversarial Robustness Toolbox (ART), a Python library of attacks, implements it, and the script runs it with four shadow models.
+
+```{.python excerpt="art-shadow-attack"}
+# ART copies the target's recipe and trains each shadow on a random half of the images.
+shadows = ShadowModels(models.first, num_shadow_models=N_ART_SHADOWS, random_state=seed)
+(x_in, y_in, pred_in), (x_out, y_out, pred_out) = shadows.generate_shadow_dataset(x, onehot)
+# One attack model learns "member" from a shadow's probabilities and the true label.
+attack = MembershipInferenceBlackBox(models.first, attack_model_type="rf")
+attack.fit(x_in, y_in, x_out, y_out, pred=pred_in, test_pred=pred_out)
+# The same attack model scores every target's probabilities on every image.
+scores = [attack.infer(x, onehot, pred=p, probabilities=True)[:, 0] for p in models.probs]
+```
+
+Its one rule fails at a low FPR too, since at an FPR of $10^{-3}$ it finds only 0.0014 of the members.
 
 ## LiRA: a likelihood-ratio test per record {#sec-mia-lira}
 
@@ -37,33 +50,33 @@ $$\ln\Lambda_z = \ln\mathcal N\big(\phi_z;\, \mu_{\mathrm{in}}, \sigma_{\mathrm{
 **Offline LiRA** uses only OUT models. Unlike IN models, which must contain the record being tested, they can be trained once and reused for every new record. It asks how many OUT standard deviations the logit lies above its usual value,
 $$\frac{\phi_z - \mu_{\mathrm{out}}}{\sigma_{\mathrm{out}}}.$$ {#eq-mia-lira-offline}
 
-Each score already compares a record with its own fits, so one threshold then serves for all records. In the script, `phi` holds the target's logits on the images and `shadow_phi` the shadows' logits, one row per shadow. The array `shadow_member` says which shadow trained on which image.
+Each score already compares a record with its own fits, so one threshold then serves for all records. In the script, ART's `SklearnClassifier` wraps the scikit-learn recipe, trains every model and returns its probabilities.
 
-```{.python excerpt="lira-scores"}
-# Fit a Gaussian to each image's φ over the shadows that trained on it (IN) and those that did not (OUT).
-phi_in = np.where(shadow_member, shadow_phi, np.nan)  # NaN where the shadow did not train on the image
-phi_out = np.where(~shadow_member, shadow_phi, np.nan)
-mu_in, sd_in = np.nanmean(phi_in, axis=0), np.nanstd(phi_in, axis=0, ddof=1)
-mu_out, sd_out = np.nanmean(phi_out, axis=0), np.nanstd(phi_out, axis=0, ddof=1)
-if global_variance:  # one spread shared by all images: steadier with few shadow models
-    sd_in = np.full_like(sd_in, np.sqrt(np.nanmean(sd_in**2)))
-    sd_out = np.full_like(sd_out, np.sqrt(np.nanmean(sd_out**2)))
-# Online: how much more likely the target's φ is under the image's IN fit than under its OUT fit.
-online = norm.logpdf(phi, loc=mu_in, scale=sd_in) - norm.logpdf(phi, loc=mu_out, scale=sd_out)
-# Offline (OUT shadows only): how many OUT standard deviations φ lies above the OUT mean.
-offline = (phi - mu_out) / sd_out
+```{.python excerpt="lira-shadows"}
+# Each image is in each model's training set with probability 1/2.
+member = rng.random((n_models, n)) < 0.5
+for k in range(n_models):
+    model = recipe()  # a fresh, untrained copy of the target's recipe
+    model.fit(x[member[k]], onehot[member[k]])
+    probs[k] = model.predict(x)  # the probabilities the attacker sees, for every image
+    p = np.clip(probs[k, np.arange(n), y], 1e-15, 1 - 1e-15)  # confidence on the true label
+    phi[k] = np.log(p) - np.log(1 - p)  # its logit, close to Gaussian over retrainings
+    confidence[k] = p
 ```
+
+So ART trains the models, while the LiRA scores come from a helper, because no library installed with this book computes them. The helper's `lira_scores`, in [practitioner_privacy_tests.py](../../code/practitioner_privacy_tests.py), fits the two normals per image and returns @eq-mia-lira-online and @eq-mia-lira-offline. It follows the reference code in TensorFlow Privacy, which needs TensorFlow.
 
 The command `uv run python code/part02-attacks/practitioner_lira.py` runs it in seconds. It compares the attacks by their TPR at two low FPRs and by their area under the curve (AUC) of the TPR against the FPR.
 
 ```text
   loss attack: AUC=0.518  TPR@0.001=0.0009  TPR@0.01=0.0105
+  ART shadow-model attack: AUC=0.570  TPR@0.001=0.0014  TPR@0.01=0.0146
   LiRA offline: AUC=0.577  TPR@0.001=0.0087  TPR@0.01=0.0345
   LiRA online: AUC=0.623  TPR@0.001=0.0318  TPR@0.01=0.0790
   LiRA online, global variance: AUC=0.614  TPR@0.001=0.0250  TPR@0.01=0.0737
 ```
 
-By AUC the attacks look close. At an FPR of $10^{-3}$ they are not, because online LiRA finds 0.0318 of the members and the loss attack only 0.0009. Both use the same model outputs, so the whole gain comes from comparing each record's output with that record's own fits. Online LiRA beats offline LiRA because its IN fit also tells it how far training on a record moves that record's logit.
+By AUC the attacks look close, and ART's attack nearly matches offline LiRA. At an FPR of $10^{-3}$ they are not close, because online LiRA finds 0.0318 of the members and the loss attack only 0.0009. All of them use the same model outputs, so the whole gain comes from comparing each record's output with that record's own fits. Online LiRA beats offline LiRA because its IN fit also tells it how far training on a record moves that record's logit.
 
 Noisy fits are the main practical failure. Each record's variance comes from only about half the shadow models, and an underestimated one makes an ordinary output look like a far-tail event. That output becomes a false positive at exactly the strict thresholds that matter. So Carlini et al. recommend one **global variance**, shared by all records, when shadow models are few. With a global variance 16 shadows give a usable attack, while per-record variances need about 64. With 63 shadows, as here, the per-record fits win.
 
@@ -75,7 +88,7 @@ For a confident model, $1 - p_y$ rounds to 0 and the logit becomes infinite. So 
 
 The most common way a membership audit goes wrong is to draw members and non-members from different distributions. If non-members come from a later period, another site or another preprocessing pipeline, the attack measures that shift rather than the model, so split one pool at random.
 
-When shadows cost too much, the reference-model attack of Zarifzadeh et al. (2024) stays strong with only a few. Returning labels only does not stop the attack, because a label-only attack measures how much an input must change before its label flips (Choquette-Choo et al., 2021). Check which attack a library runs, because TensorFlow Privacy's `run_attacks` and the Adversarial Robustness Toolbox's `MembershipInferenceBlackBox` treat all records alike, while ML Privacy Meter implements LiRA.
+When shadows cost too much, the reference-model attack of Zarifzadeh et al. (2024) stays strong with only a few. Returning labels only does not stop the attack, because a label-only attack measures how much an input must change before its label flips (Choquette-Choo et al., 2021). Check which attack a library runs, because TensorFlow Privacy's `run_attacks` and ART's `MembershipInferenceBlackBox` treat all records alike, while ML Privacy Meter implements LiRA.
 
 To catch a training change that makes a model leak, rerun a cheaper LiRA on every release candidate. Train 16 models with the candidate's own recipe, since shadows cached from an older recipe are stale, and score online LiRA with a global variance. On the digits, `practitioner_lira.py --models 16` runs this check in seconds, and it blocks the model, as the 64-model run does. Apply the release rule of [the risk assessment](10-risk-assessment.md#sec-risk-threat) unchanged, so the check and the decision agree. To catch a drift below that rule, store the last release's interval and alert when a candidate's lower end exceeds its upper end. Comparing point values would alarm on seed noise alone.
 

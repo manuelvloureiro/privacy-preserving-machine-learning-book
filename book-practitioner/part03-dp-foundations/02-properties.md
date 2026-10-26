@@ -20,18 +20,36 @@ The condition is that $f$ never reads the data. "Take the noisy top category, th
 
 The definition protects one record, but a customer of an online shop has dozens of invoice lines. If the guarantee is per record and a person owns $k$ records, you need a guarantee for datasets that differ in $k$ records. You can walk from one dataset to the other by changing one record at a time, and each of the $k$ steps costs $\varepsilon$. So for pure DP, where $\delta = 0$, $\varepsilon$-DP per record becomes $k\varepsilon$-DP for the group. With a slack, the slack grows much faster than $k$. For a group of $k$ records, an $(\varepsilon, \delta)$-DP mechanism is
 $$\Big(k\varepsilon,\ \delta_k\Big)\text{-DP}, \qquad \delta_k = \delta\,\frac{e^{k\varepsilon} - 1}{e^\varepsilon - 1} \le k\,e^{(k-1)\varepsilon}\delta.$$ {#eq-dpprop-group}
-The fraction is the sum $\delta\,(1 + e^\varepsilon + \dots + e^{(k-1)\varepsilon})$. The simpler form on the right is looser, so compute the sum with the function below, because hand calculations of $\delta_k$ often go wrong. It uses `exp` from Python's `math` module.
+
+The fraction is the sum $\delta\,(1 + e^\varepsilon + \dots + e^{(k-1)\varepsilon})$, and the simpler form on the right is looser. Take $\varepsilon = 0.5$ and $\delta = 10^{-5}$ per record. Then a person with 10 records gets a slack of $2.272\times10^{-3}$. The simple form would claim $9.002\times10^{-3}$, about four times too much. The growth is far worse at $\varepsilon = 1$ per record, where the fraction multiplies $\delta$ by 12818.3 for a group of ten. That hurts, because $\delta$ was chosen far below one over the number of people in the first place ([How small δ must be](01-definition.md#sec-dpdef-small-delta)).
+
+Don't compute group guarantees by hand, because OpenDP computes them from the mechanism itself. A measurement's `map(d_in=k)` is its guarantee when neighbouring datasets differ in $k$ records, here for a count with Laplace noise and one with Gaussian noise.
 
 ```{.python excerpt="adult-group-privacy"}
-def group_privacy(eps: float, delta: float, k: int) -> tuple[float, float]:
-    """The guarantee for a group of k records, from an (eps, delta) guarantee per record."""
-    return k * eps, delta * sum(exp(j * eps) for j in range(k))
+count = dp.t.make_count(dp.vector_domain(dp.atom_domain(T=int)), dp.symmetric_distance())
+laplace = count >> dp.m.then_laplace(scale=2.0)  # epsilon = 0.5 per record
+print(f"Laplace count: epsilon {laplace.map(d_in=1):.1f} per record, {laplace.map(d_in=10):.1f} for 10")
 
-eps_k, delta_k = group_privacy(0.5, 1e-5, 10)
-print(f"group of 10 at (0.5, 1e-5): ({eps_k:.1f}, {delta_k:.3e})")
+def gaussian(scale: float) -> dp.Measurement:  # a Gaussian count, as a privacy curve
+    return dp.c.make_zCDP_to_approxDP(count >> dp.m.then_gaussian(scale=scale))
+
+def at_1e5(scale: float) -> dp.Measurement:
+    return dp.c.make_fix_delta(gaussian(scale), delta=1e-5)
+
+scale = dp.binary_search_param(at_1e5, d_in=1, d_out=(0.5, 1e-5))  # (0.5, 1e-5) per record
+curve = gaussian(scale).map(d_in=10)  # the privacy curve for a group of 10 records
+print(f"Gaussian count, group of 10: epsilon {curve.epsilon(1e-5):.2f} at delta 1e-5")
+# delta_k is the slack that the group-privacy formula gives the group
+print(f"Gaussian count, group of 10: epsilon {curve.epsilon(delta_k):.2f} at delta {delta_k:.3e}")
 ```
 
-It prints `(5.0, 2.272e-03)`. So one record had a slack of $10^{-5}$, but a person with 10 records gets $2.272\times10^{-3}$. The simple form would have claimed $9.002\times10^{-3}$, about four times too much. At $\varepsilon = 1$ per record the growth is far worse, because the fraction $(e^{10} - 1)/(e - 1)$ multiplies $\delta$ by 12818.3 for a group of 10. That hurts, because $\delta$ was chosen far below one over the number of people in the first place ([How small δ must be](01-definition.md#sec-dpdef-small-delta)).
+```text
+Laplace count: epsilon 0.5 per record, 5.0 for 10
+Gaussian count, group of 10: epsilon 6.43 at delta 1e-5
+Gaussian count, group of 10: epsilon 4.57 at delta 2.272e-03
+```
+
+For the Laplace count, `map(d_in=10)` gives $k\varepsilon = 5.0$, as the formula does. The Gaussian count, calibrated to $(0.5, 10^{-5})$ per record, does better than the formula, because OpenDP reads the group's guarantee off the mechanism's whole privacy curve. At the formula's slack its group gets $\varepsilon = 4.57$, which is below the formula's 5.0, and keeping the original slack instead costs more. Read a group guarantee off the library's map, then, and fall back on the formula only for a mechanism the library cannot map.
 
 So if you care about people, don't patch a per-record guarantee with group privacy. Make the person the unit of privacy, so that neighbouring datasets differ in all of one person's records. Then bound how many records each person may contribute before any noise is added, as [Release statistics with a library](12-release-statistics.md) does on real data. Group privacy is the fallback for when you cannot, and for records of different people that reveal each other, such as the members of a household who share an address and an income.
 

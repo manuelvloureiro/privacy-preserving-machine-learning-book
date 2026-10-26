@@ -51,7 +51,9 @@ What it does:
    digit tokens after its prefix (never the mean loss), ranked against 2,000 random candidate secrets, which caps
    a measurable exposure at log2(2,001) = 10.97 bits (the full space would allow log2(10^5) = 16.61); an exposure
    extrapolated from a skew-normal fit to the candidates' scores (capped at 16.61); and whether greedy decoding
-   from the prefix writes the secret. Uninserted controls should average 1/ln 2 = 1.44 bits.
+   from the prefix writes the secret. Uninserted controls should average 1/ln 2 = 1.44 bits. The two exposures,
+   which no maintained library computes, come from code/practitioner_privacy_tests.py (after TensorFlow Privacy's
+   `privacy_tests/secret_sharer`).
 
 Prints every quoted number on a labelled line. Determinism: torch runs on 4 threads with seed 0; held-out losses
 are printed to 3 decimals and exposures to 1 decimal, which reruns reproduce.
@@ -71,12 +73,12 @@ from numpy.typing import NDArray
 from opacus import PrivacyEngine
 from opacus.validators import ModuleValidator
 from peft import LoraConfig, PeftModel, get_peft_model
-from scipy import stats
 from torch.utils.data import DataLoader, TensorDataset
 from transformers import AutoModelForCausalLM, AutoTokenizer, PreTrainedModel, PreTrainedTokenizerBase
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 import practitioner_datasets
+from practitioner_privacy_tests import exposure, extrapolated_exposure
 
 SEQ_LEN = 32
 N_TRAIN, N_HELDOUT = 1024, 128
@@ -266,10 +268,13 @@ def secret_scores(model: PeftModel, tokenizer: PreTrainedTokenizerBase, prefix: 
     return logprobs.sum(dim=(1, 2)).double().numpy()
 
 
-def exposure(canary_score: float, candidate_scores: Scores) -> float:
-    """log2 of 1 / (the share of candidates the model finds at least as likely), canary included."""
-    at_least = 1 + np.sum(candidate_scores >= canary_score)
-    return math.log2((len(candidate_scores) + 1) / at_least)
+def canary_exposure(
+    model: PeftModel, tokenizer: PreTrainedTokenizerBase, canary: Canary, candidates: list[str]
+) -> tuple[float, float]:
+    """The exposure of the canary's secret among the candidates, measured and extrapolated past the cap."""
+    candidate_scores = scores_batched(model, tokenizer, canary.prefix, candidates)
+    score = float(scores_batched(model, tokenizer, canary.prefix, [canary.secret])[0])
+    return exposure(score, candidate_scores), extrapolated_exposure(score, candidate_scores, SECRET_SPACE)
 
 
 # end excerpt
@@ -278,13 +283,6 @@ def exposure(canary_score: float, candidate_scores: Scores) -> float:
 def scores_batched(model: PeftModel, tokenizer: PreTrainedTokenizerBase, prefix: str, secrets: list[str]) -> Scores:
     parts = [secret_scores(model, tokenizer, prefix, secrets[i : i + 250]) for i in range(0, len(secrets), 250)]
     return np.concatenate(parts)
-
-
-def extrapolated_exposure(canary_score: float, candidate_scores: Scores) -> float:
-    """Exposure from a skew-normal fitted to the candidates' scores, capped at log2 of the secret space."""
-    shape, loc, scale = stats.skewnorm.fit(candidate_scores)
-    tail = stats.skewnorm.sf(canary_score, shape, loc=loc, scale=scale)
-    return min(-math.log2(max(tail, 1e-300)), math.log2(SECRET_SPACE))
 
 
 # excerpt: lora-extract
@@ -315,17 +313,9 @@ def audit(
     model.eval()
     results: list[CanaryResult] = []
     for canary in canaries:
-        candidate_scores = scores_batched(model, tokenizer, canary.prefix, candidates)
-        score = float(scores_batched(model, tokenizer, canary.prefix, [canary.secret])[0])
+        measured, extrapolated = canary_exposure(model, tokenizer, canary, candidates)
         completion = greedy_completion(model, tokenizer, canary.prefix)
-        results.append(
-            CanaryResult(
-                canary,
-                exposure(score, candidate_scores),
-                extrapolated_exposure(score, candidate_scores),
-                completion == canary.secret,
-            )
-        )
+        results.append(CanaryResult(canary, measured, extrapolated, completion == canary.secret))
     return results
 
 

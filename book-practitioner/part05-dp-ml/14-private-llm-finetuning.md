@@ -179,13 +179,16 @@ def secret_scores(model: PeftModel, tokenizer: PreTrainedTokenizerBase, prefix: 
     return logprobs.sum(dim=(1, 2)).double().numpy()
 
 
-def exposure(canary_score: float, candidate_scores: Scores) -> float:
-    """log2 of 1 / (the share of candidates the model finds at least as likely), canary included."""
-    at_least = 1 + np.sum(candidate_scores >= canary_score)
-    return math.log2((len(candidate_scores) + 1) / at_least)
+def canary_exposure(
+    model: PeftModel, tokenizer: PreTrainedTokenizerBase, canary: Canary, candidates: list[str]
+) -> tuple[float, float]:
+    """The exposure of the canary's secret among the candidates, measured and extrapolated past the cap."""
+    candidate_scores = scores_batched(model, tokenizer, canary.prefix, candidates)
+    score = float(scores_batched(model, tokenizer, canary.prefix, [canary.secret])[0])
+    return exposure(score, candidate_scores), extrapolated_exposure(score, candidate_scores, SECRET_SPACE)
 ```
 
-The script ranks each secret among 2,000 random candidates, so a canary that beats them all reaches a cap of 10.97 bits. A secret the model has never seen averages about 1.44 bits ($\log_2 e$), because its rank among the candidates is then random. Each line below gives a group's mean exposure, the same past the cap (explained below), and how many of its three secrets greedy decoding wrote out.
+No maintained library computes exposure, so `exposure` and `extrapolated_exposure` come from the book's helper module [practitioner_privacy_tests.py](../../code/practitioner_privacy_tests.py), after TensorFlow Privacy's reference code. The script ranks each secret among 2,000 random candidates, so a canary that beats them all reaches a cap of 10.97 bits. A secret the model has never seen averages about 1.44 bits ($\log_2 e$), because its rank among the candidates is then random. Each line below gives a group's mean exposure, the same past the cap (explained below), and how many of its three secrets greedy decoding wrote out.
 
 ```text
 non-private 1 copies: mean exposure 2.0 bits  extrapolated 2.0  extracted 0/3

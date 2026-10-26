@@ -53,28 +53,34 @@ A flagged person cares about a third number, the chance that the verdict is righ
 $$\Pr[\text{member} \mid \text{flagged}] = \frac{\pi_1\,\mathrm{TPR}}{\pi_1\,\mathrm{TPR} + \pi_0\,\mathrm{FPR}}.$$
 When members are rare, even a small FPR applied to the many non-members swamps the true positives (Jayaraman et al., 2021). Take a count of people with a condition, released with Gaussian noise of standard deviation 1, so that a member adds 1 to the count. An adversary who knows every other record flags the target when the count is high, with advantage 0.3829. Held to an FPR of $10^{-3}$, it catches members with probability 0.0183. Yet when it fires at a fair prior, its precision is $0.0183/(0.0183 + 0.001) = 0.948$. If only one target in a hundred is a member, the precision drops to 0.156, so never quote a precision without its prior.
 
-The rates you report are measured on a finite set of targets, so each needs an interval. [Hypothesis testing](../part01-prerequisites/04-hypothesis-testing.md#sec-ht-recipe) gives the recipe. It plans about $100/a$ non-members for an FPR of $a$, so that about 100 false positives pin the rate down. It sets the threshold on one split, measures on another, and puts a Clopper–Pearson interval on each rate. The snippet below reads the TPR at an FPR of $10^{-3}$ and both intervals from seeded stand-in scores, with members' scores shifted up by 1 as in the noisy count. To stay short it sets the threshold on the scores it measures, but a real evaluation sets it on a separate split.
+The rates you report are measured on a finite set of targets, so each needs an interval. [Hypothesis testing](../part01-prerequisites/04-hypothesis-testing.md#sec-ht-recipe) gives the recipe. It plans about $100/\alpha$ non-members for an FPR of $\alpha$, so that about 100 false positives pin the rate down. It sets the threshold on one split, measures on another, and puts a Clopper–Pearson interval on each rate. The snippet below runs a real attack, the black-box membership attack of the Adversarial Robustness Toolbox (ART). Its target is a random forest trained on half of scikit-learn's breast cancer data, 569 patient records. The attacker trains its attack on records whose membership it knows, then scores the others. The snippet reads the TPR at an FPR of at most 0.01, with both intervals. To stay short it sets the threshold on the scores it measures, but a real evaluation sets it on a separate split.
 
 ```python
 import numpy as np
+from art.attacks.inference.membership_inference import MembershipInferenceBlackBox
+from art.estimators.classification import SklearnClassifier
 from scipy.stats import binomtest
-from sklearn.metrics import roc_curve
+from sklearn.datasets import load_breast_cancer
+from sklearn.ensemble import RandomForestClassifier
+from sklearn.metrics import auc, roc_curve
 
-rng = np.random.default_rng(0)
-n = 20_000  # members and non-members each
-scores = np.concatenate([rng.normal(1.0, 1.0, n), rng.normal(0.0, 1.0, n)])  # an attack's scores
-is_member = np.concatenate([np.ones(n), np.zeros(n)])
-fpr, tpr, _ = roc_curve(is_member, scores)
-i = np.flatnonzero(fpr <= 1e-3)[-1]  # the best TPR whose FPR is at most 1e-3
-true_pos, false_pos = round(tpr[i] * n), round(fpr[i] * n)
-print(f"TPR={tpr[i]:.4f} ({true_pos} of {n})  FPR={fpr[i]:.5f} ({false_pos} of {n})")  # TPR=0.0158 (317 of 20000)  FPR=0.00100 (20 of 20000)
-tpr_ci = binomtest(true_pos, n).proportion_ci(method="exact")
-fpr_ci = binomtest(false_pos, n).proportion_ci(method="exact")
-print(f"TPR 95% CI [{tpr_ci.low:.4f}, {tpr_ci.high:.4f}]")  # TPR 95% CI [0.0142, 0.0177]
-print(f"FPR 95% CI [{fpr_ci.low:.5f}, {fpr_ci.high:.5f}]")  # FPR 95% CI [0.00061, 0.00154]
+np.random.seed(0)  # ART's attack model draws from NumPy's global generator
+x, y = load_breast_cancer(return_X_y=True)
+member = np.random.default_rng(0).random(len(y)) < 0.5  # the target's training records
+target = SklearnClassifier(RandomForestClassifier(random_state=0).fit(x[member], y[member]))
+known = np.arange(len(y)) % 2 == 0  # records whose membership the attacker knows, to train its attack
+attack = MembershipInferenceBlackBox(target, attack_model_type="rf")
+attack.fit(x[known & member], y[known & member], x[known & ~member], y[known & ~member])
+fpr, tpr, _ = roc_curve(member[~known], attack.infer(x[~known], y[~known], probabilities=True)[:, 0])
+i = np.flatnonzero(fpr <= 0.01)[-1]  # the best TPR whose FPR is at most 0.01
+n_in, n_out = int(member[~known].sum()), int((~member[~known]).sum())
+tp, fp = round(tpr[i] * n_in), round(fpr[i] * n_out)
+print(f"AUC={auc(fpr, tpr):.3f}  TP={tp} of {n_in}  FP={fp} of {n_out}")  # AUC=0.552  TP=3 of 133  FP=1 of 151
+t, f = (binomtest(k, n).proportion_ci(method="exact") for k, n in ((tp, n_in), (fp, n_out)))
+print(f"TPR 95% CI [{t.low:.4f}, {t.high:.4f}]  FPR 95% CI [{f.low:.4f}, {f.high:.4f}]")  # TPR 95% CI [0.0047, 0.0645]  FPR 95% CI [0.0002, 0.0363]
 ```
 
-The snippet's 20,000 non-members are a fifth of what the rule asks for, so its FPR rests on only 20 false positives. Its interval runs from 0.00061 to 0.00154. So the threshold's true FPR may lie below the measured 0.00100, and a lower FPR goes with a lower TPR. That is how the TPR of 0.0158 can sit below the exact 0.0183.
+The attack is scored on only 151 non-members, so the smallest FPR it can show above zero is one in that many. An FPR of $10^{-3}$ cannot be measured at all. Even one false positive leaves the FPR's interval running from 0.0002 to 0.0363. The TPR's interval, from 0.0047 to 0.0645, overlaps it, so this test cannot show that the attack beats chance at a low FPR. Its area under the ROC curve, 0.552, adds little. Measuring an FPR of $10^{-3}$ takes about 100,000 non-members, which is why audits retrain many models on many records ([Membership inference](02-membership-inference.md)).
 
 A report you can act on therefore gives the TPR at a stated low FPR, with its counts, intervals on both rates and the ROC curve on log axes. It also states the threat model, the baseline, the prior behind any precision, and whether the targets were random records or chosen worst cases.
 

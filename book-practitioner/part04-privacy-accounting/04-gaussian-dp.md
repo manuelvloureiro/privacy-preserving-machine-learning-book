@@ -4,8 +4,8 @@
 
 Every differential privacy (DP) guarantee limits how well an attacker can tell whether the data held a target's record. The attacker runs a [hypothesis test](../part01-prerequisites/04-hypothesis-testing.md), so the fullest guarantee is a **trade-off curve**. It gives the lowest false negative rate that any test can reach at each false positive rate. A mechanism is **$f$-DP** when its curve never falls below a given curve $f$ (Dong, Roth and Su 2022). A privacy level $\varepsilon$ with its slack $\delta$ only summarizes that curve.
 
-For Gaussian noise the curve has one parameter. Write $\sigma$ for the noise multiplier, the noise's standard deviation in units of the query's $\ell_2$ sensitivity. In those units the attacker must tell a standard normal draw from one shifted by a distance $\mu$ equal to $1/\sigma$. So the mechanism satisfies Gaussian differential privacy (GDP) with parameter $\mu$, written **$\mu$-GDP**. Write $\Phi$ for the standard normal distribution function, and $\Phi^{-1}$ for its inverse. At a false positive rate $a$, no membership attack then reaches a true positive rate, one minus its false negative rate, above
-$$1 - \Phi\big(\Phi^{-1}(1 - a) - \mu\big).$$
+For Gaussian noise the curve has one parameter. Write $\sigma$ for the noise multiplier, the noise's standard deviation in units of the query's $\ell_2$ sensitivity. In those units the attacker must tell a standard normal draw from one shifted by a distance $\mu$ equal to $1/\sigma$. So the mechanism satisfies Gaussian differential privacy (GDP) with parameter $\mu$, written **$\mu$-GDP**. Write $\Phi$ for the standard normal distribution function, and $\Phi^{-1}$ for its inverse. At a false positive rate $\alpha$, no membership attack then reaches a true positive rate, one minus its false negative rate, above
+$$1 - \Phi\big(\Phi^{-1}(1 - \alpha) - \mu\big).$$
 
 ## When you meet it
 

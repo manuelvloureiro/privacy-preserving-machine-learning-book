@@ -6,7 +6,9 @@ Each section below holds the example of one page, as a marked excerpt (prefix `a
 labelled lines, page by page:
 
 - 02 (properties): diffprivlib's BudgetAccountant as a ledger (a mean and a count of age, the total spent, the
-  BudgetError on overspending) and the group-privacy calculation that the page's formula gives.
+  BudgetError on overspending), the group-privacy calculation that the page's formula gives, and OpenDP's
+  `map(d_in=k)`, which gives a measurement's own guarantee for a group of k records (a Laplace count, and a Gaussian
+  count calibrated by binary search to (0.5, 1e-5) per record, read off its privacy curve).
 - 05 (selection): the private median of age, with diffprivlib (exponential mechanism over [17, 90]) and with OpenDP's
   Polars median over the candidate ages 17, ..., 90.
 - 06 (query release): education x income counts with OpenDP's Polars group-by over public keys.
@@ -41,7 +43,7 @@ import numpy as np
 import opendp.prelude as dp
 import polars as pl
 from diffprivlib import BudgetAccountant, tools
-from diffprivlib.mechanisms import Binary
+from diffprivlib.mechanisms import Binary, Laplace
 from diffprivlib.utils import BudgetError, PrivacyLeakWarning
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
@@ -67,6 +69,11 @@ INCOME = ["<=50K", ">50K"]
 def delta_for(n: int) -> float:
     """The book's default delta: 1/n^1.1, rounded down to a power of ten."""
     return 10.0 ** math.floor(math.log10(n**-1.1))
+
+
+def group_privacy(eps: float, delta: float, k: int) -> tuple[float, float]:
+    """The generic guarantee for a group of k records, from an (eps, delta) guarantee per record."""
+    return k * eps, delta * sum(exp(j * eps) for j in range(k))
 
 
 def group_privacy_simple(eps: float, delta: float, k: int) -> tuple[float, float]:
@@ -97,17 +104,29 @@ def page_02(adult: pl.DataFrame, seed: int) -> None:
     print(f"remaining: epsilon={eps_left:.2f} delta={delta_left:.0e}")
     print(f"true mean age: {age.mean():.2f}  true count over 50: {int((age > 50).sum()):,}")
 
-    # excerpt: adult-group-privacy
-    def group_privacy(eps: float, delta: float, k: int) -> tuple[float, float]:
-        """The guarantee for a group of k records, from an (eps, delta) guarantee per record."""
-        return k * eps, delta * sum(exp(j * eps) for j in range(k))
-
     eps_k, delta_k = group_privacy(0.5, 1e-5, 10)
     print(f"group of 10 at (0.5, 1e-5): ({eps_k:.1f}, {delta_k:.3e})")
-    # end excerpt
     eps_s, delta_s = group_privacy_simple(0.5, 1e-5, 10)
     print(f"simple bound k e^((k-1) eps) delta: ({eps_s:.1f}, {delta_s:.3e})")
     print(f"delta multiplier, group of 10 at eps=1: {group_privacy(1.0, 1.0, 10)[1]:.1f}")
+
+    # excerpt: adult-group-privacy
+    count = dp.t.make_count(dp.vector_domain(dp.atom_domain(T=int)), dp.symmetric_distance())
+    laplace = count >> dp.m.then_laplace(scale=2.0)  # epsilon = 0.5 per record
+    print(f"Laplace count: epsilon {laplace.map(d_in=1):.1f} per record, {laplace.map(d_in=10):.1f} for 10")
+
+    def gaussian(scale: float) -> dp.Measurement:  # a Gaussian count, as a privacy curve
+        return dp.c.make_zCDP_to_approxDP(count >> dp.m.then_gaussian(scale=scale))
+
+    def at_1e5(scale: float) -> dp.Measurement:
+        return dp.c.make_fix_delta(gaussian(scale), delta=1e-5)
+
+    scale = dp.binary_search_param(at_1e5, d_in=1, d_out=(0.5, 1e-5))  # (0.5, 1e-5) per record
+    curve = gaussian(scale).map(d_in=10)  # the privacy curve for a group of 10 records
+    print(f"Gaussian count, group of 10: epsilon {curve.epsilon(1e-5):.2f} at delta 1e-5")
+    # delta_k is the slack that the group-privacy formula gives the group
+    print(f"Gaussian count, group of 10: epsilon {curve.epsilon(delta_k):.2f} at delta {delta_k:.3e}")
+    # end excerpt
 
 
 # ---------------------------------------------------------------------------------------------------------------
@@ -217,7 +236,7 @@ def page_09(adult: pl.DataFrame, seed: int) -> None:
     # excerpt: adult-central-count
     rich = (adult["income"] == ">50K").to_numpy()
     central = tools.count_nonzero(rich, epsilon=log(3), random_state=seed) / len(rich)
-    central_sd = math.sqrt(2) / log(3) / len(rich)  # a Laplace count with sensitivity 1
+    central_sd = math.sqrt(Laplace(epsilon=log(3), sensitivity=1).variance(0)) / len(rich)  # the count's noise
     print(f"central estimate: {central:.4f}  sd {central_sd:.6f}")
     # end excerpt
     print(f"local sd / central sd: {local_sd / central_sd:.0f}")

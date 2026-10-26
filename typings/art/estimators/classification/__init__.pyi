@@ -1,0 +1,1 @@
+from art.estimators.classification.scikitlearn import SklearnClassifier as SklearnClassifier

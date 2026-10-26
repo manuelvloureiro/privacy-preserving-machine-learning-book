@@ -37,18 +37,27 @@ Data: Adult (UCI Machine Learning Repository, dataset 2, "Census Income", Becker
 training rows, 2,000 public stand-in validation rows, and 16,842 test rows, of which 1,000 become canaries and
 15,842 measure test accuracy.
 
-Prints, with seed 0, every number the pages quote: the CI test's μ_lo and verdict for each implementation, and,
-for each trained model, its test accuracy, the canaries' mean loss in and out, the correct guesses per r, and the
-certified ε lower bound. Runs in about 1 minute on this machine's CPU (the CI test about 5 s, the three trainings
-and the public learning-rate sweep the rest; up to 2 minutes under load). Opacus 1.6.0, SciPy 1.18.1, torch 2.14.1
-(CPU).
+3. The certified ε lower bound from independent trials (#sec-audit-bound), for two example outcomes of 1,000 runs
+   with and 1,000 without a canary.
+
+What is a library and what is not. Opacus is under test; SciPy's `binomtest(...).proportion_ci(method="exact")`
+gives the Clopper–Pearson bounds. The μ and ε lower bounds and the one-run audit, which no maintained package
+provides, come from code/practitioner_privacy_tests.py.
+
+Prints, with seed 0, every number the pages quote: the CI test's μ_lo and verdict for each implementation, the
+two example ε lower bounds, and, for each trained model, its test accuracy, the canaries' mean loss in and out, the
+correct guesses per r, and the certified ε lower bound. Runs in about 1 minute on this machine's CPU (the CI test
+about 5 s, the three trainings and the public learning-rate sweep the rest; up to 2 minutes under load). Opacus
+1.6.0, SciPy 1.18.1, torch 2.14.1 (CPU).
 """
 
 import argparse
 import math
+import sys
 import warnings
 from collections.abc import Sequence
 from dataclasses import dataclass
+from pathlib import Path
 
 import numpy as np
 import torch
@@ -70,7 +79,9 @@ from practitioner_dp_sgd import (
     train_non_private,
     train_private,
 )
-from scipy import stats
+
+sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
+from practitioner_privacy_tests import correct_guesses, eps_lower_bound, mu_lower_bound, one_run_eps
 
 Array = NDArray[np.float64]
 Mask = NDArray[np.bool_]
@@ -87,19 +98,6 @@ N_CANARIES = 1_000
 DELTA = 1e-5  # the release's delta: 1/n^1.1 = 1.2e-5 for n = 30,000, rounded down to a power of ten
 MEMORIZE_EPOCHS, MEMORIZE_LR, MEMORIZE_BATCH = 60, 3e-3, 128
 GUESS_GRID: tuple[int, ...] = (20, 50, 100, 200, 500, 1000)
-
-
-# --- Confidence bounds on rates (Clopper–Pearson, one-sided) ------------------------------------------
-
-
-def cp_upper(k: int, n: int, a: float) -> float:
-    """One-sided Clopper–Pearson upper bound at level a: the rate u with P[Bin(n, u) ≤ k] = a."""
-    return 1.0 if k >= n else stats.beta.ppf(1 - a, k + 1, n - k)
-
-
-def cp_lower(k: int, n: int, a: float) -> float:
-    """One-sided Clopper–Pearson lower bound at level a: the rate l with P[Bin(n, l) ≥ k] = a."""
-    return 0.0 if k <= 0 else stats.beta.ppf(a, k, n - k + 1)
 
 
 # --- 1. The CI test: Dirac canary in every step of Opacus's DPOptimizer --------------------------------
@@ -157,14 +155,6 @@ class MuAudit:
     mu_lo: float
 
 
-def mu_lower(fp: int, n_out: int, tp: int, n_in: int, beta: float = BETA) -> float:
-    """Rigorous lower bound on μ: Φ⁻¹(TPR_lo) − Φ⁻¹(FPR_hi), each rate bounded at β/2."""
-    fpr_hi, tpr_lo = cp_upper(fp, n_out, beta / 2), cp_lower(tp, n_in, beta / 2)
-    if tpr_lo <= 0.0:
-        return 0.0
-    return max(0.0, stats.norm.ppf(tpr_lo) - stats.norm.ppf(fpr_hi))
-
-
 def per_step_audit(x_in: Array, x_out: Array) -> MuAudit:
     """Choose the threshold on the first half of the steps, then count and bound on the second half."""
     h_in, h_out = x_in.size // 2, x_out.size // 2
@@ -174,7 +164,7 @@ def per_step_audit(x_in: Array, x_out: Array) -> MuAudit:
     # Say "canary in" when the reading is strictly above the threshold: with no noise every canary-free reading is
     # exactly 0, the threshold is 0, and ">=" would flag them all as false positives and hide the bug.
     def mu_at(thr: float, s_in: Array, s_out: Array) -> float:
-        return mu_lower(int(np.sum(s_out > thr)), s_out.size, int(np.sum(s_in > thr)), s_in.size)
+        return mu_lower_bound(int(np.sum(s_out > thr)), s_out.size, int(np.sum(s_in > thr)), s_in.size, BETA)
 
     thr = max(candidates, key=lambda c: mu_at(c, sel_in, sel_out))
     fp, tp = int(np.sum(ev_out > thr)), int(np.sum(ev_in > thr))
@@ -248,35 +238,6 @@ def per_example_loss(model: torch.nn.Module, split: Split) -> Array:
 
 
 # --- 2. One-run audit: guesses and the certified bound ------------------------------------------------
-
-
-def correct_guesses(scores: Array, included: Mask, r: int) -> int:
-    """Guess "in" for the r/2 highest scores and "out" for the r/2 lowest; count the correct guesses."""
-    order = np.argsort(-scores, kind="stable")
-    guessed_in, guessed_out = order[: r // 2], order[scores.size - r // 2 :]
-    return int(np.count_nonzero(included[guessed_in]) + np.count_nonzero(~included[guessed_out]))
-
-
-def one_run_pvalue(m: int, r: int, v: int, eps: float, delta: float) -> float:
-    """P[W ≥ v] under (ε, δ)-DP with m canaries: f(v) + 2mδ max_i (f(v − i) − f(v))/i, f the binomial tail."""
-    p = 1 / (1 + math.exp(-eps))
-    tail = stats.binom.sf(v - 1, r, p)  # f(v) = P[Bin(r, p) ≥ v]
-    i = np.arange(1, v + 1, dtype=np.float64)
-    gaps = (stats.binom.sf(v - i - 1, r, p) - tail) / i
-    return min(1.0, tail + 2 * m * delta * float(gaps.max()))
-
-
-def one_run_eps(m: int, r: int, v: int, delta: float, beta: float) -> float:
-    """The largest ε rejected at level β by v correct guesses out of r: training is not (ε, δ)-DP for smaller ε."""
-    if v <= 0 or one_run_pvalue(m, r, v, 0.0, delta) >= beta:
-        return 0.0
-    lo, hi = 0.0, 1.0
-    while one_run_pvalue(m, r, v, hi, delta) < beta and hi < 64:
-        lo, hi = hi, 2 * hi
-    for _ in range(50):
-        mid = (lo + hi) / 2
-        lo, hi = (mid, hi) if one_run_pvalue(m, r, v, mid, delta) < beta else (lo, mid)
-    return lo
 
 
 @dataclass(frozen=True)
@@ -357,6 +318,13 @@ def main() -> None:
             f"TP {audit.true_pos}/{audit.trials}"
         )
         print(f"{bug}: mu_lo={audit.mu_lo:.3f}  {'pass' if passed else 'FAIL'}")
+    # end excerpt
+
+    print("== Certified epsilon from independent trials: 1,000 runs per hypothesis ==")
+    # excerpt: audit-eps-bound
+    for false_pos, true_pos in ((1, 500), (0, 1_000)):  # out of 1,000 runs without and with the canary
+        eps_lo = eps_lower_bound(false_pos, true_pos, 1_000, DELTA)
+        print(f"FP {false_pos}/1000  TP {true_pos}/1000: certified eps lower bound {eps_lo:.2f}")
     # end excerpt
 
     print("== One-run audit of the released pipeline on Adult: mislabeled canaries ==")

@@ -20,6 +20,8 @@ def test_practitioner_audit_seed_0() -> None:
         "variance for std: mu_lo=1.722  FAIL",
         "no noise: noise std 0.000 (claim 0.7)  FP 0/1000  TP 1000/1000",
         "no noise: mu_lo=5.360  FAIL",
+        "FP 1/1000  TP 500/1000: certified eps lower bound 4.43",
+        "FP 0/1000  TP 1000/1000: certified eps lower bound 5.60",
         "DP-SGD eps=4: test accuracy 0.8470",
         "DP-SGD eps=4: mean canary loss in 4.105  out 4.006",
         "DP-SGD eps=4: r=20  correct=10  eps_lo=0.00",

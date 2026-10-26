@@ -46,15 +46,18 @@ Compare the model's accuracy on its training data with its accuracy on held-out 
 ```text
 target 0: train accuracy=1.0000  test accuracy=0.9650
 train-test gap, mean over 64 targets=0.0422
+ART rule-based attack on target 0: TPR=1.0000  FPR=0.9650  advantage=0.0350
 loss attack at FPR 0.001: TPR=0.0009
 loss attack at FPR 0.01: TPR=0.0105
 ```
 
-The first target gets every training image right, but only 0.9650 of its test images. So even "member if correctly classified" beats chance, by the mean gap of 0.0422, a free lower bound on the leak that does not say who is exposed. At an FPR of $10^{-3}$ the loss attack flags no more members than non-members. A weak attack's failure proves little, so this check can never clear a model. A large gap is reason enough to regularize first, while a small one only means you need the next step.
+The first target gets every training image right, but only 0.9650 of its test images. So even "member if correctly classified" beats chance, by the mean gap of 0.0422, a free lower bound on the leak that does not say who is exposed. The Adversarial Robustness Toolbox (ART), a Python library of attacks, runs that rule as `MembershipInferenceBlackBoxRuleBased`, and on the first target its advantage of 0.0350 is that model's gap. At an FPR of $10^{-3}$ the loss attack flags no more members than non-members. A weak attack's failure proves little, so this check can never clear a model. A large gap is reason enough to regularize first, while a small one only means you need the next step.
 
 ## Classifier: LiRA with shadow models {#sec-risk-lira}
 
 The likelihood ratio attack (LiRA) compares the target's output on a record with other models' outputs on that same record. **Shadow models** are trained like the target on random halves of the data, so some trained on a given image and some did not. LiRA works with $\phi = \ln(p/(1 - p))$, the logit of the confidence $p$ in the true label, which is close to normal across retrainings. For each image, it fits a normal to $\phi$ over the shadows that trained on it (IN) and another over those that did not (OUT). Online LiRA scores the target's $\phi$ by its log-likelihood ratio between the two fits. Offline LiRA uses only the OUT fit, and scores $\phi$ by how many OUT standard deviations it lies above the OUT mean ([Membership inference](02-membership-inference.md#sec-mia-lira) shows the code).
+
+ART's `SklearnClassifier` trains every model, but no library installed with this book computes the LiRA scores, so they come from the helper [practitioner_privacy_tests.py](../../code/practitioner_privacy_tests.py).
 
 Four decisions set the attack's strength. Use online LiRA for a release decision, because it is the strongest. Train 64 shadows when training is cheap. With 16 or fewer, fit one variance shared by all images, because per-image variances from a handful of models are too noisy. Put each record in each model by a fair coin, so that every record has IN and OUT shadows. Finally, rotate the target role, so that each model serves once as the target with the other 63 as its shadows. Every model then judges every image, which gives 57,704 member and 57,304 non-member pairs of a model and an image.
 
@@ -75,15 +78,17 @@ fpr_ci = clopper_pearson(false_pos, n_nonmembers)
 
 ```text
   loss attack: AUC=0.518  TPR@0.001=0.0009  TPR@0.01=0.0105
+  ART shadow-model attack: AUC=0.570  TPR@0.001=0.0014  TPR@0.01=0.0146
   LiRA offline: AUC=0.577  TPR@0.001=0.0087  TPR@0.01=0.0345
   LiRA online: AUC=0.623  TPR@0.001=0.0318  TPR@0.01=0.0790
 [At FPR 0.001: counts, exact 95% intervals, ln(TPR/FPR) as a point estimate, not a certified bound; step 1 blocks if the TPR's lower end > 0.01]
   loss attack: TP=53/57704  TPR=0.0009 [0.0007, 0.0012]  FP=57/57304  FPR=0.00099 [0.00075, 0.00129]  ln(TPR/FPR)=-0.08  pass
+  ART shadow-model attack: TP=82/57704  TPR=0.0014 [0.0011, 0.0018]  FP=57/57304  FPR=0.00099 [0.00075, 0.00129]  ln(TPR/FPR)=0.36  pass
   LiRA offline: TP=502/57704  TPR=0.0087 [0.0080, 0.0095]  FP=56/57304  FPR=0.00098 [0.00074, 0.00127]  ln(TPR/FPR)=2.19  pass
   LiRA online: TP=1833/57704  TPR=0.0318 [0.0303, 0.0332]  FP=57/57304  FPR=0.00099 [0.00075, 0.00129]  ln(TPR/FPR)=3.46  block
 ```
 
-By area under the curve (AUC) the three attacks look alike, but at an FPR of $10^{-3}$ they differ sharply. Online LiRA flags 1,833 members, a TPR of 0.0318. The lower end of its interval, 0.0303, is above 0.01, so the model fails @tbl-risk-thresholds. Offline LiRA would have passed it, which is why a release decision rests on the strongest attack you can afford. A model with privacy level $\varepsilon$ keeps the TPR within about $e^{\varepsilon}$ times the FPR, so ln(TPR/FPR) is a point estimate of the $\varepsilon$ the attack implies. It is not a certified lower bound, because the pairs share models and so are not independent trials ([Auditing private training](../part05-dp-ml/10-auditing.md#sec-audit-bound)).
+By area under the curve (AUC) the four attacks look alike, but at an FPR of $10^{-3}$ they differ sharply. Online LiRA flags 1,833 members, a TPR of 0.0318. The lower end of its interval, 0.0303, is above 0.01, so the model fails @tbl-risk-thresholds. Offline LiRA would have passed it, and so would ART's attack of Shokri et al. (2017), which learns one rule for all images from four shadow models of its own. That is why a release decision rests on the strongest attack you can afford. A model with privacy level $\varepsilon$ keeps the TPR within about $e^{\varepsilon}$ times the FPR, so ln(TPR/FPR) is a point estimate of the $\varepsilon$ the attack implies. It is not a certified lower bound, because the pairs share models and so are not independent trials ([Auditing private training](../part05-dp-ml/10-auditing.md#sec-audit-bound)).
 
 The script also prints the ten images whose IN and OUT fits lie furthest apart, the records an attacker exposes first. The top one is image 1658, a 9, given a confidence of 0.812 by models trained on it and 0.003 by the others. Online LiRA flags it, at an FPR of $10^{-3}$, in all 33 models that trained on it. Inspect such records, usually rare or mislabelled ones.
 

@@ -36,12 +36,12 @@ print(f"true share over 50K: {answers.count('1') / n:.4f}")
 print(f"local estimate: {local:.4f}  sd {local_sd:.4f}")
 ```
 
-In the central model, a trusted curator counts the true bits with diffprivlib's `tools.count_nonzero` at the same level, which adds Laplace noise with standard deviation $\sqrt2/\varepsilon$ to the count.
+In the central model, a trusted curator counts the true bits with diffprivlib's `tools.count_nonzero` at the same level, which adds Laplace noise with standard deviation $\sqrt2/\varepsilon$ to the count. The standard deviation comes from the variance that diffprivlib's own `Laplace` mechanism reports.
 
 ```{.python excerpt="adult-central-count"}
 rich = (adult["income"] == ">50K").to_numpy()
 central = tools.count_nonzero(rich, epsilon=log(3), random_state=seed) / len(rich)
-central_sd = math.sqrt(2) / log(3) / len(rich)  # a Laplace count with sensitivity 1
+central_sd = math.sqrt(Laplace(epsilon=log(3), sensitivity=1).variance(0)) / len(rich)  # the count's noise
 print(f"central estimate: {central:.4f}  sd {central_sd:.6f}")
 ```
 
@@ -96,7 +96,7 @@ The small shares are also the weakness. A client that colludes with the server c
 $$\sigma\sqrt{\frac{n - t}{n}}.$$
 So fix in advance the largest fraction $\rho$ of clients that may collude or drop out, and have each client add variance $\sigma^2/(n(1 - \rho))$. The honest clients alone then supply the full noise.
 
-For example, a server sums a histogram of many users through 100 clients and targets $(1, 10^{-6})$, the default $\delta$ for about a hundred thousand users. A user who changes value moves one count down and another up, so the $\ell_2$ sensitivity is $\sqrt 2$. The analytic Gaussian calibration of [The Laplace and Gaussian mechanisms](03-laplace-gaussian.md) gives a total $\sigma$ of 5.975, or a standard deviation of 0.597 per client. Without over-provisioning, a fifth of the clients colluding weakens the guarantee to $\varepsilon = 1.128$ at the same $\delta$. Half colluding gives 1.455, and nine-tenths gives 3.525.
+For example, a server sums a histogram of many users through 100 clients and targets $(1, 10^{-6})$, the default $\delta$ for about a hundred thousand users. A user who changes value moves one count down and another up, so the $\ell_2$ sensitivity is $\sqrt 2$. The analytic Gaussian calibration of [the Laplace and Gaussian mechanisms](03-laplace-gaussian.md) gives a total $\sigma$ of 5.975, or a standard deviation of 0.597 per client. Without over-provisioning, a fifth of the clients colluding weakens the guarantee to $\varepsilon = 1.128$ at the same $\delta$. Half colluding gives 1.455, and nine-tenths gives 3.525.
 
 Secure aggregation works on integers, so clients add integer noise, Skellam or the distributed discrete Gaussian of [Discrete mechanisms](08-discrete-mechanisms.md), as TensorFlow Federated's `tff.aggregators.DistributedDpSumFactory` does. Secure aggregation does not check inputs, so a malicious client can still send any vector.
 

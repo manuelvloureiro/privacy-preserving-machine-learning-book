@@ -14,7 +14,7 @@ You meet a lower bound when a design looks too good. Someone asks, for example, 
 
 ## How to use it
 
-For the million locations, every pure-DP histogram has an error of at least 6.38 records in some bin, so the five-record promise is impossible. The exact error of the Laplace histogram of [The Laplace and Gaussian mechanisms](03-laplace-gaussian.md) is 16.79, about 2.6 times the floor, so it is already near the best. With $\delta = 10^{-6}$, the floor can never pass about 13.82 records, whatever $N$ is. A stability-based histogram releases only non-empty bins, so its error does not grow with $N$ at all ([Beyond global sensitivity](07-sensitivity.md)). So when a huge, mostly empty universe puts the floor too high, switch to approximate DP.
+For the million locations, every pure-DP histogram has an error of at least 6.38 records in some bin, so the five-record promise is impossible. The exact error of the Laplace histogram of [the Laplace and Gaussian mechanisms](03-laplace-gaussian.md) is 16.79, about 2.6 times the floor, so it is already near the best. With $\delta = 10^{-6}$, the floor can never pass about 13.82 records, whatever $N$ is. A stability-based histogram releases only non-empty bins, so its error does not grow with $N$ at all ([Beyond global sensitivity](07-sensitivity.md)). So when a huge, mostly empty universe puts the floor too high, switch to approximate DP.
 
 The same floor sizes a dataset, since an error in records becomes an error in frequencies once you divide by the number of records $n$. A pure-DP histogram whose frequencies must all be within $\alpha$ needs
 $$n \ge \frac{\ln\big(N(1 - \beta)\big) - \varepsilon}{2\alpha\varepsilon}.$$ {#eq-lower-n-histogram}

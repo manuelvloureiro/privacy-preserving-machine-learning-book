@@ -61,11 +61,16 @@ def secret_scores(model: PeftModel, tokenizer: PreTrainedTokenizerBase, prefix: 
     return logprobs.sum(dim=(1, 2)).double().numpy()
 
 
-def exposure(canary_score: float, candidate_scores: Scores) -> float:
-    """log2 of 1 / (the share of candidates the model finds at least as likely), canary included."""
-    at_least = 1 + np.sum(candidate_scores >= canary_score)
-    return math.log2((len(candidate_scores) + 1) / at_least)
+def canary_exposure(
+    model: PeftModel, tokenizer: PreTrainedTokenizerBase, canary: Canary, candidates: list[str]
+) -> tuple[float, float]:
+    """The exposure of the canary's secret among the candidates, measured and extrapolated past the cap."""
+    candidate_scores = scores_batched(model, tokenizer, canary.prefix, candidates)
+    score = float(scores_batched(model, tokenizer, canary.prefix, [canary.secret])[0])
+    return exposure(score, candidate_scores), extrapolated_exposure(score, candidate_scores, SECRET_SPACE)
 ```
+
+The model comes from `transformers` and its adapters from `peft`, but no maintained library computes exposure. So `exposure` and `extrapolated_exposure` come from the book's helper module [practitioner_privacy_tests.py](../../code/practitioner_privacy_tests.py), which follows the reference code in TensorFlow Privacy.
 
 The model trains on 1,024 sequences of Tiny Shakespeare, a public extract of Shakespeare's plays. The script inserts three canaries at each copy count from 1 to 64, keeps three as controls, and ranks each value among 2,000 random candidates. The command `uv run python code/part05-dp-ml/practitioner_lora.py` runs it in about two and a half minutes on an idle CPU, and several times longer on a busy one. Each line gives a group's mean exposure, then that exposure extrapolated past the cap the candidates set (explained below), and how many of its secrets greedy decoding wrote out.
 

@@ -17,23 +17,28 @@ You meet it whenever you publish counts, cross-tabulations, dashboards or a quer
 
 ## How to use it
 
-To audit an aggregate release, first count the equations. If the published cells or allowed queries outnumber the people, exact answers can pin down every secret, and only the noise protects them. Then plug your noise level and number of queries into @eq-recon-ls-random, and run the attack if the prediction is far above the majority guess, as the snippet does. The release fails when either decoder beats that guess.
+To audit an aggregate release, first count the equations. If the published cells or allowed queries outnumber the people, exact answers can pin down every secret, and only the noise protects them. Then plug your noise level and number of queries into @eq-recon-ls-random, and run the attack if the prediction is far above the majority guess. The release fails when either decoder beats that guess. The snippet draws the noise from OpenDP's Gaussian mechanism, as a release would, and runs least squares, the textbook attack. OpenDP's noise cannot be seeded, so the snippet checks the share of bits recovered against the prediction instead of printing it.
 
 ```python
 from statistics import NormalDist
 
 import numpy as np
+import opendp.prelude as dp
 
+dp.enable_features("contrib")
 rng = np.random.default_rng(0)
 n, m = 500, 2000  # people with a secret bit each, and random subset-sum queries
 sigma = 0.25 * np.sqrt(n)  # noise sd added to each answer
 secret = rng.integers(0, 2, n)
 queries = rng.integers(0, 2, (m, n))
-answers = queries @ secret + rng.normal(0, sigma, m)
-estimate = np.linalg.lstsq(queries, answers, rcond=None)[0]
+space = dp.vector_domain(dp.atom_domain(T=float, nan=False)), dp.l2_distance(T=float)
+gaussian = dp.m.make_gaussian(*space, scale=sigma)  # OpenDP's Gaussian mechanism on all m answers
+answers = np.array(gaussian((queries @ secret).astype(float).tolist()))
+estimate = np.linalg.lstsq(queries, answers, rcond=None)[0]  # the textbook attack: least squares
 recovered = np.mean(np.clip(estimate, 0, 1).round() == secret)
 predicted = NormalDist().cdf(np.sqrt(m - n) / (4 * sigma))
-print(f"recovered {recovered:.4f}, predicted {predicted:.4f}")  # recovered 0.9660, predicted 0.9584
+print(f"predicted {predicted:.4f}")  # predicted 0.9584
+print(f"recovered within 0.04 of it: {abs(recovered - predicted) < 0.04}")  # recovered within 0.04 of it: True
 ```
 
 The number of queries matters as much as the noise. With noise of twice $\sqrt n$, four queries per person recovered only 0.5875 of the bits in the full edition's simulation, so the curator looks safe. But solving @eq-recon-ls-random at that noise shows that 106.1 queries per person recover 90%. So the noise must grow with the number of answers, which is what differential privacy provides.

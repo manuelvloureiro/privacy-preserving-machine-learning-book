@@ -1,7 +1,7 @@
 """code/part02-attacks/practitioner_lira.py runs and prints the numbers that the practitioner edition quotes.
 
 The pages are book-practitioner/part02-attacks/10-risk-assessment.md (steps 2 and 3) and 02-membership-inference.md.
-The script fixes BLAS to one thread, so the logistic-regression fits and every printed digit are reproducible.
+The script fixes BLAS to one thread and seeds ART's attack model, so the fits and every printed digit are reproducible.
 """
 
 import subprocess
@@ -21,18 +21,22 @@ def test_practitioner_lira_matches_pages() -> None:
         "member pairs=57,704  non-member pairs=57,304",
         "target 0: train accuracy=1.0000  test accuracy=0.9650",
         "train-test gap, mean over 64 targets=0.0422",
+        "ART rule-based attack on target 0: TPR=1.0000  FPR=0.9650  advantage=0.0350",
         "loss attack at FPR 0.001: TPR=0.0009",
         "loss attack at FPR 0.01: TPR=0.0105",
         "pairs without a fit, dropped: 0",
         "loss attack: AUC=0.518  TPR@0.001=0.0009  TPR@0.01=0.0105",
+        "ART shadow-model attack: AUC=0.570  TPR@0.001=0.0014  TPR@0.01=0.0146",
         "LiRA offline: AUC=0.577  TPR@0.001=0.0087  TPR@0.01=0.0345",
         "LiRA online: AUC=0.623  TPR@0.001=0.0318  TPR@0.01=0.0790",
         "LiRA online, global variance: AUC=0.614  TPR@0.001=0.0250  TPR@0.01=0.0737",
         "loss attack: TP=53/57704  TPR=0.0009 [0.0007, 0.0012]  FP=57/57304  FPR=0.00099 [0.00075, 0.00129]  ln(TPR/FPR)=-0.08  pass",
+        "ART shadow-model attack: TP=82/57704  TPR=0.0014 [0.0011, 0.0018]  FP=57/57304  FPR=0.00099 [0.00075, 0.00129]  ln(TPR/FPR)=0.36  pass",
         "LiRA offline: TP=502/57704  TPR=0.0087 [0.0080, 0.0095]  FP=56/57304  FPR=0.00098 [0.00074, 0.00127]  ln(TPR/FPR)=2.19  pass",
         "LiRA online: TP=1833/57704  TPR=0.0318 [0.0303, 0.0332]  FP=57/57304  FPR=0.00099 [0.00075, 0.00129]  ln(TPR/FPR)=3.46  block",
         "LiRA online, global variance: TP=1445/57704  TPR=0.0250 [0.0238, 0.0263]  FP=57/57304  FPR=0.00099 [0.00075, 0.00129]  ln(TPR/FPR)=3.23  block",
         "loss attack: TP=608/57704  TPR=0.0105 [0.0097, 0.0114]  FP=573/57304  FPR=0.01000 [0.00920, 0.01085]  ln(TPR/FPR)=0.05",
+        "ART shadow-model attack: TP=842/57704  TPR=0.0146 [0.0136, 0.0156]  FP=570/57304  FPR=0.00995 [0.00915, 0.01079]  ln(TPR/FPR)=0.38",
         "LiRA offline: TP=1992/57704  TPR=0.0345 [0.0330, 0.0360]  FP=573/57304  FPR=0.01000 [0.00920, 0.01085]  ln(TPR/FPR)=1.24",
         "LiRA online: TP=4557/57704  TPR=0.0790 [0.0768, 0.0812]  FP=571/57304  FPR=0.00996 [0.00917, 0.01081]  ln(TPR/FPR)=2.07",
         "LiRA online, global variance: TP=4253/57704  TPR=0.0737 [0.0716, 0.0759]  FP=573/57304  FPR=0.01000 [0.00920, 0.01085]  ln(TPR/FPR)=2.00",

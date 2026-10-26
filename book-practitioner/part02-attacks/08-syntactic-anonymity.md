@@ -24,7 +24,7 @@ The choice of $k$ is a policy. A minimum of 5 is a common convention, and some h
 
 Anonymizers search for a generalization that loses little. **Mondrian**, for example, splits groups of records at the median of one quasi-identifier while both halves keep $k$ records. The full edition tries it on a synthetic table of 10,000 hospital patients. There, at $k = 5$, a class spans on average only 1.6% of each quasi-identifier's range, so k-anonymity itself costs little precision.
 
-On a real table, you can also generalize by hand and recheck. The script [practitioner_table_risk.py](../../code/part02-attacks/practitioner_table_risk.py) takes the Adult census extract of the previous chapter, with its six quasi-identifiers. It puts age into 10-year bands, native country into US or other, and education into four levels. It then counts the different occupations in each class, with occupation standing in for a sensitive attribute.
+On a real table, you can also generalize by hand and recheck. The script [practitioner_table_risk.py](../../code/part02-attacks/practitioner_table_risk.py) takes the Adult census extract of the previous chapter, with its six quasi-identifiers. It puts age into 10-year bands, native country into US or other, and education into four levels. It then counts the different occupations in each class, with occupation standing in for a sensitive attribute. Both checks are Polars counts, since no maintained Python package computes k-anonymity or distinct $\ell$. ARX in Java and sdcMicro in R do.
 
 ```{.python excerpt="generalize-and-check"}
 general = df.with_columns(

@@ -20,7 +20,7 @@ The choice depends on how many queries you have, compared with the number of rec
 
 : Which query-release method to use. {#tbl-qr-choose}
 
-Where "a few" tables end is the dense-query rule of [The Laplace and Gaussian mechanisms](03-laplace-gaussian.md#sec-lg-choose). One person sits in every table, so at a privacy level $\varepsilon$ of 1 and a slack $\delta$ of $10^{-5}$, Gaussian noise wins from 7 tables on.
+Where "a few" tables end is the dense-query rule of [the Laplace and Gaussian mechanisms](03-laplace-gaussian.md#sec-lg-choose). One person sits in every table, so at a privacy level $\varepsilon$ of 1 and a slack $\delta$ of $10^{-5}$, Gaussian noise wins from 7 tables on.
 
 ## Noise on every cell {#sec-qr-baseline}
 

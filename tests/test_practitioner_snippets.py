@@ -1,4 +1,4 @@
-"""Every Python snippet in the practitioner edition runs on its own and prints what its comments say.
+"""Every Python snippet in the practitioner edition and the OpenDP book runs on its own and prints what its comments say.
 
 A snippet is a ```python block. It must be self-contained (its imports included), and each line that prints ends
 with the expected output as a comment, `print(f"{x:.4f}")  # 3.7306`. It runs from the repository's root. A snippet
@@ -13,11 +13,11 @@ from pathlib import Path
 import pytest
 
 ROOT = Path(__file__).resolve().parent.parent
-BOOK = ROOT / "book-practitioner"
+BOOKS = ["book-practitioner", "book-opendp"]
 BLOCK = re.compile(r"^```python\n(.*?)^```$", re.DOTALL | re.MULTILINE)
 EXPECTED = re.compile(r"^\s*print\(.*\)\s*#\s*(.+?)\s*$")
 LIBS = re.compile(
-    r"^\s*(?:import|from)\s+(torch|torchvision|opacus|dp_accounting|opendp|diffprivlib|peft|transformers|sklearn|"
+    r"^\s*(?:import|from)\s+(torch|torchvision|opacus|dp_accounting|opendp|diffprivlib|peft|transformers|sklearn|art|"
     r"scipy|polars)\b",
     re.MULTILINE,
 )
@@ -25,9 +25,11 @@ LIBS = re.compile(
 
 def snippets() -> list[tuple[str, str]]:
     found: list[tuple[str, str]] = []
-    for page in sorted([*BOOK.rglob("*.md"), *BOOK.rglob("*.qmd")]):
-        for i, m in enumerate(BLOCK.finditer(page.read_text()), start=1):
-            found.append((f"{page.relative_to(BOOK)}#{i}", m.group(1)))
+    for book in BOOKS:
+        folder = ROOT / book
+        for page in sorted([*folder.rglob("*.md"), *folder.rglob("*.qmd")]):
+            for i, m in enumerate(BLOCK.finditer(page.read_text()), start=1):
+                found.append((f"{book}/{page.relative_to(folder)}#{i}", m.group(1)))
     return found
 
 
