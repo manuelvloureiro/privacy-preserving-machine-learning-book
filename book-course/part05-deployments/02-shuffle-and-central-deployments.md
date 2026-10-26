@@ -101,7 +101,7 @@ Then shuffled randomized response is $(\varepsilon,\delta)$-DP in the shuffle mo
 
 ::: {.proof}
 1. *Reduce to the count.* Given the count $Z$, every arrangement of the shuffled bits with $Z$ ones is equally likely. So the shuffled output and $Z$ are functions of each other, up to independent randomness, and it suffices to prove that $Z$ is $(\varepsilon,\delta)$-DP.
-2. *Isolate one person.* The count does not depend on the order of the people, so we may take neighbours $D \simeq D'$ that differ by replacing the record of person $1$. Let $J$ be the set of persons $i \ge 2$ who send coins. Its law does not depend on the data, and given $J$,
+2. *Isolate one person.* The count does not depend on the order of the people, so we may take neighbours $D \sim D'$ that differ by replacing the record of person $1$. Let $J$ be the set of persons $i \ge 2$ who send coins. Its law does not depend on the data, and given $J$,
 
 $$
 Z = C_J + N + Y_1, \qquad C_J = \sum_{i \ge 2,\ i \notin J} X_i,
@@ -161,7 +161,7 @@ $$
 for the privacy loss of output $y$ between neighbours $D$ and $D'$. Pure $\varepsilon$-DP says $|L(y)| \le \varepsilon$, an interval of width $2\varepsilon$. The exponential mechanism satisfies a stronger condition.
 
 ::: {#def-shuf-br name="Bounded range"}
-A mechanism $M$ with a countable output set is **$\varepsilon$-bounded range** if for all neighbours $D \simeq D'$ and all outputs $y, y'$,
+A mechanism $M$ with a countable output set is **$\varepsilon$-bounded range** if for all neighbours $D \sim D'$ and all outputs $y, y'$,
 
 $$
 \Pr[M(D) = y]\,\Pr[M(D') = y'] \le e^{\varepsilon}\,\Pr[M(D') = y]\,\Pr[M(D) = y'] .
@@ -196,7 +196,7 @@ The exponential mechanism with parameter $\varepsilon$ is $\varepsilon$-bounded 
 The factor of two matters when many selections are composed. Two lemmas make the composition precise. The first converts a tail bound on the privacy loss into a privacy guarantee. It holds for any output space, with $L$ the logarithm of the ratio of probability mass functions or of densities.
 
 ::: {#lem-shuf-tail}
-Let $\varepsilon' \ge 0$ and $\delta \in [0,1]$. If for all neighbours $D \simeq D'$ the loss satisfies $\Pr_{y \sim M(D)}[L(y) > \varepsilon'] \le \delta$, then $M$ is $(\varepsilon', \delta)$-DP.
+Let $\varepsilon' \ge 0$ and $\delta \in [0,1]$. If for all neighbours $D \sim D'$ the loss satisfies $\Pr_{y \sim M(D)}[L(y) > \varepsilon'] \le \delta$, then $M$ is $(\varepsilon', \delta)$-DP.
 :::
 
 ::: {.proof}
@@ -206,7 +206,7 @@ Fix an event $S$ and let $G = \{y : L(y) \le \varepsilon'\}$. On $S \cap G$ the 
 The second lemma bounds the mean loss, using Hoeffding's lemma: a random variable $W$ in an interval of length $\ell$ satisfies $\mathbb E[e^{\lambda(W - \mathbb E W)}] \le e^{\lambda^2\ell^2/8}$ for every real $\lambda$. This is the step at the heart of the proof of Hoeffding's inequality.
 
 ::: {#lem-shuf-mean-loss}
-If $M$ is $\varepsilon$-bounded range and $D \simeq D'$, then $\mathbb E_{y\sim M(D)}[L(y)] \le \varepsilon^2/8$.
+If $M$ is $\varepsilon$-bounded range and $D \sim D'$, then $\mathbb E_{y\sim M(D)}[L(y)] \le \varepsilon^2/8$.
 :::
 
 ::: {.proof}
@@ -301,7 +301,7 @@ $$
 with a sum in place of the integral on a countable set. It is zero when $P = Q$ and grows as they move apart. Zero-concentrated privacy asks that the divergence between the outputs on neighbours grow at most linearly in the order $\alpha$.
 
 ::: {#def-shuf-zcdp name="Zero-concentrated differential privacy"}
-Let $\rho \ge 0$. A mechanism $M$ is **$\rho$-zero-concentrated differentially private** if for all neighbours $D \simeq D'$ and all $\alpha > 1$,
+Let $\rho \ge 0$. A mechanism $M$ is **$\rho$-zero-concentrated differentially private** if for all neighbours $D \sim D'$ and all $\alpha > 1$,
 
 $$
 D_\alpha\big(M(D)\,\|\,M(D')\big) \le \rho\,\alpha .

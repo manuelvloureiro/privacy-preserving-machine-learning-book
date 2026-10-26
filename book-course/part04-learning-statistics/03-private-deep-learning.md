@@ -73,7 +73,7 @@ Adding or removing a record adds or removes one clipped vector, of norm at most 
 
 Clipping has a cost. The clipped average is a biased estimate of the gradient, so even the convergence theorem for convex losses would no longer apply. For neural networks no such theorem was available anyway, and clipped SGD works well in practice.
 
-The privacy analysis depends on how the lot is drawn, and schemes that look alike differ for privacy. **Poisson sampling** includes each record independently with probability $q$, so the lot size is random. Even at $q = 1/n$ this is not the same as picking one record, because the lot may be empty or hold several records. **Sampling without replacement** draws a lot of fixed size $m$ uniformly among subsets. Picking one record, as in the previous chapter, is the case $m = 1$. **Sampling with replacement** draws $m$ records independently, so a record can appear more than once. The analyses below assume Poisson sampling, and they use the add/remove relation, under which neighbours $D \simeq D'$ differ by one added or removed record and @lem-dpdl-clip gives sensitivity $C$. In practice, implementations often shuffle the data once and cut it into consecutive batches of fixed size. Every batch is then a uniform sample, but the batches are dependent, so the Poisson analysis does not apply to them. Reporting it for shuffled batches is a common error.
+The privacy analysis depends on how the lot is drawn, and schemes that look alike differ for privacy. **Poisson sampling** includes each record independently with probability $q$, so the lot size is random. Even at $q = 1/n$ this is not the same as picking one record, because the lot may be empty or hold several records. **Sampling without replacement** draws a lot of fixed size $m$ uniformly among subsets. Picking one record, as in the previous chapter, is the case $m = 1$. **Sampling with replacement** draws $m$ records independently, so a record can appear more than once. The analyses below assume Poisson sampling, and they use the add/remove relation, under which neighbours $D \sim D'$ differ by one added or removed record and @lem-dpdl-clip gives sensitivity $C$. In practice, implementations often shuffle the data once and cut it into consecutive batches of fixed size. Every batch is then a uniform sample, but the batches are dependent, so the Poisson analysis does not apply to them. Reporting it for shuffled batches is a common error.
 
 ## Privacy accounting {#sec-dpdl-accounting}
 
@@ -99,10 +99,10 @@ The proof is Theorem 1 of Abadi and coauthors, 2016. In the composition bound, t
 The starting point is the privacy loss. For a mechanism $M$ whose output has density $p_D$ on dataset $D$, the **privacy loss** at an output $y$ is $\ln\big(p_D(y)/p_{D'}(y)\big)$. When $y$ is drawn from $M(D)$, it is a random variable. Pure $\varepsilon$-DP says that it never exceeds $\varepsilon$. By the privacy loss criterion of [the approximate DP chapter](../part02-dp-basics/03-approximate-dp.md), $(\varepsilon,\delta)$-DP follows if, for every ordered pair of neighbours, it exceeds $\varepsilon$ with probability at most $\delta$. That criterion only counts the mass above $\varepsilon$, and says nothing about how far above it lies. Moments describe the whole distribution, and unlike tail bounds, they compose by simple addition. The accountant uses the moments of the likelihood ratio $p_D(y)/p_{D'}(y)$. For an order $\lambda > 0$, it takes the average of the ratio raised to the power $\lambda$, and then the logarithm of that average. The worst pair of neighbours gives the log-moment of $M$.
 
 ::: {#def-dpdl-moments name="Log-moments of the privacy loss"}
-Let $p_D$ be the density of the output $M(D)$. For $\lambda > 0$, the $\lambda$-th log-moment of $M$ is the logarithm of the average $\lambda$-th power of the density ratio, for the worst pair of neighbours $D \simeq D'$,
+Let $p_D$ be the density of the output $M(D)$. For $\lambda > 0$, the $\lambda$-th log-moment of $M$ is the logarithm of the average $\lambda$-th power of the density ratio, for the worst pair of neighbours $D \sim D'$,
 
 $$
-\kappa_M(\lambda) = \sup_{D \simeq D'}\ \ln\ \mathbb E_{y\sim M(D)}\left[\left(\frac{p_D(y)}{p_{D'}(y)}\right)^{\lambda}\right].
+\kappa_M(\lambda) = \sup_{D \sim D'}\ \ln\ \mathbb E_{y\sim M(D)}\left[\left(\frac{p_D(y)}{p_{D'}(y)}\right)^{\lambda}\right].
 $$
 :::
 
@@ -117,7 +117,7 @@ $$
 :::
 
 ::: {.proof}
-1. Fix neighbours $D \simeq D'$ and write $L = \ln(p_D(Y)/p_{D'}(Y))$ for the privacy loss random variable, with $Y \sim M(D)$. The map $u \mapsto e^{\lambda u}$ is increasing, so $\Pr[L > \varepsilon] \le \Pr[e^{\lambda L} \ge e^{\lambda\varepsilon}]$.
+1. Fix neighbours $D \sim D'$ and write $L = \ln(p_D(Y)/p_{D'}(Y))$ for the privacy loss random variable, with $Y \sim M(D)$. The map $u \mapsto e^{\lambda u}$ is increasing, so $\Pr[L > \varepsilon] \le \Pr[e^{\lambda L} \ge e^{\lambda\varepsilon}]$.
 2. Markov's inequality bounds the right side by $\mathbb E[e^{\lambda L}]\,e^{-\lambda\varepsilon}$, and $\mathbb E[e^{\lambda L}] \le e^{\kappa_M(\lambda)}$ by definition.
 3. So the privacy loss exceeds $\varepsilon$ with probability at most $\delta$, and the privacy loss criterion gives $(\varepsilon,\delta)$-DP.
 :::

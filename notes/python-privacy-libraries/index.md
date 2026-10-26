@@ -31,7 +31,7 @@ You need basic probability to follow the note, and nothing about privacy. @sec-n
 
 | Symbol | Meaning |
 |:---|:---|
-| $D$, $D'$; $D \simeq D'$ | two neighbouring datasets: one is the other with one person's record added or removed |
+| $D$, $D'$; $D \sim D'$ | two neighbouring datasets: one is the other with one person's record added or removed |
 | $n$ | the number of records |
 | $M$ | a mechanism, the random procedure that computes the released output |
 | $f$, $\Delta f$ | a statistic, and its sensitivity: the most one record can change it |
@@ -51,12 +51,12 @@ Before comparing packages, you need to know what you are asking them to do. This
 
 Take a dataset $D$ of $n$ records, one per person. The running example of this note is a public dataset of 569 breast-tumour biopsies, one record per patient, each with 30 measurements and a label saying whether the tumour was malignant. A hospital that holds such records might want to publish how many patients it saw and the average size of the tumours. Each of those numbers reveals a little about every patient, and differential privacy limits how much.
 
-The limit is stated by comparing two datasets that differ in one person. Two datasets are **neighbouring**, written $D \simeq D'$, when one of them is the other with one person's record added or removed. Some libraries instead define neighbours by replacing one record with another, and that choice changes the numbers, so a library must say which it uses. This note uses add or remove unless it says otherwise.
+The limit is stated by comparing two datasets that differ in one person. Two datasets are **neighbouring**, written $D \sim D'$, when one of them is the other with one person's record added or removed. Some libraries instead define neighbours by replacing one record with another, and that choice changes the numbers, so a library must say which it uses. This note uses add or remove unless it says otherwise.
 
 A **mechanism** $M$ is a randomized procedure that takes a dataset and returns an output. Because it is random, its output has a probability distribution, and the guarantee says that the distribution barely depends on whether any one person is present. The guarantee has two parameters. The privacy parameter $\varepsilon$ bounds the ratio between the probability of any set of outputs with one person in the data and without, and the slack $\delta$ is a small amount by which that bound may be exceeded.
 
 ::: {#def-dp name="Differential privacy"}
-A mechanism $M$ is $(\varepsilon, \delta)$-differentially private if for every pair of neighbouring datasets $D \simeq D'$ and every set $S$ of outputs,
+A mechanism $M$ is $(\varepsilon, \delta)$-differentially private if for every pair of neighbouring datasets $D \sim D'$ and every set $S$ of outputs,
 $$\Pr[M(D) \in S] \le e^{\varepsilon}\,\Pr[M(D') \in S] + \delta.$$
 When $\delta = 0$ it is $\varepsilon$-differentially private, also called pure DP.
 :::
@@ -71,7 +71,7 @@ A mechanism hides a person by adding noise, and the amount of noise depends on t
 
 ::: {#def-sensitivity name="Sensitivity"}
 The sensitivity of a statistic $f$, written $\Delta f$, is the most it can change between neighbouring datasets,
-$$\Delta f = \max_{D \simeq D'} \lvert f(D) - f(D') \rvert.$$
+$$\Delta f = \max_{D \sim D'} \lvert f(D) - f(D') \rvert.$$
 The maximum runs over every pair of neighbouring datasets, not only the one you hold.
 :::
 
@@ -511,7 +511,7 @@ ML Privacy Meter, from the National University of Singapore, is the research too
 
 ## Encrypted computation
 
-Encryption protects a computation from the party that runs it, which differential privacy does not do, and it protects nothing about what the result reveals, which differential privacy does. The two are complementary. TenSEAL exposes Microsoft SEAL's homomorphic encryption on tensors, with the integer scheme BFV and the approximate scheme CKKS, and had a release in September 2026. Its parameters carry their SEAL meaning, and the user sets the ones that fix the security level and the depth of computation they allow. CrypTen made secure multi-party computation look like PyTorch, but its repository is archived, its last release was in 2022, and its README calls it a research framework that is not production ready. 
+Encryption protects a computation from the party that runs it, which differential privacy does not do, and it protects nothing about what the result reveals, which differential privacy does. The two are complementary. TenSEAL exposes Microsoft SEAL's homomorphic encryption on tensors, with the integer scheme BFV and the approximate scheme CKKS, and had a release in September 2026. Its parameters carry their SEAL meaning, and the user sets the ones that fix the security level and the depth of computation they allow. CrypTen made secure multi-party computation look like PyTorch, but its repository is archived, its last release was in 2022, and its README calls it a research framework that is not production ready.
 
 Concrete ML compiles quantized scikit-learn and PyTorch models to fully homomorphic circuits. Its licence allows research and prototyping and requires a commercial patent licence from Zama for commercial use, which rules it out of many deployments before any technical question arises.
 

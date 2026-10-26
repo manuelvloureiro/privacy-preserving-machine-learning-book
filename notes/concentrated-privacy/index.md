@@ -29,7 +29,7 @@ You need only basic probability to follow the note: densities, expectations, var
 
 | Symbol | Meaning |
 |:---|:---|
-| $D$, $D'$; $D \simeq D'$ | two neighbouring datasets, which means that one contains a person's record and the other does not |
+| $D$, $D'$; $D \sim D'$ | two neighbouring datasets, which means that one contains a person's record and the other does not |
 | $M$ | a mechanism, the random procedure that computes the released output |
 | $f$, $\Delta f$ | the statistic to release, and its sensitivity: how much one record can change it |
 | $P$, $Q$ | the distributions of the released output when the data are $D$ and $D'$ |
@@ -52,13 +52,13 @@ Every definition in this note compares two probability distributions of the rele
 
 ## Two output distributions
 
-Take two datasets $D$ and $D'$ that are the same except that $D$ contains one person's record and $D'$ does not. Such datasets are called **neighbouring**, written $D \simeq D'$. Some authors instead call two datasets neighbouring when one record has been replaced by another. The derivations below work for either choice, but the numbers in the examples depend on it, and this note uses adding or removing a record throughout.
+Take two datasets $D$ and $D'$ that are the same except that $D$ contains one person's record and $D'$ does not. Such datasets are called **neighbouring**, written $D \sim D'$. Some authors instead call two datasets neighbouring when one record has been replaced by another. The derivations below work for either choice, but the numbers in the examples depend on it, and this note uses adding or removing a record throughout.
 
 A **mechanism** $M$ is a randomized procedure that takes a dataset and releases an output. Because it is random, running it on $D$ gives an output drawn from a probability distribution, which we call $P$. Running it on $D'$ gives an output drawn from another distribution, $Q$. Both depend on the pair of datasets, although the notation does not show it. Privacy is about how different $P$ and $Q$ are. If they were identical, the output would reveal nothing about whether the person is in the data. If they differ a lot, it reveals a lot.
 
 The running example of this note is a counting query. Suppose the statistic $f(D)$ is the number of people in dataset $D$ who have some medical condition. Adding or removing one person changes the count by at most one. In general, the **sensitivity** of a statistic is the most it can change between neighbouring datasets. For a statistic $f$ it is written $\Delta f$:
 
-$$\Delta f = \max_{D \simeq D'} |f(D) - f(D')|.$$
+$$\Delta f = \max_{D \sim D'} |f(D) - f(D')|.$$
 
 So a count has $\Delta f = 1$. A mechanism for releasing the count adds random noise to the true count. With noise drawn from the Laplace distribution of scale $b$, which has density $e^{-|z|/b}/(2b)$, the output on dataset $D$ has density
 
@@ -103,7 +103,7 @@ The strongest natural guarantee is that the privacy loss is small at every outpu
 The definition is usually stated for events rather than single outputs. An **event** $S$ is a set of possible outputs, such as "the released count is above 100".
 
 ::: {#def-pure name="Pure differential privacy"}
-Let $\varepsilon \ge 0$. A mechanism satisfies **$\varepsilon$-differential privacy (DP)**, and is called $\varepsilon$-DP, if for every pair of neighbouring datasets $D \simeq D'$, in either order, and every event $S$,
+Let $\varepsilon \ge 0$. A mechanism satisfies **$\varepsilon$-differential privacy (DP)**, and is called $\varepsilon$-DP, if for every pair of neighbouring datasets $D \sim D'$, in either order, and every event $S$,
 $$\Pr_P[S] \le e^{\varepsilon}\, \Pr_Q[S].$$
 :::
 
@@ -204,7 +204,7 @@ But a normal variable is unbounded, so there is no $\varepsilon$ that bounds thi
 ## The definition
 
 ::: {#def-approx name="Approximate differential privacy"}
-Let $\varepsilon \ge 0$ and $0 \le \delta \le 1$. A mechanism is **$(\varepsilon, \delta)$-DP** if for every pair of neighbouring datasets $D \simeq D'$, in either order, and every event $S$,
+Let $\varepsilon \ge 0$ and $0 \le \delta \le 1$. A mechanism is **$(\varepsilon, \delta)$-DP** if for every pair of neighbouring datasets $D \sim D'$, in either order, and every event $S$,
 $$\Pr_P[S] \le e^\varepsilon \Pr_Q[S] + \delta.$$
 :::
 

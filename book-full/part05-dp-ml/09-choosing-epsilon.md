@@ -8,7 +8,7 @@ This chapter supplies the privacy half. It reads the guarantee in three operatio
 
 ### The one idea: ε is one line under a curve
 
-An attacker who wants to know whether a record was in the training set runs a test, and every test has two error rates. The definition of DP is equivalent to a straight-line bound on those rates: at false positive rate $a$, the true positive rate is at most $e^\varepsilon a + \delta$. But a training algorithm has a whole **trade-off curve**, the best true positive rate at every false positive rate, and $(\varepsilon, \delta)$ is only one line that lies above it, touching it at one point. Far from that point, the line can be useless: at $\varepsilon = 8$ it allows a test that catches every member while almost never accusing a non-member, while the curve of DP-SGD at the same $\varepsilon$ caps the true positive rate at 0.0589 when the false positive rate is $10^{-3}$. Choosing $\varepsilon$ well means computing and reporting the curve, not just the line, and reading it at the error rates that matter for your threat.
+An attacker who wants to know whether a record was in the training set runs a test, and every test has two error rates. The definition of DP is equivalent to a straight-line bound on those rates: at false positive rate $\mathrm{FPR}$, the true positive rate is at most $e^\varepsilon \mathrm{FPR} + \delta$. But a training algorithm has a whole **trade-off curve**, the best true positive rate at every false positive rate, and $(\varepsilon, \delta)$ is only one line that lies above it, touching it at one point. Far from that point, the line can be useless: at $\varepsilon = 8$ it allows a test that catches every member while almost never accusing a non-member, while the curve of DP-SGD at the same $\varepsilon$ caps the true positive rate at 0.0589 when the false positive rate is $10^{-3}$. Choosing $\varepsilon$ well means computing and reporting the curve, not just the line, and reading it at the error rates that matter for your threat.
 
 @tbl-epsc-overview lists the results and where each is used.
 
@@ -24,9 +24,9 @@ An attacker who wants to know whether a record was in the training set runs a te
 
 : The results of this chapter and where each is used. {#tbl-epsc-overview}
 
-**Notation.** A **membership test** sees the trained model (or the whole sequence of iterates) and says "member" or "non-member" about a target record $z^*$. Its **false positive rate (FPR)** $a$ is the probability that it says "member" when $z^*$ was not in the training set, and its **true positive rate (TPR)** is the probability that it says "member" when $z^*$ was. $Q$ is the distribution of the output when $z^*$ is in the data, $P$ the distribution when it is not, and $L = \ln(Q(y)/P(y))$ is the **privacy loss** of an output $y$. $\delta(\varepsilon)$ is the smallest $\delta$ for which a mechanism is $(\varepsilon, \delta)$-DP at a given $\varepsilon$, its **privacy profile**. For DP-SGD, $q$ is the sampling rate, $\sigma$ the noise multiplier and $T$ the number of steps. The running example has $q = 0.01$, $T = 10{,}000$ and $n = 10{,}000$ records, and its noise multiplier is the one the Rényi differential privacy (RDP) accountant of [DP-SGD](02-dp-sgd.md) requires for each target $\varepsilon$ at $\delta = 10^{-5}$.
+**Notation.** A **membership test** sees the trained model (or the whole sequence of iterates) and says "member" or "non-member" about a target record $z^*$. Its **false positive rate (FPR)** is the probability that it says "member" when $z^*$ was not in the training set, and its **true positive rate (TPR)** is the probability that it says "member" when $z^*$ was. $Q$ is the distribution of the output when $z^*$ is in the data, $P$ the distribution when it is not, and $L = \ln(Q(y)/P(y))$ is the **privacy loss** of an output $y$. $\delta(\varepsilon)$ is the smallest $\delta$ for which a mechanism is $(\varepsilon, \delta)$-DP at a given $\varepsilon$, its **privacy profile**. For DP-SGD, $q$ is the sampling rate, $\sigma$ the noise multiplier and $T$ the number of steps. The running example has $q = 0.01$, $T = 10{,}000$ and $n = 10{,}000$ records, and its noise multiplier is the one the Rényi differential privacy (RDP) accountant of [DP-SGD](02-dp-sgd.md) requires for each target $\varepsilon$ at $\delta = 10^{-5}$.
 
-**How to read this chapter.** The toolkit and @sec-epsc-pair restate what [The definition of differential privacy](../part03-dp-foundations/01-definition.md) proves, in the form this chapter needs. @sec-epsc-curve is the core: the curve of DP-SGD against the line. @sec-epsc-bayes and @sec-epsc-recon read the same curve as beliefs and as reconstruction. @sec-epsc-delta, @sec-epsc-deployed and @sec-epsc-justify are about practice and can be read on their own.
+**How to read this chapter.** The toolkit and @sec-epsc-pair restate what [the definition of differential privacy](../part03-dp-foundations/01-definition.md) proves, in the form this chapter needs. @sec-epsc-curve is the core: the curve of DP-SGD against the line. @sec-epsc-bayes and @sec-epsc-recon read the same curve as beliefs and as reconstruction. @sec-epsc-delta, @sec-epsc-deployed and @sec-epsc-justify are about practice and can be read on their own.
 
 ## Toolkit: four facts every derivation uses
 
@@ -40,9 +40,9 @@ So DP is a statement about tests before it is a statement about anything else. T
 
 Among all tests with a given FPR, the one with the largest TPR says "member" when the likelihood ratio $Q(y)/P(y)$ is large, that is, when the privacy loss $L(y)$ exceeds a threshold $\tau$, randomizing at the threshold if needed. This is the Neyman–Pearson lemma ([Hypothesis testing](../part01-prerequisites/04-hypothesis-testing.md)). The reason is an exchange argument: if a test said "member" on an output with a low ratio and "non-member" on one with a higher ratio, swapping the two (in equal amounts of $P$-probability) would keep its FPR and raise its TPR.
 
-Two consequences follow. First, the best TPR at FPR $a$ depends only on the distribution of $L$. Write $\omega$ for the distribution of $L$ when $y \sim Q$, the **privacy loss distribution (PLD)**. Then the best test with threshold $\tau$ has
+Two consequences follow. First, the best TPR at FPR $\mathrm{FPR}$ depends only on the distribution of $L$. Write $\omega$ for the distribution of $L$ when $y \sim Q$, the **privacy loss distribution (PLD)**. Then the best test with threshold $\tau$ has
 $$\mathrm{TPR}(\tau) = Q[L > \tau], \qquad \mathrm{FPR}(\tau) = P[L > \tau] = \mathbb E_Q\big[e^{-L};\ L > \tau\big],$$
-where the second form is a **change of measure**: $P(y) = e^{-L(y)}Q(y)$ by the definition of $L$, so the $P$-probability of any event is the $Q$-average of $e^{-L}$ over it. Second, the best achievable pairs $(\mathrm{FPR}, \mathrm{TPR})$ form a region whose upper boundary, the **trade-off curve** written here as $\mathrm{TPR}^*(a)$, is increasing and concave: increasing because a test with a higher FPR can always say "member" more often, concave because randomizing between two tests reaches every point of the segment between them.
+where the second form is a **change of measure**: $P(y) = e^{-L(y)}Q(y)$ by the definition of $L$, so the $P$-probability of any event is the $Q$-average of $e^{-L}$ over it. Second, the best achievable pairs $(\mathrm{FPR}, \mathrm{TPR})$ form a region whose upper boundary, the **trade-off curve** written here as $\mathrm{TPR}^*(\mathrm{FPR})$, is increasing and concave: increasing because a test with a higher FPR can always say "member" more often, concave because randomizing between two tests reaches every point of the segment between them.
 
 ### Fact 3 — Beliefs multiply by the likelihood ratio
 
@@ -90,7 +90,7 @@ $$\mathrm{TPR} - \mathrm{FPR} \le \frac{e^\varepsilon - 1 + 2\delta}{e^\varepsil
 
 1. **The first line.** Apply the definition (Fact 1) with $D^- \cup \{z\}$ first and the event $S$ on which the test says "member": $Q(S) \le e^\varepsilon P(S) + \delta$, that is $\mathrm{TPR} \le e^\varepsilon\mathrm{FPR} + \delta$.
 2. **The second line.** Apply it in the other order to the complement $S^c$, where the test says "non-member": $P(S^c) \le e^\varepsilon Q(S^c) + \delta$, that is $1 - \mathrm{FPR} \le e^\varepsilon(1 - \mathrm{TPR}) + \delta$. Solving for TPR gives $\mathrm{TPR} \le 1 - e^{-\varepsilon}(1 - \delta - \mathrm{FPR})$. A probability is at most 1, which is the third term of @eq-epsc-pair.
-3. **The advantage.** $\mathrm{TPR} - \mathrm{FPR}$ is largest where the two lines of steps 1 and 2 cross, because below the crossing the first line rises faster than the diagonal (slope $e^\varepsilon \ge 1$) and above it the second line rises more slowly (slope $e^{-\varepsilon} \le 1$). Setting $e^\varepsilon a + \delta = 1 - e^{-\varepsilon}(1 - \delta - a)$ and multiplying by $e^\varepsilon$ gives $a(e^{2\varepsilon} - 1) = e^\varepsilon - 1 + \delta - \delta e^\varepsilon$, so $a = (1 - \delta)/(e^\varepsilon + 1)$. There the TPR is $e^\varepsilon(1 - \delta)/(e^\varepsilon + 1) + \delta$, and subtracting $a$ gives @eq-epsc-adv.
+3. **The advantage.** $\mathrm{TPR} - \mathrm{FPR}$ is largest where the two lines of steps 1 and 2 cross, because below the crossing the first line rises faster than the diagonal (slope $e^\varepsilon \ge 1$) and above it the second line rises more slowly (slope $e^{-\varepsilon} \le 1$). Setting $e^\varepsilon \mathrm{FPR} + \delta = 1 - e^{-\varepsilon}(1 - \delta - \mathrm{FPR})$ and multiplying by $e^\varepsilon$ gives $\mathrm{FPR}(e^{2\varepsilon} - 1) = e^\varepsilon - 1 + \delta - \delta e^\varepsilon$, so $\mathrm{FPR} = (1 - \delta)/(e^\varepsilon + 1)$. There the TPR is $e^\varepsilon(1 - \delta)/(e^\varepsilon + 1) + \delta$, and subtracting $\mathrm{FPR}$ gives @eq-epsc-adv.
 
 ### Interpretation
 
@@ -130,14 +130,14 @@ The pair $(\varepsilon, \delta)$ is one number out of a whole profile: the accou
 
 ### Statement
 
-For a mechanism with PLD $\omega$ (the law of $L$ under $Q$), the best TPR at FPR $a$ is reached by thresholding the total loss (Fact 2), and equals the lower envelope of all the lines of its profile:
-$$\mathrm{TPR}^*(a) = \inf_{\varepsilon \in \mathbb R}\big(e^\varepsilon a + \delta(\varepsilon)\big), \qquad \delta(\varepsilon) = Q[L > \varepsilon] - e^\varepsilon P[L > \varepsilon].$$ {#eq-epsc-duality}
+For a mechanism with PLD $\omega$ (the law of $L$ under $Q$), the best TPR at FPR $\mathrm{FPR}$ is reached by thresholding the total loss (Fact 2), and equals the lower envelope of all the lines of its profile:
+$$\mathrm{TPR}^*(\mathrm{FPR}) = \inf_{\varepsilon \in \mathbb R}\big(e^\varepsilon \mathrm{FPR} + \delta(\varepsilon)\big), \qquad \delta(\varepsilon) = Q[L > \varepsilon] - e^\varepsilon P[L > \varepsilon].$$ {#eq-epsc-duality}
 For DP-SGD the curve is traced exactly by
 $$\big(\mathrm{FPR}(\tau), \mathrm{TPR}(\tau)\big) = \big(\mathbb E_\omega[e^{-L};\ L > \tau],\ \omega(L > \tau)\big), \qquad \tau \in \mathbb R,$$ {#eq-epsc-roc}
 where $\omega$ is the $T$-fold convolution of the one-step PLD of Fact 4. Two cheaper curves bracket or approximate it. From the RDP curve $\varepsilon(\alpha)$ of the whole run, every test satisfies
 $$\mathrm{TPR} \le \min_{\alpha > 1}\big(\mathrm{FPR}\cdot e^{\varepsilon(\alpha)}\big)^{(\alpha - 1)/\alpha},$$ {#eq-epsc-rdp}
 a valid bound. The GDP central limit theorem approximates the curve by that of $\mathcal N(0, 1)$ against $\mathcal N(\mu, 1)$,
-$$\mathrm{TPR}^*(a) \approx 1 - \Phi\big(\Phi^{-1}(1 - a) - \mu\big), \qquad \mu = q\sqrt{T\big(e^{1/\sigma^2} - 1\big)},$$ {#eq-epsc-gdp}
+$$\mathrm{TPR}^*(\mathrm{FPR}) \approx 1 - \Phi\big(\Phi^{-1}(1 - \mathrm{FPR}) - \mu\big), \qquad \mu = q\sqrt{T\big(e^{1/\sigma^2} - 1\big)},$$ {#eq-epsc-gdp}
 with $\Phi$ the standard normal distribution function; this is not a bound.
 
 ### Derivation
@@ -148,7 +148,7 @@ with $\Phi$ the standard normal distribution function; this is not a bound.
 4. **Composition adds losses.** The $T$ steps of DP-SGD use independent noise, so the likelihood ratio of all $T$ outputs is the product of the per-step ratios, and the total loss is the sum of the per-step losses. Even though each step's input depends on the earlier outputs, the worst-case pair of Fact 4 is the same at every step, so the per-step losses are independent and identically distributed under $Q$, and $\omega$ is the $T$-fold convolution of one step's PLD ([Numerical accounting](../part04-privacy-accounting/06-numerical-accounting.md)). Fact 2 then gives @eq-epsc-roc.
 5. **Computing it with a guarantee.** Round each one-step loss up to the grid $h\mathbb Z$ and compose: the total loss is rounded up by at most $Th$, and the resulting pair is less private than the true one, so its curve lies above the true curve. Rounding down gives a curve below it. The script uses $h = 2\times10^{-6}$ for the three smallest budgets and $h = 10^{-5}$ for the others, so that the total loss is pinned within 0.02 and 0.1.
 6. **The RDP bound.** The Rényi divergence can only shrink when both distributions are passed through the same test (data processing, [Rényi DP](../part04-privacy-accounting/01-renyi-dp.md)). After the test, the two distributions are coins with "member" probabilities TPR and FPR, so $e^{(\alpha - 1)\varepsilon(\alpha)} \ge \mathrm{TPR}^\alpha\mathrm{FPR}^{1 - \alpha} + (1 - \mathrm{TPR})^\alpha(1 - \mathrm{FPR})^{1 - \alpha}$. Dropping the second, non-negative term and solving for TPR gives $\mathrm{TPR}^\alpha \le e^{(\alpha - 1)\varepsilon(\alpha)}\mathrm{FPR}^{\alpha - 1}$, which is @eq-epsc-rdp after taking the power $1/\alpha$; it holds at every order, so at the best one.
-7. **The GDP approximation.** For $\mathcal N(0, 1)$ against $\mathcal N(\mu, 1)$ the best test thresholds the output at $\Phi^{-1}(1 - a)$, and the shifted distribution exceeds that threshold with probability $1 - \Phi(\Phi^{-1}(1 - a) - \mu)$. The value of $\mu$ is the central-limit approximation of [f-DP and Gaussian DP](../part04-privacy-accounting/04-gaussian-dp.md#sec-gdp-sgd), which matches the mean and variance of the summed loss to leading order in $q$.
+7. **The GDP approximation.** For $\mathcal N(0, 1)$ against $\mathcal N(\mu, 1)$ the best test thresholds the output at $\Phi^{-1}(1 - \mathrm{FPR})$, and the shifted distribution exceeds that threshold with probability $1 - \Phi(\Phi^{-1}(1 - \mathrm{FPR}) - \mu)$. The value of $\mu$ is the central-limit approximation of [f-DP and Gaussian DP](../part04-privacy-accounting/04-gaussian-dp.md#sec-gdp-sgd), which matches the mean and variance of the summed loss to leading order in $q$.
 
 ### Interpretation
 
@@ -291,9 +291,9 @@ With the pair $(\varepsilon, \delta)$ this is $e^\varepsilon\kappa + \delta$; wi
 ### Derivation
 
 1. **A reconstruction attack defines one test per candidate.** Fix $D^-$ and the attack $\mathcal A$. For a candidate $z$, let $S_z$ be the set of models $\theta$ for which $\mathcal A(\theta)$ is within $\xi$ of $z$. The attack succeeds on $z$ exactly when the model trained on $D^- \cup \{z\}$ falls in $S_z$.
-2. **Each test is bounded by the curve.** "Say member when $\theta \in S_z$" is a membership test for $z$ against the pair $Q_z = M(D^- \cup \{z\})$, $P = M(D^-)$. Its FPR is $a_z = P(S_z)$, so its TPR satisfies $Q_z(S_z) \le \mathrm{TPR}^*(a_z)$.
-3. **Average over the prior.** The success probability is $\mathbb E_{Z\sim\pi}[Q_Z(S_Z)] \le \mathbb E_Z[\mathrm{TPR}^*(a_Z)] \le \mathrm{TPR}^*(\mathbb E_Z[a_Z])$, by Jensen's inequality, since the curve is concave (Fact 2).
-4. **The average FPR is at most the baseline.** $\mathbb E_Z[a_Z] = \Pr_{Z\sim\pi,\,\theta\sim M(D^-)}[\mathrm{err}(Z, \mathcal A(\theta)) \le \xi]$. Here $\theta$ is trained without $Z$, so it is independent of $Z$, and for each fixed $\theta$ the guess $\mathcal A(\theta)$ is a fixed $z_0$, which succeeds with probability at most $\kappa$. So $\mathbb E_Z[a_Z] \le \kappa$, and since the curve is increasing, @eq-epsc-rero follows.
+2. **Each test is bounded by the curve.** "Say member when $\theta \in S_z$" is a membership test for $z$ against the pair $Q_z = M(D^- \cup \{z\})$, $P = M(D^-)$. Its FPR is $\mathrm{FPR}_z = P(S_z)$, so its TPR satisfies $Q_z(S_z) \le \mathrm{TPR}^*(\mathrm{FPR}_z)$.
+3. **Average over the prior.** The success probability is $\mathbb E_{Z\sim\pi}[Q_Z(S_Z)] \le \mathbb E_Z[\mathrm{TPR}^*(\mathrm{FPR}_Z)] \le \mathrm{TPR}^*(\mathbb E_Z[\mathrm{FPR}_Z])$, by Jensen's inequality, since the curve is concave (Fact 2).
+4. **The average FPR is at most the baseline.** $\mathbb E_Z[\mathrm{FPR}_Z] = \Pr_{Z\sim\pi,\,\theta\sim M(D^-)}[\mathrm{err}(Z, \mathcal A(\theta)) \le \xi]$. Here $\theta$ is trained without $Z$, so it is independent of $Z$, and for each fixed $\theta$ the guess $\mathcal A(\theta)$ is a fixed $z_0$, which succeeds with probability at most $\kappa$. So $\mathbb E_Z[\mathrm{FPR}_Z] \le \kappa$, and since the curve is increasing, @eq-epsc-rero follows.
 5. **The special cases.** Substitute the line of @eq-epsc-pair, or the RDP bound @eq-epsc-rdp at one order, for $\mathrm{TPR}^*$.
 
 The $(\varepsilon, \delta)$ form $e^\varepsilon\kappa + \delta$ is this chapter's corollary; Balle, Cherubin & Hayes state the pure-DP, RDP and zero-concentrated cases.
@@ -545,10 +545,10 @@ $Q$, $P$: output laws with and without the target; $L = \ln(Q/P)$ its privacy lo
 | Result | Formula | Conditions |
 | --- | --- | --- |
 | One pair | $\mathrm{TPR} \le e^\varepsilon\mathrm{FPR} + \delta$; advantage $\le \frac{e^\varepsilon - 1 + 2\delta}{e^\varepsilon + 1}$ | Any $(\varepsilon, \delta)$-DP mechanism |
-| Whole curve | $\mathrm{TPR}^*(a) = \inf_\varepsilon(e^\varepsilon a + \delta(\varepsilon))$ | Exact, from the full profile |
+| Whole curve | $\mathrm{TPR}^*(\mathrm{FPR}) = \inf_\varepsilon(e^\varepsilon \mathrm{FPR} + \delta(\varepsilon))$ | Exact, from the full profile |
 | Curve from the PLD | $(\mathbb E_\omega[e^{-L}; L > \tau], \omega(L > \tau))$ | Composition: convolve per-step PLDs |
 | From RDP | $\mathrm{TPR} \le \min_\alpha(\mathrm{FPR}\,e^{\varepsilon(\alpha)})^{(\alpha - 1)/\alpha}$ | Valid bound, cheap |
-| GDP | $\mathrm{TPR} \approx 1 - \Phi(\Phi^{-1}(1 - a) - \mu)$, $\mu = q\sqrt{T(e^{1/\sigma^2} - 1)}$ | Approximation, not a bound |
+| GDP | $\mathrm{TPR} \approx 1 - \Phi(\Phi^{-1}(1 - \mathrm{FPR}) - \mu)$, $\mu = q\sqrt{T(e^{1/\sigma^2} - 1)}$ | Approximation, not a bound |
 | Posterior | $\le pe^\varepsilon/(pe^\varepsilon + 1 - p)$; exactly $pe^L/(pe^L + 1 - p)$ | Fails with probability $\le \delta/(1 - e^{\varepsilon - \varepsilon'})$ at level $\varepsilon'$ |
 | Precision of a flag | $p\,\mathrm{TPR}/(p\,\mathrm{TPR} + (1 - p)\mathrm{FPR})$ | Base rates dominate at small $p$ |
 | Reconstruction | Success $\le \mathrm{TPR}^*(\kappa)$; pair: $e^\varepsilon\kappa + \delta$ | Informed adversary, prior baseline $\kappa$ |

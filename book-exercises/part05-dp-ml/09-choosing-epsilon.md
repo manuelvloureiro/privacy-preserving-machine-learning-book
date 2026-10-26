@@ -35,8 +35,8 @@ The solutions use the chapter's notation. A mechanism satisfies differential pri
 > **Exercise 3.** **When can a flag be trusted?** An attacker with prior $p = 0.01$ wants a test whose flags are right at least half the time. Using @eq-epsc-precision, find the largest FPR at which the pair $(\varepsilon, 10^{-5})$ allows a precision of 1/2, for $\varepsilon = 1$, 4 and 8. *Check: $1.04\times10^{-7}$, $2.25\times10^{-7}$, and every FPR at $\varepsilon = 8$.* *(Base rates)*
 
 ::: {.callout-tip collapse="true" title="Solution"}
-1. **The condition.** Precision at least 1/2 means $p(e^\varepsilon a + \delta) \ge (1 - p)a$, with $a$ the FPR: the flagged members at least as many as the flagged non-members.
-2. **Solve for $a$.** $a\big((1 - p) - pe^\varepsilon\big) \le p\delta$. If $(1 - p) > pe^\varepsilon$, this is $a \le p\delta/\big((1 - p) - pe^\varepsilon\big)$. If not, every $a$ works.
+1. **The condition.** Precision at least 1/2 means $p(e^\varepsilon \mathrm{FPR} + \delta) \ge (1 - p)\mathrm{FPR}$, with $\mathrm{FPR}$ the false positive rate: the flagged members at least as many as the flagged non-members.
+2. **Solve for $\mathrm{FPR}$.** $\mathrm{FPR}\big((1 - p) - pe^\varepsilon\big) \le p\delta$. If $(1 - p) > pe^\varepsilon$, this is $\mathrm{FPR} \le p\delta/\big((1 - p) - pe^\varepsilon\big)$. If not, every $\mathrm{FPR}$ works.
 3. **Numbers.** At $\varepsilon = 1$: $0.01 \times 10^{-5}/(0.99 - 0.0272) = 1.04\times10^{-7}$. At $\varepsilon = 4$: $10^{-7}/(0.99 - 0.546) = 2.25\times10^{-7}$. At $\varepsilon = 8$: $0.01e^8 = 29.8 > 0.99$, so the pair allows even odds at every FPR.
 4. **Reading it.** For $\varepsilon \le 4$, the only way the pair allows a trustworthy flag at this prior is through $\delta$, at FPRs around $10^{-7}$, where at most a fraction $\delta$ of members can be flagged.
 

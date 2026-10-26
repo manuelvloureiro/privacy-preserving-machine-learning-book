@@ -4,7 +4,7 @@ Queries often arrive one at a time, and each must be answered before the next is
 
 ## Answering queries online {#sec-svt-online}
 
-The setting is a stream of queries $f_1, f_2, \dots, f_k \colon \mathcal X^n \to \mathbb R$, each with sensitivity at most $1$. Here two datasets $D$ and $D'$ are neighbours, written $D \simeq D'$, when they differ in one record, which is the replace-one relation. Sensitivity at most $1$ means that $|f_i(D) - f_i(D')| \le 1$ for every such pair. Counting queries, which count the records with some property, are the typical example. Query $f_i$ arrives at step $i$ and must be answered before $f_{i+1}$ is revealed.
+The setting is a stream of queries $f_1, f_2, \dots, f_k \colon \mathcal X^n \to \mathbb R$, each with sensitivity at most $1$. Here two datasets $D$ and $D'$ are neighbours, written $D \sim D'$, when they differ in one record, which is the replace-one relation. Sensitivity at most $1$ means that $|f_i(D) - f_i(D')| \le 1$ for every such pair. Counting queries, which count the records with some property, are the typical example. Query $f_i$ arrives at step $i$ and must be answered before $f_{i+1}$ is revealed.
 
 The [Laplace mechanism](../part02-dp-basics/02-laplace-mechanism.md) answers each query with noise from the Laplace distribution $\mathrm{Lap}(b)$ of scale $b$, whose density at $z$ is $e^{-|z|/b}/(2b)$. For a sensitivity-$1$ query it is $\varepsilon$-DP when $b = 1/\varepsilon$. Its tails are $\Pr[|\mathrm{Lap}(b)| \ge tb] = e^{-t}$. Under pure DP with a total budget $\varepsilon$, basic composition forces the scale $k/\varepsilon$ on each of $k$ answers, so the error is of order $k/\varepsilon$. Under approximate DP, the [advanced composition theorem](../part02-dp-basics/04-advanced-composition.md) brings this down to order $\sqrt{k\ln(1/\delta)}/\varepsilon$. Both are polynomial in $k$, and in the worst case no algorithm that answers every query can do much better.
 
@@ -36,7 +36,7 @@ AboveThreshold is $\varepsilon$-DP.
 :::
 
 ::: {.proof}
-1. Fix neighbours $D \simeq D'$ and a stream, and write $Y$ and $Y'$ for the outputs on $D$ and $D'$. The outputs are $y = \bot^{t-1}\top$, which halts at query $t$, and the output that never halts: $\bot^k$ for a stream of finite length $k$, or $\bot^\infty$ for an infinite one. These form a countable set, so by the [pointwise lemma for discrete outputs](../part02-dp-basics/01-randomized-response.md) it suffices to show $\Pr[Y = y] \le e^\varepsilon\Pr[Y' = y]$ for each of them.
+1. Fix neighbours $D \sim D'$ and a stream, and write $Y$ and $Y'$ for the outputs on $D$ and $D'$. The outputs are $y = \bot^{t-1}\top$, which halts at query $t$, and the output that never halts: $\bot^k$ for a stream of finite length $k$, or $\bot^\infty$ for an infinite one. These form a countable set, so by the [pointwise lemma for discrete outputs](../part02-dp-basics/01-randomized-response.md) it suffices to show $\Pr[Y = y] \le e^\varepsilon\Pr[Y' = y]$ for each of them.
 2. *Fix the noise of the first $t-1$ queries.* Condition on $\nu_i = v_i$ for $i < t$, the same values on both datasets, and let
 
 $$

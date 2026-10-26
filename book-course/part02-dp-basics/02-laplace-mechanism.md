@@ -6,13 +6,13 @@ The second half of the chapter proves three properties of differential privacy (
 
 ## Sensitivity {#sec-lap-sensitivity}
 
-Differential privacy asks that the output hide the contribution of any one person. So the noise must be at least as large as the change that one person can cause in the answer, and the sensitivity measures the largest such change. Recall from [the randomized response chapter](01-randomized-response.md) that two datasets are neighbours, written $D \simeq D'$, when they differ in exactly one record. This is the replace-one relation.
+Differential privacy asks that the output hide the contribution of any one person. So the noise must be at least as large as the change that one person can cause in the answer, and the sensitivity measures the largest such change. Recall from [the randomized response chapter](01-randomized-response.md) that two datasets are neighbours, written $D \sim D'$, when they differ in exactly one record. This is the replace-one relation.
 
 ::: {#def-lap-sensitivity name="ℓ1 sensitivity"}
-Let $f\colon\mathcal X^n \to \mathbb R^k$ map a dataset of $n$ records to a vector of $d$ numbers. The **$\ell_1$ sensitivity** of $f$ is the largest change in $f$, measured by the sum of the absolute changes of its coordinates, between neighbours $D \simeq D'$:
+Let $f\colon\mathcal X^n \to \mathbb R^k$ map a dataset of $n$ records to a vector of $d$ numbers. The **$\ell_1$ sensitivity** of $f$ is the largest change in $f$, measured by the sum of the absolute changes of its coordinates, between neighbours $D \sim D'$:
 
 $$
-\Delta_1 f = \sup_{D \simeq D'}\|f(D) - f(D')\|_1 ,
+\Delta_1 f = \sup_{D \sim D'}\|f(D) - f(D')\|_1 ,
 $$
 
 where $\|v\|_1 = \sum_{j=1}^d|v_j|$ for a vector $v \in \mathbb R^d$.
@@ -87,7 +87,7 @@ For every $f\colon\mathcal X^n\to\mathbb R^d$ with $0 < \Delta_1 f < \infty$ and
 :::
 
 ::: {.proof}
-1. Fix neighbours $D \simeq D'$, and write $p$ and $q$ for the densities of $M(D)$ and $M(D')$ on $\mathbb R^d$. In this proof $p$ is a density, not the fraction of ones. Let $b = \Delta_1 f/\varepsilon$. The coordinates are independent, so at a point $y \in \mathbb R^d$,
+1. Fix neighbours $D \sim D'$, and write $p$ and $q$ for the densities of $M(D)$ and $M(D')$ on $\mathbb R^d$. In this proof $p$ is a density, not the fraction of ones. Let $b = \Delta_1 f/\varepsilon$. The coordinates are independent, so at a point $y \in \mathbb R^d$,
 
 $$
 \frac{p(y)}{q(y)} = \prod_{j=1}^d \frac{\exp(-|f(D)_j - y_j|/b)}{\exp(-|f(D')_j - y_j|/b)} = \exp\!\left(\frac{\varepsilon}{\Delta_1 f}\sum_{j=1}^d\big(|f(D')_j - y_j| - |f(D)_j - y_j|\big)\right).
@@ -160,7 +160,7 @@ Let $M\colon\mathcal X^n\to\mathcal Y$ be $\varepsilon$-DP, and let $F\colon\mat
 
 ::: {.proof}
 1. A randomized map is a random choice of a deterministic one. Write $F(y) = g_R(y)$, where $R$ is the coins of $F$ and each $g_r\colon\mathcal Y\to\mathcal Z$ is deterministic.
-2. Fix neighbours $D \simeq D'$ and an event $S\subseteq\mathcal Z$. For fixed coins, $g_R(M(D))\in S$ exactly when $M(D) \in g_R^{-1}(S)$, so
+2. Fix neighbours $D \sim D'$ and an event $S\subseteq\mathcal Z$. For fixed coins, $g_R(M(D))\in S$ exactly when $M(D) \in g_R^{-1}(S)$, so
 
 $$
 \Pr[F(M(D))\in S] = \mathbb E_R\Big[\Pr\big[M(D)\in g_R^{-1}(S)\big]\Big].
@@ -209,7 +209,7 @@ The proof is simplest for countable outputs, where the probability of a sequence
 ::: {.proof}
 *Countable outputs.*
 
-1. Fix neighbours $D \simeq D'$ and outputs $y = (y_1,\dots,y_k)$. Each $M_i$ uses fresh coins, so the chain rule gives $\Pr[M(D) = y] = \prod_{i=1}^k\Pr[M_i(D; y_{<i}) = y_i]$, and likewise for $D'$.
+1. Fix neighbours $D \sim D'$ and outputs $y = (y_1,\dots,y_k)$. Each $M_i$ uses fresh coins, so the chain rule gives $\Pr[M(D) = y] = \prod_{i=1}^k\Pr[M_i(D; y_{<i}) = y_i]$, and likewise for $D'$.
 2. Each factor for $D$ is at most $e^{\varepsilon_i}$ times the matching factor for $D'$, by the privacy of $M_i(\cdot\,; y_{<i})$ applied to the event $\{y_i\}$. Multiplying the $k$ bounds gives
 
 $$
@@ -229,7 +229,7 @@ $$
 *General outputs.*
 
 1. The composition of the first $k-1$ mechanisms is itself a mechanism, so by induction on $k$ it suffices to treat $k = 2$.
-2. Fix neighbours $D \simeq D'$ and an event $S$ of pairs. For an output $y_1$, write $S_{y_1} = \{y_2 : (y_1,y_2)\in S\}$ and $g_D(y_1) = \Pr[M_2(D; y_1)\in S_{y_1}]$, and define $g_{D'}$ in the same way. Conditioning on the first output gives $\Pr[M(D)\in S] = \mathbb E_{y_1\sim M_1(D)}[g_D(y_1)]$, and likewise for $D'$.
+2. Fix neighbours $D \sim D'$ and an event $S$ of pairs. For an output $y_1$, write $S_{y_1} = \{y_2 : (y_1,y_2)\in S\}$ and $g_D(y_1) = \Pr[M_2(D; y_1)\in S_{y_1}]$, and define $g_{D'}$ in the same way. Conditioning on the first output gives $\Pr[M(D)\in S] = \mathbb E_{y_1\sim M_1(D)}[g_D(y_1)]$, and likewise for $D'$.
 3. By the privacy of $M_2(\cdot\,; y_1)$, $g_D(y_1) \le e^{\varepsilon_2}g_{D'}(y_1)$ for every $y_1$.
 4. The function $g_{D'}$ takes values in $[0,1]$, so the fact above, applied to $M_1$, gives
 

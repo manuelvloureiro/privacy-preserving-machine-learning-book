@@ -89,13 +89,13 @@ use = 'f\colon \mathcal X^n \to \mathbb R^d'
 
 [[rule]]
 in = "math"
-find = "(?<![\\w])([DXSx])\\s*\\\\sim\\s*\\1'"
-use = "D \\simeq D'"
+find = "(?<![\\w])([DXSx])\\s*\\\\simeq\\s*\\1'|(?<![\\w])([XSx])\\s*\\\\sim\\s*\\2'"
+use = "D \\sim D'"
 
 [[rule]]
 in = "math"
-find = "(?<![\\w\\\\])M\\(X'?\\)|(?<![\\w])X\\s*\\\\simeq\\s*X'"
-use = "M(D), D \\simeq D': the dataset is D, never X"
+find = "(?<![\\w\\\\])M\\(X'?\\)|(?<![\\w])X\\s*\\\\sim\\s*X'"
+use = "M(D), D \\sim D': the dataset is D, never X"
 
 [[rule]]
 in = "page"
@@ -145,6 +145,16 @@ find = '\\varepsilon_\{?\\alpha'
 use = '\varepsilon(\alpha)'
 
 # --- Concepts written with another symbol ---------------------------------------------------
+
+[[rule]]
+in = "page"
+find = 'type I{1,2} errors? (?:is |of |at most |at )?\$[ab]\$|errors? \$\(a,\s*b\)\$|false[ -](?:positive|negative) rate \$[ab]\$|FPR (?:of )?\$a\$'
+use = 'the type I and type II errors \alpha and \beta (\mathrm{FPR} and \mathrm{FNR} where \alpha or \beta means something else)'
+
+[[rule]]
+in = "math"
+find = '(?<![\\\w])[ab]_\{?\\phi|T\(P,\s*Q\)\(a\)|G_\{?\\mu\}?\(a\)'
+use = 'the type I and type II errors \alpha and \beta (\mathrm{FPR} and \mathrm{FNR} where \alpha or \beta means something else)'
 
 [[rule]]
 in = "page"
@@ -273,8 +283,20 @@ fix = 'write the Lipschitz constant G'
 [[conflict]]
 symbol = 'b'
 first = '\\mathrm\{Lap\}\(b\)|scale \$b\$'
-second = "(?:hidden )?bit \\$b\\$|\\$b' = b\\$|type II error \\$b\\$"
-fix = 'write the Laplace scale out as \Delta f/\varepsilon, or name it s'
+second = "(?:hidden )?bit \\$b\\$|\\$b' = b\\$"
+fix = 'write the Laplace scale out as \Delta f/\varepsilon'
+
+[[conflict]]
+symbol = 'alpha'
+first = 'D_\\alpha|\\varepsilon\(\\alpha\)|\(\\alpha,\s*\\varepsilon\)-RDP|R[ée]nyi order|\(\\alpha,\s*\\beta\)-accura'
+second = 'type I errors? (?:is |of |at most |at )?\$\\alpha\b|\\alpha_\{?\\phi|T\(P,\s*Q\)\(\\alpha\)|G_\{?\\mu\}?\(\\alpha\)'
+fix = 'keep alpha for the Rényi order or the error bound, and write the errors of a test FPR and FNR'
+
+[[conflict]]
+symbol = 'beta'
+first = 'probability (?:at least )?\$1\s*-\s*\\beta|failure probability \$\\beta|\\beta\$?-smooth'
+second = 'type II errors? (?:is |of |at most |at )?\$\\beta\b|\\beta_\{?\\phi'
+fix = 'keep beta for the failure probability or the smoothness constant, and write the errors of a test FPR and FNR'
 
 [[conflict]]
 symbol = 'q'

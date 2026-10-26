@@ -55,7 +55,7 @@ You add Gaussian noise to a gradient, a count or a mean, again and again, and yo
 
 ### Statement
 
-A mechanism $M$ is **$\rho$-zero-concentrated differentially private** ($\rho$-zCDP) if its RDP curve lies below the line of slope $\rho$: for all neighbouring $D \simeq D'$ and all orders $\alpha > 1$,
+A mechanism $M$ is **$\rho$-zero-concentrated differentially private** ($\rho$-zCDP) if its RDP curve lies below the line of slope $\rho$: for all neighbouring $D \sim D'$ and all orders $\alpha > 1$,
 $$D_\alpha\big(M(D)\,\|\,M(D')\big) \le \rho\alpha.$$ {#eq-cdp-def}
 Multiplying both sides by $\alpha - 1$ and using Fact 1 turns this into a statement about the privacy loss random variable $L$: its MGF at every point $\alpha - 1 > 0$ is bounded,
 $$\ln\mathbb E\big[e^{(\alpha - 1)L}\big] \le (\alpha - 1)\alpha\rho \quad\text{for all } \alpha > 1.$$ {#eq-cdp-mgf}
@@ -263,7 +263,7 @@ $$\mathbb E_R\big[(P/R)^\alpha(R/Q)^{\alpha-1}\big] \le \big(\mathbb E_R[(P/R)^{
 **Group privacy, by induction on $m$.** Now walk along the chain one record at a time, using the triangle-like inequality to add one step to a group of $m - 1$.
 
 5. **Base case.** $m = 1$ is the definition.
-6. **Step.** Let $D \simeq_{m-1} \hat D \simeq D'$: $\hat D$ is $m - 1$ steps from $D$ and one step from $D'$. Apply @eq-cdp-triangle with $P = M(D)$, $R = M(\hat D)$, $Q = M(D')$. The first term involves the group of $m - 1$, so by the induction hypothesis at order $\beta = \frac{m\alpha - 1}{m - 1}$ it is at most $\frac{m\alpha}{m\alpha - 1}(m-1)^2\rho\frac{m\alpha - 1}{m - 1} = m(m - 1)\rho\alpha$; the factor $\frac{m\alpha - 1}{m - 1}$ from the order cancels the coefficient's denominator. The second term is a single neighbouring step, so by $\rho$-zCDP at order $m\alpha$ it is at most $m\rho\alpha$. The sum is $(m^2 - m + m)\rho\alpha = m^2\rho\alpha$, which is @eq-cdp-group.
+6. **Step.** Let $D \sim_{m-1} \hat D \sim D'$: $\hat D$ is $m - 1$ steps from $D$ and one step from $D'$. Apply @eq-cdp-triangle with $P = M(D)$, $R = M(\hat D)$, $Q = M(D')$. The first term involves the group of $m - 1$, so by the induction hypothesis at order $\beta = \frac{m\alpha - 1}{m - 1}$ it is at most $\frac{m\alpha}{m\alpha - 1}(m-1)^2\rho\frac{m\alpha - 1}{m - 1} = m(m - 1)\rho\alpha$; the factor $\frac{m\alpha - 1}{m - 1}$ from the order cancels the coefficient's denominator. The second term is a single neighbouring step, so by $\rho$-zCDP at order $m\alpha$ it is at most $m\rho\alpha$. The sum is $(m^2 - m + m)\rho\alpha = m^2\rho\alpha$, which is @eq-cdp-group.
 7. **Tightness.** For the Gaussian mechanism a group of $m$ shifts the mean by $m\Delta$, and the Gaussian Rényi divergence $\alpha s^2/(2\sigma^2)$ with $s = m\Delta$ (@eq-gauss-renyi) gives exactly $\alpha m^2\Delta^2/(2\sigma^2) = m^2\rho\alpha$. Along the chain $\mathcal N(0, 1)$, $\mathcal N(1, 1)$, $\mathcal N(2, 1)$, @eq-cdp-triangle holds with equality: at $\alpha = 3$, $m = 2$, the left side is $D_3$ for a shift of 2, $3 \cdot 4/2 = 6$; on the right, the first leg has order $(6 - 1)/1 = 5$ and coefficient $6/5$, giving $\frac65 \cdot \frac52 = 3$, and the second leg has order 6, giving $6/2 = 3$. Both sides are $6$.
 
 ### Interpretation
@@ -300,7 +300,7 @@ Some useful mechanisms are $(\varepsilon, \delta)$-DP but not zCDP at all. Propo
 
 ### Statement
 
-$M$ is **$\delta$-approximately $\rho$-zCDP** if, after throwing away a bad event of probability at most $\delta$ in each world, the rest is $\rho$-zCDP. Precisely: for all neighbours $D \simeq D'$ there are events $E$ (for $M(D)$) and $E'$ (for $M(D')$), each of probability at least $1 - \delta$, such that for every $\alpha > 1$
+$M$ is **$\delta$-approximately $\rho$-zCDP** if, after throwing away a bad event of probability at most $\delta$ in each world, the rest is $\rho$-zCDP. Precisely: for all neighbours $D \sim D'$ there are events $E$ (for $M(D)$) and $E'$ (for $M(D')$), each of probability at least $1 - \delta$, such that for every $\alpha > 1$
 $$D_\alpha\big(M(D)|_E\,\|\,M(D')|_{E'}\big) \le \rho\alpha \quad\text{and}\quad D_\alpha\big(M(D')|_{E'}\,\|\,M(D)|_E\big) \le \rho\alpha,$$
 where $M(D)|_E$ is the output distribution conditioned on $E$ (Bun & Steinke 2016, Definition 1.12). The events may depend on the mechanism's internal randomness, not only on its output. With $\delta = 0$ the events are certain and this is $\rho$-zCDP.
 

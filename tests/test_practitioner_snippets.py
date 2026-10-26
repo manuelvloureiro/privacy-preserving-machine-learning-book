@@ -45,7 +45,12 @@ def test_snippet_prints_its_comments(name: str, code: str) -> None:
     expected = [m.group(1) for line in code.splitlines() if (m := EXPECTED.match(line))]
     assert expected, f"{name}: no print line with an expected-output comment"
     result = subprocess.run(
-        [sys.executable, "-I", "-W", "ignore", "-c", code], capture_output=True, text=True, cwd=ROOT, timeout=120
+        [sys.executable, "-I", "-W", "ignore", "-c", code],
+        check=False,
+        capture_output=True,
+        text=True,
+        cwd=ROOT,
+        timeout=120,
     )
     assert result.returncode == 0, f"{name}:\n{result.stderr}"
     assert result.stdout.splitlines() == expected, name

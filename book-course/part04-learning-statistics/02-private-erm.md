@@ -63,7 +63,7 @@ Let $d = 1$, $\ell(\theta; x) = |\theta - x|$, records in $[-R, R]$ with $R > 0$
 
 ::: {.proof}
 1. Away from the records, the function $\theta \mapsto \sum_i |\theta - x_i|$ has slope equal to the number of records below $\theta$ minus the number above. For $\theta < x_{(m)}$ at least $m$ records lie above, so the slope is at most $(m-1) - m = -1$. For $\theta > x_{(m)}$ the slope is at least $1$ in the same way. The function is continuous, so $x_{(m)}$ is its unique minimizer.
-2. On the dataset with every record equal to $-R$ the output is $-R$, and on the dataset with every record equal to $R$ it is $R$. A path of $n$ replacements joins the two datasets, so some neighbours $D \simeq D'$ have different outputs $v \ne v'$.
+2. On the dataset with every record equal to $-R$ the output is $-R$, and on the dataset with every record equal to $R$ it is $R$. A path of $n$ replacements joins the two datasets, so some neighbours $D \sim D'$ have different outputs $v \ne v'$.
 3. The algorithm is deterministic. For the event $S = \{v\}$ this gives $\Pr[M(D) \in S] = 1$ and $\Pr[M(D') \in S] = 0$, and $1 \le e^\varepsilon \cdot 0 + \delta$ fails for every $\delta < 1$.
 :::
 
@@ -115,7 +115,7 @@ In particular, the minimizer is unique.
 This growth is what keeps the regularized minimizer stable. When one record changes, the two regularized objectives differ by a Lipschitz function. Each objective grows quadratically around its own minimizer, so the two minimizers cannot be far apart.
 
 ::: {#thm-erm-sensitivity name="Sensitivity of the regularized minimizer"}
-Let $\Theta$ be nonempty, closed, convex and bounded. Suppose that for every record $z$ the loss $\ell(\cdot\,; z)$ is convex and $L$-Lipschitz on $\Theta$, and that $N$ is continuous and $1$-strongly convex. For each dataset $D$, let $\theta_D$ be the minimizer of $F_D = \mathcal L(\cdot\,; D) + \lambda N$ over $\Theta$. Then for all neighbours $D \simeq D'$, which differ in one replaced record,
+Let $\Theta$ be nonempty, closed, convex and bounded. Suppose that for every record $z$ the loss $\ell(\cdot\,; z)$ is convex and $L$-Lipschitz on $\Theta$, and that $N$ is continuous and $1$-strongly convex. For each dataset $D$, let $\theta_D$ be the minimizer of $F_D = \mathcal L(\cdot\,; D) + \lambda N$ over $\Theta$. Then for all neighbours $D \sim D'$, which differ in one replaced record,
 
 $$
 \|\theta_D - \theta_{D'}\|_2 \le \frac{2L}{\lambda}.

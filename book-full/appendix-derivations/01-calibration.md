@@ -87,7 +87,7 @@ Noise has to hide the effect of any one person. So before choosing the noise you
 ### The answer
 
 Let $f$ be the query, a function that takes a dataset and returns $d$ numbers. The **sensitivity** of $f$ is the largest change that one person can cause, over all pairs of neighbours. Because the answer is a list of numbers, the change $v = f(D) - f(D')$ is a list too, and its size can be measured in two ways. The **$\ell_1$ norm** $\|v\|_1 = |v_1| + \dots + |v_d|$ adds up the absolute changes, and Laplace noise is calibrated to it. The **$\ell_2$ norm** $\|v\|_2 = \sqrt{v_1^2 + \dots + v_d^2}$ is the straight-line length of the change, and Gaussian noise is calibrated to it. So there are two sensitivities, one for each norm:
-$$\Delta_1 = \max_{D \simeq D'}\|f(D) - f(D')\|_1, \qquad \Delta_2 = \max_{D \simeq D'}\|f(D) - f(D')\|_2.$$
+$$\Delta_1 = \max_{D \sim D'}\|f(D) - f(D')\|_1, \qquad \Delta_2 = \max_{D \sim D'}\|f(D) - f(D')\|_2.$$
 @tbl-apx-cal-sens gives them for the standard queries. Values are **clipped** to a range $[0, C]$: any value above $C$ is replaced by $C$ before the query runs, so no record can contribute more than $C$.
 
 | Query | Add/remove $\Delta_1$ | Add/remove $\Delta_2$ | Replace-one $\Delta_1$ | Replace-one $\Delta_2$ |

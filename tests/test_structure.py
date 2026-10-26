@@ -21,7 +21,7 @@ The question this chapter answers, the one idea, and the running example: a coun
 The noise must hide what one record can change, so the first step is to measure that change.
 
 ::: {#def-lg-sensitivity name="Sensitivity"}
-The sensitivity is the largest change over neighbours, $\\Delta_1 f = \\max_{D \\simeq D'} \\|f(D) - f(D')\\|_1$.
+The sensitivity is the largest change over neighbours, $\\Delta_1 f = \\max_{D \\sim D'} \\|f(D) - f(D')\\|_1$.
 :::
 
 ::: {#thm-lg-laplace name="Laplace mechanism"}

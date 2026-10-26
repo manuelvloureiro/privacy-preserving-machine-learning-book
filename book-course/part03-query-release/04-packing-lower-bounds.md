@@ -30,7 +30,7 @@ where $\mathbf 1[x_i = j]$ is $1$ if record $i$ equals $j$ and $0$ otherwise.
 
 For both problems, an answer $y$ is judged by its worst coordinate, the $\ell_\infty$ error $\max_j |y_j - f_j(D)|$. So an answer with error at most $\alpha$ gets every query right to within $\alpha$ at once.
 
-The upper bounds come from the [Laplace mechanism](../part02-dp-basics/02-laplace-mechanism.md). Suppose the vector of answers $f$ has $\ell_1$ sensitivity at most $\Delta_1 f$, which means that $\sum_j |f_j(D) - f_j(D')| \le \Delta_1 f$ for all neighbours $D \simeq D'$, datasets that differ in one record (the replace-one relation). The Laplace mechanism releases $f(D) + (Z_1, \dots, Z_d)$, where the noise terms $Z_j$ are independent Laplace variables with scale $\Delta_1 f/\varepsilon$, and it is $\varepsilon$-DP. The analysis needs only the tail of a Laplace variable $Z$ with scale $b$, which for every $s \ge 0$ is
+The upper bounds come from the [Laplace mechanism](../part02-dp-basics/02-laplace-mechanism.md). Suppose the vector of answers $f$ has $\ell_1$ sensitivity at most $\Delta_1 f$, which means that $\sum_j |f_j(D) - f_j(D')| \le \Delta_1 f$ for all neighbours $D \sim D'$, datasets that differ in one record (the replace-one relation). The Laplace mechanism releases $f(D) + (Z_1, \dots, Z_d)$, where the noise terms $Z_j$ are independent Laplace variables with scale $\Delta_1 f/\varepsilon$, and it is $\varepsilon$-DP. The analysis needs only the tail of a Laplace variable $Z$ with scale $b$, which for every $s \ge 0$ is
 
 $$
 \Pr[|Z| \ge s] = e^{-s/b} .

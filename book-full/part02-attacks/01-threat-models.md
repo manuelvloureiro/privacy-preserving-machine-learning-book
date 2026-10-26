@@ -256,7 +256,7 @@ A two-world game is a test of $H_0: V \sim P$ ("not a member") against $H_1: V \
 
 ### Statement
 
-Fact 3 already showed that no attack's advantage exceeds the total variation distance between the two worlds' views. The first bound restates that. The second goes further: it bounds the attack's TPR at *every* false positive rate, not just at the one point where TPR − FPR is largest. The bound comes from the **trade-off function** $T(P, Q)$: for each false positive rate $a$, $T(P, Q)(a)$ is the smallest fraction of members that any attack with false positive rate $a$ must miss. An attack can catch at most the rest. For every attack in a two-world game,
+Fact 3 already showed that no attack's advantage exceeds the total variation distance between the two worlds' views. The first bound restates that. The second goes further: it bounds the attack's TPR at *every* false positive rate, not just at the one point where TPR − FPR is largest. The bound comes from the **trade-off function** $T(P, Q)$: for each false positive rate $\alpha$, $T(P, Q)(\alpha)$ is the smallest fraction of members that any attack with false positive rate $\alpha$ must miss. An attack can catch at most the rest. For every attack in a two-world game,
 
 $$\mathrm{Adv} = \mathrm{TPR} - \mathrm{FPR} \le \mathrm{TV}(P, Q), \qquad \Pr[b' = b] \le \tfrac12 + \tfrac12\mathrm{TV}(P, Q),$$ {#eq-threat-tv}
 

@@ -29,7 +29,7 @@ The messages $(Y_1,\dots,Y_n)$ of a noninteractive $\varepsilon$-local protocol,
 :::
 
 ::: {.proof}
-1. Let $D \simeq D'$ be neighbours, which differ by replacing entry $j$, and take an event $S$. Write $y_{-j}$ for a value of all the messages except the $j$-th, and $S_{y_{-j}} = \{y_j : (y_j, y_{-j}) \in S\}$ for the slice of $S$ through it.
+1. Let $D \sim D'$ be neighbours, which differ by replacing entry $j$, and take an event $S$. Write $y_{-j}$ for a value of all the messages except the $j$-th, and $S_{y_{-j}} = \{y_j : (y_j, y_{-j}) \in S\}$ for the slice of $S$ through it.
 2. The other messages have the same distribution under $D$ and $D'$, because they depend only on the other records and on independent randomness. Conditioning on them gives
 
 $$

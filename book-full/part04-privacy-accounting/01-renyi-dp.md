@@ -31,7 +31,7 @@ For the 1000 Gaussian steps, adding curves and converting once gives $\varepsilo
 
 **What you need.** The Rényi divergence, its limits, its monotonicity in $\alpha$ and the data-processing inequality are in [Divergences](../part01-prerequisites/03-divergences.md) (@sec-div-renyi, @sec-div-dpi). The Chernoff method is in [Concentration](../part01-prerequisites/02-concentration.md). From Part 3 you need the definition of DP ([Definition](../part03-dp-foundations/01-definition.md)), the Laplace and Gaussian mechanisms ([Laplace and Gaussian mechanisms](../part03-dp-foundations/03-laplace-gaussian.md)), randomized response ([Definition](../part03-dp-foundations/01-definition.md), @sec-dpdef-rr) and the privacy loss random variable ([Composition](../part03-dp-foundations/04-composition.md)). The Toolkit restates the facts this chapter uses, and each mechanism is restated where it first appears.
 
-**Notation.** $M$ is a mechanism and $D \simeq D'$ are neighbouring datasets. $P = M(D)$ and $Q = M(D')$ are the output distributions, with densities (or probability mass functions) $p$ and $q$. The **privacy loss** at output $y$ is $L(y) = \ln\frac{p(y)}{q(y)}$, the log of how much more likely $y$ is under $D$ than under $D'$: positive when $y$ points to $D$, negative when it points to $D'$. The **privacy loss random variable** is $L(Y)$ with $Y \sim P$, the loss of an output actually drawn from the mechanism on $D$. The Gaussian mechanism adds $\mathcal N(0, \sigma^2\Delta_2^2)$ noise to a query $f$ of $\ell_2$-sensitivity $\Delta_2 f$ (the largest Euclidean distance between the query's answers on neighbours), so $\sigma$ is the noise multiplier. Logarithms are natural. Whenever this part optimizes over the order, it uses the same grid of orders: 99 orders from 1.1 to 10.9 in steps of 0.1, the 52 integers from 12 to 63, and 128, 256 and 512, which is $99 + 52 + 3 = 154$ orders from 1.1 to 512:
+**Notation.** $M$ is a mechanism and $D \sim D'$ are neighbouring datasets. $P = M(D)$ and $Q = M(D')$ are the output distributions, with densities (or probability mass functions) $p$ and $q$. The **privacy loss** at output $y$ is $L(y) = \ln\frac{p(y)}{q(y)}$, the log of how much more likely $y$ is under $D$ than under $D'$: positive when $y$ points to $D$, negative when it points to $D'$. The **privacy loss random variable** is $L(Y)$ with $Y \sim P$, the loss of an output actually drawn from the mechanism on $D$. The Gaussian mechanism adds $\mathcal N(0, \sigma^2\Delta_2^2)$ noise to a query $f$ of $\ell_2$-sensitivity $\Delta_2 f$ (the largest Euclidean distance between the query's answers on neighbours), so $\sigma$ is the noise multiplier. Logarithms are natural. Whenever this part optimizes over the order, it uses the same grid of orders: 99 orders from 1.1 to 10.9 in steps of 0.1, the 52 integers from 12 to 63, and 128, 256 and 512, which is $99 + 52 + 3 = 154$ orders from 1.1 to 512:
 ```text
 ORDERS = [1 + x / 10 for x in range(1, 100)] + list(range(12, 64)) + [128, 256, 512]
 ```
@@ -72,10 +72,10 @@ $\varepsilon$-DP bounds the privacy loss $L(y)$ at *every* output. That is a sta
 
 ### Statement
 
-The definition asks for the same bound on the Rényi divergence for every pair of neighbours. A mechanism $M$ is **$(\alpha, \varepsilon)$-RDP**, for an order $\alpha > 1$, if for all neighbouring datasets $D \simeq D'$
+The definition asks for the same bound on the Rényi divergence for every pair of neighbours. A mechanism $M$ is **$(\alpha, \varepsilon)$-RDP**, for an order $\alpha > 1$, if for all neighbouring datasets $D \sim D'$
 $$D_\alpha\big(M(D)\,\|\,M(D')\big) \le \varepsilon.$$
 The **RDP curve** of $M$ records, at each order, the smallest $\varepsilon$ that works, which is the divergence of the worst pair of neighbours:
-$$\varepsilon_M(\alpha) = \sup_{D \simeq D'} D_\alpha\big(M(D)\,\|\,M(D')\big).$$
+$$\varepsilon_M(\alpha) = \sup_{D \sim D'} D_\alpha\big(M(D)\,\|\,M(D')\big).$$
 The curve has three properties, which tie its two ends to familiar quantities.
 
 1. **$\alpha = \infty$ is pure DP.** $M$ is $\varepsilon$-DP if and only if $\varepsilon_M(\infty) \le \varepsilon$.
@@ -86,7 +86,7 @@ The curve has three properties, which tie its two ends to familiar quantities.
 
 1. **Pure DP is the max-divergence.** $\varepsilon$-DP says $P(S) \le e^\varepsilon Q(S)$ for every event $S$, that is, $\ln\frac{P(S)}{Q(S)} \le \varepsilon$. The largest value of that log ratio over events equals the largest privacy loss of a single output, which is the event form of the max-divergence (@sec-div-renyi). The reason: $\frac{P(S)}{Q(S)} = \frac{\int_S q\,r}{\int_S q}$ is an average of the likelihood ratio $r$ over the outputs in $S$, weighted by $q$, so it can never exceed the largest $r$, and an event concentrated on the outputs where $r$ is largest comes as close to it as you like. So $\sup_S \ln\frac{P(S)}{Q(S)} = D_\infty(P\|Q)$, and $\varepsilon$-DP holds exactly when $D_\infty(M(D)\|M(D')) \le \varepsilon$ for all neighbours, that is, when $\varepsilon_M(\infty) \le \varepsilon$.
 2. **Monotonicity passes through the supremum.** For each pair, $D_\alpha$ is non-decreasing in $\alpha$ (Fact 2). A supremum of non-decreasing functions is non-decreasing, because if every function in the family is larger at $\alpha'$ than at $\alpha$, so is the largest of them. Combined with step 1, $\varepsilon_M(\alpha) \le \varepsilon_M(\infty) \le \varepsilon$ for an $\varepsilon$-DP mechanism.
-3. **The KL limit.** For each pair, $D_\alpha \ge D_{\mathrm{KL}}$ and $D_\alpha \to D_{\mathrm{KL}}$ as $\alpha \to 1$ (Fact 2). So $\varepsilon_M(\alpha) \ge \sup_{D \simeq D'}D_{\mathrm{KL}}\big(M(D)\|M(D')\big)$ at every order, and the limit is at least the largest KL. Equality would need the limit and the supremum to commute, which can fail in general: each pair's divergence could approach its KL at a different speed. For the mechanisms below the curves are explicit, and you can check the limit directly.
+3. **The KL limit.** For each pair, $D_\alpha \ge D_{\mathrm{KL}}$ and $D_\alpha \to D_{\mathrm{KL}}$ as $\alpha \to 1$ (Fact 2). So $\varepsilon_M(\alpha) \ge \sup_{D \sim D'}D_{\mathrm{KL}}\big(M(D)\|M(D')\big)$ at every order, and the limit is at least the largest KL. Equality would need the limit and the supremum to commute, which can fail in general: each pair's divergence could approach its KL at a different speed. For the mechanisms below the curves are explicit, and you can check the limit directly.
 
 ### Interpretation
 
@@ -202,7 +202,7 @@ By induction, treating the first $k - 1$ steps as one mechanism, $k$ adaptively 
 
 ### Derivation
 
-The idea is to write the order-$\alpha$ moment of the pair of outputs as a double integral, bound the inner integral (over $y_2$) by the worst case of the second step, and recognise what is left as the moment of the first step. Fix neighbours $D \simeq D'$ and an order $\alpha > 1$. Write $p_1, q_1$ for the densities of $y_1$ under $D$ and $D'$, and $p_2(\cdot \mid y_1), q_2(\cdot \mid y_1)$ for those of $y_2$ given $y_1$.
+The idea is to write the order-$\alpha$ moment of the pair of outputs as a double integral, bound the inner integral (over $y_2$) by the worst case of the second step, and recognise what is left as the moment of the first step. Fix neighbours $D \sim D'$ and an order $\alpha > 1$. Write $p_1, q_1$ for the densities of $y_1$ under $D$ and $D'$, and $p_2(\cdot \mid y_1), q_2(\cdot \mid y_1)$ for those of $y_2$ given $y_1$.
 
 1. **Factor the joint densities.** By the definition of the adaptive composition, $y_1$ is drawn first and $y_2$ is drawn given $y_1$, so $p(y_1, y_2) = p_1(y_1)\,p_2(y_2 \mid y_1)$, and the same for $q$.
 2. **Write the order-$\alpha$ moment as a double integral** (Fact 1):
@@ -331,7 +331,7 @@ Abadi et al. (2016) introduced the **moments accountant** to train neural networ
 
 ### Statement
 
-Abadi et al. define the log-moment $\alpha_M(\lambda) = \sup_{D \simeq D'}\ln\mathbb E_{Y \sim M(D)}\big[e^{\lambda L(Y)}\big]$, the log-MGF of the privacy loss for the worst pair of neighbours. Their letter $\alpha$ clashes with our order, so write it $K_M(\lambda)$. It is the RDP curve one order up, multiplied by $\lambda$:
+Abadi et al. define the log-moment $\alpha_M(\lambda) = \sup_{D \sim D'}\ln\mathbb E_{Y \sim M(D)}\big[e^{\lambda L(Y)}\big]$, the log-MGF of the privacy loss for the worst pair of neighbours. Their letter $\alpha$ clashes with our order, so write it $K_M(\lambda)$. It is the RDP curve one order up, multiplied by $\lambda$:
 $$K_M(\lambda) = \lambda\,\varepsilon_M(\lambda + 1), \qquad\text{equivalently}\qquad \varepsilon_M(\alpha) = \frac{K_M(\alpha - 1)}{\alpha - 1}.$$ {#eq-rdp-moments}
 The two parts of their Theorem 2 (Abadi et al. 2016) then become the two results of this chapter that RDP needs.
 
@@ -491,7 +491,7 @@ $P = M(D)$, $Q = M(D')$ for neighbours; $L = \ln(p/q)$ the privacy loss; orders 
 
 | Result | Statement | Tight? |
 | --- | --- | --- |
-| $(\alpha, \varepsilon)$-RDP | $D_\alpha(M(D)\Vert M(D')) \le \varepsilon$ for all $D \simeq D'$ | — |
+| $(\alpha, \varepsilon)$-RDP | $D_\alpha(M(D)\Vert M(D')) \le \varepsilon$ for all $D \sim D'$ | — |
 | Limits | $\varepsilon(\alpha \to 1) \ge$ largest KL (equal for the mechanisms here); $\varepsilon(\infty) = $ pure DP $\varepsilon$; non-decreasing in $\alpha$ | — |
 | Gaussian, noise multiplier $\sigma$ | $\varepsilon(\alpha) = \alpha/(2\sigma^2)$ | Exact |
 | Laplace, scale $b$, sensitivity 1 | $\frac{1}{\alpha - 1}\ln\big(\frac{\alpha}{2\alpha - 1}e^{(\alpha - 1)/b} + \frac{\alpha - 1}{2\alpha - 1}e^{-\alpha/b}\big)$ | Exact |

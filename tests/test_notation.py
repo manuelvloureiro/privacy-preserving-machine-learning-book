@@ -59,3 +59,28 @@ def test_two_meanings_of_one_symbol_on_a_page_are_a_conflict(tmp_path: Path) -> 
     text = "Add $\\mathrm{Lap}(b)$ noise.\n\nThe hidden bit $b$ picks the world.\n"
     assert any("two meanings" in m for m in findings(tmp_path, text))
     assert not any("two meanings" in m for m in findings(tmp_path, "Add $\\mathrm{Lap}(b)$ noise.\n"))
+
+
+def test_a_and_b_as_the_errors_of_a_test_are_found(tmp_path: Path) -> None:
+    assert findings(tmp_path, "A test has type I error $a$ and type II error $b$.\n")
+    assert findings(tmp_path, "Its errors are $a_\\phi = \\mathbb E_P[\\phi]$ and the curve $T(P, Q)(a)$.\n")
+    assert findings(tmp_path, "At a false positive rate $a$ the curve is $G_\\mu(a)$.\n")
+    assert not findings(tmp_path, "A test has type I error $\\alpha$, and $\\beta_\\phi = 1 - \\mathbb E_Q[\\phi]$.\n")
+    assert not findings(tmp_path, "Two coins give $\\mathrm{kl}(a\\|b)$, with $a = \\Pr_P[A]$ and $b = \\Pr_Q[A]$.\n")
+
+
+def test_the_errors_of_a_test_give_way_to_another_meaning_of_alpha_or_beta(tmp_path: Path) -> None:
+    renyi = "The Rényi order is $\\alpha$, so $D_\\alpha(P\\|Q) \\le \\varepsilon(\\alpha)$.\n\n"
+    assert any("two meanings" in m for m in findings(tmp_path, renyi + "A test has type I error $\\alpha$.\n"))
+    assert any("two meanings" in m for m in findings(tmp_path, renyi + "The curve is $G_\\mu(\\alpha)$.\n"))
+    assert not any("two meanings" in m for m in findings(tmp_path, renyi + "The curve is $G_\\mu(\\mathrm{FPR})$.\n"))
+    failure = "With probability at least $1 - \\beta$ the error is small.\n\n"
+    assert any("two meanings" in m for m in findings(tmp_path, failure + "Its type II error $\\beta$ is large.\n"))
+    assert not any("two meanings" in m for m in findings(tmp_path, failure + "Its type II error $\\mathrm{FNR}$.\n"))
+    assert not findings(tmp_path, "A test has type I error $\\alpha$ and type II error $\\beta$.\n")
+
+
+def test_the_laplace_scale_keeps_b_and_is_never_renamed_s(tmp_path: Path) -> None:
+    text = "Add $\\mathrm{Lap}(b)$ noise.\n\nThe hidden bit $b$ picks the world.\n"
+    messages = [m for m in findings(tmp_path, text) if "two meanings" in m]
+    assert messages and "name it s" not in messages[0]

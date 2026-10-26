@@ -7,10 +7,10 @@ One nomenclature for all four books and the study notes: the symbol for each con
 ## Rules
 
 1. **One concept, one symbol.** Every concept in the tables below is written with its symbol on every page of every book, whatever the source paper or lecture uses. When a source's notation differs, the page may say so once ("Mironov writes the order as $\lambda$"), and then uses ours.
-2. **Reserved symbols keep their meaning everywhere.** $\varepsilon$, $\delta$, $M$, $D$, $D'$, $\simeq$, $\Delta$, $\mathrm{Lap}$, $\mathcal N$, $\Pr$, $\mathbb E$, $q$ (sampling rate; see the densities row for the one exception), $C$ (clipping norm), $\eta$ (learning rate) and $\theta$ (parameters) never take another meaning on any page.
-3. **Other symbols in the tables** may be reused for something else only on a page where their concept does not appear, and the page names the other meaning in words where it first uses it. The overloads below are the only exceptions, because both meanings are fixed in the literature. The first five must not meet on a page, and `make notation-check` fails on a page that uses both meanings of one of them; the rest may, and the page says which meaning it means.
+2. **Reserved symbols keep their meaning everywhere.** $\varepsilon$, $\delta$, $M$, $D$, $D'$, $\sim$, $\Delta$, $\mathrm{Lap}$, $\mathcal N$, $\Pr$, $\mathbb E$, $q$ (sampling rate; see the densities row for the one exception), $C$ (clipping norm), $\eta$ (learning rate) and $\theta$ (parameters) never take another meaning on any page.
+3. **Other symbols in the tables** may be reused for something else only on a page where their concept does not appear, and the page names the other meaning in words where it first uses it. The overloads below are the only exceptions, because both meanings are fixed in the literature. The first six must not meet on a page, and `make notation-check` fails on a page that uses both meanings of one of them; the rest may, and the page says which meaning it means.
 4. **Local letters are free.** Indices ($i$, $j$, $t$), constants ($c$, $c'$), dummy variables and the quantities of one derivation are chosen by the page and named in words where they first appear (PROSE.md rule 4).
-5. **The neighbouring relation is stated, not implied.** The symbol is always $D \simeq D'$. Every page that uses it says which relation it means, in words: add/remove one record (the default of the full edition, the practitioner edition and the exercise book) or replace one record (the default of the course). The relation is a definition, so changing the symbol never changes it.
+5. **The neighbouring relation is stated, not implied.** The symbol is always $D \sim D'$. Every page that uses it says which relation it means, in words: add/remove one record (the default of the full edition, the practitioner edition and the exercise book) or replace one record (the default of the course). The relation is a definition, so changing the symbol never changes it.
 6. **Each book's notation tables follow this file.** The notation table of a part introduction, a course chapter or a note lists the symbols of this file that it uses, with the same meanings.
 
 ### Overloads that must not meet on a page
@@ -19,10 +19,11 @@ One nomenclature for all four books and the study notes: the symbol for each con
 | --- | --- | --- | --- |
 | $\alpha$ | Rényi order | Error bound of an $(\alpha, \beta)$-accuracy guarantee | write the error bound $a$ |
 | $\beta$ | Failure probability | Smoothness constant ($\beta$-smooth) | write the smoothness constant $\beta_s$ |
+| $\alpha$, $\beta$ | Type I and type II errors of a test | Any meaning above: Rényi order, error bound, failure probability, smoothness constant | the other meaning keeps its letter, and the page writes the two errors by their names, the false positive rate $\mathrm{FPR}$ and the false negative rate $\mathrm{FNR}$ (power $1 - \mathrm{FNR}$), and a trade-off function at $\mathrm{FPR}$ as $T(P, Q)(\mathrm{FPR})$ or $G_\mu(\mathrm{FPR})$. Balle et al. (2020), on the testing view of Rényi DP, likewise keep $\alpha$ for the order and name the errors (false alarm and missed detection) |
 | $L$ | Privacy loss $L_{D,D'}(y)$ | Lipschitz constant ($L$-Lipschitz) | write the Lipschitz constant $G$ |
-| $b$ | Laplace scale | Hidden bit of a two-world game; type II error of a test | write the Laplace scale out as $\Delta f/\varepsilon$, or name it $s$ |
-| $\sigma$ | Noise standard deviation | Noise multiplier (standard deviation per unit of sensitivity) | allowed: they agree when the sensitivity is 1; otherwise the page says which, and writes the standard deviation $\sigma\Delta_2 f$ or $\sigma C$ |
+| $b$ | Laplace scale | Hidden bit of a two-world game | write the Laplace scale out as $\Delta f/\varepsilon$ |
 | $q$ | Sampling rate | A counting query $q \in \mathcal Q$ in query release | write the query $f$ |
+| $\sigma$ | Noise standard deviation | Noise multiplier (standard deviation per unit of sensitivity) | allowed: they agree when the sensitivity is 1; otherwise the page says which, and writes the standard deviation $\sigma\Delta_2 f$ or $\sigma C$ |
 | $T$ | Number of iterations | Trade-off function $T(P, Q)$, always with its arguments | allowed: the arguments tell them apart |
 | $L$ | Privacy loss $L_{D,D'}(y)$ | Decoder of a matrix factorization $A = LR$ | allowed: the privacy loss keeps its subscripts or argument there |
 | $\lambda$ | Strong convexity constant | Weight of a ridge (squared-norm) regularizer | allowed when the regularizer is what makes the objective $\lambda$-strongly convex |
@@ -57,7 +58,7 @@ One nomenclature for all four books and the study notes: the symbol for each con
 | Dataset; its records | $D = (x_1, \dots, x_n)$ | $X$, $x$, $S$ for a dataset |
 | Number of records | $n$ | $N$ |
 | Data universe (the set of possible records); the set of datasets | $\mathcal X$, so $D \in \mathcal X^n$; a mechanism's domain is $\mathcal X^n$, or $\bigcup_n \mathcal X^n$ when the size is not fixed | $\mathcal U$, $\Omega$, $\mathbb X$ for the universe; $\mathcal D$ for the set of datasets (AIM's use) |
-| Neighbouring datasets | $D \simeq D'$ | $D \sim D'$, $X \sim X'$, "adjacent" |
+| Neighbouring datasets | $D \sim D'$ (between a variable and a distribution, as in $Y \sim P$, $\sim$ reads "distributed as") | $D \simeq D'$, $X \sim X'$, "adjacent" |
 | Under add/remove, the dataset with the record $x$ | $D' = D \cup \{x\}$ | |
 | Records drawn at random from a distribution | $X_1, \dots, X_n \sim P$ i.i.d., with $D = (X_1, \dots, X_n)$ | |
 | Data distribution (a population) | $\mathcal D$ | $\pi$ for a population; $\mathcal D$ never names the set of datasets |
@@ -97,7 +98,7 @@ One nomenclature for all four books and the study notes: the symbol for each con
 | zCDP parameter | $\rho$-zCDP | |
 | Trade-off function of $P$ and $Q$; a generic one | $T(P, Q)$; $f$ | |
 | Gaussian DP; the Gaussian trade-off function | $\mu$-GDP; $G_\mu = T(\mathcal N(0, 1), \mathcal N(\mu, 1))$ | |
-| A test (rejection rule); its type I and type II errors | $\phi$; $a$ and $b$ | $\psi$ for the test; $\alpha$ and $\beta$ for the errors |
+| A test (rejection rule); its type I and type II errors | $\phi$; $\alpha$ and $\beta$, as in Neyman–Pearson and in $f$-DP, where $\beta = T(P, Q)(\alpha)$; $\mathrm{FPR}$ and $\mathrm{FNR}$ on a page where $\alpha$ or $\beta$ already has another meaning (see the overloads) | $\psi$ for the test; $a$ and $b$ for the errors |
 | Grid width of a discretized privacy loss distribution | $h$ | |
 | Sampling rate | $q$ | $\gamma$, $p$, $r$ |
 
@@ -105,7 +106,7 @@ One nomenclature for all four books and the study notes: the symbol for each con
 
 | Concept | Symbol | Not |
 | --- | --- | --- |
-| Laplace mechanism | $M(D) = f(D) + Z$, $Z \sim \mathrm{Lap}(b)^d$, $b = \Delta_1 f/\varepsilon$ | $\lambda$ or $\beta$ for the scale |
+| Laplace mechanism | $M(D) = f(D) + Z$, $Z \sim \mathrm{Lap}(b)^d$, $b = \Delta_1 f/\varepsilon$ | $\lambda$, $\beta$ or $s$ for the scale |
 | Gaussian mechanism | $M(D) = f(D) + Z$, $Z \sim \mathcal N(0, \sigma^2 I_d)$ | |
 | Noise multiplier | $\sigma$, the noise standard deviation in units of the sensitivity | $z$ |
 | Exponential mechanism: candidates, score, its sensitivity | $r \in \mathcal R$; $u(D, r)$; $\Delta u$ | $q$ or $s$ for the score, $k$ for $\lvert\mathcal R\rvert$ |
@@ -113,7 +114,7 @@ One nomenclature for all four books and the study notes: the symbol for each con
 | Sparse vector: threshold; the answers "below" and "above" | $\tau$; $\bot$ and $\top$ | $T$ or $t$ for the threshold, $\perp$ |
 | A threshold of any test or rule | $\tau$ | |
 | Accuracy guarantee | $(\alpha, \beta)$-accurate: error at most $\alpha$ with probability at least $1 - \beta$ | |
-| Failure probability | $\beta$ | $\eta$, or $\delta$ for anything but the DP parameter |
+| Failure probability | $\beta$; a confidence interval has level $1 - \beta$, except on a page where $\beta$ is a type II error: there the level is $1 - \alpha$, the size of the tests the interval inverts | $\eta$, or $\delta$ for anything but the DP parameter |
 | Randomized response: probability of answering truthfully | stated by the page, never $\gamma$ or $q$ | |
 | Local randomizer | $R\colon \mathcal X \to \mathcal Y$ | $\mathcal R$ (that is the candidate set) |
 

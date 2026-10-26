@@ -40,21 +40,21 @@ The attack has the same TPR and FPR in both cases; only the prior changed. At $\
 
 ## Same AUC, different exposure {#sec-sol-mia-3}
 
-> **Exercise 3.** **Same AUC, different exposure.** Derive the AUC, best advantage and TPR at FPR $a$ of attacks A and B in @sec-mia-eval, and repeat the comparison at $r = 0.01$. *Check: AUC 0.5050, $\mu = 0.0177$, TPR at $10^{-3}$ 0.01099 for A and 0.00106 for B.* *(AUC as a ranking probability, Gaussian trade-off)*
+> **Exercise 3.** **Same AUC, different exposure.** Derive the AUC, best advantage and TPR at FPR $\alpha$ of attacks A and B in @sec-mia-eval, and repeat the comparison at $r = 0.01$. *Check: AUC 0.5050, $\mu = 0.0177$, TPR at $10^{-3}$ 0.01099 for A and 0.00106 for B.* *(AUC as a ranking probability, Gaussian trade-off)*
 
 ::: {.callout-tip collapse="true" title="Solution"}
 **Attack A.**
 
 1. **AUC.** The AUC is $\Pr[\text{member's score} > \text{non-member's score}]$, with ties counted as one half. With probability $r$ the member is exposed and wins outright; otherwise its score has the same distribution as the non-member's and it wins half the time. So $\mathrm{AUC} = r + \frac12(1 - r) = \frac12 + \frac r2$.
-2. **TPR.** At a threshold with FPR $a$, the exposed members always pass and the rest pass with probability $a$: $\mathrm{TPR} = r + (1 - r)a$.
-3. **Best advantage.** $\mathrm{TPR} - \mathrm{FPR} = r(1 - a)$, largest as $a \to 0$, where it tends to $r$.
+2. **TPR.** At a threshold with FPR $\alpha$, the exposed members always pass and the rest pass with probability $\alpha$: $\mathrm{TPR} = r + (1 - r)\alpha$.
+3. **Best advantage.** $\mathrm{TPR} - \mathrm{FPR} = r(1 - \alpha)$, largest as $\alpha \to 0$, where it tends to $r$.
 
 **Attack B.**
 
 4. **AUC.** A member's score minus a non-member's is $\mathcal N(\mu, 2)$, positive with probability $\Phi(\mu/\sqrt2)$. Setting this equal to $\frac12 + \frac r2$ gives $\mu = \sqrt2\,\Phi^{-1}(\frac12 + \frac r2)$.
 5. **TPR** is @eq-mia-gauss-tpr with $s = \mu$, and the **best advantage** is the total variation between $\mathcal N(0, 1)$ and $\mathcal N(\mu, 1)$, $2\Phi(\mu/2) - 1$.
 
-**Numbers** at $a = 10^{-3}$ (@tbl-sol-mia-same-auc):
+**Numbers** at $\alpha = 10^{-3}$ (@tbl-sol-mia-same-auc):
 
 | $r$ | AUC | A: advantage | A: TPR | B: $\mu$ | B: advantage | B: TPR |
 | --- | --- | --- | --- | --- | --- | --- |
@@ -70,13 +70,13 @@ At $r = 0.01$, the AUC is 0.505, which most papers would call "no better than ch
 
 ## How many non-members? {#sec-sol-mia-4}
 
-> **Exercise 4.** **How many non-members?** You want to claim, at 95% confidence, that an attack's FPR is below $a$, and you see no false positives at all. How many non-members do you need for $a = 10^{-3}, 10^{-4}, 10^{-5}$? *Check: 2,995, 29,956 and 299,572.* *Hint: $(1 - a)^n \le 0.05$.* *(Estimating rates from trials)*
+> **Exercise 4.** **How many non-members?** You want to claim, at 95% confidence, that an attack's FPR is below $\alpha$, and you see no false positives at all. How many non-members do you need for $\alpha = 10^{-3}, 10^{-4}, 10^{-5}$? *Check: 2,995, 29,956 and 299,572.* *Hint: $(1 - \alpha)^n \le 0.05$.* *(Estimating rates from trials)*
 
 ::: {.callout-tip collapse="true" title="Solution"}
-1. **The event to rule out.** If the true FPR were $a$ or more, then seeing zero false positives among $n$ independent non-members would have probability at most $(1 - a)^n$.
-2. **Make it unlikely.** The one-sided 95% upper bound from zero counts ([Hypothesis testing](../../book-full/part01-prerequisites/04-hypothesis-testing.md)) is below $a$ exactly when $(1 - a)^n \le 0.05$.
-3. **Solve.** Take logarithms (both sides negative): $n \ge \ln 0.05/\ln(1 - a) = \ln 20/(-\ln(1 - a))$.
-4. **Plug in.** $a = 10^{-3}$: $n \ge 2{,}994.2$, so 2,995. $a = 10^{-4}$: $n \ge 29{,}955.8$, so 29,956. $a = 10^{-5}$: $n \ge 299{,}571.7$, so 299,572. Each is about $3/a$, the rule of three.
+1. **The event to rule out.** If the true FPR were $\alpha$ or more, then seeing zero false positives among $n$ independent non-members would have probability at most $(1 - \alpha)^n$.
+2. **Make it unlikely.** The one-sided 95% upper bound from zero counts ([Hypothesis testing](../../book-full/part01-prerequisites/04-hypothesis-testing.md)) is below $\alpha$ exactly when $(1 - \alpha)^n \le 0.05$.
+3. **Solve.** Take logarithms (both sides negative): $n \ge \ln 0.05/\ln(1 - \alpha) = \ln 20/(-\ln(1 - \alpha))$.
+4. **Plug in.** $\alpha = 10^{-3}$: $n \ge 2{,}994.2$, so 2,995. $\alpha = 10^{-4}$: $n \ge 29{,}955.8$, so 29,956. $\alpha = 10^{-5}$: $n \ge 299{,}571.7$, so 299,572. Each is about $3/\alpha$, the rule of three.
 
 The running example has 64,000 non-member pairs, so a threshold at FPR $10^{-3}$ leaves about 64 false positives, enough for an interval of about $\pm 25\%$ on the FPR (the chapter's $[0.00077, 0.00128]$). At FPR $10^{-5}$ the same data could not even certify a bound. The pairs are also not fully independent: the same 1,000 points recur across the 128 target models, which is one more reason the interval is too narrow.
 

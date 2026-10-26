@@ -196,7 +196,7 @@ $$
 \mathbb E[q(D)] = \frac1n\sum_{i=1}^n \mathbb E[q(X_i)] = \frac1n\sum_{i=1}^n \Pr[q(X_i) = 1].
 $$
 
-2. *A fresh record.* Fix $i$, draw $X_i'$ from $\mathcal D$ independently of everything else, and let $D^{(i)}$ be $D$ with entry $i$ replaced by $X_i'$. The datasets $D$ and $D^{(i)}$ are neighbours, $D \simeq D^{(i)}$, since they differ in one replaced record.
+2. *A fresh record.* Fix $i$, draw $X_i'$ from $\mathcal D$ independently of everything else, and let $D^{(i)}$ be $D$ with entry $i$ replaced by $X_i'$. The datasets $D$ and $D^{(i)}$ are neighbours, $D \sim D^{(i)}$, since they differ in one replaced record.
 3. *Privacy.* Write $W(D)(X_i)$ for the value of the query $W(D)$ on the record $X_i$. For fixed values of $D$ and $X_i'$, the queries $q'$ with $q'(X_i) = 1$ form an event about the output of $W$. DP for the neighbours $D$ and $D^{(i)}$ gives
 
 $$

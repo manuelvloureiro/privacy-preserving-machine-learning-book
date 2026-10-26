@@ -26,7 +26,7 @@ In the example, $D$ is the list of valuations, $\mathcal R$ is the set of prices
 The **sensitivity** of a score function $u$ is
 
 $$
-\Delta u = \sup_{r \in \mathcal R}\ \sup_{D \simeq D'} \big|u(D,r) - u(D',r)\big| ,
+\Delta u = \sup_{r \in \mathcal R}\ \sup_{D \sim D'} \big|u(D,r) - u(D',r)\big| ,
 $$
 
 where the inner supremum is over neighbouring datasets, which differ in one record (the replace-one relation).
@@ -62,7 +62,7 @@ The exponential mechanism is $\varepsilon$-DP.
 
 ::: {.proof}
 
-1. Fix neighbours $D \simeq D'$ and an object $r$. By @eq-em-density, the ratio of the densities is
+1. Fix neighbours $D \sim D'$ and an object $r$. By @eq-em-density, the ratio of the densities is
 
    $$
    \frac{p_D(r)}{p_{D'}(r)} = \exp\!\left(\frac{\varepsilon\,(u(D,r) - u(D',r))}{2\Delta}\right)\cdot\frac{Z(D')}{Z(D)} .

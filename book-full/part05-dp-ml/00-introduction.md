@@ -52,7 +52,7 @@ The part uses the notation of the earlier parts, extended in @tbl-dpml-notation.
 
 | Symbol | Meaning |
 | --- | --- |
-| $D = (z_1, \dots, z_n)$, $z_i = (x_i, y_i)$ | A training set of $n$ records with features $x_i$ and labels $y_i$; a neighbouring dataset $D'$ adds or removes one record, $D \simeq D'$ |
+| $D = (z_1, \dots, z_n)$, $z_i = (x_i, y_i)$ | A training set of $n$ records with features $x_i$ and labels $y_i$; a neighbouring dataset $D'$ adds or removes one record, $D \sim D'$ |
 | $\theta \in \mathbb R^d$, $\ell(\theta; z)$, $\mathcal L(\theta; D)$ | The model parameters; the loss on one record; the empirical risk, the training objective (with its regularizer, when there is one) |
 | $\theta_t$, $\theta^*$, $\tilde\theta$ | The iterate at step $t$; the non-private minimizer; a private release |
 | $g_i = \nabla_\theta\ell(\theta; z_i)$, $\bar g_i$ | The gradient of record $i$'s loss, a per-example gradient; the clipped one |

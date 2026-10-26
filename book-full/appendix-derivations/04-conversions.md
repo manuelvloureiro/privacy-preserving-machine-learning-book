@@ -1,6 +1,6 @@
 # What ε means, and converting between definitions
 
-A **mechanism** $M$ is a randomized algorithm: it takes a dataset and returns a random output. Two datasets $D$ and $D'$ are **neighbours**, written $D \simeq D'$, when one is the other with one person's record added or removed. The definition of privacy has two parameters, a multiplicative limit $\varepsilon$ and a small additive slack $\delta$. The mechanism is **$(\varepsilon, \delta)$-differentially private** when, for every pair of neighbours and every set $S$ of outputs,
+A **mechanism** $M$ is a randomized algorithm: it takes a dataset and returns a random output. Two datasets $D$ and $D'$ are **neighbours**, written $D \sim D'$, when one is the other with one person's record added or removed. The definition of privacy has two parameters, a multiplicative limit $\varepsilon$ and a small additive slack $\delta$. The mechanism is **$(\varepsilon, \delta)$-differentially private** when, for every pair of neighbours and every set $S$ of outputs,
 $$\Pr[M(D) \in S] \le e^\varepsilon\,\Pr[M(D') \in S] + \delta.$$
 
 The **privacy loss** of an output $y$ is the log of how much more likely $y$ is when the data are $D$ than when they are $D'$. Write $p(y)$ and $q(y)$ for the probability (or density) of $y$ under $M(D)$ and $M(D')$. Then the privacy loss $L$ is
@@ -39,7 +39,7 @@ An attacker sees the output and must guess whether the data were $D$ or $D'$, fo
 
 Any guessing rule can be written as a set $S$ of outputs: the attacker says "$D'$" when the output lands in $S$, and "$D$" otherwise. It can be wrong in two ways. Its **false positive rate (FPR)** is how often it says "$D'$" when the data were $D$, so $\mathrm{FPR} = \Pr[M(D) \in S]$. Its **false negative rate (FNR)** is how often it says "$D$" when the data were $D'$, so $\mathrm{FNR} = \Pr[M(D') \notin S]$. If $M$ is $(\varepsilon, \delta)$-DP, then every test, against every pair of neighbours, satisfies both
 $$\mathrm{FPR} + e^\varepsilon\,\mathrm{FNR} \ge 1 - \delta \qquad\text{and}\qquad e^\varepsilon\,\mathrm{FPR} + \mathrm{FNR} \ge 1 - \delta.$$ {#eq-apx-conv-testing}
-The chapter on the definition (@sec-dpdef-testing) writes $a$ and $b$ for the two error rates. This page writes the rates out, and @sec-apx-conv-gdp names the false positive rate $a$ again. There are two inequalities because the definition holds in both orders of the pair.
+The chapter on the definition (@sec-dpdef-testing) writes $\alpha$ and $\beta$ for the two error rates. This page needs $\alpha$ for a Rényi order, so it writes them $\mathrm{FPR}$ and $\mathrm{FNR}$. There are two inequalities because the definition holds in both orders of the pair.
 
 ### A worked example
 
@@ -262,8 +262,8 @@ For the Gaussian mechanism, both conversions above leave slack. Is there one num
 
 ### The answer
 
-Write $a$ for a test's false positive rate. A mechanism is **$\mu$-GDP** when no pair of neighbours is easier to tell apart than $\mathcal N(0, 1)$ from $\mathcal N(\mu, 1)$. In terms of errors, every test with false positive rate $a$ has a false negative rate of at least
-$$G_\mu(a) = \Phi\big(\Phi^{-1}(1 - a) - \mu\big).$$ {#eq-apx-conv-gmu}
+A mechanism is **$\mu$-GDP** when no pair of neighbours is easier to tell apart than $\mathcal N(0, 1)$ from $\mathcal N(\mu, 1)$. In terms of errors, every test with false positive rate $\mathrm{FPR}$ has a false negative rate of at least
+$$G_\mu(\mathrm{FPR}) = \Phi\big(\Phi^{-1}(1 - \mathrm{FPR}) - \mu\big).$$ {#eq-apx-conv-gmu}
 The Gaussian mechanism is $\mu$-GDP with $\mu = \Delta/\sigma$, with no slack. It is $(\varepsilon, \delta)$-DP exactly when $\delta$ is at least
 $$\delta(\varepsilon) = \Phi\Big(-\frac{\varepsilon}{\mu} + \frac{\mu}{2}\Big) - e^\varepsilon\,\Phi\Big(-\frac{\varepsilon}{\mu} - \frac{\mu}{2}\Big).$$ {#eq-apx-conv-gdp-delta}
 When several GDP mechanisms run one after another, their $\mu$'s add like the sides of a right-angled triangle, $\mu = \sqrt{\mu_1^2 + \dots + \mu_k^2}$.
@@ -286,18 +286,18 @@ Composition is just as quick. Four releases with $\sigma = 2\Delta$ each have $\
 The first three steps find the best test, which gives the curve $G_\mu$. The next three find the $(\varepsilon, \delta)$ guarantee that the curve implies, and the last one handles composition.
 
 1. **The best test thresholds the output.** The Neyman–Pearson lemma says that, among tests with the same false positive rate, the one with the fewest misses says "$D'$" on the outputs where $q(y)/p(y)$ is largest. The reason is that each output in the region costs $p(y)$ in false positives and buys $q(y)$ in detections, so the best buys go first. For the pair $\mathcal N(0, 1)$ and $\mathcal N(\mu, 1)$, the ratio is $q(y)/p(y) = e^{-L(y)} = e^{\mu y - \mu^2/2}$, which grows with $y$. So the best test says "$D'$" when $y$ is above a threshold $\tau$.
-2. **Its two errors.** Under $D$, $y$ is standard normal, so $a = \Pr[Z > \tau] = 1 - \Phi(\tau)$, and the threshold for a given $a$ is $\tau = \Phi^{-1}(1 - a)$. Under $D'$, $y = \mu + Z$, so the test misses when $\mu + Z \le \tau$, which has probability $\Phi(\tau - \mu)$.
-3. **Substitute.** Putting $\tau = \Phi^{-1}(1 - a)$ into $\Phi(\tau - \mu)$ gives @eq-apx-conv-gmu. For the Gaussian mechanism, a pair of neighbours whose query values differ by $s \le \Delta$ gives the pair $\mathcal N(0, 1)$ and $\mathcal N(s/\sigma, 1)$, with shift $s/\sigma \le \Delta/\sigma$. A larger shift is easier to detect, because $G_\mu$ falls as $\mu$ grows, so the worst pair has $\mu = \Delta/\sigma$.
-4. **One $(\varepsilon, \delta)$ guarantee is one line.** By @sec-apx-conv-testing, $(\varepsilon, \delta)$-DP asks every test to have $\mathrm{FNR} \ge 1 - \delta - e^\varepsilon a$. The best tests have $\mathrm{FNR} = G_\mu(a)$, so the condition is $\delta \ge 1 - G_\mu(a) - e^\varepsilon a$ for every $a$, and the smallest valid $\delta$ is the largest value of the right side. The other inequality of @eq-apx-conv-testing gives the same number. Reflecting the output, $y \mapsto \mu - y$, swaps the two normals, so it turns each test into one with the two error rates swapped, and the two inequalities into each other.
-5. **Find the touching point.** Lowering the threshold by a small step $h$ adds the outputs just below $\tau$ to the region. That raises $a$ by about $p(\tau)h$ and lowers the miss rate by about $q(\tau)h$, so the curve's slope at that point is $-q(\tau)/p(\tau) = -e^{\mu \tau - \mu^2/2}$. As $a$ grows the threshold drops, so this slope gets flatter. The quantity $1 - G_\mu(a) - e^\varepsilon a$ therefore rises while the miss rate falls faster than $e^\varepsilon$ per unit of $a$, and falls afterwards. So it is largest where the slope equals $-e^\varepsilon$. Setting $\mu \tau - \mu^2/2 = \varepsilon$ gives $\tau = \varepsilon/\mu + \mu/2$.
-6. **Read off $\delta$.** At that threshold, $a = 1 - \Phi(\tau) = \Phi(-\tau)$ and the detection rate is $1 - \Phi(\tau - \mu) = \Phi(\mu - \tau)$. So $\delta(\varepsilon) = \Phi(\mu - \tau) - e^\varepsilon\Phi(-\tau)$, which is @eq-apx-conv-gdp-delta.
+2. **Its two errors.** Under $D$, $y$ is standard normal, so $\mathrm{FPR} = \Pr[Z > \tau] = 1 - \Phi(\tau)$, and the threshold for a given $\mathrm{FPR}$ is $\tau = \Phi^{-1}(1 - \mathrm{FPR})$. Under $D'$, $y = \mu + Z$, so the test misses when $\mu + Z \le \tau$, which has probability $\Phi(\tau - \mu)$.
+3. **Substitute.** Putting $\tau = \Phi^{-1}(1 - \mathrm{FPR})$ into $\Phi(\tau - \mu)$ gives @eq-apx-conv-gmu. For the Gaussian mechanism, a pair of neighbours whose query values differ by $s \le \Delta$ gives the pair $\mathcal N(0, 1)$ and $\mathcal N(s/\sigma, 1)$, with shift $s/\sigma \le \Delta/\sigma$. A larger shift is easier to detect, because $G_\mu$ falls as $\mu$ grows, so the worst pair has $\mu = \Delta/\sigma$.
+4. **One $(\varepsilon, \delta)$ guarantee is one line.** By @sec-apx-conv-testing, $(\varepsilon, \delta)$-DP asks every test to have $\mathrm{FNR} \ge 1 - \delta - e^\varepsilon \mathrm{FPR}$. The best tests have $\mathrm{FNR} = G_\mu(\mathrm{FPR})$, so the condition is $\delta \ge 1 - G_\mu(\mathrm{FPR}) - e^\varepsilon \mathrm{FPR}$ for every $\mathrm{FPR}$, and the smallest valid $\delta$ is the largest value of the right side. The other inequality of @eq-apx-conv-testing gives the same number. Reflecting the output, $y \mapsto \mu - y$, swaps the two normals, so it turns each test into one with the two error rates swapped, and the two inequalities into each other.
+5. **Find the touching point.** Lowering the threshold by a small step $h$ adds the outputs just below $\tau$ to the region. That raises $\mathrm{FPR}$ by about $p(\tau)h$ and lowers the miss rate by about $q(\tau)h$, so the curve's slope at that point is $-q(\tau)/p(\tau) = -e^{\mu \tau - \mu^2/2}$. As $\mathrm{FPR}$ grows the threshold drops, so this slope gets flatter. The quantity $1 - G_\mu(\mathrm{FPR}) - e^\varepsilon \mathrm{FPR}$ therefore rises while the miss rate falls faster than $e^\varepsilon$ per unit of $\mathrm{FPR}$, and falls afterwards. So it is largest where the slope equals $-e^\varepsilon$. Setting $\mu \tau - \mu^2/2 = \varepsilon$ gives $\tau = \varepsilon/\mu + \mu/2$.
+6. **Read off $\delta$.** At that threshold, $\mathrm{FPR} = 1 - \Phi(\tau) = \Phi(-\tau)$ and the detection rate is $1 - \Phi(\tau - \mu) = \Phi(\mu - \tau)$. So $\delta(\varepsilon) = \Phi(\mu - \tau) - e^\varepsilon\Phi(-\tau)$, which is @eq-apx-conv-gdp-delta.
 7. **Composition.** Each release adds independent noise, so $k$ releases give a vector of $k$ outputs, $\mathcal N(0, I)$ under $D$ and $\mathcal N(\boldsymbol\mu, I)$ under $D'$ with $\boldsymbol\mu = (\mu_1, \dots, \mu_k)$. Only the direction of $\boldsymbol\mu$ carries evidence, and along it the shift is the length of $\boldsymbol\mu$, $\sqrt{\mu_1^2 + \dots + \mu_k^2}$. @sec-apx-ccomp-gaussian proves this rotation step.
 
-At $\mu = 1$ and $\varepsilon = 1$, step 5 gives $\tau = 1 + 0.5 = 1.5$. Step 6 then gives $a = \Phi(-1.5) = 0.066807$ and a detection rate of $\Phi(-0.5) = 0.308538$, which are the numbers of the worked example. @sec-apx-cal-gauss-exact reaches the same formula by a different route. There, $\Phi(-0.5)$ is the chance that the privacy loss exceeds $\varepsilon$, and $e\,\Phi(-1.5)$ is the correction subtracted from it. With $\mu = \Delta/\sigma$ the two derivations give the same curve.
+At $\mu = 1$ and $\varepsilon = 1$, step 5 gives $\tau = 1 + 0.5 = 1.5$. Step 6 then gives $\mathrm{FPR} = \Phi(-1.5) = 0.066807$ and a detection rate of $\Phi(-0.5) = 0.308538$, which are the numbers of the worked example. @sec-apx-cal-gauss-exact reaches the same formula by a different route. There, $\Phi(-0.5)$ is the chance that the privacy loss exceeds $\varepsilon$, and $e\,\Phi(-1.5)$ is the correction subtracted from it. With $\mu = \Delta/\sigma$ the two derivations give the same curve.
 
 ### Checking it
 
-Searching over 20,001 thresholds for the largest $1 - G_1(a) - e\,a$ gives 0.126937, the value of @eq-apx-conv-gdp-delta. A simulation of the threshold test at $a = 0.05$ with 1,000,000 draws per world gives a false positive rate of 0.0497 and a false negative rate of 0.7413, against the exact 0.7405.
+Searching over 20,001 thresholds for the largest $1 - G_1(\mathrm{FPR}) - e\,\mathrm{FPR}$ gives 0.126937, the value of @eq-apx-conv-gdp-delta. A simulation of the threshold test at $\mathrm{FPR} = 0.05$ with 1,000,000 draws per world gives a false positive rate of 0.0497 and a false negative rate of 0.7413, against the exact 0.7405.
 
 @fig-apx-conv-gdp shows both halves of the derivation. On the left, each curve $G_\mu$ has a dashed line of slope $-e$ that just touches it. The line starts at $1 - \delta(1)$ on the vertical axis, so the gap below 1 is the exact $\delta$ at $\varepsilon = 1$. On the right, the whole curve $\delta(\varepsilon)$ falls steeply, and the dots mark where it crosses $10^{-5}$.
 
@@ -340,7 +340,7 @@ uv run python code/appendix-derivations/apx_core_conversions.py
 | Three outputs: largest $\Pr_P[S] - e^{0.1}\Pr_Q[S]$ | 0.00989 | at most 0.01 |
 | $\Pr[L > 5.2985]$ for the Gaussian, $\mu = 1$ | $7.992\times10^{-7}$ | at most $10^{-5}$ |
 | $\delta(1)$ for $\mu = 1$ by search over thresholds | 0.126937 | 0.126937 |
-| Threshold test at $a = 0.05$, $\mu = 1$, simulated miss rate | 0.7413 | 0.7405 |
+| Threshold test at $\mathrm{FPR} = 0.05$, $\mu = 1$, simulated miss rate | 0.7413 | 0.7405 |
 
 : The checks the script prints, with seed 0. {#tbl-apx-conv-code}
 

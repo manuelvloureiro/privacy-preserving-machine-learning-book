@@ -95,13 +95,13 @@ people. A smaller $\kappa$ hides each bit better and needs more people for the s
 In privacy, the first step is to fix the setting. Here it is the **central model**. Each of $n$ people sends their data point to a **trusted curator**, whom they trust with it and trust no one else. The curator runs an algorithm $M$ on the dataset $D = (x_1, \dots, x_n) \in \mathcal X^n$ and publishes the output. Everything the curator publishes crosses a trust barrier, and anyone on the far side may be an adversary. The guarantee is a property of the algorithm, which in this field is called a **mechanism**. It says that no single person's data has a large effect on the distribution of the output. To make "one person's data" precise, compare two datasets that differ only in one person's record.
 
 ::: {#def-rr-neighbours name="Neighbouring datasets"}
-Two datasets $D, D' \in \mathcal X^n$ are **neighbours**, written $D \simeq D'$, if they differ in exactly one record. This is the **replace-one** relation.
+Two datasets $D, D' \in \mathcal X^n$ are **neighbours**, written $D \sim D'$, if they differ in exactly one record. This is the **replace-one** relation.
 :::
 
 The definition asks that the distribution of the output barely change between neighbours. On every set of outputs, the probability may grow by at most a factor $e^\varepsilon$, where the privacy parameter $\varepsilon$ measures how much change is allowed.
 
 ::: {#def-rr-dp name="Differential privacy"}
-Let $\varepsilon \ge 0$. A randomized algorithm $M \colon \mathcal X^n \to \mathcal Y$, which maps a dataset to an output in a set $\mathcal Y$, is **$\varepsilon$-differentially private** ($\varepsilon$-DP) if for all neighbours $D \simeq D'$ and all events $S \subseteq \mathcal Y$,
+Let $\varepsilon \ge 0$. A randomized algorithm $M \colon \mathcal X^n \to \mathcal Y$, which maps a dataset to an output in a set $\mathcal Y$, is **$\varepsilon$-differentially private** ($\varepsilon$-DP) if for all neighbours $D \sim D'$ and all events $S \subseteq \mathcal Y$,
 
 $$
 \Pr[M(D) \in S] \le e^{\varepsilon}\, \Pr[M(D') \in S] .
@@ -125,7 +125,7 @@ This notion of neighbours replaces one record, and differential privacy under it
 For discrete outputs it suffices to check single outcomes, because the probability of an event is a sum of the probabilities of its outcomes.
 
 ::: {#lem-rr-pointwise}
-Let $\mathcal Y$ be countable. If $\Pr[M(D) = y] \le e^{\varepsilon}\Pr[M(D') = y]$ for all neighbours $D \simeq D'$ and all outputs $y \in \mathcal Y$, then $M$ is $\varepsilon$-DP.
+Let $\mathcal Y$ be countable. If $\Pr[M(D) = y] \le e^{\varepsilon}\Pr[M(D') = y]$ for all neighbours $D \sim D'$ and all outputs $y \in \mathcal Y$, then $M$ is $\varepsilon$-DP.
 :::
 
 ::: {.proof}
@@ -143,7 +143,7 @@ For $\varepsilon < \infty$, a deterministic $\varepsilon$-DP algorithm is consta
 :::
 
 ::: {.proof}
-1. Let $M$ be deterministic and $D \simeq D'$. Take the event $S = \{M(D)\}$. The definition gives $1 = \Pr[M(D) \in S] \le e^\varepsilon \Pr[M(D') \in S]$, so $\Pr[M(D') = M(D)] > 0$. Since $M(D')$ is a single value, $M(D') = M(D)$.
+1. Let $M$ be deterministic and $D \sim D'$. Take the event $S = \{M(D)\}$. The definition gives $1 = \Pr[M(D) \in S] \le e^\varepsilon \Pr[M(D') \in S]$, so $\Pr[M(D') = M(D)] > 0$. Since $M(D')$ is a single value, $M(D') = M(D)$.
 2. Any two datasets in $\mathcal X^n$ are joined by a path of at most $n$ neighbours, changing one record at a time. By step 1, $M$ takes the same value at every step of the path, so it is constant.
 :::
 
@@ -155,29 +155,29 @@ $$
 H_0\colon \text{the dataset is } D, \qquad H_1\colon \text{the dataset is } D' .
 $$
 
-A test is a function $\phi\colon \mathcal Y \to [0,1]$, the probability of answering $H_1$ given the output, so randomized tests are allowed. Write $a$ and $b$ for the test's two error rates. The test's **false positive rate** $a$ is the chance of answering $H_1$ when $H_0$ holds, and its **false negative rate** $b$ is the chance of answering $H_0$ when $H_1$ holds:
+A test is a function $\phi\colon \mathcal Y \to [0,1]$, the probability of answering $H_1$ given the output, so randomized tests are allowed. Statistics writes the two error rates $\alpha$ and $\beta$, but this chapter already uses those letters for accuracy. The test's **false positive rate** $\mathrm{FPR}$ is the chance of answering $H_1$ when $H_0$ holds, and its **false negative rate** $\mathrm{FNR}$ is the chance of answering $H_0$ when $H_1$ holds:
 
 $$
-a = \mathbb E[\phi(M(D))], \qquad b = 1 - \mathbb E[\phi(M(D'))].
+\mathrm{FPR} = \mathbb E[\phi(M(D))], \qquad \mathrm{FNR} = 1 - \mathbb E[\phi(M(D'))].
 $$
 
 An adversary wants both error rates small. The next theorem says that differential privacy is exactly a limit on how small they can be at once, for every test.
 
 ::: {#thm-rr-testing}
-A mechanism $M$ is $\varepsilon$-DP if and only if, for every pair of neighbours and every test, the false positive rate $a$ and the false negative rate $b$ satisfy
+A mechanism $M$ is $\varepsilon$-DP if and only if, for every pair of neighbours and every test, the false positive rate $\mathrm{FPR}$ and the false negative rate $\mathrm{FNR}$ satisfy
 
 $$
-a + e^{\varepsilon}b \ge 1 \qquad\text{and}\qquad e^{\varepsilon}a + b \ge 1 .
+\mathrm{FPR} + e^{\varepsilon}\mathrm{FNR} \ge 1 \qquad\text{and}\qquad e^{\varepsilon}\mathrm{FPR} + \mathrm{FNR} \ge 1 .
 $$ {#eq-rr-testing}
 :::
 
 ::: {.proof}
 1. *DP extends from events to tests.* Let $M$ be $\varepsilon$-DP and let $\phi$ take values in $[0,1]$. Write its average as an integral of tail probabilities, $\mathbb E[\phi(M(D))] = \int_0^1 \Pr[\phi(M(D)) > t]\,\mathrm d t$. Each tail is the probability of the event $S_t = \{y : \phi(y) > t\}$, which @eq-rr-dp bounds by $e^\varepsilon\Pr[M(D') \in S_t]$. Integrating over $t$ gives $\mathbb E[\phi(M(D))] \le e^\varepsilon\,\mathbb E[\phi(M(D'))]$, and the same holds with $D$ and $D'$ swapped.
-2. *DP implies the inequalities.* Apply step 1 to $\phi$, from $D'$ to $D$: $1 - b = \mathbb E[\phi(M(D'))] \le e^\varepsilon\,\mathbb E[\phi(M(D))] = e^\varepsilon a$. This is the second inequality. Apply step 1 to $1 - \phi$, from $D$ to $D'$: $1 - a = \mathbb E[1-\phi(M(D))] \le e^\varepsilon\,\mathbb E[1-\phi(M(D'))] = e^\varepsilon b$. This is the first.
-3. *The inequalities imply DP.* Take an event $S$ and the test $\phi(y) = \mathbf 1[y \in S]$, which answers $H_1$ exactly when the output lands in $S$. Its error rates are $a = \Pr[M(D)\in S]$ and $b = 1 - \Pr[M(D')\in S]$. The second inequality says $e^\varepsilon\Pr[M(D)\in S] + 1 - \Pr[M(D')\in S] \ge 1$, that is, $\Pr[M(D')\in S] \le e^\varepsilon \Pr[M(D)\in S]$. The pair of neighbours was arbitrary, so the same holds with the roles of $D$ and $D'$ swapped, which is @eq-rr-dp.
+2. *DP implies the inequalities.* Apply step 1 to $\phi$, from $D'$ to $D$: $1 - \mathrm{FNR} = \mathbb E[\phi(M(D'))] \le e^\varepsilon\,\mathbb E[\phi(M(D))] = e^\varepsilon \mathrm{FPR}$. This is the second inequality. Apply step 1 to $1 - \phi$, from $D$ to $D'$: $1 - \mathrm{FPR} = \mathbb E[1-\phi(M(D))] \le e^\varepsilon\,\mathbb E[1-\phi(M(D'))] = e^\varepsilon \mathrm{FNR}$. This is the first.
+3. *The inequalities imply DP.* Take an event $S$ and the test $\phi(y) = \mathbf 1[y \in S]$, which answers $H_1$ exactly when the output lands in $S$. Its error rates are $\mathrm{FPR} = \Pr[M(D)\in S]$ and $\mathrm{FNR} = 1 - \Pr[M(D')\in S]$. The second inequality says $e^\varepsilon\Pr[M(D)\in S] + 1 - \Pr[M(D')\in S] \ge 1$, that is, $\Pr[M(D')\in S] \le e^\varepsilon \Pr[M(D)\in S]$. The pair of neighbours was arbitrary, so the same holds with the roles of $D$ and $D'$ swapped, which is @eq-rr-dp.
 :::
 
-At $\varepsilon = 0$ the two inequalities force $a + b \ge 1$, which is what a test that ignores the output achieves, such as guessing at random ($a = b = 1/2$) or always answering $H_0$ ($a = 0$, $b = 1$). As $\varepsilon$ grows, the region of achievable error pairs widens, and the adversary can beat blind guessing by more.
+At $\varepsilon = 0$ the two inequalities force $\mathrm{FPR} + \mathrm{FNR} \ge 1$, which is what a test that ignores the output achieves, such as guessing at random ($\mathrm{FPR} = \mathrm{FNR} = 1/2$) or always answering $H_0$ ($\mathrm{FPR} = 0$, $\mathrm{FNR} = 1$). As $\varepsilon$ grows, the region of achievable error pairs widens, and the adversary can beat blind guessing by more.
 
 ### What the definition promises {#sec-rr-meaning}
 
@@ -244,7 +244,7 @@ Randomized response gives more than the definition asks for. Each person randomi
 | @def-rr-dp | $\Pr[M(D)\in S] \le e^\varepsilon \Pr[M(D')\in S]$ for all neighbours and events |
 | @lem-rr-pointwise | for discrete outputs, single outcomes suffice |
 | @prp-rr-randomized | a deterministic private algorithm is constant |
-| @thm-rr-testing | $\varepsilon$-DP holds exactly when every test has $a + e^\varepsilon b \ge 1$ and $e^\varepsilon a + b \ge 1$ |
+| @thm-rr-testing | $\varepsilon$-DP holds exactly when every test has $\mathrm{FPR} + e^\varepsilon \mathrm{FNR} \ge 1$ and $e^\varepsilon \mathrm{FPR} + \mathrm{FNR} \ge 1$ |
 | @thm-rr-privacy | truth with probability $e^\varepsilon/(1+e^\varepsilon)$ gives $\varepsilon$-DP |
 | @eq-rr-tradeoff | error $\coth(\varepsilon/2)\sqrt{\ln(2/\beta)/(2n)} = O(1/(\varepsilon\sqrt n))$ |
 

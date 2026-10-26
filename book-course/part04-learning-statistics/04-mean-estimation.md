@@ -15,7 +15,7 @@ $$
 The [Laplace mechanism](../part02-dp-basics/02-laplace-mechanism.md) privatizes a function $f$ of the dataset with values in $\mathbb R^d$. Its **sensitivity** $\Delta_1 f$ is the largest change that replacing one record can cause,
 
 $$
-\Delta_1 f = \max_{D \simeq D'} \|f(D) - f(D')\|_1 .
+\Delta_1 f = \max_{D \sim D'} \|f(D) - f(D')\|_1 .
 $$
 
 If $\Delta_1 f$ is finite, releasing $f(D)$ plus independent $\mathrm{Lap}(\Delta_1 f/\varepsilon)$ noise in each coordinate is $\varepsilon$-DP.

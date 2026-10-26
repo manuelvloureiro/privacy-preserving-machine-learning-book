@@ -4,7 +4,7 @@ Running $k$ private analyses on the same data costs privacy, and basic compositi
 
 ## The theorem {#sec-ac-theorem}
 
-Write $D \simeq D'$ for neighbouring datasets, which differ in one record (the replace-one relation). The chapter on [approximate differential privacy](03-approximate-dp.md) relaxed the definition of differential privacy (DP) by an additive term. A mechanism $M$ is **$(\varepsilon,\delta)$-DP** if, for all neighbours $D \simeq D'$ and all events $S$,
+Write $D \sim D'$ for neighbouring datasets, which differ in one record (the replace-one relation). The chapter on [approximate differential privacy](03-approximate-dp.md) relaxed the definition of differential privacy (DP) by an additive term. A mechanism $M$ is **$(\varepsilon,\delta)$-DP** if, for all neighbours $D \sim D'$ and all events $S$,
 
 $$
 \Pr[M(D)\in S] \le e^{\varepsilon}\Pr[M(D')\in S] + \delta .
@@ -162,7 +162,7 @@ The map sends each of the four outcomes to a distribution on the space. The outc
 Applying @thm-ac-simulation once per step of an adaptive composition reduces the whole transcript to a map of $k$ independent copies of the four-outcome pair.
 
 ::: {#thm-ac-reduction}
-Let $M$ be the adaptive composition of $M_1,\dots,M_k$ as in @thm-ac-advanced, and fix neighbours $D \simeq D'$. Let $U_1,\dots,U_k$ be independent copies of $U$ and $V_1,\dots,V_k$ independent copies of $V$. Then there is a randomized map $F^*$ such that $F^*(U_1,\dots,U_k)$ has the distribution of $M(D)$ and $F^*(V_1,\dots,V_k)$ has the distribution of $M(D')$.
+Let $M$ be the adaptive composition of $M_1,\dots,M_k$ as in @thm-ac-advanced, and fix neighbours $D \sim D'$. Let $U_1,\dots,U_k$ be independent copies of $U$ and $V_1,\dots,V_k$ independent copies of $V$. Then there is a randomized map $F^*$ such that $F^*(U_1,\dots,U_k)$ has the distribution of $M(D)$ and $F^*(V_1,\dots,V_k)$ has the distribution of $M(D')$.
 :::
 
 ::: {.proof}
@@ -244,7 +244,7 @@ Let $\varepsilon \ge 0$, $\delta \in [0,1)$ and $\delta' \in (0,1)$. Then $\math
 The two terms of $\tilde\delta$ now have a meaning. The term $k\delta$ pays for a catastrophic outcome in some step, and $\delta'$ pays for an unusually long run of outcomes that favour $\mathbf U$. The proof of the theorem only puts the pieces together.
 
 ::: {.proof}
-*Proof of @thm-ac-advanced.* Fix neighbours $D \simeq D'$.
+*Proof of @thm-ac-advanced.* Fix neighbours $D \sim D'$.
 
 1. By @thm-ac-reduction, $M(D)$ and $M(D')$ have the distributions of $F^*(\mathbf U)$ and $F^*(\mathbf V)$ for one randomized map $F^*$.
 2. By @prp-ac-binary, $\mathbf U$ and $\mathbf V$ are $(\tilde\varepsilon,\tilde\delta)$-indistinguishable.

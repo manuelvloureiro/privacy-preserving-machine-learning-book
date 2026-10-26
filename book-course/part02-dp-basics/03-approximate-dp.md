@@ -12,10 +12,10 @@ $$
 \Pr[M(D)\in S] \le \Pr[M(D')\in S] + \delta .
 $$
 
-This allows no useful accuracy when $\delta$ is small, and it allows harmful algorithms when $\delta$ is large (Vadhan, 2017, Section 1.6). The second failure appears in @sec-adp-delta. Combined with the multiplicative bound of pure DP, however, an additive term gives the right definition. Recall that two datasets in $\mathcal X^n$ are neighbours, written $D \simeq D'$, when they differ in exactly one record (the replace-one relation).
+This allows no useful accuracy when $\delta$ is small, and it allows harmful algorithms when $\delta$ is large (Vadhan, 2017, Section 1.6). The second failure appears in @sec-adp-delta. Combined with the multiplicative bound of pure DP, however, an additive term gives the right definition. Recall that two datasets in $\mathcal X^n$ are neighbours, written $D \sim D'$, when they differ in exactly one record (the replace-one relation).
 
 ::: {#def-adp-dp name="Approximate differential privacy"}
-Let $\varepsilon \ge 0$ and $\delta \in [0,1]$. A randomized algorithm $M\colon \mathcal X^n \to \mathcal Y$ is **$(\varepsilon,\delta)$-differentially private** if for all neighbours $D \simeq D'$ and all events $S \subseteq \mathcal Y$,
+Let $\varepsilon \ge 0$ and $\delta \in [0,1]$. A randomized algorithm $M\colon \mathcal X^n \to \mathcal Y$ is **$(\varepsilon,\delta)$-differentially private** if for all neighbours $D \sim D'$ and all events $S \subseteq \mathcal Y$,
 
 $$
 \Pr[M(D) \in S] \le e^{\varepsilon}\Pr[M(D') \in S] + \delta .
@@ -26,7 +26,7 @@ At $\delta = 0$ this is the $\varepsilon$-DP of [the randomized response chapter
 
 ## The privacy loss random variable {#sec-adp-loss}
 
-@def-adp-dp bounds probabilities of events, but it is easier to understand one outcome at a time. Fix neighbours $D \simeq D'$. An observer who sees an output $y$ and wonders whether the dataset was $D$ or $D'$ compares how likely $y$ is under each. Write $P$ and $Q$ for the distributions of $M(D)$ and $M(D')$, and $p(y)$ and $q(y)$ for the likelihood of the outcome $y$ under each. When $\mathcal Y$ is countable, these are the probabilities $p(y) = \Pr[M(D) = y]$ and $q(y) = \Pr[M(D') = y]$. When both outputs have ordinary densities, $p$ and $q$ are those densities. (In general, $p$ and $q$ are densities with respect to the measure $P + Q$, which always exist.)
+@def-adp-dp bounds probabilities of events, but it is easier to understand one outcome at a time. Fix neighbours $D \sim D'$. An observer who sees an output $y$ and wonders whether the dataset was $D$ or $D'$ compares how likely $y$ is under each. Write $P$ and $Q$ for the distributions of $M(D)$ and $M(D')$, and $p(y)$ and $q(y)$ for the likelihood of the outcome $y$ under each. When $\mathcal Y$ is countable, these are the probabilities $p(y) = \Pr[M(D) = y]$ and $q(y) = \Pr[M(D') = y]$. When both outputs have ordinary densities, $p$ and $q$ are those densities. (In general, $p$ and $q$ are densities with respect to the measure $P + Q$, which always exist.)
 
 The privacy loss is the logarithm of the ratio $p(y)/q(y)$. The ratio needs a convention in one case: an outcome that can occur under $D$ but never under $D'$, so that $p(y)$ is positive while $q(y)$ is zero. Seeing such an outcome rules $D'$ out entirely, and its loss is set to $+\infty$.
 
@@ -65,7 +65,7 @@ The three masses add up to $1$. The privacy loss never leaves $[-\varepsilon, \v
 The example is an instance of a general fact. Pure DP says that the privacy loss is bounded by $\varepsilon$ with probability $1$, and approximate DP says, roughly, that it is bounded by $\varepsilon$ except with probability $\delta$. Both follow from one identity, which computes the largest violation of the multiplicative bound over all events. That largest violation is the smallest $\delta$ that works for the pair. The identity writes it as an average over the privacy loss. It uses the positive part $(z)_+ = \max(z, 0)$, which keeps $z$ when it is positive and replaces it by $0$ otherwise. When the loss is infinite, the term $e^{\varepsilon - L}$ is read as $0$.
 
 ::: {#lem-adp-hockey}
-For neighbours $D \simeq D'$ and $\varepsilon \ge 0$,
+For neighbours $D \sim D'$ and $\varepsilon \ge 0$,
 
 $$
 \sup_{S \subseteq \mathcal Y}\Big(\Pr[M(D)\in S] - e^\varepsilon \Pr[M(D')\in S]\Big) = \mathbb E\Big[\big(1 - e^{\varepsilon - L}\big)_+\Big],
@@ -84,7 +84,7 @@ where $L$ is the privacy loss random variable of @def-adp-loss for this pair, $(
 The right-hand side of @eq-adp-hockey is called the **hockey-stick divergence** of $P$ from $Q$, after the shape of the function $z \mapsto (1 - e^{\varepsilon - z})_+$. Its integrand is $0$ when $L \le \varepsilon$ and at most $1$ otherwise. So the lemma ties $(\varepsilon,\delta)$-DP to how often $L$ exceeds $\varepsilon$, and the next theorem makes that tie precise in both directions.
 
 ::: {#thm-adp-loss}
-Let $M\colon\mathcal X^n \to \mathcal Y$ be a randomized algorithm, and let $L$ be its privacy loss random variable for an ordered pair of neighbours $D \simeq D'$.
+Let $M\colon\mathcal X^n \to \mathcal Y$ be a randomized algorithm, and let $L$ be its privacy loss random variable for an ordered pair of neighbours $D \sim D'$.
 
 1. $M$ is $\varepsilon$-DP if and only if $L \le \varepsilon$ with probability $1$ for every ordered pair of neighbours. In that case $|L| \le \varepsilon$ with probability $1$.
 2. If $\Pr[L > \varepsilon] \le \delta$ for every ordered pair of neighbours, then $M$ is $(\varepsilon,\delta)$-DP.
@@ -183,7 +183,7 @@ The Laplace mechanism calibrates its noise to the $\ell_1$ sensitivity. The Gaus
 The **$\ell_2$ sensitivity** of a function $f\colon \mathcal X^n \to \mathbb R^d$ is
 
 $$
-\Delta_2 f = \sup_{D \simeq D'} \|f(D) - f(D')\|_2 .
+\Delta_2 f = \sup_{D \sim D'} \|f(D) - f(D')\|_2 .
 $$
 :::
 
@@ -277,7 +277,7 @@ Let $W \sim \mathcal N(0,1)$.
 The first step of the plan is to compute the privacy loss. It turns out to be Gaussian, with a mean and a variance set by the distance between $f(D)$ and $f(D')$.
 
 ::: {#lem-adp-gaussian-loss}
-Let $D \simeq D'$, let $M$ be the Gaussian mechanism with noise level $\sigma$, and write $v = f(D) - f(D')$. The privacy loss random variable of $M(D)$ against $M(D')$ is distributed as
+Let $D \sim D'$, let $M$ be the Gaussian mechanism with noise level $\sigma$, and write $v = f(D) - f(D')$. The privacy loss random variable of $M(D)$ against $M(D')$ is distributed as
 
 $$
 L \sim \mathcal N\!\left(\rho,\ 2\rho\right), \qquad \rho = \frac{\|v\|_2^2}{2\sigma^2}.
@@ -390,7 +390,7 @@ Let $M\colon\mathcal X^n \to \mathcal Y$ be $(\varepsilon,\delta)$-DP, and let $
 
 ::: {.proof}
 1. Write $F(y) = g_R(y)$, where $R$ is the coins of $F$ and each $g_r$ is a deterministic function. So $F$ is a random choice of a deterministic function.
-2. For neighbours $D \simeq D'$ and an event $S \subseteq \mathcal Z$, condition on $R$ and apply @eq-adp-dp to the event $g_R^{-1}(S)$:
+2. For neighbours $D \sim D'$ and an event $S \subseteq \mathcal Z$, condition on $R$ and apply @eq-adp-dp to the event $g_R^{-1}(S)$:
 
 $$
 \Pr[F(M(D))\in S] = \mathbb E_R\Big[\Pr[M(D) \in g_R^{-1}(S)]\Big] \le \mathbb E_R\Big[e^\varepsilon\Pr[M(D') \in g_R^{-1}(S)] + \delta\Big] = e^\varepsilon\Pr[F(M(D'))\in S] + \delta .
@@ -408,9 +408,9 @@ $$ {#eq-adp-group}
 :::
 
 ::: {.proof}
-1. Change the differing records one at a time to get a chain $D = D^{(0)} \simeq D^{(1)} \simeq \dots \simeq D^{(k)} = D'$ of neighbours. Write $P_j = \Pr[M(D^{(j)})\in S]$.
+1. Change the differing records one at a time to get a chain $D = D^{(0)} \sim D^{(1)} \sim \dots \sim D^{(k)} = D'$ of neighbours. Write $P_j = \Pr[M(D^{(j)})\in S]$.
 2. We show $P_0 \le e^{j\varepsilon}P_j + \delta\sum_{i=0}^{j-1}e^{i\varepsilon}$ by induction on $j$. The case $j = 1$ is @eq-adp-dp.
-3. If the bound holds for $j$, apply @eq-adp-dp to $D^{(j)} \simeq D^{(j+1)}$, which gives $P_j \le e^{\varepsilon}P_{j+1} + \delta$. Substituting,
+3. If the bound holds for $j$, apply @eq-adp-dp to $D^{(j)} \sim D^{(j+1)}$, which gives $P_j \le e^{\varepsilon}P_{j+1} + \delta$. Substituting,
 
 $$
 P_0 \le e^{j\varepsilon}\big(e^\varepsilon P_{j+1} + \delta\big) + \delta\sum_{i=0}^{j-1}e^{i\varepsilon} = e^{(j+1)\varepsilon}P_{j+1} + \delta\sum_{i=0}^{j}e^{i\varepsilon} .
@@ -424,7 +424,7 @@ The additive term grows exponentially in the group size. It exceeds $1$, and the
 Composition needs one more tool. The definition bounds probabilities of events, and the proof also needs averages of functions with values in $[0,1]$.
 
 ::: {#lem-adp-functions}
-Let $M$ be $(\varepsilon,\delta)$-DP and let $h\colon\mathcal Y \to [0,1]$. For all neighbours $D \simeq D'$,
+Let $M$ be $(\varepsilon,\delta)$-DP and let $h\colon\mathcal Y \to [0,1]$. For all neighbours $D \sim D'$,
 
 $$
 \mathbb E[h(M(D))] \le e^\varepsilon\,\mathbb E[h(M(D'))] + \delta .
@@ -445,7 +445,7 @@ If each $M_i(\cdot\,;y_{<i})$ is $(\varepsilon_i, \delta_i)$-DP for every $y_{<i
 
 ::: {.proof}
 1. The composition of the first $k-1$ mechanisms is itself a mechanism. So by induction on $k$ it suffices to treat $k = 2$.
-2. Fix neighbours $D \simeq D'$ and an event $S$ in $\mathcal Y_1\times\mathcal Y_2$. For an output $y_1$, write $S_{y_1} = \{y_2 : (y_1,y_2)\in S\}$ and $g_D(y_1) = \Pr[M_2(D; y_1) \in S_{y_1}]$, and define $g_{D'}$ in the same way. Conditioning on the first output,
+2. Fix neighbours $D \sim D'$ and an event $S$ in $\mathcal Y_1\times\mathcal Y_2$. For an output $y_1$, write $S_{y_1} = \{y_2 : (y_1,y_2)\in S\}$ and $g_D(y_1) = \Pr[M_2(D; y_1) \in S_{y_1}]$, and define $g_{D'}$ in the same way. Conditioning on the first output,
 
 $$
 \Pr[M(D)\in S] = \mathbb E_{y_1\sim M_1(D)}\big[g_D(y_1)\big].

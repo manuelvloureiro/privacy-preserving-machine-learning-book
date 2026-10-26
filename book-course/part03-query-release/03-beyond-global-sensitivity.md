@@ -6,10 +6,10 @@ Done naively, it cannot, because the amount of noise then depends on the data an
 
 ## Local sensitivity {#sec-bgs-local}
 
-Throughout the chapter, $f\colon \mathcal X^n \to \mathbb R$ is a real-valued function of the dataset. Its **global sensitivity** is the largest change that replacing one record can cause, over neighbouring datasets $D \simeq D'$ (the replace-one relation),
+Throughout the chapter, $f\colon \mathcal X^n \to \mathbb R$ is a real-valued function of the dataset. Its **global sensitivity** is the largest change that replacing one record can cause, over neighbouring datasets $D \sim D'$ (the replace-one relation),
 
 $$
-\Delta f = \max_{D \simeq D'} |f(D) - f(D')| ,
+\Delta f = \max_{D \sim D'} |f(D) - f(D')| ,
 $$
 
 and the [Laplace mechanism](../part02-dp-basics/02-laplace-mechanism.md) adds to $f(D)$ a noise term drawn from $\mathrm{Lap}(\Delta f/\varepsilon)$, which makes the release $\varepsilon$-DP. The maximum ranges over all pairs of neighbours, including datasets that look nothing like the one held. Fixing the first dataset gives a local version.
@@ -59,7 +59,7 @@ the fewest records that must change to reach a dataset whose local sensitivity e
 So $\gamma_b(D) = 0$ exactly when $\mathrm{LS}_f(D) > b$. The distance is a count of records, and that gives it sensitivity $1$ whatever $f$ is.
 
 ::: {#lem-bgs-distance}
-If $\gamma_b$ is finite, then $|\gamma_b(D) - \gamma_b(D')| \le 1$ for all neighbours $D \simeq D'$.
+If $\gamma_b$ is finite, then $|\gamma_b(D) - \gamma_b(D')| \le 1$ for all neighbours $D \sim D'$.
 :::
 
 ::: {.proof}
@@ -85,7 +85,7 @@ Propose-test-release is $(2\varepsilon, \delta)$-DP.
 :::
 
 ::: {.proof}
-Fix neighbours $D \simeq D'$ and an event $S \subseteq \mathbb R \cup \{\bot\}$. Write $\tau = \ln(1/\delta)/\varepsilon$ for the threshold. If $\gamma_b$ is infinite at every dataset, the test always passes and $b \ge \Delta f$, so the output is the Laplace mechanism and is $\varepsilon$-DP. Assume from now on that $\gamma_b$ is finite.
+Fix neighbours $D \sim D'$ and an event $S \subseteq \mathbb R \cup \{\bot\}$. Write $\tau = \ln(1/\delta)/\varepsilon$ for the threshold. If $\gamma_b$ is infinite at every dataset, the test always passes and $b \ge \Delta f$, so the output is the Laplace mechanism and is $\varepsilon$-DP. Assume from now on that $\gamma_b$ is finite.
 
 1. *The test is $\varepsilon$-DP.* By @lem-bgs-distance, $\gamma_b$ has sensitivity $1$, so $\hat\gamma$ is the Laplace mechanism and is $\varepsilon$-DP. The events $\{\hat\gamma \le \tau\}$ and $\{\hat\gamma > \tau\}$ are post-processing of $\hat\gamma$, so each has probability on $D$ at most $e^{\varepsilon}$ times its probability on $D'$.
 2. *Case $\mathrm{LS}_f(D) > b$.* Then $\gamma_b(D) = 0$, and the test passes only if $Z_1 > \tau$, which has probability $\frac12 e^{-\varepsilon\tau} = \delta/2$. Splitting on whether the output is $\bot$ and using step 1,
@@ -114,7 +114,7 @@ Propose-test-release is most striking with the bound $b = 0$. Then the test chec
 Let $\mathcal X$ be any set with a fixed total order, used only to break ties. Write $c_x(D)$ for the number of records of $D$ equal to $x$, and $c_{(1)}(D) \ge c_{(2)}(D)$ for the largest and second-largest of these counts, with $c_{(2)}(D) = 0$ if all records are equal. The mode $\mathrm{mode}(D)$ is the element with the largest count, the least one in the order among ties. To change the mode, records must move from the most frequent element to the runner-up until it overtakes. So half the gap between the two largest counts is, up to $1$, the distance to instability, and it is computed in one pass over the data whatever the domain.
 
 ::: {#lem-bgs-gap}
-Let $g(D) = \big(c_{(1)}(D) - c_{(2)}(D)\big)/2$. For all neighbours $D \simeq D'$:
+Let $g(D) = \big(c_{(1)}(D) - c_{(2)}(D)\big)/2$. For all neighbours $D \sim D'$:
 
 1. $|g(D) - g(D')| \le 1$;
 2. if $g(D) > 1$, then $\mathrm{mode}(D') = \mathrm{mode}(D)$.
@@ -139,7 +139,7 @@ The stable mode is $(\varepsilon, \delta)$-DP. On every dataset whose two larges
 :::
 
 ::: {.proof}
-Fix neighbours $D \simeq D'$ and an event $S$, and write $\tau = 1 + \ln(1/\delta)/\varepsilon$.
+Fix neighbours $D \sim D'$ and an event $S$, and write $\tau = 1 + \ln(1/\delta)/\varepsilon$.
 
 1. *The gap is $\varepsilon$-DP.* By @lem-bgs-gap, claim 1, $\hat g$ is the Laplace mechanism for a function of sensitivity $1$, so it is $\varepsilon$-DP.
 2. *Case $\mathrm{mode}(D') = \mathrm{mode}(D)$.* The output on both datasets is the same function of $\hat g$, namely $\bot$ below the threshold and the common mode above it. Post-processing gives $\Pr[M(D) \in S] \le e^{\varepsilon}\Pr[M(D') \in S]$.
@@ -196,7 +196,7 @@ In the usual regime $\delta \le 1/n$, the bound @eq-bgs-histogram is at most $1 
 Propose-test-release guesses a bound and checks it. A second technique estimates the local sensitivity itself, privately, and uses the estimate as the noise scale. It applies when the local sensitivity does not change fast between neighbours, that is, when $\mathrm{LS}_f$ has bounded global sensitivity.
 
 ::: {#def-bgs-bounding name="Noisy local sensitivity"}
-Suppose that the local sensitivity changes by at most $\lambda > 0$ between neighbours, that is, $|\mathrm{LS}_f(D) - \mathrm{LS}_f(D')| \le \lambda$ for all $D \simeq D'$. Given $\varepsilon > 0$ and $\delta \in (0,1)$, on input $D$:
+Suppose that the local sensitivity changes by at most $\lambda > 0$ between neighbours, that is, $|\mathrm{LS}_f(D) - \mathrm{LS}_f(D')| \le \lambda$ for all $D \sim D'$. Given $\varepsilon > 0$ and $\delta \in (0,1)$, on input $D$:
 
 1. compute $\hat s = \mathrm{LS}_f(D) + Z_1 + \lambda\ln(1/\delta)/\varepsilon$ with $Z_1 \sim \mathrm{Lap}(\lambda/\varepsilon)$;
 2. if $\hat s \le 0$, output $\bot$, and otherwise output $f(D) + Z_2$ with $Z_2 \sim \mathrm{Lap}(\hat s/\varepsilon)$.
@@ -205,11 +205,11 @@ Suppose that the local sensitivity changes by at most $\lambda > 0$ between neig
 The shift $\lambda\ln(1/\delta)/\varepsilon$ makes the estimate $\hat s$ an overestimate of $\mathrm{LS}_f(D)$ except with probability $\delta/2$. On that good event, the noise is large enough for privacy. Paying both for the noisy estimate and for the release gives the factor $2\varepsilon$ in the next theorem.
 
 ::: {#thm-bgs-bounding}
-Let $\lambda > 0$ satisfy $|\mathrm{LS}_f(D) - \mathrm{LS}_f(D')| \le \lambda$ for all neighbours $D \simeq D'$, and let $\varepsilon > 0$ and $\delta \in (0,1)$. Then noisy local sensitivity with these parameters is $(2\varepsilon, \delta)$-DP.
+Let $\lambda > 0$ satisfy $|\mathrm{LS}_f(D) - \mathrm{LS}_f(D')| \le \lambda$ for all neighbours $D \sim D'$, and let $\varepsilon > 0$ and $\delta \in (0,1)$. Then noisy local sensitivity with these parameters is $(2\varepsilon, \delta)$-DP.
 :::
 
 ::: {.proof}
-Fix neighbours $D \simeq D'$. It suffices to prove the guarantee for the pair $(\hat s, \text{output})$, since the output alone is post-processing of it.
+Fix neighbours $D \sim D'$. It suffices to prove the guarantee for the pair $(\hat s, \text{output})$, since the output alone is post-processing of it.
 
 1. *The good event.* Let $G = \{\hat s \ge \mathrm{LS}_f(D)\}$, computed with the data $D$. It fails only if $Z_1 < -\lambda\ln(1/\delta)/\varepsilon$, which has probability $\delta/2$.
 2. *Density of the scale.* The function $\mathrm{LS}_f$ has sensitivity $\lambda$, so the density of $\hat s$ on $D$ is at most $e^{\varepsilon}$ times its density on $D'$, at every value $s$.
@@ -240,7 +240,7 @@ where $d$ is the Hamming distance.
 The supremum ranges over all datasets, not only neighbours. Every dataset is within distance $n$ of every other, so $e^{-sn}\Delta f \le S_{f,s}(D) \le \Delta f$. The smooth sensitivity is therefore finite exactly when the global sensitivity is, and it can be smaller by a factor up to $e^{sn}$. Two properties follow from the definition, and they are all that privacy needs.
 
 ::: {#lem-bgs-smooth}
-For every $D$, $S_{f,s}(D) \ge \mathrm{LS}_f(D)$. For all neighbours $D \simeq D'$, $S_{f,s}(D) \le e^{s} S_{f,s}(D')$.
+For every $D$, $S_{f,s}(D) \ge \mathrm{LS}_f(D)$. For all neighbours $D \sim D'$, $S_{f,s}(D) \le e^{s} S_{f,s}(D')$.
 :::
 
 ::: {.proof}
@@ -267,7 +267,7 @@ is $\varepsilon$-DP.
 ::: {.proof}
 1. *The scale is positive and finite.* Some dataset $W_0$ has $\mathrm{LS}_f(W_0) > 0$ because $f$ is not constant, and every $D$ is within distance $n$ of it, so $S^*(D) \ge \mathrm{LS}_f(W_0)e^{-\varepsilon n/2} > 0$. Every term of the supremum is at most $\Delta f$, so $S^*(D) \le \Delta f < \infty$.
 2. *Two facts about $h$.* The derivative of $\ln(1+z^2)$ is $2z/(1+z^2)$, which lies in $[-1, 1]$, so $h(z)/h(z + u) \le e^{|u|}$ for all $z$ and $u$. For every real $\kappa$ and $v$, $e^{-\kappa}h(v)/h(e^{\kappa}v) = e^{-\kappa}(1 + e^{2\kappa}v^2)/(1+v^2) \le e^{-\kappa}\max(1, e^{2\kappa}) = e^{|\kappa|}$.
-3. *The ratio of densities.* Fix neighbours $D \simeq D'$ and write $a = \varepsilon/2$. The density of $M(D)$ at $y$ is $(a/S^*(D))\,h\big(a(y - f(D))/S^*(D)\big)$. Set $u = a(y - f(D))/S^*(D)$, $w = a(f(D) - f(D'))/S^*(D)$ and $e^{\kappa} = S^*(D)/S^*(D')$. Then $a(y - f(D'))/S^*(D') = e^{\kappa}(u + w)$, and the ratio of the densities on $D$ and $D'$ is
+3. *The ratio of densities.* Fix neighbours $D \sim D'$ and write $a = \varepsilon/2$. The density of $M(D)$ at $y$ is $(a/S^*(D))\,h\big(a(y - f(D))/S^*(D)\big)$. Set $u = a(y - f(D))/S^*(D)$, $w = a(f(D) - f(D'))/S^*(D)$ and $e^{\kappa} = S^*(D)/S^*(D')$. Then $a(y - f(D'))/S^*(D') = e^{\kappa}(u + w)$, and the ratio of the densities on $D$ and $D'$ is
 
 $$
 e^{-\kappa}\,\frac{h(u)}{h(e^{\kappa}(u+w))} = \frac{h(u)}{h(u+w)} \cdot \frac{e^{-\kappa}\,h(u+w)}{h(e^{\kappa}(u+w))} \le e^{|w|}\,e^{|\kappa|} ,

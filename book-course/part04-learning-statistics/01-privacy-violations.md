@@ -4,7 +4,7 @@ Machine learning on sensitive data often produces results that feel invasive, an
 
 ## What the definition promises {#sec-viol-checklist}
 
-Recall the definition from [the randomized response chapter](../part02-dp-basics/01-randomized-response.md). A mechanism $M$ is $\varepsilon$-DP if, for all pairs of neighbouring datasets $D \simeq D'$, which differ by replacing one record, and all sets of outputs $S$,
+Recall the definition from [the randomized response chapter](../part02-dp-basics/01-randomized-response.md). A mechanism $M$ is $\varepsilon$-DP if, for all pairs of neighbouring datasets $D \sim D'$, which differ by replacing one record, and all sets of outputs $S$,
 
 $$
 \Pr[M(D)\in S] \le e^\varepsilon \Pr[M(D')\in S].
@@ -58,7 +58,7 @@ in which every label is one more than its feature. Any reasonable learner finds 
 The claim can be made exact. Each record determines an offset $y_i - x_i$, and a rule of the form $y = x + b$ is a choice of offset. The stability-based histogram of [the chapter on beyond global sensitivity](../part03-query-release/03-beyond-global-sensitivity.md) releases the offsets that many records share, even though offsets are real numbers and there are infinitely many possible bins. Its guarantee is approximate differential privacy, $(\varepsilon,\delta)$-DP, from [the approximate DP chapter](../part02-dp-basics/03-approximate-dp.md), which allows the bound of the definition an additive slack $\delta$:
 
 $$
-\Pr[M(D)\in S] \le e^\varepsilon\Pr[M(D')\in S] + \delta \quad\text{for all } D \simeq D' \text{ and all } S.
+\Pr[M(D)\in S] \le e^\varepsilon\Pr[M(D')\in S] + \delta \quad\text{for all } D \sim D' \text{ and all } S.
 $$
 
 The algorithm counts how many records share each offset, adds Laplace noise to each count, and releases the offsets whose noisy count clears a threshold. A threshold that is high enough keeps an offset that only one record holds from being released.
@@ -78,7 +78,7 @@ The stable histogram of offsets is $(\varepsilon,\delta)$-DP.
 :::
 
 ::: {.proof}
-1. Replacing one record changes at most one offset, so when $D \simeq D'$ the two lists of offsets are neighbours or equal.
+1. Replacing one record changes at most one offset, so when $D \sim D'$ the two lists of offsets are neighbours or equal.
 2. The stability-based histogram is $(\varepsilon,\delta)$-DP on datasets of offsets, by the theorem of that chapter.
 3. $M(D)$ is the set of elements on its list, a function of its output alone, so it is $(\varepsilon,\delta)$-DP by post-processing, which holds for approximate DP as well.
 :::

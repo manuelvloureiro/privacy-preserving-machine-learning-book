@@ -68,11 +68,11 @@ By the Neyman–Pearson lemma, the best test thresholds the likelihood ratio. He
 $$\ln\frac{e^{-(X - s)^2/2}}{e^{-X^2/2}} = \frac{X^2 - (X - s)^2}{2} = sX - \frac{s^2}2,$$
 which grows with $X$. So "the likelihood ratio is large" is the same as "$X$ is large", and the best test says "$H_1$" when $X$ exceeds some cut-off.
 
-The cut-off is set by the FPR you allow. Write $\Phi$ for the standard normal cumulative distribution function: $\Phi(t)$ is the probability that a standard normal variable is below $t$, and $\Phi^{-1}$ is its inverse. To flag a fraction $a$ of $H_0$ draws, the cut-off must be the point that a standard normal exceeds with probability $a$, which is $\Phi^{-1}(1 - a)$. Under $H_1$, $X - s$ is standard normal, so $X$ passes the cut-off with probability $1 - \Phi\big(\Phi^{-1}(1 - a) - s\big)$. That is the TPR:
-$$\mathrm{TPR}(a) = 1 - \Phi\big(\Phi^{-1}(1 - a) - s\big).$$ {#eq-mia-gauss-tpr}
+The cut-off is set by the FPR you allow. Write $\Phi$ for the standard normal cumulative distribution function: $\Phi(t)$ is the probability that a standard normal variable is below $t$, and $\Phi^{-1}$ is its inverse. To flag a fraction $\alpha$ of $H_0$ draws, the cut-off must be the point that a standard normal exceeds with probability $\alpha$, which is $\Phi^{-1}(1 - \alpha)$. Under $H_1$, $X - s$ is standard normal, so $X$ passes the cut-off with probability $1 - \Phi\big(\Phi^{-1}(1 - \alpha) - s\big)$. That is the TPR:
+$$\mathrm{TPR}(\alpha) = 1 - \Phi\big(\Phi^{-1}(1 - \alpha) - s\big).$$ {#eq-mia-gauss-tpr}
 This is the Gaussian trade-off curve of [Hypothesis testing](../part01-prerequisites/04-hypothesis-testing.md), written as TPR against FPR: the most members any test can catch, at each FPR.
 
-To get a feel for it, take $a = 10^{-3}$, so the cut-off is $\Phi^{-1}(1 - a) = 3.0902$: a standard normal exceeds 3.0902 one time in a thousand. With a separation of 0.5, a member's $X$ must still clear $3.0902 - 0.5 = 2.59$ standard deviations above its own mean, so $\mathrm{TPR} = 1 - \Phi(2.59) = 0.0048$, barely five times the chance rate of 0.001. With a separation of 4, the cut-off sits $3.0902 - 4 = -0.91$ standard deviations from the member mean, below it, so most members pass: $1 - \Phi(-0.91) = 0.8185$. LiRA's Gaussian fits, the two-type example and the exposure of outliers all use this formula.
+To get a feel for it, take $\alpha = 10^{-3}$, so the cut-off is $\Phi^{-1}(1 - \alpha) = 3.0902$: a standard normal exceeds 3.0902 one time in a thousand. With a separation of 0.5, a member's $X$ must still clear $3.0902 - 0.5 = 2.59$ standard deviations above its own mean, so $\mathrm{TPR} = 1 - \Phi(2.59) = 0.0048$, barely five times the chance rate of 0.001. With a separation of 4, the cut-off sits $3.0902 - 4 = -0.91$ standard deviations from the member mean, below it, so most members pass: $1 - \Phi(-0.91) = 0.8185$. LiRA's Gaussian fits, the two-type example and the exposure of outliers all use this formula.
 
 ### Fact 3 — For logistic regression, the logit of the confidence is the margin
 
@@ -260,16 +260,16 @@ Two numbers dominate older papers on membership inference: the attack's **accura
 
 ### Statement
 
-Two attacks can have the same AUC and nearly the same accuracy, yet TPRs at FPR $10^{-3}$ that differ by a factor of 38. The two attacks below are built to show how. Both concern a population of members and non-members; $r$ is a fraction of members, and $a$ is the FPR at which a TPR is read off.
+Two attacks can have the same AUC and nearly the same accuracy, yet TPRs at FPR $10^{-3}$ that differ by a factor of 38. The two attacks below are built to show how. Both concern a population of members and non-members; $r$ is a fraction of members, and $\alpha$ is the FPR at which a TPR is read off.
 
-**Attack A** exposes a few members completely and learns nothing about anyone else. It recognizes a fraction $r$ of members with certainty and gives every other record, member or not, the same random score. Its AUC is $\frac12 + \frac r2$, its best advantage is $r$, and $\mathrm{TPR}(a) = r + (1 - r)a$.
+**Attack A** exposes a few members completely and learns nothing about anyone else. It recognizes a fraction $r$ of members with certainty and gives every other record, member or not, the same random score. Its AUC is $\frac12 + \frac r2$, its best advantage is $r$, and $\mathrm{TPR}(\alpha) = r + (1 - r)\alpha$.
 
 **Attack B** learns a little about everyone. It gives members a score $\mathcal N(\mu, 1)$ and non-members $\mathcal N(0, 1)$, with the shift $\mu$ chosen so that its AUC is the same as A's: $\Phi(\mu/\sqrt2) = \frac12 + \frac r2$. Its best advantage is $2\Phi(\mu/2) - 1$ and its TPR is @eq-mia-gauss-tpr with $s = \mu$.
 
 ### Derivation
 
 1. **AUC of A.** The AUC is the probability that a random member outscores a random non-member, with ties counted as one half ([Hypothesis testing](../part01-prerequisites/04-hypothesis-testing.md)). Split on whether the member is one of the recognized ones. With probability $r$ it is, and it wins. Otherwise both scores have the same distribution, so neither is more likely to be higher and the member wins with probability $\frac12$. Total: $r + (1 - r)\frac12 = \frac12 + \frac r2$.
-2. **TPR of A.** At any threshold with FPR $a$, the recognized members always pass, and the others have the same score distribution as non-members, so they pass with the same probability $a$. So $\mathrm{TPR} = r + (1 - r)a$, and $\mathrm{TPR} - \mathrm{FPR} = r + (1 - r)a - a = r(1 - a)$, at most $r$.
+2. **TPR of A.** At any threshold with FPR $\alpha$, the recognized members always pass, and the others have the same score distribution as non-members, so they pass with the same probability $\alpha$. So $\mathrm{TPR} = r + (1 - r)\alpha$, and $\mathrm{TPR} - \mathrm{FPR} = r + (1 - r)\alpha - \alpha = r(1 - \alpha)$, at most $r$.
 3. **AUC of B.** A member outscores a non-member when the difference of their scores is positive. That difference is a member's $\mathcal N(\mu, 1)$ minus an independent $\mathcal N(0, 1)$, so it is normal with mean $\mu$ and variance $1 + 1 = 2$. It is positive with probability $\Phi(\mu/\sqrt2)$, the chance that a normal variable lies less than $\mu/\sqrt2$ of its standard deviations below its mean.
 4. **Advantage of B.** The best advantage of a test between two distributions is their **total variation distance**: the most that the probability of any set of scores can differ between the two, reached by the set where one density exceeds the other. For two unit-variance Gaussians at distance $\mu$ the densities cross halfway, at $\mu/2$, so the best test says "member" above $\mu/2$. Its TPR is $\Pr[\mathcal N(\mu, 1) > \mu/2] = \Phi(\mu/2)$, its FPR is $\Pr[\mathcal N(0, 1) > \mu/2] = 1 - \Phi(\mu/2)$, and its advantage is the difference, $2\Phi(\mu/2) - 1$ (both facts are in [Hypothesis testing](../part01-prerequisites/04-hypothesis-testing.md)).
 
@@ -290,7 +290,7 @@ With $r = 0.05$ (@tbl-mia-same-auc), both AUCs are $\frac12 + \frac{0.05}2 = 0.5
 
 **Log axes** are how you see that end. On linear axes, everything below FPR 0.01 is squeezed into one pixel column (@fig-mia-same-auc). On log axes, chance is the diagonal $\mathrm{TPR} = \mathrm{FPR}$ at every scale, and an attack that is useful at low FPR stands out as a curve that flattens above it.
 
-**Measuring a low FPR takes many non-members.** An FPR is estimated by counting false positives, and a count of $k$ events has a relative error of about $1/\sqrt k$, so the estimate is only as good as the number of false positives behind it ([Hypothesis testing](../part01-prerequisites/04-hypothesis-testing.md)). To see $k$ false positives at FPR $a$ you need about $k/a$ non-members. That is why the running example evaluates many target models: 64,000 non-member pairs give about $64{,}000 \times 10^{-3} = 64$ false positives at $10^{-3}$.
+**Measuring a low FPR takes many non-members.** An FPR is estimated by counting false positives, and a count of $k$ events has a relative error of about $1/\sqrt k$, so the estimate is only as good as the number of false positives behind it ([Hypothesis testing](../part01-prerequisites/04-hypothesis-testing.md)). To see $k$ false positives at FPR $\alpha$ you need about $k/\alpha$ non-members. That is why the running example evaluates many target models: 64,000 non-member pairs give about $64{,}000 \times 10^{-3} = 64$ false positives at $10^{-3}$.
 
 **Precision** is the fraction of "member" verdicts that are right. At a fair prior, members and non-members are equally many, so the right verdicts are proportional to TPR and the wrong ones to FPR, and the precision is $\mathrm{TPR}/(\mathrm{TPR} + \mathrm{FPR})$. At TPR 0.05 and FPR $10^{-3}$ that is $0.05/0.051 = 0.98$. Real targets are rarely members with probability one half. [Threat models and privacy games](01-threat-models.md) shows how the prior changes this.
 
@@ -329,8 +329,8 @@ One caveat: **the threshold was chosen on the same data** that measure the rates
 
 ### Statement
 
-For one record, the best test is the two-Gaussian test of Fact 2, so the best TPR is set by that record's own separation. For a record $z$ with Gaussian IN and OUT distributions of a common width $\sigma_z$, the best TPR of any test on $z$ alone at FPR $a$ is
-$$\mathrm{TPR}_z(a) = 1 - \Phi\big(\Phi^{-1}(1 - a) - s_z\big), \qquad s_z = \frac{\mu_{\mathrm{in}, z} - \mu_{\mathrm{out}, z}}{\sigma_z},$$ {#eq-mia-per-example}
+For one record, the best test is the two-Gaussian test of Fact 2, so the best TPR is set by that record's own separation. For a record $z$ with Gaussian IN and OUT distributions of a common width $\sigma_z$, the best TPR of any test on $z$ alone at FPR $\alpha$ is
+$$\mathrm{TPR}_z(\alpha) = 1 - \Phi\big(\Phi^{-1}(1 - \alpha) - s_z\big), \qquad s_z = \frac{\mu_{\mathrm{in}, z} - \mu_{\mathrm{out}, z}}{\sigma_z},$$ {#eq-mia-per-example}
 and the numerator $\mu_{\mathrm{in}, z} - \mu_{\mathrm{out}, z}$ is the **self-influence** of $z$ measured in $\phi$: the average amount by which training on $z$ raises the model's logit on $z$.
 
 ### Derivation
@@ -357,7 +357,7 @@ and the numerator $\mu_{\mathrm{in}, z} - \mu_{\mathrm{out}, z}$ is the **self-i
 | --- | --- | --- |
 | Mean separation $s_z$ | 0.461 | 1.539 |
 | Mean loss self-influence, $\mathbb E[\ell \mid \text{out}] - \mathbb E[\ell \mid \text{in}]$ | 0.0897 | 2.0999 |
-| Mean of @eq-mia-per-example at $a = 10^{-3}$ | 0.0074 | 0.2145 |
+| Mean of @eq-mia-per-example at $\alpha = 10^{-3}$ | 0.0074 | 0.2145 |
 | Online LiRA at pooled FPR $10^{-3}$: TPR | 0.0020 | 0.2597 |
 | Online LiRA at pooled FPR $10^{-3}$: FPR | 0.00086 | 0.00375 |
 
@@ -473,8 +473,8 @@ $\phi = \ln\frac{p_y}{1 - p_y}$ is the logit of the confidence in the true label
 | LiRA online | $\ln\Lambda_z = \ln\mathcal N(\phi; \mu_{\mathrm{in}}, \sigma_{\mathrm{in}}^2) - \ln\mathcal N(\phi; \mu_{\mathrm{out}}, \sigma_{\mathrm{out}}^2)$, one threshold for all $z$ | Neyman–Pearson for the game when the fits are right |
 | LiRA offline | $(\phi - \mu_{\mathrm{out}})/\sigma_{\mathrm{out}}$ | OUT models only, reusable across targets |
 | Equal variances | $\ln\Lambda_z = s_zt_z - s_z^2/2$ | Online and offline rank one record alike, records differently |
-| Per-example best TPR | $1 - \Phi(\Phi^{-1}(1 - a) - s_z)$, $s_z = (\mu_{\mathrm{in}} - \mu_{\mathrm{out}})/\sigma$ | $\mu_{\mathrm{in}} - \mu_{\mathrm{out}}$ is the self-influence in $\phi$ |
-| Same AUC, A vs B | A: $\mathrm{TPR} = r + (1 - r)a$; B: $\Phi(\mu/\sqrt2) = \frac12 + \frac r2$ | AUC hides who is exposed |
+| Per-example best TPR | $1 - \Phi(\Phi^{-1}(1 - \alpha) - s_z)$, $s_z = (\mu_{\mathrm{in}} - \mu_{\mathrm{out}})/\sigma$ | $\mu_{\mathrm{in}} - \mu_{\mathrm{out}}$ is the self-influence in $\phi$ |
+| Same AUC, A vs B | A: $\mathrm{TPR} = r + (1 - r)\alpha$; B: $\Phi(\mu/\sqrt2) = \frac12 + \frac r2$ | AUC hides who is exposed |
 
 : Every result in this chapter. {#tbl-mia-cheat}
 
