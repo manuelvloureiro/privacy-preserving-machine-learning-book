@@ -43,7 +43,8 @@ The average of $n$ independent copies of $X$ has mean $\mathbb E[X]$ and varianc
 :::
 
 ::: {#exm-dist-die}
-A fair die has mean $(1 + \dots + 6)/6 = 3.5$ and mean of the square $(1 + 4 + \dots + 36)/6 = 91/6$. So its variance is $91/6 - 3.5^2 = 35/12 \approx 2.92$, and its standard deviation is about 1.71.:::
+A fair die has mean $(1 + \dots + 6)/6 = 3.5$ and mean of the square $(1 + 4 + \dots + 36)/6 = 91/6$. So its variance is $91/6 - 3.5^2 = 35/12 \approx 2.92$, and its standard deviation is about 1.71.
+:::
 
 ## The moment generating function {#sec-dist-mgf}
 
@@ -352,6 +353,7 @@ Over a million samples, the empirical CDF of $\mathrm{Exp}(1) - \mathrm{Exp}(1)$
 ![Histogram of $\mathrm{Exp}(1) - \mathrm{Exp}(1)$ samples against the $\mathrm{Lap}(0, 1)$ density.](figures/difference_of_exponentials.svg){#fig-dist-difference-of-exponentials}
 
 Put a Laplace with $b = 1$ and a normal (@sec-dist-normal) with standard deviation $\sqrt2$ side by side, both with variance 2 (@fig-dist-laplace-vs-normal). The Laplace has a sharp peak at 0 and fatter tails. On a log scale the difference is structural, because the normal's log density is a parabola, $-x^2/(2\sigma^2)$, while the Laplace's is two straight lines, $-|x|/b$. Far out, a parabola always falls below a line. At $3b$, for instance, the Laplace has $\Pr[|X| \ge 3b] = e^{-3} \approx 0.050$, while for the normal with the same variance, $3b$ is $3/\sqrt2$ standard deviations and the probability is about 0.034.
+
 ![Normal and Laplace densities with variance 2, on linear and log scales.](figures/laplace_vs_normal.svg){#fig-dist-laplace-vs-normal}
 
 ::: {#exm-dist-absolute-error}
@@ -430,7 +432,8 @@ The lean is measured by the **skewness** $\mathbb E[(X - \mu)^3]/\sigma^3$, the 
 Multiply each gap by $\sqrt n$ and you get 0.159, 0.134, 0.133 and 0.133, so the error decays like $1/\sqrt n$. In general the Berry–Esseen theorem bounds the gap by $c\,\mathbb E[|X - \mu|^3]/(\sigma^3\sqrt n)$ for a constant $c \le 0.4748$ (Shevtsova, 2011). The CLT is a statement about the *bulk*, the region within a few standard deviations of the mean. In the far tails it can be badly wrong, because a gap of order $1/\sqrt n$ is far larger than the tiny tail probabilities themselves, and bounding those is the job of the next chapter.
 
 ::: {#exm-dist-error-rate-normal}
-A common rule of thumb is that the normal approximation to a binomial is reasonable once $np(1-p) \gtrsim 10$. The running example's error count has $np(1-p) = 95$, so in the bulk it is close to $\mathcal N(100, 95)$, with the standard deviation 9.7 of @exm-dist-error-rate. A normal variable is within 1.96 standard deviations of its mean with probability $\Phi(1.96) - \Phi(-1.96) = 0.95$, so about 95% of test sets show 81 to 119 errors. At $p = 0.001$, by contrast, $np(1-p)$ is about 2, and the count is better described by $\mathrm{Poisson}(2)$.:::
+A common rule of thumb is that the normal approximation to a binomial is reasonable once $np(1-p) \gtrsim 10$. The running example's error count has $np(1-p) = 95$, so in the bulk it is close to $\mathcal N(100, 95)$, with the standard deviation 9.7 of @exm-dist-error-rate. A normal variable is within 1.96 standard deviations of its mean with probability $\Phi(1.96) - \Phi(-1.96) = 0.95$, so about 95% of test sets show 81 to 119 errors. At $p = 0.001$, by contrast, $np(1-p)$ is about 2, and the count is better described by $\mathrm{Poisson}(2)$.
+:::
 
 ## Normal vectors in many dimensions {#sec-dist-high-dim}
 

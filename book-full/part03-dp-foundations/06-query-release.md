@@ -41,6 +41,7 @@ Take two yes/no attributes, so the universe is $\{00, 01, 10, 11\}$, and four re
 | $q(x)$: first attribute is 1 | 0 | 0 | 1 | 1 |
 
 : A four-record dataset as a histogram, and one query. {#tbl-qr-inner}
+
 :::
 
 ## Noise on every answer {#sec-qr-baseline}
@@ -131,6 +132,7 @@ The smallest case shows the mechanics. Take $N = 2$ experts and $\eta = \frac12$
 | 3 | $(1/2, 1/2)$ | $(1/2, 1/2)$ | $(1, 0)$ | $1/2$ |
 
 : Multiplicative weights on two experts with learning rate 1/2. {#tbl-qr-mw-hand}
+
 :::
 
 ## From regret to a mistake bound {#sec-qr-mistakes}
@@ -263,6 +265,7 @@ The guarantees separate only at a much larger scale. @tbl-qr-records gives the r
 | $10^9$ | $4.74\times10^{11}$ | $1.76\times10^7$ | $1.81\times10^7$ | $1.90\times10^7$ |
 
 : Records needed for error 0.05 on every query with probability 0.95, $\varepsilon = 1$, $\delta = 10^{-6}$, $N = 2^{20}$. {#tbl-qr-records}
+
 :::
 
 ![Records needed for error 0.05 on every query, with probability 0.95, at $\varepsilon = 1$ and $\delta = 10^{-6}$ over a universe of $2^{20}$ records, as the number of queries grows. Log–log axes.](figures/qr_sample_complexity.svg){#fig-qr-sample-complexity}

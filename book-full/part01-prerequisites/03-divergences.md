@@ -414,6 +414,7 @@ $$D_f(P\|Q) = \mathbb E_Q\big[f(r(X))\big] = \sum_x q(x)\,f\Big(\frac{p(x)}{q(x)
 | Squared Hellinger $H^2$ | $(\sqrt u - 1)^2$ | 0.1317 |
 
 : Common f-divergences, their generators, and their values for the loaded die against the fair die. {#tbl-div-f}
+
 :::
 
 Rényi divergence is not a member, but it is an increasing function of one, so it inherits what the family proves.

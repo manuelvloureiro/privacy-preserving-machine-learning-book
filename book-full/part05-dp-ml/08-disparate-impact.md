@@ -45,6 +45,7 @@ Esipova et al. (2023) use this definition, and Bagdasaryan et al. (2019) compare
 | $\varepsilon = 1$, $\sigma = 4.13$ | $0.8822 \pm 0.0032$ | $0.6133 \pm 0.0173$ | 0.2689 | 0.0707 | 0.3278 |
 
 : Test accuracy of each group (mean ± standard deviation over 3 runs) of the running example with a 5% minority, trained with DP-SGD at four budgets ($\delta = 10^{-5}$), with clipping alone, and without privacy. The privacy cost is @eq-fair-cost. {#tbl-fair-eps}
+
 :::
 
 Both causes of the effect are already visible in the table. The clipping-only row has no noise at all, yet the minority loses 4.04 points while the majority gains 0.51, so clipping alone is disparate. Adding noise then widens the gap steadily as $\varepsilon$ falls (@fig-fair-privacy-accuracy), and the next two sections explain each part. The minority's runs also vary more, a point @sec-fair-measure returns to.
@@ -211,6 +212,7 @@ The network is not the quadratic model, so the last check varies the minority's 
 | 20% | 2,000 | $0.9395 \pm 0.0016$ | $0.9787 \pm 0.0004$ | $0.9355 \pm 0.0019$ | $0.9507 \pm 0.0038$ | 0.0041 | 0.0280 |
 
 : Each group's test accuracy for three sizes of the minority, non-private and at $\varepsilon = 4$ (mean ± standard deviation over 2 runs; the 5% row is from @tbl-fair-eps, over 3 runs). {#tbl-fair-size}
+
 :::
 
 ## Measuring per-group accuracy {#sec-fair-measure}

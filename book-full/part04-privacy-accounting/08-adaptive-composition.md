@@ -234,6 +234,7 @@ Turned around, a budget of $\varepsilon_g = 1$ allows the numbers of steps in @t
 | 0.001 | 1000 | 33,785 | 15,481 | 34,937 |
 
 : Number of steps of $\varepsilon_0$ allowed by a global budget $\varepsilon_g = 1$ at $\delta = 10^{-6}$. {#tbl-adapt-steps}
+
 :::
 
 ## Odometers {#sec-adapt-odometers}

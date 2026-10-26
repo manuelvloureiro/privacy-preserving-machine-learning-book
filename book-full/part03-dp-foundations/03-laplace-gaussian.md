@@ -258,6 +258,7 @@ To see the two terms of @eq-lg-bad-event at work, take $\mu = 1$ and $\varepsilo
 | $\delta_1(1)$, the exact $\delta$ | difference | 0.1269 |
 
 : The exact $\delta$ at $\mu = 1$, $\varepsilon = 1$ as the bad-event probability minus its correction. {#tbl-lg-bad-event}
+
 :::
 
 One Gaussian mechanism gives a whole curve of guarantees, not one: it is $(\varepsilon, \delta_\mu(\varepsilon))$-DP for every $\varepsilon \ge 0$ simultaneously, trading a larger $\varepsilon$ for a smaller $\delta$ (@fig-lg-delta-curves). At $\sigma = \Delta_2f$, so $\mu = 1$, the curve passes through $\delta = 0.3829$ at $\varepsilon = 0$ (the TV distance), 0.1269 at $\varepsilon = 1$, 0.0209 at $\varepsilon = 2$ and $4.71\times10^{-5}$ at $\varepsilon = 4$, and reaches $10^{-5}$ at $\varepsilon = 4.3772$. The whole curve, not a single point, is what composes tightly in [Part 4](../part04-privacy-accounting/00-introduction.md). Only the ratio $\mu = \Delta_2f/\sigma$ matters, because @eq-lg-analytic depends on $\Delta_2f$ and $\sigma$ only through it: doubling the sensitivity and doubling the noise give the same curve. Read $\mu$ as a signal-to-noise ratio: it is the parameter of the Gaussian trade-off curve in [Hypothesis testing](../part01-prerequisites/04-hypothesis-testing.md).
@@ -316,6 +317,7 @@ The hospital releases the empirical cumulative distribution function (CDF) of it
 | 1000 | 1414.21 | 1412.90 | 117.97 | 118.11 | 11.99 |
 
 : Root-mean-square error per count for $d$ threshold counts at $\varepsilon = 1$, $\delta = 10^{-5}$. {#tbl-lg-high-dim}
+
 :::
 
 ## Code {#sec-lg-code}

@@ -348,6 +348,7 @@ The pad must also never be reused, because XOR-ing two ciphertexts under one pad
 | Ciphertext for $m = 10$ | 10 | 11 | 00 | 01 |
 
 : The one-time pad on 2-bit messages. Each row contains every ciphertext once, so the ciphertext is uniform for every message. {#tbl-crypto-otp}
+
 :::
 
 ## Chosen-plaintext security {#sec-crypto-cpa}
@@ -525,6 +526,7 @@ At $k = 1024$ the summed error has standard deviation $\sqrt{1024 \times 32 \tim
 :::
 
 ![Decryption failure rate of a sum of $k$ Regev ciphertexts ($p = 4096$, errors uniform on $\{-32, \dots, 32\}$): simulation against the normal approximation. The dashed line is the worst-case guarantee $k < p/(4B) = 32$.](figures/crypto_basics_regev_noise.svg){#fig-crypto-regev}
+
 ## Code {#sec-crypto-code}
 
 The script [code/crypto_basics.py](../../code/part01-prerequisites/crypto_basics.py) computes every number quoted in this chapter and draws its figures. From the repository root:

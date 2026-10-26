@@ -51,6 +51,7 @@ Three properties make the definition useful, and each is inherited from a proper
 For the Gaussian the definition holds with equality in every moment. Its privacy loss is normal with mean $\rho$ and variance $2\rho$ (@lem-lg-gaussian-loss), and the logarithm of the MGF of that normal at $\lambda = \alpha - 1$ is $\lambda\rho + \lambda^2\rho = (\alpha - 1)\alpha\rho$. So a $\rho$-zCDP mechanism is one whose privacy loss is, in every exponential moment, no worse than $\mathcal N(\rho, 2\rho)$. For other mechanisms the smallest valid $\rho$ is the largest ratio $\varepsilon(\alpha)/\alpha$, the rest of the curve is forgotten, and the later sections measure that cost.
 
 The tail bound @eq-cdp-tail is loose only by a polynomial factor. For the Gaussian the exact tail is a standard normal tail at $z = t/\sqrt{2\rho}$, while the bound is $e^{-z^2/2}$. The Mills ratio of [Concentration](../part01-prerequisites/02-concentration.md) says that a normal tail at $z$ is about $e^{-z^2/2}/(z\sqrt{2\pi})$, so the exact tail divided by the bound is about $1/(z\sqrt{2\pi}) = \sqrt{\rho/\pi}/t$.
+
 ::: {#exm-cdp-gaussian}
 One Gaussian step with $\sigma = 1$ is $0.5$-zCDP, and ten of them are $5$-zCDP. A million simulated privacy losses (seed 0) have mean $0.4990$ and variance $1.0013$, against $\rho = 0.5$ and $2\rho = 1$. Their $\ln\mathbb E[e^L]$ is $1.0000$, against $(\alpha - 1)\alpha\rho = 1$ at $\alpha = 2$. @tbl-cdp-tail compares the tail with its bound. At $t = 4$ their ratio is $0.094$, against $\sqrt{0.5/\pi}/4 = 0.100$ from the Mills ratio.
 
@@ -61,6 +62,7 @@ One Gaussian step with $\sigma = 1$ is $0.5$-zCDP, and ten of them are $5$-zCDP.
 | 4 | $3.167 \times 10^{-5}$ | $2.700 \times 10^{-5}$ | $3.355 \times 10^{-4}$ |
 
 : Upper tail of the Gaussian privacy loss, $\sigma = 1$: exact, simulated ($10^6$ draws) and the bound @eq-cdp-tail. {#tbl-cdp-tail}
+
 :::
 
 ![The privacy loss of the Gaussian mechanism with $\sigma = 1$. Left: a histogram of $L(Y)$ from simulation against the normal density with mean $\rho = 0.5$ and variance $2\rho = 1$. Right: the exact upper tail $\Pr[L > \rho + t]$ against the zCDP bound $e^{-t^2/(4\rho)}$, on a log scale.](figures/concentrated_dp_privacy_loss.svg){#fig-cdp-privacy-loss}
@@ -258,6 +260,7 @@ Strong group privacy is also a weakness. Bun and Steinke use it to prove lower b
 | 8 | 32 | 68.616 | 65.319 | 8, 864, 108 |
 
 : Group privacy of the Gaussian mechanism with $\sigma = 1$. zCDP gives slope $m^2\rho$ at every order, and its conversion is within about 8% of the exact value. Mironov's RDP group bound, started from order 64, gives slope $6^c\rho$ and only on orders up to $64/m$. {#tbl-cdp-group}
+
 :::
 
 ## Approximate zCDP {#sec-cdp-approx}

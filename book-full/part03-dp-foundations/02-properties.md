@@ -241,6 +241,7 @@ The same gap appears for approximate-DP mechanisms. Take $k$ counts with Gaussia
 | 10 | $(5, 10^{-4})$ | 1.504 |
 
 : $k$ counts with Gaussian noise, each $(0.5, 10^{-5})$-DP: basic composition against the exact $\varepsilon$ at the same total $\delta$. {#tbl-dpprop-gauss-comp}
+
 :::
 
 ## Parallel composition {#sec-dpprop-parallel}

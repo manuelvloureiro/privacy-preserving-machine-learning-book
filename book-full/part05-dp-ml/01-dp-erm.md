@@ -188,6 +188,7 @@ $$e_{t+1} \approx (I - \eta H)e_t - \eta\xi_t.$$
 :::
 
 The curvature $h$ cancels in step 4, because flat directions wander farther but cost less per unit of wandering. What does not cancel is $T$, so the step count is a privacy parameter: every step spends budget, so the noise floor grows like $T$, while too few steps leave optimization error (@fig-dperm-noisy-gd-steps). @eq-dperm-gd-risk can be minimized from public quantities: $\lambda$, the curvature bound $\beta = \frac14 + \lambda$ of logistic loss with unit features, $\mathcal L(\theta_0) = \ln 2$ at $\theta_0 = 0$, $d$, $n$ and the budget. This **public rule** for $T$ is pessimistic, because it knows only that the curvature is at least $\lambda$. Picking $T$ by validation score is itself a computation on the data ([Hyperparameter tuning](03-hyperparameter-tuning.md)).
+
 ![Excess risk of noisy gradient descent at $n = 10{,}000$, $(\varepsilon, \delta) = (1, 10^{-5})$, against the number of steps $T$, averaged over datasets, with the same steps without noise (dashed). The noiseless error falls geometrically and reaches machine precision; the noisy run is limited by noise that grows with $T$, so its error is smallest near $T = 50$.](figures/erm_noisy_gd_steps.svg){#fig-dperm-noisy-gd-steps}
 
 ::: {#exm-dperm-noisy-gd}

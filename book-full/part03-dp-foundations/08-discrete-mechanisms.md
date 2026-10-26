@@ -366,6 +366,7 @@ Release the running count with $\mathcal N_{\mathbb Z}(0, 1)$ noise, so $\sigma 
 | 2 | 0.2500 (0.2500) | 0.3125 (0.3125) | 0.6250 (0.6250) |
 
 : Rényi divergences between discrete Gaussians shifted by 1, by direct summation, with the continuous value $\alpha/(2\sigma^2)$ in parentheses. {#tbl-discrete-renyi}
+
 :::
 
 ## Sampling the discrete Gaussian exactly {#sec-discrete-gaussian-sampler}

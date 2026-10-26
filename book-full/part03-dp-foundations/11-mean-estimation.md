@@ -219,6 +219,7 @@ The running example needs more records here, because an error below 1 in $d = 10
 | 1000 | 0.1000 | 2.7730 | 2 | 1000, 22.9, 1.43 | 0.1736 |
 
 : The mean of $n = 100{,}000$ normal vectors in $d$ dimensions with $\Vert\mu\Vert \le 1000$, at $(1, 10^{-6})$-DP, by the naive estimator and by shrinking balls: the $\ell_2$ RMSE from @eq-mean-multi. {#tbl-mean-multi}
+
 :::
 
 ![The $\ell_2$ root-mean-square error of the mean of 100,000 normal vectors against the dimension $d$, at $(1, 10^{-6})$-DP with $\|\mu\| \le 1000$: clipping to the ball of radius $R + \tau_d$, shrinking balls, and the non-private error $\sqrt{d/n}$.](figures/mean_dimension.svg){#fig-mean-dimension}
@@ -261,6 +262,7 @@ Take a Pareto distribution with shape 3, the law of $x_m U^{-1/3}$ for a uniform
 | 5.36 (best for this distribution) | −0.0153 | 0.0249 | 0.0152 | 0.0329 | 0.0325 |
 
 : Clipped private means of Pareto records with variance 1, $n = 1000$, $\varepsilon = 1$: the exact terms of @eq-mean-split for three clipping half-widths $\tau$ around the mean, and simulations with 4,000 repetitions. {#tbl-mean-heavy}
+
 :::
 
 ![Error of the clipped private mean of Pareto records with variance 1, $n = 1000$, $\varepsilon = 1$, against the clipping half-width $\tau$: the RMSE, the exact bias and its bound $\sigma^2/\tau$, the noise and the sampling standard deviations, and simulated points. The dashed vertical line is $\tau_b$ and the dash-dotted one the width that clips no record.](figures/mean_heavy.svg){#fig-mean-heavy}

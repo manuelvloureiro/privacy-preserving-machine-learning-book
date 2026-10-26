@@ -378,6 +378,7 @@ and $\varepsilon$ then comes from @eq-num-gauss. At $T = 10{,}000$ this gives $\
 | $10^{-5}$ | 1.8332 | 1.8232 | 0.0100 | 0.0100 |
 
 : DP-SGD after $T = 1000$ steps: the PLD bounds on $\varepsilon$ at $\delta = 10^{-5}$ for three grid widths. {#tbl-num-width}
+
 :::
 
 ![$\varepsilon$ at $\delta = 10^{-5}$ against the number of steps $T$ for DP-SGD with $q = 0.01$, $\sigma = 1$: RDP (green), the CLT (orange), and the pessimistic (red) and optimistic (blue) PLD bounds on the grid $h = 10^{-5}$, which overlap at this scale.](figures/numerical_accounting_epsilon_vs_k.svg){#fig-num-eps-k}

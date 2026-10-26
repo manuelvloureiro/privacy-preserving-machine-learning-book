@@ -259,6 +259,7 @@ For the 256 records of a test batch of the running example, the norms from @eq-d
 | $B = 8$, 4,096 tokens, $4{,}096 \to 4{,}096$ | 134,217,728 | 268,435,456 | 0.5 |
 
 : Numbers stored to clip one dense layer, explicitly and with ghost norms. {#tbl-dpsgd-ghost}
+
 :::
 
 ## Microbatches and vectorized per-example gradients {#sec-dpsgd-microbatch}

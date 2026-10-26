@@ -285,6 +285,7 @@ How loose is the constant? With a linear loss the two runs are random walks drif
 | Projected random walks, numerical | 0.0961 | 0.3693 | 0.3786 | 0.3786 | 0.3786 |
 
 : $D_2$ of the last iterate of full-batch noisy GD on a linear loss over $K = [0, 1]$, with $s = 0.01$ and $\sigma = 0.1$. {#tbl-shuf-plateau}
+
 :::
 
 ## Noisy gradient descent on a quadratic {#sec-shuf-quadratic}

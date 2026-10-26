@@ -81,7 +81,8 @@ The proposition converts a probability into an attack budget, so that a string w
 ::: {#exm-memo-migule}
 Take the secret line `migule 16430`, inserted 4 times, and prompt each model with its prefix `migule `. Greedy decoding gives `07` followed by an end of line at order 3, `81554` at order 4, `14032` at order 5, and the true `16430` at orders 6, 7 and 8. The order-5 output gets the first and fourth digits right and the other three wrong, so it is not approximately memorized either. The switch happens at order 6 because an order-6 model reads five characters of context. From the first digit on, its contexts (`gule_`, then `ule_1`, and so on) occur in this line and nowhere else. In such a context the line's own next digit has count 4 and every rival digit has count 0, so greedy decoding emits the line's digit every time. Shorter contexts, such as the four characters `ule_` that an order-5 model reads, are shared with other lines, whose digits can outvote the four copies. @sec-memo-copies turns this vote into a count of the copies a line needs.
 
-Sampling gives a graded version of the same picture. At order 5, the probability $q$ that one sample from the true prefix reproduces a secret's pin, averaged over the 100 secrets of each group, is $1.4 \times 10^{-3}$ at 4 copies and $0.142$ at 32 copies. With $\beta = 0.01$, the exact budgets for these mean probabilities are 3,252 and 31 samples for a 99% chance of extracting the pin.:::
+Sampling gives a graded version of the same picture. At order 5, the probability $q$ that one sample from the true prefix reproduces a secret's pin, averaged over the 100 secrets of each group, is $1.4 \times 10^{-3}$ at 4 copies and $0.142$ at 32 copies. With $\beta = 0.01$, the exact budgets for these mean probabilities are 3,252 and 31 samples for a 99% chance of extracting the pin.
+:::
 
 ## Duplication and model size {#sec-memo-copies}
 
@@ -166,6 +167,7 @@ Read the table along both axes. Along a row, more copies means more memorization
 ![Discoverable memorization against copies of the secret in the training set, for $n$-gram models of order 3 to 8, on an independent draw of the corpus. Left: greedy decoding reproduces the pin exactly. Right: at most one digit is wrong. Both rise with duplication and with order, and the approximate rate is only slightly higher.](figures/memo_discoverable.svg){#fig-memo-discoverable}
 
 The experiment of Carlini et al. (2023) has the same shape at scale. They prompted GPT-Neo and GPT-J models, trained on a large public collection of web and book text called the Pile, with the first 50 tokens of training sequences and counted exact greedy matches of the next 50. The largest model, with 6 billion parameters, reproduces at least 1% of its training data this way.
+
 ## Canaries and the exposure metric {#sec-memo-exposure}
 
 Discoverable memorization is all or nothing, because the secret either comes out or it does not. An auditor wants a graded answer: how much closer to the secret does the model put an attacker? Carlini et al. (2019, "The Secret Sharer") proposed planting random secrets of a fixed format in the training data and measuring where the trained model ranks each among all secrets of the same format. Because you planted the secret, you know the right answer and the size of the space, so you can measure memorization exactly.

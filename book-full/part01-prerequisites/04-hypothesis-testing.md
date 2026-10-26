@@ -76,6 +76,7 @@ $$\mathbb E_Q[\phi^*] - \mathbb E_Q[\phi] \ge c\big(\mathbb E_P[\phi^*] - \mathb
 The optimal test looks at $x$ only through $\Lambda(x)$, and everything else about $x$ is noise. When $\Lambda$ increases with a simple statistic, such as the word count or the biomarker, the optimal test is a plain threshold on the statistic. A calibrated classifier score is such a statistic, by Bayes' rule (@sec-ht-bayes), which is why thresholding it is right.
 
 For $n$ independent observations the ratio of the sample is the product of the individual ratios, and at a fixed false positive rate the best type II error decays like $e^{-n\,D_{\mathrm{KL}}(P\|Q)}$, with the Kullback–Leibler (KL) divergence of [Divergences](03-divergences.md) as the rate. This Chernoff–Stein lemma is derived in @sec-apx-tail-cramer-stein of the appendices and computed for two normals in [Exercise 8](../../book-exercises/part01-prerequisites/04-hypothesis-testing.md#sec-sol-ht-8).
+
 ::: {#exm-ht-np-spam}
 Take the spam example at budget $\alpha = 0.25$, a size no threshold has. A cut-off between 1.5 and 4 rejects only the count 3, with size 0.1, which fits. Just below 1.5 the count 2 joins and the size is 0.3, which does not, so $c = 1.5$. The test spends the remaining 0.15 on the tie set $\{2\}$, whose ham mass is 0.2, so it rejects the count 2 with probability $\gamma = 0.75$. Its power is $0.4 + 0.75 \times 0.3 = 0.625$. Randomizing matters only for discrete data like these, since for a continuous score a threshold alone can hit any size.
 
@@ -311,6 +312,7 @@ Detector A has positives that score $\mathcal N(1, 1)$, so $\mathrm{AUC} = \Phi(
 | B, $\mathcal N(1.5811, 2^2)$ | 0.7602 / 0.7601 | 0.5595 | 0.2253 |
 
 : Two binormal detectors with equal AUC. The simulated AUC counts correctly ranked pairs among 1,000,000. {#tbl-ht-auc}
+
 :::
 
 ![ROC curves of two detectors with the same AUC of 0.760. Left, linear axes: the curves cross and enclose equal areas. Right, log axes: at FPR $= 10^{-3}$ detector B has 12 times the TPR of detector A.](figures/hypothesis_testing_auc_low_fpr.svg){#fig-ht-auc-low-fpr}

@@ -98,6 +98,7 @@ Raising the noise keeps the budget: at a total of $\varepsilon = 6.71$, each of 
 | $\sigma$ per run for a total of 6.71 | 1 | 1.46 | 2.45 | 4.12 | 7.44 |
 
 : Composition of $k$ DP-SGD runs of the running example, at $\delta = 10^{-5}$. {#tbl-hpt-compose}
+
 :::
 
 ## Random stopping {#sec-hpt-stopping}
@@ -316,6 +317,7 @@ Runs take 1,000 steps instead of 10,000 to keep the script fast. Of the running 
 | Random search, logarithmic, mean 8 | 1.36 | 1.17 | 2.00 | $0.9372 \pm 0.0200$ | 7.95 |
 
 : Tuning the learning rate of the running example (1,000 steps per run) at a total budget of $\varepsilon = 2$, $\delta = 10^{-5}$. Test accuracy: mean and standard deviation over repetitions of the whole procedure; runs: the average number of private training runs. {#tbl-hpt-run}
+
 :::
 
 The honest strategies cost about a point of accuracy here, and the bug hides it. At the same total budget, composition reaches 0.9430 and Poisson random search 0.9433, against 0.9509 without tuning, while the bug claims 1.97 and spends up to 5.60. Even with its budget misreported, the grid search, at 0.9479, is below the untuned learning rate. The learning rate 0.5 is the best of the grid, and the noisy validation count sometimes picks a neighbour. It is the best because [DP-SGD](02-dp-sgd.md) chose its settings with knowledge of this very task, a leak that no accountant in the book has charged for. Tuning on proxy data is nearly free, reaching 0.9487 for the cost of one private run.

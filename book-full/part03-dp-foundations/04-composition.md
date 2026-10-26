@@ -146,6 +146,7 @@ Take the dashboard's $k = 100$ counts at $\varepsilon = 0.1$ and $\delta' = 10^{
 | 10,000 | 14,142.1 | 693.0 | 527.5 | 373.1 |
 
 : Root-mean-square error per count for $d$ dense counts at $\varepsilon = 1$ and, except in the first column, $\delta = 10^{-5}$. {#tbl-comp-dense}
+
 :::
 
 ![Total $\varepsilon'$ at $\delta = 10^{-5}$ after $k$ steps that are each $\varepsilon$-DP, for $\varepsilon = 0.1$ (left) and $0.5$ (right), on log axes. Basic composition grows like $k$, the others like $\sqrt k$ until the mean term takes over.](figures/comp_epsilon_vs_k.svg){#fig-comp-epsilon-vs-k}
@@ -168,6 +169,7 @@ The **four-point pair** $(P^\star, Q^\star)$ at level $(\varepsilon, \delta)$ is
 | Privacy loss | $+\infty$ | $+\varepsilon$ | $-\varepsilon$ | $-\infty$ |
 
 : The four-point randomized response of Kairouz, Oh & Viswanath at level $(\varepsilon, \delta)$. {#tbl-comp-four-point}
+
 :::
 
 Every $(\varepsilon, \delta)$-DP pair can be produced from the four-point pair by one channel, and for $\delta = 0$ the channel has a closed form.

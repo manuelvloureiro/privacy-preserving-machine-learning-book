@@ -275,6 +275,7 @@ $$H(d \mid \hat d) \le \sum_iH(d_i \mid \hat d_i).$$
 :::
 
 The attacks use about as few queries as possible, since exact counts take $V = n + 1$ values, so any attack needs of order $n/\ln n$ of them, and least squares with exact answers needs only $n$. The law therefore has two halves, and a defence must control both. "Overly accurate" is the error scale, below $\sqrt n$ for random queries and below $n$ for all queries. "Too many" is the count, because independent noise is averaged away unless it grows with the number of answers.
+
 ::: {#exm-recon-law}
 In the running example the sampling curator with $q = \frac12$ keeps 250 of the 500 people. Its largest error over the 2000 queries is 28.00, or $1.25\sqrt n$, well under the Hoeffding bound of 106.25 at $\beta = 0.05$. Least squares on these answers recovers 0.7560 of the bits, within sampling error of the ceiling $\frac34$ on the expected fraction.
 

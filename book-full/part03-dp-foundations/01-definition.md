@@ -33,6 +33,7 @@ Take $D = (\text{Alice: smoker}, \text{Bob: non-smoker}, \text{Carol: smoker})$.
 | (Alice: non-smoker, Bob: smoker, Carol: smoker) | no | no: two records changed |
 
 : Five candidate datasets, checked against the add/remove and the replace relation. {#tbl-dpdef-neighbours}
+
 :::
 
 ## Pure and approximate differential privacy {#sec-dpdef-definition}
@@ -282,6 +283,7 @@ Small $\varepsilon$ is strong and large $\varepsilon$ promises little. At $\vare
 | Laplace count | 0.0488 | 0.2212 | 0.3935 | 0.4226 | 0.6321 | 0.9179 |
 
 : The membership advantage bound for $\varepsilon$-DP and the exact best advantage against two $\varepsilon$-DP mechanisms. {#tbl-dpdef-advantage}
+
 :::
 
 ## The Bayesian interpretation {#sec-dpdef-bayes}
@@ -371,6 +373,7 @@ With $n = 3$ and $\delta = 0.1$ the script enumerates every output on $D$ and on
 | $10^{-8}$ | 0.0001 | $9.999\times10^{-5}$ |
 
 : Exposure under the $(0, \delta)$-DP mechanism that releases each of 10,000 records with probability $\delta$. {#tbl-dpdef-release}
+
 :::
 
 ![The probability of publishing at least one of 10,000 records against $n\delta$, on log axes. Below $n\delta \approx 0.1$ it is essentially $n\delta$, and at $\delta = 1/n$ it is already 0.63.](figures/dpdef_release.svg){#fig-dpdef-release}
