@@ -1,0 +1,1115 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.10.19">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+
+<title>12&nbsp; Utilities and the Context API inside – Differential Privacy with OpenDP</title>
+<style>
+/* Default styles provided by pandoc.
+** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
+*/
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: 1.5em;}
+div.column{flex: auto;}
+@media screen {
+div.columns{gap: min(4vw, 1.5em);}
+div.column{overflow-x: auto;}
+}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+/* CSS for syntax highlighting */
+html { -webkit-text-size-adjust: 100%; }
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+</style>
+
+
+<script src="../site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="../site_libs/quarto-nav/headroom.min.js"></script>
+<script src="../site_libs/clipboard/clipboard.min.js"></script>
+<script src="../site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="../site_libs/quarto-search/fuse.min.js"></script>
+<script src="../site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="../">
+<link href="../part04-extending/00-introduction.html" rel="next">
+<link href="../part03-framework/11-combinators.html" rel="prev">
+<script src="../site_libs/quarto-html/quarto.js" type="module"></script>
+<script src="../site_libs/quarto-html/tabsets/tabsets.js" type="module"></script>
+<script src="../site_libs/quarto-html/popper.min.js"></script>
+<script src="../site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="../site_libs/quarto-html/anchor.min.js"></script>
+<link href="../site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="../site_libs/quarto-html/quarto-syntax-highlighting-bf27225e3a48a9273f3daa8f8e829971.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="../site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="../site_libs/bootstrap/bootstrap-78f503ea39f784e8964cd205807fbe37.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
+<script id="quarto-search-options" type="application/json">{
+  "location": "sidebar",
+  "copy-button": false,
+  "collapse-after": 3,
+  "panel-placement": "start",
+  "type": "textbox",
+  "limit": 50,
+  "keyboard-shortcut": [
+    "f",
+    "/",
+    "s"
+  ],
+  "show-item-context": false,
+  "language": {
+    "search-no-results-text": "No results",
+    "search-matching-documents-text": "matching documents",
+    "search-copy-link-title": "Copy link to search",
+    "search-hide-matches-text": "Hide additional matches",
+    "search-more-match-text": "more match in this document",
+    "search-more-matches-text": "more matches in this document",
+    "search-clear-button-title": "Clear",
+    "search-text-placeholder": "",
+    "search-detached-cancel-button-title": "Cancel",
+    "search-submit-button-title": "Submit",
+    "search-label": "Search"
+  }
+}</script>
+
+  <script src="https://cdnjs.cloudflare.com/polyfill/v3/polyfill.min.js?features=es6"></script>
+  <script defer="" src="https://cdn.jsdelivr.net/npm/mathjax@4/tex-chtml.js" type="text/javascript"></script>
+
+<script type="text/javascript">
+const typesetMath = (el) => {
+  if (window.MathJax) {
+    // MathJax Typeset
+    window.MathJax.typeset([el]);
+  } else if (window.katex) {
+    // KaTeX Render
+    var mathElements = el.getElementsByClassName("math");
+    var macros = [];
+    for (var i = 0; i < mathElements.length; i++) {
+      var texText = mathElements[i].firstChild;
+      if (mathElements[i].tagName == "SPAN" && texText && texText.data) {
+        window.katex.render(texText.data, mathElements[i], {
+          displayMode: mathElements[i].classList.contains('display'),
+          throwOnError: false,
+          macros: macros,
+          fleqn: false
+        });
+      }
+    }
+  }
+}
+window.Quarto = {
+  typesetMath
+};
+</script>
+
+</head>
+
+<body class="nav-sidebar floating quarto-light">
+
+<div id="quarto-search-results"></div>
+  <header id="quarto-header" class="headroom fixed-top">
+  <nav class="quarto-secondary-nav">
+    <div class="container-fluid d-flex">
+      <button type="button" class="quarto-btn-toggle btn" data-bs-toggle="collapse" role="button" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+        <i class="bi bi-layout-text-sidebar-reverse"></i>
+      </button>
+        <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../part03-framework/00-introduction.html">The framework</a></li><li class="breadcrumb-item"><a href="../part03-framework/12-utilities-and-the-context-api.html"><span class="chapter-number">12</span>&nbsp; <span class="chapter-title">Utilities and the Context API inside</span></a></li></ol></nav>
+        <a class="flex-grow-1" role="navigation" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">      
+        </a>
+      <button type="button" class="btn quarto-search-button" aria-label="Search" onclick="window.quartoOpenSearch();">
+        <i class="bi bi-search"></i>
+      </button>
+    </div>
+  </nav>
+</header>
+<!-- content -->
+<div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article">
+<!-- sidebar -->
+  <nav id="quarto-sidebar" class="sidebar collapse collapse-horizontal quarto-sidebar-collapse-item sidebar-navigation floating overflow-auto">
+    <div class="pt-lg-2 mt-2 text-left sidebar-header">
+    <div class="sidebar-title mb-0 py-0">
+      <a href="../">Differential Privacy with OpenDP</a> 
+    </div>
+      </div>
+        <div class="mt-2 flex-shrink-0 align-items-center">
+        <div class="sidebar-search">
+        <div id="quarto-search" class="" title="Search"></div>
+        </div>
+        </div>
+    <div class="sidebar-menu-container"> 
+    <ul class="list-unstyled mt-1">
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../index.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Preface</span></a>
+  </div>
+</li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a href="../part01-getting-started/00-introduction.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Getting started</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-1" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-1" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part01-getting-started/01-first-release.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">1</span>&nbsp; <span class="chapter-title">A first release</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part01-getting-started/02-the-data-and-the-context.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">2</span>&nbsp; <span class="chapter-title">The data and the context</span></span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a href="../part02-tabular-data/00-introduction.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Tabular data</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-2" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-2" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part02-tabular-data/03-essential-statistics.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">3</span>&nbsp; <span class="chapter-title">Essential statistics</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part02-tabular-data/04-grouping.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">4</span>&nbsp; <span class="chapter-title">Grouping</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part02-tabular-data/05-identifier-truncation.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">5</span>&nbsp; <span class="chapter-title">Identifier truncation and bounds</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part02-tabular-data/06-preparing-microdata.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">6</span>&nbsp; <span class="chapter-title">Preparing microdata</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part02-tabular-data/07-utility-and-noise.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">7</span>&nbsp; <span class="chapter-title">Assessing utility and choosing the noise</span></span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a href="../part03-framework/00-introduction.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">The framework</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-3" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-3" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part03-framework/08-a-framework-for-privacy.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">8</span>&nbsp; <span class="chapter-title">A framework to understand differential privacy</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part03-framework/09-transformations.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">9</span>&nbsp; <span class="chapter-title">Transformations</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part03-framework/10-measurements.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">10</span>&nbsp; <span class="chapter-title">Measurements</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part03-framework/11-combinators.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">11</span>&nbsp; <span class="chapter-title">Combinators</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part03-framework/12-utilities-and-the-context-api.html" class="sidebar-item-text sidebar-link active">
+ <span class="menu-text"><span class="chapter-number">12</span>&nbsp; <span class="chapter-title">Utilities and the Context API inside</span></span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a href="../part04-extending/00-introduction.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Extending the library</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-4" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-4" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part04-extending/13-plugins.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">13</span>&nbsp; <span class="chapter-title">Plugins</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part04-extending/14-statistical-modelling.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">14</span>&nbsp; <span class="chapter-title">Statistical modelling</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part04-extending/15-limitations-and-troubleshooting.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">15</span>&nbsp; <span class="chapter-title">Limitations and troubleshooting</span></span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a href="../part05-synthetic-data/00-introduction.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Synthetic data</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-5" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-5" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part05-synthetic-data/16-contingency-tables.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">16</span>&nbsp; <span class="chapter-title">Contingency tables</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part05-synthetic-data/17-aim-and-mst.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">17</span>&nbsp; <span class="chapter-title">Synthetic data with AIM and MST</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part05-synthetic-data/18-evaluating-synthetic-data.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">18</span>&nbsp; <span class="chapter-title">Evaluating and tuning synthetic data</span></span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-6" role="navigation" aria-expanded="true">
+ <span class="menu-text">Appendices</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-6" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-6" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../glossary.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">A</span>&nbsp; <span class="chapter-title">Glossary</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../term-index.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">B</span>&nbsp; <span class="chapter-title">Index</span></span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+    </ul>
+    </div>
+</nav>
+<div id="quarto-sidebar-glass" class="quarto-sidebar-collapse-item" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item"></div>
+<!-- margin-sidebar -->
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+        <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">Table of contents</h2>
+   
+  <ul>
+  <li><a href="#sec-utils-types" id="toc-sec-utils-types" class="nav-link active" data-scroll-target="#sec-utils-types"><span class="header-section-number">12.1</span> Types</a></li>
+  <li><a href="#sec-utils-search" id="toc-sec-utils-search" class="nav-link" data-scroll-target="#sec-utils-search"><span class="header-section-number">12.2</span> Parameter search</a></li>
+  <li><a href="#sec-utils-serialize" id="toc-sec-utils-serialize" class="nav-link" data-scroll-target="#sec-utils-serialize"><span class="header-section-number">12.3</span> Serialization</a></li>
+  <li><a href="#sec-utils-compositor" id="toc-sec-utils-compositor" class="nav-link" data-scroll-target="#sec-utils-compositor"><span class="header-section-number">12.4</span> The compositor behind a context</a></li>
+  <li><a href="#sec-utils-query" id="toc-sec-utils-query" class="nav-link" data-scroll-target="#sec-utils-query"><span class="header-section-number">12.5</span> The query behind a release</a></li>
+  <li><a href="#sec-utils-measures" id="toc-sec-utils-measures" class="nav-link" data-scroll-target="#sec-utils-measures"><span class="header-section-number">12.6</span> Nested compositors and other measures</a></li>
+  <li><a href="#summary" id="toc-summary" class="nav-link" data-scroll-target="#summary"><span class="header-section-number">12.7</span> Summary</a></li>
+  <li><a href="#references" id="toc-references" class="nav-link" data-scroll-target="#references"><span class="header-section-number">12.8</span> References</a></li>
+  </ul>
+</nav>
+    </div>
+<!-- main -->
+<main class="content" id="quarto-document-content">
+
+<header id="title-block-header" class="quarto-title-block default"><nav class="quarto-page-breadcrumbs quarto-title-breadcrumbs d-none d-lg-block" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../part03-framework/00-introduction.html">The framework</a></li><li class="breadcrumb-item"><a href="../part03-framework/12-utilities-and-the-context-api.html"><span class="chapter-number">12</span>&nbsp; <span class="chapter-title">Utilities and the Context API inside</span></a></li></ol></nav>
+<div class="quarto-title">
+<h1 class="title"><span class="chapter-number">12</span>&nbsp; <span class="chapter-title">Utilities and the Context API inside</span></h1>
+</div>
+
+
+
+<div class="quarto-title-meta">
+
+    
+  
+    
+  </div>
+  
+
+
+</header>
+
+
+<p>Every query in this book so far ended with a call such as <code>.laplace()</code> that named no scale, and the context filled it in. This chapter shows what fills it in. The answer is a handful of utilities that the framework exposes on their own. Type descriptors say what kind of number a chain carries, a binary search turns a budget into a scale, and a serializer turns a measurement into text. The Context API is a thin layer over these utilities and over the combinators of <a href="../part03-framework/11-combinators.html">the previous chapter</a>. Once you can see the layer, you can predict what a query will do before you release it. You can also rebuild any part of it by hand when the layer refuses.</p>
+<p>The chapter follows the documentation’s pages on typing, parameter search and serialization, then its page on the Context API and its comparison of the two APIs. It ends by taking apart the count query of <a href="../part01-getting-started/01-first-release.html">the first chapter</a>, piece by piece, and finding the same scale of 3. By the end you will be able to read a type error, run the search a context runs, and store a measurement and reload it. You will also be able to say which framework object each line of a Context API program creates.</p>
+<p>The script <a href="https://github.com/manuelvloureiro/privacy-preserving-machine-learning-book/blob/main/code/part03-framework/opendp_utilities.py">opendp_utilities.py</a> runs every step on OpenDP 0.16.0 with Polars 1.36.1. Its plain-data queries use the first chapter’s hundred integers from a seeded generator, and its one Polars query counts the rows of the France Labour Force Survey (LFS) sample. The type descriptors, the error messages, the scales the searches find and the privacy maps are the same on every run. The released counts are not, because OpenDP’s noise cannot be seeded, so they appear in one block marked as one run.</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb1"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="ex">uv</span> run python code/part03-framework/opendp_utilities.py</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<section id="sec-utils-types" class="level2" data-number="12.1">
+<h2 data-number="12.1" class="anchored" data-anchor-id="sec-utils-types"><span class="header-section-number">12.1</span> Types</h2>
+<p>OpenDP’s core is written in Rust, and Rust has no single integer type. It has signed and unsigned integers of several widths, from 8 bits to 128, and floats of two widths. The library keeps that precision because the constants of a privacy proof depend on it. A sum of 32-bit integers can overflow where a sum of 64-bit integers cannot, and a float’s rounding error depends on how many bits it has. So every domain, metric and measure carries a <strong>type descriptor</strong>, and the library never casts one type to another on its own. <a href="../part03-framework/08-a-framework-for-privacy.html">The framework chapter</a> introduced the descriptors as the <code>T=</code> arguments of the constructors. This section says how to write and read them.</p>
+<p>A descriptor can be written in three ways, and the snippet shows that they agree. The canonical form is a string such as <code>"i32"</code> or <code>"Vec&lt;f64&gt;"</code>. A Python type such as <code>int</code>, <code>float</code>, <code>str</code> or <code>bool</code> is an alias, and <code>list[int]</code> is an alias for a vector. The objects in <code>opendp.typing</code>, such as <code>dp.i32</code>, <code>dp.f64</code> and <code>dp.Vec[dp.i32]</code>, spell the same strings with completion in an editor.</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb2"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> opendp.prelude <span class="im">as</span> dp</span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(dp.atom_domain(T<span class="op">=</span><span class="bu">float</span>))  <span class="co"># AtomDomain(nan=true, T=f64)</span></span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(dp.atom_domain((<span class="dv">0</span>, <span class="dv">1</span>), T<span class="op">=</span>dp.i32))  <span class="co"># AtomDomain(bounds=[0, 1], T=i32)</span></span>
+<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(dp.RuntimeType.parse(<span class="bu">list</span>[<span class="bu">int</span>]))  <span class="co"># Vec&lt;i32&gt;</span></span>
+<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(dp.Vec[dp.i32] <span class="op">==</span> dp.RuntimeType.parse(<span class="bu">list</span>[<span class="bu">int</span>]))  <span class="co"># True</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>The aliases hide one decision. A Python <code>int</code> means a 32-bit integer and a <code>float</code> a 64-bit float, which the script confirms. The function <code>dp.RuntimeType.infer</code> reads the type off a value in the same way. NumPy’s default integer has 64 bits, so an integer from an array arrives as <code>i64</code> while a domain built with <code>T=int</code> expects <code>i32</code>, and the two do not meet. The function <code>set_default_int_type</code> changes what the alias means for the rest of the program, which is the clean fix when all your integers have 64 bits.</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb3"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> numpy <span class="im">as</span> np</span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> opendp.prelude <span class="im">as</span> dp</span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(dp.RuntimeType.parse(<span class="bu">int</span>))  <span class="co"># i32</span></span>
+<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(dp.RuntimeType.infer(np.int64(<span class="dv">1</span>)))  <span class="co"># i64</span></span>
+<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a>dp.set_default_int_type(dp.i64)</span>
+<span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(dp.RuntimeType.parse(<span class="bu">int</span>))  <span class="co"># i64</span></span>
+<span id="cb3-8"><a href="#cb3-8" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(dp.vector_domain(dp.atom_domain(T<span class="op">=</span><span class="bu">int</span>)))  <span class="co"># VectorDomain(AtomDomain(T=i64))</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>When the types do not meet, the error reads <code>inferred type is XXX, expected YYY</code>, and the troubleshooting page of the documentation gives it an entry. The script provokes it in the simplest way. It builds a Laplace mechanism on an integer domain with an integer metric, then asks for its privacy map at a sensitivity of 1.5.</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb4" data-excerpt="utils-type-error"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a>int_space <span class="op">=</span> dp.atom_domain(T<span class="op">=</span><span class="bu">int</span>), dp.absolute_distance(T<span class="op">=</span><span class="bu">int</span>)</span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>laplace_int <span class="op">=</span> int_space <span class="op">&gt;&gt;</span> dp.m.then_laplace(scale<span class="op">=</span><span class="fl">1.0</span>)  <span class="co"># Laplace noise on a 32-bit integer</span></span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a><span class="cf">try</span>:</span>
+<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a>    laplace_int.<span class="bu">map</span>(<span class="fl">1.5</span>)  <span class="co"># a float sensitivity, on a metric whose distances are integers</span></span>
+<span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a>    message <span class="op">=</span> <span class="st">"no error"</span></span>
+<span id="cb4-6"><a href="#cb4-6" aria-hidden="true" tabindex="-1"></a><span class="cf">except</span> <span class="pp">TypeError</span> <span class="im">as</span> err:</span>
+<span id="cb4-7"><a href="#cb4-7" aria-hidden="true" tabindex="-1"></a>    message <span class="op">=</span> first_line(err)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<pre class="text"><code>map(1.5) on an integer metric: TypeError: inferred type is f64, expected i32
+map(2) on an integer metric: 2.0
+float d_in on the count: TypeError: inferred type is f64, expected u32
+integer d_in on the count: 0.3333</code></pre>
+<p>The message names the type the library inferred from your argument and the type the metric expects, and the fix is to pass what it expects, here the integer 2. The second pair of lines shows the case you will meet most often. The count query’s input metric is the symmetric distance, whose distances are unsigned integers, so <code>map(1.0)</code> fails and <code>map(1)</code> succeeds. One more cause the documentation names is a scalar <span class="math inline">\(\varepsilon\)</span> passed to a measurement whose measure expects a pair of <span class="math inline">\(\varepsilon\)</span> and the slack <span class="math inline">\(\delta\)</span> of approximate differential privacy. In 0.16.0 that case reads differently, so the script prints it too.</p>
+<pre class="text"><code>scalar epsilon on an approximate measure: TypeError: Cannot coerce a non-tuple type to a tuple
+pair on an approximate measure: True</code></pre>
+<p><a href="../part04-extending/15-limitations-and-troubleshooting.html">The chapter on limitations and troubleshooting</a> collects the other errors you can meet. The rule for this one is short. Read the expected type, then change your argument, your bounds or your data to match it. Never change the domain to match the argument, because the library chose that type for the proof.</p>
+</section>
+<section id="sec-utils-search" class="level2" data-number="12.2">
+<h2 data-number="12.2" class="anchored" data-anchor-id="sec-utils-search"><span class="header-section-number">12.2</span> Parameter search</h2>
+<p>A measurement has three kinds of parameter. The input distance <code>d_in</code> is the privacy unit’s bound, the output distance <code>d_out</code> is the budget, and the constructor’s own arguments include the noise scale. With every parameter fixed, <code>check(d_in, d_out)</code> answers whether the measurement stays within the budget, as <a href="../part03-framework/10-measurements.html">the measurements chapter</a> showed. The answer is monotone. If a scale passes at some budget, every larger scale passes too, and if a budget passes, every larger budget passes. A monotone yes-or-no function has one boundary, and a binary search finds it, so you can solve for any one parameter from the others.</p>
+<p>The library wraps the search three ways. The first, <code>dp.binary_search</code>, takes a predicate on one number and returns the value nearest the boundary on the passing side. The second, <code>dp.binary_search_param</code>, takes a function that builds a chain from one number, with <code>d_in</code> and <code>d_out</code>, and uses <code>check</code> as the predicate. The third, <code>dp.binary_search_chain</code>, does the same and returns the chain built at the value it found.</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb7"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> opendp.prelude <span class="im">as</span> dp</span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(dp.binary_search(<span class="kw">lambda</span> x: x <span class="op">&gt;=</span> <span class="fl">5.0</span>))  <span class="co"># 5.0</span></span>
+<span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(dp.binary_search(<span class="kw">lambda</span> x: x <span class="op">&gt;</span> <span class="dv">5</span>, T<span class="op">=</span><span class="bu">int</span>))  <span class="co"># 6</span></span>
+<span id="cb7-5"><a href="#cb7-5" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(dp.binary_search(<span class="kw">lambda</span> x: x <span class="op">&lt;=</span> <span class="dv">5</span>, bounds<span class="op">=</span>(<span class="dv">0</span>, <span class="va">None</span>)))  <span class="co"># 5</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>The three lines show the arguments that steer a search. Without bounds, the search first looks for them by stepping outwards from zero, which is why the first call needs nothing else. The type <code>T</code> says whether the parameter is a float or an integer when the predicate alone does not tell, and the integer search returns the first passing integer. A pair of bounds with <code>None</code> on one side gives a one-sided search. The script then runs the search a context runs, on the Laplace mechanism of the first chapter with a share of <span class="math inline">\(\varepsilon/3\)</span>.</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb8" data-excerpt="utils-search"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a>scale <span class="op">=</span> dp.binary_search_param(make_laplace, d_in<span class="op">=</span><span class="fl">1.0</span>, d_out<span class="op">=</span>share)  <span class="co"># the smallest scale within the share</span></span>
+<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a>chain <span class="op">=</span> dp.binary_search_chain(make_laplace, d_in<span class="op">=</span><span class="fl">1.0</span>, d_out<span class="op">=</span>share)  <span class="co"># the measurement at that scale</span></span>
+<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a>largest_d_in <span class="op">=</span> dp.binary_search(<span class="kw">lambda</span> d_in: make_laplace(<span class="fl">1.0</span>).check(d_in, EPSILON))  <span class="co"># the other way round</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<pre class="text"><code>search: scale=3.0000000000000004 chain.map(1.0)=0.3333 chain.check(1.0, share)=True
+search: largest d_in at scale 1 within epsilon 1: 1.0
+search: gaussian scale for rho=1 at d_in=1: 0.7071</code></pre>
+<p>The scale is the smallest one whose map at a sensitivity of 1 stays within a third of <span class="math inline">\(\varepsilon = 1\)</span>. It comes out a hair above 3, because the search stops on the passing side of the boundary. That is the scale <code>param()</code> reported in the first chapter. The chain is the Laplace measurement at that scale, and its check confirms the budget. The third call turns the question round and asks for the largest sensitivity that a scale of 1 can hide within <span class="math inline">\(\varepsilon = 1\)</span>, which is 1. The Gaussian mechanism is measured in zero-concentrated differential privacy (zCDP), which states the privacy loss as a parameter <span class="math inline">\(\rho\)</span>. For Gaussian noise that loss is half the square of the sensitivity over the scale, so the same search for <span class="math inline">\(\rho = 1\)</span> gives a scale of 0.7071. <a href="../../book-full/part03-dp-foundations/03-laplace-gaussian.html">The full edition’s chapter on the two mechanisms</a> derives both maps.</p>
+<p>To see what the search does, the script writes it by hand. The predicate is <code>check</code>, the interval starts at 0 to 100, and each step keeps the half that contains the boundary.</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb10" data-excerpt="utils-by-hand"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> search_by_hand(passes: Callable[[<span class="bu">float</span>], <span class="bu">bool</span>], low: <span class="bu">float</span>, high: <span class="bu">float</span>, tolerance: <span class="bu">float</span>) <span class="op">-&gt;</span> <span class="bu">tuple</span>[<span class="bu">float</span>, <span class="bu">int</span>]:</span>
+<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a>    <span class="co">"""Bisection on a predicate that fails at `low` and passes at `high`: the smallest passing value, and the steps."""</span></span>
+<span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a>    steps <span class="op">=</span> <span class="dv">0</span></span>
+<span id="cb10-4"><a href="#cb10-4" aria-hidden="true" tabindex="-1"></a>    <span class="cf">while</span> high <span class="op">-</span> low <span class="op">&gt;</span> tolerance:</span>
+<span id="cb10-5"><a href="#cb10-5" aria-hidden="true" tabindex="-1"></a>        middle <span class="op">=</span> (low <span class="op">+</span> high) <span class="op">/</span> <span class="dv">2</span></span>
+<span id="cb10-6"><a href="#cb10-6" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span> passes(middle):</span>
+<span id="cb10-7"><a href="#cb10-7" aria-hidden="true" tabindex="-1"></a>            high <span class="op">=</span> middle  <span class="co"># the boundary is at or below the middle</span></span>
+<span id="cb10-8"><a href="#cb10-8" aria-hidden="true" tabindex="-1"></a>        <span class="cf">else</span>:</span>
+<span id="cb10-9"><a href="#cb10-9" aria-hidden="true" tabindex="-1"></a>            low <span class="op">=</span> middle  <span class="co"># the boundary is above it</span></span>
+<span id="cb10-10"><a href="#cb10-10" aria-hidden="true" tabindex="-1"></a>        steps <span class="op">+=</span> <span class="dv">1</span></span>
+<span id="cb10-11"><a href="#cb10-11" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> high, steps</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<pre class="text"><code>search by hand: scale=3.000000 after 27 steps
+search with bounds (0, 100): 3.0000000000000004</code></pre>
+<p>Twenty-seven halvings of an interval of 100 bring it below a millionth, and the passing end of the last interval is the scale. The library’s search on the same bounds lands on the float just above 3, so it bisects further than that tolerance. Two things go wrong with a search, and the script shows both messages.</p>
+<pre class="text"><code>search with bounds (0, 1): ValueError: the decision boundary of the predicate is outside the bounds
+search on a constant predicate: ValueError: unable to infer bounds</code></pre>
+<p>Bounds that do not contain the boundary give the first error, so widen them. A predicate that never changes gives the second, and here it is a predicate that always passes. With a real chain it means that no value of the parameter changes the answer, so look at the chain before the bounds.</p>
+</section>
+<section id="sec-utils-serialize" class="level2" data-number="12.3">
+<h2 data-number="12.3" class="anchored" data-anchor-id="sec-utils-serialize"><span class="header-section-number">12.3</span> Serialization</h2>
+<p>A measurement is a recipe. It names the constructors it was built from and their arguments, and <code>dp.serialize</code> writes that recipe as a JSON string, which <code>dp.deserialize</code> turns back into a measurement. The use is a split deployment. An analyst builds and inspects a query on a machine without the data, and sends the text to the machine that holds them. The script serializes the first chapter’s count measurement.</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb13" data-excerpt="utils-serialize"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a>measurement <span class="op">=</span> count_laplace(<span class="fl">3.0</span>)</span>
+<span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a>text <span class="op">=</span> dp.serialize(measurement)  <span class="co"># JSON that names each constructor and its arguments</span></span>
+<span id="cb13-3"><a href="#cb13-3" aria-hidden="true" tabindex="-1"></a>restored <span class="op">=</span> dp.deserialize(text)</span>
+<span id="cb13-4"><a href="#cb13-4" aria-hidden="true" tabindex="-1"></a>same_space <span class="op">=</span> restored.input_space <span class="op">==</span> measurement.input_space</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<pre class="text"><code>serialized: 2152 characters, starting {"__function__": "make_chain_mt",
+restored: map(1)=0.3333 same input space: True</code></pre>
+<p>The text begins with the outermost constructor, the chaining of a transformation and a measurement, and nests the rest inside it. The restored measurement has the same input space and the same privacy map, so a reviewer who receives the text can check the guarantee before the data are touched. The format is JSON, but the documentation does not promise that it stays the same between versions, and it asks you not to write it by hand.</p>
+<p>Two things do not survive. The first is the <code>param</code> attribute that a context attaches to a measurement whose scale it searched for, which <a href="#sec-utils-query">a later section</a> explains. It is a Python attribute rather than part of the recipe, so it is gone after a round trip. The second is anything with Python state that the constructors did not set, which includes a context, a query and a plugin built from a Python function.</p>
+<pre class="text"><code>param before a round trip: 3.0000000000000004
+param after a round trip: None
+serialize a context: OpenDP JSON Encoder does not handle instances of &lt;class 'opendp.context.Context'&gt;</code></pre>
+<p>A Polars query has its own route, because its plan is a Polars <code>LazyFrame</code> and Polars can serialize a plan to bytes. The method <code>Context.deserialize_polars_plan</code> takes those bytes and wraps them in a query on a context of its own. So a client can write the plan against the survey’s schema and the server can run it against the rows.</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb16" data-excerpt="utils-plan"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a>client <span class="op">=</span> lfs_context(pl.LazyFrame(schema<span class="op">=</span>frame.collect_schema()))  <span class="co"># the schema, but no rows</span></span>
+<span id="cb16-2"><a href="#cb16-2" aria-hidden="true" tabindex="-1"></a>plan <span class="op">=</span> client.query().select(dp.<span class="bu">len</span>(signed<span class="op">=</span><span class="va">True</span>)).polars_plan.serialize()  <span class="co"># bytes</span></span>
+<span id="cb16-3"><a href="#cb16-3" aria-hidden="true" tabindex="-1"></a>server <span class="op">=</span> lfs_context(frame)  <span class="co"># the real data</span></span>
+<span id="cb16-4"><a href="#cb16-4" aria-hidden="true" tabindex="-1"></a>query <span class="op">=</span> server.deserialize_polars_plan(plan)</span>
+<span id="cb16-5"><a href="#cb16-5" aria-hidden="true" tabindex="-1"></a>summary <span class="op">=</span> query.summarize(alpha<span class="op">=</span><span class="fl">0.05</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<pre class="text"><code>plan: 1792 bytes
+plan on the server: scale=36.0 95% accuracy=108.3429</code></pre>
+<p>The client’s context holds an empty frame with the survey’s schema, and the server’s holds the file. Both state the privacy unit of 36 rows per person and the budget of <a href="../part01-getting-started/02-the-data-and-the-context.html">the chapter on the data and the context</a>. They must, because the plan carries the query but not the guarantee. The scale of 36 is the unit’s distance over the budget, and the error bar is about 108 rows on a count of millions. The release itself is in the block at the end of the chapter.</p>
+</section>
+<section id="sec-utils-compositor" class="level2" data-number="12.4">
+<h2 data-number="12.4" class="anchored" data-anchor-id="sec-utils-compositor"><span class="header-section-number">12.4</span> The compositor behind a context</h2>
+<p>The rest of the chapter rebuilds the Context API from the combinators of <a href="../part03-framework/11-combinators.html">the previous chapter</a>. The constructor <code>dp.Context.compositor</code> builds one measurement, an <strong>adaptive composition</strong> over the data’s space, and calls it on the data. Adaptive composition takes a list of per-query budgets, the <code>d_mids</code>, and lets you submit one measurement per share. Each may be chosen after seeing the earlier answers, and the promise is that together they stay within the sum. <a href="../../book-full/part03-dp-foundations/04-composition.html">The full edition’s chapter on composition</a> proves that the budgets add. The script reads the context’s accountant and builds the same one by hand.</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb18" data-excerpt="utils-accountant"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a>by_hand_accountant <span class="op">=</span> dp.c.make_adaptive_composition(</span>
+<span id="cb18-2"><a href="#cb18-2" aria-hidden="true" tabindex="-1"></a>    input_domain<span class="op">=</span>SPACE[<span class="dv">0</span>],</span>
+<span id="cb18-3"><a href="#cb18-3" aria-hidden="true" tabindex="-1"></a>    input_metric<span class="op">=</span>SPACE[<span class="dv">1</span>],</span>
+<span id="cb18-4"><a href="#cb18-4" aria-hidden="true" tabindex="-1"></a>    output_measure<span class="op">=</span>dp.max_divergence(),</span>
+<span id="cb18-5"><a href="#cb18-5" aria-hidden="true" tabindex="-1"></a>    d_in<span class="op">=</span><span class="dv">1</span>,  <span class="co"># the privacy unit's distance: one row added or removed</span></span>
+<span id="cb18-6"><a href="#cb18-6" aria-hidden="true" tabindex="-1"></a>    d_mids<span class="op">=</span>[share] <span class="op">*</span> QUERIES,  <span class="co"># the shares, which add up to the budget</span></span>
+<span id="cb18-7"><a href="#cb18-7" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb18-8"><a href="#cb18-8" aria-hidden="true" tabindex="-1"></a>queryable <span class="op">=</span> by_hand_accountant(data)  <span class="co"># answers measurement queries on the data, and keeps count</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<pre class="text"><code>context accountant: VectorDomain(AtomDomain(nan=true, T=f64)) SymmetricDistance() MaxDivergence
+context d_in: 1  d_mids: [0.3333, 0.3333, 0.3333]
+context accountant map(1): 1.0000
+by hand accountant map(1): 1.0000  queryable: Queryable(Q=AnyMeasurement)
+d_mids by weights [1, 2, 1]: [0.25, 0.5, 0.25]</code></pre>
+<p>The domain was inferred from the data, a list of floats, and the metric and the measure are the halves of <code>unit_of</code> and <code>loss_of</code> that the first chapter printed. The privacy map of the composition at the unit’s distance is the whole budget, 1, from either construction. Calling the accountant on the data returns a <strong>queryable</strong>, an object that answers one measurement at a time and refuses when the shares run out. That queryable is what the context keeps. The data are inside it and nowhere else, which is why the first chapter told you to drop your own reference.</p>
+<p>The shares come from <code>split_evenly_over</code> or <code>split_by_weights</code>, and the context does not divide the budget itself. It hands the weights to <code>binary_search_param</code> and scales them until the composition’s map at <code>d_in</code> meets the budget, which for pure differential privacy is the proportional split you would expect. Weights of 1, 2 and 1 give a quarter, a half and a quarter of <span class="math inline">\(\varepsilon\)</span>.</p>
+</section>
+<section id="sec-utils-query" class="level2" data-number="12.5">
+<h2 data-number="12.5" class="anchored" data-anchor-id="sec-utils-query"><span class="header-section-number">12.5</span> The query behind a release</h2>
+<p><code>context.query()</code> returns a <strong>Query</strong>, an object that holds a chain and the share it must fit. On plain data it is a <code>Query</code>, and on a LazyFrame it is the <code>LazyFrameQuery</code> of the Polars chapters, built on the same machinery. The chain starts as the data’s space. Each method you call, such as <code>count</code> or <code>laplace</code>, looks up the constructor of that name and chains it on. So <code>query.count()</code> is <code>space &gt;&gt; dp.t.then_count()</code>, with the space supplied by the context. The script watches the chain change type.</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb20" data-excerpt="utils-query"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb20-1"><a href="#cb20-1" aria-hidden="true" tabindex="-1"></a>query <span class="op">=</span> plain_query(context)  <span class="co"># the chain is the data's space: a domain and a metric</span></span>
+<span id="cb20-2"><a href="#cb20-2" aria-hidden="true" tabindex="-1"></a>counted <span class="op">=</span> query.count()  <span class="co"># the chain is a Transformation</span></span>
+<span id="cb20-3"><a href="#cb20-3" aria-hidden="true" tabindex="-1"></a>noisy <span class="op">=</span> counted.laplace()  <span class="co"># no scale: the chain is a PartialChain, waiting for one number</span></span>
+<span id="cb20-4"><a href="#cb20-4" aria-hidden="true" tabindex="-1"></a>is_partial <span class="op">=</span> <span class="bu">isinstance</span>(noisy._chain, dp.PartialChain)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<pre class="text"><code>query chain: tuple -&gt; Transformation -&gt; PartialChain
+partial chain: True
+resolve a transformation: ValueError: Query is not yet a measurement or odometer.</code></pre>
+<p>The interesting step is <code>laplace()</code> without a scale. The query counts the arguments against the constructor’s signature and finds one missing. Instead of calling the constructor, it wraps it in a <strong>partial chain</strong>, a function from the missing number to the finished chain. Only one number may be missing at a time, which is why a second noise step without a scale fails below. A query that is still a transformation cannot be resolved into a measurement, which the third line shows.</p>
+<p><code>resolve</code> is where the number is found. It calls the partial chain’s <code>fix</code>, which runs <code>binary_search</code> with the predicate “the chain at this value checks within the query’s share”. That is the search of <a href="#sec-utils-search" class="quarto-xref"><span>Section 12.2</span></a>, and <code>fix</code> stores the value it finds on the measurement as <code>param</code>. So <code>param()</code> reports the scale the search found, and <code>None</code> when nothing was searched for.</p>
+<pre class="text"><code>param of .laplace(): 3.0000000000000004
+param of .laplace(scale=3.0): None
+two missing parameters: ValueError: gaussian is missing 1 parameter(s).</code></pre>
+<p>The script now runs the same search by hand on the same chain, and releases through the by-hand queryable.</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb23" data-excerpt="utils-resolve"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb23-1"><a href="#cb23-1" aria-hidden="true" tabindex="-1"></a>by_hand_param <span class="op">=</span> dp.binary_search_param(count_laplace, d_in<span class="op">=</span><span class="dv">1</span>, d_out<span class="op">=</span>share)  <span class="co"># what resolve runs on the chain</span></span>
+<span id="cb23-2"><a href="#cb23-2" aria-hidden="true" tabindex="-1"></a>by_hand_measurement <span class="op">=</span> count_laplace(by_hand_param)</span>
+<span id="cb23-3"><a href="#cb23-3" aria-hidden="true" tabindex="-1"></a>dp_count_by_hand <span class="op">=</span> queryable(by_hand_measurement)  <span class="co"># what release does: the queryable runs the measurement</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<pre class="text"><code>resolve: context param=3.0000000000000004 by hand=3.0000000000000004 equal=True
+d_mids after context(measurement): [0.3333, 0.3333]</code></pre>
+<p>The two scales are not just close but equal, because they are the same search on the same predicate. <code>release</code> does two things with the resolved measurement. It passes the measurement to the context, which hands it to the queryable and records the share as spent, so the first share leaves <code>d_mids</code>. The by-hand version does the same with <code>queryable(measurement)</code>, except that nothing records the spend. That bookkeeping is what the context adds, and the reason to use it.</p>
+</section>
+<section id="sec-utils-measures" class="level2" data-number="12.6">
+<h2 data-number="12.6" class="anchored" data-anchor-id="sec-utils-measures"><span class="header-section-number">12.6</span> Nested compositors and other measures</h2>
+<p>Two features of the Context API are easier to understand once the chain is visible. The first is <code>Query.compositor</code>, which nests an adaptive composition inside one share. The query’s share becomes the inner budget, split again, and releasing the query returns a new <code>Context</code> rather than a number.</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb25" data-excerpt="utils-nested"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb25-1"><a href="#cb25-1" aria-hidden="true" tabindex="-1"></a>inner <span class="op">=</span> plain_query(context).compositor(split_evenly_over<span class="op">=</span><span class="dv">2</span>).release()  <span class="co"># a Context inside one share</span></span>
+<span id="cb25-2"><a href="#cb25-2" aria-hidden="true" tabindex="-1"></a>inner_scale <span class="op">=</span> plain_query(inner).count().laplace().param()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<pre class="text"><code>inner context: d_in=1 d_out=0.3333 d_mids=[0.1667, 0.1667]
+inner count scale: 6.0000
+outer d_mids after the inner compositor: [0.3333]</code></pre>
+<p>The inner context has the outer share, a third of <span class="math inline">\(\varepsilon\)</span>, as its whole budget, and splits it in two, so a count inside it gets a scale of 6. The outer context counts the nested compositor as one query spent, whatever happens inside it, because the composition’s guarantee covers everything its queryable answers.</p>
+<p>The second feature is a budget stated in one measure and a mechanism proved in another. The Laplace mechanism’s measure is the max divergence of pure differential privacy, and the Gaussian mechanism’s is zCDP. When the context’s measure differs, <code>resolve</code> casts the measurement with the converters of the combinators chapter before it checks the budget.</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb27" data-excerpt="utils-cast"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb27-1"><a href="#cb27-1" aria-hidden="true" tabindex="-1"></a>approx <span class="op">=</span> dp.Context.compositor(</span>
+<span id="cb27-2"><a href="#cb27-2" aria-hidden="true" tabindex="-1"></a>    data<span class="op">=</span>data,</span>
+<span id="cb27-3"><a href="#cb27-3" aria-hidden="true" tabindex="-1"></a>    privacy_unit<span class="op">=</span>dp.unit_of(contributions<span class="op">=</span><span class="dv">1</span>),</span>
+<span id="cb27-4"><a href="#cb27-4" aria-hidden="true" tabindex="-1"></a>    privacy_loss<span class="op">=</span>dp.loss_of(epsilon<span class="op">=</span>EPSILON, delta<span class="op">=</span>DELTA),  <span class="co"># approximate differential privacy</span></span>
+<span id="cb27-5"><a href="#cb27-5" aria-hidden="true" tabindex="-1"></a>    split_evenly_over<span class="op">=</span>QUERIES,</span>
+<span id="cb27-6"><a href="#cb27-6" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb27-7"><a href="#cb27-7" aria-hidden="true" tabindex="-1"></a>laplace_cast <span class="op">=</span> plain_query(approx).count().laplace().resolve()  <span class="co"># pure DP, cast to approximate DP</span></span>
+<span id="cb27-8"><a href="#cb27-8" aria-hidden="true" tabindex="-1"></a>gaussian_cast <span class="op">=</span> plain_query(approx).count().gaussian().resolve()  <span class="co"># zCDP, converted and its delta fixed</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<pre class="text"><code>approx share: (0.3333, 3.3e-08)
+laplace under (epsilon, delta): Approximate(MaxDivergence) map(1)=(0.3333, 0.0e+00)
+gaussian under (epsilon, delta): Approximate(MaxDivergence) map(1)=(0.3333, 3.3e-08)
+param after a cast: None</code></pre>
+<p>Under an <span class="math inline">\((\varepsilon, \delta)\)</span> budget the Laplace mechanism is wrapped by <code>make_approximate</code>, which reports its loss as the pair <span class="math inline">\((\varepsilon, 0)\)</span>. The slack goes unused, and the search fits only the <span class="math inline">\(\varepsilon\)</span> part. The Gaussian mechanism goes through <code>make_zCDP_to_approxDP</code> and <code>make_fix_delta</code>, which spend the share’s slack to convert <span class="math inline">\(\rho\)</span> into an <span class="math inline">\(\varepsilon\)</span>. One side effect matters. The cast returns a new measurement that wraps the old one, so the <code>param</code> attribute sits on the inner measurement and <code>param()</code> reads <code>None</code>. To see the scale, run <code>binary_search_param</code> on the chain yourself, as the previous section did.</p>
+<pre class="text"><code>laplace under rho: ZeroConcentratedDivergence map(1)=0.0333
+gaussian under rho: scale=3.8730
+gaussian under epsilon: ValueError: Unable to cast measure from ZeroConcentratedDivergence to MaxDivergence</code></pre>
+<p>Under a <span class="math inline">\(\rho\)</span> budget the Laplace mechanism is cast with <code>make_pureDP_to_zCDP</code>, and the Gaussian mechanism needs no cast, so its <code>param()</code> works and reports a scale of 3.873. The one direction that cannot be cast is a Gaussian mechanism under a pure <span class="math inline">\(\varepsilon\)</span> budget, because zCDP never implies pure differential privacy, and the context says so instead of guessing. <a href="../../book-full/part04-privacy-accounting/03-concentrated-dp.html">The full edition’s chapter on concentrated differential privacy</a> derives the conversions behind each cast.</p>
+<p>Finally the releases of one run, read against their error bars.</p>
+<pre class="text"><code>released (one run):
+  survey rows 3811875  (true 3811932, within 108.3 with probability 0.95)
+  count by hand 94  (true 100, within 9.4 with probability 0.95)
+  count through the context 101  (true 100)</code></pre>
+<p>All three landed within their bars. The two counts of the hundred integers came from the same measurement, once through the by-hand queryable and once through the context, and differ only by their noise.</p>
+</section>
+<section id="summary" class="level2" data-number="12.7">
+<h2 data-number="12.7" class="anchored" data-anchor-id="summary"><span class="header-section-number">12.7</span> Summary</h2>
+<div id="tbl-utils-summary" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-tbl figure">
+<figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl" id="tbl-utils-summary-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Table&nbsp;12.1: The utilities and the pieces of the Context API, what each does, and the rule of thumb that goes with it.
+</figcaption>
+<div aria-describedby="tbl-utils-summary-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<table class="caption-top table">
+<colgroup>
+<col style="width: 33%">
+<col style="width: 33%">
+<col style="width: 33%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>Call or concept</th>
+<th>What it does</th>
+<th>Rule of thumb</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><code>"i32"</code>, <code>int</code>, <code>dp.i32</code></td>
+<td>Three spellings of one type descriptor</td>
+<td><code>int</code> is <code>i32</code> and <code>float</code> is <code>f64</code>; NumPy’s integers are <code>i64</code></td>
+</tr>
+<tr class="even">
+<td><code>dp.set_default_int_type(dp.i64)</code></td>
+<td>Changes what <code>int</code> means for the rest of the program</td>
+<td>The clean fix when all your integers have 64 bits</td>
+</tr>
+<tr class="odd">
+<td><code>inferred type is XXX, expected YYY</code></td>
+<td>Your argument’s type does not match the metric’s or the domain’s</td>
+<td>Change the argument to the expected type, not the domain to the argument</td>
+</tr>
+<tr class="even">
+<td><code>dp.binary_search(predicate, bounds, T)</code></td>
+<td>The value nearest the boundary of a monotone predicate</td>
+<td>Pass bounds when the chain is only valid in a range, and <code>T=int</code> for an integer</td>
+</tr>
+<tr class="odd">
+<td><code>dp.binary_search_param(make_chain, d_in, d_out)</code></td>
+<td>The smallest scale whose chain checks within the budget</td>
+<td>What a context runs for <code>.laplace()</code> without a scale</td>
+</tr>
+<tr class="even">
+<td><code>dp.binary_search_chain(...)</code></td>
+<td>The chain built at the value the search found</td>
+<td>It carries no <code>param</code>; use <code>binary_search_param</code> for the number</td>
+</tr>
+<tr class="odd">
+<td><code>dp.serialize</code>, <code>dp.deserialize</code></td>
+<td>A measurement as JSON, and back</td>
+<td>The recipe survives; <code>param</code>, contexts and Python plugins do not</td>
+</tr>
+<tr class="even">
+<td><code>Context.deserialize_polars_plan(bytes)</code></td>
+<td>A Polars plan from a client, run on the server’s context</td>
+<td>The plan carries the query; each context states the guarantee</td>
+</tr>
+<tr class="odd">
+<td><code>dp.Context.compositor(...)</code></td>
+<td>An adaptive composition over the data’s space, called on the data</td>
+<td>Its queryable holds the data; <code>d_mids</code> are the shares</td>
+</tr>
+<tr class="even">
+<td><code>context.query()</code></td>
+<td>A <code>Query</code> whose chain grows with each constructor</td>
+<td>A missing number makes a partial chain; one at a time</td>
+</tr>
+<tr class="odd">
+<td><code>query.param()</code></td>
+<td>The scale that <code>resolve</code> found</td>
+<td><code>None</code> when the scale was given or the measure was cast</td>
+</tr>
+<tr class="even">
+<td><code>Query.compositor(...)</code></td>
+<td>A context nested inside one share</td>
+<td>The outer context counts it as one query</td>
+</tr>
+<tr class="odd">
+<td>A Gaussian query under a pure budget</td>
+<td><code>ValueError: Unable to cast measure ...</code></td>
+<td>zCDP never implies pure differential privacy; state the budget with a <span class="math inline">\(\delta\)</span> or as <span class="math inline">\(\rho\)</span></td>
+</tr>
+</tbody>
+</table>
+</div>
+</figure>
+</div>
+</section>
+<section id="references" class="level2" data-number="12.8">
+<h2 data-number="12.8" class="anchored" data-anchor-id="references"><span class="header-section-number">12.8</span> References</h2>
+<ul>
+<li>OpenDP documentation: “Typing”, “Parameter Search” and “Serialization” under “Utilities” in the API user guide; “Context” and “API Comparison” in the same guide; and the entry <code>Inferred type is XXX, expected YYY</code> of “Troubleshooting” in Getting Started.</li>
+<li>Gaboardi, Hay and Vadhan, “A Programming Framework for OpenDP” (2020): the domains, metrics, measures and maps that the type descriptors and the searches work on.</li>
+<li>Dwork, Rothblum and Vadhan, “Boosting and Differential Privacy” (2010): composition of adaptively chosen mechanisms, which the compositor behind a context implements.</li>
+<li>Bun and Steinke, “Concentrated Differential Privacy: Simplifications, Extensions, and Lower Bounds” (2016): zCDP and its conversions to approximate differential privacy, which the measure casts use.</li>
+<li>The full edition’s chapters on <a href="../../book-full/part03-dp-foundations/03-laplace-gaussian.html">the Laplace and Gaussian mechanisms</a>, <a href="../../book-full/part03-dp-foundations/04-composition.html">composition</a> and <a href="../../book-full/part04-privacy-accounting/03-concentrated-dp.html">concentrated differential privacy</a> derive the results this chapter states.</li>
+</ul>
+
+
+</section>
+
+</main> <!-- /main -->
+<script id="quarto-html-after-body" type="application/javascript">
+  window.document.addEventListener("DOMContentLoaded", function (event) {
+    const icon = "";
+    const anchorJS = new window.AnchorJS();
+    anchorJS.options = {
+      placement: 'right',
+      icon: icon
+    };
+    anchorJS.add('.anchored');
+    const isCodeAnnotation = (el) => {
+      for (const clz of el.classList) {
+        if (clz.startsWith('code-annotation-')) {                     
+          return true;
+        }
+      }
+      return false;
+    }
+    const onCopySuccess = function(e) {
+      // button target
+      const button = e.trigger;
+      // don't keep focus
+      button.blur();
+      // flash "checked"
+      button.classList.add('code-copy-button-checked');
+      var currentTitle = button.getAttribute("title");
+      button.setAttribute("title", "Copied!");
+      let tooltip;
+      if (window.bootstrap) {
+        button.setAttribute("data-bs-toggle", "tooltip");
+        button.setAttribute("data-bs-placement", "left");
+        button.setAttribute("data-bs-title", "Copied!");
+        tooltip = new bootstrap.Tooltip(button, 
+          { trigger: "manual", 
+            customClass: "code-copy-button-tooltip",
+            offset: [0, -8]});
+        tooltip.show();    
+      }
+      setTimeout(function() {
+        if (tooltip) {
+          tooltip.hide();
+          button.removeAttribute("data-bs-title");
+          button.removeAttribute("data-bs-toggle");
+          button.removeAttribute("data-bs-placement");
+        }
+        button.setAttribute("title", currentTitle);
+        button.classList.remove('code-copy-button-checked');
+      }, 1000);
+      // clear code selection
+      e.clearSelection();
+    }
+    const getTextToCopy = function(trigger) {
+      const outerScaffold = trigger.parentElement.cloneNode(true);
+      const codeEl = outerScaffold.querySelector('code');
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
+        }
+      }
+      return codeEl.innerText;
+    }
+    const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
+      text: getTextToCopy
+    });
+    clipboard.on('success', onCopySuccess);
+    if (window.document.getElementById('quarto-embedded-source-code-modal')) {
+      const clipboardModal = new window.ClipboardJS('.code-copy-button[data-in-quarto-modal]', {
+        text: getTextToCopy,
+        container: window.document.getElementById('quarto-embedded-source-code-modal')
+      });
+      clipboardModal.on('success', onCopySuccess);
+    }
+      var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+      var mailtoRegex = new RegExp(/^mailto:/);
+        var filterRegex = new RegExp('/' + window.location.host + '/');
+      var isInternal = (href) => {
+          return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+      }
+      // Inspect non-navigation links and adorn them if external
+     var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool):not(.about-link)');
+      for (var i=0; i<links.length; i++) {
+        const link = links[i];
+        if (!isInternal(link.href)) {
+          // undo the damage that might have been done by quarto-nav.js in the case of
+          // links that we want to consider external
+          if (link.dataset.originalHref !== undefined) {
+            link.href = link.dataset.originalHref;
+          }
+        }
+      }
+    function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+      const config = {
+        allowHTML: true,
+        maxWidth: 500,
+        delay: 100,
+        arrow: false,
+        appendTo: function(el) {
+            return el.parentElement;
+        },
+        interactive: true,
+        interactiveBorder: 10,
+        theme: 'quarto',
+        placement: 'bottom-start',
+      };
+      if (contentFn) {
+        config.content = contentFn;
+      }
+      if (onTriggerFn) {
+        config.onTrigger = onTriggerFn;
+      }
+      if (onUntriggerFn) {
+        config.onUntrigger = onUntriggerFn;
+      }
+      window.tippy(el, config); 
+    }
+    const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+    for (var i=0; i<noterefs.length; i++) {
+      const ref = noterefs[i];
+      tippyHover(ref, function() {
+        // use id or data attribute instead here
+        let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+        try { href = new URL(href).hash; } catch {}
+        const id = href.replace(/^#\/?/, "");
+        const note = window.document.getElementById(id);
+        if (note) {
+          return note.innerHTML;
+        } else {
+          return "";
+        }
+      });
+    }
+    const xrefs = window.document.querySelectorAll('a.quarto-xref');
+    const processXRef = (id, note) => {
+      // Strip column container classes
+      const stripColumnClz = (el) => {
+        el.classList.remove("page-full", "page-columns");
+        if (el.children) {
+          for (const child of el.children) {
+            stripColumnClz(child);
+          }
+        }
+      }
+      stripColumnClz(note)
+      if (id === null || id.startsWith('sec-')) {
+        // Special case sections, only their first couple elements
+        const container = document.createElement("div");
+        if (note.children && note.children.length > 2) {
+          container.appendChild(note.children[0].cloneNode(true));
+          for (let i = 1; i < note.children.length; i++) {
+            const child = note.children[i];
+            if (child.tagName === "P" && child.innerText === "") {
+              continue;
+            } else {
+              container.appendChild(child.cloneNode(true));
+              break;
+            }
+          }
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(container);
+          }
+          return container.innerHTML
+        } else {
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(note);
+          }
+          return note.innerHTML;
+        }
+      } else {
+        // Remove any anchor links if they are present
+        const anchorLink = note.querySelector('a.anchorjs-link');
+        if (anchorLink) {
+          anchorLink.remove();
+        }
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(note);
+        }
+        if (note.classList.contains("callout")) {
+          return note.outerHTML;
+        } else {
+          return note.innerHTML;
+        }
+      }
+    }
+    for (var i=0; i<xrefs.length; i++) {
+      const xref = xrefs[i];
+      tippyHover(xref, undefined, function(instance) {
+        instance.disable();
+        let url = xref.getAttribute('href');
+        let hash = undefined; 
+        if (url.startsWith('#')) {
+          hash = url;
+        } else {
+          try { hash = new URL(url).hash; } catch {}
+        }
+        if (hash) {
+          const id = hash.replace(/^#\/?/, "");
+          const note = window.document.getElementById(id);
+          if (note !== null) {
+            try {
+              const html = processXRef(id, note.cloneNode(true));
+              instance.setContent(html);
+            } finally {
+              instance.enable();
+              instance.show();
+            }
+          } else {
+            // See if we can fetch this
+            fetch(url.split('#')[0])
+            .then(res => res.text())
+            .then(html => {
+              const parser = new DOMParser();
+              const htmlDoc = parser.parseFromString(html, "text/html");
+              const note = htmlDoc.getElementById(id);
+              if (note !== null) {
+                const html = processXRef(id, note);
+                instance.setContent(html);
+              } 
+            }).finally(() => {
+              instance.enable();
+              instance.show();
+            });
+          }
+        } else {
+          // See if we can fetch a full url (with no hash to target)
+          // This is a special case and we should probably do some content thinning / targeting
+          fetch(url)
+          .then(res => res.text())
+          .then(html => {
+            const parser = new DOMParser();
+            const htmlDoc = parser.parseFromString(html, "text/html");
+            const note = htmlDoc.querySelector('main.content');
+            if (note !== null) {
+              // This should only happen for chapter cross references
+              // (since there is no id in the URL)
+              // remove the first header
+              if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
+                note.children[0].remove();
+              }
+              const html = processXRef(null, note);
+              instance.setContent(html);
+            } 
+          }).finally(() => {
+            instance.enable();
+            instance.show();
+          });
+        }
+      }, function(instance) {
+      });
+    }
+        let selectedAnnoteEl;
+        const selectorForAnnotation = ( cell, annotation) => {
+          let cellAttr = 'data-code-cell="' + cell + '"';
+          let lineAttr = 'data-code-annotation="' +  annotation + '"';
+          const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+          return selector;
+        }
+        const selectCodeLines = (annoteEl) => {
+          const doc = window.document;
+          const targetCell = annoteEl.getAttribute("data-target-cell");
+          const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+          const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+          const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+          const lineIds = lines.map((line) => {
+            return targetCell + "-" + line;
+          })
+          let top = null;
+          let height = null;
+          let parent = null;
+          if (lineIds.length > 0) {
+              //compute the position of the single el (top and bottom and make a div)
+              const el = window.document.getElementById(lineIds[0]);
+              top = el.offsetTop;
+              height = el.offsetHeight;
+              parent = el.parentElement.parentElement;
+            if (lineIds.length > 1) {
+              const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+              const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+              height = bottom - top;
+            }
+            if (top !== null && height !== null && parent !== null) {
+              // cook up a div (if necessary) and position it 
+              let div = window.document.getElementById("code-annotation-line-highlight");
+              if (div === null) {
+                div = window.document.createElement("div");
+                div.setAttribute("id", "code-annotation-line-highlight");
+                div.style.position = 'absolute';
+                parent.appendChild(div);
+              }
+              div.style.top = top - 2 + "px";
+              div.style.height = height + 4 + "px";
+              div.style.left = 0;
+              let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+              if (gutterDiv === null) {
+                gutterDiv = window.document.createElement("div");
+                gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+                gutterDiv.style.position = 'absolute';
+                const codeCell = window.document.getElementById(targetCell);
+                const gutter = codeCell.querySelector('.code-annotation-gutter');
+                gutter.appendChild(gutterDiv);
+              }
+              gutterDiv.style.top = top - 2 + "px";
+              gutterDiv.style.height = height + 4 + "px";
+            }
+            selectedAnnoteEl = annoteEl;
+          }
+        };
+        const unselectCodeLines = () => {
+          const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+          elementsIds.forEach((elId) => {
+            const div = window.document.getElementById(elId);
+            if (div) {
+              div.remove();
+            }
+          });
+          selectedAnnoteEl = undefined;
+        };
+          // Handle positioning of the toggle
+      window.addEventListener(
+        "resize",
+        throttle(() => {
+          elRect = undefined;
+          if (selectedAnnoteEl) {
+            selectCodeLines(selectedAnnoteEl);
+          }
+        }, 10)
+      );
+      function throttle(fn, ms) {
+      let throttle = false;
+      let timer;
+        return (...args) => {
+          if(!throttle) { // first call gets through
+              fn.apply(this, args);
+              throttle = true;
+          } else { // all the others get throttled
+              if(timer) clearTimeout(timer); // cancel #2
+              timer = setTimeout(() => {
+                fn.apply(this, args);
+                timer = throttle = false;
+              }, ms);
+          }
+        };
+      }
+        // Attach click handler to the DT
+        const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+        for (const annoteDlNode of annoteDls) {
+          annoteDlNode.addEventListener('click', (event) => {
+            const clickedEl = event.target;
+            if (clickedEl !== selectedAnnoteEl) {
+              unselectCodeLines();
+              const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+              if (activeEl) {
+                activeEl.classList.remove('code-annotation-active');
+              }
+              selectCodeLines(clickedEl);
+              clickedEl.classList.add('code-annotation-active');
+            } else {
+              // Unselect the line
+              unselectCodeLines();
+              clickedEl.classList.remove('code-annotation-active');
+            }
+          });
+        }
+    const findCites = (el) => {
+      const parentEl = el.parentElement;
+      if (parentEl) {
+        const cites = parentEl.dataset.cites;
+        if (cites) {
+          return {
+            el,
+            cites: cites.split(' ')
+          };
+        } else {
+          return findCites(el.parentElement)
+        }
+      } else {
+        return undefined;
+      }
+    };
+    var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+    for (var i=0; i<bibliorefs.length; i++) {
+      const ref = bibliorefs[i];
+      const citeInfo = findCites(ref);
+      if (citeInfo) {
+        tippyHover(citeInfo.el, function() {
+          var popup = window.document.createElement('div');
+          citeInfo.cites.forEach(function(cite) {
+            var citeDiv = window.document.createElement('div');
+            citeDiv.classList.add('hanging-indent');
+            citeDiv.classList.add('csl-entry');
+            var biblioDiv = window.document.getElementById('ref-' + cite);
+            if (biblioDiv) {
+              citeDiv.innerHTML = biblioDiv.innerHTML;
+            }
+            popup.appendChild(citeDiv);
+          });
+          return popup.innerHTML;
+        });
+      }
+    }
+  });
+  </script>
+<nav class="page-navigation">
+  <div class="nav-page nav-page-previous">
+      <a href="../part03-framework/11-combinators.html" class="pagination-link" aria-label="Combinators">
+        <i class="bi bi-arrow-left-short"></i> <span class="nav-page-text"><span class="chapter-number">11</span>&nbsp; <span class="chapter-title">Combinators</span></span>
+      </a>          
+  </div>
+  <div class="nav-page nav-page-next">
+      <a href="../part04-extending/00-introduction.html" class="pagination-link" aria-label="Extending the library">
+        <span class="nav-page-text">Extending the library</span> <i class="bi bi-arrow-right-short"></i>
+      </a>
+  </div>
+</nav>
+</div> <!-- /content -->
+
+
+
+
+</body></html>

@@ -787,16 +787,24 @@ Table&nbsp;2: Notation shared by the chapters of this part.
 </thead>
 <tbody>
 <tr class="odd">
-<td><span class="math inline">\(D\)</span>, <span class="math inline">\(\pi\)</span></td>
-<td>A dataset of records; the population they are drawn from</td>
+<td><span class="math inline">\(D\)</span>, <span class="math inline">\(\mathcal D\)</span></td>
+<td>A dataset of records; the data distribution (the population) they are drawn from</td>
 </tr>
 <tr class="even">
 <td><span class="math inline">\(\mathcal T\)</span>, <span class="math inline">\(\theta = \mathcal T(D)\)</span></td>
 <td>A (possibly randomized) training algorithm, and the model it outputs</td>
 </tr>
 <tr class="odd">
-<td><span class="math inline">\(b\)</span></td>
-<td>The hidden bit of a two-world game; <span class="math inline">\(b = 1\)</span> is the world where the target record is used (the member world)</td>
+<td><span class="math inline">\(\mathcal A\)</span></td>
+<td>The adversary</td>
+</tr>
+<tr class="even">
+<td><span class="math inline">\(b\)</span>, <span class="math inline">\(b'\)</span></td>
+<td>The hidden bit of a two-world game, and the adversary’s guess; <span class="math inline">\(b = 1\)</span> is the world where the target record is used (the member world)</td>
+</tr>
+<tr class="odd">
+<td><span class="math inline">\(\pi\)</span></td>
+<td>A prior over a secret; <span class="math inline">\(\pi_1\)</span> is the prior probability of <span class="math inline">\(b = 1\)</span></td>
 </tr>
 <tr class="even">
 <td><span class="math inline">\(V\)</span>; <span class="math inline">\(P\)</span>, <span class="math inline">\(Q\)</span></td>
@@ -804,7 +812,7 @@ Table&nbsp;2: Notation shared by the chapters of this part.
 </tr>
 <tr class="odd">
 <td><span class="math inline">\(\mathrm{TPR}\)</span>, <span class="math inline">\(\mathrm{FPR}\)</span></td>
-<td><span class="math inline">\(\Pr[b' = 1 \mid b = 1]\)</span> and <span class="math inline">\(\Pr[b' = 1 \mid b = 0]\)</span> for the guess <span class="math inline">\(b'\)</span></td>
+<td><span class="math inline">\(\Pr[b' = 1 \mid b = 1]\)</span> and <span class="math inline">\(\Pr[b' = 1 \mid b = 0]\)</span></td>
 </tr>
 <tr class="even">
 <td><span class="math inline">\(\mathrm{Adv}\)</span></td>
@@ -815,7 +823,7 @@ Table&nbsp;2: Notation shared by the chapters of this part.
 <td>The trade-off function: the smallest false negative rate <span class="math inline">\(1 - \mathrm{TPR}\)</span> of any test at each FPR</td>
 </tr>
 <tr class="even">
-<td><span class="math inline">\(\ell(\theta, z)\)</span></td>
+<td><span class="math inline">\(\ell(\theta; z)\)</span></td>
 <td>The loss of model <span class="math inline">\(\theta\)</span> on record <span class="math inline">\(z\)</span></td>
 </tr>
 </tbody>

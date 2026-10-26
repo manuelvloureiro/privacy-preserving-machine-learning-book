@@ -450,7 +450,7 @@ window.Quarto = {
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../part05-dp-ml/05-private-prediction.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">42</span>&nbsp; <span class="chapter-title">Exercises: Private prediction</span></span></a>
+ <span class="menu-text"><span class="chapter-number">42</span>&nbsp; <span class="chapter-title">Exercises: Private prediction: PATE and in-context learning</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
@@ -501,14 +501,14 @@ window.Quarto = {
     <h2 id="toc-title">Table of contents</h2>
    
   <ul>
-  <li><a href="#sec-sol-linkage-1" id="toc-sec-sol-linkage-1" class="nav-link active" data-scroll-target="#sec-sol-linkage-1"><span class="header-section-number">15.1</span> Linkage success and class sizes</a></li>
-  <li><a href="#sec-sol-linkage-2" id="toc-sec-sol-linkage-2" class="nav-link" data-scroll-target="#sec-sol-linkage-2"><span class="header-section-number">15.2</span> Bits for a target uniqueness</a></li>
-  <li><a href="#sec-sol-linkage-3" id="toc-sec-sol-linkage-3" class="nav-link" data-scroll-target="#sec-sol-linkage-3"><span class="header-section-number">15.3</span> Collisions and the birthday bound</a></li>
-  <li><a href="#sec-sol-linkage-4" id="toc-sec-sol-linkage-4" class="nav-link" data-scroll-target="#sec-sol-linkage-4"><span class="header-section-number">15.4</span> The variance of the number of uniques</a></li>
-  <li><a href="#sec-sol-linkage-5" id="toc-sec-sol-linkage-5" class="nav-link" data-scroll-target="#sec-sol-linkage-5"><span class="header-section-number">15.5</span> How many rare items</a></li>
-  <li><a href="#sec-sol-linkage-6" id="toc-sec-sol-linkage-6" class="nav-link" data-scroll-target="#sec-sol-linkage-6"><span class="header-section-number">15.6</span> Sampling and the Poisson approximation</a></li>
-  <li><a href="#sec-sol-linkage-7" id="toc-sec-sol-linkage-7" class="nav-link" data-scroll-target="#sec-sol-linkage-7"><span class="header-section-number">15.7</span> Eccentricity under an exponential tail</a></li>
-  <li><a href="#sec-sol-linkage-8" id="toc-sec-sol-linkage-8" class="nav-link" data-scroll-target="#sec-sol-linkage-8"><span class="header-section-number">15.8</span> Hashed identifiers and taxi trips</a></li>
+  <li><a href="#sec-sol-link-1" id="toc-sec-sol-link-1" class="nav-link active" data-scroll-target="#sec-sol-link-1"><span class="header-section-number">15.1</span> Linkage success and class sizes</a></li>
+  <li><a href="#sec-sol-link-2" id="toc-sec-sol-link-2" class="nav-link" data-scroll-target="#sec-sol-link-2"><span class="header-section-number">15.2</span> Bits for a target uniqueness</a></li>
+  <li><a href="#sec-sol-link-3" id="toc-sec-sol-link-3" class="nav-link" data-scroll-target="#sec-sol-link-3"><span class="header-section-number">15.3</span> Collisions and the birthday bound</a></li>
+  <li><a href="#sec-sol-link-4" id="toc-sec-sol-link-4" class="nav-link" data-scroll-target="#sec-sol-link-4"><span class="header-section-number">15.4</span> The variance of the number of uniques</a></li>
+  <li><a href="#sec-sol-link-5" id="toc-sec-sol-link-5" class="nav-link" data-scroll-target="#sec-sol-link-5"><span class="header-section-number">15.5</span> How many rare items</a></li>
+  <li><a href="#sec-sol-link-6" id="toc-sec-sol-link-6" class="nav-link" data-scroll-target="#sec-sol-link-6"><span class="header-section-number">15.6</span> Sampling and the Poisson approximation</a></li>
+  <li><a href="#sec-sol-link-7" id="toc-sec-sol-link-7" class="nav-link" data-scroll-target="#sec-sol-link-7"><span class="header-section-number">15.7</span> Eccentricity under an exponential tail</a></li>
+  <li><a href="#sec-sol-link-8" id="toc-sec-sol-link-8" class="nav-link" data-scroll-target="#sec-sol-link-8"><span class="header-section-number">15.8</span> Hashed identifiers and taxi trips</a></li>
   </ul>
 </nav>
     </div>
@@ -535,9 +535,9 @@ window.Quarto = {
 
 
 <p>Exercises for <a href="../../book-full/part02-attacks/07-linkage-reidentification.html">Linkage and re-identification</a>, each with a worked solution. Try each exercise before opening its solution. The script <code>code/part02-attacks/solutions_linkage.py</code> computes every number quoted here; run it with <code>uv run python code/part02-attacks/solutions_linkage.py</code>.</p>
-<p>The notation is the chapter’s: <span class="math inline">\(n\)</span> people, cells <span class="math inline">\(c\)</span> with probabilities <span class="math inline">\(p_c\)</span>, <span class="math inline">\(M\)</span> cells, <span class="math inline">\(U\)</span> the number of unique people, <span class="math inline">\(\pi\)</span> the sampling fraction and <span class="math inline">\(\lambda\)</span> the expected number of other people in a cell.</p>
-<section id="sec-sol-linkage-1" class="level2" data-number="15.1">
-<h2 data-number="15.1" class="anchored" data-anchor-id="sec-sol-linkage-1"><span class="header-section-number">15.1</span> Linkage success and class sizes</h2>
+<p>The notation is the chapter’s: <span class="math inline">\(n\)</span> people, cells <span class="math inline">\(c\)</span> with probabilities <span class="math inline">\(p_c\)</span>, <span class="math inline">\(K\)</span> cells, <span class="math inline">\(U\)</span> the number of unique people, <span class="math inline">\(q\)</span> the sampling rate and <span class="math inline">\(\lambda\)</span> the expected number of other people in a cell.</p>
+<section id="sec-sol-link-1" class="level2" data-number="15.1">
+<h2 data-number="15.1" class="anchored" data-anchor-id="sec-sol-link-1"><span class="header-section-number">15.1</span> Linkage success and class sizes</h2>
 <blockquote class="blockquote">
 <p><strong>Exercise 1.</strong> <strong>Linkage success and class sizes.</strong> Show that for a fixed number of records <span class="math inline">\(n\)</span>, <a href="../../book-full/part02-attacks/07-linkage-reidentification.html#eq-link-success">Equation&nbsp;15.3</a> is at most <span class="math inline">\(1/k\)</span> when every class has at least <span class="math inline">\(k\)</span> records, and compute the success for a release of 8 records in classes of sizes 2, 2 and 4. When is the bound <span class="math inline">\(1/k\)</span> attained? <em>Check: <span class="math inline">\(3/8 = 0.375\)</span>.</em> <em>(The linkage game)</em></p>
 </blockquote>
@@ -566,8 +566,8 @@ window.Quarto = {
 </div>
 </div>
 </section>
-<section id="sec-sol-linkage-2" class="level2" data-number="15.2">
-<h2 data-number="15.2" class="anchored" data-anchor-id="sec-sol-linkage-2"><span class="header-section-number">15.2</span> Bits for a target uniqueness</h2>
+<section id="sec-sol-link-2" class="level2" data-number="15.2">
+<h2 data-number="15.2" class="anchored" data-anchor-id="sec-sol-link-2"><span class="header-section-number">15.2</span> Bits for a target uniqueness</h2>
 <blockquote class="blockquote">
 <p><strong>Exercise 2.</strong> <strong>Bits for a target uniqueness.</strong> Under uniform cells, how many bits beyond <span class="math inline">\(\log_2n\)</span> does it take to make a fraction <span class="math inline">\(f\)</span> of the population unique? Evaluate for 8 billion people at <span class="math inline">\(f = 0.5\)</span> and <span class="math inline">\(0.99\)</span>, and show that at exactly <span class="math inline">\(\log_2n\)</span> bits the fraction tends to <span class="math inline">\(e^{-1}\)</span> as <span class="math inline">\(n \to \infty\)</span>. <em>Check: 33.4 and 39.5 bits.</em> <em>(Fact 2, uniform cells)</em></p>
 </blockquote>
@@ -584,19 +584,19 @@ window.Quarto = {
 <div id="callout-2" class="callout-2-contents callout-collapse collapse">
 <div class="callout-body-container callout-body">
 <ol type="1">
-<li><strong>The fraction.</strong> With <span class="math inline">\(M = 2^b\)</span> uniform cells, <a href="../../book-full/part02-attacks/07-linkage-reidentification.html#eq-link-uniform">Equation&nbsp;15.5</a> gives <span class="math inline">\(f \approx e^{-n/M}\)</span>.</li>
-<li><strong>Solve for <span class="math inline">\(M\)</span>.</strong> <span class="math inline">\(n/M = \ln(1/f)\)</span>, so <span class="math inline">\(M = n/\ln(1/f)\)</span>.</li>
+<li><strong>The fraction.</strong> With <span class="math inline">\(K = 2^b\)</span> uniform cells, <a href="../../book-full/part02-attacks/07-linkage-reidentification.html#eq-link-uniform">Equation&nbsp;15.5</a> gives <span class="math inline">\(f \approx e^{-n/K}\)</span>.</li>
+<li><strong>Solve for <span class="math inline">\(K\)</span>.</strong> <span class="math inline">\(n/K = \ln(1/f)\)</span>, so <span class="math inline">\(K = n/\ln(1/f)\)</span>.</li>
 <li><strong>Take <span class="math inline">\(\log_2\)</span>.</strong> <span class="math inline">\(b = \log_2n - \log_2\ln(1/f) = \log_2 n + \log_2\frac{1}{\ln(1/f)}\)</span>. The excess over <span class="math inline">\(\log_2n\)</span> does not depend on <span class="math inline">\(n\)</span>.</li>
 <li><strong>Evaluate.</strong> <span class="math inline">\(\log_2(8\times10^9) = 32.9\)</span>. At <span class="math inline">\(f = 0.5\)</span>, <span class="math inline">\(\log_2(1/\ln 2) = 0.53\)</span>, so <span class="math inline">\(b = 33.4\)</span>. At <span class="math inline">\(f = 0.99\)</span>, <span class="math inline">\(\ln(1/0.99) = 0.01005\)</span> and <span class="math inline">\(\log_2(1/0.01005) = 6.64\)</span>, so <span class="math inline">\(b = 39.5\)</span>.</li>
-<li><strong>At <span class="math inline">\(b = \log_2 n\)</span>.</strong> Then <span class="math inline">\(M = n\)</span> and the exact fraction is <span class="math inline">\((1 - 1/n)^{n-1}\)</span>. By Fact 2 it lies between <span class="math inline">\(e^{-(n-1)/(n-1)} = e^{-1}\)</span> and <span class="math inline">\(e^{-(n-1)/n}\)</span>, and both tend to <span class="math inline">\(e^{-1}\)</span>. Numerically: 0.3874 for <span class="math inline">\(n = 10\)</span>, 0.3697 for <span class="math inline">\(n = 100\)</span>, and 0.3679 <span class="math inline">\(= e^{-1}\)</span> to four decimals for <span class="math inline">\(n = 10^4\)</span> and <span class="math inline">\(8\times10^9\)</span>.</li>
+<li><strong>At <span class="math inline">\(b = \log_2 n\)</span>.</strong> Then <span class="math inline">\(K = n\)</span> and the exact fraction is <span class="math inline">\((1 - 1/n)^{n-1}\)</span>. By Fact 2 it lies between <span class="math inline">\(e^{-(n-1)/(n-1)} = e^{-1}\)</span> and <span class="math inline">\(e^{-(n-1)/n}\)</span>, and both tend to <span class="math inline">\(e^{-1}\)</span>. Numerically: 0.3874 for <span class="math inline">\(n = 10\)</span>, 0.3697 for <span class="math inline">\(n = 100\)</span>, and 0.3679 <span class="math inline">\(= e^{-1}\)</span> to four decimals for <span class="math inline">\(n = 10^4\)</span> and <span class="math inline">\(8\times10^9\)</span>.</li>
 </ol>
 <p><em>Six and a half bits beyond <span class="math inline">\(\log_2 n\)</span> make 99% of a population unique, whatever its size: about two extra attributes of the kind in the chapter’s census.</em></p>
 </div>
 </div>
 </div>
 </section>
-<section id="sec-sol-linkage-3" class="level2" data-number="15.3">
-<h2 data-number="15.3" class="anchored" data-anchor-id="sec-sol-linkage-3"><span class="header-section-number">15.3</span> Collisions and the birthday bound</h2>
+<section id="sec-sol-link-3" class="level2" data-number="15.3">
+<h2 data-number="15.3" class="anchored" data-anchor-id="sec-sol-link-3"><span class="header-section-number">15.3</span> Collisions and the birthday bound</h2>
 <blockquote class="blockquote">
 <p><strong>Exercise 3.</strong> <strong>Collisions and the birthday bound.</strong> Show that the expected number of pairs of people who share a cell is <span class="math inline">\(\binom n2\sum_cp_c^2\)</span>, and deduce a union bound on the probability that <em>somebody</em> shares a cell. For 30 people and the 730 cells of (birthday, sex), compare it with the exact probability. <em>Check: union bound <span class="math inline">\(435/730 = 0.596\)</span>.</em> <em>(Indicators, birthday bound)</em></p>
 </blockquote>
@@ -613,10 +613,10 @@ window.Quarto = {
 <div id="callout-3" class="callout-3-contents callout-collapse collapse">
 <div class="callout-body-container callout-body">
 <ol type="1">
-<li><strong>Indicators.</strong> Let <span class="math inline">\(C_{ij} = \mathbf 1[\text{persons } i \text{ and } j \text{ share a cell}]\)</span> for each of the <span class="math inline">\(\binom n2\)</span> pairs. The number of sharing pairs is <span class="math inline">\(\sum_{i&lt;j}C_{ij}\)</span>.</li>
-<li><strong>One pair.</strong> Persons <span class="math inline">\(i\)</span> and <span class="math inline">\(j\)</span> are independent, so <span class="math inline">\(\Pr[C_{ij} = 1] = \sum_c\Pr[i \in c]\Pr[j \in c] = \sum_cp_c^2\)</span>.</li>
+<li><strong>Indicators.</strong> Let <span class="math inline">\(Y_{ij} = \mathbf 1[\text{persons } i \text{ and } j \text{ share a cell}]\)</span> for each of the <span class="math inline">\(\binom n2\)</span> pairs. The number of sharing pairs is <span class="math inline">\(\sum_{i&lt;j}Y_{ij}\)</span>.</li>
+<li><strong>One pair.</strong> Persons <span class="math inline">\(i\)</span> and <span class="math inline">\(j\)</span> are independent, so <span class="math inline">\(\Pr[Y_{ij} = 1] = \sum_c\Pr[i \in c]\Pr[j \in c] = \sum_cp_c^2\)</span>.</li>
 <li><strong>Linearity</strong> (Fact 1): the expected number of sharing pairs is <span class="math inline">\(\binom n2\sum_cp_c^2\)</span>.</li>
-<li><strong>Union bound.</strong> “Somebody shares a cell” is the event that some <span class="math inline">\(C_{ij} = 1\)</span>, and <span class="math inline">\(\Pr[\bigcup_{i&lt;j}\{C_{ij} = 1\}] \le \sum_{i&lt;j}\Pr[C_{ij} = 1] = \binom n2\sum_cp_c^2\)</span>. (Equivalently, Markov’s inequality applied to the number of sharing pairs.)</li>
+<li><strong>Union bound.</strong> “Somebody shares a cell” is the event that some <span class="math inline">\(Y_{ij} = 1\)</span>, and <span class="math inline">\(\Pr[\bigcup_{i&lt;j}\{Y_{ij} = 1\}] \le \sum_{i&lt;j}\Pr[Y_{ij} = 1] = \binom n2\sum_cp_c^2\)</span>. (Equivalently, Markov’s inequality applied to the number of sharing pairs.)</li>
 <li><strong>The example.</strong> 730 equally likely cells give <span class="math inline">\(\sum_cp_c^2 = 1/730\)</span>, and <span class="math inline">\(\binom{30}{2} = 435\)</span>, so the bound is <span class="math inline">\(435/730 = 0.596\)</span>. The exact probability, <span class="math inline">\(1 - \prod_{i&lt;30}(1 - i/730)\)</span> as in the birthday bound of <a href="../../book-full/part01-prerequisites/08-crypto-basics.html">Cryptography basics</a>, is 0.4534, and the lower bound <span class="math inline">\(1 - e^{-0.5959} = 0.4489\)</span>.</li>
 </ol>
 <p>With birthdays alone (365 cells), the union bound is 1.192, useless as a probability, while the exact value is 0.7063.</p>
@@ -625,10 +625,10 @@ window.Quarto = {
 </div>
 </div>
 </section>
-<section id="sec-sol-linkage-4" class="level2" data-number="15.4">
-<h2 data-number="15.4" class="anchored" data-anchor-id="sec-sol-linkage-4"><span class="header-section-number">15.4</span> The variance of the number of uniques</h2>
+<section id="sec-sol-link-4" class="level2" data-number="15.4">
+<h2 data-number="15.4" class="anchored" data-anchor-id="sec-sol-link-4"><span class="header-section-number">15.4</span> The variance of the number of uniques</h2>
 <blockquote class="blockquote">
-<p><strong>Exercise 4.</strong> <strong>The variance of the number of uniques.</strong> For <span class="math inline">\(M\)</span> uniform cells, show that <span class="math inline">\(\Pr[i \text{ and } j \text{ both unique}] = (1 - \frac1M)(1 - \frac2M)^{n-2}\)</span> for <span class="math inline">\(i \ne j\)</span>, and compute <span class="math inline">\(\operatorname{Var}U\)</span>. For <span class="math inline">\(n = M = 10{,}000\)</span>, compare the standard deviation of <span class="math inline">\(U/n\)</span> with a simulation and with McDiarmid. <em>Hint: <span class="math inline">\(\operatorname{Var}U = \mathbb E[U(U - 1)] + \mathbb EU - (\mathbb EU)^2\)</span>.</em> <em>(Indicators, concentration)</em></p>
+<p><strong>Exercise 4.</strong> <strong>The variance of the number of uniques.</strong> For <span class="math inline">\(K\)</span> uniform cells, show that <span class="math inline">\(\Pr[i \text{ and } j \text{ both unique}] = (1 - \frac1K)(1 - \frac2K)^{n-2}\)</span> for <span class="math inline">\(i \ne j\)</span>, and compute <span class="math inline">\(\operatorname{Var}U\)</span>. For <span class="math inline">\(n = K = 10{,}000\)</span>, compare the standard deviation of <span class="math inline">\(U/n\)</span> with a simulation and with McDiarmid. <em>Hint: <span class="math inline">\(\operatorname{Var}U = \mathbb E[U(U - 1)] + \mathbb EU - (\mathbb EU)^2\)</span>.</em> <em>(Indicators, concentration)</em></p>
 </blockquote>
 <div class="callout callout-style-default callout-tip callout-titled" title="Solution">
 <div class="callout-header d-flex align-content-center collapsed" data-bs-toggle="collapse" data-bs-target=".callout-4-contents" aria-controls="callout-4" aria-expanded="false" aria-label="Toggle callout">
@@ -643,23 +643,23 @@ window.Quarto = {
 <div id="callout-4" class="callout-4-contents callout-collapse collapse">
 <div class="callout-body-container callout-body">
 <ol type="1">
-<li><strong>Both unique.</strong> Persons <span class="math inline">\(i\)</span> and <span class="math inline">\(j\)</span> must be in different cells, probability <span class="math inline">\(1 - \frac1M\)</span>. Given their two cells, each of the other <span class="math inline">\(n - 2\)</span> people must avoid both, probability <span class="math inline">\(1 - \frac2M\)</span> each, independently. Multiply.</li>
-<li><strong>Second factorial moment.</strong> <span class="math inline">\(U(U - 1) = \sum_{i \ne j}\mathbf 1[i \text{ unique}]\mathbf 1[j \text{ unique}]\)</span>, a sum over the <span class="math inline">\(n(n-1)\)</span> ordered pairs. By linearity, <span class="math inline">\(\mathbb E[U(U - 1)] = n(n-1)(1 - \frac1M)(1 - \frac2M)^{n-2}\)</span>.</li>
-<li><strong>Mean.</strong> <span class="math inline">\(\mathbb EU = n(1 - \frac1M)^{n-1}\)</span> (<a href="../../book-full/part02-attacks/07-linkage-reidentification.html#eq-link-unique">Equation&nbsp;15.4</a> with uniform cells).</li>
+<li><strong>Both unique.</strong> Persons <span class="math inline">\(i\)</span> and <span class="math inline">\(j\)</span> must be in different cells, probability <span class="math inline">\(1 - \frac1K\)</span>. Given their two cells, each of the other <span class="math inline">\(n - 2\)</span> people must avoid both, probability <span class="math inline">\(1 - \frac2K\)</span> each, independently. Multiply.</li>
+<li><strong>Second factorial moment.</strong> <span class="math inline">\(U(U - 1) = \sum_{i \ne j}\mathbf 1[i \text{ unique}]\mathbf 1[j \text{ unique}]\)</span>, a sum over the <span class="math inline">\(n(n-1)\)</span> ordered pairs. By linearity, <span class="math inline">\(\mathbb E[U(U - 1)] = n(n-1)(1 - \frac1K)(1 - \frac2K)^{n-2}\)</span>.</li>
+<li><strong>Mean.</strong> <span class="math inline">\(\mathbb EU = n(1 - \frac1K)^{n-1}\)</span> (<a href="../../book-full/part02-attacks/07-linkage-reidentification.html#eq-link-unique">Equation&nbsp;15.4</a> with uniform cells).</li>
 <li><strong>Variance.</strong> <span class="math inline">\(\operatorname{Var}U = \mathbb E[U^2] - (\mathbb EU)^2 = \mathbb E[U(U-1)] + \mathbb EU - (\mathbb EU)^2\)</span>.</li>
-<li><strong>Evaluate at <span class="math inline">\(n = M = 10{,}000\)</span>.</strong> <span class="math inline">\(\mathbb EU/n = 0.3679\)</span> and <span class="math inline">\(\operatorname{Var}U = 2325.6\)</span>, so the standard deviation of <span class="math inline">\(U/n\)</span> is <span class="math inline">\(0.00482\)</span>. 2,000 simulated populations give mean 0.3678 and standard deviation 0.00483.</li>
+<li><strong>Evaluate at <span class="math inline">\(n = K = 10{,}000\)</span>.</strong> <span class="math inline">\(\mathbb EU/n = 0.3679\)</span> and <span class="math inline">\(\operatorname{Var}U = 2325.6\)</span>, so the standard deviation of <span class="math inline">\(U/n\)</span> is <span class="math inline">\(0.00482\)</span>. 2,000 simulated populations give mean 0.3678 and standard deviation 0.00483.</li>
 <li><strong>Compare with McDiarmid.</strong> A normal approximation puts 95% of populations within <span class="math inline">\(1.96 \times 0.00482 = 0.0095\)</span> of the mean. McDiarmid guarantees 0.0272, about 2.9 times wider, because it charges every person the worst-case change of 2 in <span class="math inline">\(U\)</span>.</li>
 </ol>
-<p><strong>A detail about dependence.</strong> If the indicators were independent, the variance would be <span class="math inline">\(n f(1 - f)\)</span> with <span class="math inline">\(f = \mathbb EU/n\)</span>: 2325.5, almost exactly the true 2325.6. At <span class="math inline">\(n = M\)</span> the covariances between indicators happen to cancel. They do not in general: at <span class="math inline">\(n = 10{,}000\)</span> and <span class="math inline">\(M = 2{,}500\)</span>, <span class="math inline">\(\mathbb EU/n = 0.0183\)</span> and <span class="math inline">\(\operatorname{Var}U = 139.5\)</span>, against 179.7 for independent indicators. The covariance part is <span class="math inline">\(-40.2\)</span>: there, one person being unique makes others slightly less likely to be, because the remaining people crowd into fewer cells. The standard deviation of <span class="math inline">\(U/n\)</span> is then 0.00118 (simulated 0.00117).</p>
+<p><strong>A detail about dependence.</strong> If the indicators were independent, the variance would be <span class="math inline">\(n f(1 - f)\)</span> with <span class="math inline">\(f = \mathbb EU/n\)</span>: 2325.5, almost exactly the true 2325.6. At <span class="math inline">\(n = K\)</span> the covariances between indicators happen to cancel. They do not in general: at <span class="math inline">\(n = 10{,}000\)</span> and <span class="math inline">\(K = 2{,}500\)</span>, <span class="math inline">\(\mathbb EU/n = 0.0183\)</span> and <span class="math inline">\(\operatorname{Var}U = 139.5\)</span>, against 179.7 for independent indicators. The covariance part is <span class="math inline">\(-40.2\)</span>: there, one person being unique makes others slightly less likely to be, because the remaining people crowd into fewer cells. The standard deviation of <span class="math inline">\(U/n\)</span> is then 0.00118 (simulated 0.00117).</p>
 <p><em>Pairwise indicators give the exact variance, and it shows McDiarmid’s bound to be about three times too wide for the fraction unique, but valid without any calculation.</em></p>
 </div>
 </div>
 </div>
 </section>
-<section id="sec-sol-linkage-5" class="level2" data-number="15.5">
-<h2 data-number="15.5" class="anchored" data-anchor-id="sec-sol-linkage-5"><span class="header-section-number">15.5</span> How many rare items</h2>
+<section id="sec-sol-link-5" class="level2" data-number="15.5">
+<h2 data-number="15.5" class="anchored" data-anchor-id="sec-sol-link-5"><span class="header-section-number">15.5</span> How many rare items</h2>
 <blockquote class="blockquote">
-<p><strong>Exercise 5.</strong> <strong>How many rare items.</strong> Each auxiliary item is rated by 1% of 480,189 users, and agreements are independent. What is the smallest number of items for which the expected number of unrelated records agreeing on all of them is below 0.01? With that many items, <span class="math inline">\(\varepsilon = 0\)</span>, and exactly one record agreeing on all of them, what is the posterior probability that this record is the target, if the target is in the release with prior probability <span class="math inline">\(\frac12\)</span>? <em>Check: 4 items, 0.0048 expected false matches, posterior 0.9952.</em> <em>(Bits, Bayes)</em></p>
+<p><strong>Exercise 5.</strong> <strong>How many rare items.</strong> Each auxiliary item is rated by 1% of 480,189 users, and agreements are independent. What is the smallest number of items for which the expected number of unrelated records agreeing on all of them is below 0.01? With that many items, <span class="math inline">\(\rho = 0\)</span>, and exactly one record agreeing on all of them, what is the posterior probability that this record is the target, if the target is in the release with prior probability <span class="math inline">\(\frac12\)</span>? <em>Check: 4 items, 0.0048 expected false matches, posterior 0.9952.</em> <em>(Bits, Bayes)</em></p>
 </blockquote>
 <div class="callout callout-style-default callout-tip callout-titled" title="Solution">
 <div class="callout-header d-flex align-content-center collapsed" data-bs-toggle="collapse" data-bs-target=".callout-5-contents" aria-controls="callout-5" aria-expanded="false" aria-label="Toggle callout">
@@ -676,19 +676,19 @@ window.Quarto = {
 <ol type="1">
 <li><strong>Expected false matches.</strong> An unrelated record agrees on all <span class="math inline">\(m\)</span> items with probability <span class="math inline">\(0.01^m\)</span>, so the expected number among <span class="math inline">\(n = 480{,}189\)</span> records is <span class="math inline">\(n\cdot0.01^m\)</span>.</li>
 <li><strong>Solve.</strong> <span class="math inline">\(m = 3\)</span> gives 0.48 and <span class="math inline">\(m = 4\)</span> gives 0.0048, so <span class="math inline">\(m = 4\)</span>. In bits: each item carries <span class="math inline">\(\log_2 100 = 6.64\)</span> bits, and four carry 26.6, which exceeds <span class="math inline">\(\log_2 n = 18.9\)</span> by more than the 6.64 bits needed to push the expected false matches below 0.01.</li>
-<li><strong>Likelihood ratios.</strong> With <span class="math inline">\(\varepsilon = 0\)</span>, a record that misses an item cannot be the target, so its likelihood ratio is 0. The one agreeing record has <span class="math inline">\(\mathrm{LR} = \prod_i(1/s_i) = 100^4 = 10^8\)</span>.</li>
-<li><strong>Posterior with a prior.</strong> From the chapter’s interpretation of <a href="../../book-full/part02-attacks/07-linkage-reidentification.html#eq-link-posterior">Equation&nbsp;15.11</a>, with prior <span class="math inline">\(q\)</span> that the target is in the release, <span id="eq-auto-07linkagereidentification-1"><span class="math display">\[\Pr[\text{target} = t \mid \text{data}] = \frac{q\,\mathrm{LR}(t)}{q\sum_j\mathrm{LR}(j) + (1 - q)n} = \frac{10^8/2}{10^8/2 + 480{,}189/2} = 0.9952. \tag{15.1}\]</span></span></li>
-<li><strong>The role of the prior.</strong> With <span class="math inline">\(q = 0.01\)</span>, say if the adversary merely suspects the target used the service, the posterior is 0.6778. The same match is much weaker evidence when the target is unlikely to be in the data at all.</li>
+<li><strong>Likelihood ratios.</strong> With <span class="math inline">\(\rho = 0\)</span>, a record that misses an item cannot be the target, so its likelihood ratio is 0. The one agreeing record has <span class="math inline">\(\mathrm{LR} = \prod_i(1/s_i) = 100^4 = 10^8\)</span>.</li>
+<li><strong>Posterior with a prior.</strong> From the chapter’s interpretation of <a href="../../book-full/part02-attacks/07-linkage-reidentification.html#eq-link-posterior">Equation&nbsp;15.11</a>, with prior <span class="math inline">\(\pi\)</span> that the target is in the release, <span id="eq-auto-07linkagereidentification-1"><span class="math display">\[\Pr[\text{target} = t \mid \text{data}] = \frac{\pi\,\mathrm{LR}(t)}{\pi\sum_j\mathrm{LR}(j) + (1 - \pi)n} = \frac{10^8/2}{10^8/2 + 480{,}189/2} = 0.9952. \tag{15.1}\]</span></span></li>
+<li><strong>The role of the prior.</strong> With <span class="math inline">\(\pi = 0.01\)</span>, say if the adversary merely suspects the target used the service, the posterior is 0.6778. The same match is much weaker evidence when the target is unlikely to be in the data at all.</li>
 </ol>
 <p><em>Each rare item cuts the expected false matches by its rarity factor; the posterior then says how much a perfect match is worth, which depends on whether the target is in the data at all.</em></p>
 </div>
 </div>
 </div>
 </section>
-<section id="sec-sol-linkage-6" class="level2" data-number="15.6">
-<h2 data-number="15.6" class="anchored" data-anchor-id="sec-sol-linkage-6"><span class="header-section-number">15.6</span> Sampling and the Poisson approximation</h2>
+<section id="sec-sol-link-6" class="level2" data-number="15.6">
+<h2 data-number="15.6" class="anchored" data-anchor-id="sec-sol-link-6"><span class="header-section-number">15.6</span> Sampling and the Poisson approximation</h2>
 <blockquote class="blockquote">
-<p><strong>Exercise 6.</strong> <strong>Sampling and the Poisson approximation.</strong> Derive the Poisson form of <a href="../../book-full/part02-attacks/07-linkage-reidentification.html#eq-link-kappa">Equation&nbsp;15.13</a> directly from Poisson thinning, and show <span class="math inline">\(\kappa \ge 1/(1 + \lambda)\)</span> for every <span class="math inline">\(\pi\)</span>. For which <span class="math inline">\(\lambda\)</span> is <span class="math inline">\(\kappa = \frac12\)</span> in a 1% sample? <em>Check: <span class="math inline">\(\lambda = 1/0.99 = 1.0101\)</span>.</em> <em>(Poisson thinning)</em></p>
+<p><strong>Exercise 6.</strong> <strong>Sampling and the Poisson approximation.</strong> Derive the Poisson form of <a href="../../book-full/part02-attacks/07-linkage-reidentification.html#eq-link-kappa">Equation&nbsp;15.13</a> directly from Poisson thinning, and show <span class="math inline">\(\kappa \ge 1/(1 + \lambda)\)</span> for every <span class="math inline">\(q\)</span>. For which <span class="math inline">\(\lambda\)</span> is <span class="math inline">\(\kappa = \frac12\)</span> in a 1% sample? <em>Check: <span class="math inline">\(\lambda = 1/0.99 = 1.0101\)</span>.</em> <em>(Poisson thinning)</em></p>
 </blockquote>
 <div class="callout callout-style-default callout-tip callout-titled" title="Solution">
 <div class="callout-header d-flex align-content-center collapsed" data-bs-toggle="collapse" data-bs-target=".callout-6-contents" aria-controls="callout-6" aria-expanded="false" aria-label="Toggle callout">
@@ -703,12 +703,12 @@ window.Quarto = {
 <div id="callout-6" class="callout-6-contents callout-collapse collapse">
 <div class="callout-body-container callout-body">
 <ol type="1">
-<li><strong>Poisson thinning.</strong> Let the number of other people in the target’s cell be <span class="math inline">\(J \sim \mathrm{Poisson}(\lambda)\)</span>. Each is sampled independently with probability <span class="math inline">\(\pi\)</span>. By Exercise 2 of <a href="../../book-full/part01-prerequisites/01-distributions.html">Probability distributions</a>, the sampled count is <span class="math inline">\(J_s \sim \mathrm{Poisson}(\lambda\pi)\)</span>, and (by the same moment generating function argument applied to the pair) it is independent of the unsampled count.</li>
-<li><strong>Correct and one match.</strong> The target is sampled and <span class="math inline">\(J_s = 0\)</span>: probability <span class="math inline">\(\pi e^{-\lambda\pi}\)</span>.</li>
-<li><strong>Wrong and one match.</strong> The target is not sampled and <span class="math inline">\(J_s = 1\)</span>: probability <span class="math inline">\((1 - \pi)\lambda\pi e^{-\lambda\pi}\)</span>.</li>
-<li><strong>Condition.</strong> <span class="math inline">\(\kappa = \dfrac{\pi e^{-\lambda\pi}}{\pi e^{-\lambda\pi} + (1 - \pi)\lambda\pi e^{-\lambda\pi}} = \dfrac{1}{1 + \lambda(1 - \pi)}\)</span>.</li>
-<li><strong>The floor.</strong> <span class="math inline">\(\lambda(1 - \pi) \le \lambda\)</span> for every <span class="math inline">\(\pi \in [0, 1]\)</span>, so <span class="math inline">\(\kappa \ge 1/(1 + \lambda)\)</span>, with equality only as <span class="math inline">\(\pi \to 0\)</span>.</li>
-<li><strong>Half.</strong> <span class="math inline">\(\kappa = \frac12\)</span> when <span class="math inline">\(\lambda(1 - \pi) = 1\)</span>; at <span class="math inline">\(\pi = 0.01\)</span>, <span class="math inline">\(\lambda = 1/0.99 = 1.0101\)</span>.</li>
+<li><strong>Poisson thinning.</strong> Let the number of other people in the target’s cell be <span class="math inline">\(J \sim \mathrm{Poisson}(\lambda)\)</span>. Each is sampled independently with probability <span class="math inline">\(q\)</span>. By Exercise 2 of <a href="../../book-full/part01-prerequisites/01-distributions.html">Probability distributions</a>, the sampled count is <span class="math inline">\(J_s \sim \mathrm{Poisson}(\lambda q)\)</span>, and (by the same moment generating function argument applied to the pair) it is independent of the unsampled count.</li>
+<li><strong>Correct and one match.</strong> The target is sampled and <span class="math inline">\(J_s = 0\)</span>: probability <span class="math inline">\(q e^{-\lambda q}\)</span>.</li>
+<li><strong>Wrong and one match.</strong> The target is not sampled and <span class="math inline">\(J_s = 1\)</span>: probability <span class="math inline">\((1 - q)\lambda q e^{-\lambda q}\)</span>.</li>
+<li><strong>Condition.</strong> <span class="math inline">\(\kappa = \dfrac{q e^{-\lambda q}}{q e^{-\lambda q} + (1 - q)\lambda q e^{-\lambda q}} = \dfrac{1}{1 + \lambda(1 - q)}\)</span>.</li>
+<li><strong>The floor.</strong> <span class="math inline">\(\lambda(1 - q) \le \lambda\)</span> for every <span class="math inline">\(q \in [0, 1]\)</span>, so <span class="math inline">\(\kappa \ge 1/(1 + \lambda)\)</span>, with equality only as <span class="math inline">\(q \to 0\)</span>.</li>
+<li><strong>Half.</strong> <span class="math inline">\(\kappa = \frac12\)</span> when <span class="math inline">\(\lambda(1 - q) = 1\)</span>; at <span class="math inline">\(q = 0.01\)</span>, <span class="math inline">\(\lambda = 1/0.99 = 1.0101\)</span>.</li>
 <li><strong>Against the exact binomial.</strong> With <span class="math inline">\(n = 100{,}000\)</span> and <span class="math inline">\(p = \lambda/(n - 1)\)</span>, the exact <a href="../../book-full/part02-attacks/07-linkage-reidentification.html#eq-link-kappa">Equation&nbsp;15.13</a> and the Poisson form agree to five decimals: 0.90992 for <span class="math inline">\(\lambda = 0.1\)</span> and 0.50251 for <span class="math inline">\(\lambda = 1\)</span>, just above their floors 0.90909 and 0.50000.</li>
 </ol>
 <p><em>A 1% sample protects a target only if their cell is expected to hold about one other person or more; for rarer combinations the match is right most of the time.</em></p>
@@ -716,10 +716,10 @@ window.Quarto = {
 </div>
 </div>
 </section>
-<section id="sec-sol-linkage-7" class="level2" data-number="15.7">
-<h2 data-number="15.7" class="anchored" data-anchor-id="sec-sol-linkage-7"><span class="header-section-number">15.7</span> Eccentricity under an exponential tail</h2>
+<section id="sec-sol-link-7" class="level2" data-number="15.7">
+<h2 data-number="15.7" class="anchored" data-anchor-id="sec-sol-link-7"><span class="header-section-number">15.7</span> Eccentricity under an exponential tail</h2>
 <blockquote class="blockquote">
-<p><strong>Exercise 7.</strong> <strong>Eccentricity under an exponential tail.</strong> Suppose an outsider’s scores against the <span class="math inline">\(n\)</span> records were independent exponential variables with mean <span class="math inline">\(\mu\)</span> (so standard deviation <span class="math inline">\(\mu\)</span>). Show that the gap between the two largest is again exponential with mean <span class="math inline">\(\mu\)</span>, whatever <span class="math inline">\(n\)</span>, so the eccentricity test with threshold <span class="math inline">\(\varphi\)</span> falsely matches with probability about <span class="math inline">\(e^{-\varphi}\)</span>. Compare with normally distributed scores by simulation. <em>Hint: memorylessness (<a href="../../book-full/part01-prerequisites/01-distributions.html">Probability distributions</a>).</em> <em>Check: <span class="math inline">\(e^{-1.5} = 0.2231\)</span>.</em> <em>(Exponential distribution, false positives)</em></p>
+<p><strong>Exercise 7.</strong> <strong>Eccentricity under an exponential tail.</strong> Suppose an outsider’s scores against the <span class="math inline">\(n\)</span> records were independent exponential variables with mean <span class="math inline">\(\mu\)</span> (so standard deviation <span class="math inline">\(\mu\)</span>). Show that the gap between the two largest is again exponential with mean <span class="math inline">\(\mu\)</span>, whatever <span class="math inline">\(n\)</span>, so the eccentricity test with threshold <span class="math inline">\(\tau\)</span> falsely matches with probability about <span class="math inline">\(e^{-\tau}\)</span>. Compare with normally distributed scores by simulation. <em>Hint: memorylessness (<a href="../../book-full/part01-prerequisites/01-distributions.html">Probability distributions</a>).</em> <em>Check: <span class="math inline">\(e^{-1.5} = 0.2231\)</span>.</em> <em>(Exponential distribution, false positives)</em></p>
 </blockquote>
 <div class="callout callout-style-default callout-tip callout-titled" title="Solution">
 <div class="callout-header d-flex align-content-center collapsed" data-bs-toggle="collapse" data-bs-target=".callout-7-contents" aria-controls="callout-7" aria-expanded="false" aria-label="Toggle callout">
@@ -737,17 +737,17 @@ window.Quarto = {
 <li><strong>Condition on the second largest.</strong> Let <span class="math inline">\(x\)</span> be the value of the second-largest score. Given <span class="math inline">\(x\)</span>, exactly one score exceeds <span class="math inline">\(x\)</span>, and (by independence and symmetry) it is distributed as a single exponential score conditioned to exceed <span class="math inline">\(x\)</span>.</li>
 <li><strong>Memorylessness.</strong> For an exponential <span class="math inline">\(S\)</span> with mean <span class="math inline">\(\mu\)</span>, <span class="math inline">\(\Pr[S &gt; x + g \mid S &gt; x] = e^{-(x+g)/\mu}/e^{-x/\mu} = e^{-g/\mu}\)</span>. So, given <span class="math inline">\(x\)</span>, the gap <span class="math inline">\(s_1 - x\)</span> is exponential with mean <span class="math inline">\(\mu\)</span>.</li>
 <li><strong>Remove the conditioning.</strong> The conditional law in step 2 does not depend on <span class="math inline">\(x\)</span>, so the gap is exponential with mean <span class="math inline">\(\mu\)</span> unconditionally, and independent of <span class="math inline">\(x\)</span>. Nothing depended on <span class="math inline">\(n\)</span>.</li>
-<li><strong>The test.</strong> For large <span class="math inline">\(n\)</span> the sample standard deviation of the scores is close to <span class="math inline">\(\mu\)</span>, so <span class="math inline">\(\Pr[(s_1 - s_2)/\sigma \ge \varphi] \approx \Pr[\text{gap} \ge \varphi\mu] = e^{-\varphi}\)</span>. At <span class="math inline">\(\varphi = 1.5\)</span> that is 0.2231. A simulation with <span class="math inline">\(n = 1000\)</span> and 20,000 trials gives 0.2257.</li>
+<li><strong>The test.</strong> For large <span class="math inline">\(n\)</span> the sample standard deviation of the scores is close to <span class="math inline">\(\mu\)</span>, so <span class="math inline">\(\Pr[(s_1 - s_2)/\sigma \ge \tau] \approx \Pr[\text{gap} \ge \tau\mu] = e^{-\tau}\)</span>. At <span class="math inline">\(\tau = 1.5\)</span> that is 0.2231. A simulation with <span class="math inline">\(n = 1000\)</span> and 20,000 trials gives 0.2257.</li>
 <li><strong>Normal scores.</strong> With standard normal scores, the gap between the top two shrinks with <span class="math inline">\(n\)</span>, roughly like an exponential with mean <span class="math inline">\(1/\sqrt{2\ln n}\)</span> (the normal tail near its maximum behaves like an exponential with that rate). The approximation gives <span class="math inline">\(e^{-1.5\sqrt{2\ln 1000}} = 0.0038\)</span>, and the simulation 0.0024.</li>
 </ol>
-<p>So the same threshold <span class="math inline">\(\varphi = 1.5\)</span> falsely matches about one outsider in five when null scores have an exponential tail, and about one in 400 when they are normal. The chapter’s ratings experiment, with 26.3% of outsiders matched, sits on the exponential side: its scores are sums of a few weighted agreements, mostly zero, with a long right tail.</p>
+<p>So the same threshold <span class="math inline">\(\tau = 1.5\)</span> falsely matches about one outsider in five when null scores have an exponential tail, and about one in 400 when they are normal. The chapter’s ratings experiment, with 26.3% of outsiders matched, sits on the exponential side: its scores are sums of a few weighted agreements, mostly zero, with a long right tail.</p>
 <p><em>The eccentricity threshold controls false matches only relative to the tail of the null score distribution, which is why it has to be calibrated on outsiders.</em></p>
 </div>
 </div>
 </div>
 </section>
-<section id="sec-sol-linkage-8" class="level2" data-number="15.8">
-<h2 data-number="15.8" class="anchored" data-anchor-id="sec-sol-linkage-8"><span class="header-section-number">15.8</span> Hashed identifiers and taxi trips</h2>
+<section id="sec-sol-link-8" class="level2" data-number="15.8">
+<h2 data-number="15.8" class="anchored" data-anchor-id="sec-sol-link-8"><span class="header-section-number">15.8</span> Hashed identifiers and taxi trips</h2>
 <blockquote class="blockquote">
 <p><strong>Exercise 8.</strong> <strong>Hashed identifiers and taxi trips.</strong> Driver licence numbers in the taxi release of <a href="../../book-full/part02-attacks/07-linkage-reidentification.html#sec-link-pseudonyms">Section&nbsp;15.4</a> have six digits, or seven digits starting with 5. (a) How many values is that, how many bits, and how long does it take to hash them all at <span class="math inline">\(10^7\)</span> hashes per second? Compare a random 10-character password over 62 symbols. (b) Treat each trip’s pickup as a uniformly random cell: one of 525,600 minutes of the year and one of 78,000 squares of 100 m. Use <a href="../../book-full/part02-attacks/07-linkage-reidentification.html#eq-link-uniform">Equation&nbsp;15.5</a> to find the fraction of the 173 million trips that are unique on their pickup. Why is the true fraction lower, and why does that not save the passengers? <em>Check: <span class="math inline">\(2\times10^6\)</span> values (20.9 bits) take 0.2 seconds. A password carries 59.5 bits and takes about 2661 years. The unique fraction is 0.9958.</em> <em>(Bits, uniqueness)</em></p>
 </blockquote>
@@ -767,7 +767,7 @@ window.Quarto = {
 <li><strong>Count the licences.</strong> There are <span class="math inline">\(10^6\)</span> six-digit numbers and <span class="math inline">\(10^6\)</span> seven-digit numbers starting with 5, so <span class="math inline">\(2\times10^6\)</span> values. That is <span class="math inline">\(\log_2(2\times10^6) = 20.9\)</span> bits.</li>
 <li><strong>Time the dictionary.</strong> At <span class="math inline">\(10^7\)</span> hashes per second, hashing every value takes <span class="math inline">\(2\times10^6/10^7 = 0.2\)</span> seconds. Sorting the hashes and looking up each pseudonym adds little.</li>
 <li><strong>Compare a password.</strong> A random 10-character password over 62 symbols has <span class="math inline">\(62^{10} = 8.39\times10^{17}\)</span> values, 59.5 bits. Hashing all of them at the same rate takes about 2661 years. The hash function is the same in both cases; what differs is how many bits the input carries.</li>
-<li><strong>Count the pickup cells.</strong> There are <span class="math inline">\(525{,}600 \times 78{,}000 = 4.1\times10^{10}\)</span> cells, so the average cell holds <span class="math inline">\(n/M = 173\times10^6/4.1\times10^{10} = 0.00422\)</span> trips.</li>
+<li><strong>Count the pickup cells.</strong> There are <span class="math inline">\(525{,}600 \times 78{,}000 = 4.1\times10^{10}\)</span> cells, so the average cell holds <span class="math inline">\(n/K = 173\times10^6/4.1\times10^{10} = 0.00422\)</span> trips.</li>
 <li><strong>Apply <a href="../../book-full/part02-attacks/07-linkage-reidentification.html#eq-link-uniform">Equation&nbsp;15.5</a>.</strong> The fraction unique is about <span class="math inline">\(e^{-0.00422} = 0.9958\)</span>.</li>
 <li><strong>Why the true fraction is lower.</strong> Trips are not spread uniformly. They crowd into busy hours and busy places, such as Midtown Manhattan at rush hour, where many trips share a minute and a square. The uniform model overstates uniqueness, as it did for Sweeney’s attributes.</li>
 <li><strong>Why that does not save the passengers.</strong> An adversary who knows a pickup usually knows more than its minute and square: the drop-off area, the date, a photograph of the taxi. Each adds bits, and a celebrity photographed outside a hotel is rarely in the crowded cells anyway. Even in a crowded cell, the adversary learns that the trip is one of a handful.</li>

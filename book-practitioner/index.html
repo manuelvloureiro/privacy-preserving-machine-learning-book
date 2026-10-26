@@ -344,7 +344,7 @@ ul.task-list li input[type="checkbox"] {
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="./part04-privacy-accounting/09-choosing-an-accountant.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">31</span>&nbsp; <span class="chapter-title">Report and review an ε claim</span></span></a>
+ <span class="menu-text"><span class="chapter-number">31</span>&nbsp; <span class="chapter-title">Choosing an accountant</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
@@ -560,7 +560,7 @@ ul.task-list li input[type="checkbox"] {
     <div>
     <div class="quarto-title-meta-heading">Published</div>
     <div class="quarto-title-meta-contents">
-      <p class="date">Version 2026-10-23</p>
+      <p class="date">Version 2026-10-26</p>
     </div>
   </div>
   
@@ -575,19 +575,19 @@ ul.task-list li input[type="checkbox"] {
 <section id="preface" class="level1 unnumbered">
 <h1 class="unnumbered">Preface</h1>
 <p>This is the practitioner edition of <em>Privacy-Preserving Machine Learning</em>. It is for engineers, data scientists and auditors who build or review machine-learning systems that handle personal data, and it tells them what each result says, when it applies, how to use it and what goes wrong, without proofs.</p>
-<p>It covers the same topics as the <a href="../book-full/index.html">full edition</a>, in the same parts and chapters, but it is organised around the work rather than the theory. Each topic states the result with its formula, says why it matters, and gives a recipe with a worked example. It ends with what goes wrong. Each chapter closes with a cheat sheet and a link to the matching chapter of the full edition, which derives every result step by step. A separate exercise book, keyed to the full edition, has worked solutions.</p>
+<p>It keeps the parts and the chapter files of the <a href="../book-full/index.html">full edition</a>, so that every page here has a twin there that derives its results step by step, but it is organized around the work rather than the theory. Three kinds of page do that. A <strong>workflow chapter</strong> does one job end to end with real libraries on a real public dataset: assessing a model’s privacy risk before release, releasing statistics with OpenDP and diffprivlib, calibrating and reporting a run of differentially private stochastic gradient descent, training and fine-tuning with Opacus, and governing a release. Each part reads in the order of the work, so a workflow comes early in its part and the pages it relies on follow. A <strong>full chapter</strong> covers a topic a practitioner computes with: the result and its formula, why it matters, a recipe with a worked example, what goes wrong, and a cheat sheet. A <strong>reference page</strong> covers a theory-heavy topic a practitioner meets but rarely computes with, in a few hundred words: what it is, when you meet it, how to use it and what goes wrong. Every page ends with a link to the full edition’s chapter.</p>
 <p>You need some Python and NumPy, basic probability, and enough machine learning to know what a loss and stochastic gradient descent are.</p>
 <section id="how-this-book-is-organized" class="level2 unnumbered">
 <h2 class="unnumbered anchored" data-anchor-id="how-this-book-is-organized">How this book is organized</h2>
 <ol type="1">
 <li><strong>Prerequisites</strong> is a mathematical reference to dip into when a later chapter cites it.</li>
-<li><strong>Threat models and attacks</strong> shows how models and data leak.</li>
-<li><strong>Differential privacy foundations</strong> defines the guarantee and builds its mechanisms.</li>
-<li><strong>Privacy accounting</strong> tracks the guarantee through private training.</li>
-<li><strong>Differential privacy in machine learning</strong> trains, tunes and audits private models.</li>
+<li><strong>Threat models and attacks</strong> shows how models and data leak, and assesses a model’s risk before release.</li>
+<li><strong>Differential privacy foundations</strong> defines the guarantee, builds its mechanisms, and releases statistics with them.</li>
+<li><strong>Privacy accounting</strong> tracks the guarantee through private training, and calibrates and reports a run.</li>
+<li><strong>Differential privacy in machine learning</strong> trains, fine-tunes, audits and releases private models.</li>
 </ol>
 <p>You do not need to read Part 1 first. With a background in statistics or machine learning, start at Part 2 or Part 3 and follow the links back when you need a fact.</p>
-<p>The numbers in the text come from the scripts in the repository’s <code>code/</code> directory, which the full edition also uses, and tests check that the scripts still produce them. To rerun one, run <code>uv run python code/&lt;part&gt;/&lt;topic&gt;.py</code>.</p>
+<p>Every piece of code on a page has been run: a snippet runs on its own, and an excerpt is a marked region of a workflow script in the repository’s <code>code/</code> directory, which a test runs and checks against the numbers the page quotes. To rerun a workflow, run <code>uv run python code/&lt;part&gt;/practitioner_&lt;topic&gt;.py</code>.</p>
 
 
 </section>

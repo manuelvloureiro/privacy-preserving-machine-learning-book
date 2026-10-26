@@ -373,7 +373,7 @@ window.Quarto = {
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../part04-privacy-accounting/09-choosing-an-accountant.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">31</span>&nbsp; <span class="chapter-title">Report and review an ε claim</span></span></a>
+ <span class="menu-text"><span class="chapter-number">31</span>&nbsp; <span class="chapter-title">Choosing an accountant</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
@@ -564,7 +564,7 @@ window.Quarto = {
   <li><a href="#sec-mfac-when" id="toc-sec-mfac-when" class="nav-link" data-scroll-target="#sec-mfac-when"><span class="header-section-number">50.2</span> When you meet it</a></li>
   <li><a href="#sec-mfac-use" id="toc-sec-mfac-use" class="nav-link" data-scroll-target="#sec-mfac-use"><span class="header-section-number">50.3</span> How to use it</a></li>
   <li><a href="#sec-mfac-wrong" id="toc-sec-mfac-wrong" class="nav-link" data-scroll-target="#sec-mfac-wrong"><span class="header-section-number">50.4</span> What goes wrong</a></li>
-  <li><a href="#further-reading" id="toc-further-reading" class="nav-link" data-scroll-target="#further-reading"><span class="header-section-number">50.5</span> Further reading</a></li>
+  <li><a href="#references" id="toc-references" class="nav-link" data-scroll-target="#references"><span class="header-section-number">50.5</span> References</a></li>
   </ul>
 </nav>
     </div>
@@ -621,13 +621,13 @@ plan = config.plan       # calibrates the noise multiplier with dp_accounting</c
 </section>
 <section id="sec-mfac-wrong" class="level2" data-number="50.4">
 <h2 data-number="50.4" class="anchored" data-anchor-id="sec-mfac-wrong"><span class="header-section-number">50.4</span> What goes wrong</h2>
-<p>The pitfalls come from records that take part more than once. Over <span class="math inline">\(k\)</span> epochs a record enters through <span class="math inline">\(k\)</span> columns of the encoder. The square root’s columns for nearby steps are nonzero in the same rows, so they add up and the sensitivity grows faster than <span class="math inline">\(\sqrt k\)</span>. <strong>Banding</strong> keeps a number <span class="math inline">\(b\)</span> of the encoder’s diagonals, the main one and those just below it. It needs every two participations of a record to be at least <span class="math inline">\(b\)</span> steps apart, a condition called <strong><span class="math inline">\(b\)</span>-min-separation</strong>. The record’s columns then share no rows, so the sensitivity is at most <span class="math inline">\(\sqrt k\)</span> times the longest column, as for independent noise.</p>
+<p>The pitfalls come from records that take part more than once. Over <span class="math inline">\(E\)</span> epochs a record enters through <span class="math inline">\(E\)</span> columns of the encoder. The square root’s columns for nearby steps are nonzero in the same rows, so they add up and the sensitivity grows faster than <span class="math inline">\(\sqrt E\)</span>. <strong>Banding</strong> keeps a number <span class="math inline">\(b\)</span> of the encoder’s diagonals, the main one and those just below it. It needs every two participations of a record to be at least <span class="math inline">\(b\)</span> steps apart, a condition called <strong><span class="math inline">\(b\)</span>-min-separation</strong>. The record’s columns then share no rows, so the sensitivity is at most <span class="math inline">\(\sqrt E\)</span> times the longest column, as for independent noise.</p>
 <p>The data order is therefore part of the mechanism. Fix it before training, independently of the data, and keep the same permutation every epoch. Reshuffling each epoch can put a record at the end of one epoch and the start of the next, one step apart, which breaks the banded bound.</p>
 <p>The neighbouring relation changes the numbers too. The analysis here leaves a neighbour’s slot empty, so a step moves by at most the clipping norm. If a neighbour replaces the record with another instead, every sensitivity doubles. So state the relation your accountant assumes next to every <span class="math inline">\(\varepsilon\)</span>.</p>
 <p>The accounting library enforces this. In <code>dp_accounting</code> 0.6.0, the event for tree aggregation, <code>SingleEpochTreeAggregationDpEvent</code>, is accepted only by the Rényi differential privacy (RDP) accountant built with <code>NeighboringRelation.REPLACE_SPECIAL</code>, under which a neighbour replaces the record with an empty one. An accountant built for add/remove, the default for DP-SGD, raises <code>UnsupportedEventError</code>, and the privacy loss distribution (PLD) accountant does not support the event at all. So DP-FTRL and DP-SGD runs cannot share one add/remove ledger.</p>
 </section>
-<section id="further-reading" class="level2" data-number="50.5">
-<h2 data-number="50.5" class="anchored" data-anchor-id="further-reading"><span class="header-section-number">50.5</span> Further reading</h2>
+<section id="references" class="level2" data-number="50.5">
+<h2 data-number="50.5" class="anchored" data-anchor-id="references"><span class="header-section-number">50.5</span> References</h2>
 <ul>
 <li>Choquette-Choo et al., “(Amplified) Banded Matrix Factorizations: A Unified Approach to Private Training” (NeurIPS 2023): banding, min-separation and amplification.</li>
 </ul>

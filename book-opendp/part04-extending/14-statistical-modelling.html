@@ -1,0 +1,1059 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.10.19">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+
+<title>14&nbsp; Statistical modelling – Differential Privacy with OpenDP</title>
+<style>
+/* Default styles provided by pandoc.
+** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
+*/
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: 1.5em;}
+div.column{flex: auto;}
+@media screen {
+div.columns{gap: min(4vw, 1.5em);}
+div.column{overflow-x: auto;}
+}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+/* CSS for syntax highlighting */
+html { -webkit-text-size-adjust: 100%; }
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+</style>
+
+
+<script src="../site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="../site_libs/quarto-nav/headroom.min.js"></script>
+<script src="../site_libs/clipboard/clipboard.min.js"></script>
+<script src="../site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="../site_libs/quarto-search/fuse.min.js"></script>
+<script src="../site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="../">
+<link href="../part04-extending/15-limitations-and-troubleshooting.html" rel="next">
+<link href="../part04-extending/13-plugins.html" rel="prev">
+<script src="../site_libs/quarto-html/quarto.js" type="module"></script>
+<script src="../site_libs/quarto-html/tabsets/tabsets.js" type="module"></script>
+<script src="../site_libs/quarto-html/popper.min.js"></script>
+<script src="../site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="../site_libs/quarto-html/anchor.min.js"></script>
+<link href="../site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="../site_libs/quarto-html/quarto-syntax-highlighting-bf27225e3a48a9273f3daa8f8e829971.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="../site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="../site_libs/bootstrap/bootstrap-78f503ea39f784e8964cd205807fbe37.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
+<script id="quarto-search-options" type="application/json">{
+  "location": "sidebar",
+  "copy-button": false,
+  "collapse-after": 3,
+  "panel-placement": "start",
+  "type": "textbox",
+  "limit": 50,
+  "keyboard-shortcut": [
+    "f",
+    "/",
+    "s"
+  ],
+  "show-item-context": false,
+  "language": {
+    "search-no-results-text": "No results",
+    "search-matching-documents-text": "matching documents",
+    "search-copy-link-title": "Copy link to search",
+    "search-hide-matches-text": "Hide additional matches",
+    "search-more-match-text": "more match in this document",
+    "search-more-matches-text": "more matches in this document",
+    "search-clear-button-title": "Clear",
+    "search-text-placeholder": "",
+    "search-detached-cancel-button-title": "Cancel",
+    "search-submit-button-title": "Submit",
+    "search-label": "Search"
+  }
+}</script>
+
+  <script src="https://cdnjs.cloudflare.com/polyfill/v3/polyfill.min.js?features=es6"></script>
+  <script defer="" src="https://cdn.jsdelivr.net/npm/mathjax@4/tex-chtml.js" type="text/javascript"></script>
+
+<script type="text/javascript">
+const typesetMath = (el) => {
+  if (window.MathJax) {
+    // MathJax Typeset
+    window.MathJax.typeset([el]);
+  } else if (window.katex) {
+    // KaTeX Render
+    var mathElements = el.getElementsByClassName("math");
+    var macros = [];
+    for (var i = 0; i < mathElements.length; i++) {
+      var texText = mathElements[i].firstChild;
+      if (mathElements[i].tagName == "SPAN" && texText && texText.data) {
+        window.katex.render(texText.data, mathElements[i], {
+          displayMode: mathElements[i].classList.contains('display'),
+          throwOnError: false,
+          macros: macros,
+          fleqn: false
+        });
+      }
+    }
+  }
+}
+window.Quarto = {
+  typesetMath
+};
+</script>
+
+</head>
+
+<body class="nav-sidebar floating quarto-light">
+
+<div id="quarto-search-results"></div>
+  <header id="quarto-header" class="headroom fixed-top">
+  <nav class="quarto-secondary-nav">
+    <div class="container-fluid d-flex">
+      <button type="button" class="quarto-btn-toggle btn" data-bs-toggle="collapse" role="button" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+        <i class="bi bi-layout-text-sidebar-reverse"></i>
+      </button>
+        <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../part04-extending/00-introduction.html">Extending the library</a></li><li class="breadcrumb-item"><a href="../part04-extending/14-statistical-modelling.html"><span class="chapter-number">14</span>&nbsp; <span class="chapter-title">Statistical modelling</span></a></li></ol></nav>
+        <a class="flex-grow-1" role="navigation" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">      
+        </a>
+      <button type="button" class="btn quarto-search-button" aria-label="Search" onclick="window.quartoOpenSearch();">
+        <i class="bi bi-search"></i>
+      </button>
+    </div>
+  </nav>
+</header>
+<!-- content -->
+<div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article">
+<!-- sidebar -->
+  <nav id="quarto-sidebar" class="sidebar collapse collapse-horizontal quarto-sidebar-collapse-item sidebar-navigation floating overflow-auto">
+    <div class="pt-lg-2 mt-2 text-left sidebar-header">
+    <div class="sidebar-title mb-0 py-0">
+      <a href="../">Differential Privacy with OpenDP</a> 
+    </div>
+      </div>
+        <div class="mt-2 flex-shrink-0 align-items-center">
+        <div class="sidebar-search">
+        <div id="quarto-search" class="" title="Search"></div>
+        </div>
+        </div>
+    <div class="sidebar-menu-container"> 
+    <ul class="list-unstyled mt-1">
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../index.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Preface</span></a>
+  </div>
+</li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a href="../part01-getting-started/00-introduction.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Getting started</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-1" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-1" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part01-getting-started/01-first-release.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">1</span>&nbsp; <span class="chapter-title">A first release</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part01-getting-started/02-the-data-and-the-context.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">2</span>&nbsp; <span class="chapter-title">The data and the context</span></span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a href="../part02-tabular-data/00-introduction.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Tabular data</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-2" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-2" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part02-tabular-data/03-essential-statistics.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">3</span>&nbsp; <span class="chapter-title">Essential statistics</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part02-tabular-data/04-grouping.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">4</span>&nbsp; <span class="chapter-title">Grouping</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part02-tabular-data/05-identifier-truncation.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">5</span>&nbsp; <span class="chapter-title">Identifier truncation and bounds</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part02-tabular-data/06-preparing-microdata.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">6</span>&nbsp; <span class="chapter-title">Preparing microdata</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part02-tabular-data/07-utility-and-noise.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">7</span>&nbsp; <span class="chapter-title">Assessing utility and choosing the noise</span></span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a href="../part03-framework/00-introduction.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">The framework</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-3" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-3" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part03-framework/08-a-framework-for-privacy.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">8</span>&nbsp; <span class="chapter-title">A framework to understand differential privacy</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part03-framework/09-transformations.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">9</span>&nbsp; <span class="chapter-title">Transformations</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part03-framework/10-measurements.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">10</span>&nbsp; <span class="chapter-title">Measurements</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part03-framework/11-combinators.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">11</span>&nbsp; <span class="chapter-title">Combinators</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part03-framework/12-utilities-and-the-context-api.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">12</span>&nbsp; <span class="chapter-title">Utilities and the Context API inside</span></span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a href="../part04-extending/00-introduction.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Extending the library</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-4" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-4" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part04-extending/13-plugins.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">13</span>&nbsp; <span class="chapter-title">Plugins</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part04-extending/14-statistical-modelling.html" class="sidebar-item-text sidebar-link active">
+ <span class="menu-text"><span class="chapter-number">14</span>&nbsp; <span class="chapter-title">Statistical modelling</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part04-extending/15-limitations-and-troubleshooting.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">15</span>&nbsp; <span class="chapter-title">Limitations and troubleshooting</span></span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a href="../part05-synthetic-data/00-introduction.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Synthetic data</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-5" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-5" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part05-synthetic-data/16-contingency-tables.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">16</span>&nbsp; <span class="chapter-title">Contingency tables</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part05-synthetic-data/17-aim-and-mst.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">17</span>&nbsp; <span class="chapter-title">Synthetic data with AIM and MST</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part05-synthetic-data/18-evaluating-synthetic-data.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">18</span>&nbsp; <span class="chapter-title">Evaluating and tuning synthetic data</span></span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-6" role="navigation" aria-expanded="true">
+ <span class="menu-text">Appendices</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-6" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-6" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../glossary.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">A</span>&nbsp; <span class="chapter-title">Glossary</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../term-index.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">B</span>&nbsp; <span class="chapter-title">Index</span></span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+    </ul>
+    </div>
+</nav>
+<div id="quarto-sidebar-glass" class="quarto-sidebar-collapse-item" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item"></div>
+<!-- margin-sidebar -->
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+        <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">Table of contents</h2>
+   
+  <ul>
+  <li><a href="#sec-model-choice" id="toc-sec-model-choice" class="nav-link active" data-scroll-target="#sec-model-choice"><span class="header-section-number">14.1</span> A model or a table?</a></li>
+  <li><a href="#sec-model-regression" id="toc-sec-model-regression" class="nav-link" data-scroll-target="#sec-model-regression"><span class="header-section-number">14.2</span> Linear regression</a>
+  <ul class="collapse">
+  <li><a href="#actual-hours-against-usual-hours-on-the-survey" id="toc-actual-hours-against-usual-hours-on-the-survey" class="nav-link" data-scroll-target="#actual-hours-against-usual-hours-on-the-survey"><span class="header-section-number">14.2.1</span> Actual hours against usual hours on the survey</a></li>
+  </ul></li>
+  <li><a href="#sec-model-pca" id="toc-sec-model-pca" class="nav-link" data-scroll-target="#sec-model-pca"><span class="header-section-number">14.3</span> Principal component analysis</a></li>
+  <li><a href="#sec-model-numpy" id="toc-sec-model-numpy" class="nav-link" data-scroll-target="#sec-model-numpy"><span class="header-section-number">14.4</span> The NumPy domain underneath</a></li>
+  <li><a href="#sec-model-review" id="toc-sec-model-review" class="nav-link" data-scroll-target="#sec-model-review"><span class="header-section-number">14.5</span> What a reviewer should ask</a></li>
+  <li><a href="#sec-model-run" id="toc-sec-model-run" class="nav-link" data-scroll-target="#sec-model-run"><span class="header-section-number">14.6</span> The releases of one run</a></li>
+  <li><a href="#summary" id="toc-summary" class="nav-link" data-scroll-target="#summary"><span class="header-section-number">14.7</span> Summary</a></li>
+  <li><a href="#references" id="toc-references" class="nav-link" data-scroll-target="#references"><span class="header-section-number">14.8</span> References</a></li>
+  </ul>
+</nav>
+    </div>
+<!-- main -->
+<main class="content" id="quarto-document-content">
+
+<header id="title-block-header" class="quarto-title-block default"><nav class="quarto-page-breadcrumbs quarto-title-breadcrumbs d-none d-lg-block" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../part04-extending/00-introduction.html">Extending the library</a></li><li class="breadcrumb-item"><a href="../part04-extending/14-statistical-modelling.html"><span class="chapter-number">14</span>&nbsp; <span class="chapter-title">Statistical modelling</span></a></li></ol></nav>
+<div class="quarto-title">
+<h1 class="title"><span class="chapter-number">14</span>&nbsp; <span class="chapter-title">Statistical modelling</span></h1>
+</div>
+
+
+
+<div class="quarto-title-meta">
+
+    
+  
+    
+  </div>
+  
+
+
+</header>
+
+
+<p>Every release so far has been a table of statistics, such as a count, a sum, a mean or a quantile per group. Often the question is about a relation instead. How many hours do people actually work for each hour they usually work? Which directions of a numeric table carry its variance? OpenDP ships two models for such questions, a differentially private linear regression and a differentially private principal component analysis (PCA), both with interfaces modelled on scikit-learn. The one idea of this chapter is that a fitted model is a release like any other. Behind each <code>fit</code> is a measurement with a privacy map, and the map, not the argument named <code>epsilon</code>, says what the fit costs.</p>
+<p>You will fit the regression on the documentation’s generated points and on the Labour Force Survey (LFS), and read its privacy loss from its measurement. You will see what the estimator targets and why its sensitivity is bounded. You will fit the PCA on the documentation’s generated table and compare its release with NumPy’s exact decomposition. Then you will meet the NumPy domain and the clamp underneath both estimators, and finish with the questions a reviewer should ask about a private model.</p>
+<p>The script <a href="https://github.com/manuelvloureiro/privacy-preserving-machine-learning-book/blob/main/code/part04-extending/opendp_statistical_modelling.py">opendp_statistical_modelling.py</a> runs every step on OpenDP 0.16.0 with scikit-learn 1.8.0. Its toys come from a seeded NumPy generator, and the seed also fixes how the regression pairs its rows. So the exact fits, the bounds, the cut points and every privacy map are the same on every run. The released fits are not, because the private medians and the PCA’s noise come from OpenDP’s cryptographic generator, which cannot be seeded. They appear in one block marked as one run.</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb1"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="ex">uv</span> run python code/part04-extending/opendp_statistical_modelling.py</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<section id="sec-model-choice" class="level2" data-number="14.1">
+<h2 data-number="14.1" class="anchored" data-anchor-id="sec-model-choice"><span class="header-section-number">14.1</span> A model or a table?</h2>
+<p>The documentation’s page on statistical modelling makes one point before it shows any code. When you know which relation you need, a model tailored to it spends the whole budget on the few numbers that answer the question. A slope costs two private medians, as the next section shows. A table fine enough to read the slope off would cost a noisy count in every cell. The same holds for the PCA, which releases a handful of directions rather than a full covariance matrix.</p>
+<p>The flexible alternative is synthetic data. A synthetic copy of the table answers any later question, including ones nobody has asked yet, and it can be handed to people who need microdata. The price is accuracy. A statistic computed from a synthetic copy is less accurate than the same statistic released directly under the same budget, because the copy had to serve every question at once. <a href="../part05-synthetic-data/17-aim-and-mst.html">AIM and MST</a> generates such copies. So release a table when the questions are counts, a model when the question is a relation, and synthetic data when the questions are not yet known.</p>
+<p>The two models are narrow on purpose. The regression takes one explanatory column and one response, and the PCA takes a numeric table whose rows can be bounded in length. A model with many explanatory variables is trained by the methods of <a href="../../book-full/part05-dp-ml/01-dp-erm.html">the full edition’s chapter on private empirical risk minimization</a>, which OpenDP does not ship.</p>
+</section>
+<section id="sec-model-regression" class="level2" data-number="14.2">
+<h2 data-number="14.2" class="anchored" data-anchor-id="sec-model-regression"><span class="header-section-number">14.2</span> Linear regression</h2>
+<p>A least-squares line is a poor thing to release directly. Its slope is a ratio of sums whose sensitivity is unbounded unless both columns are clipped, and clipping changes the line. The estimator OpenDP ships is a <strong>Theil-Sen regression</strong>, which rests on medians instead. It pairs the rows at random, fits the line through each pair, and reads each line at two fixed cut points on the x axis. At each cut point it then releases the median of those readings with a private quantile. Finally it solves the two released medians for a slope and an intercept, which is post-processing and costs nothing more.</p>
+<p>The sensitivity is bounded because of how the private median chooses. It scores every candidate on a fixed grid by how many readings lie on either side of it. The exponential mechanism then picks a candidate with a probability that favours high scores. One person’s row sits in one pair, so it moves one reading, and that changes any candidate’s score by at most one. How far the reading moved never enters, which is why the estimator needs no clipping and survives a person who reports a thousand hours. <a href="../../book-full/part03-dp-foundations/05-selection.html">The full edition’s chapter on selection</a> derives the exponential mechanism and the private quantile. <a href="../../book-full/part03-dp-foundations/07-sensitivity.html">Its chapter on sensitivity</a> explains why a count of readings is the right quantity to bound.</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb2" data-excerpt="model-regression"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> make_regression(</span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>    x_bounds: <span class="bu">tuple</span>[<span class="bu">float</span>, <span class="bu">float</span>], y_bounds: <span class="bu">tuple</span>[<span class="bu">float</span>, <span class="bu">float</span>], scale: <span class="bu">float</span>, runs: <span class="bu">int</span> <span class="op">=</span> <span class="dv">1</span></span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>) <span class="op">-&gt;</span> dp.sklearn.linear_model.LinearRegression:</span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a>    <span class="co">"""The private Theil-Sen regression under pure differential privacy, with public bounds on x and y."""</span></span>
+<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> dp.sklearn.linear_model.LinearRegression(</span>
+<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a>        dp.max_divergence(),  <span class="co"># the output measure: the privacy loss is read in epsilon</span></span>
+<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a>        x_bounds<span class="op">=</span>[x_bounds],  <span class="co"># fixes the two cut points, a quarter and three quarters of the way across</span></span>
+<span id="cb2-8"><a href="#cb2-8" aria-hidden="true" tabindex="-1"></a>        y_bounds<span class="op">=</span>y_bounds,  <span class="co"># the range over which the candidate medians are spread</span></span>
+<span id="cb2-9"><a href="#cb2-9" aria-hidden="true" tabindex="-1"></a>        scale<span class="op">=</span>scale,  <span class="co"># the noise scale of each of the two private medians</span></span>
+<span id="cb2-10"><a href="#cb2-10" aria-hidden="true" tabindex="-1"></a>        runs<span class="op">=</span>runs,  <span class="co"># how many random pairings to pool; each multiplies the privacy loss</span></span>
+<span id="cb2-11"><a href="#cb2-11" aria-hidden="true" tabindex="-1"></a>    )</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>The first argument is the output measure. Here <code>dp.max_divergence()</code> asks for pure differential privacy (DP), whose parameter is the privacy loss <span class="math inline">\(\varepsilon\)</span>. The bounds are public information, and they never clip the data. The x bounds only fix where the two cut points go, at the fractions <code>fraction_bounds</code> of the way across, a quarter and three quarters by default. The y bounds only fix the grid of <code>candidates_count</code> evenly spaced candidates from which each median is chosen, a hundred by default. The scale is the noise scale of each private median, and <code>runs</code> repeats the random pairing and pools the readings. The documentation also builds this estimator from plugins, which <a href="../part04-extending/13-plugins.html">Plugins</a> follows.</p>
+<pre class="text"><code>regression space: NPArray2Domain(num_columns=2, nan=True, T=f64) SymmetricDistance() MaxDivergence
+regression map: scale=1 runs=1 -&gt; epsilon=2.0
+regression map: scale=2 runs=1 -&gt; epsilon=1.0
+regression map: scale=2 runs=3 -&gt; epsilon=3.0</code></pre>
+<p>The estimator’s measurement is reachable as its <code>measurement</code> attribute, and it reads like any other. Its input is a two-column NumPy array under the symmetric distance, so the privacy unit is a row. Its map at distance 1 is therefore the privacy loss for adding or removing one row. Two medians at scale 1 cost <span class="math inline">\(\varepsilon = 2\)</span>, and doubling the scale halves it. Three runs at scale 2 cost <span class="math inline">\(\varepsilon = 3\)</span>, because a row then sits in three pairs and moves three readings. More runs make the median better defined, but at a fixed budget they force a larger scale, so the gain is rarely worth it on a large dataset.</p>
+<p>The documentation’s toy is a hundred points with a true slope of 2 and an intercept of 1, drawn here by a seeded generator. The script prints the deterministic things to read a fit against.</p>
+<pre class="text"><code>toy: n=100 cut points=[-1.5, 1.5] candidate step=0.2020
+toy least squares: slope=2.0275 intercept=0.9725
+toy median line, no noise: slope=2.0379 intercept=1.0786 readings=50</code></pre>
+<p>The candidate step is the y range divided into 99 intervals, about 0.2 here. The cut points are 3 apart, so moving one median by one grid step changes the slope by about 0.07, before any noise is added. The median line is what the estimator would return with exact medians and the seeded pairing, from the 50 readings that 100 points give. It is close to least squares here because the noise in the toy is symmetric. The released fit is in the last section.</p>
+<section id="actual-hours-against-usual-hours-on-the-survey" class="level3" data-number="14.2.1">
+<h3 data-number="14.2.1" class="anchored" data-anchor-id="actual-hours-against-usual-hours-on-the-survey"><span class="header-section-number">14.2.1</span> Actual hours against usual hours on the survey</h3>
+<p>The survey question is how many hours people actually worked in the reference week for each hour they usually work. The script takes the people working in the fourth quarter of 2013 whose usual and actual hours are both recorded. The survey codes hours from 0 to 98, so the bounds of both columns are public. The code 99 means “not applicable” and is dropped. A person can appear more than once in a quarter, so the script keeps each person’s first row, and the privacy unit of the fit is one person. That step and the row filter run in Polars before the array reaches the measurement, so the library does not account for them. A row filter keeps neighbouring datasets neighbouring, and keeping one row per person is the truncation of <a href="../part02-tabular-data/05-identifier-truncation.html">Identifier truncation</a>. Here both are your claim rather than the library’s.</p>
+<pre class="text"><code>survey: working people in 2013 Q4 with hours recorded: 36,914 (one row each)
+survey: of them with 0 actual hours that week: 4,109
+survey: bounds=(0.0, 98.0) cut points=[24.5, 73.5] candidate step=0.9899
+survey least squares: slope=0.8582 intercept=-0.1935
+survey median line, no noise: slope=1.0000 intercept=0.0000 medians=[24.50, 73.50]
+survey readings: 16,463 pairs; within one candidate step of the medians: 5,606 and 5,252</code></pre>
+<p>The two exact fits disagree, and the disagreement is the lesson. Among the 36,914 people, 4,109 worked no hours at all that week, through leave or illness. So least squares is pulled toward them, and it gives 0.86 actual hours per usual hour. The median line ignores them, because most pairs of people lie on the line where actual equals usual. So its medians at the cut points are the cut points themselves, and its slope is exactly 1. A private Theil-Sen fit therefore estimates the typical relation, not the average one, and the median line is the exact value to compare it with. The last line counts the readings, which are fewer than half the people because a pair with equal usual hours has no slope. Thousands of them lie within one grid step of each median.</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb6" data-excerpt="model-fit"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a>model <span class="op">=</span> make_regression(HOURS_BOUNDS, HOURS_BOUNDS, scale<span class="op">=</span>REGRESSION_SCALE)</span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a>epsilon <span class="op">=</span> model.measurement.<span class="bu">map</span>(<span class="dv">1</span>)  <span class="co"># the privacy loss for adding or removing one person's row</span></span>
+<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a>survey_slope, survey_intercept <span class="op">=</span> fit_regression(model, hours, seed)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<pre class="text"><code>survey private fit: scale=2 epsilon=1.0</code></pre>
+<p>The fit at scale 2 costs <span class="math inline">\(\varepsilon = 1\)</span> for one person. The <code>fit</code> method takes the explanatory column as a two-dimensional array and the response as a vector, like scikit-learn. It returns a fitted scikit-learn <code>LinearRegression</code>, so <code>coef_</code>, <code>intercept_</code> and <code>predict</code> work as usual.</p>
+</section>
+</section>
+<section id="sec-model-pca" class="level2" data-number="14.3">
+<h2 data-number="14.3" class="anchored" data-anchor-id="sec-model-pca"><span class="header-section-number">14.3</span> Principal component analysis</h2>
+<p>A PCA finds the directions along which a table varies most. OpenDP’s version releases three things under one budget. The first is the mean of the rows, the second the singular values, which say how much variance each direction carries, and the third the components, which are the directions. The algorithm follows Amin and others (2019). It scales every row into a ball of radius <code>row_norm</code>, centres the rows on a privately estimated mean, and forms the matrix of sums of squares and cross-products. It releases that matrix’s eigenvalues with Laplace noise, since replacing one row moves their sum by at most twice the squared row norm. It then draws the eigenvectors one at a time from a distribution that favours directions of high variance, which is the exponential mechanism on the sphere. After each draw it projects the matrix away from the drawn direction.</p>
+<p>That is why two facts must be public. The row norm is the sensitivity of the whole algorithm, and every map below is in units of it. The number of rows is part of the domain. It makes neighbouring tables tables of the same size with one row replaced, which is distance 2 under the symmetric distance, and it gives the mean a known divisor. Both are declared, not checked, as the reviewer’s section shows. The budget is split in three equal parts, for the mean, the eigenvalues and the eigenvectors, and the eigenvectors’ part is split again over the number of eigenvectors drawn.</p>
+<p>The table is the documentation’s. Ten thousand centred rows of four columns are drawn from a normal distribution with a random covariance, here from a seeded generator so that the exact decomposition is reproducible.</p>
+<pre class="text"><code>pca table: 10,000 rows x 4 columns, row length mean=8.53 max=36.56
+pca table: rows longer than 1: 99.9%  longer than 40: 0.0%
+pca exact, raw rows: singular values=[901.9, 278.6, 222.2, 156.9]
+pca exact, rows clamped to 1: singular values=[80.48, 40.67, 34.29, 26.29]
+pca exact, rows clamped to 1: first component=[-0.614, -0.534, -0.526, -0.247]</code></pre>
+<p>The documentation fits with <code>row_norm=1.0</code>, and the first line says what that means here. Almost every row is longer than 1, so the clamp scales almost every row onto the unit sphere. The singular values the algorithm can estimate are then those of the clamped table, about 80 rather than about 900 for the first. The directions survive the clamp, because scaling a row does not turn it, so the first component of the clamped table is the one to compare the release with. A row norm of 40 clamps nothing, and the script fits with it too, to show the other side of the trade.</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb9" data-excerpt="model-pca"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> make_pca(epsilon: <span class="bu">float</span>, row_norm: <span class="bu">float</span>, n_components: <span class="bu">int</span> <span class="op">|</span> <span class="va">None</span> <span class="op">=</span> <span class="va">None</span>) <span class="op">-&gt;</span> dp.sklearn.decomposition.PCA:</span>
+<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a>    <span class="co">"""The private PCA of the generated table, with the two public facts the algorithm needs."""</span></span>
+<span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> dp.sklearn.decomposition.PCA(</span>
+<span id="cb9-4"><a href="#cb9-4" aria-hidden="true" tabindex="-1"></a>        epsilon<span class="op">=</span>epsilon,</span>
+<span id="cb9-5"><a href="#cb9-5" aria-hidden="true" tabindex="-1"></a>        row_norm<span class="op">=</span>row_norm,  <span class="co"># public: every row is scaled into a ball of this radius before anything else</span></span>
+<span id="cb9-6"><a href="#cb9-6" aria-hidden="true" tabindex="-1"></a>        n_samples<span class="op">=</span>PCA_ROWS,  <span class="co"># public: the exact number of rows, which fixes the domain</span></span>
+<span id="cb9-7"><a href="#cb9-7" aria-hidden="true" tabindex="-1"></a>        n_features<span class="op">=</span>PCA_COLUMNS,</span>
+<span id="cb9-8"><a href="#cb9-8" aria-hidden="true" tabindex="-1"></a>        n_components<span class="op">=</span>n_components,  <span class="co"># None releases every component</span></span>
+<span id="cb9-9"><a href="#cb9-9" aria-hidden="true" tabindex="-1"></a>    )</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb10" data-excerpt="model-pca-fit"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a>pca <span class="op">=</span> make_pca(PCA_EPSILON, ROW_NORM)</span>
+<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a>measurement <span class="op">=</span> pca.measurement()  <span class="co"># the measurement behind fit(), for its map and for compositors</span></span>
+<span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a>pca.fit(table)  <span class="co"># the private release: the mean, the singular values and the components</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<pre class="text"><code>pca model: PCA(epsilon=1.0, n_components=4, n_features=4, n_samples=10000, row_norm=1.0)
+pca space: NPArray2Domain(size=10000, num_columns=4, nan=True, T=f64) SymmetricDistance() MaxDivergence
+pca map: map(2)=2.0 map(1)=2.0 check(2, 1.0)=False check(2, 2.0)=True
+make_private_pca unit_epsilon=1: map(2)=1.0 map(1)=1.0
+pca n_components=2: map(2)=2.0
+pca composition of epsilon 1 and 0.5: map(2)=3.0</code></pre>
+<p>Read the third line twice. The model was built with <code>epsilon=1.0</code>, but its measurement’s map at distance 2, which is one replaced row, is 2.0. The <code>check</code> call confirms that the fit does not stay within <span class="math inline">\(\varepsilon = 1\)</span>. The reason is in the constructor. The <code>PCA</code> class calls the framework’s <code>make_private_pca</code> with twice its <code>epsilon</code>, divided by <code>n_changes</code>, the number of rows one person may change. And <code>make_private_pca</code> with a unit budget of 1 has a map of 1.0 at distance 2, as the fourth line shows. So in version 0.16.0 a <code>PCA(epsilon=1.0)</code> fit costs <span class="math inline">\(\varepsilon = 2\)</span> per changed row by its own map, and the map is what you should quote. The map is also flat below distance 2, because the algorithm is an adaptive composition declared at that distance, which <a href="../part03-framework/11-combinators.html">Combinators</a> explains.</p>
+<p>Asking for two components leaves the total unchanged, as the fifth line shows. What changes is inside. The library draws at most one eigenvector fewer than there are columns, since the last direction is determined by the others. So the eigenvectors’ third is split over three draws for four components and over two draws for two, and each draw gets a larger share. The <code>measurement()</code> method exists for the compositors of the same chapter. The last line composes a fit at <code>epsilon=1.0</code> with one at <code>epsilon=0.5</code>, and the maps add to 3.0 at distance 2. Calling the measurement on the table fits the model and returns it.</p>
+</section>
+<section id="sec-model-numpy" class="level2" data-number="14.4">
+<h2 data-number="14.4" class="anchored" data-anchor-id="sec-model-numpy"><span class="header-section-number">14.4</span> The NumPy domain underneath</h2>
+<p>Both estimators live on <code>dp.numpy.array2_domain</code>, the domain of two-dimensional NumPy arrays. Its members are described by a number of columns, an optional number of rows and the element type. Optionally they also have a norm, its order <code>p</code> and an origin, which say that every row lies within that norm of the origin. A domain with a norm is a promise about the data, and <code>make_np_clamp</code> is the transformation that makes the promise true.</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb12"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> numpy <span class="im">as</span> np</span>
+<span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> opendp.prelude <span class="im">as</span> dp</span>
+<span id="cb12-3"><a href="#cb12-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-4"><a href="#cb12-4" aria-hidden="true" tabindex="-1"></a>dp.enable_features(<span class="st">"contrib"</span>, <span class="st">"honest-but-curious"</span>)</span>
+<span id="cb12-5"><a href="#cb12-5" aria-hidden="true" tabindex="-1"></a>rows <span class="op">=</span> dp.numpy.array2_domain(num_columns<span class="op">=</span><span class="dv">2</span>, T<span class="op">=</span><span class="bu">float</span>)</span>
+<span id="cb12-6"><a href="#cb12-6" aria-hidden="true" tabindex="-1"></a>clamp <span class="op">=</span> dp.numpy.make_np_clamp(rows, dp.symmetric_distance(), norm<span class="op">=</span><span class="fl">1.0</span>, p<span class="op">=</span><span class="dv">2</span>, origin<span class="op">=</span>np.array([<span class="fl">1.0</span>, <span class="fl">2.0</span>]))</span>
+<span id="cb12-7"><a href="#cb12-7" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(clamp(np.array([[<span class="fl">1.0</span>, <span class="fl">2.0</span>], [<span class="fl">4.0</span>, <span class="fl">6.0</span>], [<span class="fl">1.5</span>, <span class="fl">2.0</span>]])).tolist())  <span class="co"># [[1.0, 2.0], [1.6, 2.8], [1.5, 2.0]]</span></span>
+<span id="cb12-8"><a href="#cb12-8" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(clamp.<span class="bu">map</span>(<span class="dv">1</span>))  <span class="co"># 1</span></span>
+<span id="cb12-9"><a href="#cb12-9" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(clamp.output_domain)  <span class="co"># NPArray2Domain(origin=[1. 2.], norm=1.0, p=2, num_columns=2, nan=False, T=f64)</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>The clamp leaves the first and third rows alone, because they lie within distance 1 of the origin. It pulls the second row from distance 5 back to the sphere, along the line to the origin. Its stability map is the identity, since clamping each row on its own neither adds nor removes rows. Its output domain records the norm, the order and the origin, and that no value is missing. <a href="../part03-framework/09-transformations.html">Transformations</a> reads stability maps in general.</p>
+<p>That output domain is what <code>make_private_pca</code> would rather receive. A domain built with the norm and the origin states that the rows are already bounded around a known centre. The algorithm then skips the private mean and its third of the budget.</p>
+<pre class="text"><code>bounded domain: NPArray2Domain(origin=[0. 0. 0. 0.], norm=1.0, p=2, size=10000, num_columns=4, nan=True, T=f64)
+pca on the bounded domain: map(1)=0.50 map(2)=1.00 map(4)=2.00</code></pre>
+<p>The script passes an explicit split as a <code>PCAEpsilons</code>, with half for the eigenvalues, a sixth for each of three eigenvectors and nothing for the mean. The map is then linear in the distance rather than flat, because no compositor is declared in between. Use this route when the centre is public, for instance when the columns are scores on a known scale, and the class when it is not.</p>
+</section>
+<section id="sec-model-review" class="level2" data-number="14.5">
+<h2 data-number="14.5" class="anchored" data-anchor-id="sec-model-review"><span class="header-section-number">14.5</span> What a reviewer should ask</h2>
+<p>The first question is the privacy unit. Both estimators count rows, so the claim “one person” holds only if each person has one row, which on the survey was your own Polars step. The second is the bounds. The regression’s bounds and the PCA’s row norm and row count must come from the code book or the domain, never from the data. A bound read off the data leaks it. The third is which features are on, since a feature is a statement about what you accept on trust.</p>
+<pre class="text"><code>regression without honest-but-curious: Attempted to use function that requires "contrib", "honest-but-curious", but not enabled
+pca without honest-but-curious: Attempted to use function that requires "contrib", "honest-but-curious", but not enabled
+pca without idealized-numerics: Attempted to use function that requires "contrib", "idealized-numerics", but not enabled
+regression without idealized-numerics: constructed
+pca with n_samples one short of the table: fitted without complaint</code></pre>
+<p>Both estimators need <code>honest-but-curious</code>, because both are built from user-defined transformations whose functions and stability maps are taken as written. The regression’s pairing step, for example, claims that one row moves <code>runs</code> readings, and the library records that claim rather than proving it. The PCA also needs <code>idealized-numerics</code>, which concedes that its proofs hold for real arithmetic and not for floating point. Every guarantee of the PCA rests on that concession. The eigenvalues, their sensitivity and the eigenvector sampler are all computed in floating point, and the library’s own source notes that it knows no floating-point-safe sampler for the eigenvector draw. The regression constructs without the flag, because its private medians run in the Rust core and only the pairing is Python.</p>
+<p>The last line is the reviewer’s trap. The number of rows is part of the PCA’s domain, but the library does not check that the array has that many rows. A wrong <code>n_samples</code> is therefore a wrong guarantee that nothing reports. The row norm, by contrast, is enforced by the clamp, and the regression’s bounds need no enforcing because its sensitivity does not depend on them. <a href="../part04-extending/15-limitations-and-troubleshooting.html">Limitations and troubleshooting</a> collects the other things the library does not check.</p>
+</section>
+<section id="sec-model-run" class="level2" data-number="14.6">
+<h2 data-number="14.6" class="anchored" data-anchor-id="sec-model-run"><span class="header-section-number">14.6</span> The releases of one run</h2>
+<pre class="text"><code>released (one run):
+  toy private fit: slope=1.9529 intercept=1.0101
+  survey private fit: slope=1.0101 intercept=-0.9899
+  survey private fit at 35 usual hours: 34.36 actual
+  pca row_norm=1: singular values=[80.48, 40.66, 34.28, 26.37]
+  pca row_norm=1: |cos| with exact components=[1.000, 0.998, 0.996, 0.996]
+  pca row_norm=1: mean=[0.001, 0.002, 0.001, 0.001]  explained variance ratio=[0.648, 0.165, 0.117, 0.070]
+  pca row_norm=40: singular values=[906.8, 268.6, 212.6, 153.2] (exact [901.9, 278.6, 222.2, 156.9])
+  pca row_norm=40: |cos| with exact components=[0.996, 0.659, 0.426, 0.086]
+  pca n_components=2: returned the model: True  singular values=[80.41, 40.64]
+  pca n_components=2: |cos| with exact components=[0.999, 0.999]</code></pre>
+<p>The toy fit is off the least-squares line by about one grid step at one cut point, which is what a private median on 50 readings at <span class="math inline">\(\varepsilon = 2\)</span> gives. The test allows the slope within 0.3 of the least-squares slope and the intercept within 0.5. That is about three grid steps at either cut point. A candidate three steps from the best one scores lower by every reading in between, and the exponential mechanism makes such a candidate rare at this budget.</p>
+<p>The survey fit is the same on every run. The medians sit exactly at the cut points, and the nearest candidates on the grid give a slope of 1.0101 and an intercept of about <span class="math inline">\(-1\)</span>. Thousands of readings lie within one grid step of each median, so the next candidate on the grid scores thousands of readings worse than the best one. Noise at scale 2 never overturns a gap that large. The error of the fit is therefore the grid, not the noise, and a finer <code>candidates_count</code> would remove it at no cost in privacy. The test allows the slope within 0.1 of the median line and the intercept within 4 hours of it, which is two grid steps at the lower cut point. The fit predicts about 34.4 actual hours for someone who usually works 35.</p>
+<p>The PCA at row norm 1 recovers the singular values of the clamped table to within a tenth and all four directions to a cosine above 0.99. Its private mean is within a few thousandths of the true zero. The test allows each singular value within 1 of the exact one and each cosine above 0.9. Both bounds leave a wide margin, because the eigenvalues’ Laplace noise is a few units against eigenvalues in the thousands and the four directions are well separated.</p>
+<p>At row norm 40 the singular values are the raw table’s, within a few percent, but only the first direction is right. The eigenvector sampler’s concentration falls with the square of the row norm, so a norm of 40 leaves little of it, and the last three directions are close to random. The test checks only the first singular value, within 30, and the first cosine, above 0.9. The two-component fit returns the model itself, and its two directions are as good as the four-component fit’s first two.</p>
+</section>
+<section id="summary" class="level2" data-number="14.7">
+<h2 data-number="14.7" class="anchored" data-anchor-id="summary"><span class="header-section-number">14.7</span> Summary</h2>
+<div id="tbl-model-summary" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-tbl figure">
+<figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl" id="tbl-model-summary-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Table&nbsp;14.1: The calls and concepts of private modelling, what each does, and the rule of thumb that goes with it.
+</figcaption>
+<div aria-describedby="tbl-model-summary-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<table class="caption-top table">
+<colgroup>
+<col style="width: 33%">
+<col style="width: 33%">
+<col style="width: 33%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>Call or concept</th>
+<th>What it does</th>
+<th>Rule of thumb</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><code>dp.sklearn.linear_model.LinearRegression(measure, x_bounds, y_bounds, scale, runs)</code></td>
+<td>A Theil-Sen regression from two private medians</td>
+<td>Bounds fix the cut points and the grid; they never clip the data</td>
+</tr>
+<tr class="even">
+<td><code>model.measurement.map(1)</code></td>
+<td>The privacy loss of the fit per added or removed row</td>
+<td>Two medians at scale <span class="math inline">\(s\)</span> cost <span class="math inline">\(2\,\mathrm{runs}/s\)</span>; quote this, not the arguments</td>
+</tr>
+<tr class="odd">
+<td><code>candidates_count</code></td>
+<td>The grid the medians are chosen from</td>
+<td>On a large dataset the grid, not the noise, is the error; refine it for free</td>
+</tr>
+<tr class="even">
+<td>The median line against least squares</td>
+<td>What the estimator targets</td>
+<td>Compare a Theil-Sen fit with the median line; outliers pull least squares only</td>
+</tr>
+<tr class="odd">
+<td><code>dp.sklearn.decomposition.PCA(epsilon, row_norm, n_samples, n_features, n_components)</code></td>
+<td>Releases the mean, the singular values and the components</td>
+<td><code>row_norm</code> and <code>n_samples</code> are public facts the library does not check</td>
+</tr>
+<tr class="even">
+<td><code>pca.measurement()</code></td>
+<td>The measurement behind <code>fit</code>, for maps and compositors</td>
+<td>In 0.16.0 its map at distance 2 is twice <code>epsilon</code>; read the map</td>
+</tr>
+<tr class="odd">
+<td><code>n_components</code></td>
+<td>How many directions to draw</td>
+<td>Fewer draws give each more budget at the same total</td>
+</tr>
+<tr class="even">
+<td><code>row_norm</code></td>
+<td>The sensitivity scale of the whole algorithm</td>
+<td>Tight: magnitudes are the clamped table’s, directions good. Loose: magnitudes right, directions poor</td>
+</tr>
+<tr class="odd">
+<td><code>dp.numpy.array2_domain(norm, p, origin)</code> and <code>make_np_clamp</code></td>
+<td>The bounded domain and the transformation that enforces it</td>
+<td>A known origin skips the private mean and its third of the budget</td>
+</tr>
+<tr class="even">
+<td><code>honest-but-curious</code>, <code>idealized-numerics</code></td>
+<td>Trust the plugins’ maps; accept real-arithmetic proofs</td>
+<td>Both estimators need the first; the whole PCA rests on the second</td>
+</tr>
+</tbody>
+</table>
+</div>
+</figure>
+</div>
+</section>
+<section id="references" class="level2" data-number="14.8">
+<h2 data-number="14.8" class="anchored" data-anchor-id="references"><span class="header-section-number">14.8</span> References</h2>
+<ul>
+<li>OpenDP documentation: “Statistical Modeling”, “Linear Regression” with the API reference of <code>opendp.extras.sklearn.linear_model</code>, “Differentially Private PCA”, and “Theil-Sen Regression” in the plugins user guide.</li>
+<li>Theil, “A Rank-Invariant Method of Linear and Polynomial Regression Analysis” (1950), and Sen, “Estimates of the Regression Coefficient Based on Kendall’s Tau” (1968): the median-of-slopes estimator.</li>
+<li>Dwork and Lei, “Differential Privacy and Robust Statistics” (2009): why robust estimators such as medians are the natural private ones.</li>
+<li>Amin, Dick, Kulesza, Munoz and Vassilvitskii, “Differentially Private Covariance Estimation” (2019): the eigenvalue and eigenvector mechanisms behind the PCA.</li>
+<li>The full edition’s chapters on <a href="../../book-full/part03-dp-foundations/05-selection.html">selection</a>, <a href="../../book-full/part03-dp-foundations/07-sensitivity.html">sensitivity</a> and <a href="../../book-full/part05-dp-ml/01-dp-erm.html">private empirical risk minimization</a> derive the results this chapter states.</li>
+</ul>
+
+
+</section>
+
+</main> <!-- /main -->
+<script id="quarto-html-after-body" type="application/javascript">
+  window.document.addEventListener("DOMContentLoaded", function (event) {
+    const icon = "";
+    const anchorJS = new window.AnchorJS();
+    anchorJS.options = {
+      placement: 'right',
+      icon: icon
+    };
+    anchorJS.add('.anchored');
+    const isCodeAnnotation = (el) => {
+      for (const clz of el.classList) {
+        if (clz.startsWith('code-annotation-')) {                     
+          return true;
+        }
+      }
+      return false;
+    }
+    const onCopySuccess = function(e) {
+      // button target
+      const button = e.trigger;
+      // don't keep focus
+      button.blur();
+      // flash "checked"
+      button.classList.add('code-copy-button-checked');
+      var currentTitle = button.getAttribute("title");
+      button.setAttribute("title", "Copied!");
+      let tooltip;
+      if (window.bootstrap) {
+        button.setAttribute("data-bs-toggle", "tooltip");
+        button.setAttribute("data-bs-placement", "left");
+        button.setAttribute("data-bs-title", "Copied!");
+        tooltip = new bootstrap.Tooltip(button, 
+          { trigger: "manual", 
+            customClass: "code-copy-button-tooltip",
+            offset: [0, -8]});
+        tooltip.show();    
+      }
+      setTimeout(function() {
+        if (tooltip) {
+          tooltip.hide();
+          button.removeAttribute("data-bs-title");
+          button.removeAttribute("data-bs-toggle");
+          button.removeAttribute("data-bs-placement");
+        }
+        button.setAttribute("title", currentTitle);
+        button.classList.remove('code-copy-button-checked');
+      }, 1000);
+      // clear code selection
+      e.clearSelection();
+    }
+    const getTextToCopy = function(trigger) {
+      const outerScaffold = trigger.parentElement.cloneNode(true);
+      const codeEl = outerScaffold.querySelector('code');
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
+        }
+      }
+      return codeEl.innerText;
+    }
+    const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
+      text: getTextToCopy
+    });
+    clipboard.on('success', onCopySuccess);
+    if (window.document.getElementById('quarto-embedded-source-code-modal')) {
+      const clipboardModal = new window.ClipboardJS('.code-copy-button[data-in-quarto-modal]', {
+        text: getTextToCopy,
+        container: window.document.getElementById('quarto-embedded-source-code-modal')
+      });
+      clipboardModal.on('success', onCopySuccess);
+    }
+      var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+      var mailtoRegex = new RegExp(/^mailto:/);
+        var filterRegex = new RegExp('/' + window.location.host + '/');
+      var isInternal = (href) => {
+          return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+      }
+      // Inspect non-navigation links and adorn them if external
+     var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool):not(.about-link)');
+      for (var i=0; i<links.length; i++) {
+        const link = links[i];
+        if (!isInternal(link.href)) {
+          // undo the damage that might have been done by quarto-nav.js in the case of
+          // links that we want to consider external
+          if (link.dataset.originalHref !== undefined) {
+            link.href = link.dataset.originalHref;
+          }
+        }
+      }
+    function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+      const config = {
+        allowHTML: true,
+        maxWidth: 500,
+        delay: 100,
+        arrow: false,
+        appendTo: function(el) {
+            return el.parentElement;
+        },
+        interactive: true,
+        interactiveBorder: 10,
+        theme: 'quarto',
+        placement: 'bottom-start',
+      };
+      if (contentFn) {
+        config.content = contentFn;
+      }
+      if (onTriggerFn) {
+        config.onTrigger = onTriggerFn;
+      }
+      if (onUntriggerFn) {
+        config.onUntrigger = onUntriggerFn;
+      }
+      window.tippy(el, config); 
+    }
+    const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+    for (var i=0; i<noterefs.length; i++) {
+      const ref = noterefs[i];
+      tippyHover(ref, function() {
+        // use id or data attribute instead here
+        let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+        try { href = new URL(href).hash; } catch {}
+        const id = href.replace(/^#\/?/, "");
+        const note = window.document.getElementById(id);
+        if (note) {
+          return note.innerHTML;
+        } else {
+          return "";
+        }
+      });
+    }
+    const xrefs = window.document.querySelectorAll('a.quarto-xref');
+    const processXRef = (id, note) => {
+      // Strip column container classes
+      const stripColumnClz = (el) => {
+        el.classList.remove("page-full", "page-columns");
+        if (el.children) {
+          for (const child of el.children) {
+            stripColumnClz(child);
+          }
+        }
+      }
+      stripColumnClz(note)
+      if (id === null || id.startsWith('sec-')) {
+        // Special case sections, only their first couple elements
+        const container = document.createElement("div");
+        if (note.children && note.children.length > 2) {
+          container.appendChild(note.children[0].cloneNode(true));
+          for (let i = 1; i < note.children.length; i++) {
+            const child = note.children[i];
+            if (child.tagName === "P" && child.innerText === "") {
+              continue;
+            } else {
+              container.appendChild(child.cloneNode(true));
+              break;
+            }
+          }
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(container);
+          }
+          return container.innerHTML
+        } else {
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(note);
+          }
+          return note.innerHTML;
+        }
+      } else {
+        // Remove any anchor links if they are present
+        const anchorLink = note.querySelector('a.anchorjs-link');
+        if (anchorLink) {
+          anchorLink.remove();
+        }
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(note);
+        }
+        if (note.classList.contains("callout")) {
+          return note.outerHTML;
+        } else {
+          return note.innerHTML;
+        }
+      }
+    }
+    for (var i=0; i<xrefs.length; i++) {
+      const xref = xrefs[i];
+      tippyHover(xref, undefined, function(instance) {
+        instance.disable();
+        let url = xref.getAttribute('href');
+        let hash = undefined; 
+        if (url.startsWith('#')) {
+          hash = url;
+        } else {
+          try { hash = new URL(url).hash; } catch {}
+        }
+        if (hash) {
+          const id = hash.replace(/^#\/?/, "");
+          const note = window.document.getElementById(id);
+          if (note !== null) {
+            try {
+              const html = processXRef(id, note.cloneNode(true));
+              instance.setContent(html);
+            } finally {
+              instance.enable();
+              instance.show();
+            }
+          } else {
+            // See if we can fetch this
+            fetch(url.split('#')[0])
+            .then(res => res.text())
+            .then(html => {
+              const parser = new DOMParser();
+              const htmlDoc = parser.parseFromString(html, "text/html");
+              const note = htmlDoc.getElementById(id);
+              if (note !== null) {
+                const html = processXRef(id, note);
+                instance.setContent(html);
+              } 
+            }).finally(() => {
+              instance.enable();
+              instance.show();
+            });
+          }
+        } else {
+          // See if we can fetch a full url (with no hash to target)
+          // This is a special case and we should probably do some content thinning / targeting
+          fetch(url)
+          .then(res => res.text())
+          .then(html => {
+            const parser = new DOMParser();
+            const htmlDoc = parser.parseFromString(html, "text/html");
+            const note = htmlDoc.querySelector('main.content');
+            if (note !== null) {
+              // This should only happen for chapter cross references
+              // (since there is no id in the URL)
+              // remove the first header
+              if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
+                note.children[0].remove();
+              }
+              const html = processXRef(null, note);
+              instance.setContent(html);
+            } 
+          }).finally(() => {
+            instance.enable();
+            instance.show();
+          });
+        }
+      }, function(instance) {
+      });
+    }
+        let selectedAnnoteEl;
+        const selectorForAnnotation = ( cell, annotation) => {
+          let cellAttr = 'data-code-cell="' + cell + '"';
+          let lineAttr = 'data-code-annotation="' +  annotation + '"';
+          const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+          return selector;
+        }
+        const selectCodeLines = (annoteEl) => {
+          const doc = window.document;
+          const targetCell = annoteEl.getAttribute("data-target-cell");
+          const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+          const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+          const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+          const lineIds = lines.map((line) => {
+            return targetCell + "-" + line;
+          })
+          let top = null;
+          let height = null;
+          let parent = null;
+          if (lineIds.length > 0) {
+              //compute the position of the single el (top and bottom and make a div)
+              const el = window.document.getElementById(lineIds[0]);
+              top = el.offsetTop;
+              height = el.offsetHeight;
+              parent = el.parentElement.parentElement;
+            if (lineIds.length > 1) {
+              const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+              const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+              height = bottom - top;
+            }
+            if (top !== null && height !== null && parent !== null) {
+              // cook up a div (if necessary) and position it 
+              let div = window.document.getElementById("code-annotation-line-highlight");
+              if (div === null) {
+                div = window.document.createElement("div");
+                div.setAttribute("id", "code-annotation-line-highlight");
+                div.style.position = 'absolute';
+                parent.appendChild(div);
+              }
+              div.style.top = top - 2 + "px";
+              div.style.height = height + 4 + "px";
+              div.style.left = 0;
+              let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+              if (gutterDiv === null) {
+                gutterDiv = window.document.createElement("div");
+                gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+                gutterDiv.style.position = 'absolute';
+                const codeCell = window.document.getElementById(targetCell);
+                const gutter = codeCell.querySelector('.code-annotation-gutter');
+                gutter.appendChild(gutterDiv);
+              }
+              gutterDiv.style.top = top - 2 + "px";
+              gutterDiv.style.height = height + 4 + "px";
+            }
+            selectedAnnoteEl = annoteEl;
+          }
+        };
+        const unselectCodeLines = () => {
+          const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+          elementsIds.forEach((elId) => {
+            const div = window.document.getElementById(elId);
+            if (div) {
+              div.remove();
+            }
+          });
+          selectedAnnoteEl = undefined;
+        };
+          // Handle positioning of the toggle
+      window.addEventListener(
+        "resize",
+        throttle(() => {
+          elRect = undefined;
+          if (selectedAnnoteEl) {
+            selectCodeLines(selectedAnnoteEl);
+          }
+        }, 10)
+      );
+      function throttle(fn, ms) {
+      let throttle = false;
+      let timer;
+        return (...args) => {
+          if(!throttle) { // first call gets through
+              fn.apply(this, args);
+              throttle = true;
+          } else { // all the others get throttled
+              if(timer) clearTimeout(timer); // cancel #2
+              timer = setTimeout(() => {
+                fn.apply(this, args);
+                timer = throttle = false;
+              }, ms);
+          }
+        };
+      }
+        // Attach click handler to the DT
+        const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+        for (const annoteDlNode of annoteDls) {
+          annoteDlNode.addEventListener('click', (event) => {
+            const clickedEl = event.target;
+            if (clickedEl !== selectedAnnoteEl) {
+              unselectCodeLines();
+              const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+              if (activeEl) {
+                activeEl.classList.remove('code-annotation-active');
+              }
+              selectCodeLines(clickedEl);
+              clickedEl.classList.add('code-annotation-active');
+            } else {
+              // Unselect the line
+              unselectCodeLines();
+              clickedEl.classList.remove('code-annotation-active');
+            }
+          });
+        }
+    const findCites = (el) => {
+      const parentEl = el.parentElement;
+      if (parentEl) {
+        const cites = parentEl.dataset.cites;
+        if (cites) {
+          return {
+            el,
+            cites: cites.split(' ')
+          };
+        } else {
+          return findCites(el.parentElement)
+        }
+      } else {
+        return undefined;
+      }
+    };
+    var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+    for (var i=0; i<bibliorefs.length; i++) {
+      const ref = bibliorefs[i];
+      const citeInfo = findCites(ref);
+      if (citeInfo) {
+        tippyHover(citeInfo.el, function() {
+          var popup = window.document.createElement('div');
+          citeInfo.cites.forEach(function(cite) {
+            var citeDiv = window.document.createElement('div');
+            citeDiv.classList.add('hanging-indent');
+            citeDiv.classList.add('csl-entry');
+            var biblioDiv = window.document.getElementById('ref-' + cite);
+            if (biblioDiv) {
+              citeDiv.innerHTML = biblioDiv.innerHTML;
+            }
+            popup.appendChild(citeDiv);
+          });
+          return popup.innerHTML;
+        });
+      }
+    }
+  });
+  </script>
+<nav class="page-navigation">
+  <div class="nav-page nav-page-previous">
+      <a href="../part04-extending/13-plugins.html" class="pagination-link" aria-label="Plugins">
+        <i class="bi bi-arrow-left-short"></i> <span class="nav-page-text"><span class="chapter-number">13</span>&nbsp; <span class="chapter-title">Plugins</span></span>
+      </a>          
+  </div>
+  <div class="nav-page nav-page-next">
+      <a href="../part04-extending/15-limitations-and-troubleshooting.html" class="pagination-link" aria-label="Limitations and troubleshooting">
+        <span class="nav-page-text"><span class="chapter-number">15</span>&nbsp; <span class="chapter-title">Limitations and troubleshooting</span></span> <i class="bi bi-arrow-right-short"></i>
+      </a>
+  </div>
+</nav>
+</div> <!-- /content -->
+
+
+
+
+</body></html>

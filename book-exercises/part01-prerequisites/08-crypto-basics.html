@@ -26,41 +26,6 @@ ul.task-list li input[type="checkbox"] {
   margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
   vertical-align: middle;
 }
-/* CSS for syntax highlighting */
-html { -webkit-text-size-adjust: 100%; }
-pre > code.sourceCode { white-space: pre; position: relative; }
-pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
-pre > code.sourceCode > span:empty { height: 1.2em; }
-.sourceCode { overflow: visible; }
-code.sourceCode > span { color: inherit; text-decoration: inherit; }
-div.sourceCode { margin: 1em 0; }
-pre.sourceCode { margin: 0; }
-@media screen {
-div.sourceCode { overflow: auto; }
-}
-@media print {
-pre > code.sourceCode { white-space: pre-wrap; }
-pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
-}
-pre.numberSource code
-  { counter-reset: source-line 0; }
-pre.numberSource code > span
-  { position: relative; left: -4em; counter-increment: source-line; }
-pre.numberSource code > span > a:first-child::before
-  { content: counter(source-line);
-    position: relative; left: -1em; text-align: right; vertical-align: baseline;
-    border: none; display: inline-block;
-    -webkit-touch-callout: none; -webkit-user-select: none;
-    -khtml-user-select: none; -moz-user-select: none;
-    -ms-user-select: none; user-select: none;
-    padding: 0 4px; width: 4em;
-  }
-pre.numberSource { margin-left: 3em;  padding-left: 4px; }
-div.sourceCode
-  {   }
-@media screen {
-pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
-}
 </style>
 
 
@@ -485,7 +450,7 @@ window.Quarto = {
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../part05-dp-ml/05-private-prediction.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">42</span>&nbsp; <span class="chapter-title">Exercises: Private prediction</span></span></a>
+ <span class="menu-text"><span class="chapter-number">42</span>&nbsp; <span class="chapter-title">Exercises: Private prediction: PATE and in-context learning</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
@@ -536,15 +501,15 @@ window.Quarto = {
     <h2 id="toc-title">Table of contents</h2>
    
   <ul>
-  <li><a href="#sec-sol-crypto-basics-1" id="toc-sec-sol-crypto-basics-1" class="nav-link active" data-scroll-target="#sec-sol-crypto-basics-1"><span class="header-section-number">8.1</span> Which are negligible?</a></li>
-  <li><a href="#sec-sol-crypto-basics-2" id="toc-sec-sol-crypto-basics-2" class="nav-link" data-scroll-target="#sec-sol-crypto-basics-2"><span class="header-section-number">8.2</span> Hybrids for TV</a></li>
-  <li><a href="#sec-sol-crypto-basics-3" id="toc-sec-sol-crypto-basics-3" class="nav-link" data-scroll-target="#sec-sol-crypto-basics-3"><span class="header-section-number">8.3</span> The best threshold</a></li>
-  <li><a href="#sec-sol-crypto-basics-4" id="toc-sec-sol-crypto-basics-4" class="nav-link" data-scroll-target="#sec-sol-crypto-basics-4"><span class="header-section-number">8.4</span> Birthday for 32 bits</a></li>
-  <li><a href="#sec-sol-crypto-basics-5" id="toc-sec-sol-crypto-basics-5" class="nav-link" data-scroll-target="#sec-sol-crypto-basics-5"><span class="header-section-number">8.5</span> Two-time pad</a></li>
-  <li><a href="#sec-sol-crypto-basics-6" id="toc-sec-sol-crypto-basics-6" class="nav-link" data-scroll-target="#sec-sol-crypto-basics-6"><span class="header-section-number">8.6</span> Toy GGM</a></li>
-  <li><a href="#sec-sol-crypto-basics-7" id="toc-sec-sol-crypto-basics-7" class="nav-link" data-scroll-target="#sec-sol-crypto-basics-7"><span class="header-section-number">8.7</span> Threshold sharing</a></li>
-  <li><a href="#sec-sol-crypto-basics-8" id="toc-sec-sol-crypto-basics-8" class="nav-link" data-scroll-target="#sec-sol-crypto-basics-8"><span class="header-section-number">8.8</span> Regev’s budget</a></li>
-  <li><a href="#sec-sol-crypto-basics-9" id="toc-sec-sol-crypto-basics-9" class="nav-link" data-scroll-target="#sec-sol-crypto-basics-9"><span class="header-section-number">8.9</span> Odd modulus</a></li>
+  <li><a href="#sec-sol-crypto-1" id="toc-sec-sol-crypto-1" class="nav-link active" data-scroll-target="#sec-sol-crypto-1"><span class="header-section-number">8.1</span> Which are negligible?</a></li>
+  <li><a href="#sec-sol-crypto-2" id="toc-sec-sol-crypto-2" class="nav-link" data-scroll-target="#sec-sol-crypto-2"><span class="header-section-number">8.2</span> Hybrids for TV</a></li>
+  <li><a href="#sec-sol-crypto-3" id="toc-sec-sol-crypto-3" class="nav-link" data-scroll-target="#sec-sol-crypto-3"><span class="header-section-number">8.3</span> The best threshold</a></li>
+  <li><a href="#sec-sol-crypto-4" id="toc-sec-sol-crypto-4" class="nav-link" data-scroll-target="#sec-sol-crypto-4"><span class="header-section-number">8.4</span> Birthday for 32 bits</a></li>
+  <li><a href="#sec-sol-crypto-5" id="toc-sec-sol-crypto-5" class="nav-link" data-scroll-target="#sec-sol-crypto-5"><span class="header-section-number">8.5</span> Two-time pad</a></li>
+  <li><a href="#sec-sol-crypto-6" id="toc-sec-sol-crypto-6" class="nav-link" data-scroll-target="#sec-sol-crypto-6"><span class="header-section-number">8.6</span> Toy GGM</a></li>
+  <li><a href="#sec-sol-crypto-7" id="toc-sec-sol-crypto-7" class="nav-link" data-scroll-target="#sec-sol-crypto-7"><span class="header-section-number">8.7</span> Threshold sharing</a></li>
+  <li><a href="#sec-sol-crypto-8" id="toc-sec-sol-crypto-8" class="nav-link" data-scroll-target="#sec-sol-crypto-8"><span class="header-section-number">8.8</span> Regev’s budget</a></li>
+  <li><a href="#sec-sol-crypto-9" id="toc-sec-sol-crypto-9" class="nav-link" data-scroll-target="#sec-sol-crypto-9"><span class="header-section-number">8.9</span> Odd modulus</a></li>
   </ul>
 </nav>
     </div>
@@ -571,8 +536,8 @@ window.Quarto = {
 
 
 <p>Exercises for <a href="../../book-full/part01-prerequisites/08-crypto-basics.html">Cryptography basics</a>, each with a worked solution. Try each exercise before opening its solution. The numbers below, from the total variation (TV) distances of the coin distinguisher to the toy pseudorandom function (PRF) and the learning with errors (LWE) noise budget, come from <code>uv run python code/part01-prerequisites/solutions_crypto_basics.py</code> (seed 0).</p>
-<section id="sec-sol-crypto-basics-1" class="level2" data-number="8.1">
-<h2 data-number="8.1" class="anchored" data-anchor-id="sec-sol-crypto-basics-1"><span class="header-section-number">8.1</span> Which are negligible?</h2>
+<section id="sec-sol-crypto-1" class="level2" data-number="8.1">
+<h2 data-number="8.1" class="anchored" data-anchor-id="sec-sol-crypto-1"><span class="header-section-number">8.1</span> Which are negligible?</h2>
 <blockquote class="blockquote">
 <p><strong>Exercise 1.</strong> <strong>Which are negligible?</strong> Decide for <span class="math inline">\(\lambda^{-\log_2\log_2\lambda}\)</span>, <span class="math inline">\(2^{-(\log_2\lambda)^2}\)</span>, <span class="math inline">\(1/\lambda^{100}\)</span> and <span class="math inline">\(\mu(\lambda) = 2^{-\lambda}\)</span> for even and <span class="math inline">\(\lambda^{-2}\)</span> for odd <span class="math inline">\(\lambda\)</span>. <em>Check: yes, yes, no, no.</em> <em>(Negligible functions)</em></p>
 </blockquote>
@@ -609,10 +574,10 @@ window.Quarto = {
 </div>
 </div>
 </section>
-<section id="sec-sol-crypto-basics-2" class="level2" data-number="8.2">
-<h2 data-number="8.2" class="anchored" data-anchor-id="sec-sol-crypto-basics-2"><span class="header-section-number">8.2</span> Hybrids for TV</h2>
+<section id="sec-sol-crypto-2" class="level2" data-number="8.2">
+<h2 data-number="8.2" class="anchored" data-anchor-id="sec-sol-crypto-2"><span class="header-section-number">8.2</span> Hybrids for TV</h2>
 <blockquote class="blockquote">
-<p><strong>Exercise 2.</strong> <strong>Hybrids for TV.</strong> Prove <span class="math inline">\(\mathrm{TV}(P^{\otimes m}, Q^{\otimes m}) \le m\,\mathrm{TV}(P, Q)\)</span> directly with the chain <span class="math inline">\(H_i\)</span> and Fact 3. Then show that for two coins the true value grows like <span class="math inline">\(\sqrt m\)</span> when <span class="math inline">\(\mathrm{TV}(P, Q)\)</span> is small. <em>(Hybrid argument)</em></p>
+<p><strong>Exercise 2.</strong> <strong>Hybrids for TV.</strong> Prove <span class="math inline">\(\mathrm{TV}(P_0^{\otimes m}, P_1^{\otimes m}) \le m\,\mathrm{TV}(P_0, P_1)\)</span> directly with the chain <span class="math inline">\(H_i\)</span> and Fact 3. Then show that for two coins the true value grows like <span class="math inline">\(\sqrt m\)</span> when <span class="math inline">\(\mathrm{TV}(P_0, P_1)\)</span> is small. <em>(Hybrid argument)</em></p>
 </blockquote>
 <div class="callout callout-style-default callout-tip callout-titled" title="Solution">
 <div class="callout-header d-flex align-content-center collapsed" data-bs-toggle="collapse" data-bs-target=".callout-2-contents" aria-controls="callout-2" aria-expanded="false" aria-label="Toggle callout">
@@ -628,21 +593,21 @@ window.Quarto = {
 <div class="callout-body-container callout-body">
 <p><strong>The bound.</strong> <span class="math inline">\(\mathrm{TV}\)</span> is the TV distance of Fact 2.</p>
 <ol type="1">
-<li><strong>Hybrids.</strong> Let <span class="math inline">\(H_i = (Q_1, \dots, Q_i, P_{i+1}, \dots, P_m)\)</span>: <span class="math inline">\(m\)</span> independent entries, the first <span class="math inline">\(i\)</span> drawn from <span class="math inline">\(Q\)</span> and the rest from <span class="math inline">\(P\)</span>. Then <span class="math inline">\(H_0 = P^{\otimes m}\)</span> and <span class="math inline">\(H_m = Q^{\otimes m}\)</span>.</li>
-<li><strong>Fix a distinguisher.</strong> Let <span class="math inline">\(A\)</span> be any distinguisher on <span class="math inline">\(m\)</span>-tuples, randomized or not, with no limit on its running time.</li>
-<li><strong>One step changes one entry.</strong> <span class="math inline">\(H_{i-1}\)</span> and <span class="math inline">\(H_i\)</span> differ only in entry <span class="math inline">\(i\)</span>: <span class="math inline">\(P\)</span> in <span class="math inline">\(H_{i-1}\)</span>, <span class="math inline">\(Q\)</span> in <span class="math inline">\(H_i\)</span>. The other <span class="math inline">\(m - 1\)</span> entries have the same distribution in both, and are independent of entry <span class="math inline">\(i\)</span>. Condition on their values <span class="math inline">\(w\)</span>. Then <span class="math inline">\(A(\dots)\)</span> becomes a distinguisher <span class="math inline">\(A_w\)</span> that sees only entry <span class="math inline">\(i\)</span>, so by Fact 2 <span id="eq-auto-08cryptobasics-1"><span class="math display">\[\big|\Pr[A(H_{i-1}) = 1 \mid w] - \Pr[A(H_i) = 1 \mid w]\big| = \mathrm{Adv}_{A_w}(P, Q) \le \mathrm{TV}(P, Q). \tag{8.1}\]</span></span></li>
-<li><strong>Average over <span class="math inline">\(w\)</span>.</strong> The two conditional probabilities are averaged with the same weights in both hybrids, so the triangle inequality gives <span class="math inline">\(\mathrm{Adv}_A(H_{i-1}, H_i) \le \mathrm{TV}(P, Q)\)</span>.</li>
-<li><strong>Chain.</strong> By Fact 3, <span class="math inline">\(\mathrm{Adv}_A(H_0, H_m) \le \sum_{i=1}^m\mathrm{Adv}_A(H_{i-1}, H_i) \le m\,\mathrm{TV}(P, Q)\)</span>.</li>
-<li><strong>Take the best <span class="math inline">\(A\)</span>.</strong> By Fact 2 the best unbounded distinguisher attains <span class="math inline">\(\mathrm{TV}(H_0, H_m)\)</span>. Step 5 holds for it too, so <span class="math inline">\(\mathrm{TV}(P^{\otimes m}, Q^{\otimes m}) \le m\,\mathrm{TV}(P, Q)\)</span>.</li>
+<li><strong>Hybrids.</strong> Let <span class="math inline">\(H_i = (V_1, \dots, V_i, U_{i+1}, \dots, U_m)\)</span>: <span class="math inline">\(m\)</span> independent entries, the first <span class="math inline">\(i\)</span> drawn from <span class="math inline">\(P_1\)</span> and the rest from <span class="math inline">\(P_0\)</span>. Then <span class="math inline">\(H_0 = P_0^{\otimes m}\)</span> and <span class="math inline">\(H_m = P_1^{\otimes m}\)</span>.</li>
+<li><strong>Fix a distinguisher.</strong> Let <span class="math inline">\(\mathcal A\)</span> be any distinguisher on <span class="math inline">\(m\)</span>-tuples, randomized or not, with no limit on its running time.</li>
+<li><strong>One step changes one entry.</strong> <span class="math inline">\(H_{i-1}\)</span> and <span class="math inline">\(H_i\)</span> differ only in entry <span class="math inline">\(i\)</span>: <span class="math inline">\(P_0\)</span> in <span class="math inline">\(H_{i-1}\)</span>, <span class="math inline">\(P_1\)</span> in <span class="math inline">\(H_i\)</span>. The other <span class="math inline">\(m - 1\)</span> entries have the same distribution in both, and are independent of entry <span class="math inline">\(i\)</span>. Condition on their values <span class="math inline">\(w\)</span>. Then <span class="math inline">\(\mathcal A(\dots)\)</span> becomes a distinguisher <span class="math inline">\(\mathcal \mathcal A_w\)</span> that sees only entry <span class="math inline">\(i\)</span>, so by Fact 2 <span id="eq-auto-08cryptobasics-1"><span class="math display">\[\big|\Pr[\mathcal A(H_{i-1}) = 1 \mid w] - \Pr[\mathcal A(H_i) = 1 \mid w]\big| = \mathrm{Adv}_{\mathcal \mathcal A_w}(P_0, P_1) \le \mathrm{TV}(P_0, P_1). \tag{8.1}\]</span></span></li>
+<li><strong>Average over <span class="math inline">\(w\)</span>.</strong> The two conditional probabilities are averaged with the same weights in both hybrids, so the triangle inequality gives <span class="math inline">\(\mathrm{Adv}_{\mathcal A}(H_{i-1}, H_i) \le \mathrm{TV}(P_0, P_1)\)</span>.</li>
+<li><strong>Chain.</strong> By Fact 3, <span class="math inline">\(\mathrm{Adv}_{\mathcal A}(H_0, H_m) \le \sum_{i=1}^m\mathrm{Adv}_{\mathcal A}(H_{i-1}, H_i) \le m\,\mathrm{TV}(P_0, P_1)\)</span>.</li>
+<li><strong>Take the best <span class="math inline">\(\mathcal A\)</span>.</strong> By Fact 2 the best unbounded distinguisher attains <span class="math inline">\(\mathrm{TV}(H_0, H_m)\)</span>. Step 5 holds for it too, so <span class="math inline">\(\mathrm{TV}(P_0^{\otimes m}, P_1^{\otimes m}) \le m\,\mathrm{TV}(P_0, P_1)\)</span>.</li>
 </ol>
-<p><strong>The true growth for two coins.</strong> Let <span class="math inline">\(P\)</span> be a coin with heads probability <span class="math inline">\(\frac12 + \delta\)</span> and <span class="math inline">\(Q\)</span> a fair coin, so <span class="math inline">\(\mathrm{TV}(P, Q) = \delta\)</span>.</p>
+<p><strong>The true growth for two coins.</strong> Let <span class="math inline">\(P_0\)</span> be a coin with heads probability <span class="math inline">\(\frac12 + \xi\)</span> and <span class="math inline">\(P_1\)</span> a fair coin, so <span class="math inline">\(\mathrm{TV}(P_0, P_1) = \xi\)</span>.</p>
 <ol type="1">
-<li><strong>Only the count matters.</strong> A sequence <span class="math inline">\(\omega\)</span> with <span class="math inline">\(k\)</span> heads has <span class="math inline">\(P^{\otimes m}(\omega) = (\frac12 + \delta)^k(\frac12 - \delta)^{m - k}\)</span> and <span class="math inline">\(Q^{\otimes m}(\omega) = 2^{-m}\)</span>, which depend on <span class="math inline">\(\omega\)</span> only through <span class="math inline">\(k\)</span>. In <span class="math inline">\(\mathrm{TV} = \frac12\sum_\omega|P^{\otimes m}(\omega) - Q^{\otimes m}(\omega)|\)</span> (<a href="../../book-full/part01-prerequisites/03-divergences.html#eq-tv">Equation&nbsp;3.20</a>), group the <span class="math inline">\(\binom mk\)</span> sequences with <span class="math inline">\(k\)</span> heads. Each group contributes <span class="math inline">\(\frac12|\mathrm{Bin}(m, \frac12 + \delta)(k) - \mathrm{Bin}(m, \frac12)(k)|\)</span>, so the TV distance between the tuples equals the TV distance between the two head counts.</li>
-<li><strong>Normal approximation.</strong> The biased count has mean <span class="math inline">\(\frac m2 + m\delta\)</span> and variance <span class="math inline">\(m(\frac14 - \delta^2) \approx \frac m4\)</span>. The fair count has mean <span class="math inline">\(\frac m2\)</span> and variance <span class="math inline">\(\frac m4\)</span>. For large <span class="math inline">\(m\)</span> both are close to normal with standard deviation <span class="math inline">\(\sigma = \sqrt m/2\)</span>.</li>
-<li><strong>TV between two normals.</strong> In <a href="../../book-full/part01-prerequisites/03-divergences.html">Divergences</a>, two normals with the same <span class="math inline">\(\sigma\)</span> and means <span class="math inline">\(s\)</span> apart have <span class="math inline">\(\mathrm{TV} = 2\Phi(\mu/2) - 1\)</span> with <span class="math inline">\(\mu = s/\sigma\)</span>. Here <span class="math inline">\(s = m\delta\)</span>, so <span class="math inline">\(\mu/2 = m\delta/\sqrt m = \delta\sqrt m\)</span> and <span id="eq-auto-08cryptobasics-2"><span class="math display">\[\mathrm{TV}(P^{\otimes m}, Q^{\otimes m}) \approx 2\Phi(\delta\sqrt m) - 1. \tag{8.2}\]</span></span></li>
-<li><strong>Small argument.</strong> Near 0, <span class="math inline">\(\Phi(x) \approx \frac12 + x\varphi(0)\)</span> with <span class="math inline">\(\varphi(0) = 1/\sqrt{2\pi}\)</span>. So while <span class="math inline">\(\delta\sqrt m\)</span> is small, <span class="math inline">\(\mathrm{TV} \approx \sqrt{2/\pi}\,\delta\sqrt m \approx 0.80\,\delta\sqrt m\)</span>: it grows like <span class="math inline">\(\sqrt m\)</span>, not like <span class="math inline">\(m\)</span>.</li>
+<li><strong>Only the count matters.</strong> A sequence <span class="math inline">\(\omega\)</span> with <span class="math inline">\(k\)</span> heads has <span class="math inline">\(P_0^{\otimes m}(\omega) = (\frac12 + \xi)^k(\frac12 - \xi)^{m - k}\)</span> and <span class="math inline">\(P_1^{\otimes m}(\omega) = 2^{-m}\)</span>, which depend on <span class="math inline">\(\omega\)</span> only through <span class="math inline">\(k\)</span>. In <span class="math inline">\(\mathrm{TV} = \frac12\sum_\omega|P_0^{\otimes m}(\omega) - P_1^{\otimes m}(\omega)|\)</span> (<a href="../../book-full/part01-prerequisites/03-divergences.html#eq-tv">Equation&nbsp;3.20</a>), group the <span class="math inline">\(\binom mk\)</span> sequences with <span class="math inline">\(k\)</span> heads. Each group contributes <span class="math inline">\(\frac12|\mathrm{Bin}(m, \frac12 + \xi)(k) - \mathrm{Bin}(m, \frac12)(k)|\)</span>, so the TV distance between the tuples equals the TV distance between the two head counts.</li>
+<li><strong>Normal approximation.</strong> The biased count has mean <span class="math inline">\(\frac m2 + m\xi\)</span> and variance <span class="math inline">\(m(\frac14 - \xi^2) \approx \frac m4\)</span>. The fair count has mean <span class="math inline">\(\frac m2\)</span> and variance <span class="math inline">\(\frac m4\)</span>. For large <span class="math inline">\(m\)</span> both are close to normal with standard deviation <span class="math inline">\(\sigma = \sqrt m/2\)</span>.</li>
+<li><strong>TV between two normals.</strong> In <a href="../../book-full/part01-prerequisites/03-divergences.html">Divergences</a>, two normals with the same <span class="math inline">\(\sigma\)</span> and means <span class="math inline">\(s\)</span> apart have <span class="math inline">\(\mathrm{TV} = 2\Phi(\mu/2) - 1\)</span> with <span class="math inline">\(\mu = s/\sigma\)</span>. Here <span class="math inline">\(s = m\xi\)</span>, so <span class="math inline">\(\mu/2 = m\xi/\sqrt m = \xi\sqrt m\)</span> and <span id="eq-auto-08cryptobasics-2"><span class="math display">\[\mathrm{TV}(P_0^{\otimes m}, P_1^{\otimes m}) \approx 2\Phi(\xi\sqrt m) - 1. \tag{8.2}\]</span></span></li>
+<li><strong>Small argument.</strong> Near 0, <span class="math inline">\(\Phi(x) \approx \frac12 + x\varphi(0)\)</span> with <span class="math inline">\(\varphi(0) = 1/\sqrt{2\pi}\)</span>. So while <span class="math inline">\(\xi\sqrt m\)</span> is small, <span class="math inline">\(\mathrm{TV} \approx \sqrt{2/\pi}\,\xi\sqrt m \approx 0.80\,\xi\sqrt m\)</span>: it grows like <span class="math inline">\(\sqrt m\)</span>, not like <span class="math inline">\(m\)</span>.</li>
 </ol>
-<p><a href="#tbl-sol-crypto-basics-tv" class="quarto-xref">Table&nbsp;<span>8.1</span></a> compares the exact TV distance with both approximations and with the hybrid bound, for <span class="math inline">\(\delta = 0.01\)</span>.</p>
+<p><a href="#tbl-sol-crypto-basics-tv" class="quarto-xref">Table&nbsp;<span>8.1</span></a> compares the exact TV distance with both approximations and with the hybrid bound, for <span class="math inline">\(\xi = 0.01\)</span>.</p>
 <div id="tbl-sol-crypto-basics-tv" class="quarto-float quarto-figure quarto-figure-center anchored">
 <figure class="quarto-float quarto-float-tbl figure">
 <figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl" id="tbl-sol-crypto-basics-tv-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
@@ -661,9 +626,9 @@ Table&nbsp;8.1: TV distance between <span class="math inline">\(m\)</span> flips
 <tr class="header">
 <th>Flips <span class="math inline">\(m\)</span></th>
 <th>Exact TV</th>
-<th><span class="math inline">\(2\Phi(\delta\sqrt m) - 1\)</span></th>
-<th><span class="math inline">\(\sqrt{2/\pi}\,\delta\sqrt m\)</span></th>
-<th>Hybrid bound <span class="math inline">\(\min(1, m\delta)\)</span></th>
+<th><span class="math inline">\(2\Phi(\xi\sqrt m) - 1\)</span></th>
+<th><span class="math inline">\(\sqrt{2/\pi}\,\xi\sqrt m\)</span></th>
+<th>Hybrid bound <span class="math inline">\(\min(1, m\xi)\)</span></th>
 </tr>
 </thead>
 <tbody>
@@ -707,16 +672,16 @@ Table&nbsp;8.1: TV distance between <span class="math inline">\(m\)</span> flips
 </div>
 </figure>
 </div>
-<p>Each fourfold increase in <span class="math inline">\(m\)</span> (100 to 400) doubles the TV distance, as <span class="math inline">\(\sqrt m\)</span> predicts. The normal approximation is poor only at <span class="math inline">\(m = 1\)</span>, where the count is a single coin flip and the bound <span class="math inline">\(m\delta\)</span> is exact. The linear form overshoots once <span class="math inline">\(\delta\sqrt m\)</span> is no longer small, because <span class="math inline">\(2\Phi(x) - 1\)</span> bends over towards 1.</p>
+<p>Each fourfold increase in <span class="math inline">\(m\)</span> (100 to 400) doubles the TV distance, as <span class="math inline">\(\sqrt m\)</span> predicts. The normal approximation is poor only at <span class="math inline">\(m = 1\)</span>, where the count is a single coin flip and the bound <span class="math inline">\(m\xi\)</span> is exact. The linear form overshoots once <span class="math inline">\(\xi\sqrt m\)</span> is no longer small, because <span class="math inline">\(2\Phi(x) - 1\)</span> bends over towards 1.</p>
 <p><em>The hybrid bound is tight for one sample and loose by a factor of order <span class="math inline">\(\sqrt m\)</span> afterwards, because the per-step losses in Fact 3 do not add up in the same direction.</em></p>
 </div>
 </div>
 </div>
 </section>
-<section id="sec-sol-crypto-basics-3" class="level2" data-number="8.3">
-<h2 data-number="8.3" class="anchored" data-anchor-id="sec-sol-crypto-basics-3"><span class="header-section-number">8.3</span> The best threshold</h2>
+<section id="sec-sol-crypto-3" class="level2" data-number="8.3">
+<h2 data-number="8.3" class="anchored" data-anchor-id="sec-sol-crypto-3"><span class="header-section-number">8.3</span> The best threshold</h2>
 <blockquote class="blockquote">
-<p><strong>Exercise 3.</strong> <strong>The best threshold.</strong> For <span class="math inline">\(m\)</span> flips of a <span class="math inline">\((\frac12 + \delta)\)</span>-coin against a fair coin, show that the likelihood ratio is increasing in the number of heads, so the best test is a threshold, and find where the two binomial probabilities cross. <em>Check: about <span class="math inline">\(m/2 + m\delta/2\)</span>; for <span class="math inline">\(m = 10{,}000\)</span> and <span class="math inline">\(\delta = 0.01\)</span> the best advantage is 0.683.</em> <em>(Distinguishers and TV)</em></p>
+<p><strong>Exercise 3.</strong> <strong>The best threshold.</strong> For <span class="math inline">\(m\)</span> flips of a <span class="math inline">\((\frac12 + \xi)\)</span>-coin against a fair coin, show that the likelihood ratio is increasing in the number of heads, so the best test is a threshold, and find where the two binomial probabilities cross. <em>Check: about <span class="math inline">\(m/2 + m\xi/2\)</span>; for <span class="math inline">\(m = 10{,}000\)</span> and <span class="math inline">\(\xi = 0.01\)</span> the best advantage is 0.683.</em> <em>(Distinguishers and TV)</em></p>
 </blockquote>
 <div class="callout callout-style-default callout-tip callout-titled" title="Solution">
 <div class="callout-header d-flex align-content-center collapsed" data-bs-toggle="collapse" data-bs-target=".callout-3-contents" aria-controls="callout-3" aria-expanded="false" aria-label="Toggle callout">
@@ -731,13 +696,13 @@ Table&nbsp;8.1: TV distance between <span class="math inline">\(m\)</span> flips
 <div id="callout-3" class="callout-3-contents callout-collapse collapse">
 <div class="callout-body-container callout-body">
 <ol type="1">
-<li><strong>Likelihood ratio.</strong> For a sequence with <span class="math inline">\(k\)</span> heads, divide the two probabilities from Exercise 2: <span id="eq-auto-08cryptobasics-3"><span class="math display">\[L(k) = \frac{(\frac12 + \delta)^k(\frac12 - \delta)^{m - k}}{2^{-m}} = (1 + 2\delta)^k(1 - 2\delta)^{m - k}. \tag{8.3}\]</span></span></li>
-<li><strong>It increases in <span class="math inline">\(k\)</span>.</strong> One more head multiplies it by <span class="math inline">\(L(k + 1)/L(k) = (1 + 2\delta)/(1 - 2\delta) &gt; 1\)</span> for <span class="math inline">\(\delta &gt; 0\)</span>.</li>
+<li><strong>Likelihood ratio.</strong> For a sequence with <span class="math inline">\(k\)</span> heads, divide the two probabilities from Exercise 2: <span id="eq-auto-08cryptobasics-3"><span class="math display">\[L(k) = \frac{(\frac12 + \xi)^k(\frac12 - \xi)^{m - k}}{2^{-m}} = (1 + 2\xi)^k(1 - 2\xi)^{m - k}. \tag{8.3}\]</span></span></li>
+<li><strong>It increases in <span class="math inline">\(k\)</span>.</strong> One more head multiplies it by <span class="math inline">\(L(k + 1)/L(k) = (1 + 2\xi)/(1 - 2\xi) &gt; 1\)</span> for <span class="math inline">\(\xi &gt; 0\)</span>.</li>
 <li><strong>The best test is a threshold.</strong> By Fact 2, the best distinguisher outputs 1 exactly where the biased coin’s probability is larger, that is where <span class="math inline">\(L(k) &gt; 1\)</span>. Since <span class="math inline">\(L\)</span> increases, this set is <span class="math inline">\(\{k &gt; k^*\}\)</span> for the <span class="math inline">\(k^*\)</span> with <span class="math inline">\(L(k^*) = 1\)</span>.</li>
-<li><strong>Where the binomials cross.</strong> The binomial probabilities are <span class="math inline">\(\binom mk\)</span> times the sequence probabilities. The factor <span class="math inline">\(\binom mk\)</span> is the same for both, so they cross at the same <span class="math inline">\(k^*\)</span>. Take logarithms of <span class="math inline">\(L(k^*) = 1\)</span>: <span id="eq-auto-08cryptobasics-4"><span class="math display">\[k^*\ln(1 + 2\delta) + (m - k^*)\ln(1 - 2\delta) = 0 \quad\Longrightarrow\quad k^* = m\,\frac{-\ln(1 - 2\delta)}{\ln(1 + 2\delta) - \ln(1 - 2\delta)}. \tag{8.4}\]</span></span></li>
-<li><strong>Expand for small <span class="math inline">\(\delta\)</span>.</strong> With <span class="math inline">\(u = 2\delta\)</span>, <span class="math inline">\(-\ln(1 - u) = u + \frac{u^2}2 + \frac{u^3}3 + \dots\)</span> and <span class="math inline">\(\ln(1 + u) - \ln(1 - u) = 2u + \frac{2u^3}3 + \dots\)</span>. The ratio is <span id="eq-auto-08cryptobasics-5"><span class="math display">\[\frac{1 + \frac u2 + \frac{u^2}3}{2(1 + \frac{u^2}3)} = \frac12 + \frac u4 + O(u^3) = \frac12 + \frac\delta2 + O(\delta^3). \tag{8.5}\]</span></span> So <span class="math inline">\(k^* = \frac m2 + \frac{m\delta}2 + O(m\delta^3)\)</span>: halfway between the fair mean <span class="math inline">\(\frac m2\)</span> and the biased mean <span class="math inline">\(\frac m2 + m\delta\)</span>.</li>
-<li><strong>The numbers.</strong> For <span class="math inline">\(m = 10{,}000\)</span> and <span class="math inline">\(\delta = 0.01\)</span>, the exact crossing is <span class="math inline">\(k^* = 5050.0033\)</span>, against <span class="math inline">\(m/2 + m\delta/2 = 5050\)</span>. The test “output 1 iff <span class="math inline">\(k &gt; k^*\)</span>” has advantage 0.6827, equal to the exact TV distance 0.6827, which rounds to the check value 0.683.</li>
-<li><strong>Normal check.</strong> The threshold sits <span class="math inline">\(\frac{m\delta}2 = 50 = 1\cdot\sigma\)</span> from each mean (<span class="math inline">\(\sigma = \sqrt m/2 = 50\)</span>). So the advantage is about <span class="math inline">\(\Phi(1) - (1 - \Phi(1)) = 2\Phi(1) - 1 = 0.6827\)</span>.</li>
+<li><strong>Where the binomials cross.</strong> The binomial probabilities are <span class="math inline">\(\binom mk\)</span> times the sequence probabilities. The factor <span class="math inline">\(\binom mk\)</span> is the same for both, so they cross at the same <span class="math inline">\(k^*\)</span>. Take logarithms of <span class="math inline">\(L(k^*) = 1\)</span>: <span id="eq-auto-08cryptobasics-4"><span class="math display">\[k^*\ln(1 + 2\xi) + (m - k^*)\ln(1 - 2\xi) = 0 \quad\Longrightarrow\quad k^* = m\,\frac{-\ln(1 - 2\xi)}{\ln(1 + 2\xi) - \ln(1 - 2\xi)}. \tag{8.4}\]</span></span></li>
+<li><strong>Expand for small <span class="math inline">\(\xi\)</span>.</strong> With <span class="math inline">\(u = 2\xi\)</span>, <span class="math inline">\(-\ln(1 - u) = u + \frac{u^2}2 + \frac{u^3}3 + \dots\)</span> and <span class="math inline">\(\ln(1 + u) - \ln(1 - u) = 2u + \frac{2u^3}3 + \dots\)</span>. The ratio is <span id="eq-auto-08cryptobasics-5"><span class="math display">\[\frac{1 + \frac u2 + \frac{u^2}3}{2(1 + \frac{u^2}3)} = \frac12 + \frac u4 + O(u^3) = \frac12 + \frac\xi2 + O(\xi^3). \tag{8.5}\]</span></span> So <span class="math inline">\(k^* = \frac m2 + \frac{m\xi}2 + O(m\xi^3)\)</span>: halfway between the fair mean <span class="math inline">\(\frac m2\)</span> and the biased mean <span class="math inline">\(\frac m2 + m\xi\)</span>.</li>
+<li><strong>The numbers.</strong> For <span class="math inline">\(m = 10{,}000\)</span> and <span class="math inline">\(\xi = 0.01\)</span>, the exact crossing is <span class="math inline">\(k^* = 5050.0033\)</span>, against <span class="math inline">\(m/2 + m\xi/2 = 5050\)</span>. The test “output 1 iff <span class="math inline">\(k &gt; k^*\)</span>” has advantage 0.6827, equal to the exact TV distance 0.6827, which rounds to the check value 0.683.</li>
+<li><strong>Normal check.</strong> The threshold sits <span class="math inline">\(\frac{m\xi}2 = 50 = 1\cdot\sigma\)</span> from each mean (<span class="math inline">\(\sigma = \sqrt m/2 = 50\)</span>). So the advantage is about <span class="math inline">\(\Phi(1) - (1 - \Phi(1)) = 2\Phi(1) - 1 = 0.6827\)</span>.</li>
 </ol>
 <p>Majority vote is the threshold at <span class="math inline">\(\frac m2\)</span> instead of <span class="math inline">\(k^*\)</span>. Its exact advantage is 0.4807, which matches the 0.481 simulated in <a href="../../book-full/part01-prerequisites/08-crypto-basics.html#tbl-crypto-coin-hybrid">Table&nbsp;8.4</a>. The fair count lands above <span class="math inline">\(\frac m2\)</span> almost half the time, so moving the threshold up by one standard deviation gains a lot.</p>
 <p><em>The best distinguisher is a likelihood-ratio test, and for coins that test is a threshold on the head count, placed midway between the two means.</em></p>
@@ -745,8 +710,8 @@ Table&nbsp;8.1: TV distance between <span class="math inline">\(m\)</span> flips
 </div>
 </div>
 </section>
-<section id="sec-sol-crypto-basics-4" class="level2" data-number="8.4">
-<h2 data-number="8.4" class="anchored" data-anchor-id="sec-sol-crypto-basics-4"><span class="header-section-number">8.4</span> Birthday for 32 bits</h2>
+<section id="sec-sol-crypto-4" class="level2" data-number="8.4">
+<h2 data-number="8.4" class="anchored" data-anchor-id="sec-sol-crypto-4"><span class="header-section-number">8.4</span> Birthday for 32 bits</h2>
 <blockquote class="blockquote">
 <p><strong>Exercise 4.</strong> <strong>Birthday for 32 bits.</strong> How many random 32-bit identifiers can you draw before a collision has probability <span class="math inline">\(\frac12\)</span>? <em>Check: <span class="math inline">\(\sqrt{2\cdot2^{32}\ln 2} \approx 77{,}000\)</span>.</em> <em>(Birthday bound)</em></p>
 </blockquote>
@@ -763,10 +728,10 @@ Table&nbsp;8.1: TV distance between <span class="math inline">\(m\)</span> flips
 <div id="callout-4" class="callout-4-contents callout-collapse collapse">
 <div class="callout-body-container callout-body">
 <ol type="1">
-<li><strong>Set up.</strong> <span class="math inline">\(N = 2^{32}\)</span> possible identifiers, <span class="math inline">\(q\)</span> independent uniform draws.</li>
-<li><strong>Use the lower bound as an approximation.</strong> By <a href="../../book-full/part01-prerequisites/08-crypto-basics.html#eq-crypto-birthday">Equation&nbsp;8.9</a>, <span class="math inline">\(\Pr[\text{collision}] \ge 1 - e^{-q(q-1)/(2N)}\)</span>. For <span class="math inline">\(q \ll N\)</span> this is close to exact: the only step that lost anything was <span class="math inline">\(1 - i/N \le e^{-i/N}\)</span>, and <span class="math inline">\(i/N\)</span> is tiny here.</li>
-<li><strong>Solve for <span class="math inline">\(\frac12\)</span>.</strong> <span class="math inline">\(1 - e^{-q^2/(2N)} = \frac12\)</span> gives <span class="math inline">\(q^2/(2N) = \ln 2\)</span>, so <span id="eq-auto-08cryptobasics-6"><span class="math display">\[q = \sqrt{2N\ln 2} = \sqrt{2\cdot 2^{32}\cdot 0.6931} = 77{,}162.7. \tag{8.6}\]</span></span> This is <span class="math inline">\(1.18\sqrt N\)</span> with <span class="math inline">\(\sqrt N = 65{,}536\)</span>.</li>
-<li><strong>Exact check.</strong> The script evaluates the exact product <span class="math inline">\(1 - \prod_{i&lt;q}(1 - i/N)\)</span> and finds that it first reaches <span class="math inline">\(\frac12\)</span> at <span class="math inline">\(q = 77{,}164\)</span>.</li>
+<li><strong>Set up.</strong> <span class="math inline">\(N = 2^{32}\)</span> possible identifiers, <span class="math inline">\(Q\)</span> independent uniform draws.</li>
+<li><strong>Use the lower bound as an approximation.</strong> By <a href="../../book-full/part01-prerequisites/08-crypto-basics.html#eq-crypto-birthday">Equation&nbsp;8.9</a>, <span class="math inline">\(\Pr[\text{collision}] \ge 1 - e^{-Q(Q-1)/(2N)}\)</span>. For <span class="math inline">\(Q \ll N\)</span> this is close to exact: the only step that lost anything was <span class="math inline">\(1 - i/N \le e^{-i/N}\)</span>, and <span class="math inline">\(i/N\)</span> is tiny here.</li>
+<li><strong>Solve for <span class="math inline">\(\frac12\)</span>.</strong> <span class="math inline">\(1 - e^{-Q^2/(2N)} = \frac12\)</span> gives <span class="math inline">\(Q^2/(2N) = \ln 2\)</span>, so <span id="eq-auto-08cryptobasics-6"><span class="math display">\[Q = \sqrt{2N\ln 2} = \sqrt{2\cdot 2^{32}\cdot 0.6931} = 77{,}162.7. \tag{8.6}\]</span></span> This is <span class="math inline">\(1.18\sqrt N\)</span> with <span class="math inline">\(\sqrt N = 65{,}536\)</span>.</li>
+<li><strong>Exact check.</strong> The script evaluates the exact product <span class="math inline">\(1 - \prod_{i&lt;Q}(1 - i/N)\)</span> and finds that it first reaches <span class="math inline">\(\frac12\)</span> at <span class="math inline">\(Q = 77{,}164\)</span>.</li>
 </ol>
 <p>So about 77,000 identifiers, in agreement with the check. A table of 100,000 records with random 32-bit keys is already past this point, which is why <a href="../../book-full/part01-prerequisites/08-crypto-basics.html#tbl-crypto-birthday">Table&nbsp;8.5</a> finds a collision probability of 0.688.</p>
 <p><em>Random <span class="math inline">\(\kappa\)</span>-bit values collide after about <span class="math inline">\(2^{\kappa/2}\)</span> draws: 32-bit identifiers are safe only for tables of a few thousand rows.</em></p>
@@ -774,8 +739,8 @@ Table&nbsp;8.1: TV distance between <span class="math inline">\(m\)</span> flips
 </div>
 </div>
 </section>
-<section id="sec-sol-crypto-basics-5" class="level2" data-number="8.5">
-<h2 data-number="8.5" class="anchored" data-anchor-id="sec-sol-crypto-basics-5"><span class="header-section-number">8.5</span> Two-time pad</h2>
+<section id="sec-sol-crypto-5" class="level2" data-number="8.5">
+<h2 data-number="8.5" class="anchored" data-anchor-id="sec-sol-crypto-5"><span class="header-section-number">8.5</span> Two-time pad</h2>
 <blockquote class="blockquote">
 <p><strong>Exercise 5.</strong> <strong>Two-time pad.</strong> Two messages of English text are encrypted with the same pad. Show what an eavesdropper learns, and why guessing a common word in one message reveals the other at the same position. <em>(Perfect secrecy)</em></p>
 </blockquote>
@@ -846,8 +811,8 @@ Table&nbsp;8.2: Crib dragging the guess “the” across <span class="math inlin
 </div>
 </div>
 </section>
-<section id="sec-sol-crypto-basics-6" class="level2" data-number="8.6">
-<h2 data-number="8.6" class="anchored" data-anchor-id="sec-sol-crypto-basics-6"><span class="header-section-number">8.6</span> Toy GGM</h2>
+<section id="sec-sol-crypto-6" class="level2" data-number="8.6">
+<h2 data-number="8.6" class="anchored" data-anchor-id="sec-sol-crypto-6"><span class="header-section-number">8.6</span> Toy GGM</h2>
 <blockquote class="blockquote">
 <p><strong>Exercise 6.</strong> <strong>Toy GGM.</strong> Implement the GGM tree with SHA-256 as a length-doubling generator (<span class="math inline">\(G_0(s) = \mathrm{SHA256}(s\,\|\,0)\)</span>, <span class="math inline">\(G_1(s) = \mathrm{SHA256}(s\,\|\,1)\)</span>). How many generator calls does one evaluation on <span class="math inline">\(n\)</span>-bit inputs cost, and what does the proof lose? <em>Check: <span class="math inline">\(n\)</span> calls; the loss factor is <span class="math inline">\(nq\)</span>.</em> <em>(PRFs)</em></p>
 </blockquote>
@@ -864,26 +829,26 @@ Table&nbsp;8.2: Crib dragging the guess “the” across <span class="math inlin
 <div id="callout-6" class="callout-6-contents callout-collapse collapse">
 <div class="callout-body-container callout-body">
 <p><strong>Implementation.</strong> A seed is 32 bytes and each half <span class="math inline">\(G_b\)</span> returns 32 bytes, so <span class="math inline">\(G = G_0\,\|\,G_1\)</span> maps 32 bytes to 64: a length-doubling pseudorandom generator (PRG), in the toy model where the hash is treated as one. The tree walk is three lines:</p>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb1"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> ggm_eval(gen: CountingGenerator, key: <span class="bu">bytes</span>, bits: <span class="bu">list</span>[<span class="bu">int</span>]) <span class="op">-&gt;</span> <span class="bu">bytes</span>:</span>
-<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a>    node <span class="op">=</span> key</span>
-<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> b <span class="kw">in</span> bits:</span>
-<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a>        node <span class="op">=</span> gen.half(node, b)  <span class="co"># G_b(node) = SHA256(node || b), counted</span></span>
-<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> node</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<pre class="text"><code>def ggm_eval(gen: CountingGenerator, key: bytes, bits: list[int]) -&gt; bytes:
+    node = key
+    for b in bits:
+        node = gen.half(node, b)  # G_b(node) = SHA256(node || b), counted
+    return node</code></pre>
 <p><strong>Cost.</strong> The walk visits one node per level and computes only the half <span class="math inline">\(G_{x_i}\)</span> it follows. So one evaluation costs <span class="math inline">\(n\)</span> generator calls (one hash each). The script counts them: on <span class="math inline">\(n = 8\)</span> bits, each evaluation makes 8 calls. Evaluating all 256 inputs gives 256 distinct outputs, with a fraction 0.5001 of 1 bits, and re-evaluating an input gives the same output, as a function must.</p>
 <p><strong>What the proof loses.</strong> Follow the proof sketch in the chapter:</p>
 <ol type="1">
 <li>There are <span class="math inline">\(n + 1\)</span> hybrids <span class="math inline">\(H_0, \dots, H_n\)</span>, where <span class="math inline">\(H_j\)</span> makes every node at depth <span class="math inline">\(j\)</span> uniform. <span class="math inline">\(H_0\)</span> is <span class="math inline">\(F_k\)</span> and <span class="math inline">\(H_n\)</span> is a random function.</li>
-<li>A <span class="math inline">\(q\)</span>-query adversary touches at most <span class="math inline">\(q\)</span> nodes at each depth. Telling <span class="math inline">\(H_{j-1}\)</span> from <span class="math inline">\(H_j\)</span> is telling <span class="math inline">\(q\)</span> outputs of <span class="math inline">\(G\)</span> from <span class="math inline">\(q\)</span> uniform strings, which by the hybrid lemma costs at most <span class="math inline">\(q\cdot\mathrm{Adv}_{\mathrm{PRG}}\)</span>.</li>
+<li>A <span class="math inline">\(Q\)</span>-query adversary touches at most <span class="math inline">\(Q\)</span> nodes at each depth. Telling <span class="math inline">\(H_{j-1}\)</span> from <span class="math inline">\(H_j\)</span> is telling <span class="math inline">\(Q\)</span> outputs of <span class="math inline">\(G\)</span> from <span class="math inline">\(Q\)</span> uniform strings, which by the hybrid lemma costs at most <span class="math inline">\(Q\cdot\mathrm{Adv}_{\mathrm{PRG}}\)</span>.</li>
 <li>Summing the <span class="math inline">\(n\)</span> steps with Fact 3 gives <span class="math inline">\(\mathrm{Adv}_{\mathrm{PRF}} \le nq\cdot\mathrm{Adv}_{\mathrm{PRG}}\)</span>: a loss factor <span class="math inline">\(nq\)</span>.</li>
 </ol>
-<p>Concretely, with <span class="math inline">\(n = 128\)</span> input bits and <span class="math inline">\(q = 2^{40}\)</span> queries, <span class="math inline">\(nq = 2^7\cdot2^{40} = 2^{47}\)</span>. For a PRF advantage of at most <span class="math inline">\(2^{-64}\)</span> the generator must have advantage at most <span class="math inline">\(2^{-111}\)</span>: the reduction costs 47 bits of security.</p>
+<p>Concretely, with <span class="math inline">\(n = 128\)</span> input bits and <span class="math inline">\(Q = 2^{40}\)</span> queries, <span class="math inline">\(nq = 2^7\cdot2^{40} = 2^{47}\)</span>. For a PRF advantage of at most <span class="math inline">\(2^{-64}\)</span> the generator must have advantage at most <span class="math inline">\(2^{-111}\)</span>: the reduction costs 47 bits of security.</p>
 <p><em>The GGM tree turns any length-doubling generator into a PRF at <span class="math inline">\(n\)</span> generator calls per input, but the reduction is loose by <span class="math inline">\(nq\)</span>, so the generator needs a large security margin.</em></p>
 </div>
 </div>
 </div>
 </section>
-<section id="sec-sol-crypto-basics-7" class="level2" data-number="8.7">
-<h2 data-number="8.7" class="anchored" data-anchor-id="sec-sol-crypto-basics-7"><span class="header-section-number">8.7</span> Threshold sharing</h2>
+<section id="sec-sol-crypto-7" class="level2" data-number="8.7">
+<h2 data-number="8.7" class="anchored" data-anchor-id="sec-sol-crypto-7"><span class="header-section-number">8.7</span> Threshold sharing</h2>
 <blockquote class="blockquote">
 <p><strong>Exercise 7.</strong> <strong>Threshold sharing.</strong> In Shamir’s 2-out-of-3 scheme over prime <span class="math inline">\(\mathbb Z_p\)</span>, the dealer picks a uniform <span class="math inline">\(c\)</span> and gives holder <span class="math inline">\(i\)</span> the value <span class="math inline">\(x + ci\)</span>. Show by counting that any single share is uniform, and that any two shares determine <span class="math inline">\(x\)</span>. <em>(Simulation by counting)</em></p>
 </blockquote>
@@ -972,8 +937,8 @@ Table&nbsp;8.3: Shamir 2-out-of-3 shares of <span class="math inline">\(x = 2\)<
 </div>
 </div>
 </section>
-<section id="sec-sol-crypto-basics-8" class="level2" data-number="8.8">
-<h2 data-number="8.8" class="anchored" data-anchor-id="sec-sol-crypto-basics-8"><span class="header-section-number">8.8</span> Regev’s budget</h2>
+<section id="sec-sol-crypto-8" class="level2" data-number="8.8">
+<h2 data-number="8.8" class="anchored" data-anchor-id="sec-sol-crypto-8"><span class="header-section-number">8.8</span> Regev’s budget</h2>
 <blockquote class="blockquote">
 <p><strong>Exercise 8.</strong> <strong>Regev’s budget.</strong> Using the normal approximation, find the <span class="math inline">\(k\)</span> at which the failure rate for <span class="math inline">\(p = 4096\)</span>, <span class="math inline">\(B = 32\)</span> reaches 1%. Then change the script’s error distribution to a rounded normal with <span class="math inline">\(\sigma = 3.2\)</span> and redo it. <em>Check for the first part: <span class="math inline">\(1024^2/(2.576^2\cdot352) \approx 450\)</span>.</em> <em>(Noise growth)</em></p>
 </blockquote>
@@ -1009,8 +974,8 @@ Table&nbsp;8.3: Shamir 2-out-of-3 shares of <span class="math inline">\(x = 2\)<
 </div>
 </div>
 </section>
-<section id="sec-sol-crypto-basics-9" class="level2" data-number="8.9">
-<h2 data-number="8.9" class="anchored" data-anchor-id="sec-sol-crypto-basics-9"><span class="header-section-number">8.9</span> Odd modulus</h2>
+<section id="sec-sol-crypto-9" class="level2" data-number="8.9">
+<h2 data-number="8.9" class="anchored" data-anchor-id="sec-sol-crypto-9"><span class="header-section-number">8.9</span> Odd modulus</h2>
 <blockquote class="blockquote">
 <p><strong>Exercise 9.</strong> <strong>Odd modulus.</strong> Modify the addition experiment to use a prime <span class="math inline">\(p\)</span> and the encoding <span class="math inline">\(\lfloor p/2\rfloor\)</span>. Measure the extra drift and compare with the prediction of about <span class="math inline">\(-k/4\)</span>. <em>(LWE arithmetic)</em></p>
 </blockquote>
@@ -1028,12 +993,12 @@ Table&nbsp;8.3: Shamir 2-out-of-3 shares of <span class="math inline">\(x = 2\)<
 <div class="callout-body-container callout-body">
 <p><strong>Prediction.</strong></p>
 <ol type="1">
-<li><strong>Write <span class="math inline">\(p = 2\Delta + 1\)</span></strong>, so the encoding is <span class="math inline">\(\Delta = \lfloor p/2\rfloor\)</span> and <span class="math inline">\(2\Delta = p - 1 \equiv -1\)</span>.</li>
-<li><strong>The sum.</strong> As in the derivation of <a href="../../book-full/part01-prerequisites/08-crypto-basics.html#eq-crypto-regev-budget">Equation&nbsp;8.16</a>, the summed ciphertext decrypts to <span class="math inline">\(v = \sum_i e_i + w\Delta \bmod p\)</span>, where <span class="math inline">\(w = \sum_i m_i\)</span> is the number of 1-bits.</li>
-<li><strong>Split <span class="math inline">\(w\)</span>.</strong> <span class="math inline">\(w = (w \bmod 2) + 2\lfloor w/2\rfloor\)</span>, so <span id="eq-auto-08cryptobasics-10"><span class="math display">\[w\Delta = (w \bmod 2)\,\Delta + \lfloor w/2\rfloor\cdot 2\Delta \equiv (w \bmod 2)\,\Delta - \lfloor w/2\rfloor. \tag{8.10}\]</span></span> The first term is the correct encoding of the parity. The second is an extra error of <span class="math inline">\(-\lfloor w/2\rfloor\)</span>: every pair of 1-bits adds <span class="math inline">\(-1\)</span>.</li>
+<li><strong>Write <span class="math inline">\(p = 2t + 1\)</span></strong>, so the encoding is <span class="math inline">\(t = \lfloor p/2\rfloor\)</span> and <span class="math inline">\(2t = p - 1 \equiv -1\)</span>.</li>
+<li><strong>The sum.</strong> As in the derivation of <a href="../../book-full/part01-prerequisites/08-crypto-basics.html#eq-crypto-regev-budget">Equation&nbsp;8.16</a>, the summed ciphertext decrypts to <span class="math inline">\(v = \sum_i e_i + wt \bmod p\)</span>, where <span class="math inline">\(w = \sum_i m_i\)</span> is the number of 1-bits.</li>
+<li><strong>Split <span class="math inline">\(w\)</span>.</strong> <span class="math inline">\(w = (w \bmod 2) + 2\lfloor w/2\rfloor\)</span>, so <span id="eq-auto-08cryptobasics-10"><span class="math display">\[wt = (w \bmod 2)\,t + \lfloor w/2\rfloor\cdot 2t \equiv (w \bmod 2)\,t - \lfloor w/2\rfloor. \tag{8.10}\]</span></span> The first term is the correct encoding of the parity. The second is an extra error of <span class="math inline">\(-\lfloor w/2\rfloor\)</span>: every pair of 1-bits adds <span class="math inline">\(-1\)</span>.</li>
 <li><strong>Its mean.</strong> For random bits, <span class="math inline">\(w \sim \mathrm{Bin}(k, \frac12)\)</span>, with <span class="math inline">\(\mathbb E w = k/2\)</span>. Also <span class="math inline">\(\Pr[w \text{ even}] - \Pr[w \text{ odd}] = \mathbb E(-1)^w = (\frac12 - \frac12)^k = 0\)</span> for <span class="math inline">\(k \ge 1\)</span>, so <span class="math inline">\(\Pr[w \text{ odd}] = \frac12\)</span>. Hence <span id="eq-auto-08cryptobasics-11"><span class="math display">\[\mathbb E\lfloor w/2\rfloor = \frac{\mathbb E w - \Pr[w \text{ odd}]}{2} = \frac{k - 1}4, \qquad \text{drift} = -\frac{k - 1}4. \tag{8.11}\]</span></span> This is the “about <span class="math inline">\(-k/4\)</span>” of the exercise, exact up to the <span class="math inline">\(\frac14\)</span>.</li>
 </ol>
-<p><strong>Measurement.</strong> The script repeats the addition experiment with the prime <span class="math inline">\(p = 4093\)</span> (the largest prime below 4096), errors uniform on <span class="math inline">\(\{-32, \dots, 32\}\)</span>, <span class="math inline">\(d = 4\)</span> and 20,000 trials. It computes the drift as <span class="math inline">\(v - \sum_i e_i - (w \bmod 2)\Delta\)</span>, centred in <span class="math inline">\((-p/2, p/2]\)</span>, and also reruns <span class="math inline">\(p = 4096\)</span> for comparison. The normal approximation for the odd modulus shifts the mean of the summed error by the predicted drift. <a href="#tbl-sol-crypto-basics-odd" class="quarto-xref">Table&nbsp;<span>8.4</span></a> has the results.</p>
+<p><strong>Measurement.</strong> The script repeats the addition experiment with the prime <span class="math inline">\(p = 4093\)</span> (the largest prime below 4096), errors uniform on <span class="math inline">\(\{-32, \dots, 32\}\)</span>, <span class="math inline">\(d = 4\)</span> and 20,000 trials. It computes the drift as <span class="math inline">\(v - \sum_i e_i - (w \bmod 2)t\)</span>, centred in <span class="math inline">\((-p/2, p/2]\)</span>, and also reruns <span class="math inline">\(p = 4096\)</span> for comparison. The normal approximation for the odd modulus shifts the mean of the summed error by the predicted drift. <a href="#tbl-sol-crypto-basics-odd" class="quarto-xref">Table&nbsp;<span>8.4</span></a> has the results.</p>
 <div id="tbl-sol-crypto-basics-odd" class="quarto-float quarto-figure quarto-figure-center anchored">
 <figure class="quarto-float quarto-float-tbl figure">
 <figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl" id="tbl-sol-crypto-basics-odd-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">

@@ -1,0 +1,1868 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.10.19">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+<meta name="author" content="Study notes">
+<meta name="dcterms.date" content="2026-10-23">
+
+<title>Datasets for Differentially Private Machine Learning</title>
+<style>
+/* Default styles provided by pandoc.
+** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
+*/
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: 1.5em;}
+div.column{flex: auto;}
+@media screen {
+div.columns{gap: min(4vw, 1.5em);}
+div.column{overflow-x: auto;}
+}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+</style>
+
+
+<script src="index_files/libs/clipboard/clipboard.min.js"></script>
+<script src="index_files/libs/quarto-html/quarto.js" type="module"></script>
+<script src="index_files/libs/quarto-html/tabsets/tabsets.js" type="module"></script>
+<script src="index_files/libs/quarto-html/popper.min.js"></script>
+<script src="index_files/libs/quarto-html/tippy.umd.min.js"></script>
+<script src="index_files/libs/quarto-html/anchor.min.js"></script>
+<link href="index_files/libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="index_files/libs/quarto-html/quarto-syntax-highlighting-bf27225e3a48a9273f3daa8f8e829971.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="index_files/libs/bootstrap/bootstrap.min.js"></script>
+<link href="index_files/libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="index_files/libs/bootstrap/bootstrap-67a1b6612eaed44f7b934f3849f761ca.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
+
+  <script src="https://cdnjs.cloudflare.com/polyfill/v3/polyfill.min.js?features=es6"></script>
+  <script defer="" src="https://cdn.jsdelivr.net/npm/mathjax@4/tex-chtml.js" type="text/javascript"></script>
+
+<script type="text/javascript">
+const typesetMath = (el) => {
+  if (window.MathJax) {
+    // MathJax Typeset
+    window.MathJax.typeset([el]);
+  } else if (window.katex) {
+    // KaTeX Render
+    var mathElements = el.getElementsByClassName("math");
+    var macros = [];
+    for (var i = 0; i < mathElements.length; i++) {
+      var texText = mathElements[i].firstChild;
+      if (mathElements[i].tagName == "SPAN" && texText && texText.data) {
+        window.katex.render(texText.data, mathElements[i], {
+          displayMode: mathElements[i].classList.contains('display'),
+          throwOnError: false,
+          macros: macros,
+          fleqn: false
+        });
+      }
+    }
+  }
+}
+window.Quarto = {
+  typesetMath
+};
+</script>
+
+</head>
+
+<body class="quarto-light">
+
+<div id="quarto-content" class="page-columns page-rows-contents page-layout-article toc-left">
+<div id="quarto-sidebar-toc-left" class="sidebar toc-left">
+  <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">Table of contents</h2>
+   
+  <ul>
+  <li><a href="#sec-what" id="toc-sec-what" class="nav-link active" data-scroll-target="#sec-what"><span class="header-section-number">1</span> What a dataset has to offer a DP experiment</a>
+  <ul class="collapse">
+  <li><a href="#the-privacy-unit" id="toc-the-privacy-unit" class="nav-link" data-scroll-target="#the-privacy-unit"><span class="header-section-number">1.1</span> The privacy unit</a></li>
+  <li><a href="#the-size-of-the-dataset" id="toc-the-size-of-the-dataset" class="nav-link" data-scroll-target="#the-size-of-the-dataset"><span class="header-section-number">1.2</span> The size of the dataset</a></li>
+  <li><a href="#the-domain" id="toc-the-domain" class="nav-link" data-scroll-target="#the-domain"><span class="header-section-number">1.3</span> The domain</a></li>
+  <li><a href="#licence-and-provenance" id="toc-licence-and-provenance" class="nav-link" data-scroll-target="#licence-and-provenance"><span class="header-section-number">1.4</span> Licence and provenance</a></li>
+  </ul></li>
+  <li><a href="#sec-tabular" id="toc-sec-tabular" class="nav-link" data-scroll-target="#sec-tabular"><span class="header-section-number">2</span> Tabular data</a>
+  <ul class="collapse">
+  <li><a href="#adult-and-why-it-is-retiring" id="toc-adult-and-why-it-is-retiring" class="nav-link" data-scroll-target="#adult-and-why-it-is-retiring"><span class="header-section-number">2.1</span> Adult, and why it is retiring</a></li>
+  <li><a href="#the-other-common-tables" id="toc-the-other-common-tables" class="nav-link" data-scroll-target="#the-other-common-tables"><span class="header-section-number">2.2</span> The other common tables</a></li>
+  <li><a href="#recommendation-data-and-the-warning-of-netflix" id="toc-recommendation-data-and-the-warning-of-netflix" class="nav-link" data-scroll-target="#recommendation-data-and-the-warning-of-netflix"><span class="header-section-number">2.3</span> Recommendation data, and the warning of Netflix</a></li>
+  <li><a href="#the-census-bureaus-own-data" id="toc-the-census-bureaus-own-data" class="nav-link" data-scroll-target="#the-census-bureaus-own-data"><span class="header-section-number">2.4</span> The Census Bureau’s own data</a></li>
+  </ul></li>
+  <li><a href="#sec-images" id="toc-sec-images" class="nav-link" data-scroll-target="#sec-images"><span class="header-section-number">3</span> Images</a></li>
+  <li><a href="#sec-text" id="toc-sec-text" class="nav-link" data-scroll-target="#sec-text"><span class="header-section-number">4</span> Text</a>
+  <ul class="collapse">
+  <li><a href="#what-the-model-saw-first" id="toc-what-the-model-saw-first" class="nav-link" data-scroll-target="#what-the-model-saw-first"><span class="header-section-number">4.1</span> What the model saw first</a></li>
+  </ul></li>
+  <li><a href="#sec-users" id="toc-sec-users" class="nav-link" data-scroll-target="#sec-users"><span class="header-section-number">5</span> Datasets with user identifiers</a>
+  <ul class="collapse">
+  <li><a href="#what-user-level-data-costs-online-retail" id="toc-what-user-level-data-costs-online-retail" class="nav-link" data-scroll-target="#what-user-level-data-costs-online-retail"><span class="header-section-number">5.1</span> What user-level data costs: Online Retail</a></li>
+  </ul></li>
+  <li><a href="#sec-other" id="toc-sec-other" class="nav-link" data-scroll-target="#sec-other"><span class="header-section-number">6</span> Locations, graphs and clinical records</a>
+  <ul class="collapse">
+  <li><a href="#locations-and-trajectories" id="toc-locations-and-trajectories" class="nav-link" data-scroll-target="#locations-and-trajectories"><span class="header-section-number">6.1</span> Locations and trajectories</a></li>
+  <li><a href="#graphs" id="toc-graphs" class="nav-link" data-scroll-target="#graphs"><span class="header-section-number">6.2</span> Graphs</a></li>
+  <li><a href="#clinical-records" id="toc-clinical-records" class="nav-link" data-scroll-target="#clinical-records"><span class="header-section-number">6.3</span> Clinical records</a></li>
+  </ul></li>
+  <li><a href="#sec-released" id="toc-sec-released" class="nav-link" data-scroll-target="#sec-released"><span class="header-section-number">7</span> Public DP releases as datasets</a></li>
+  <li><a href="#sec-synthetic" id="toc-sec-synthetic" class="nav-link" data-scroll-target="#sec-synthetic"><span class="header-section-number">8</span> Datasets for DP synthetic data generation</a>
+  <ul class="collapse">
+  <li><a href="#why-the-winning-generators-fit-marginals-adults-domain" id="toc-why-the-winning-generators-fit-marginals-adults-domain" class="nav-link" data-scroll-target="#why-the-winning-generators-fit-marginals-adults-domain"><span class="header-section-number">8.1</span> Why the winning generators fit marginals: Adult’s domain</a></li>
+  <li><a href="#the-nist-challenges" id="toc-the-nist-challenges" class="nav-link" data-scroll-target="#the-nist-challenges"><span class="header-section-number">8.2</span> The NIST challenges</a></li>
+  <li><a href="#benchmark-suites-and-what-they-found" id="toc-benchmark-suites-and-what-they-found" class="nav-link" data-scroll-target="#benchmark-suites-and-what-they-found"><span class="header-section-number">8.3</span> Benchmark suites and what they found</a></li>
+  <li><a href="#the-generators-and-their-data" id="toc-the-generators-and-their-data" class="nav-link" data-scroll-target="#the-generators-and-their-data"><span class="header-section-number">8.4</span> The generators and their data</a></li>
+  <li><a href="#evaluating-synthetic-data-and-attacking-it" id="toc-evaluating-synthetic-data-and-attacking-it" class="nav-link" data-scroll-target="#evaluating-synthetic-data-and-attacking-it"><span class="header-section-number">8.5</span> Evaluating synthetic data, and attacking it</a></li>
+  </ul></li>
+  <li><a href="#sec-choose" id="toc-sec-choose" class="nav-link" data-scroll-target="#sec-choose"><span class="header-section-number">9</span> Choosing a dataset for a privacy-utility study</a></li>
+  <li><a href="#sec-sources" id="toc-sec-sources" class="nav-link" data-scroll-target="#sec-sources"><span class="header-section-number">10</span> References</a></li>
+  </ul>
+<div class="quarto-alternate-formats"><h2>Other Formats</h2><ul><li><a href="Datasets-for-Differentially-Private-Machine-Learning.pdf"><i class="bi bi-file-pdf"></i>PDF</a></li></ul></div></nav>
+</div>
+<div id="quarto-margin-sidebar" class="sidebar margin-sidebar zindex-bottom">
+</div>
+<main class="content" id="quarto-document-content">
+
+<header id="title-block-header" class="quarto-title-block default">
+<div class="quarto-title">
+<h1 class="title">Datasets for Differentially Private Machine Learning</h1>
+<p class="subtitle lead">Which public data DP papers use, what each dataset can test, and where to get it</p>
+</div>
+
+
+
+<div class="quarto-title-meta">
+
+    <div>
+    <div class="quarto-title-meta-heading">Author</div>
+    <div class="quarto-title-meta-contents">
+             <p>Study notes </p>
+          </div>
+  </div>
+    
+    <div>
+    <div class="quarto-title-meta-heading">Published</div>
+    <div class="quarto-title-meta-contents">
+      <p class="date">October 23, 2026</p>
+    </div>
+  </div>
+  
+    
+  </div>
+  
+<div>
+  <div class="abstract">
+    <div class="block-title">Abstract</div>
+    <p>Every experiment with differential privacy (DP) runs on some dataset, and the choice decides what the experiment can show. This note catalogues the public datasets that DP papers use, by kind of data: tables, images, text, data with user identifiers, locations, graphs and clinical records. For each it gives the size, the licence, what one record is, and the results it is known for. One section covers the datasets and benchmarks of DP synthetic data generation, from the NIST challenges to synthesis through foundation-model APIs. The note opens by working out what a dataset’s size and shape mean for DP, with numbers computed by a script, and closes with how to choose a dataset for a privacy-utility study, such as the bank campaign worked through in the companion note on pricing the trade-off.</p>
+  </div>
+</div>
+
+
+</header>
+
+
+<p>Suppose you want to run, or read, an experiment with differential privacy (DP). You need a dataset, and three things about it decide what the experiment can show. The first is what one record is, because that decides whom the guarantee protects. The second is how many records there are, because that decides whether the noise is small. The third is where the data came from, which decides whether you may use it and whether a model has already seen it. This note is a guide to the public datasets that DP papers use, organized around those three questions.</p>
+<p>The note is for a reader who knows what DP promises and wants to put it to work, in a paper, a benchmark or a privacy-utility study. It assumes basic probability and nothing about any particular dataset. Every size, licence and result below was read from the dataset’s own page or the paper that reports it, and the sources are listed at the end. Where a number could not be confirmed, the note says so rather than guessing. The companion note, “The Privacy–Utility Trade-off, Worked Through”, ran one experiment on one dataset, Adult, and this note says what the alternatives are and what each would have changed. <a href="#tbl-map" class="quarto-xref">Table&nbsp;1</a> shows the question each section answers, and <a href="#tbl-symbols" class="quarto-xref">Table&nbsp;2</a> lists the few symbols the note uses.</p>
+<div id="tbl-map" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-tbl figure">
+<figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl" id="tbl-map-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Table&nbsp;1: The question each section answers.
+</figcaption>
+<div aria-describedby="tbl-map-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<table class="caption-top table">
+<colgroup>
+<col style="width: 50%">
+<col style="width: 50%">
+</colgroup>
+<thead>
+<tr class="header">
+<th style="text-align: left;">Section</th>
+<th style="text-align: left;">The question it answers</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: left;"><a href="#sec-what" class="quarto-xref">Section&nbsp;1</a></td>
+<td style="text-align: left;">What do the size and shape of a dataset mean for DP?</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;"><a href="#sec-tabular" class="quarto-xref">Section&nbsp;2</a></td>
+<td style="text-align: left;">Which tables do DP papers use, and what has replaced Adult?</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;"><a href="#sec-images" class="quarto-xref">Section&nbsp;3</a></td>
+<td style="text-align: left;">Which image datasets, and what accuracy does DP reach on them?</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;"><a href="#sec-text" class="quarto-xref">Section&nbsp;4</a></td>
+<td style="text-align: left;">Which text datasets, and what does public pre-training change?</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;"><a href="#sec-users" class="quarto-xref">Section&nbsp;5</a></td>
+<td style="text-align: left;">Which datasets have user identifiers, and what does user-level privacy cost?</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;"><a href="#sec-other" class="quarto-xref">Section&nbsp;6</a></td>
+<td style="text-align: left;">What is used for locations, graphs and clinical records?</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;"><a href="#sec-released" class="quarto-xref">Section&nbsp;7</a></td>
+<td style="text-align: left;">Which real DP releases are themselves public datasets?</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;"><a href="#sec-synthetic" class="quarto-xref">Section&nbsp;8</a></td>
+<td style="text-align: left;">What do DP synthetic data generators train and compete on?</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;"><a href="#sec-choose" class="quarto-xref">Section&nbsp;9</a></td>
+<td style="text-align: left;">How do you choose a dataset for a privacy-utility study?</td>
+</tr>
+</tbody>
+</table>
+</div>
+</figure>
+</div>
+<div id="tbl-symbols" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-tbl figure">
+<figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl" id="tbl-symbols-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Table&nbsp;2: The symbols the note uses. Each is also explained where it first appears.
+</figcaption>
+<div aria-describedby="tbl-symbols-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<table class="caption-top table">
+<colgroup>
+<col style="width: 50%">
+<col style="width: 50%">
+</colgroup>
+<thead>
+<tr class="header">
+<th style="text-align: left;">Symbol</th>
+<th style="text-align: left;">Meaning</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: left;"><span class="math inline">\(D\)</span>, <span class="math inline">\(D'\)</span>; <span class="math inline">\(D \sim D'\)</span></td>
+<td style="text-align: left;">two neighbouring datasets, which differ by one record added or removed</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;"><span class="math inline">\(M\)</span></td>
+<td style="text-align: left;">a mechanism, the random procedure that computes a released output</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;"><span class="math inline">\(\varepsilon\)</span>, <span class="math inline">\(\delta\)</span></td>
+<td style="text-align: left;">the parameters of a DP guarantee</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;"><span class="math inline">\(n\)</span></td>
+<td style="text-align: left;">the number of records in a dataset</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;"><span class="math inline">\(s\)</span></td>
+<td style="text-align: left;">the share of the records that a count covers</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;"><span class="math inline">\(k\)</span></td>
+<td style="text-align: left;">the most records one user may contribute, the contribution bound</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;"><span class="math inline">\(\rho\)</span></td>
+<td style="text-align: left;">the single parameter of zero-concentrated DP, a form of the guarantee that converts to an <span class="math inline">\((\varepsilon, \delta)\)</span> pair</td>
+</tr>
+</tbody>
+</table>
+</div>
+</figure>
+</div>
+<section id="sec-what" class="level1" data-number="1">
+<h1 data-number="1"><span class="header-section-number">1</span> What a dataset has to offer a DP experiment</h1>
+<p>Before the catalogue, this section fixes what to look for in a dataset, because the same four questions come up for every entry below. What is one record, and so who is being protected? How many records are there, and is that enough for the noise to be small? Is the domain of the data known without looking at it? And may you download, use and redistribute it? Each question gets a short answer here, with the numbers that the rest of the note refers back to. Everything computed in this note comes from one script, <a href="https://github.com/manuelvloureiro/privacy-preserving-machine-learning-book/blob/main/code/notes/dp_datasets.py">code/notes/dp_datasets.py</a>, which a reader can run to get the same numbers.</p>
+<section id="the-privacy-unit" class="level2" data-number="1.1">
+<h2 data-number="1.1" class="anchored" data-anchor-id="the-privacy-unit"><span class="header-section-number">1.1</span> The privacy unit</h2>
+<p>DP protects whatever one record is, and its definition says how. Write <span class="math inline">\(M\)</span> for a mechanism, the random procedure that computes the released output, and take two datasets, written <span class="math inline">\(D\)</span> and <span class="math inline">\(D'\)</span>, that differ in one record. The guarantee has two parameters. The first is the privacy parameter <span class="math inline">\(\varepsilon\)</span>, which bounds how much the probability of any output may change between the two datasets. The second is the parameter <span class="math inline">\(\delta\)</span>, a small probability of exception. The mechanism is <span class="math inline">\((\varepsilon, \delta)\)</span>-DP when, for any such pair of datasets and any set <span class="math inline">\(S\)</span> of outputs,</p>
+<p><span class="math display">\[\Pr[M(D) \in S] \le e^{\varepsilon}\Pr[M(D') \in S] + \delta.\]</span></p>
+<p>This note uses the add/remove relation throughout, so <span class="math inline">\(D'\)</span> is <span class="math inline">\(D\)</span> with one record added or taken away. The guarantee is a promise about that record, and what a record is decides what is protected. In Adult one record is one person, so the guarantee is about a person. In Online Retail one record is one line of an invoice, and a customer with 400 lines is 400 records, so a guarantee at the record level says little about the customer. To protect the customer, the mechanism has to treat all of their lines as one unit, which is called <strong>user-level</strong> privacy, and the dataset has to say which lines belong to whom. Most benchmark datasets carry no such identifier, so they can only test <strong>example-level</strong> privacy. <a href="#sec-users" class="quarto-xref">Section&nbsp;5</a> is about the ones that do.</p>
+</section>
+<section id="the-size-of-the-dataset" class="level2" data-number="1.2">
+<h2 data-number="1.2" class="anchored" data-anchor-id="the-size-of-the-dataset"><span class="header-section-number">1.2</span> The size of the dataset</h2>
+<p>The noise that DP adds to a count does not depend on how many records there are. Under add/remove, a count changes by at most one when one record changes, so Laplace noise with scale <span class="math inline">\(1/\varepsilon\)</span> makes it <span class="math inline">\(\varepsilon\)</span>-DP. That noise has standard deviation <span class="math inline">\(\sqrt{2}/\varepsilon\)</span> whatever the dataset. What the number of records <span class="math inline">\(n\)</span> decides is how that fixed noise compares with the counts the dataset can answer. A count of a share <span class="math inline">\(s\)</span> of the records is about <span class="math inline">\(ns\)</span>, so the noise, as a fraction of that count, is</p>
+<p><span class="math display">\[\frac{\sqrt{2}}{\varepsilon\, n s}.\]</span></p>
+<p>Doubling the data therefore halves the relative error, and a ten times stricter <span class="math inline">\(\varepsilon\)</span> costs the same as ten times less data.</p>
+<p>That fraction is plotted in <a href="#fig-noise-floor" class="quarto-xref">Figure&nbsp;1</a> for a count of 1% of the records, against <span class="math inline">\(n\)</span>, with the common benchmark datasets marked on the <span class="math inline">\(\varepsilon = 1\)</span> line. The dotted line is a relative error of 10%, a reasonable bar for a statistic worth publishing. At <span class="math inline">\(\varepsilon = 1\)</span> a dataset clears it once it has 1,414 records, and at <span class="math inline">\(\varepsilon = 0.1\)</span> once it has 14,142. <a href="#tbl-sizes" class="quarto-xref">Table&nbsp;3</a> gives the values for each dataset.</p>
+<div id="fig-noise-floor" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-noise-floor-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="figures/noise_floor.svg" class="img-fluid figure-img">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-noise-floor-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;1: The Laplace noise on a count of 1% of the dataset, as a share of that count, against the number of records. Each marker is a benchmark dataset at ε = 1.
+</figcaption>
+</figure>
+</div>
+<div id="tbl-sizes" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-tbl figure">
+<figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl" id="tbl-sizes-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Table&nbsp;3: The Laplace noise on a count of 1% of each dataset, as a share of that count, under add/remove-one-record ε-DP. The noise’s standard deviation is √2/ε whatever the dataset; what changes is the count it is compared with.
+</figcaption>
+<div aria-describedby="tbl-sizes-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<table class="caption-top table">
+<colgroup>
+<col style="width: 16%">
+<col style="width: 16%">
+<col style="width: 16%">
+<col style="width: 16%">
+<col style="width: 16%">
+<col style="width: 16%">
+</colgroup>
+<thead>
+<tr class="header">
+<th style="text-align: left;">Dataset</th>
+<th style="text-align: right;">Records</th>
+<th style="text-align: left;">One record is</th>
+<th style="text-align: right;">1% of the records</th>
+<th style="text-align: right;">Noise at <span class="math inline">\(\varepsilon = 0.1\)</span></th>
+<th style="text-align: right;">Noise at <span class="math inline">\(\varepsilon = 1\)</span></th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: left;">Breast Cancer Wisconsin</td>
+<td style="text-align: right;">569</td>
+<td style="text-align: left;">one patient</td>
+<td style="text-align: right;">6</td>
+<td style="text-align: right;">248.5%</td>
+<td style="text-align: right;">24.9%</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">German Credit</td>
+<td style="text-align: right;">1,000</td>
+<td style="text-align: left;">one applicant</td>
+<td style="text-align: right;">10</td>
+<td style="text-align: right;">141.4%</td>
+<td style="text-align: right;">14.1%</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Bank Marketing</td>
+<td style="text-align: right;">45,211</td>
+<td style="text-align: left;">one client contact</td>
+<td style="text-align: right;">452</td>
+<td style="text-align: right;">3.1%</td>
+<td style="text-align: right;">0.3%</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Adult</td>
+<td style="text-align: right;">48,842</td>
+<td style="text-align: left;">one person</td>
+<td style="text-align: right;">488</td>
+<td style="text-align: right;">2.9%</td>
+<td style="text-align: right;">0.3%</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">CIFAR-10</td>
+<td style="text-align: right;">60,000</td>
+<td style="text-align: left;">one image</td>
+<td style="text-align: right;">600</td>
+<td style="text-align: right;">2.4%</td>
+<td style="text-align: right;">0.2%</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">MNIST</td>
+<td style="text-align: right;">70,000</td>
+<td style="text-align: left;">one image</td>
+<td style="text-align: right;">700</td>
+<td style="text-align: right;">2.0%</td>
+<td style="text-align: right;">0.2%</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Diabetes 130-US hospitals</td>
+<td style="text-align: right;">101,766</td>
+<td style="text-align: left;">one hospital stay</td>
+<td style="text-align: right;">1,018</td>
+<td style="text-align: right;">1.4%</td>
+<td style="text-align: right;">0.1%</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Credit Card Fraud</td>
+<td style="text-align: right;">284,807</td>
+<td style="text-align: left;">one transaction</td>
+<td style="text-align: right;">2,848</td>
+<td style="text-align: right;">0.5%</td>
+<td style="text-align: right;">0.0%</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">ImageNet (train)</td>
+<td style="text-align: right;">1,281,167</td>
+<td style="text-align: left;">one image</td>
+<td style="text-align: right;">12,812</td>
+<td style="text-align: right;">0.1%</td>
+<td style="text-align: right;">0.0%</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">ACSIncome 2018</td>
+<td style="text-align: right;">1,664,500</td>
+<td style="text-align: left;">one person</td>
+<td style="text-align: right;">16,645</td>
+<td style="text-align: right;">0.1%</td>
+<td style="text-align: right;">0.0%</td>
+</tr>
+</tbody>
+</table>
+</div>
+</figure>
+</div>
+<p>Two things follow for choosing a dataset. The small datasets that machine-learning courses use, with a few hundred or a thousand records, cannot show DP at work, because the noise swamps any count finer than the whole. German Credit’s 1,000 applicants give a 1% count of ten people, and the noise at <span class="math inline">\(\varepsilon = 1\)</span> is 14% of it. Above about fifty thousand records, on the other hand, a single count is almost free at any <span class="math inline">\(\varepsilon\)</span> a paper would report. The cost of DP on such data comes from asking many questions of it, since the budget is shared between them, or from training a model, which asks thousands. That is why the companion note found that a model trained on Adult kept its quality as <span class="math inline">\(\varepsilon\)</span> shrank, down to about 0.1, and lost it much earlier when the note kept only 2,000 of Adult’s records.</p>
+</section>
+<section id="the-domain" class="level2" data-number="1.3">
+<h2 data-number="1.3" class="anchored" data-anchor-id="the-domain"><span class="header-section-number">1.3</span> The domain</h2>
+<p>A DP mechanism needs to know the range of every value before it looks at the data. The sensitivity of a sum is the largest value a record can contribute, and if that largest value is read off the data, the reading itself is a leak. A dataset with a public codebook, which lists each attribute’s categories and bounds, is therefore easier to use than one whose columns have to be inspected. Adult’s codebook gives every category and the survey’s top codes, the caps above which a value is recorded as the cap itself, and the companion note scaled its features from that alone. The size of the domain also decides what can be released at all, which <a href="#sec-synthetic" class="quarto-xref">Section&nbsp;8</a> takes up. A table with fifteen columns has far more possible rows than records, so a mechanism has to choose which few summaries to release.</p>
+</section>
+<section id="licence-and-provenance" class="level2" data-number="1.4">
+<h2 data-number="1.4" class="anchored" data-anchor-id="licence-and-provenance"><span class="header-section-number">1.4</span> Licence and provenance</h2>
+<p>A dataset in a paper is downloaded, modified and sometimes redistributed, and each of these needs permission. The UCI Machine Learning Repository’s datasets carry a Creative Commons licence (CC BY 4.0), which allows all three with attribution. Kaggle datasets, by contrast, carry whatever licence the uploader chose, and some forbid redistribution. ImageNet and CelebA go further and are released for non-commercial research only. Clinical data such as MIMIC are the strictest case, since they require a signed agreement and training before download and cannot be shared onward. The catalogue names the terms of each entry, because the choice of dataset often turns on them.</p>
+<p>Provenance matters for a different reason. Benchmark datasets are not private. Adult is a public survey extract, and CIFAR-10 was collected from the web. A DP experiment on them measures what a mechanism would cost on data of that shape, not whether anyone is harmed. That is the right measurement, but the data’s public status has a consequence in the other direction. A model pre-trained on a public web corpus and then fine-tuned with DP on a benchmark may have already seen the benchmark, and its DP accuracy is then overstated. <a href="#sec-text" class="quarto-xref">Section&nbsp;4</a> returns to this.</p>
+</section>
+</section>
+<section id="sec-tabular" class="level1" data-number="2">
+<h1 data-number="2"><span class="header-section-number">2</span> Tabular data</h1>
+<p>Tables are where DP started, because a table of survey records is what a statistics office releases. They remain the data of most DP papers on query release, which is answering many counting queries about a table under one budget, and on synthetic data. This section catalogues them, from the one dataset nearly every paper uses to the census microdata that is replacing it. <a href="#tbl-tabular" class="quarto-xref">Table&nbsp;4</a> summarizes them, and the text says what each is good for.</p>
+<div id="tbl-tabular" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-tbl figure">
+<figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl" id="tbl-tabular-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Table&nbsp;4: The tabular datasets of this section. Record counts are as the source page states them.
+</figcaption>
+<div aria-describedby="tbl-tabular-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<table class="caption-top table">
+<colgroup>
+<col style="width: 20%">
+<col style="width: 20%">
+<col style="width: 20%">
+<col style="width: 20%">
+<col style="width: 20%">
+</colgroup>
+<thead>
+<tr class="header">
+<th style="text-align: left;">Dataset</th>
+<th style="text-align: right;">Records</th>
+<th style="text-align: left;">One record is</th>
+<th style="text-align: left;">Label or task</th>
+<th style="text-align: left;">Licence</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: left;">Adult (UCI 2)</td>
+<td style="text-align: right;">48,842</td>
+<td style="text-align: left;">a person, 1994 survey</td>
+<td style="text-align: left;">income over $50,000</td>
+<td style="text-align: left;">CC BY 4.0</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">ACSIncome (folktables, 2018, US)</td>
+<td style="text-align: right;">1,664,500</td>
+<td style="text-align: left;">a person, ACS PUMS</td>
+<td style="text-align: left;">income over $50,000</td>
+<td style="text-align: left;">Census Bureau terms</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">ACSEmployment (folktables, 2018, US)</td>
+<td style="text-align: right;">3,236,107</td>
+<td style="text-align: left;">a person</td>
+<td style="text-align: left;">employed</td>
+<td style="text-align: left;">Census Bureau terms</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Census-Income KDD (UCI 117)</td>
+<td style="text-align: right;">299,285</td>
+<td style="text-align: left;">a person, 1994–95 surveys</td>
+<td style="text-align: left;">income over $50,000</td>
+<td style="text-align: left;">CC BY 4.0</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Bank Marketing (UCI 222)</td>
+<td style="text-align: right;">45,211</td>
+<td style="text-align: left;">a client contact</td>
+<td style="text-align: left;">subscribed a deposit</td>
+<td style="text-align: left;">CC BY 4.0</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">German Credit (UCI 144)</td>
+<td style="text-align: right;">1,000</td>
+<td style="text-align: left;">a loan applicant</td>
+<td style="text-align: left;">good or bad risk</td>
+<td style="text-align: left;">CC BY 4.0</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Credit Card Fraud (Kaggle, ULB)</td>
+<td style="text-align: right;">284,807</td>
+<td style="text-align: left;">a transaction</td>
+<td style="text-align: left;">fraud, 492 cases</td>
+<td style="text-align: left;">DbCL 1.0</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Online Retail (UCI 352)</td>
+<td style="text-align: right;">541,909</td>
+<td style="text-align: left;">an invoice line</td>
+<td style="text-align: left;">none</td>
+<td style="text-align: left;">CC BY 4.0</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Diabetes 130-US hospitals (UCI 296)</td>
+<td style="text-align: right;">101,766</td>
+<td style="text-align: left;">a hospital stay</td>
+<td style="text-align: left;">readmission</td>
+<td style="text-align: left;">CC BY 4.0</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">MovieLens 25M (GroupLens)</td>
+<td style="text-align: right;">25,000,095</td>
+<td style="text-align: left;">a rating</td>
+<td style="text-align: left;">rating prediction</td>
+<td style="text-align: left;">research use, no redistribution</td>
+</tr>
+</tbody>
+</table>
+</div>
+</figure>
+</div>
+<section id="adult-and-why-it-is-retiring" class="level2" data-number="2.1">
+<h2 data-number="2.1" class="anchored" data-anchor-id="adult-and-why-it-is-retiring"><span class="header-section-number">2.1</span> Adult, and why it is retiring</h2>
+<p><strong>Adult</strong> is the dataset of the companion note and of more DP papers than any other table. Barry Becker extracted it from the 1994 Current Population Survey (<a href="https://archive.ics.uci.edu/dataset/2/adult">UCI dataset 2</a>, licence CC BY 4.0). It holds 48,842 people with 14 attributes, and a label saying whether their income exceeded $50,000. It ships split into a training file of 32,561 rows and a test file of 16,281, which the companion note used as the bank’s customers and the next campaign. Its attributes are mostly categorical, its codebook lists every category, and it is small enough to run anything on. That is why it appears in the query-release papers of Hardt, Ligett and McSherry (2012) and Aydore et al.&nbsp;(2021), in every synthetic data benchmark of <a href="#sec-synthetic" class="quarto-xref">Section&nbsp;8</a>, and in the fairness literature. Some papers use a cleaned version of 45,222 rows with the missing values dropped, so a paper’s row count tells you which version it took.</p>
+<p>Adult’s weaknesses are the reason it is being retired. Its data are from 1994, its $50,000 threshold is arbitrary, and its filtering of the survey is undocumented. Ding, Hardt, Miller and Schmidt (2021) built <strong>folktables</strong> to replace it. The library downloads the American Community Survey (ACS) Public Use Microdata Sample (PUMS) from the Census Bureau and derives five prediction tasks from it, for any state and any year from 2014 on. Their Table 1 gives the sizes for the whole United States in 2018. ACSIncome, the direct successor of Adult, has 1,664,500 people with ten features, and ACSEmployment has 3,236,107 with seventeen. ACSPublicCoverage has 1,138,289 people, ACSMobility has 620,937 and ACSTravelTime has 1,466,648. The code is MIT-licensed, and the data fall under the Census Bureau’s terms of service, which allow use and redistribution with attribution (<a href="https://github.com/socialfoundations/folktables">folktables</a>).</p>
+<p>For DP, folktables has two advantages beyond size. A task can be cut by state, which gives datasets from a few thousand records for the smallest states to a few hundred thousand for the largest, and millions for the whole country, all with the same columns. A paper can therefore show how the cost of privacy falls with <span class="math inline">\(n\)</span>. And the same survey underlies the Census Bureau’s own DP work and the NIST synthetic data benchmarks, so results carry over. Vietri et al.&nbsp;(2022) built their synthetic data benchmark from five tasks in five states, and Annamalai, Gadotti and Rocher (2024) used the California employment task to attack synthetic data. A paper that would once have used Adult should now use ACSIncome for one state, and Adult only to compare with older work.</p>
+</section>
+<section id="the-other-common-tables" class="level2" data-number="2.2">
+<h2 data-number="2.2" class="anchored" data-anchor-id="the-other-common-tables"><span class="header-section-number">2.2</span> The other common tables</h2>
+<p>The <strong>UCI Census-Income (KDD)</strong> dataset is Adult’s larger sibling (<a href="https://archive.ics.uci.edu/dataset/117/census+income+kdd">UCI dataset 117</a>, CC BY 4.0). It holds 299,285 records from the 1994 and 1995 surveys with 41 attributes, and the synthetic data literature calls it “Census”. It needs care, because its codebook reports tens of thousands of duplicate or conflicting rows, and a survey weight column that must be dropped before training. <strong>Bank Marketing</strong> records 45,211 telephone contacts of a Portuguese bank’s marketing campaign (<a href="https://archive.ics.uci.edu/dataset/222/bank+marketing">UCI dataset 222</a>, CC BY 4.0). Each row has the client’s attributes and whether they subscribed a term deposit. That makes it the closest public analogue of the companion note’s use case, a campaign with a yes-or-no outcome. It also appears in the synthetic data benchmarks of Tao et al.&nbsp;(2021) and Chen et al.&nbsp;(2025). It exists in two versions with different columns, the original and an extended one with economic indicators, and papers rarely say which they used.</p>
+<p><strong>German Credit</strong> holds 1,000 loan applicants with a good-or-bad label (<a href="https://archive.ics.uci.edu/dataset/144/statlog+german+credit+data">UCI dataset 144</a>, CC BY 4.0). It is too small for DP, as <a href="#sec-what" class="quarto-xref">Section&nbsp;1</a> showed, and it appears mostly in studies of fairness under DP, where its small size is part of the point. The <strong>Credit Card Fraud</strong> dataset from the Université Libre de Bruxelles is the opposite case (<a href="https://www.kaggle.com/datasets/mlg-ulb/creditcardfraud">Kaggle</a>, Database Contents License 1.0). It holds 284,807 card transactions of September 2013, of which only 492 are frauds. The features are 28 anonymized principal components, the time and the amount. Its interest for DP is the extreme imbalance, because a class of 492 records is exactly the kind of count that noise can erase. Two of the synthetic data generators of <a href="#sec-synthetic" class="quarto-xref">Section&nbsp;8</a> evaluate on it: DP-MERF, and a generative adversarial network (GAN) trained through private aggregation of teacher ensembles (PATE), called PATE-GAN.</p>
+<p><strong>Diabetes 130-US hospitals</strong> is the largest freely downloadable clinical table (<a href="https://archive.ics.uci.edu/dataset/296/diabetes+130-us+hospitals+for+years+1999-2008">UCI dataset 296</a>, CC BY 4.0). It holds 101,766 hospital stays of diabetic patients over ten years, with a readmission label. <strong>Online Retail</strong> records 541,909 invoice lines of a UK online shop over thirteen months (<a href="https://archive.ics.uci.edu/dataset/352/online+retail">UCI dataset 352</a>, CC BY 4.0). It has no label, and no DP paper this note could find uses it. It is in the catalogue because it has a customer id on 406,829 of its lines. That makes it the one freely licensed table on which user-level privacy can be studied, and <a href="#sec-users" class="quarto-xref">Section&nbsp;5</a> does so.</p>
+<p>Two Kaggle datasets are also used. <strong>Home Credit Default Risk</strong> is competition data, 307,511 loan applications with 122 columns. The <strong>Lending Club</strong> loan files are the source of the “Loans” dataset of 42,535 records in the query-release papers of Vietri et al.&nbsp;(2020) and Aydore et al.&nbsp;(2021). Both have competition or uploader terms that this note could not verify, so a paper that uses them should say what it was permitted.</p>
+</section>
+<section id="recommendation-data-and-the-warning-of-netflix" class="level2" data-number="2.3">
+<h2 data-number="2.3" class="anchored" data-anchor-id="recommendation-data-and-the-warning-of-netflix"><span class="header-section-number">2.3</span> Recommendation data, and the warning of Netflix</h2>
+<p><strong>MovieLens</strong> is the standard dataset for recommendation, released by GroupLens for research with a condition against redistribution (<a href="https://files.grouplens.org/datasets/movielens/">GroupLens</a>). It comes in sizes from 100,000 ratings by 943 users to 25,000,095 ratings by 162,541 users. Each record is one rating, and each user has many, so it is a user-level dataset, which is why the DP recommendation literature uses it. Jain, Thakkar and Thakurta (2018) train DP matrix completion on it and on the <strong>Netflix Prize</strong> data, 100,480,507 ratings by 480,189 subscribers.</p>
+<p>The Netflix data are the warning that opens most privacy courses. Netflix released them in 2006 with the subscriber names removed. Narayanan and Shmatikov (2008) then showed that eight ratings, two of them wrong, with dates known to within two weeks, identify 99% of subscribers uniquely. The side information was public reviews on IMDb. The dataset was withdrawn after a lawsuit and is no longer distributed, though copies circulate. McSherry and Mironov (2009) showed on the same data that DP recommenders lose little accuracy, which made it one of the first demonstrations of DP at scale. The lesson for a dataset catalogue is that “anonymized” means nothing without a definition, and that DP is the definition this note is about.</p>
+</section>
+<section id="the-census-bureaus-own-data" class="level2" data-number="2.4">
+<h2 data-number="2.4" class="anchored" data-anchor-id="the-census-bureaus-own-data"><span class="header-section-number">2.4</span> The Census Bureau’s own data</h2>
+<p>The US Census Bureau protected the 2020 Census with DP, and the data around that decision are a resource of their own. The TopDown algorithm of Abowd et al.&nbsp;(2022) adds discrete Gaussian noise to counts at every level of geography and then fits the published tables to those noisy measurements. The redistricting data were released with a total budget of <span class="math inline">\(\varepsilon = 19.61\)</span>, of which 17.14 went to persons and 2.47 to housing units (<a href="https://www.census.gov/newsroom/press-releases/2021/2020-census-key-parameters.html">Census Bureau, June 2021</a>). To let researchers study the effect, the Bureau ran the same algorithm on the 2010 Census and published the results as demonstration data. Development releases used budgets of 4.5 and 12.2, and a 2023 release used the production settings (<a href="https://www.census.gov/programs-surveys/decennial-census/decade/2020/planning-management/process/disclosure-avoidance/2020-das-development.html">2020 DAS development</a>). It also published the noisy measurement file itself, the counts after noise and before fitting, which is as close to a raw DP release as any statistics office has gone (<a href="https://registry.opendata.aws/census-2010-pl94-nmf">AWS Open Data</a>). Kenny et al.&nbsp;(2021) used the demonstration data to measure what DP did to redistricting.</p>
+<p>The Bureau’s test data for the algorithm were the full-count 1940 Census, which IPUMS distributes to registered users, and whose Colorado extract became the data of the first NIST challenge in <a href="#sec-synthetic" class="quarto-xref">Section&nbsp;8</a> (<a href="https://usa.ipums.org/usa/1940CensusDASTestData.shtml">IPUMS</a>). The ACS PUMS is the Bureau’s other public microdata, and it is the source of folktables and of the NIST excerpts below (<a href="https://www.census.gov/programs-surveys/acs/microdata.html">ACS PUMS</a>).</p>
+</section>
+</section>
+<section id="sec-images" class="level1" data-number="3">
+<h1 data-number="3"><span class="header-section-number">3</span> Images</h1>
+<p>The private form of stochastic gradient descent (SGD), called DP-SGD, was introduced on image classification, and that is where its progress is measured, so a few image datasets carry most of the DP deep-learning literature. DP-SGD trains on randomly sampled batches, clips each example’s gradient to a fixed norm and adds Gaussian noise to every update. An accountant then turns the noise and the number of steps into an <span class="math inline">\((\varepsilon, \delta)\)</span> guarantee. <a href="#tbl-images" class="quarto-xref">Table&nbsp;5</a> lists the datasets with the results they are known for, and the text explains what those results mean and what each dataset’s terms allow.</p>
+<div id="tbl-images" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-tbl figure">
+<figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl" id="tbl-images-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Table&nbsp;5: The image datasets of DP deep learning. Train + test sizes are as the source page states them; each result is at δ = 10⁻⁵ unless the paper states otherwise.
+</figcaption>
+<div aria-describedby="tbl-images-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<table class="caption-top table">
+<colgroup>
+<col style="width: 20%">
+<col style="width: 20%">
+<col style="width: 20%">
+<col style="width: 20%">
+<col style="width: 20%">
+</colgroup>
+<thead>
+<tr class="header">
+<th style="text-align: left;">Dataset</th>
+<th style="text-align: right;">Images</th>
+<th style="text-align: right;">Classes</th>
+<th style="text-align: left;">Licence or terms</th>
+<th style="text-align: left;">A DP result</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: left;">MNIST</td>
+<td style="text-align: right;">60,000 + 10,000</td>
+<td style="text-align: right;">10</td>
+<td style="text-align: left;">none stated</td>
+<td style="text-align: left;">98.7% at <span class="math inline">\(\varepsilon = 2.93\)</span> (Tramèr and Boneh, 2021)</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Fashion-MNIST</td>
+<td style="text-align: right;">60,000 + 10,000</td>
+<td style="text-align: right;">10</td>
+<td style="text-align: left;">MIT</td>
+<td style="text-align: left;">89.7% at <span class="math inline">\(\varepsilon = 3\)</span> (Tramèr and Boneh, 2021)</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">CIFAR-10</td>
+<td style="text-align: right;">50,000 + 10,000</td>
+<td style="text-align: right;">10</td>
+<td style="text-align: left;">none stated</td>
+<td style="text-align: left;">81.4% at <span class="math inline">\(\varepsilon = 8\)</span> from scratch (De et al., 2022)</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">CIFAR-100</td>
+<td style="text-align: right;">50,000 + 10,000</td>
+<td style="text-align: right;">100</td>
+<td style="text-align: left;">none stated</td>
+<td style="text-align: left;">81.8% at <span class="math inline">\(\varepsilon = 8\)</span> with ImageNet pre-training (De et al., 2022)</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">ImageNet (ILSVRC 2012)</td>
+<td style="text-align: right;">1,281,167 + 50,000</td>
+<td style="text-align: right;">1,000</td>
+<td style="text-align: left;">non-commercial research</td>
+<td style="text-align: left;">32.4% at <span class="math inline">\(\varepsilon = 8\)</span> from scratch (De et al., 2022)</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Places365-Standard</td>
+<td style="text-align: right;">1,803,460</td>
+<td style="text-align: right;">365</td>
+<td style="text-align: left;">non-commercial, no redistribution</td>
+<td style="text-align: left;">public pre-training data (Kurakin et al., 2022)</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">CelebA</td>
+<td style="text-align: right;">202,599</td>
+<td style="text-align: right;">40 attributes</td>
+<td style="text-align: left;">non-commercial research</td>
+<td style="text-align: left;">FID 21.1 at <span class="math inline">\(\varepsilon = 10\)</span> (Dockhorn et al., 2022)</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Camelyon17 (WILDS)</td>
+<td style="text-align: right;">455,954 patches</td>
+<td style="text-align: right;">2</td>
+<td style="text-align: left;">CC0</td>
+<td style="text-align: left;">91.1% at <span class="math inline">\(\varepsilon = 10\)</span> (Ghalebikesabi et al., 2023)</td>
+</tr>
+</tbody>
+</table>
+</div>
+</figure>
+</div>
+<p><strong>MNIST</strong> and <strong>CIFAR-10</strong> are the two datasets of Abadi et al.&nbsp;(2016), the paper that introduced DP-SGD, and every later paper reports on them to be comparable. MNIST’s 70,000 handwritten digits are so easy that DP costs little. Abadi et al.&nbsp;reached 90% at <span class="math inline">\(\varepsilon = 0.5\)</span>, 95% at <span class="math inline">\(\varepsilon = 2\)</span> and 97% at <span class="math inline">\(\varepsilon = 8\)</span>. Tramèr and Boneh (2021) then reached 98.7% at <span class="math inline">\(\varepsilon = 2.93\)</span> with hand-designed features and a linear model, close to the non-private 99%. MNIST’s original page served no files when this note was checked, and it states no licence, so papers load it from a mirror. <strong>Fashion-MNIST</strong>, Zalando’s drop-in replacement with clothing items, is harder and MIT-licensed (<a href="https://github.com/zalandoresearch/fashion-mnist">Fashion-MNIST</a>).</p>
+<p>CIFAR-10 is where the gap shows. Its 60,000 colour images in ten classes (<a href="https://www.cs.toronto.edu/~kriz/cifar.html">CIFAR</a>) are classified at over 95% without privacy, and Abadi et al.&nbsp;reached 73% at <span class="math inline">\(\varepsilon = 8\)</span>, with convolutional layers pre-trained on CIFAR-100 treated as public. De et al.&nbsp;(2022) raised the from-scratch result to 81.4% at <span class="math inline">\(\varepsilon = 8\)</span> by scaling up the model and the batch, and to 96.7% with a model pre-trained on ImageNet. The second number is the one to read carefully, since it depends on what counts as public data, and <a href="#sec-text" class="quarto-xref">Section&nbsp;4</a> comes back to that. CIFAR’s page states no licence at all, and the images were collected from the web, which has not stopped anyone from using it.</p>
+<p><strong>ImageNet</strong> is the test of whether DP training scales. It has 1,281,167 training images in 1,000 classes, and access requires agreeing to use it only for non-commercial research (<a href="https://www.image-net.org/download.php">ImageNet</a>). Kurakin et al.&nbsp;(2022) trained a ResNet-18 to 47.9% at <span class="math inline">\(\varepsilon = 10\)</span>, against 75% without privacy, after pre-training on Places365. De et al.&nbsp;(2022) reached 32.4% from scratch at <span class="math inline">\(\varepsilon = 8\)</span>, and 86.7% by fine-tuning a model pre-trained on JFT-4B, a Google-internal dataset of four billion images that nobody else can use. The two numbers for one dataset at one budget are the clearest illustration in this note that a DP result means nothing without its public data stated.</p>
+<p><strong>CelebA</strong> and <strong>Camelyon17</strong> are the datasets of DP image synthesis, which <a href="#sec-synthetic" class="quarto-xref">Section&nbsp;8</a> covers. CelebA’s 202,599 face images with forty attributes are for non-commercial research only (<a href="https://mmlab.ie.cuhk.edu.hk/projects/CelebA.html">CelebA</a>). Dockhorn et al.&nbsp;(2022) report a Fréchet inception distance (FID) of 21.1 at <span class="math inline">\(\varepsilon = 10\)</span> for DP diffusion models trained on it. Camelyon17 is different in kind: 455,954 histopathology patches from five Dutch hospitals, labelled for tumour tissue, in the public domain under CC0 (<a href="https://wilds.stanford.edu/datasets/">WILDS</a>). It is the one image dataset in this note whose contents resemble data that would actually be private. Ghalebikesabi et al.&nbsp;(2023) reached 91.1% on it at <span class="math inline">\(\varepsilon = 10\)</span> by fine-tuning a diffusion model pre-trained on ImageNet.</p>
+<p>Two recent benchmark papers judge these choices. Mokhtari et al.&nbsp;(2026) argue that MNIST, CIFAR-10 and ImageNet have nothing private about them. They propose two medical datasets, CheXpert and EyePACS, for private fine-tuning, with tiers for what public data a method may use. DPMLBench, by Wei et al.&nbsp;(2023), compares twelve DP training algorithms on MNIST, Fashion-MNIST, CIFAR-10 and the street-view house numbers of SVHN, and finds that the ranking depends on the dataset. Neither counts how often each dataset is used, and this note found no paper that does.</p>
+</section>
+<section id="sec-text" class="level1" data-number="4">
+<h1 data-number="4"><span class="header-section-number">4</span> Text</h1>
+<p>Language models memorize their training data, which is why DP matters for them and why the datasets of DP language modelling are the ones where memorization was first shown. This section lists them, then takes up the question that every DP text result now turns on, which is what the model saw before DP training began.</p>
+<div id="tbl-text" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-tbl figure">
+<figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl" id="tbl-text-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Table&nbsp;6: The text datasets of DP fine-tuning. The GLUE sizes are training sets; each result is development-set accuracy.
+</figcaption>
+<div aria-describedby="tbl-text-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<table class="caption-top table">
+<colgroup>
+<col style="width: 20%">
+<col style="width: 20%">
+<col style="width: 20%">
+<col style="width: 20%">
+<col style="width: 20%">
+</colgroup>
+<thead>
+<tr class="header">
+<th style="text-align: left;">Dataset</th>
+<th style="text-align: right;">Size</th>
+<th style="text-align: left;">Task</th>
+<th style="text-align: left;">Licence</th>
+<th style="text-align: left;">A DP result</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: left;">SST-2 (GLUE)</td>
+<td style="text-align: right;">67,349 sentences</td>
+<td style="text-align: left;">sentiment</td>
+<td style="text-align: left;">not stated</td>
+<td style="text-align: left;">93.0% at <span class="math inline">\(\varepsilon = 3\)</span> (Li et al., 2022)</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">MNLI (GLUE)</td>
+<td style="text-align: right;">392,702 pairs</td>
+<td style="text-align: left;">entailment</td>
+<td style="text-align: left;">not stated</td>
+<td style="text-align: left;">87.8% at <span class="math inline">\(\varepsilon = 6.7\)</span> (Yu et al., 2022)</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">QNLI, QQP (GLUE)</td>
+<td style="text-align: right;">104,743; 363,846</td>
+<td style="text-align: left;">question answering; paraphrase</td>
+<td style="text-align: left;">not stated</td>
+<td style="text-align: left;">90.8%; 86.4% at <span class="math inline">\(\varepsilon = 3\)</span> (Li et al., 2022)</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">E2E NLG</td>
+<td style="text-align: right;">42,061 pairs</td>
+<td style="text-align: left;">table to text</td>
+<td style="text-align: left;">CC BY-SA 4.0</td>
+<td style="text-align: left;">BLEU 61.5 at <span class="math inline">\(\varepsilon = 3\)</span> (Li et al., 2022)</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">DART</td>
+<td style="text-align: right;">30,526 instances</td>
+<td style="text-align: left;">table to text</td>
+<td style="text-align: left;">MIT</td>
+<td style="text-align: left;">BLEU 43.8 at <span class="math inline">\(\varepsilon = 6.8\)</span> (Yu et al., 2022)</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">PersonaChat</td>
+<td style="text-align: right;">162,064 utterances</td>
+<td style="text-align: left;">dialogue</td>
+<td style="text-align: left;">not stated</td>
+<td style="text-align: left;">used by Li et al.&nbsp;(2022)</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">WikiText-103</td>
+<td style="text-align: right;">103 million tokens</td>
+<td style="text-align: left;">language modelling</td>
+<td style="text-align: left;">CC BY-SA</td>
+<td style="text-align: left;">not in the four papers checked</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Enron emails</td>
+<td style="text-align: right;">about 500,000 messages, 150 users</td>
+<td style="text-align: left;">memorization studies</td>
+<td style="text-align: left;">none</td>
+<td style="text-align: left;">real personal mail</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Yelp reviews (processed)</td>
+<td style="text-align: right;">1.9 million reviews</td>
+<td style="text-align: left;">synthetic text</td>
+<td style="text-align: left;">Yelp terms</td>
+<td style="text-align: left;">see <a href="#sec-synthetic" class="quarto-xref">Section&nbsp;8</a></td>
+</tr>
+</tbody>
+</table>
+</div>
+</figure>
+</div>
+<p>The DP fine-tuning papers of 2022 fixed the benchmarks. Li et al.&nbsp;(2022) and Yu et al.&nbsp;(2022) both fine-tune RoBERTa on four classification tasks of the GLUE benchmark of language understanding, which are SST-2, QNLI, QQP and MNLI. Both also fine-tune GPT-2 on the table-to-text datasets E2E and DART (<a href="https://www.tensorflow.org/datasets/catalog/glue">GLUE sizes</a>). Their results are the reference points of <a href="#tbl-text" class="quarto-xref">Table&nbsp;6</a>. At <span class="math inline">\(\varepsilon = 3\)</span> a large model fine-tuned with DP is within a few points of its non-private accuracy on every GLUE task. On E2E the cost shows in the BLEU score, a measure from 0 to 100 of how closely generated text matches reference text, which falls from 69.5 to 61.5. GLUE’s tasks come with the licences of their underlying datasets, which the GLUE page does not restate, and its test labels are hidden, so papers report on the development sets. E2E is CC BY-SA 4.0 (<a href="https://github.com/tuetschek/e2e-dataset">E2E</a>) and DART is MIT (<a href="https://github.com/Yale-LILY/dart">DART</a>).</p>
+<p>The older language-modelling benchmarks appear in DP work less than one would expect. They are <strong>WikiText-103</strong>, 103 million tokens of Wikipedia under CC BY-SA (<a href="https://huggingface.co/datasets/Salesforce/wikitext">WikiText</a>), and the <strong>Penn Treebank</strong>, which the Linguistic Data Consortium licenses for a fee. None of the four papers above evaluates on them. The <strong>Enron emails</strong> are about half a million messages of 150 Enron employees, released by a court (<a href="https://www.cs.cmu.edu/~enron/">CMU</a>). They are the standard testbed for memorization and extraction attacks, because they are real personal mail with real names in it. They have no licence, only a request to respect the privacy of the people involved, which is itself a reason to think before using them.</p>
+<section id="what-the-model-saw-first" class="level2" data-number="4.1">
+<h2 data-number="4.1" class="anchored" data-anchor-id="what-the-model-saw-first"><span class="header-section-number">4.1</span> What the model saw first</h2>
+<p>Every result in <a href="#tbl-text" class="quarto-xref">Table&nbsp;6</a> comes from a model pre-trained on a public corpus and then fine-tuned with DP, and the pre-training is where the accuracy comes from. The corpora are Wikipedia and books for BERT and RoBERTa, WebText for GPT-2, and C4 or the Pile for later models. Anil et al.&nbsp;(2022) showed what DP costs without that help. They pre-trained BERT itself with DP on Wikipedia and books, 346 million examples. Reaching a masked-language-model accuracy of 60.5% at <span class="math inline">\(\varepsilon = 5.36\)</span>, against about 70% without privacy, took a batch of two million examples.</p>
+<p>Tramèr, Kamath and Carlini (2024) ask whether the recipe is honest. A web corpus contains personal data of people who never consented, so a model “pre-trained publicly” has already absorbed private information, and the DP guarantee on the fine-tuning says nothing about it. The corpus may also contain the benchmark itself. C4 is 364,868,892 documents of filtered Common Crawl, under ODC-BY (<a href="https://huggingface.co/datasets/allenai/c4">C4</a>). The Pile is 825 GiB from 22 sources (<a href="https://pile.eleuther.ai/">the Pile</a>), one of which was removed in 2023 after copyright notices. A paper that reports a DP result on text should therefore state the pre-training corpus, and a reader should treat the public data as part of the method. Ponomareva et al.&nbsp;(2023) put this in their reporting checklist, next to the privacy unit and the neighbouring relation.</p>
+</section>
+</section>
+<section id="sec-users" class="level1" data-number="5">
+<h1 data-number="5"><span class="header-section-number">5</span> Datasets with user identifiers</h1>
+<p>A guarantee about a person needs a dataset that knows which records are the person’s. Few benchmarks do, and this section catalogues the ones that do, which are mostly the datasets of federated learning. It then uses Online Retail to show what user-level privacy costs, with numbers from the script.</p>
+<div id="tbl-users" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-tbl figure">
+<figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl" id="tbl-users-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Table&nbsp;7: The datasets with user identifiers. Records per user is the mean as the source reports it, or as the script computes it for Online Retail.
+</figcaption>
+<div aria-describedby="tbl-users-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<table class="caption-top table">
+<colgroup>
+<col style="width: 20%">
+<col style="width: 20%">
+<col style="width: 20%">
+<col style="width: 20%">
+<col style="width: 20%">
+</colgroup>
+<thead>
+<tr class="header">
+<th style="text-align: left;">Dataset</th>
+<th style="text-align: right;">Users</th>
+<th style="text-align: right;">Records</th>
+<th style="text-align: right;">Records per user</th>
+<th style="text-align: left;">Licence</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: left;">Stack Overflow (TFF)</td>
+<td style="text-align: right;">342,477 train</td>
+<td style="text-align: right;">135,818,730</td>
+<td style="text-align: right;">about 400</td>
+<td style="text-align: left;">CC BY-SA 3.0</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Reddit (LEAF)</td>
+<td style="text-align: right;">1,660,820</td>
+<td style="text-align: right;">56,587,343</td>
+<td style="text-align: right;">34</td>
+<td style="text-align: left;">not stated</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">FEMNIST (LEAF)</td>
+<td style="text-align: right;">3,550</td>
+<td style="text-align: right;">805,263</td>
+<td style="text-align: right;">227</td>
+<td style="text-align: left;">not stated</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Shakespeare (TFF)</td>
+<td style="text-align: right;">715</td>
+<td style="text-align: right;">16,068</td>
+<td style="text-align: right;">22</td>
+<td style="text-align: left;">public-domain text</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">CelebA (LEAF)</td>
+<td style="text-align: right;">9,343</td>
+<td style="text-align: right;">200,288</td>
+<td style="text-align: right;">21</td>
+<td style="text-align: left;">non-commercial research</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Sentiment140 (LEAF)</td>
+<td style="text-align: right;">660,120</td>
+<td style="text-align: right;">1,600,498</td>
+<td style="text-align: right;">2.4</td>
+<td style="text-align: left;">research use</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">FLAIR (Apple)</td>
+<td style="text-align: right;">51,414</td>
+<td style="text-align: right;">429,078</td>
+<td style="text-align: right;">8.3</td>
+<td style="text-align: left;">CC BY-NC 4.0 annotations</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Online Retail (UCI)</td>
+<td style="text-align: right;">4,372</td>
+<td style="text-align: right;">406,829</td>
+<td style="text-align: right;">93 (median 42)</td>
+<td style="text-align: left;">CC BY 4.0</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">MovieLens 25M</td>
+<td style="text-align: right;">162,541</td>
+<td style="text-align: right;">25,000,095</td>
+<td style="text-align: right;">154</td>
+<td style="text-align: left;">research use</td>
+</tr>
+</tbody>
+</table>
+</div>
+</figure>
+</div>
+<p>The <strong>LEAF</strong> benchmark of Caldas et al.&nbsp;(2018) and the datasets module of TensorFlow Federated (TFF) are where most of these live. <strong>Stack Overflow</strong> is the largest, with 342,477 training users and 135,818,730 questions and answers between them, under CC BY-SA 3.0 (<a href="https://www.tensorflow.org/federated/api_docs/python/tff/simulation/datasets/stackoverflow/load_data">TFF</a>). Kairouz et al.&nbsp;(2021) used it to test the private form of follow the regularized leader (FTRL), called DP-FTRL. That training method adds noise that is correlated across steps instead of relying on DP-SGD’s random sampling of batches, which a deployment on phones cannot guarantee. With user-level privacy at <span class="math inline">\(\varepsilon \approx 18.7\)</span> it trains a next-word model to about 21% accuracy, against 25% without privacy. <strong>Reddit</strong> in LEAF is one month of comments by 1,660,820 users. McMahan et al.&nbsp;(2018) trained the first user-level DP language model on a different cut of the same source, with 763,430 users, and lost almost no accuracy at <span class="math inline">\((4.634, 10^{-9})\)</span>-DP.</p>
+<p>The smaller ones serve for quick experiments. <strong>FEMNIST</strong> gives EMNIST’s handwritten characters back to their 3,550 writers, and <strong>Shakespeare</strong> makes each speaking role a user (<a href="https://leaf.cmu.edu/">LEAF</a>). Apple’s <strong>FLAIR</strong> is a newer image dataset built for the purpose (<a href="https://github.com/apple/ml-flair">FLAIR</a>). It has 429,078 Flickr photos from 51,414 users, split by user, and its annotations are CC BY-NC 4.0 while the images keep their owners’ licences.</p>
+<p>The deployed systems that these datasets simulate are not public. Google’s Gboard models are trained on device with DP-FTRL. Xu et al.&nbsp;(2023) state the guarantee in zero-concentrated DP (zCDP), a form of the guarantee with a single parameter <span class="math inline">\(\rho\)</span> that bounds the privacy loss in every moment and converts to an <span class="math inline">\((\varepsilon, \delta)\)</span> pair. The launched models have <span class="math inline">\(\rho\)</span> between 0.2 and 2, over populations of a million to seventeen million devices per language. At <span class="math inline">\(\delta = 10^{-10}\)</span> the paper converts that to an <span class="math inline">\(\varepsilon\)</span> between 4.49 and 13.69. Stack Overflow is the public stand-in for that setting, and its per-user record counts are the reason. A user with 400 posts is the heavy contributor that user-level DP has to bound.</p>
+<section id="what-user-level-data-costs-online-retail" class="level2" data-number="5.1">
+<h2 data-number="5.1" class="anchored" data-anchor-id="what-user-level-data-costs-online-retail"><span class="header-section-number">5.1</span> What user-level data costs: Online Retail</h2>
+<p>Online Retail is the one dataset in this note’s code that has a user identifier, so it serves here to show what user-level privacy does to a release. Of its 541,909 invoice lines, 406,829 carry one of 4,372 customer ids. One record is one line, one product on one invoice. The script counts the lines of each identified customer, and <a href="#fig-contributions" class="quarto-xref">Figure&nbsp;2</a> shows the result on the left. The median customer has 42 lines, one in ten has more than 212, one in a hundred has more than 672, and the heaviest has 7,983. That long tail is typical of any dataset where people act repeatedly, and it is what makes user-level privacy expensive.</p>
+<div id="fig-contributions" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-contributions-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="figures/contributions.svg" class="img-fluid figure-img">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-contributions-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;2: Left: the share of Online Retail’s customers with more than k invoice lines. Right: the error of a user-level DP histogram of lines per month, against the number of lines each customer is allowed to keep.
+</figcaption>
+</figure>
+</div>
+<p>Consider releasing the number of lines in each of the thirteen months, with the customer as the privacy unit. Adding or removing a customer moves all of their lines, so the histogram’s sensitivity is the largest number of lines any customer has, 7,983, and Laplace noise of that scale is useless. The standard fix is to <strong>bound the contribution</strong>: choose a bound <span class="math inline">\(k\)</span> and keep at most <span class="math inline">\(k\)</span> lines of each customer. That caps the sensitivity at <span class="math inline">\(k\)</span>, but it drops the rest of a heavy customer’s purchases. The release then has two errors that pull in opposite directions. The lines dropped from heavy customers bias every month’s count downward, and that bias shrinks as <span class="math inline">\(k\)</span> grows. The Laplace noise has scale <span class="math inline">\(k/\varepsilon\)</span>, so it grows with <span class="math inline">\(k\)</span>. The right panel of <a href="#fig-contributions" class="quarto-xref">Figure&nbsp;2</a> plots the root mean squared error over the thirteen months against <span class="math inline">\(k\)</span>, when each customer keeps their first <span class="math inline">\(k\)</span> lines in date order. <a href="#tbl-contributions" class="quarto-xref">Table&nbsp;8</a> gives a few of its points.</p>
+<div id="tbl-contributions" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-tbl figure">
+<figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl" id="tbl-contributions-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Table&nbsp;8: Bounding each customer of Online Retail to k invoice lines, and what it does to a user-level DP histogram of lines per month at ε = 1. The bias falls and the noise grows with k.
+</figcaption>
+<div aria-describedby="tbl-contributions-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<table class="caption-top table">
+<colgroup>
+<col style="width: 16%">
+<col style="width: 16%">
+<col style="width: 16%">
+<col style="width: 16%">
+<col style="width: 16%">
+<col style="width: 16%">
+</colgroup>
+<thead>
+<tr class="header">
+<th style="text-align: right;">Bound <span class="math inline">\(k\)</span></th>
+<th style="text-align: right;">Customers above it</th>
+<th style="text-align: right;">Lines kept</th>
+<th style="text-align: right;">Lines dropped per month</th>
+<th style="text-align: right;">Noise sd at <span class="math inline">\(\varepsilon = 1\)</span></th>
+<th style="text-align: right;">RMSE at <span class="math inline">\(\varepsilon = 1\)</span></th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: right;">10</td>
+<td style="text-align: right;">84.8%</td>
+<td style="text-align: right;">10.0%</td>
+<td style="text-align: right;">28,156</td>
+<td style="text-align: right;">14</td>
+<td style="text-align: right;">30,980</td>
+</tr>
+<tr class="even">
+<td style="text-align: right;">42</td>
+<td style="text-align: right;">49.4%</td>
+<td style="text-align: right;">32.4%</td>
+<td style="text-align: right;">21,146</td>
+<td style="text-align: right;">59</td>
+<td style="text-align: right;">24,483</td>
+</tr>
+<tr class="odd">
+<td style="text-align: right;">100</td>
+<td style="text-align: right;">25.3%</td>
+<td style="text-align: right;">54.6%</td>
+<td style="text-align: right;">14,217</td>
+<td style="text-align: right;">141</td>
+<td style="text-align: right;">17,434</td>
+</tr>
+<tr class="even">
+<td style="text-align: right;">212</td>
+<td style="text-align: right;">10.0%</td>
+<td style="text-align: right;">73.6%</td>
+<td style="text-align: right;">8,263</td>
+<td style="text-align: right;">300</td>
+<td style="text-align: right;">10,769</td>
+</tr>
+<tr class="odd">
+<td style="text-align: right;">500</td>
+<td style="text-align: right;">2.0%</td>
+<td style="text-align: right;">88.1%</td>
+<td style="text-align: right;">3,731</td>
+<td style="text-align: right;">707</td>
+<td style="text-align: right;">5,079</td>
+</tr>
+<tr class="even">
+<td style="text-align: right;">1,000</td>
+<td style="text-align: right;">0.5%</td>
+<td style="text-align: right;">93.0%</td>
+<td style="text-align: right;">2,189</td>
+<td style="text-align: right;">1,414</td>
+<td style="text-align: right;">3,435</td>
+</tr>
+<tr class="odd">
+<td style="text-align: right;">7,983</td>
+<td style="text-align: right;">0.0%</td>
+<td style="text-align: right;">100.0%</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">11,290</td>
+<td style="text-align: right;">11,290</td>
+</tr>
+</tbody>
+</table>
+</div>
+</figure>
+</div>
+<p>At <span class="math inline">\(\varepsilon = 1\)</span> the error is smallest at a bound of 1,263 lines, where it is 3,294 lines against a monthly average of 31,295, so about a tenth of the count. Keeping every line instead gives an error of 11,290, more than three times worse, and so does bounding too tightly. At <span class="math inline">\(k = 42\)</span>, the median, the bias alone is 21,146 lines a month. At <span class="math inline">\(\varepsilon = 0.1\)</span> the best bound moves down to 399 lines, and the best error is 8,421. So a user-level experiment needs the per-user counts reported, because the right bound, and the cost of privacy, depend on the tail of that distribution and on nothing else about the data.</p>
+</section>
+</section>
+<section id="sec-other" class="level1" data-number="6">
+<h1 data-number="6"><span class="header-section-number">6</span> Locations, graphs and clinical records</h1>
+<p>Three kinds of data have DP literatures of their own, with their own datasets. Locations are the most sensitive data most people generate, graphs make the privacy unit ambiguous, and clinical records are the data DP was meant for but can rarely be downloaded. This section lists what each literature uses.</p>
+<section id="locations-and-trajectories" class="level2" data-number="6.1">
+<h2 data-number="6.1" class="anchored" data-anchor-id="locations-and-trajectories"><span class="header-section-number">6.1</span> Locations and trajectories</h2>
+<p>A trajectory is a sequence of timed positions, and one person’s trajectory is one record, so trajectory datasets are user-level by construction. <strong>GeoLife</strong> holds 17,621 trajectories of 182 Microsoft Research volunteers in Beijing between 2007 and 2012 (<a href="https://www.microsoft.com/en-us/download/details.aspx?id=52367">GeoLife</a>), with no licence stated and a request to cite. <strong>T-Drive</strong> is one week of 10,357 Beijing taxis, about fifteen million GPS points, from the same group. The <strong>Porto taxi</strong> data from the ECML/PKDD 2015 challenge hold 1,710,671 trips of 442 taxis over one year, under CC BY 4.0 at UCI (<a href="https://archive.ics.uci.edu/dataset/339/taxi+service+trajectory+prediction+challenge+ecml+pkdd+2015">Porto</a>). They are the dataset most DP trajectory papers share.</p>
+<p>Two check-in datasets are also used. <strong>Gowalla</strong> from the Stanford Network Analysis Project (SNAP) has 6,442,890 check-ins with user ids and a friendship graph, and the <strong>Foursquare</strong> check-ins of Dingqi Yang have 227,428 records for New York and 573,703 for Tokyo.</p>
+<p>The DP work on these is synthesis. AdaTrace, by Gursoy et al.&nbsp;(2018), generates synthetic trajectories and is evaluated on GeoLife and Porto. PrivTrace, by Wang et al.&nbsp;(2022), does the same with adaptive Markov models, on GeoLife, Porto and a simulated city. Buchholz et al.&nbsp;(2024) review six generative models on GeoLife and Foursquare and find that most offer no formal guarantee. The older query-release line, Qardaji, Yang and Li (2013), released two-dimensional counts over Gowalla check-ins and road intersections. DPBench, the benchmark of Hay et al.&nbsp;(2016) for range queries, kept Gowalla among its twenty-seven datasets. The one public DP release of location data is Google’s, in <a href="#sec-released" class="quarto-xref">Section&nbsp;7</a>.</p>
+</section>
+<section id="graphs" class="level2" data-number="6.2">
+<h2 data-number="6.2" class="anchored" data-anchor-id="graphs"><span class="header-section-number">6.2</span> Graphs</h2>
+<p>In a graph the privacy unit is a choice. <strong>Edge-level</strong> DP hides one relationship, and <strong>node-level</strong> DP hides a person with all of their relationships. The second is far harder, because one person’s node can touch many edges, so a count can change by their whole degree when they are added or removed. The datasets come from SNAP, which states no licence for its collections. Karwa et al.&nbsp;(2011) released subgraph counts of five arXiv collaboration graphs and of the Enron email graph of 36,692 addresses. The <strong>ego-Facebook</strong> graph of 4,039 users and 88,234 friendships is the small standard. Under local DP, where each person randomizes their own data before it leaves them, Imola, Murakami and Chaudhuri (2021) counted triangles and stars. They used an IMDb actor graph of 896,308 nodes and Orkut with 3,072,441 nodes. The DP graph neural network papers, such as Sajadmanesh et al.&nbsp;(2023), use the citation graph <strong>Cora</strong> with 2,708 papers, together with Reddit, Amazon co-purchases and the Facebook100 friendship networks. Daigavane et al.&nbsp;(2021) use the Open Graph Benchmark’s arXiv and products graphs.</p>
+</section>
+<section id="clinical-records" class="level2" data-number="6.3">
+<h2 data-number="6.3" class="anchored" data-anchor-id="clinical-records"><span class="header-section-number">6.3</span> Clinical records</h2>
+<p><strong>MIMIC-III</strong> is the dataset that DP clinical papers use (<a href="https://physionet.org/content/mimiciii/1.4/">PhysioNet</a>). It holds the intensive-care unit (ICU) records of over forty thousand patients at one Boston hospital, from 2001 to 2012. The exact counts often quoted, 46,520 patients and 58,976 admissions, come from the database’s schema documentation rather than its paper, and this note could not confirm them on PhysioNet. Access needs PhysioNet credentialing, a training course and a signed data use agreement. The agreement forbids redistributing anything derived from the data. So the DP-GAN of Xie et al.&nbsp;(2018) and the DP-auto-GAN of Tantipongpipat et al.&nbsp;(2019) train on it, but their synthetic records cannot be released. Suriyakumar et al.&nbsp;(2021) show on the same data that DP-SGD hurts the rarest patients most.</p>
+<p>The other clinical databases follow the same pattern. <strong>MIMIC-IV</strong> extends MIMIC-III to 364,627 people through 2022, and the <strong>eICU</strong> database holds over 200,000 stays from 208 hospitals, under the same terms. The two freely downloadable clinical datasets are the PhysioNet 2012 challenge, with 12,000 ICU stays under an open licence, and Diabetes 130-US hospitals from <a href="#sec-tabular" class="quarto-xref">Section&nbsp;2</a>. The <strong>Texas Hospital Inpatient Discharge</strong> files sit in between. They can be downloaded, but under a state data use agreement with penalties for re-identification. Stadler, Oprisanu and Troncoso (2022) used 50,000-record samples of them to attack synthetic data.</p>
+</section>
+</section>
+<section id="sec-released" class="level1" data-number="7">
+<h1 data-number="7"><span class="header-section-number">7</span> Public DP releases as datasets</h1>
+<p>A handful of organizations have published data with a DP guarantee, and those releases are datasets too, with a known <span class="math inline">\(\varepsilon\)</span> attached. They are worth knowing for two reasons. They show what budgets are used in practice, and they are the only public data whose noise a reader can study. <a href="#tbl-released" class="quarto-xref">Table&nbsp;9</a> lists them.</p>
+<div id="tbl-released" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-tbl figure">
+<figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl" id="tbl-released-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Table&nbsp;9: Real DP releases and their stated guarantees, as the publishing organization reports them.
+</figcaption>
+<div aria-describedby="tbl-released-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<table class="caption-top table">
+<thead>
+<tr class="header">
+<th style="text-align: left;">Release</th>
+<th style="text-align: left;">What is published</th>
+<th style="text-align: left;">Guarantee</th>
+<th style="text-align: left;">Where</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: left;">US Census 2020 redistricting data</td>
+<td style="text-align: left;">population counts by geography</td>
+<td style="text-align: left;"><span class="math inline">\(\varepsilon = 19.61\)</span> in total, zCDP accounting</td>
+<td style="text-align: left;"><a href="https://data.census.gov">data.census.gov</a></td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">2010 Census demonstration data</td>
+<td style="text-align: left;">the same algorithm on 2010 data, and the noisy measurement file</td>
+<td style="text-align: left;"><span class="math inline">\(\varepsilon = 4.5\)</span> and 12.2 (2021), production settings (2023)</td>
+<td style="text-align: left;"><a href="https://www.census.gov/programs-surveys/decennial-census/decade/2020/planning-management/process/disclosure-avoidance/2020-das-development.html">Census Bureau</a></td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Google Community Mobility Reports</td>
+<td style="text-align: left;">daily change in visits by place category and region, 2020–2022</td>
+<td style="text-align: left;">Laplace, <span class="math inline">\(\varepsilon = 0.11\)</span> to 0.44 per metric per day, 1.76 per user per day</td>
+<td style="text-align: left;"><a href="https://www.google.com/covid19/mobility/">Google</a></td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Wikimedia pageviews by country</td>
+<td style="text-align: left;">daily page views per country and project</td>
+<td style="text-align: left;"><span class="math inline">\(\rho\)</span>-zCDP of 0.015 per device per day, about <span class="math inline">\(\varepsilon = 1\)</span> at <span class="math inline">\(\delta = 10^{-7}\)</span></td>
+<td style="text-align: left;"><a href="https://analytics.wikimedia.org/published/datasets/country_project_page/00_README.html">Wikimedia</a></td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Meta Full URLs dataset</td>
+<td style="text-align: left;">shares and views of 38 million URLs</td>
+<td style="text-align: left;">Gaussian noise; action-level privacy, which protects one share or view rather than a user</td>
+<td style="text-align: left;">by application to Social Science One</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">LinkedIn Audience Engagements API</td>
+<td style="text-align: left;">top-k engagement counts</td>
+<td style="text-align: left;"><span class="math inline">\((34.9, 7 \times 10^{-9})\)</span>-DP per analyst per month</td>
+<td style="text-align: left;">not public</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Apple, Microsoft telemetry</td>
+<td style="text-align: left;">emoji and domain frequencies; app usage</td>
+<td style="text-align: left;">local DP, <span class="math inline">\(\varepsilon = 4\)</span> (Apple), <span class="math inline">\(\varepsilon = 1\)</span> per collection (Microsoft)</td>
+<td style="text-align: left;">not public</td>
+</tr>
+</tbody>
+</table>
+</div>
+</figure>
+</div>
+<p>Google’s reports are the most useful of these for study, because Aktay et al.&nbsp;(2020) describe them exactly. Each metric is a daily percentage change in visits to a place category. It is protected by Laplace noise, with <span class="math inline">\(\varepsilon\)</span> of 0.11 per metric per day at the country and first region level, 0.22 at the second, and 0.44 per place visit at the county level. All of one user’s contributions in a day share a budget of <span class="math inline">\(\varepsilon = 1.76\)</span>, and any region whose noisy user count is under 100 is suppressed. The reports stopped in October 2022, but the history remains downloadable, with its noise in it. Apple’s mobility reports of the same period are not DP, despite often being listed with Google’s, and the note excludes them. Wikimedia’s release of pageviews by country, described by Adeleye et al.&nbsp;(2023), is the other continuing one, and its README gives the budget per risk tier of country. The deployments of Apple, Microsoft and LinkedIn publish their mechanisms and budgets but not their data.</p>
+<p>The DP libraries ship small example datasets for tutorials, and they are worth naming so that nobody mistakes them for benchmarks. OpenDP’s examples use a 1,000-row sample of the California PUMS, Tumult Analytics uses a fictional library’s 54,217 members, and Google’s library counts the carrots eaten by about 200 fictional zoo animals.</p>
+</section>
+<section id="sec-synthetic" class="level1" data-number="8">
+<h1 data-number="8"><span class="header-section-number">8</span> Datasets for DP synthetic data generation</h1>
+<p>A DP synthetic dataset is a mechanism’s output that looks like the original data. It has the same columns and the same kinds of rows, with a guarantee that no one record changed it much. The field has its own benchmarks, because what counts as “looks like” has to be measured, and its own history of public challenges. This section first uses Adult’s domain to say why the methods that win fit marginals. It then catalogues the challenges, the benchmark suites, and the generators with the data each was evaluated on, and it ends with synthesis through foundation models.</p>
+<section id="why-the-winning-generators-fit-marginals-adults-domain" class="level2" data-number="8.1">
+<h2 data-number="8.1" class="anchored" data-anchor-id="why-the-winning-generators-fit-marginals-adults-domain"><span class="header-section-number">8.1</span> Why the winning generators fit marginals: Adult’s domain</h2>
+<p>The reason that marginal-based generators win is in the domain of a tabular dataset, and Adult makes it concrete. Its fourteen attributes and its label are listed in <a href="#tbl-adult-domain" class="quarto-xref">Table&nbsp;10</a> with the number of values each can take, where the script cuts each numeric attribute into ten equal-width bins and counts the missing-value code as a category.</p>
+<div id="tbl-adult-domain" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-tbl figure">
+<figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl" id="tbl-adult-domain-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Table&nbsp;10: The domain of Adult’s attributes: the categories of each categorical attribute, with the missing-value code counted as one, and 10 equal-width bins for each numeric one.
+</figcaption>
+<div aria-describedby="tbl-adult-domain-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<table class="caption-top table">
+<thead>
+<tr class="header">
+<th style="text-align: left;">Attribute</th>
+<th style="text-align: right;">Values</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: left;">age</td>
+<td style="text-align: right;">10</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">workclass</td>
+<td style="text-align: right;">9</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">fnlwgt</td>
+<td style="text-align: right;">10</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">education</td>
+<td style="text-align: right;">16</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">education-num</td>
+<td style="text-align: right;">10</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">marital-status</td>
+<td style="text-align: right;">7</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">occupation</td>
+<td style="text-align: right;">15</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">relationship</td>
+<td style="text-align: right;">6</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">race</td>
+<td style="text-align: right;">5</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">sex</td>
+<td style="text-align: right;">2</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">capital-gain</td>
+<td style="text-align: right;">10</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">capital-loss</td>
+<td style="text-align: right;">10</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">hours-per-week</td>
+<td style="text-align: right;">10</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">native-country</td>
+<td style="text-align: right;">42</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">income</td>
+<td style="text-align: right;">2</td>
+</tr>
+</tbody>
+</table>
+</div>
+</figure>
+</div>
+<div id="tbl-adult-marginals" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-tbl figure">
+<figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl" id="tbl-adult-marginals-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Table&nbsp;11: Adult’s marginals against its 48,842 records. The noise is what each cell carries when the ε = 1 budget is split evenly over all the marginals of that order by basic composition.
+</figcaption>
+<div aria-describedby="tbl-adult-marginals-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<table class="caption-top table">
+<colgroup>
+<col style="width: 20%">
+<col style="width: 20%">
+<col style="width: 20%">
+<col style="width: 20%">
+<col style="width: 20%">
+</colgroup>
+<thead>
+<tr class="header">
+<th style="text-align: left;">Marginals</th>
+<th style="text-align: right;">How many</th>
+<th style="text-align: right;">Cells in total</th>
+<th style="text-align: right;">Average records per cell</th>
+<th style="text-align: right;">Noise sd per cell at <span class="math inline">\(\varepsilon = 1\)</span></th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: left;">1-way</td>
+<td style="text-align: right;">15</td>
+<td style="text-align: right;">164</td>
+<td style="text-align: right;">4,467.3</td>
+<td style="text-align: right;">21.2</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">2-way</td>
+<td style="text-align: right;">105</td>
+<td style="text-align: right;">11,926</td>
+<td style="text-align: right;">430.0</td>
+<td style="text-align: right;">148.5</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">3-way</td>
+<td style="text-align: right;">455</td>
+<td style="text-align: right;">515,212</td>
+<td style="text-align: right;">43.1</td>
+<td style="text-align: right;">643.5</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">the full table</td>
+<td style="text-align: right;">1</td>
+<td style="text-align: right;">76,204,800,000,000</td>
+<td style="text-align: right;">6.4e-10</td>
+<td style="text-align: right;">1.4</td>
+</tr>
+</tbody>
+</table>
+</div>
+</figure>
+</div>
+<p>A <strong>marginal</strong> is a table of counts over a few attributes. The one-way marginal of occupation has fifteen cells, one per occupation and one for the missing-value code, and the two-way marginal of occupation and sex has thirty. The full table of counts over all fifteen attributes has as many cells as there are combinations of values, which is the product of the sizes in <a href="#tbl-adult-domain" class="quarto-xref">Table&nbsp;10</a>, about <span class="math inline">\(7.6 \times 10^{13}\)</span>. Adult has 48,842 records, so almost every cell of that table is empty, and the few occupied ones hold a single record each. Releasing that table is useless either way. Without noise it lists the dataset’s records one by one, which is exactly what a synthetic dataset must not do. With Laplace noise the noise is cheap, since adding a record changes one cell by one and the noise per cell is only <span class="math inline">\(\sqrt{2}/\varepsilon\)</span>, but every true count is 0 or 1, so the noise buries them all.</p>
+<p>The other end is in <a href="#tbl-adult-marginals" class="quarto-xref">Table&nbsp;11</a>. The fifteen one-way marginals have 164 cells between them, and an average of 4,467 records per cell. The 105 two-way marginals have 11,926 cells and 430 records per cell. Even when the budget of <span class="math inline">\(\varepsilon = 1\)</span> is split evenly over all 105 two-way marginals by basic composition, the noise on a cell has standard deviation 148, about a third of the average count. That is a usable signal, and better accounting improves on it. The three-way marginals are where it stops. There are 455 of them, with 515,212 cells and only 43 records each, while the noise at an even split is 644 per cell, more than the count itself.</p>
+<p>A generator therefore cannot measure every three-way marginal. The practical ones measure all the one-way marginals and a chosen set of two- and three-way ones. They pick that set by what the data suggest, at a small cost in budget, and fit a model to the noisy measurements. The noise per measured cell then grows with the square root of the number of measurements under zCDP rather than linearly, which is a further reason the method works.</p>
+</section>
+<section id="the-nist-challenges" class="level2" data-number="8.2">
+<h2 data-number="8.2" class="anchored" data-anchor-id="the-nist-challenges"><span class="header-section-number">8.2</span> The NIST challenges</h2>
+<p>The field’s public record is three NIST challenges, each with public data and published scoring. The <strong>2018 Differential Privacy Synthetic Data Challenge</strong> ran three matches on Topcoder (<a href="https://www.nist.gov/ctl/pscr/open-innovation-prize-challenges/past-prize-challenges/2018-differential-privacy-synthetic">NIST</a>). The first two used San Francisco Fire Department calls for service, about 305,000 records with 32 attributes. The third used the 1940 Census PUMS for Colorado, about 661,000 records with 98 attributes. It scored entries on the Arizona file of 293,999 records and the Vermont file of 211,228. Bowen and Snoke (2021) compare the entries.</p>
+<p>The results set the pattern for everything since. A team called pfr won the first two matches and released no code. DPSyn placed second in all three, and Ryan McKenna’s entry won the third match and the overall ranking. The winning methods measured low-order marginals with noise and fitted a graphical model. The one entry built on a GAN scored far below them. McKenna, Miklau and Sheldon (2021) generalized the winner into <strong>MST</strong>. It measures all one-way marginals, selects two-way marginals along a maximum spanning tree of mutual information, and fits a graphical model to the noisy measurements, a step called Private-PGM that the generators subsection describes.</p>
+<p>The <strong>2020 Differential Privacy Temporal Map Challenge</strong> moved to data with time and place (<a href="https://www.nist.gov/ctl/pscr/open-innovation-prize-challenges/past-prize-challenges/2020-differential-privacy-temporal">NIST</a>). Its three sprints used Baltimore 911 calls, the ACS for Illinois and Ohio, and Chicago taxi trips. They were won by the Minutemen team of the University of Massachusetts and by N-CRiPT of the National University of Singapore, again with noisy marginals and graphical models. The winning code is public, and McKenna’s adaptive-grid entry became the basis of <strong>AIM</strong> (<a href="https://github.com/ryan112358/nist-synthetic-data-2021">nist-synthetic-data-2021</a>).</p>
+<p>The <strong>Collaborative Research Cycle</strong>, from 2023, is not a competition but a shared benchmark (<a href="https://pages.nist.gov/privacy_collaborative_research_cycle/">NIST CRC</a>). Its data are the <strong>NIST ACS Data Excerpts</strong>, formerly the Diverse Communities Data Excerpts, drawn from the 2019 ACS PUMS with 24 features. There are three excerpts. The national one has 27,254 records from twenty areas, the Massachusetts one 7,634 and the Texas one 9,276. Each comes with a control sample from 2018, real data from the same areas to compare a synthetic version against (<a href="https://github.com/usnistgov/SDNist">SDNist</a>). Sen et al.&nbsp;(2023) describe them, and the point of the design is that the areas were chosen for their demographic diversity, so that a generator’s errors on minorities show. The SDNist tool scores any synthetic version against the originals and produces a report, and the archive holds over 450 scored submissions, which is the largest public comparison of DP synthetic data.</p>
+</section>
+<section id="benchmark-suites-and-what-they-found" class="level2" data-number="8.3">
+<h2 data-number="8.3" class="anchored" data-anchor-id="benchmark-suites-and-what-they-found"><span class="header-section-number">8.3</span> Benchmark suites and what they found</h2>
+<p><strong>SDGym</strong>, from the CTGAN paper of Xu et al.&nbsp;(2019), fixed the datasets of the deep-learning side (<a href="https://github.com/sdv-dev/SDGym">SDGym</a>). Its real datasets are Adult, the Census-Income KDD data, Covertype, the Credit Card Fraud data, the KDD Cup 99 intrusion data, two binarized MNISTs and the Online News Popularity data, plus seven simulated datasets from Gaussian mixtures and Bayesian networks. CTGAN itself is not private, but DP-CTGAN, PATE-CTGAN and DP-MERF were evaluated on SDGym’s datasets, and the suite’s licence has since changed to one that forbids running a commercial benchmarking service on it.</p>
+<p>Tao, McKenna, Hay, Machanavajjhala and Miklau (2021) ran the first systematic DP comparison, on seven small tables. They were Adult, Bank Marketing, Census-Income KDD, Online Shoppers, Car, Mushroom and a scooter dataset. Their findings set the field’s expectations. Many mechanisms, and nearly all the GAN-based ones, failed to preserve even one-way marginals and did worse than releasing noisy independent marginals. No mechanism was best everywhere, but MST had the best average rank, and how numeric columns were binned mattered as much as the mechanism. Ganev, Xu and De Cristofaro (2024) trained about 21,000 models to explain why. Graphical models spread their budget over columns and struggle on wide tables, while deep models spend it per training step and scale to width, so PATE-GAN wins on complex prediction tasks and MST on statistics. Chen et al.&nbsp;(2025) rerun eight methods on ACS, Bank and Loan data and find the same trade-off, now between utility and running time.</p>
+<p>The benchmarks also exposed a reproducibility problem. Ganev, Annamalai and De Cristofaro (2025) tried to reproduce PATE-GAN from its six open-source implementations. None matched the paper’s utility, and all leaked more privacy than claimed, with nineteen privacy violations between them. A dataset catalogue cannot fix that, but it can say that a result on a benchmark is only as good as the implementation’s audit.</p>
+</section>
+<section id="the-generators-and-their-data" class="level2" data-number="8.4">
+<h2 data-number="8.4" class="anchored" data-anchor-id="the-generators-and-their-data"><span class="header-section-number">8.4</span> The generators and their data</h2>
+<p>The main generators are listed in <a href="#tbl-generators" class="quarto-xref">Table&nbsp;12</a> with the data they were evaluated on, which is what a reader needs to compare a new method with them.</p>
+<div id="tbl-generators" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-tbl figure">
+<figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl" id="tbl-generators-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Table&nbsp;12: DP synthetic data generators and the datasets of their evaluations, as their papers report them.
+</figcaption>
+<div aria-describedby="tbl-generators-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<table class="caption-top table">
+<colgroup>
+<col style="width: 25%">
+<col style="width: 25%">
+<col style="width: 25%">
+<col style="width: 25%">
+</colgroup>
+<thead>
+<tr class="header">
+<th style="text-align: left;">Generator</th>
+<th style="text-align: left;">Kind</th>
+<th style="text-align: left;">Evaluated on</th>
+<th style="text-align: left;">Source</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: left;">PrivBayes (2017)</td>
+<td style="text-align: left;">Bayesian network over marginals</td>
+<td style="text-align: left;">NLTCS 21,574; ACS 47,461; Adult 45,222; Brazil 2000 census 38,000</td>
+<td style="text-align: left;">Zhang et al.</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">MST (2021)</td>
+<td style="text-align: left;">marginals and Private-PGM</td>
+<td style="text-align: left;">the 2018 NIST data</td>
+<td style="text-align: left;">McKenna, Miklau and Sheldon</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">AIM (2022)</td>
+<td style="text-align: left;">adaptive marginals and Private-PGM</td>
+<td style="text-align: left;">Adult; Salary 135,727; MSNBC 989,818; Fire 305,119; NLTCS; Titanic 1,304</td>
+<td style="text-align: left;">McKenna et al.</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">PrivSyn (2021)</td>
+<td style="text-align: left;">many two-way marginals, iterative fitting</td>
+<td style="text-align: left;">Adult; US Accidents 600,000; Loan 600,000; the Colorado 1940 PUMS</td>
+<td style="text-align: left;">Zhang et al.</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">DP-GAN (2018)</td>
+<td style="text-align: left;">GAN with DP-SGD</td>
+<td style="text-align: left;">MNIST; MIMIC-III binary codes</td>
+<td style="text-align: left;">Xie et al.</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">PATE-GAN (2019)</td>
+<td style="text-align: left;">GAN trained through PATE</td>
+<td style="text-align: left;">Credit Card Fraud; cervical cancer; ISOLET; epileptic seizure; two private</td>
+<td style="text-align: left;">Jordon, Yoon and van der Schaar</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">DP-MERF (2021)</td>
+<td style="text-align: left;">kernel mean embeddings</td>
+<td style="text-align: left;">MNIST; Fashion-MNIST; nine SDGym tables</td>
+<td style="text-align: left;">Harder, Adamczewski and Park</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">DP diffusion (2022–23)</td>
+<td style="text-align: left;">diffusion models with DP-SGD</td>
+<td style="text-align: left;">MNIST; Fashion-MNIST; CelebA; CIFAR-10; Camelyon17</td>
+<td style="text-align: left;">Dockhorn et al.; Ghalebikesabi et al.</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Private Evolution (2024)</td>
+<td style="text-align: left;">API calls to a foundation model</td>
+<td style="text-align: left;">CIFAR-10; Camelyon17; two sets of 100 cat photos</td>
+<td style="text-align: left;">Lin et al.</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Aug-PE (2024)</td>
+<td style="text-align: left;">the same for text</td>
+<td style="text-align: left;">Yelp 1.9 million; OpenReview 8,396; PubMed 75,316</td>
+<td style="text-align: left;">Xie et al.</td>
+</tr>
+</tbody>
+</table>
+</div>
+</figure>
+</div>
+<p>The marginal-based line began with <strong>PrivBayes</strong> of Zhang et al.&nbsp;(2017), which learns a Bayesian network under DP and samples from it. <strong>Private-PGM</strong> of McKenna, Sheldon and Miklau (2019) then separated the two halves of the problem, measuring and fitting, since it fits a graphical model to any set of noisy marginals, whichever mechanism measured them. MST chooses those marginals along a spanning tree. <strong>AIM</strong> of McKenna et al.&nbsp;(2022) chooses them adaptively, by how badly the current model fits them, and <strong>PrivSyn</strong> of Zhang et al.&nbsp;(2021) handles a hundred attributes at once. The reference implementation of the McKenna methods is one repository, which now ships only Adult and its domain file (<a href="https://github.com/ryan112358/mbi">mbi</a>). Every other dataset in <a href="#tbl-generators" class="quarto-xref">Table&nbsp;12</a> therefore has to be fetched from its source.</p>
+<p>The GAN line runs from <strong>DP-GAN</strong> through <strong>PATE-GAN</strong> to <strong>DP-MERF</strong>, and was evaluated on SDGym’s tables and on MNIST. The systematization of Hu et al.&nbsp;(2024) finds DP-MERF the most dependable of the deep methods on images.</p>
+<p>The newest line does not train on the private data at all. <strong>Private Evolution</strong>, by Lin et al.&nbsp;(2024), asks a pre-trained image model, through its application programming interface (API), to generate candidates. It then scores the candidates by DP nearest-neighbour counts against the private data, keeps the best and repeats. On CIFAR-10 it reaches an FID of 7.87 at <span class="math inline">\(\varepsilon = 0.67\)</span>, where earlier methods needed <span class="math inline">\(\varepsilon = 32\)</span>. On Camelyon17 a classifier trained on its output reaches 80.3% at <span class="math inline">\(\varepsilon = 10\)</span>, against 91.1% for DP fine-tuning.</p>
+<p><strong>Aug-PE</strong>, by Xie et al.&nbsp;(2024), does the same for text, on three datasets the authors prepared (<a href="https://github.com/AI-secure/aug-pe">aug-pe</a>). The first is 1.9 million Yelp reviews in ten business categories. The second is 8,396 ICLR 2023 reviews from OpenReview, and the third is 75,316 PubMed abstracts from one week of 2023. The Yelp data come from Yue et al.&nbsp;(2023), who first showed that DP fine-tuning of GPT-2 gives synthetic reviews on which a classifier trains almost as well as on the originals. Only the code in the repository carries a licence. The terms of Yelp, OpenReview and PubMed for the texts themselves are not stated, so a paper reusing them should check.</p>
+</section>
+<section id="evaluating-synthetic-data-and-attacking-it" class="level2" data-number="8.5">
+<h2 data-number="8.5" class="anchored" data-anchor-id="evaluating-synthetic-data-and-attacking-it"><span class="header-section-number">8.5</span> Evaluating synthetic data, and attacking it</h2>
+<p>A synthetic dataset is judged on two things, and both need the original. Utility is measured by comparing marginals, or by training a model on the synthetic data and testing it on real held-out data. SDNist and the SDMetrics library of the Synthetic Data Vault automate both (<a href="https://github.com/sdv-dev/SDMetrics">SDMetrics</a>). Privacy is measured by attack, and here the datasets matter because the attacks target specific records. Stadler, Oprisanu and Troncoso (2022), for example, attacked synthetic versions of Adult and of the Texas discharge data. Without DP, the synthetic data did not stop linkage and attribute inference, and outliers stayed exposed. With DP the synthesis protected them, but at a large cost in utility. Annamalai, Gadotti and Rocher (2024) then built a linear reconstruction attack that infers a hidden attribute from DP synthetic data. They ran it on the ACS California employment task and on the Fire data, and found that it works on ordinary records, not just outliers. The attack datasets of choice are therefore the ones with a known sensitive attribute and a known population, which the ACS tasks provide.</p>
+<p>Two official synthetic products are often mentioned beside DP ones and are not DP. The Census Bureau’s SIPP Synthetic Beta and its Synthetic Longitudinal Business Database are synthesized from confidential records by older methods, with validation on the real data offered on request. The UK Office for National Statistics, by contrast, used MST. It built a DP synthetic version of the linked 2011 Census and deaths register for England and Wales, at <span class="math inline">\(\varepsilon = 1\)</span> and <span class="math inline">\(\delta = 10^{-8}\)</span>, from a source of about 55 million rows (<a href="https://datasciencecampus.ons.gov.uk/synthesising-the-linked-2011-census-and-deaths-dataset-while-preserving-its-confidentiality/">ONS Data Science Campus</a>). That is the largest MST run on record.</p>
+</section>
+</section>
+<section id="sec-choose" class="level1" data-number="9">
+<h1 data-number="9"><span class="header-section-number">9</span> Choosing a dataset for a privacy-utility study</h1>
+<p>The companion note walked through one decision on Adult. This section says what a dataset needs to support that kind of study, and which of the datasets above would do. The study needs a business count, which is a label or outcome whose count the decision maker cares about, so an unlabelled dataset will not do. The records must be many enough for the privacy-utility curve to have a flat part, which <a href="#sec-what" class="quarto-xref">Section&nbsp;1</a> put at tens of thousands at least. A public codebook matters too, so that nothing is tuned on the private data. And the licence must allow the results, and ideally the data, to be published. <a href="#tbl-choose" class="quarto-xref">Table&nbsp;13</a> rates the candidates.</p>
+<div id="tbl-choose" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-tbl figure">
+<figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl" id="tbl-choose-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Table&nbsp;13: Candidate datasets for a privacy-utility study, with the count a decision maker would sign for.
+</figcaption>
+<div aria-describedby="tbl-choose-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<table class="caption-top table">
+<colgroup>
+<col style="width: 20%">
+<col style="width: 20%">
+<col style="width: 20%">
+<col style="width: 20%">
+<col style="width: 20%">
+</colgroup>
+<thead>
+<tr class="header">
+<th style="text-align: left;">Dataset</th>
+<th style="text-align: left;">The business count</th>
+<th style="text-align: right;">Records</th>
+<th style="text-align: left;">Fits a privacy-utility study because</th>
+<th style="text-align: left;">But</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: left;">Adult</td>
+<td style="text-align: left;">high earners reached by a campaign</td>
+<td style="text-align: right;">48,842</td>
+<td style="text-align: left;">codebook, licence, every DP method has a result on it</td>
+<td style="text-align: left;">1994 data, retiring</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">ACSIncome, one state</td>
+<td style="text-align: left;">the same, on current data</td>
+<td style="text-align: right;">thousands to hundreds of thousands</td>
+<td style="text-align: left;">same task, any size, same source as the Census Bureau’s DP work</td>
+<td style="text-align: left;">no codebook of categories bundled; use the PUMS data dictionary</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Bank Marketing</td>
+<td style="text-align: left;">deposits sold per contact</td>
+<td style="text-align: right;">45,211</td>
+<td style="text-align: left;">a real campaign with a yes-or-no outcome</td>
+<td style="text-align: left;">two versions; contacts repeat clients</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Credit Card Fraud</td>
+<td style="text-align: left;">frauds caught per review</td>
+<td style="text-align: right;">284,807</td>
+<td style="text-align: left;">the count that matters is rare, so DP’s cost shows</td>
+<td style="text-align: left;">features are anonymized components with no codebook</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Online Retail</td>
+<td style="text-align: left;">revenue retained per customer</td>
+<td style="text-align: right;">4,372 customers</td>
+<td style="text-align: left;">the only free table for a user-level study</td>
+<td style="text-align: left;">no label; the outcome must be defined</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Home Credit</td>
+<td style="text-align: left;">defaults avoided per loan</td>
+<td style="text-align: right;">307,511</td>
+<td style="text-align: left;">a real credit decision with rich features</td>
+<td style="text-align: left;">competition terms, unverified</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Stack Overflow</td>
+<td style="text-align: left;">next-word accuracy</td>
+<td style="text-align: right;">342,477 users</td>
+<td style="text-align: left;">the standard user-level benchmark</td>
+<td style="text-align: left;">not a business count</td>
+</tr>
+</tbody>
+</table>
+</div>
+</figure>
+</div>
+<p>Three of these deserve a comment. ACSIncome for one state is the natural successor to the companion note’s experiment. It is the same task on data twenty-five years newer, and a state can be chosen to match the size of the business in question. Credit Card Fraud turns the study around. With 492 frauds among 284,807 transactions, the business count is tiny, so a model that must catch a fixed number of frauds at a fixed number of reviews will feel DP’s noise where Adult did not. And Online Retail is the only free dataset on which the privacy unit can be a customer. A study of user-level DP for a business would have to start there, with the contribution bound of <a href="#sec-users" class="quarto-xref">Section&nbsp;5</a> as its first decision.</p>
+<p>Whatever the dataset, the report should say four things about it, which Ponomareva et al.&nbsp;(2023) put in their checklist. It says what one record is, and so whom the guarantee covers. It says which neighbouring relation the accounting assumed, add/remove or replace-one. It says what public data the method used, for pre-training, for tuning or for the codebook. And for a user-level study it gives the distribution of records per user, because without it no reader can judge the contribution bound.</p>
+</section>
+<section id="sec-sources" class="level1" data-number="10">
+<h1 data-number="10"><span class="header-section-number">10</span> References</h1>
+<p>Datasets, in the order of the catalogue.</p>
+<ul>
+<li>Becker, B. and Kohavi, R. (1996). <a href="https://archive.ics.uci.edu/dataset/2/adult">Adult</a>. UCI Machine Learning Repository, dataset 2. CC BY 4.0.</li>
+<li>Ding, F., Hardt, M., Miller, J. and Schmidt, L. (2021). <a href="https://arxiv.org/abs/2108.04884">Retiring Adult: New Datasets for Fair Machine Learning</a>. <em>NeurIPS 2021</em>. The folktables library and the ACS tasks.</li>
+<li><a href="https://archive.ics.uci.edu/dataset/117/census+income+kdd">Census-Income (KDD)</a>, UCI dataset 117; Moro, S., Rita, P. and Cortez, P. (2014), <a href="https://archive.ics.uci.edu/dataset/222/bank+marketing">Bank Marketing</a>, UCI dataset 222; Hofmann, H. (1994), <a href="https://archive.ics.uci.edu/dataset/144/statlog+german+credit+data">Statlog (German Credit Data)</a>, UCI dataset 144; Chen, D. (2015), <a href="https://archive.ics.uci.edu/dataset/352/online+retail">Online Retail</a>, UCI dataset 352; Clore, J. et al.&nbsp;(2014), <a href="https://archive.ics.uci.edu/dataset/296/diabetes+130-us+hospitals+for+years+1999-2008">Diabetes 130-US hospitals</a>, UCI dataset 296. All CC BY 4.0.</li>
+<li>Dal Pozzolo, A. et al.&nbsp;<a href="https://www.kaggle.com/datasets/mlg-ulb/creditcardfraud">Credit Card Fraud Detection</a>. Kaggle, Université Libre de Bruxelles Machine Learning Group. DbCL 1.0.</li>
+<li>Harper, F. M. and Konstan, J. A. (2015). The MovieLens Datasets: History and Context. <em>ACM Transactions on Interactive Intelligent Systems</em> 5(4). <a href="https://files.grouplens.org/datasets/movielens/">GroupLens</a>.</li>
+<li>Narayanan, A. and Shmatikov, V. (2008). <a href="https://arxiv.org/abs/cs/0610105">Robust De-anonymization of Large Sparse Datasets</a>. <em>IEEE S&amp;P 2008</em>. The Netflix Prize de-anonymization.</li>
+<li>McSherry, F. and Mironov, I. (2009). Differentially Private Recommender Systems: Building Privacy into the Netflix Prize Contenders. <em>KDD 2009</em>.</li>
+<li>Jain, P., Thakkar, O. and Thakurta, A. (2018). <a href="https://arxiv.org/abs/1712.09765">Differentially Private Matrix Completion Revisited</a>. <em>ICML 2018</em>.</li>
+<li>Abowd, J. et al.&nbsp;(2022). <a href="https://arxiv.org/abs/2204.08986">The 2020 Census Disclosure Avoidance System TopDown Algorithm</a>. <em>Harvard Data Science Review</em>, special issue 2. The Census Bureau’s <a href="https://www.census.gov/newsroom/press-releases/2021/2020-census-key-parameters.html">key parameters</a> and <a href="https://www.census.gov/programs-surveys/decennial-census/decade/2020/planning-management/process/disclosure-avoidance/2020-das-development.html">2010 demonstration data</a>.</li>
+<li>Kenny, C. et al.&nbsp;(2021). <a href="https://arxiv.org/abs/2105.14197">The use of differential privacy for census data and its impact on redistricting</a>. <em>Science Advances</em> 7(41).</li>
+<li>Image datasets: <a href="https://github.com/zalandoresearch/fashion-mnist">Fashion-MNIST</a> (MIT); Krizhevsky, A. (2009), <a href="https://www.cs.toronto.edu/~kriz/cifar.html">CIFAR-10 and CIFAR-100</a>; <a href="https://www.image-net.org/download.php">ImageNet</a>; <a href="http://places2.csail.mit.edu/download-private.html">Places365</a>; Liu, Z. et al.&nbsp;(2015), <a href="https://mmlab.ie.cuhk.edu.hk/projects/CelebA.html">CelebA</a>; Koh, P. W. et al.&nbsp;(2021), <a href="https://arxiv.org/abs/2012.07421">WILDS</a>, for Camelyon17.</li>
+<li>Abadi, M. et al.&nbsp;(2016). <a href="https://arxiv.org/abs/1607.00133">Deep Learning with Differential Privacy</a>. <em>ACM CCS 2016</em>. DP-SGD, with its MNIST and CIFAR-10 results.</li>
+<li>Tramèr, F. and Boneh, D. (2021). <a href="https://arxiv.org/abs/2011.11660">Differentially Private Learning Needs Better Features (or Much More Data)</a>. <em>ICLR 2021</em>.</li>
+<li>De, S., Berrada, L., Hayes, J., Smith, S. L. and Balle, B. (2022). <a href="https://arxiv.org/abs/2204.13650">Unlocking High-Accuracy Differentially Private Image Classification through Scale</a>.</li>
+<li>Kurakin, A. et al.&nbsp;(2022). <a href="https://arxiv.org/abs/2201.12328">Toward Training at ImageNet Scale with Differential Privacy</a>.</li>
+<li>Wei, C. et al.&nbsp;(2023). <a href="https://arxiv.org/abs/2305.05900">DPMLBench: Holistic Evaluation of Differentially Private Machine Learning</a>. <em>ACM CCS 2023</em>.</li>
+<li>Mokhtari, A., Kodeiri, S., Mohapatra, S., Tramèr, F. and Kamath, G. (2026). <a href="https://arxiv.org/abs/2601.17189">Rethinking Benchmarks for Differentially Private Image Classification</a>.</li>
+<li>Text datasets: <a href="https://www.tensorflow.org/datasets/catalog/glue">GLUE</a>; Novikova, J., Dušek, O. and Rieser, V. (2017), <a href="https://github.com/tuetschek/e2e-dataset">E2E</a>; Nan, L. et al.&nbsp;(2021), <a href="https://github.com/Yale-LILY/dart">DART</a>; Zhang, S. et al.&nbsp;(2018), <a href="https://arxiv.org/abs/1801.07243">PersonaChat</a>; Merity, S. et al.&nbsp;(2016), <a href="https://arxiv.org/abs/1609.07843">WikiText</a>; the <a href="https://www.cs.cmu.edu/~enron/">Enron corpus</a>; <a href="https://huggingface.co/datasets/allenai/c4">C4</a>; Gao, L. et al.&nbsp;(2020), <a href="https://pile.eleuther.ai/">the Pile</a>.</li>
+<li>Li, X., Tramèr, F., Liang, P. and Hashimoto, T. (2022). <a href="https://arxiv.org/abs/2110.05679">Large Language Models Can Be Strong Differentially Private Learners</a>. <em>ICLR 2022</em>.</li>
+<li>Yu, D. et al.&nbsp;(2022). <a href="https://arxiv.org/abs/2110.06500">Differentially Private Fine-tuning of Language Models</a>. <em>ICLR 2022</em>.</li>
+<li>Anil, R., Ghazi, B., Gupta, V., Kumar, R. and Manurangsi, P. (2022). <a href="https://arxiv.org/abs/2108.01624">Large-Scale Differentially Private BERT</a>.</li>
+<li>Tramèr, F., Kamath, G. and Carlini, N. (2024). <a href="https://arxiv.org/abs/2212.06470">Position: Considerations for Differentially Private Learning with Large-Scale Public Pretraining</a>. <em>ICML 2024</em>.</li>
+<li>Caldas, S. et al.&nbsp;(2018). <a href="https://arxiv.org/abs/1812.01097">LEAF: A Benchmark for Federated Settings</a>. The <a href="https://www.tensorflow.org/federated/api_docs/python/tff/simulation/datasets">TensorFlow Federated datasets</a>, including <a href="https://www.tensorflow.org/federated/api_docs/python/tff/simulation/datasets/stackoverflow/load_data">Stack Overflow</a>.</li>
+<li>Song, C., Granqvist, F. and Talwar, K. (2022). <a href="https://arxiv.org/abs/2207.08869">FLAIR: Federated Learning Annotated Image Repository</a>. <a href="https://github.com/apple/ml-flair">GitHub</a>.</li>
+<li>McMahan, H. B., Ramage, D., Talwar, K. and Zhang, L. (2018). <a href="https://arxiv.org/abs/1710.06963">Learning Differentially Private Recurrent Language Models</a>. <em>ICLR 2018</em>.</li>
+<li>Kairouz, P., McMahan, B., Song, S., Thakkar, O., Thakurta, A. and Xu, Z. (2021). <a href="https://arxiv.org/abs/2103.00039">Practical and Private (Deep) Learning without Sampling or Shuffling</a>. <em>ICML 2021</em>. DP-FTRL on Stack Overflow.</li>
+<li>Xu, Z. et al.&nbsp;(2023). <a href="https://arxiv.org/abs/2305.18465">Federated Learning of Gboard Language Models with Differential Privacy</a>. The deployed guarantees.</li>
+<li>Location data: Zheng, Y. et al., <a href="https://www.microsoft.com/en-us/download/details.aspx?id=52367">GeoLife</a> and <a href="https://www.microsoft.com/en-us/research/publication/t-drive-trajectory-data-sample/">T-Drive</a>; Moreira-Matias, L. et al.&nbsp;(2013), <a href="https://archive.ics.uci.edu/dataset/339/taxi+service+trajectory+prediction+challenge+ecml+pkdd+2015">Porto taxi trajectories</a>, UCI dataset 339; Cho, E., Myers, S. and Leskovec, J. (2011), <a href="https://snap.stanford.edu/data/loc-gowalla.html">Gowalla</a>; Yang, D. et al., <a href="https://sites.google.com/site/yangdingqi/home/foursquare-dataset">Foursquare</a>.</li>
+<li>Gursoy, M. E., Liu, L., Truex, S., Yu, L. and Wei, W. (2018). Utility-Aware Synthesis of Differentially Private and Attack-Resilient Location Traces. <em>ACM CCS 2018</em>. AdaTrace.</li>
+<li>Wang, H. et al.&nbsp;(2022). <a href="https://arxiv.org/abs/2210.00581">PrivTrace: Differentially Private Trajectory Synthesis by Adaptive Markov Models</a>. <em>USENIX Security 2023</em>.</li>
+<li>Buchholz, E., Abuadbba, A., Wang, S., Nepal, S. and Kanhere, S. (2024). <a href="https://arxiv.org/abs/2403.07218">SoK: Can Trajectory Generation Combine Privacy and Utility?</a>. <em>PoPETs 2024</em>.</li>
+<li>Qardaji, W., Yang, W. and Li, N. (2013). <a href="https://arxiv.org/abs/1209.1322">Differentially Private Grids for Geospatial Data</a>. <em>ICDE 2013</em>.</li>
+<li>Aktay, A. et al.&nbsp;(2020). <a href="https://arxiv.org/abs/2004.04145">Google COVID-19 Community Mobility Reports: Anonymization Process Description</a>. The <a href="https://www.google.com/covid19/mobility/">reports</a>.</li>
+<li>Adeleye, T. et al.&nbsp;(2023). <a href="https://arxiv.org/abs/2308.16298">Publishing Wikipedia Usage Data with Strong Privacy Guarantees</a>. The <a href="https://analytics.wikimedia.org/published/datasets/country_project_page/00_README.html">dataset</a>.</li>
+<li>Rogers, R. et al.&nbsp;(2020). <a href="https://arxiv.org/abs/2002.05839">LinkedIn’s Audience Engagements API</a>; Apple (2017), <a href="https://machinelearning.apple.com/research/learning-with-privacy-at-scale">Learning with Privacy at Scale</a>; Ding, B., Kulkarni, J. and Yekhanin, S. (2017), <a href="https://arxiv.org/abs/1712.01524">Collecting Telemetry Data Privately</a>, <em>NeurIPS 2017</em>; Messing, S. et al.&nbsp;(2020), <a href="https://doi.org/10.7910/DVN/TDOAPG">Facebook Privacy-Protected Full URLs Data Set</a>.</li>
+<li>Graph data: Leskovec, J. and Krevl, A., <a href="https://snap.stanford.edu/data/">SNAP Datasets</a>; Karwa, V., Raskhodnikova, S., Smith, A. and Yaroslavtsev, G. (2011), Private Analysis of Graph Structure, <em>PVLDB</em> 4(11); Imola, J., Murakami, T. and Chaudhuri, K. (2021), <a href="https://arxiv.org/abs/2010.08688">Locally Differentially Private Analysis of Graph Statistics</a>, <em>USENIX Security 2021</em>; Sajadmanesh, S., Shamsabadi, A. S., Bellet, A. and Gatica-Perez, D. (2023), <a href="https://arxiv.org/abs/2203.00949">GAP: Differentially Private Graph Neural Networks with Aggregation Perturbation</a>, <em>USENIX Security 2023</em>; Daigavane, A. et al.&nbsp;(2021), <a href="https://arxiv.org/abs/2111.15521">Node-Level Differentially Private Graph Neural Networks</a>.</li>
+<li>Clinical data: Johnson, A. et al.&nbsp;(2016), MIMIC-III, a freely accessible critical care database, <em>Scientific Data</em> 3, on <a href="https://physionet.org/content/mimiciii/1.4/">PhysioNet</a>; <a href="https://physionet.org/content/mimiciv/3.1/">MIMIC-IV</a>; <a href="https://physionet.org/content/eicu-crd/2.0/">eICU</a>; the <a href="https://physionet.org/content/challenge-2012/1.0.0/">PhysioNet 2012 challenge</a>; the <a href="https://www.dshs.texas.gov/center-health-statistics/chs-data-sets-reports/texas-health-care-information-collection/general-public-information/hospital-discharge-data-public">Texas Hospital Inpatient Discharge PUDF</a>.</li>
+<li>Suriyakumar, V. M., Papernot, N., Goldenberg, A. and Ghassemi, M. (2021). <a href="https://arxiv.org/abs/2010.06667">Chasing Your Long Tails: Differentially Private Prediction in Health Care Settings</a>. <em>FAccT 2021</em>.</li>
+<li>Bowen, C. M. and Snoke, J. (2021). <a href="https://arxiv.org/abs/1911.12704">Comparative Study of Differentially Private Synthetic Data Algorithms from the NIST PSCR Differential Privacy Synthetic Data Challenge</a>. <em>Journal of Privacy and Confidentiality</em> 11(1).</li>
+<li>Sen, A., Task, C., Kapur, D., Howarth, G. and Bhagat, K. (2023). <a href="https://arxiv.org/abs/2306.13216">Diverse Community Data for Benchmarking Data Privacy Algorithms</a>. <em>NeurIPS 2023 Datasets and Benchmarks</em>. The NIST excerpts and <a href="https://github.com/usnistgov/SDNist">SDNist</a>.</li>
+<li>Xu, L., Skoularidou, M., Cuesta-Infante, A. and Veeramachaneni, K. (2019). <a href="https://arxiv.org/abs/1907.00503">CTGAN, the conditional GAN for tabular data</a>. <em>NeurIPS 2019</em>. With the <a href="https://github.com/sdv-dev/SDGym">SDGym</a>.</li>
+<li>Tao, Y., McKenna, R., Hay, M., Machanavajjhala, A. and Miklau, G. (2021). <a href="https://arxiv.org/abs/2112.09238">Benchmarking Differentially Private Synthetic Data Generation Algorithms</a>.</li>
+<li>Ganev, G., Xu, K. and De Cristofaro, E. (2024). <a href="https://arxiv.org/abs/2305.10994">Graphical vs.&nbsp;Deep Generative Models: Measuring the Impact of Differentially Private Mechanisms and Budgets on Utility</a>. <em>ACM CCS 2024</em>.</li>
+<li>Ganev, G., Annamalai, M. S. M. S. and De Cristofaro, E. (2025). <a href="https://arxiv.org/abs/2406.13985">The Elusive Pursuit of Reproducing PATE-GAN: Benchmarking, Auditing, Debugging</a>. <em>TMLR</em>.</li>
+<li>Chen, K., Li, X., Gong, C., McKenna, R. and Wang, T. (2025). <a href="https://arxiv.org/abs/2504.14061">Benchmarking Differentially Private Tabular Data Synthesis</a>.</li>
+<li>Hu, Y. et al.&nbsp;(2024). <a href="https://arxiv.org/abs/2307.02106">SoK: Privacy-Preserving Data Synthesis</a>. <em>IEEE S&amp;P 2024</em>.</li>
+<li>Zhang, J., Cormode, G., Procopiuc, C. M., Srivastava, D. and Xiao, X. (2017). PrivBayes: Private Data Release via Bayesian Networks. <em>ACM Transactions on Database Systems</em> 42(4).</li>
+<li>McKenna, R., Sheldon, D. and Miklau, G. (2019). <a href="https://arxiv.org/abs/1901.09136">Graphical-model based estimation and inference for differential privacy</a>. <em>ICML 2019</em>. Private-PGM, in the <a href="https://github.com/ryan112358/mbi">mbi</a> repository.</li>
+<li>McKenna, R., Miklau, G. and Sheldon, D. (2021). <a href="https://arxiv.org/abs/2108.04978">Winning the NIST Contest: A scalable and general approach to differentially private synthetic data</a>. <em>Journal of Privacy and Confidentiality</em> 11(3). MST.</li>
+<li>McKenna, R., Mullins, B., Sheldon, D. and Miklau, G. (2022). <a href="https://arxiv.org/abs/2201.12677">AIM: An Adaptive and Iterative Mechanism for Differentially Private Synthetic Data</a>. <em>PVLDB</em> 15(11).</li>
+<li>Zhang, Z. et al.&nbsp;(2021). <a href="https://arxiv.org/abs/2012.15128">PrivSyn: Differentially Private Data Synthesis</a>. <em>USENIX Security 2021</em>.</li>
+<li>Xie, L., Lin, K., Wang, S., Wang, F. and Zhou, J. (2018). <a href="https://arxiv.org/abs/1802.06739">Differentially Private Generative Adversarial Network</a>.</li>
+<li>Jordon, J., Yoon, J. and van der Schaar, M. (2019). <a href="https://openreview.net/forum?id=S1zk9iRqF7">PATE-GAN: Generating Synthetic Data with Differential Privacy Guarantees</a>. <em>ICLR 2019</em>.</li>
+<li>Harder, F., Adamczewski, K. and Park, M. (2021). <a href="https://arxiv.org/abs/2002.11603">DP-MERF</a>. <em>AISTATS 2021</em>.</li>
+<li>Dockhorn, T., Cao, T., Vahdat, A. and Kreis, K. (2022). <a href="https://arxiv.org/abs/2210.09929">Differentially Private Diffusion Models</a>. <em>TMLR</em>.</li>
+<li>Ghalebikesabi, S. et al.&nbsp;(2023). <a href="https://arxiv.org/abs/2302.13861">Differentially Private Diffusion Models Generate Useful Synthetic Images</a>.</li>
+<li>Lin, Z., Gopi, S., Kulkarni, J., Nori, H. and Yekhanin, S. (2024). <a href="https://arxiv.org/abs/2305.15560">Differentially Private Synthetic Data via Foundation Model APIs 1: Images</a>. <em>ICLR 2024</em>. Private Evolution, in the <a href="https://github.com/microsoft/DPSDA">DPSDA</a> repository.</li>
+<li>Xie, C. et al.&nbsp;(2024). <a href="https://arxiv.org/abs/2403.01749">Differentially Private Synthetic Data via Foundation Model APIs 2: Text</a>. <em>ICML 2024</em>. Aug-PE.</li>
+<li>Yue, X. et al.&nbsp;(2023). <a href="https://arxiv.org/abs/2210.14348">Synthetic Text Generation with Differential Privacy: A Simple and Practical Recipe</a>. <em>ACL 2023</em>.</li>
+<li>Stadler, T., Oprisanu, B. and Troncoso, C. (2022). <a href="https://arxiv.org/abs/2011.07018">Synthetic Data – Anonymisation Groundhog Day</a>. <em>USENIX Security 2022</em>.</li>
+<li>Annamalai, M. S. M. S., Gadotti, A. and Rocher, L. (2024). <a href="https://arxiv.org/abs/2301.10053">A Linear Reconstruction Approach for Attribute Inference Attacks against Synthetic Data</a>. <em>USENIX Security 2024</em>.</li>
+<li>Hardt, M., Ligett, K. and McSherry, F. (2012). <a href="https://arxiv.org/abs/1012.4763">A Simple and Practical Algorithm for Differentially Private Data Release</a>. <em>NeurIPS 2012</em>. The multiplicative weights exponential mechanism.</li>
+<li>Aydore, S. et al.&nbsp;(2021). <a href="https://arxiv.org/abs/2103.06641">Differentially Private Query Release Through Adaptive Projection</a>. <em>ICML 2021</em>. RAP, on Adult and Loans; Vietri, G. et al.&nbsp;(2020), <a href="https://arxiv.org/abs/2007.05453">New Oracle-Efficient Algorithms for Private Synthetic Data Release</a>, <em>ICML 2020</em>, for the Loans data; Vietri, G. et al.&nbsp;(2022), <a href="https://arxiv.org/abs/2209.07400">Private Synthetic Data for Multitask Learning and Marginal Queries</a>, <em>NeurIPS 2022</em>, for the ACS benchmark.</li>
+<li>Hay, M., Machanavajjhala, A., Miklau, G., Chen, Y. and Zhang, D. (2016). <a href="https://arxiv.org/abs/1512.04817">Principled Evaluation of Differentially Private Algorithms using DPBench</a>. <em>SIGMOD 2016</em>. Twenty-seven datasets for range queries.</li>
+<li>Ponomareva, N. et al.&nbsp;(2023). <a href="https://arxiv.org/abs/2303.00654">How to DP-fy ML: A Practical Guide to Machine Learning with Differential Privacy</a>. <em>Journal of Artificial Intelligence Research</em> 77. The reporting checklist.</li>
+<li>Office for National Statistics Data Science Campus (2023). <a href="https://datasciencecampus.ons.gov.uk/synthesising-the-linked-2011-census-and-deaths-dataset-while-preserving-its-confidentiality/">Synthesising the linked 2011 Census and deaths dataset while preserving its confidentiality</a>.</li>
+</ul>
+</section>
+
+</main>
+<!-- /main column -->
+<script id="quarto-html-after-body" type="application/javascript">
+  window.document.addEventListener("DOMContentLoaded", function (event) {
+    const icon = "";
+    const anchorJS = new window.AnchorJS();
+    anchorJS.options = {
+      placement: 'right',
+      icon: icon
+    };
+    anchorJS.add('.anchored');
+    const isCodeAnnotation = (el) => {
+      for (const clz of el.classList) {
+        if (clz.startsWith('code-annotation-')) {                     
+          return true;
+        }
+      }
+      return false;
+    }
+    const onCopySuccess = function(e) {
+      // button target
+      const button = e.trigger;
+      // don't keep focus
+      button.blur();
+      // flash "checked"
+      button.classList.add('code-copy-button-checked');
+      var currentTitle = button.getAttribute("title");
+      button.setAttribute("title", "Copied!");
+      let tooltip;
+      if (window.bootstrap) {
+        button.setAttribute("data-bs-toggle", "tooltip");
+        button.setAttribute("data-bs-placement", "left");
+        button.setAttribute("data-bs-title", "Copied!");
+        tooltip = new bootstrap.Tooltip(button, 
+          { trigger: "manual", 
+            customClass: "code-copy-button-tooltip",
+            offset: [0, -8]});
+        tooltip.show();    
+      }
+      setTimeout(function() {
+        if (tooltip) {
+          tooltip.hide();
+          button.removeAttribute("data-bs-title");
+          button.removeAttribute("data-bs-toggle");
+          button.removeAttribute("data-bs-placement");
+        }
+        button.setAttribute("title", currentTitle);
+        button.classList.remove('code-copy-button-checked');
+      }, 1000);
+      // clear code selection
+      e.clearSelection();
+    }
+    const getTextToCopy = function(trigger) {
+      const outerScaffold = trigger.parentElement.cloneNode(true);
+      const codeEl = outerScaffold.querySelector('code');
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
+        }
+      }
+      return codeEl.innerText;
+    }
+    const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
+      text: getTextToCopy
+    });
+    clipboard.on('success', onCopySuccess);
+    if (window.document.getElementById('quarto-embedded-source-code-modal')) {
+      const clipboardModal = new window.ClipboardJS('.code-copy-button[data-in-quarto-modal]', {
+        text: getTextToCopy,
+        container: window.document.getElementById('quarto-embedded-source-code-modal')
+      });
+      clipboardModal.on('success', onCopySuccess);
+    }
+      var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+      var mailtoRegex = new RegExp(/^mailto:/);
+        var filterRegex = new RegExp('/' + window.location.host + '/');
+      var isInternal = (href) => {
+          return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+      }
+      // Inspect non-navigation links and adorn them if external
+     var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool):not(.about-link)');
+      for (var i=0; i<links.length; i++) {
+        const link = links[i];
+        if (!isInternal(link.href)) {
+          // undo the damage that might have been done by quarto-nav.js in the case of
+          // links that we want to consider external
+          if (link.dataset.originalHref !== undefined) {
+            link.href = link.dataset.originalHref;
+          }
+        }
+      }
+    function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+      const config = {
+        allowHTML: true,
+        maxWidth: 500,
+        delay: 100,
+        arrow: false,
+        appendTo: function(el) {
+            return el.parentElement;
+        },
+        interactive: true,
+        interactiveBorder: 10,
+        theme: 'quarto',
+        placement: 'bottom-start',
+      };
+      if (contentFn) {
+        config.content = contentFn;
+      }
+      if (onTriggerFn) {
+        config.onTrigger = onTriggerFn;
+      }
+      if (onUntriggerFn) {
+        config.onUntrigger = onUntriggerFn;
+      }
+      window.tippy(el, config); 
+    }
+    const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+    for (var i=0; i<noterefs.length; i++) {
+      const ref = noterefs[i];
+      tippyHover(ref, function() {
+        // use id or data attribute instead here
+        let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+        try { href = new URL(href).hash; } catch {}
+        const id = href.replace(/^#\/?/, "");
+        const note = window.document.getElementById(id);
+        if (note) {
+          return note.innerHTML;
+        } else {
+          return "";
+        }
+      });
+    }
+    const xrefs = window.document.querySelectorAll('a.quarto-xref');
+    const processXRef = (id, note) => {
+      // Strip column container classes
+      const stripColumnClz = (el) => {
+        el.classList.remove("page-full", "page-columns");
+        if (el.children) {
+          for (const child of el.children) {
+            stripColumnClz(child);
+          }
+        }
+      }
+      stripColumnClz(note)
+      if (id === null || id.startsWith('sec-')) {
+        // Special case sections, only their first couple elements
+        const container = document.createElement("div");
+        if (note.children && note.children.length > 2) {
+          container.appendChild(note.children[0].cloneNode(true));
+          for (let i = 1; i < note.children.length; i++) {
+            const child = note.children[i];
+            if (child.tagName === "P" && child.innerText === "") {
+              continue;
+            } else {
+              container.appendChild(child.cloneNode(true));
+              break;
+            }
+          }
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(container);
+          }
+          return container.innerHTML
+        } else {
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(note);
+          }
+          return note.innerHTML;
+        }
+      } else {
+        // Remove any anchor links if they are present
+        const anchorLink = note.querySelector('a.anchorjs-link');
+        if (anchorLink) {
+          anchorLink.remove();
+        }
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(note);
+        }
+        if (note.classList.contains("callout")) {
+          return note.outerHTML;
+        } else {
+          return note.innerHTML;
+        }
+      }
+    }
+    for (var i=0; i<xrefs.length; i++) {
+      const xref = xrefs[i];
+      tippyHover(xref, undefined, function(instance) {
+        instance.disable();
+        let url = xref.getAttribute('href');
+        let hash = undefined; 
+        if (url.startsWith('#')) {
+          hash = url;
+        } else {
+          try { hash = new URL(url).hash; } catch {}
+        }
+        if (hash) {
+          const id = hash.replace(/^#\/?/, "");
+          const note = window.document.getElementById(id);
+          if (note !== null) {
+            try {
+              const html = processXRef(id, note.cloneNode(true));
+              instance.setContent(html);
+            } finally {
+              instance.enable();
+              instance.show();
+            }
+          } else {
+            // See if we can fetch this
+            fetch(url.split('#')[0])
+            .then(res => res.text())
+            .then(html => {
+              const parser = new DOMParser();
+              const htmlDoc = parser.parseFromString(html, "text/html");
+              const note = htmlDoc.getElementById(id);
+              if (note !== null) {
+                const html = processXRef(id, note);
+                instance.setContent(html);
+              } 
+            }).finally(() => {
+              instance.enable();
+              instance.show();
+            });
+          }
+        } else {
+          // See if we can fetch a full url (with no hash to target)
+          // This is a special case and we should probably do some content thinning / targeting
+          fetch(url)
+          .then(res => res.text())
+          .then(html => {
+            const parser = new DOMParser();
+            const htmlDoc = parser.parseFromString(html, "text/html");
+            const note = htmlDoc.querySelector('main.content');
+            if (note !== null) {
+              // This should only happen for chapter cross references
+              // (since there is no id in the URL)
+              // remove the first header
+              if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
+                note.children[0].remove();
+              }
+              const html = processXRef(null, note);
+              instance.setContent(html);
+            } 
+          }).finally(() => {
+            instance.enable();
+            instance.show();
+          });
+        }
+      }, function(instance) {
+      });
+    }
+        let selectedAnnoteEl;
+        const selectorForAnnotation = ( cell, annotation) => {
+          let cellAttr = 'data-code-cell="' + cell + '"';
+          let lineAttr = 'data-code-annotation="' +  annotation + '"';
+          const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+          return selector;
+        }
+        const selectCodeLines = (annoteEl) => {
+          const doc = window.document;
+          const targetCell = annoteEl.getAttribute("data-target-cell");
+          const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+          const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+          const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+          const lineIds = lines.map((line) => {
+            return targetCell + "-" + line;
+          })
+          let top = null;
+          let height = null;
+          let parent = null;
+          if (lineIds.length > 0) {
+              //compute the position of the single el (top and bottom and make a div)
+              const el = window.document.getElementById(lineIds[0]);
+              top = el.offsetTop;
+              height = el.offsetHeight;
+              parent = el.parentElement.parentElement;
+            if (lineIds.length > 1) {
+              const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+              const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+              height = bottom - top;
+            }
+            if (top !== null && height !== null && parent !== null) {
+              // cook up a div (if necessary) and position it 
+              let div = window.document.getElementById("code-annotation-line-highlight");
+              if (div === null) {
+                div = window.document.createElement("div");
+                div.setAttribute("id", "code-annotation-line-highlight");
+                div.style.position = 'absolute';
+                parent.appendChild(div);
+              }
+              div.style.top = top - 2 + "px";
+              div.style.height = height + 4 + "px";
+              div.style.left = 0;
+              let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+              if (gutterDiv === null) {
+                gutterDiv = window.document.createElement("div");
+                gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+                gutterDiv.style.position = 'absolute';
+                const codeCell = window.document.getElementById(targetCell);
+                const gutter = codeCell.querySelector('.code-annotation-gutter');
+                gutter.appendChild(gutterDiv);
+              }
+              gutterDiv.style.top = top - 2 + "px";
+              gutterDiv.style.height = height + 4 + "px";
+            }
+            selectedAnnoteEl = annoteEl;
+          }
+        };
+        const unselectCodeLines = () => {
+          const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+          elementsIds.forEach((elId) => {
+            const div = window.document.getElementById(elId);
+            if (div) {
+              div.remove();
+            }
+          });
+          selectedAnnoteEl = undefined;
+        };
+          // Handle positioning of the toggle
+      window.addEventListener(
+        "resize",
+        throttle(() => {
+          elRect = undefined;
+          if (selectedAnnoteEl) {
+            selectCodeLines(selectedAnnoteEl);
+          }
+        }, 10)
+      );
+      function throttle(fn, ms) {
+      let throttle = false;
+      let timer;
+        return (...args) => {
+          if(!throttle) { // first call gets through
+              fn.apply(this, args);
+              throttle = true;
+          } else { // all the others get throttled
+              if(timer) clearTimeout(timer); // cancel #2
+              timer = setTimeout(() => {
+                fn.apply(this, args);
+                timer = throttle = false;
+              }, ms);
+          }
+        };
+      }
+        // Attach click handler to the DT
+        const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+        for (const annoteDlNode of annoteDls) {
+          annoteDlNode.addEventListener('click', (event) => {
+            const clickedEl = event.target;
+            if (clickedEl !== selectedAnnoteEl) {
+              unselectCodeLines();
+              const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+              if (activeEl) {
+                activeEl.classList.remove('code-annotation-active');
+              }
+              selectCodeLines(clickedEl);
+              clickedEl.classList.add('code-annotation-active');
+            } else {
+              // Unselect the line
+              unselectCodeLines();
+              clickedEl.classList.remove('code-annotation-active');
+            }
+          });
+        }
+    const findCites = (el) => {
+      const parentEl = el.parentElement;
+      if (parentEl) {
+        const cites = parentEl.dataset.cites;
+        if (cites) {
+          return {
+            el,
+            cites: cites.split(' ')
+          };
+        } else {
+          return findCites(el.parentElement)
+        }
+      } else {
+        return undefined;
+      }
+    };
+    var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+    for (var i=0; i<bibliorefs.length; i++) {
+      const ref = bibliorefs[i];
+      const citeInfo = findCites(ref);
+      if (citeInfo) {
+        tippyHover(citeInfo.el, function() {
+          var popup = window.document.createElement('div');
+          citeInfo.cites.forEach(function(cite) {
+            var citeDiv = window.document.createElement('div');
+            citeDiv.classList.add('hanging-indent');
+            citeDiv.classList.add('csl-entry');
+            var biblioDiv = window.document.getElementById('ref-' + cite);
+            if (biblioDiv) {
+              citeDiv.innerHTML = biblioDiv.innerHTML;
+            }
+            popup.appendChild(citeDiv);
+          });
+          return popup.innerHTML;
+        });
+      }
+    }
+  });
+  </script>
+</div> <!-- /content -->
+
+
+
+
+</body></html>

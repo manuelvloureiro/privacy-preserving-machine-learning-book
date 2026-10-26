@@ -450,7 +450,7 @@ window.Quarto = {
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../part05-dp-ml/05-private-prediction.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">42</span>&nbsp; <span class="chapter-title">Exercises: Private prediction</span></span></a>
+ <span class="menu-text"><span class="chapter-number">42</span>&nbsp; <span class="chapter-title">Exercises: Private prediction: PATE and in-context learning</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
@@ -501,14 +501,14 @@ window.Quarto = {
     <h2 id="toc-title">Table of contents</h2>
    
   <ul>
-  <li><a href="#sec-sol-information-theory-1" id="toc-sec-sol-information-theory-1" class="nav-link active" data-scroll-target="#sec-sol-information-theory-1"><span class="header-section-number">5.1</span> Entropy of a geometric variable</a></li>
-  <li><a href="#sec-sol-information-theory-2" id="toc-sec-sol-information-theory-2" class="nav-link" data-scroll-target="#sec-sol-information-theory-2"><span class="header-section-number">5.2</span> Information from independent observations</a></li>
-  <li><a href="#sec-sol-information-theory-3" id="toc-sec-sol-information-theory-3" class="nav-link" data-scroll-target="#sec-sol-information-theory-3"><span class="header-section-number">5.3</span> Min-capacity bounds capacity for the binary symmetric channel</a></li>
-  <li><a href="#sec-sol-information-theory-4" id="toc-sec-sol-information-theory-4" class="nav-link" data-scroll-target="#sec-sol-information-theory-4"><span class="header-section-number">5.4</span> The Z-channel</a></li>
-  <li><a href="#sec-sol-information-theory-5" id="toc-sec-sol-information-theory-5" class="nav-link" data-scroll-target="#sec-sol-information-theory-5"><span class="header-section-number">5.5</span> Capacities of the M-ary symmetric channel</a></li>
-  <li><a href="#sec-sol-information-theory-6" id="toc-sec-sol-information-theory-6" class="nav-link" data-scroll-target="#sec-sol-information-theory-6"><span class="header-section-number">5.6</span> Smith versus the average of logs</a></li>
-  <li><a href="#sec-sol-information-theory-7" id="toc-sec-sol-information-theory-7" class="nav-link" data-scroll-target="#sec-sol-information-theory-7"><span class="header-section-number">5.7</span> Fano is tight on the symmetric channel</a></li>
-  <li><a href="#sec-sol-information-theory-8" id="toc-sec-sol-information-theory-8" class="nav-link" data-scroll-target="#sec-sol-information-theory-8"><span class="header-section-number">5.8</span> A sample-size lower bound</a></li>
+  <li><a href="#sec-sol-min-1" id="toc-sec-sol-min-1" class="nav-link active" data-scroll-target="#sec-sol-min-1"><span class="header-section-number">5.1</span> Entropy of a geometric variable</a></li>
+  <li><a href="#sec-sol-min-2" id="toc-sec-sol-min-2" class="nav-link" data-scroll-target="#sec-sol-min-2"><span class="header-section-number">5.2</span> Information from independent observations</a></li>
+  <li><a href="#sec-sol-min-3" id="toc-sec-sol-min-3" class="nav-link" data-scroll-target="#sec-sol-min-3"><span class="header-section-number">5.3</span> Min-capacity bounds capacity for the binary symmetric channel</a></li>
+  <li><a href="#sec-sol-min-4" id="toc-sec-sol-min-4" class="nav-link" data-scroll-target="#sec-sol-min-4"><span class="header-section-number">5.4</span> The Z-channel</a></li>
+  <li><a href="#sec-sol-min-5" id="toc-sec-sol-min-5" class="nav-link" data-scroll-target="#sec-sol-min-5"><span class="header-section-number">5.5</span> Capacities of the k-ary symmetric channel</a></li>
+  <li><a href="#sec-sol-min-6" id="toc-sec-sol-min-6" class="nav-link" data-scroll-target="#sec-sol-min-6"><span class="header-section-number">5.6</span> Smith versus the average of logs</a></li>
+  <li><a href="#sec-sol-min-7" id="toc-sec-sol-min-7" class="nav-link" data-scroll-target="#sec-sol-min-7"><span class="header-section-number">5.7</span> Fano is tight on the symmetric channel</a></li>
+  <li><a href="#sec-sol-min-8" id="toc-sec-sol-min-8" class="nav-link" data-scroll-target="#sec-sol-min-8"><span class="header-section-number">5.8</span> A sample-size lower bound</a></li>
   </ul>
 </nav>
     </div>
@@ -535,10 +535,10 @@ window.Quarto = {
 
 
 <p>Exercises for <a href="../../book-full/part01-prerequisites/05-information-theory.html">Information theory</a>, each with a worked solution. Try each exercise before opening its solution. The script <code>code/part01-prerequisites/solutions_information_theory.py</code> computes every number quoted here; run it from the repository root with <code>uv run python code/part01-prerequisites/solutions_information_theory.py</code>.</p>
-<section id="sec-sol-information-theory-1" class="level2" data-number="5.1">
-<h2 data-number="5.1" class="anchored" data-anchor-id="sec-sol-information-theory-1"><span class="header-section-number">5.1</span> Entropy of a geometric variable</h2>
+<section id="sec-sol-min-1" class="level2" data-number="5.1">
+<h2 data-number="5.1" class="anchored" data-anchor-id="sec-sol-min-1"><span class="header-section-number">5.1</span> Entropy of a geometric variable</h2>
 <blockquote class="blockquote">
-<p><strong>Exercise 1.</strong> <strong>Entropy of a geometric variable.</strong> <span class="math inline">\(X\)</span> takes value <span class="math inline">\(k \ge 1\)</span> with probability <span class="math inline">\(2^{-k}\)</span>. Show that <span class="math inline">\(H(X) = 2\)</span> bits, while <span class="math inline">\(H_\infty(X) = 1\)</span>. <em>Hint: <span class="math inline">\(\sum_k k2^{-k} = 2\)</span>.</em> <em>(Entropy definition)</em></p>
+<p><strong>Exercise 1.</strong> <strong>Entropy of a geometric variable.</strong> <span class="math inline">\(X\)</span> takes value <span class="math inline">\(j \ge 1\)</span> with probability <span class="math inline">\(2^{-j}\)</span>. Show that <span class="math inline">\(H(X) = 2\)</span> bits, while <span class="math inline">\(H_\infty(X) = 1\)</span>. <em>Hint: <span class="math inline">\(\sum_j j2^{-j} = 2\)</span>.</em> <em>(Entropy definition)</em></p>
 </blockquote>
 <div class="callout callout-style-default callout-tip callout-titled" title="Solution">
 <div class="callout-header d-flex align-content-center collapsed" data-bs-toggle="collapse" data-bs-target=".callout-1-contents" aria-controls="callout-1" aria-expanded="false" aria-label="Toggle callout">
@@ -553,19 +553,19 @@ window.Quarto = {
 <div id="callout-1" class="callout-1-contents callout-collapse collapse">
 <div class="callout-body-container callout-body">
 <ol type="1">
-<li><strong>Surprisal of each outcome.</strong> <span class="math inline">\(p(k) = 2^{-k}\)</span>, so <span class="math inline">\(\log\frac{1}{p(k)} = k\)</span> bits. The outcome <span class="math inline">\(k\)</span> costs exactly <span class="math inline">\(k\)</span> bits, as in the code <span class="math inline">\(1, 01, 001, \dots\)</span></li>
-<li><strong>Average it</strong> (definition of entropy): <span id="eq-auto-05informationtheory-1"><span class="math display">\[H(X) = \sum_{k \ge 1} p(k)\log\frac{1}{p(k)} = \sum_{k \ge 1} k\,2^{-k}. \tag{5.1}\]</span></span></li>
-<li><strong>Sum the series</strong> (the hint). Let <span class="math inline">\(S = \sum_{k \ge 1} k\,2^{-k}\)</span>. Then <span class="math inline">\(S/2 = \sum_{k \ge 1} k\,2^{-(k+1)} = \sum_{k \ge 2}(k - 1)2^{-k}\)</span>. Subtract term by term: <span class="math inline">\(S - S/2 = \sum_{k \ge 1} 2^{-k} = 1\)</span>, so <span class="math inline">\(S = 2\)</span> and <span class="math inline">\(H(X) = 2\)</span> bits.</li>
-<li><strong>Min-entropy.</strong> The most likely value is <span class="math inline">\(k = 1\)</span>, so <span class="math inline">\(V(X) = \max_k 2^{-k} = \frac12\)</span> and <span class="math inline">\(H_\infty(X) = -\log\frac12 = 1\)</span> bit.</li>
+<li><strong>Surprisal of each outcome.</strong> <span class="math inline">\(p(j) = 2^{-j}\)</span>, so <span class="math inline">\(\log_2\frac{1}{p(j)} = j\)</span> bits. The outcome <span class="math inline">\(j\)</span> costs exactly <span class="math inline">\(j\)</span> bits, as in the code <span class="math inline">\(1, 01, 001, \dots\)</span></li>
+<li><strong>Average it</strong> (definition of entropy): <span id="eq-auto-05informationtheory-1"><span class="math display">\[H(X) = \sum_{j \ge 1} p(j)\log_2\frac{1}{p(j)} = \sum_{j \ge 1} j\,2^{-j}. \tag{5.1}\]</span></span></li>
+<li><strong>Sum the series</strong> (the hint). Let <span class="math inline">\(S = \sum_{j \ge 1} j\,2^{-j}\)</span>. Then <span class="math inline">\(S/2 = \sum_{j \ge 1} j\,2^{-(j+1)} = \sum_{j \ge 2}(j - 1)2^{-j}\)</span>. Subtract term by term: <span class="math inline">\(S - S/2 = \sum_{j \ge 1} 2^{-j} = 1\)</span>, so <span class="math inline">\(S = 2\)</span> and <span class="math inline">\(H(X) = 2\)</span> bits.</li>
+<li><strong>Min-entropy.</strong> The most likely value is <span class="math inline">\(j = 1\)</span>, so <span class="math inline">\(V(X) = \max_j 2^{-j} = \frac12\)</span> and <span class="math inline">\(H_\infty(X) = -\log_2\frac12 = 1\)</span> bit.</li>
 </ol>
-<p>The series converges fast. The partial sums up to <span class="math inline">\(k = 5\)</span>, <span class="math inline">\(10\)</span> and <span class="math inline">\(20\)</span> are 1.7812, 1.9883 and 2.0000. As predicted by <span class="math inline">\(H_\infty \le H\)</span>, the min-entropy is below the entropy. The bound <span class="math inline">\(H \le \log\lvert\mathcal X\rvert\)</span> says nothing here, because <span class="math inline">\(X\)</span> has infinitely many values.</p>
+<p>The series converges fast. The partial sums up to <span class="math inline">\(j = 5\)</span>, <span class="math inline">\(10\)</span> and <span class="math inline">\(20\)</span> are 1.7812, 1.9883 and 2.0000. As predicted by <span class="math inline">\(H_\infty \le H\)</span>, the min-entropy is below the entropy. The bound <span class="math inline">\(H \le \log_2\lvert\mathcal X\rvert\)</span> says nothing here, because <span class="math inline">\(X\)</span> has infinitely many values.</p>
 <p><em>A variable with infinitely many values can still have a small finite entropy, and its best single guess (here <span class="math inline">\(X = 1\)</span>) succeeds half the time.</em></p>
 </div>
 </div>
 </div>
 </section>
-<section id="sec-sol-information-theory-2" class="level2" data-number="5.2">
-<h2 data-number="5.2" class="anchored" data-anchor-id="sec-sol-information-theory-2"><span class="header-section-number">5.2</span> Information from independent observations</h2>
+<section id="sec-sol-min-2" class="level2" data-number="5.2">
+<h2 data-number="5.2" class="anchored" data-anchor-id="sec-sol-min-2"><span class="header-section-number">5.2</span> Information from independent observations</h2>
 <blockquote class="blockquote">
 <p><strong>Exercise 2.</strong> <strong>Information from independent observations.</strong> If <span class="math inline">\(Y_1\)</span> and <span class="math inline">\(Y_2\)</span> are independent given <span class="math inline">\(X\)</span>, show that <span class="math inline">\(I(X; Y_1, Y_2) \le I(X; Y_1) + I(X; Y_2)\)</span>. Find an example where <span class="math inline">\(Y_1, Y_2\)</span> are <em>not</em> conditionally independent and the inequality fails. <em>Hint for the counterexample: <span class="math inline">\(X = Y_1 \oplus Y_2\)</span> for independent fair bits.</em> <em>(Chain rule)</em></p>
 </blockquote>
@@ -645,10 +645,10 @@ Table&nbsp;5.1: The exclusive-or counterexample: every row has probability 1/4.
 </div>
 </div>
 </section>
-<section id="sec-sol-information-theory-3" class="level2" data-number="5.3">
-<h2 data-number="5.3" class="anchored" data-anchor-id="sec-sol-information-theory-3"><span class="header-section-number">5.3</span> Min-capacity bounds capacity for the binary symmetric channel</h2>
+<section id="sec-sol-min-3" class="level2" data-number="5.3">
+<h2 data-number="5.3" class="anchored" data-anchor-id="sec-sol-min-3"><span class="header-section-number">5.3</span> Min-capacity bounds capacity for the binary symmetric channel</h2>
 <blockquote class="blockquote">
-<p><strong>Exercise 3.</strong> <strong>Min-capacity bounds capacity for the binary symmetric channel.</strong> Show that <span class="math inline">\(1 - h(p) \le \log_2\big(2\max(p, 1 - p)\big)\)</span> for every <span class="math inline">\(p\)</span>. <em>Hint: <span class="math inline">\(H_\infty \le H\)</span> applied to a <span class="math inline">\(\mathrm{Bernoulli}(p)\)</span> variable.</em> <em>Check: at <span class="math inline">\(p = 0.25\)</span>, <span class="math inline">\(0.1887 \le 0.5850\)</span>.</em> <em>(Min-entropy vs Shannon)</em></p>
+<p><strong>Exercise 3.</strong> <strong>Min-capacity bounds capacity for the binary symmetric channel.</strong> Show that <span class="math inline">\(1 - h(p) \le \log_2\big(2\max(p, 1 - p)\big)\)</span> for every <span class="math inline">\(p\)</span>. <em>Hint: <span class="math inline">\(H_\infty \le H\)</span> applied to a <span class="math inline">\(\mathrm{Bern}(p)\)</span> variable.</em> <em>Check: at <span class="math inline">\(p = 0.25\)</span>, <span class="math inline">\(0.1887 \le 0.5850\)</span>.</em> <em>(Min-entropy vs Shannon)</em></p>
 </blockquote>
 <div class="callout callout-style-default callout-tip callout-titled" title="Solution">
 <div class="callout-header d-flex align-content-center collapsed" data-bs-toggle="collapse" data-bs-target=".callout-3-contents" aria-controls="callout-3" aria-expanded="false" aria-label="Toggle callout">
@@ -663,9 +663,9 @@ Table&nbsp;5.1: The exclusive-or counterexample: every row has probability 1/4.
 <div id="callout-3" class="callout-3-contents callout-collapse collapse">
 <div class="callout-body-container callout-body">
 <ol type="1">
-<li><strong>Min-entropy of a coin.</strong> For <span class="math inline">\(B \sim \mathrm{Bernoulli}(p)\)</span>, <span class="math inline">\(V(B) = \max(p, 1 - p)\)</span>, so <span class="math inline">\(H_\infty(B) = -\log\max(p, 1 - p)\)</span>.</li>
-<li><strong>Apply <span class="math inline">\(H_\infty \le H\)</span></strong> (Min-entropy and guessing): <span class="math inline">\(-\log\max(p, 1 - p) \le h(p)\)</span>.</li>
-<li><strong>Rearrange.</strong> Subtract both sides from 1: <span class="math inline">\(1 - h(p) \le 1 + \log\max(p, 1 - p) = \log_2 2 + \log_2\max(p, 1 - p) = \log_2\big(2\max(p, 1 - p)\big)\)</span>.</li>
+<li><strong>Min-entropy of a coin.</strong> For <span class="math inline">\(B \sim \mathrm{Bern}(p)\)</span>, <span class="math inline">\(V(B) = \max(p, 1 - p)\)</span>, so <span class="math inline">\(H_\infty(B) = -\log_2\max(p, 1 - p)\)</span>.</li>
+<li><strong>Apply <span class="math inline">\(H_\infty \le H\)</span></strong> (Min-entropy and guessing): <span class="math inline">\(-\log_2\max(p, 1 - p) \le h(p)\)</span>.</li>
+<li><strong>Rearrange.</strong> Subtract both sides from 1: <span class="math inline">\(1 - h(p) \le 1 + \log_2\max(p, 1 - p) = \log_2 2 + \log_2\max(p, 1 - p) = \log_2\big(2\max(p, 1 - p)\big)\)</span>.</li>
 <li><strong>Read the two sides.</strong> The left side is the capacity <a href="../../book-full/part01-prerequisites/05-information-theory.html#eq-bsc-capacity">Equation&nbsp;5.17</a>. The right side is <a href="../../book-full/part01-prerequisites/05-information-theory.html#eq-min-capacity">Equation&nbsp;5.22</a> for <span class="math inline">\(\mathrm{BSC}(p)\)</span>, whose two column maxima are both <span class="math inline">\(\max(p, 1 - p)\)</span>.</li>
 <li><strong>Check.</strong> At <span class="math inline">\(p = 0.25\)</span>: <span class="math inline">\(1 - h(0.25) = 0.1887\)</span> and <span class="math inline">\(\log_2(2 \cdot 0.75) = \log_2 1.5 = 0.5850\)</span>. At <span class="math inline">\(p = 0.11\)</span> the two are 0.5001 and 0.8319. On a grid of 1,001 values of <span class="math inline">\(p\)</span>, the smallest gap between the two sides is 0.0000.</li>
 </ol>
@@ -675,10 +675,10 @@ Table&nbsp;5.1: The exclusive-or counterexample: every row has probability 1/4.
 </div>
 </div>
 </section>
-<section id="sec-sol-information-theory-4" class="level2" data-number="5.4">
-<h2 data-number="5.4" class="anchored" data-anchor-id="sec-sol-information-theory-4"><span class="header-section-number">5.4</span> The Z-channel</h2>
+<section id="sec-sol-min-4" class="level2" data-number="5.4">
+<h2 data-number="5.4" class="anchored" data-anchor-id="sec-sol-min-4"><span class="header-section-number">5.4</span> The Z-channel</h2>
 <blockquote class="blockquote">
-<p><strong>Exercise 4.</strong> <strong>The Z-channel.</strong> Input 0 always arrives as 0; input 1 arrives as 0 with probability <span class="math inline">\(\frac12\)</span>. Show that <span class="math inline">\(I(X; Y) = h(q/2) - q\)</span> for <span class="math inline">\(q = \Pr[X = 1]\)</span>, maximize over <span class="math inline">\(q\)</span>, and confirm that the uniform input is <em>not</em> optimal. <em>Check: the optimum is <span class="math inline">\(q = 0.4\)</span> and the capacity is <span class="math inline">\(\log_2(5/4) = 0.3219\)</span> bits; the script confirms both with Blahut–Arimoto.</em> <em>(Capacity)</em></p>
+<p><strong>Exercise 4.</strong> <strong>The Z-channel.</strong> Input 0 always arrives as 0; input 1 arrives as 0 with probability <span class="math inline">\(\frac12\)</span>. Show that <span class="math inline">\(I(X; Y) = h(\pi_1/2) - \pi_1\)</span> for <span class="math inline">\(\pi_1 = \Pr[X = 1]\)</span>, maximize over <span class="math inline">\(\pi_1\)</span>, and confirm that the uniform input is <em>not</em> optimal. <em>Check: the optimum is <span class="math inline">\(\pi_1 = 0.4\)</span> and the capacity is <span class="math inline">\(\log_2(5/4) = 0.3219\)</span> bits; the script confirms both with Blahut–Arimoto.</em> <em>(Capacity)</em></p>
 </blockquote>
 <div class="callout callout-style-default callout-tip callout-titled" title="Solution">
 <div class="callout-header d-flex align-content-center collapsed" data-bs-toggle="collapse" data-bs-target=".callout-4-contents" aria-controls="callout-4" aria-expanded="false" aria-label="Toggle callout">
@@ -694,19 +694,19 @@ Table&nbsp;5.1: The exclusive-or counterexample: every row has probability 1/4.
 <div class="callout-body-container callout-body">
 <p><em>The formula.</em> Use <span class="math inline">\(I(X; Y) = H(Y) - H(Y \mid X)\)</span>, as for the binary symmetric channel.</p>
 <ol type="1">
-<li><strong>Output distribution.</strong> <span class="math inline">\(Y = 1\)</span> only if <span class="math inline">\(X = 1\)</span> and the bit survives: <span class="math inline">\(\Pr[Y = 1] = q \cdot \frac12 = q/2\)</span>. So <span class="math inline">\(H(Y) = h(q/2)\)</span>.</li>
-<li><strong>Noise entropy.</strong> Given <span class="math inline">\(X = 0\)</span>, <span class="math inline">\(Y = 0\)</span> for certain: <span class="math inline">\(H(Y \mid X = 0) = 0\)</span>. Given <span class="math inline">\(X = 1\)</span>, <span class="math inline">\(Y\)</span> is a fair bit: <span class="math inline">\(H(Y \mid X = 1) = h(\frac12) = 1\)</span>. Averaging over <span class="math inline">\(X\)</span>: <span class="math inline">\(H(Y \mid X) = (1 - q)\cdot0 + q\cdot1 = q\)</span>.</li>
-<li><strong>Subtract:</strong> <span class="math inline">\(I(X; Y) = h(q/2) - q\)</span>. The script compares this with the general joint-table formula on a grid of 1,001 values of <span class="math inline">\(q\)</span>; they agree to <span class="math inline">\(3.1\times10^{-16}\)</span>.</li>
+<li><strong>Output distribution.</strong> <span class="math inline">\(Y = 1\)</span> only if <span class="math inline">\(X = 1\)</span> and the bit survives: <span class="math inline">\(\Pr[Y = 1] = \pi_1 \cdot \frac12 = \pi_1/2\)</span>. So <span class="math inline">\(H(Y) = h(\pi_1/2)\)</span>.</li>
+<li><strong>Noise entropy.</strong> Given <span class="math inline">\(X = 0\)</span>, <span class="math inline">\(Y = 0\)</span> for certain: <span class="math inline">\(H(Y \mid X = 0) = 0\)</span>. Given <span class="math inline">\(X = 1\)</span>, <span class="math inline">\(Y\)</span> is a fair bit: <span class="math inline">\(H(Y \mid X = 1) = h(\frac12) = 1\)</span>. Averaging over <span class="math inline">\(X\)</span>: <span class="math inline">\(H(Y \mid X) = (1 - \pi_1)\cdot0 + \pi_1\cdot1 = \pi_1\)</span>.</li>
+<li><strong>Subtract:</strong> <span class="math inline">\(I(X; Y) = h(\pi_1/2) - \pi_1\)</span>. The script compares this with the general joint-table formula on a grid of 1,001 values of <span class="math inline">\(\pi_1\)</span>; they agree to <span class="math inline">\(3.1\times10^{-16}\)</span>.</li>
 </ol>
 <p><em>The maximum.</em></p>
 <ol type="1">
-<li><strong>Derivative of <span class="math inline">\(h\)</span>.</strong> Differentiating <span class="math inline">\(h(t) = -t\log t - (1 - t)\log(1 - t)\)</span> gives <span class="math inline">\(h'(t) = \log\frac{1 - t}{t}\)</span> (the <span class="math inline">\(\pm 1/\ln 2\)</span> terms cancel).</li>
-<li><strong>Derivative of <span class="math inline">\(I\)</span>.</strong> By the chain rule of calculus, <span class="math inline">\(\frac{d}{dq}h(q/2) = \frac12\log\frac{1 - q/2}{q/2} = \frac12\log\frac{2 - q}{q}\)</span>. So <span id="eq-auto-05informationtheory-3"><span class="math display">\[\frac{dI}{dq} = \frac12\log_2\frac{2 - q}{q} - 1. \tag{5.3}\]</span></span></li>
-<li><strong>Set it to zero.</strong> <span class="math inline">\(\log_2\frac{2 - q}{q} = 2\)</span>, so <span class="math inline">\(\frac{2 - q}{q} = 4\)</span> and <span class="math inline">\(q = \frac25 = 0.4\)</span>.</li>
-<li><strong>It is a maximum.</strong> <span class="math inline">\(h\)</span> is concave and <span class="math inline">\(q \mapsto q/2\)</span> is linear, so <span class="math inline">\(h(q/2)\)</span> is concave, and subtracting the linear <span class="math inline">\(q\)</span> keeps it concave. A stationary point of a concave function is its maximum.</li>
+<li><strong>Derivative of <span class="math inline">\(h\)</span>.</strong> Differentiating <span class="math inline">\(h(t) = -t\log_2 t - (1 - t)\log_2(1 - t)\)</span> gives <span class="math inline">\(h'(t) = \log_2\frac{1 - t}{t}\)</span> (the <span class="math inline">\(\pm 1/\ln 2\)</span> terms cancel).</li>
+<li><strong>Derivative of <span class="math inline">\(I\)</span>.</strong> By the chain rule of calculus, <span class="math inline">\(\frac{\mathrm d}{\mathrm d\pi_1}h(\pi_1/2) = \frac12\log_2\frac{1 - \pi_1/2}{\pi_1/2} = \frac12\log_2\frac{2 - \pi_1}{\pi_1}\)</span>. So <span id="eq-auto-05informationtheory-3"><span class="math display">\[\frac{\mathrm dI}{\mathrm d\pi_1} = \frac12\log_2\frac{2 - \pi_1}{\pi_1} - 1. \tag{5.3}\]</span></span></li>
+<li><strong>Set it to zero.</strong> <span class="math inline">\(\log_2\frac{2 - \pi_1}{\pi_1} = 2\)</span>, so <span class="math inline">\(\frac{2 - \pi_1}{\pi_1} = 4\)</span> and <span class="math inline">\(\pi_1 = \frac25 = 0.4\)</span>.</li>
+<li><strong>It is a maximum.</strong> <span class="math inline">\(h\)</span> is concave and <span class="math inline">\(\pi_1 \mapsto \pi_1/2\)</span> is linear, so <span class="math inline">\(h(\pi_1/2)\)</span> is concave, and subtracting the linear <span class="math inline">\(\pi_1\)</span> keeps it concave. A stationary point of a concave function is its maximum.</li>
 <li><strong>The capacity.</strong> <span class="math inline">\(h(0.2) = 0.2\log_2 5 + 0.8\log_2\frac54 = \log_2 5 - 0.8\cdot 2 = \log_2 5 - 1.6\)</span>. So <span class="math inline">\(I = \log_2 5 - 1.6 - 0.4 = \log_2 5 - 2 = \log_2\frac54 = 0.3219\)</span> bits.</li>
-<li><strong>Uniform input.</strong> At <span class="math inline">\(q = \frac12\)</span>, <span class="math inline">\(I = h(\frac14) - \frac12 = 0.8113 - 0.5 = 0.3113\)</span> bits, less than 0.3219. So the uniform input is not optimal.</li>
-<li><strong>Numerical check.</strong> A grid search over <span class="math inline">\(q\)</span> in steps of 0.001 peaks at <span class="math inline">\(q = 0.4000\)</span>. Blahut–Arimoto gives capacity 0.3219 at <span class="math inline">\(\Pr[X = 1] = 0.4000\)</span>.</li>
+<li><strong>Uniform input.</strong> At <span class="math inline">\(\pi_1 = \frac12\)</span>, <span class="math inline">\(I = h(\frac14) - \frac12 = 0.8113 - 0.5 = 0.3113\)</span> bits, less than 0.3219. So the uniform input is not optimal.</li>
+<li><strong>Numerical check.</strong> A grid search over <span class="math inline">\(\pi_1\)</span> in steps of 0.001 peaks at <span class="math inline">\(\pi_1 = 0.4000\)</span>. Blahut–Arimoto gives capacity 0.3219 at <span class="math inline">\(\Pr[X = 1] = 0.4000\)</span>.</li>
 </ol>
 <p>The optimum puts less weight on input 1 because sending a 1 is expensive: half of the time it is lost, and that loss costs a full bit of noise entropy <span class="math inline">\(H(Y \mid X = 1) = 1\)</span>.</p>
 <p><em>When a channel is not symmetric, the capacity-achieving input is not uniform.</em></p>
@@ -714,10 +714,10 @@ Table&nbsp;5.1: The exclusive-or counterexample: every row has probability 1/4.
 </div>
 </div>
 </section>
-<section id="sec-sol-information-theory-5" class="level2" data-number="5.5">
-<h2 data-number="5.5" class="anchored" data-anchor-id="sec-sol-information-theory-5"><span class="header-section-number">5.5</span> Capacities of the M-ary symmetric channel</h2>
+<section id="sec-sol-min-5" class="level2" data-number="5.5">
+<h2 data-number="5.5" class="anchored" data-anchor-id="sec-sol-min-5"><span class="header-section-number">5.5</span> Capacities of the k-ary symmetric channel</h2>
 <blockquote class="blockquote">
-<p><strong>Exercise 5.</strong> <strong>Capacities of the <span class="math inline">\(M\)</span>-ary symmetric channel.</strong> Show that its Shannon capacity is <span class="math inline">\(\log M - h(\varepsilon) - \varepsilon\log(M - 1)\)</span> and its min-capacity is <span class="math inline">\(\log\big(M(1 - \varepsilon)\big)\)</span> when <span class="math inline">\(1 - \varepsilon \ge \varepsilon/(M - 1)\)</span>. <em>Check: at <span class="math inline">\(M = 8\)</span> and <span class="math inline">\(\varepsilon = 0.3\)</span>, 1.2765 and 2.4854 bits.</em> <em>(Capacity, min-capacity)</em></p>
+<p><strong>Exercise 5.</strong> <strong>Capacities of the <span class="math inline">\(k\)</span>-ary symmetric channel.</strong> Show that its Shannon capacity is <span class="math inline">\(\log_2 k - h(p) - p\log_2(k - 1)\)</span> and its min-capacity is <span class="math inline">\(\log_2\big(k(1 - p)\big)\)</span> when <span class="math inline">\(1 - p \ge p/(k - 1)\)</span>. <em>Check: at <span class="math inline">\(k = 8\)</span> and <span class="math inline">\(p = 0.3\)</span>, 1.2765 and 2.4854 bits.</em> <em>(Capacity, min-capacity)</em></p>
 </blockquote>
 <div class="callout callout-style-default callout-tip callout-titled" title="Solution">
 <div class="callout-header d-flex align-content-center collapsed" data-bs-toggle="collapse" data-bs-target=".callout-5-contents" aria-controls="callout-5" aria-expanded="false" aria-label="Toggle callout">
@@ -731,28 +731,28 @@ Table&nbsp;5.1: The exclusive-or counterexample: every row has probability 1/4.
 </div>
 <div id="callout-5" class="callout-5-contents callout-collapse collapse">
 <div class="callout-body-container callout-body">
-<p>The channel keeps the input with probability <span class="math inline">\(1 - \varepsilon\)</span> and otherwise sends one of the other <span class="math inline">\(M - 1\)</span> symbols, each with probability <span class="math inline">\(\varepsilon/(M - 1)\)</span>. Every row of <span class="math inline">\(C\)</span> holds one entry <span class="math inline">\(1 - \varepsilon\)</span> and <span class="math inline">\(M - 1\)</span> entries <span class="math inline">\(\varepsilon/(M - 1)\)</span>, and so does every column.</p>
+<p>The channel keeps the input with probability <span class="math inline">\(1 - p\)</span> and otherwise sends one of the other <span class="math inline">\(k - 1\)</span> symbols, each with probability <span class="math inline">\(p/(k - 1)\)</span>. Every row of <span class="math inline">\(K\)</span> holds one entry <span class="math inline">\(1 - p\)</span> and <span class="math inline">\(k - 1\)</span> entries <span class="math inline">\(p/(k - 1)\)</span>, and so does every column.</p>
 <p><em>Shannon capacity.</em> Follow the binary symmetric channel derivation.</p>
 <ol type="1">
-<li><strong>Noise entropy does not depend on the input.</strong> Row <span class="math inline">\(x\)</span> has entropy <span id="eq-auto-05informationtheory-4"><span class="math display">\[H(Y \mid X = x) = -(1 - \varepsilon)\log(1 - \varepsilon) - (M - 1)\frac{\varepsilon}{M - 1}\log\frac{\varepsilon}{M - 1} = h(\varepsilon) + \varepsilon\log(M - 1), \tag{5.4}\]</span></span> using <span class="math inline">\(-\varepsilon\log\frac{\varepsilon}{M - 1} = -\varepsilon\log\varepsilon + \varepsilon\log(M - 1)\)</span>. The rows are permutations of each other, so this holds for every <span class="math inline">\(x\)</span>, and <span class="math inline">\(H(Y \mid X) = h(\varepsilon) + \varepsilon\log(M - 1)\)</span> for every prior.</li>
-<li><strong>Maximize <span class="math inline">\(H(Y)\)</span>.</strong> <span class="math inline">\(Y\)</span> takes <span class="math inline">\(M\)</span> values, so <span class="math inline">\(H(Y) \le \log M\)</span>, with equality iff <span class="math inline">\(Y\)</span> is uniform (the entropy upper bound).</li>
-<li><strong>The uniform input attains it.</strong> With <span class="math inline">\(\pi(x) = 1/M\)</span>, <span class="math inline">\(\Pr[Y = y] = \frac1M\sum_x C[x, y] = \frac1M\big[(1 - \varepsilon) + (M - 1)\frac{\varepsilon}{M - 1}\big] = \frac1M\)</span>.</li>
-<li><strong>So</strong> <span class="math inline">\(\mathcal C = \log M - h(\varepsilon) - \varepsilon\log(M - 1)\)</span>.</li>
+<li><strong>Noise entropy does not depend on the input.</strong> Row <span class="math inline">\(x\)</span> has entropy <span id="eq-auto-05informationtheory-4"><span class="math display">\[H(Y \mid X = x) = -(1 - p)\log_2(1 - p) - (k - 1)\frac{p}{k - 1}\log_2\frac{p}{k - 1} = h(p) + p\log_2(k - 1), \tag{5.4}\]</span></span> using <span class="math inline">\(-p\log_2\frac{p}{k - 1} = -p\log_2p + p\log_2(k - 1)\)</span>. The rows are permutations of each other, so this holds for every <span class="math inline">\(x\)</span>, and <span class="math inline">\(H(Y \mid X) = h(p) + p\log_2(k - 1)\)</span> for every prior.</li>
+<li><strong>Maximize <span class="math inline">\(H(Y)\)</span>.</strong> <span class="math inline">\(Y\)</span> takes <span class="math inline">\(k\)</span> values, so <span class="math inline">\(H(Y) \le \log_2 k\)</span>, with equality iff <span class="math inline">\(Y\)</span> is uniform (the entropy upper bound).</li>
+<li><strong>The uniform input attains it.</strong> With <span class="math inline">\(\pi(x) = 1/k\)</span>, <span class="math inline">\(\Pr[Y = y] = \frac1k\sum_x K[x, y] = \frac1k\big[(1 - p) + (k - 1)\frac{p}{k - 1}\big] = \frac1k\)</span>.</li>
+<li><strong>So</strong> <span class="math inline">\(\mathcal C = \log_2 k - h(p) - p\log_2(k - 1)\)</span>.</li>
 </ol>
-<p>At <span class="math inline">\(M = 8\)</span>, <span class="math inline">\(\varepsilon = 0.3\)</span>: <span class="math inline">\(h(0.3) = 0.8813\)</span> and <span class="math inline">\(0.3\log_2 7 = 0.8422\)</span>, so <span class="math inline">\(\mathcal C = 3 - 0.8813 - 0.8422 = 1.2765\)</span> bits. Blahut–Arimoto gives 1.2765, and the input distribution it finds is exactly uniform.</p>
+<p>At <span class="math inline">\(k = 8\)</span>, <span class="math inline">\(p = 0.3\)</span>: <span class="math inline">\(h(0.3) = 0.8813\)</span> and <span class="math inline">\(0.3\log_2 7 = 0.8422\)</span>, so <span class="math inline">\(\mathcal C = 3 - 0.8813 - 0.8422 = 1.2765\)</span> bits. Blahut–Arimoto gives 1.2765, and the input distribution it finds is exactly uniform.</p>
 <p><em>Min-capacity.</em></p>
 <ol type="1">
-<li><strong>Column maxima.</strong> Each column holds one entry <span class="math inline">\(1 - \varepsilon\)</span> and <span class="math inline">\(M - 1\)</span> entries <span class="math inline">\(\varepsilon/(M - 1)\)</span>. Under the condition <span class="math inline">\(1 - \varepsilon \ge \varepsilon/(M - 1)\)</span>, its maximum is <span class="math inline">\(1 - \varepsilon\)</span>.</li>
-<li><strong>Apply <a href="../../book-full/part01-prerequisites/05-information-theory.html#eq-min-capacity">Equation&nbsp;5.22</a>:</strong> <span class="math inline">\(\mathcal{ML}(C) = \log\sum_{y=1}^{M}(1 - \varepsilon) = \log\big(M(1 - \varepsilon)\big)\)</span>.</li>
+<li><strong>Column maxima.</strong> Each column holds one entry <span class="math inline">\(1 - p\)</span> and <span class="math inline">\(k - 1\)</span> entries <span class="math inline">\(p/(k - 1)\)</span>. Under the condition <span class="math inline">\(1 - p \ge p/(k - 1)\)</span>, its maximum is <span class="math inline">\(1 - p\)</span>.</li>
+<li><strong>Apply <a href="../../book-full/part01-prerequisites/05-information-theory.html#eq-min-capacity">Equation&nbsp;5.22</a>:</strong> <span class="math inline">\(\mathcal{ML}(K) = \log_2\sum_{y=1}^{k}(1 - p) = \log_2\big(k(1 - p)\big)\)</span>.</li>
 </ol>
-<p>At <span class="math inline">\(M = 8\)</span>, <span class="math inline">\(\varepsilon = 0.3\)</span>: <span class="math inline">\(\varepsilon/(M - 1) = 0.0429 \le 0.7\)</span>, so the condition holds, and <span class="math inline">\(\mathcal{ML} = \log_2 5.6 = 2.4854\)</span> bits. The general column-maxima formula gives the same. If the condition fails, the column maximum is <span class="math inline">\(\varepsilon/(M - 1)\)</span> and <span class="math inline">\(\mathcal{ML} = \log\frac{M\varepsilon}{M - 1}\)</span>.</p>
+<p>At <span class="math inline">\(k = 8\)</span>, <span class="math inline">\(p = 0.3\)</span>: <span class="math inline">\(p/(k - 1) = 0.0429 \le 0.7\)</span>, so the condition holds, and <span class="math inline">\(\mathcal{ML} = \log_2 5.6 = 2.4854\)</span> bits. The general column-maxima formula gives the same. If the condition fails, the column maximum is <span class="math inline">\(p/(k - 1)\)</span> and <span class="math inline">\(\mathcal{ML} = \log_2\frac{kp}{k - 1}\)</span>.</p>
 <p><em>Under the same channel, a one-try guesser gains almost twice as many bits (2.4854) as the Shannon capacity (1.2765) suggests.</em></p>
 </div>
 </div>
 </div>
 </section>
-<section id="sec-sol-information-theory-6" class="level2" data-number="5.6">
-<h2 data-number="5.6" class="anchored" data-anchor-id="sec-sol-information-theory-6"><span class="header-section-number">5.6</span> Smith versus the average of logs</h2>
+<section id="sec-sol-min-6" class="level2" data-number="5.6">
+<h2 data-number="5.6" class="anchored" data-anchor-id="sec-sol-min-6"><span class="header-section-number">5.6</span> Smith versus the average of logs</h2>
 <blockquote class="blockquote">
 <p><strong>Exercise 6.</strong> <strong>Smith versus the average of logs.</strong> Prove that <span class="math inline">\(H_\infty(X \mid Y) \le \sum_y p(y)H_\infty(X \mid Y = y)\)</span>, and find a joint table where the gap is large. <em>Check: the walk-through gives 0.5995 vs 0.6548.</em> <em>(Jensen)</em></p>
 </blockquote>
@@ -770,17 +770,17 @@ Table&nbsp;5.1: The exclusive-or counterexample: every row has probability 1/4.
 <div class="callout-body-container callout-body">
 <p><em>The inequality.</em></p>
 <ol type="1">
-<li><strong>Write Smith’s value as a log of an average.</strong> By the derivation of <a href="../../book-full/part01-prerequisites/05-information-theory.html#eq-posterior-vulnerability">Equation&nbsp;5.20</a>, <span class="math inline">\(V(X \mid Y) = \sum_y p(y)\,V(X \mid Y = y)\)</span>, where <span class="math inline">\(V(X \mid Y = y) = \max_x p(x \mid y)\)</span>. Let <span class="math inline">\(g(y) = V(X \mid Y = y)\)</span> and <span class="math inline">\(Z = g(Y)\)</span>, a positive random variable. Then <span class="math inline">\(H_\infty(X \mid Y) = -\log\mathbb E[Z]\)</span>.</li>
-<li><strong>Write the other side as an average of logs.</strong> <span class="math inline">\(\sum_y p(y)H_\infty(X \mid Y = y) = \sum_y p(y)\big(-\log V(X \mid Y = y)\big) = \mathbb E[-\log Z]\)</span>.</li>
-<li><strong>Apply Fact 1 in its mirror form</strong> for the convex <span class="math inline">\(-\log\)</span>: <span class="math inline">\(-\log\mathbb E[Z] \le \mathbb E[-\log Z]\)</span>. That is the claim. Equality holds iff <span class="math inline">\(Z\)</span> is constant, that is, when the best guess is equally likely to be right after every observation.</li>
+<li><strong>Write Smith’s value as a log of an average.</strong> By the derivation of <a href="../../book-full/part01-prerequisites/05-information-theory.html#eq-posterior-vulnerability">Equation&nbsp;5.20</a>, <span class="math inline">\(V(X \mid Y) = \sum_y p(y)\,V(X \mid Y = y)\)</span>, where <span class="math inline">\(V(X \mid Y = y) = \max_x p(x \mid y)\)</span>. Let <span class="math inline">\(g(y) = V(X \mid Y = y)\)</span> and <span class="math inline">\(Z = g(Y)\)</span>, a positive random variable. Then <span class="math inline">\(H_\infty(X \mid Y) = -\log_2\mathbb E[Z]\)</span>.</li>
+<li><strong>Write the other side as an average of logs.</strong> <span class="math inline">\(\sum_y p(y)H_\infty(X \mid Y = y) = \sum_y p(y)\big(-\log_2 V(X \mid Y = y)\big) = \mathbb E[-\log_2 Z]\)</span>.</li>
+<li><strong>Apply Fact 1 in its mirror form</strong> for the convex <span class="math inline">\(-\log_2\)</span>: <span class="math inline">\(-\log_2\mathbb E[Z] \le \mathbb E[-\log_2 Z]\)</span>. That is the claim. Equality holds iff <span class="math inline">\(Z\)</span> is constant, that is, when the best guess is equally likely to be right after every observation.</li>
 </ol>
 <p>In the walk-through, Smith’s value is 0.5995 bits and the average of logs is 0.6548, as the check says.</p>
-<p><em>A large gap.</em> Reuse reveal-if-zero(1) from <a href="../../book-full/part01-prerequisites/05-information-theory.html#sec-shannon-vs-min">Section&nbsp;5.8</a>: <span class="math inline">\(X\)</span> is uniform on <span class="math inline">\(n\)</span>-bit strings, and <span class="math inline">\(Y\)</span> is <span class="math inline">\(X\)</span> itself if its lowest bit is 0 (probability <span class="math inline">\(\frac12\)</span>), and <span class="math inline">\(\perp\)</span> otherwise.</p>
+<p><em>A large gap.</em> Reuse reveal-if-zero(1) from <a href="../../book-full/part01-prerequisites/05-information-theory.html#sec-shannon-vs-min">Section&nbsp;5.8</a>: <span class="math inline">\(X\)</span> is uniform on <span class="math inline">\(n\)</span>-bit strings, and <span class="math inline">\(Y\)</span> is <span class="math inline">\(X\)</span> itself if its lowest bit is 0 (probability <span class="math inline">\(\frac12\)</span>), and <span class="math inline">\(\bot\)</span> otherwise.</p>
 <ol type="1">
 <li><strong>If <span class="math inline">\(Y\)</span> is a string,</strong> the posterior is a point mass: <span class="math inline">\(V(X \mid Y = y) = 1\)</span> and <span class="math inline">\(H_\infty(X \mid Y = y) = 0\)</span>.</li>
-<li><strong>If <span class="math inline">\(Y = \perp\)</span>,</strong> the posterior is uniform on the <span class="math inline">\(2^{n-1}\)</span> odd strings: <span class="math inline">\(V(X \mid Y = \perp) = 2^{-(n-1)}\)</span> and <span class="math inline">\(H_\infty(X \mid Y = \perp) = n - 1\)</span>.</li>
+<li><strong>If <span class="math inline">\(Y = \bot\)</span>,</strong> the posterior is uniform on the <span class="math inline">\(2^{n-1}\)</span> odd strings: <span class="math inline">\(V(X \mid Y = \bot) = 2^{-(n-1)}\)</span> and <span class="math inline">\(H_\infty(X \mid Y = \bot) = n - 1\)</span>.</li>
 <li><strong>Average of logs:</strong> <span class="math inline">\(\frac12\cdot0 + \frac12(n - 1) = \frac{n - 1}{2}\)</span>.</li>
-<li><strong>Smith:</strong> <span class="math inline">\(V(X \mid Y) = \frac12\cdot1 + \frac12\cdot2^{-(n-1)} = \frac12 + 2^{-n}\)</span>, so <span class="math inline">\(H_\infty(X \mid Y) = -\log\big(\tfrac12 + 2^{-n}\big) = n - \log\big(2^{n-1} + 1\big)\)</span>, just under 1 bit.</li>
+<li><strong>Smith:</strong> <span class="math inline">\(V(X \mid Y) = \frac12\cdot1 + \frac12\cdot2^{-(n-1)} = \frac12 + 2^{-n}\)</span>, so <span class="math inline">\(H_\infty(X \mid Y) = -\log_2\big(\tfrac12 + 2^{-n}\big) = n - \log_2\big(2^{n-1} + 1\big)\)</span>, just under 1 bit.</li>
 </ol>
 <div id="tbl-sol-information-theory-smith" class="quarto-float quarto-figure quarto-figure-center anchored">
 <figure class="quarto-float quarto-float-tbl figure">
@@ -823,10 +823,10 @@ Table&nbsp;5.2: Smith’s conditional min-entropy against the average of logs fo
 </div>
 </div>
 </section>
-<section id="sec-sol-information-theory-7" class="level2" data-number="5.7">
-<h2 data-number="5.7" class="anchored" data-anchor-id="sec-sol-information-theory-7"><span class="header-section-number">5.7</span> Fano is tight on the symmetric channel</h2>
+<section id="sec-sol-min-7" class="level2" data-number="5.7">
+<h2 data-number="5.7" class="anchored" data-anchor-id="sec-sol-min-7"><span class="header-section-number">5.7</span> Fano is tight on the symmetric channel</h2>
 <blockquote class="blockquote">
-<p><strong>Exercise 7.</strong> <strong>Fano is tight on the symmetric channel.</strong> Show that the MAP error of the <span class="math inline">\(M\)</span>-ary symmetric channel with uniform input is <span class="math inline">\(\varepsilon\)</span> for <span class="math inline">\(\varepsilon \le (M - 1)/M\)</span>, and that <a href="../../book-full/part01-prerequisites/05-information-theory.html#eq-fano">Equation&nbsp;5.25</a> holds with equality. <em>(Fano)</em></p>
+<p><strong>Exercise 7.</strong> <strong>Fano is tight on the symmetric channel.</strong> Show that the MAP error of the <span class="math inline">\(k\)</span>-ary symmetric channel with uniform input is <span class="math inline">\(p\)</span> for <span class="math inline">\(p \le (k - 1)/k\)</span>, and that <a href="../../book-full/part01-prerequisites/05-information-theory.html#eq-fano">Equation&nbsp;5.25</a> holds with equality. <em>(Fano)</em></p>
 </blockquote>
 <div class="callout callout-style-default callout-tip callout-titled" title="Solution">
 <div class="callout-header d-flex align-content-center collapsed" data-bs-toggle="collapse" data-bs-target=".callout-7-contents" aria-controls="callout-7" aria-expanded="false" aria-label="Toggle callout">
@@ -842,39 +842,32 @@ Table&nbsp;5.2: Smith’s conditional min-entropy against the average of logs fo
 <div class="callout-body-container callout-body">
 <p><em>The MAP error.</em></p>
 <ol type="1">
-<li><strong>Joint table.</strong> With uniform input, <span class="math inline">\(p(x, y) = \frac1M C[x, y]\)</span>: <span class="math inline">\(\frac{1 - \varepsilon}{M}\)</span> on the diagonal and <span class="math inline">\(\frac{\varepsilon}{M(M - 1)}\)</span> off it.</li>
-<li><strong>When the diagonal wins.</strong> <span class="math inline">\(1 - \varepsilon \ge \frac{\varepsilon}{M - 1}\)</span> iff <span class="math inline">\((M - 1)(1 - \varepsilon) \ge \varepsilon\)</span> iff <span class="math inline">\(M - 1 \ge M\varepsilon\)</span> iff <span class="math inline">\(\varepsilon \le \frac{M - 1}{M}\)</span>. Under this condition the MAP guess on observation <span class="math inline">\(y\)</span> is <span class="math inline">\(x = y\)</span>.</li>
-<li><strong>Success probability</strong> by <a href="../../book-full/part01-prerequisites/05-information-theory.html#eq-posterior-vulnerability">Equation&nbsp;5.20</a>: <span class="math inline">\(V(X \mid Y) = \sum_{y=1}^{M}\frac{1 - \varepsilon}{M} = 1 - \varepsilon\)</span>. So the MAP error is <span class="math inline">\(1 - V(X \mid Y) = \varepsilon\)</span>.</li>
+<li><strong>Joint table.</strong> With uniform input, <span class="math inline">\(p(x, y) = \frac1k K[x, y]\)</span>: <span class="math inline">\(\frac{1 - p}{k}\)</span> on the diagonal and <span class="math inline">\(\frac{p}{k(k - 1)}\)</span> off it.</li>
+<li><strong>When the diagonal wins.</strong> <span class="math inline">\(1 - p \ge \frac{p}{k - 1}\)</span> iff <span class="math inline">\((k - 1)(1 - p) \ge p\)</span> iff <span class="math inline">\(k - 1 \ge kp\)</span> iff <span class="math inline">\(p \le \frac{k - 1}{k}\)</span>. Under this condition the MAP guess on observation <span class="math inline">\(y\)</span> is <span class="math inline">\(x = y\)</span>.</li>
+<li><strong>Success probability</strong> by <a href="../../book-full/part01-prerequisites/05-information-theory.html#eq-posterior-vulnerability">Equation&nbsp;5.20</a>: <span class="math inline">\(V(X \mid Y) = \sum_{y=1}^{k}\frac{1 - p}{k} = 1 - p\)</span>. So the MAP error is <span class="math inline">\(1 - V(X \mid Y) = p\)</span>.</li>
 </ol>
 <p><em>Fano holds with equality.</em></p>
 <ol type="1">
-<li><strong>The output is uniform.</strong> Each column of <span class="math inline">\(C\)</span> sums to 1 (Exercise 5), so <span class="math inline">\(p(y) = \frac1M\)</span>.</li>
-<li><strong>The posterior is a column of <span class="math inline">\(C\)</span>.</strong> <span class="math inline">\(p(x \mid y) = \frac{p(x, y)}{p(y)} = C[x, y]\)</span>: <span class="math inline">\(1 - \varepsilon\)</span> on <span class="math inline">\(x = y\)</span> and <span class="math inline">\(\frac{\varepsilon}{M - 1}\)</span> on each of the other <span class="math inline">\(M - 1\)</span> values.</li>
-<li><strong>Its entropy</strong> is the row entropy computed in Exercise 5: <span class="math inline">\(H(X \mid Y = y) = h(\varepsilon) + \varepsilon\log(M - 1)\)</span> for every <span class="math inline">\(y\)</span>. Averaging over <span class="math inline">\(y\)</span> gives the same value for <span class="math inline">\(H(X \mid Y)\)</span>.</li>
-<li><strong>Compare with <a href="../../book-full/part01-prerequisites/05-information-theory.html#eq-fano">Equation&nbsp;5.25</a> at <span class="math inline">\(P_e = \varepsilon\)</span>.</strong> The right side is <span class="math inline">\(h(\varepsilon) + \varepsilon\log(M - 1)\)</span>, the same expression. So <a href="../../book-full/part01-prerequisites/05-information-theory.html#eq-fano">Equation&nbsp;5.25</a> holds with equality for the MAP estimator.</li>
-<li><strong>Why each step of the derivation is tight.</strong> Step 3 there, <span class="math inline">\(H(E \mid \hat X) \le H(E)\)</span>, is tight because the error <span class="math inline">\(E\)</span> has probability <span class="math inline">\(\varepsilon\)</span> whatever the guess is, so <span class="math inline">\(E\)</span> is independent of <span class="math inline">\(\hat X\)</span>. Step 4 is tight because, given an error, the true value is uniform over the <span class="math inline">\(M - 1\)</span> wrong values. Step 6 is tight because the MAP guess is <span class="math inline">\(\hat X = Y\)</span>, so <span class="math inline">\(\hat X\)</span> and <span class="math inline">\(Y\)</span> carry the same information.</li>
+<li><strong>The output is uniform.</strong> Each column of <span class="math inline">\(K\)</span> sums to 1 (Exercise 5), so <span class="math inline">\(p(y) = \frac1k\)</span>.</li>
+<li><strong>The posterior is a column of <span class="math inline">\(K\)</span>.</strong> <span class="math inline">\(p(x \mid y) = \frac{p(x, y)}{p(y)} = K[x, y]\)</span>: <span class="math inline">\(1 - p\)</span> on <span class="math inline">\(x = y\)</span> and <span class="math inline">\(\frac{p}{k - 1}\)</span> on each of the other <span class="math inline">\(k - 1\)</span> values.</li>
+<li><strong>Its entropy</strong> is the row entropy computed in Exercise 5: <span class="math inline">\(H(X \mid Y = y) = h(p) + p\log_2(k - 1)\)</span> for every <span class="math inline">\(y\)</span>. Averaging over <span class="math inline">\(y\)</span> gives the same value for <span class="math inline">\(H(X \mid Y)\)</span>.</li>
+<li><strong>Compare with <a href="../../book-full/part01-prerequisites/05-information-theory.html#eq-fano">Equation&nbsp;5.25</a> at <span class="math inline">\(P_e = p\)</span>.</strong> The right side is <span class="math inline">\(h(p) + p\log_2(k - 1)\)</span>, the same expression. So <a href="../../book-full/part01-prerequisites/05-information-theory.html#eq-fano">Equation&nbsp;5.25</a> holds with equality for the MAP estimator.</li>
+<li><strong>Why each step of the derivation is tight.</strong> Step 3 there, <span class="math inline">\(H(E \mid \hat X) \le H(E)\)</span>, is tight because the error <span class="math inline">\(E\)</span> has probability <span class="math inline">\(p\)</span> whatever the guess is, so <span class="math inline">\(E\)</span> is independent of <span class="math inline">\(\hat X\)</span>. Step 4 is tight because, given an error, the true value is uniform over the <span class="math inline">\(k - 1\)</span> wrong values. Step 6 is tight because the MAP guess is <span class="math inline">\(\hat X = Y\)</span>, so <span class="math inline">\(\hat X\)</span> and <span class="math inline">\(Y\)</span> carry the same information.</li>
 </ol>
-<p>Since the right side of <a href="../../book-full/part01-prerequisites/05-information-theory.html#eq-fano">Equation&nbsp;5.25</a> increases in <span class="math inline">\(P_e\)</span> on <span class="math inline">\([0, (M - 1)/M]\)</span>, the Fano bound obtained by inverting it equals <span class="math inline">\(\varepsilon\)</span> exactly. <a href="#tbl-sol-information-theory-fano" class="quarto-xref">Table&nbsp;<span>5.3</span></a> checks this at <span class="math inline">\(M = 8\)</span>.</p>
+<p>Since the right side of <a href="../../book-full/part01-prerequisites/05-information-theory.html#eq-fano">Equation&nbsp;5.25</a> increases in <span class="math inline">\(P_e\)</span> on <span class="math inline">\([0, (k - 1)/k]\)</span>, the Fano bound obtained by inverting it equals <span class="math inline">\(p\)</span> exactly. <a href="#tbl-sol-information-theory-fano" class="quarto-xref">Table&nbsp;<span>5.3</span></a> checks this at <span class="math inline">\(k = 8\)</span>.</p>
 <div id="tbl-sol-information-theory-fano" class="quarto-float quarto-figure quarto-figure-center anchored">
 <figure class="quarto-float quarto-float-tbl figure">
 <figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl" id="tbl-sol-information-theory-fano-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-Table&nbsp;5.3: The <span class="math inline">\(8\)</span>-ary symmetric channel with uniform input: MAP error, conditional entropy, the right side of Fano’s inequality at <span class="math inline">\(P_e = \varepsilon\)</span>, and the inverted Fano bound. The two entropy columns agree to floating-point precision.
+Table&nbsp;5.3: The <span class="math inline">\(8\)</span>-ary symmetric channel with uniform input: MAP error, conditional entropy, the right side of Fano’s inequality at <span class="math inline">\(P_e = p\)</span>, and the inverted Fano bound. The two entropy columns agree to floating-point precision.
 </figcaption>
 <div aria-describedby="tbl-sol-information-theory-fano-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
 <table class="caption-top table">
-<colgroup>
-<col style="width: 20%">
-<col style="width: 20%">
-<col style="width: 20%">
-<col style="width: 20%">
-<col style="width: 20%">
-</colgroup>
 <thead>
 <tr class="header">
-<th><span class="math inline">\(\varepsilon\)</span></th>
+<th><span class="math inline">\(p\)</span></th>
 <th>MAP error</th>
 <th><span class="math inline">\(H(X \mid Y)\)</span></th>
-<th><span class="math inline">\(h(\varepsilon) + \varepsilon\log_2 7\)</span></th>
+<th><span class="math inline">\(h(p) + p\log_2 7\)</span></th>
 <th>Fano bound</th>
 </tr>
 </thead>
@@ -912,16 +905,16 @@ Table&nbsp;5.3: The <span class="math inline">\(8\)</span>-ary symmetric channel
 </div>
 </figure>
 </div>
-<p>At <span class="math inline">\(\varepsilon = \frac78\)</span> the output is independent of the input, <span class="math inline">\(H(X \mid Y) = \log_2 8 = 3\)</span>, and the best guess is right only by chance.</p>
+<p>At <span class="math inline">\(p = \frac78\)</span> the output is independent of the input, <span class="math inline">\(H(X \mid Y) = \log_2 8 = 3\)</span>, and the best guess is right only by chance.</p>
 <p><em>Fano’s inequality cannot be improved in general: this channel attains it at every noise level.</em></p>
 </div>
 </div>
 </div>
 </section>
-<section id="sec-sol-information-theory-8" class="level2" data-number="5.8">
-<h2 data-number="5.8" class="anchored" data-anchor-id="sec-sol-information-theory-8"><span class="header-section-number">5.8</span> A sample-size lower bound</h2>
+<section id="sec-sol-min-8" class="level2" data-number="5.8">
+<h2 data-number="5.8" class="anchored" data-anchor-id="sec-sol-min-8"><span class="header-section-number">5.8</span> A sample-size lower bound</h2>
 <blockquote class="blockquote">
-<p><strong>Exercise 8.</strong> <strong>A sample-size lower bound.</strong> In Fano’s method, how many samples must you have before the bound <span class="math inline">\(P_e \ge 1 - (n\kappa + 1)/\log M\)</span> allows <span class="math inline">\(P_e \le 0.1\)</span>? Express <span class="math inline">\(n\)</span> in terms of <span class="math inline">\(\kappa\)</span> and <span class="math inline">\(M\)</span>. <em>Check: with <span class="math inline">\(M = 1024\)</span> and <span class="math inline">\(\kappa = 0.01\)</span> bits, <span class="math inline">\(n \ge 800\)</span>.</em> <em>(Fano’s method)</em></p>
+<p><strong>Exercise 8.</strong> <strong>A sample-size lower bound.</strong> In Fano’s method, how many samples must you have before the bound <span class="math inline">\(P_e \ge 1 - (n\kappa + 1)/\log_2 k\)</span> allows <span class="math inline">\(P_e \le 0.1\)</span>? Express <span class="math inline">\(n\)</span> in terms of <span class="math inline">\(\kappa\)</span> and <span class="math inline">\(k\)</span>. <em>Check: with <span class="math inline">\(k = 1024\)</span> and <span class="math inline">\(\kappa = 0.01\)</span> bits, <span class="math inline">\(n \ge 800\)</span>.</em> <em>(Fano’s method)</em></p>
 </blockquote>
 <div class="callout callout-style-default callout-tip callout-titled" title="Solution">
 <div class="callout-header d-flex align-content-center collapsed" data-bs-toggle="collapse" data-bs-target=".callout-8-contents" aria-controls="callout-8" aria-expanded="false" aria-label="Toggle callout">
@@ -936,11 +929,11 @@ Table&nbsp;5.3: The <span class="math inline">\(8\)</span>-ary symmetric channel
 <div id="callout-8" class="callout-8-contents callout-collapse collapse">
 <div class="callout-body-container callout-body">
 <ol type="1">
-<li><strong>What “allows” means.</strong> The bound rules out <span class="math inline">\(P_e \le 0.1\)</span> as long as its right side is above 0.1. It stops ruling it out when <span id="eq-auto-05informationtheory-5"><span class="math display">\[1 - \frac{n\kappa + 1}{\log M} \le 0.1. \tag{5.5}\]</span></span></li>
-<li><strong>Solve for <span class="math inline">\(n\)</span>.</strong> Rearrange to <span class="math inline">\(\frac{n\kappa + 1}{\log M} \ge 0.9\)</span>, then <span class="math inline">\(n\kappa \ge 0.9\log M - 1\)</span>, so <span id="eq-auto-05informationtheory-6"><span class="math display">\[n \ge \frac{0.9\log M - 1}{\kappa}. \tag{5.6}\]</span></span> For a general target error <span class="math inline">\(\delta\)</span>, replace 0.9 by <span class="math inline">\(1 - \delta\)</span>.</li>
+<li><strong>What “allows” means.</strong> The bound rules out <span class="math inline">\(P_e \le 0.1\)</span> as long as its right side is above 0.1. It stops ruling it out when <span id="eq-auto-05informationtheory-5"><span class="math display">\[1 - \frac{n\kappa + 1}{\log_2 k} \le 0.1. \tag{5.5}\]</span></span></li>
+<li><strong>Solve for <span class="math inline">\(n\)</span>.</strong> Rearrange to <span class="math inline">\(\frac{n\kappa + 1}{\log_2 k} \ge 0.9\)</span>, then <span class="math inline">\(n\kappa \ge 0.9\log_2 k - 1\)</span>, so <span id="eq-auto-05informationtheory-6"><span class="math display">\[n \ge \frac{0.9\log_2 k - 1}{\kappa}. \tag{5.6}\]</span></span> For a general target error <span class="math inline">\(t\)</span>, replace 0.9 by <span class="math inline">\(1 - t\)</span>.</li>
 <li><strong>Check.</strong> With <span class="math inline">\(\log_2 1024 = 10\)</span> and <span class="math inline">\(\kappa = 0.01\)</span>: <span class="math inline">\(n \ge (9 - 1)/0.01 = 800\)</span>. The script gives a bound of 0.1010 at <span class="math inline">\(n = 799\)</span> and exactly 0.1000 at <span class="math inline">\(n = 800\)</span>.</li>
 </ol>
-<p>This is a necessary condition, not a sufficient one. With fewer than 800 samples, every estimator has error above 0.1. With 800 or more, Fano no longer forbids it, but that does not mean an estimator reaches it; that depends on the problem. The sample size grows like <span class="math inline">\(\log M/\kappa\)</span>: more candidates, or candidates that are harder to tell apart, push it up.</p>
+<p>This is a necessary condition, not a sufficient one. With fewer than 800 samples, every estimator has error above 0.1. With 800 or more, Fano no longer forbids it, but that does not mean an estimator reaches it; that depends on the problem. The sample size grows like <span class="math inline">\(\log_2 k/\kappa\)</span>: more candidates, or candidates that are harder to tell apart, push it up.</p>
 <p><em>Fano’s method turns “each sample carries at most <span class="math inline">\(\kappa\)</span> bits” into a minimum sample size, roughly the number of bits needed to identify the candidate divided by the bits each sample carries.</em></p>
 </div>
 </div>

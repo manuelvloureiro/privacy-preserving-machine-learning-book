@@ -1,0 +1,1029 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.10.19">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+
+<title>1&nbsp; A first release – Differential Privacy with OpenDP</title>
+<style>
+/* Default styles provided by pandoc.
+** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
+*/
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: 1.5em;}
+div.column{flex: auto;}
+@media screen {
+div.columns{gap: min(4vw, 1.5em);}
+div.column{overflow-x: auto;}
+}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+/* CSS for syntax highlighting */
+html { -webkit-text-size-adjust: 100%; }
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+</style>
+
+
+<script src="../site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="../site_libs/quarto-nav/headroom.min.js"></script>
+<script src="../site_libs/clipboard/clipboard.min.js"></script>
+<script src="../site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="../site_libs/quarto-search/fuse.min.js"></script>
+<script src="../site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="../">
+<link href="../part01-getting-started/02-the-data-and-the-context.html" rel="next">
+<link href="../part01-getting-started/00-introduction.html" rel="prev">
+<script src="../site_libs/quarto-html/quarto.js" type="module"></script>
+<script src="../site_libs/quarto-html/tabsets/tabsets.js" type="module"></script>
+<script src="../site_libs/quarto-html/popper.min.js"></script>
+<script src="../site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="../site_libs/quarto-html/anchor.min.js"></script>
+<link href="../site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="../site_libs/quarto-html/quarto-syntax-highlighting-bf27225e3a48a9273f3daa8f8e829971.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="../site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="../site_libs/bootstrap/bootstrap-78f503ea39f784e8964cd205807fbe37.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
+<script id="quarto-search-options" type="application/json">{
+  "location": "sidebar",
+  "copy-button": false,
+  "collapse-after": 3,
+  "panel-placement": "start",
+  "type": "textbox",
+  "limit": 50,
+  "keyboard-shortcut": [
+    "f",
+    "/",
+    "s"
+  ],
+  "show-item-context": false,
+  "language": {
+    "search-no-results-text": "No results",
+    "search-matching-documents-text": "matching documents",
+    "search-copy-link-title": "Copy link to search",
+    "search-hide-matches-text": "Hide additional matches",
+    "search-more-match-text": "more match in this document",
+    "search-more-matches-text": "more matches in this document",
+    "search-clear-button-title": "Clear",
+    "search-text-placeholder": "",
+    "search-detached-cancel-button-title": "Cancel",
+    "search-submit-button-title": "Submit",
+    "search-label": "Search"
+  }
+}</script>
+
+  <script src="https://cdnjs.cloudflare.com/polyfill/v3/polyfill.min.js?features=es6"></script>
+  <script defer="" src="https://cdn.jsdelivr.net/npm/mathjax@4/tex-chtml.js" type="text/javascript"></script>
+
+<script type="text/javascript">
+const typesetMath = (el) => {
+  if (window.MathJax) {
+    // MathJax Typeset
+    window.MathJax.typeset([el]);
+  } else if (window.katex) {
+    // KaTeX Render
+    var mathElements = el.getElementsByClassName("math");
+    var macros = [];
+    for (var i = 0; i < mathElements.length; i++) {
+      var texText = mathElements[i].firstChild;
+      if (mathElements[i].tagName == "SPAN" && texText && texText.data) {
+        window.katex.render(texText.data, mathElements[i], {
+          displayMode: mathElements[i].classList.contains('display'),
+          throwOnError: false,
+          macros: macros,
+          fleqn: false
+        });
+      }
+    }
+  }
+}
+window.Quarto = {
+  typesetMath
+};
+</script>
+
+</head>
+
+<body class="nav-sidebar floating quarto-light">
+
+<div id="quarto-search-results"></div>
+  <header id="quarto-header" class="headroom fixed-top">
+  <nav class="quarto-secondary-nav">
+    <div class="container-fluid d-flex">
+      <button type="button" class="quarto-btn-toggle btn" data-bs-toggle="collapse" role="button" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+        <i class="bi bi-layout-text-sidebar-reverse"></i>
+      </button>
+        <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../part01-getting-started/00-introduction.html">Getting started</a></li><li class="breadcrumb-item"><a href="../part01-getting-started/01-first-release.html"><span class="chapter-number">1</span>&nbsp; <span class="chapter-title">A first release</span></a></li></ol></nav>
+        <a class="flex-grow-1" role="navigation" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">      
+        </a>
+      <button type="button" class="btn quarto-search-button" aria-label="Search" onclick="window.quartoOpenSearch();">
+        <i class="bi bi-search"></i>
+      </button>
+    </div>
+  </nav>
+</header>
+<!-- content -->
+<div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article">
+<!-- sidebar -->
+  <nav id="quarto-sidebar" class="sidebar collapse collapse-horizontal quarto-sidebar-collapse-item sidebar-navigation floating overflow-auto">
+    <div class="pt-lg-2 mt-2 text-left sidebar-header">
+    <div class="sidebar-title mb-0 py-0">
+      <a href="../">Differential Privacy with OpenDP</a> 
+    </div>
+      </div>
+        <div class="mt-2 flex-shrink-0 align-items-center">
+        <div class="sidebar-search">
+        <div id="quarto-search" class="" title="Search"></div>
+        </div>
+        </div>
+    <div class="sidebar-menu-container"> 
+    <ul class="list-unstyled mt-1">
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../index.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Preface</span></a>
+  </div>
+</li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a href="../part01-getting-started/00-introduction.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Getting started</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-1" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-1" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part01-getting-started/01-first-release.html" class="sidebar-item-text sidebar-link active">
+ <span class="menu-text"><span class="chapter-number">1</span>&nbsp; <span class="chapter-title">A first release</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part01-getting-started/02-the-data-and-the-context.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">2</span>&nbsp; <span class="chapter-title">The data and the context</span></span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a href="../part02-tabular-data/00-introduction.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Tabular data</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-2" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-2" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part02-tabular-data/03-essential-statistics.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">3</span>&nbsp; <span class="chapter-title">Essential statistics</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part02-tabular-data/04-grouping.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">4</span>&nbsp; <span class="chapter-title">Grouping</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part02-tabular-data/05-identifier-truncation.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">5</span>&nbsp; <span class="chapter-title">Identifier truncation and bounds</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part02-tabular-data/06-preparing-microdata.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">6</span>&nbsp; <span class="chapter-title">Preparing microdata</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part02-tabular-data/07-utility-and-noise.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">7</span>&nbsp; <span class="chapter-title">Assessing utility and choosing the noise</span></span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a href="../part03-framework/00-introduction.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">The framework</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-3" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-3" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part03-framework/08-a-framework-for-privacy.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">8</span>&nbsp; <span class="chapter-title">A framework to understand differential privacy</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part03-framework/09-transformations.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">9</span>&nbsp; <span class="chapter-title">Transformations</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part03-framework/10-measurements.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">10</span>&nbsp; <span class="chapter-title">Measurements</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part03-framework/11-combinators.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">11</span>&nbsp; <span class="chapter-title">Combinators</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part03-framework/12-utilities-and-the-context-api.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">12</span>&nbsp; <span class="chapter-title">Utilities and the Context API inside</span></span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a href="../part04-extending/00-introduction.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Extending the library</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-4" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-4" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part04-extending/13-plugins.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">13</span>&nbsp; <span class="chapter-title">Plugins</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part04-extending/14-statistical-modelling.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">14</span>&nbsp; <span class="chapter-title">Statistical modelling</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part04-extending/15-limitations-and-troubleshooting.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">15</span>&nbsp; <span class="chapter-title">Limitations and troubleshooting</span></span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a href="../part05-synthetic-data/00-introduction.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Synthetic data</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-5" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-5" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part05-synthetic-data/16-contingency-tables.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">16</span>&nbsp; <span class="chapter-title">Contingency tables</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part05-synthetic-data/17-aim-and-mst.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">17</span>&nbsp; <span class="chapter-title">Synthetic data with AIM and MST</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part05-synthetic-data/18-evaluating-synthetic-data.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">18</span>&nbsp; <span class="chapter-title">Evaluating and tuning synthetic data</span></span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-6" role="navigation" aria-expanded="true">
+ <span class="menu-text">Appendices</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-6" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-6" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../glossary.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">A</span>&nbsp; <span class="chapter-title">Glossary</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../term-index.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">B</span>&nbsp; <span class="chapter-title">Index</span></span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+    </ul>
+    </div>
+</nav>
+<div id="quarto-sidebar-glass" class="quarto-sidebar-collapse-item" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item"></div>
+<!-- margin-sidebar -->
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+        <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">Table of contents</h2>
+   
+  <ul>
+  <li><a href="#sec-first-install" id="toc-sec-first-install" class="nav-link active" data-scroll-target="#sec-first-install"><span class="header-section-number">1.1</span> Install the library</a></li>
+  <li><a href="#sec-first-number" id="toc-sec-first-number" class="nav-link" data-scroll-target="#sec-first-number"><span class="header-section-number">1.2</span> One noisy number</a></li>
+  <li><a href="#sec-first-steps" id="toc-sec-first-steps" class="nav-link" data-scroll-target="#sec-first-steps"><span class="header-section-number">1.3</span> The five steps of an analysis</a></li>
+  <li><a href="#sec-first-count" id="toc-sec-first-count" class="nav-link" data-scroll-target="#sec-first-count"><span class="header-section-number">1.4</span> A count and a mean</a></li>
+  <li><a href="#sec-first-refused" id="toc-sec-first-refused" class="nav-link" data-scroll-target="#sec-first-refused"><span class="header-section-number">1.5</span> What the context refuses</a></li>
+  <li><a href="#summary" id="toc-summary" class="nav-link" data-scroll-target="#summary"><span class="header-section-number">1.6</span> Summary</a></li>
+  <li><a href="#references" id="toc-references" class="nav-link" data-scroll-target="#references"><span class="header-section-number">1.7</span> References</a></li>
+  </ul>
+</nav>
+    </div>
+<!-- main -->
+<main class="content" id="quarto-document-content">
+
+<header id="title-block-header" class="quarto-title-block default"><nav class="quarto-page-breadcrumbs quarto-title-breadcrumbs d-none d-lg-block" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../part01-getting-started/00-introduction.html">Getting started</a></li><li class="breadcrumb-item"><a href="../part01-getting-started/01-first-release.html"><span class="chapter-number">1</span>&nbsp; <span class="chapter-title">A first release</span></a></li></ol></nav>
+<div class="quarto-title">
+<h1 class="title"><span class="chapter-number">1</span>&nbsp; <span class="chapter-title">A first release</span></h1>
+</div>
+
+
+
+<div class="quarto-title-meta">
+
+    
+  
+    
+  </div>
+  
+
+
+</header>
+
+
+<p>Suppose you hold a list of a hundred people’s scores and want to publish how many there are and their average, without letting anyone work out any one person’s score. This chapter does exactly that with OpenDP, and on the way it introduces the one idea the whole library is built on. A <strong>differentially private</strong> release is a randomized computation whose noise is calibrated to how much one person can change the answer. OpenDP’s job is to do the calibration, to refuse a computation it cannot calibrate, and to keep count of what has been spent.</p>
+<p>The chapter follows the documentation’s quickstart and its typical workflow. You will install the library, build a Laplace mechanism by hand and read its guarantee, then let the Context API do the work: state the privacy unit and the budget, hand over the data once, and release a count and a mean. By the end you will be able to explain what each line of a first OpenDP program promises.</p>
+<p>The script <a href="https://github.com/manuelvloureiro/privacy-preserving-machine-learning-book/blob/main/code/part01-getting-started/opendp_first_release.py">opendp_first_release.py</a> runs every step on OpenDP 0.16.0, with a hundred integers drawn by a seeded generator standing in for the scores. The noise scales, the error bars and the privacy maps it prints are the same on every run. The released values are not, because OpenDP draws its noise from a cryptographic generator that cannot be seeded, so this page shows them in one block marked as one run.</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb1"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="ex">uv</span> run python code/part01-getting-started/opendp_first_release.py</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<section id="sec-first-install" class="level2" data-number="1.1">
+<h2 data-number="1.1" class="anchored" data-anchor-id="sec-first-install"><span class="header-section-number">1.1</span> Install the library</h2>
+<p>OpenDP is a Python package with a Rust core, and it reads tables through Polars, so install it with the Polars extra.</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb2"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="ex">pip</span> install <span class="st">'opendp[polars]'</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>The repository pins <code>opendp[polars]==0.16.0</code> with Polars 1.36.1, which is what every number in this book comes from. Then import the prelude, which gathers the library’s modules under one name, and switch on the <code>contrib</code> feature.</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb3"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> opendp.prelude <span class="im">as</span> dp</span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a>dp.enable_features(<span class="st">"contrib"</span>)</span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(dp.__version__)  <span class="co"># 0.16.0</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>The feature flag is a statement about trust. Every component of OpenDP is meant to come with a written proof that it does what it claims, and a review of that proof. Components whose proof has not finished that process are marked <code>contrib</code>, and the library will not run them unless you opt in. Almost everything in this book, from the Context API to the Polars queries, is still <code>contrib</code> in version 0.16.0, so the line goes at the top of every script. A reviewer who needs only vetted components can leave it out and see what stops working.</p>
+</section>
+<section id="sec-first-number" class="level2" data-number="1.2">
+<h2 data-number="1.2" class="anchored" data-anchor-id="sec-first-number"><span class="header-section-number">1.2</span> One noisy number</h2>
+<p>The simplest private computation adds noise to one number. OpenDP builds it from a <strong>space</strong>, which is a pair of a domain and a metric, and a constructor that turns the space into a <strong>measurement</strong>, which is a randomized function with a privacy guarantee.</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb4"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> opendp.prelude <span class="im">as</span> dp</span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a>dp.enable_features(<span class="st">"contrib"</span>)</span>
+<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a>space <span class="op">=</span> dp.atom_domain(T<span class="op">=</span><span class="bu">float</span>, nan<span class="op">=</span><span class="va">False</span>), dp.absolute_distance(T<span class="op">=</span><span class="bu">float</span>)</span>
+<span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a>laplace <span class="op">=</span> space <span class="op">&gt;&gt;</span> dp.m.then_laplace(scale<span class="op">=</span><span class="fl">1.0</span>)</span>
+<span id="cb4-6"><a href="#cb4-6" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(laplace.<span class="bu">map</span>(<span class="fl">1.0</span>))  <span class="co"># 1.0</span></span>
+<span id="cb4-7"><a href="#cb4-7" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(laplace.<span class="bu">map</span>(<span class="fl">2.0</span>))  <span class="co"># 2.0</span></span>
+<span id="cb4-8"><a href="#cb4-8" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(laplace.check(<span class="fl">1.0</span>, <span class="fl">0.5</span>))  <span class="co"># False</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>The domain says what the input may be, here any finite float. The metric says how two inputs are compared, here by their absolute difference. The constructor <code>then_laplace</code> adds a draw from the Laplace distribution with scale 1 to its input, and the <code>&gt;&gt;</code> operator attaches it to the space. Calling <code>laplace(123.0)</code> gives a noisy value near 123, different each time.</p>
+<p>The guarantee lives in the <strong>privacy map</strong>. Its argument is a bound on how far apart two inputs can be, which differential privacy calls the <strong>sensitivity</strong> of the quantity you are releasing. Its value is the largest privacy loss <span class="math inline">\(\varepsilon\)</span> the mechanism can incur on two such inputs. For Laplace noise the map is the sensitivity divided by the scale, so a sensitivity of 1 at scale 1 costs <span class="math inline">\(\varepsilon = 1\)</span> and a sensitivity of 2 costs <span class="math inline">\(\varepsilon = 2\)</span>. The <code>check</code> method asks whether the map at a given sensitivity stays within a given <span class="math inline">\(\varepsilon\)</span>, and it answers that sensitivity 1 at scale 1 does not fit within <span class="math inline">\(\varepsilon = 0.5\)</span>. Doubling the scale halves the cost, which the script confirms.</p>
+<pre class="text"><code>laplace scale 1: map(1.0)=1.0 map(2.0)=2.0
+laplace scale 1: check(1.0, 1.0)=True check(1.0, 0.5)=False
+laplace scale 2: map(1.0)=0.5</code></pre>
+<p>What <span class="math inline">\(\varepsilon\)</span> promises is that changing one person’s data changes the probability of any output by a factor of at most <span class="math inline">\(e^\varepsilon\)</span>. The full edition derives the Laplace mechanism’s guarantee, and why the scale must be the sensitivity over <span class="math inline">\(\varepsilon\)</span>, in <a href="../../book-full/part03-dp-foundations/03-laplace-gaussian.html">its chapter on the Laplace and Gaussian mechanisms</a>. For now the point is where the guarantee comes from: not from the noise alone, but from the noise together with a bound on what one person can change. You supplied that bound as the argument of <code>map</code>. The rest of the chapter shows how the library works it out for you.</p>
+</section>
+<section id="sec-first-steps" class="level2" data-number="1.3">
+<h2 data-number="1.3" class="anchored" data-anchor-id="sec-first-steps"><span class="header-section-number">1.3</span> The five steps of an analysis</h2>
+<p>The documentation’s typical workflow has five steps, and every analysis in this book follows them. The first three are decisions you make before touching the data. The fourth hands the data to the library, and the fifth asks it questions.</p>
+<p>The first step is to identify the <strong>privacy unit</strong>, which is what the guarantee protects. The documentation calls it the unit of privacy. Here each person contributes one row, so the unit is one row, and two datasets are <strong>neighbours</strong> when one is the other with a row added or removed. OpenDP writes that as a metric, the symmetric distance, and a distance of 1 under it.</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb6"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> opendp.prelude <span class="im">as</span> dp</span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a>dp.enable_features(<span class="st">"contrib"</span>)</span>
+<span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(dp.unit_of(contributions<span class="op">=</span><span class="dv">1</span>))  <span class="co"># (SymmetricDistance(), 1)</span></span>
+<span id="cb6-5"><a href="#cb6-5" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(dp.loss_of(epsilon<span class="op">=</span><span class="fl">1.0</span>))  <span class="co"># (MaxDivergence, 1.0)</span></span>
+<span id="cb6-6"><a href="#cb6-6" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(dp.loss_of(epsilon<span class="op">=</span><span class="fl">1.0</span>, delta<span class="op">=</span><span class="fl">1e-7</span>))  <span class="co"># (Approximate(MaxDivergence), (1.0, 1e-07))</span></span>
+<span id="cb6-7"><a href="#cb6-7" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(dp.loss_of(rho<span class="op">=</span><span class="fl">0.1</span>))  <span class="co"># (ZeroConcentratedDivergence, 0.1)</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>The second step is to set the <strong>privacy budget</strong>, which the documentation calls the privacy loss. It is a measure, which says how the distributions of two releases are compared, and a bound on that comparison. Pure differential privacy compares them by the max divergence and bounds it by <span class="math inline">\(\varepsilon\)</span>, so <code>loss_of(epsilon=1.0)</code> is the pair you see printed. The other two lines show the budgets later chapters use. Adding a slack <span class="math inline">\(\delta\)</span> gives approximate differential privacy, and a budget <span class="math inline">\(\rho\)</span> gives zero-concentrated differential privacy, which <a href="../part02-tabular-data/07-utility-and-noise.html">Assessing utility and choosing the noise</a> introduces. A budget of <span class="math inline">\(\varepsilon = 1\)</span> is a common starting point, and the documentation points to the OpenDP deployments registry for the values real releases have used.</p>
+<p>The third step is to collect <strong>public information</strong>: facts about the data that you choose not to protect because they are known anyway. Here they are the bounds on a score, 0 to 100, and a value to stand in for a missing score, the midpoint 50. Bounds must come from the domain or from another public source, never from looking at the private data, because a bound read off the data leaks it.</p>
+<p>The fourth step is to <strong>mediate access</strong>. The script builds a <strong>context</strong>, which holds the data, the privacy unit, the budget and the rule for splitting it, and from then on every computation on the data goes through it.</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb7" data-excerpt="first-context"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> make_context(data: <span class="bu">list</span>[<span class="bu">float</span>]) <span class="op">-&gt;</span> dp.Context:</span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a>    <span class="co">"""The context: the data behind a privacy unit of one row, a budget of epsilon = 1, split evenly over 3 queries."""</span></span>
+<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> dp.Context.compositor(</span>
+<span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a>        data<span class="op">=</span>data,</span>
+<span id="cb7-5"><a href="#cb7-5" aria-hidden="true" tabindex="-1"></a>        privacy_unit<span class="op">=</span>dp.unit_of(contributions<span class="op">=</span><span class="dv">1</span>),  <span class="co"># neighbours add or remove one person's row</span></span>
+<span id="cb7-6"><a href="#cb7-6" aria-hidden="true" tabindex="-1"></a>        privacy_loss<span class="op">=</span>dp.loss_of(epsilon<span class="op">=</span>EPSILON),  <span class="co"># pure differential privacy</span></span>
+<span id="cb7-7"><a href="#cb7-7" aria-hidden="true" tabindex="-1"></a>        split_evenly_over<span class="op">=</span>QUERIES,  <span class="co"># each query gets epsilon / 3</span></span>
+<span id="cb7-8"><a href="#cb7-8" aria-hidden="true" tabindex="-1"></a>    )</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>The context is a <strong>compositor</strong>, because the budget of several releases adds up. Three queries at a third of <span class="math inline">\(\varepsilon\)</span> each cost <span class="math inline">\(\varepsilon\)</span> in all, which is the basic composition rule that <a href="../../book-full/part03-dp-foundations/02-properties.html">the full edition’s chapter on properties</a> proves. The script prints the split.</p>
+<pre class="text"><code>privacy unit: (SymmetricDistance(), 1)
+privacy loss: (MaxDivergence, 1.0)
+bounds: (0.0, 100.0)  imputed value: 50
+budget per query: [0.3333, 0.3333, 0.3333]</code></pre>
+<p>The fifth step is to submit queries, which the next section does. One habit from the documentation is worth adopting now: once the context exists, stop touching the data directly, and delete your own reference to it. Anything you compute outside the context is outside the guarantee.</p>
+</section>
+<section id="sec-first-count" class="level2" data-number="1.4">
+<h2 data-number="1.4" class="anchored" data-anchor-id="sec-first-count"><span class="header-section-number">1.4</span> A count and a mean</h2>
+<p>A query is built by chaining methods on <code>context.query()</code>, each a constructor of the framework with its space left out, because the context knows the space. The count query counts the rows and adds Laplace noise.</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb9" data-excerpt="first-count"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a>count_query <span class="op">=</span> context.query().count().laplace()</span>
+<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a>count_scale <span class="op">=</span> count_query.param()  <span class="co"># the scale the budget allows: sensitivity 1 over epsilon / 3</span></span>
+<span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a>count_accuracy <span class="op">=</span> dp.discrete_laplacian_scale_to_accuracy(scale<span class="op">=</span>count_scale, alpha<span class="op">=</span><span class="fl">0.05</span>)</span>
+<span id="cb9-4"><a href="#cb9-4" aria-hidden="true" tabindex="-1"></a>dp_count <span class="op">=</span> count_query.release()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>Nothing in <code>laplace()</code> says what scale to use. The context fills it in, by searching for the smallest scale whose privacy map at the unit’s distance still fits within the query’s share of the budget, and <code>param</code> reports what it found. A larger scale would also fit, but it would add more noise than the budget requires. Adding or removing one row changes a count by 1, so the sensitivity is 1, and the share is <span class="math inline">\(\varepsilon/3\)</span>, so the scale is 3. The accuracy function turns that scale into an error bar: with probability 0.95, the released count is within about 9.4 of the true count. The count is an integer, so the noise is the discrete Laplace distribution and the accuracy function is the discrete one.</p>
+<pre class="text"><code>count: scale=3.0000 95% accuracy=9.4457</code></pre>
+<p>Read those two numbers before you release anything. They depend on the budget and the sensitivity, not on the data, so you can decide whether the error bar is acceptable without spending anything.</p>
+<p>The mean needs more preparation, because the mean of a list is not a well-behaved function of the list until three things are fixed.</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb11" data-excerpt="first-mean"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a>mean_query <span class="op">=</span> (</span>
+<span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a>    context.query()</span>
+<span id="cb11-3"><a href="#cb11-3" aria-hidden="true" tabindex="-1"></a>    .impute_constant(IMPUTED)  <span class="co"># a missing value becomes the public midpoint</span></span>
+<span id="cb11-4"><a href="#cb11-4" aria-hidden="true" tabindex="-1"></a>    .clamp(BOUNDS)  <span class="co"># every value is clipped into the public bounds</span></span>
+<span id="cb11-5"><a href="#cb11-5" aria-hidden="true" tabindex="-1"></a>    .resize(size<span class="op">=</span>dp_count, constant<span class="op">=</span>IMPUTED)  <span class="co"># the mean needs a known size: the released count</span></span>
+<span id="cb11-6"><a href="#cb11-6" aria-hidden="true" tabindex="-1"></a>    .mean()</span>
+<span id="cb11-7"><a href="#cb11-7" aria-hidden="true" tabindex="-1"></a>    .laplace()</span>
+<span id="cb11-8"><a href="#cb11-8" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb11-9"><a href="#cb11-9" aria-hidden="true" tabindex="-1"></a>mean_scale <span class="op">=</span> mean_query.param()</span>
+<span id="cb11-10"><a href="#cb11-10" aria-hidden="true" tabindex="-1"></a>dp_mean <span class="op">=</span> mean_query.release()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>Imputation removes missing values, since the mean of a list with a hole in it is undefined. Clamping bounds every value, since without bounds one person could move the mean by any amount and no finite noise would hide them. Resizing fixes the number of rows, since the mean divides by it, and the sensitivity of a mean is only bounded when that divisor is known. The size passed in is the count just released, which is allowed because a released value is public and using it again costs nothing. That is the post-processing property, proved in <a href="../../book-full/part03-dp-foundations/02-properties.html">the full edition</a>. If the noisy count is too small, the resize pads the list with the imputed value, and if it is too large, it drops rows, so the released mean is the mean of a slightly altered list. The error bar below does not cover that alteration.</p>
+<p>Because the scale of the mean depends on the released count, it changes from run to run. At the true size of 100 the script computes the scale and its error bar at development time, which is fine here because the data are a public toy.</p>
+<pre class="text"><code>mean at size 100: scale=3.0000 95% accuracy=8.9872</code></pre>
+<p>A scale of 3 on a mean of values between 0 and 100 gives an error bar of about 9 points, which is wide. The reason is the budget. A third of <span class="math inline">\(\varepsilon = 1\)</span> on a hundred rows is little, and the Laplace mechanism’s error does not shrink with the number of rows when the sensitivity is a fixed fraction of the range. <a href="../part02-tabular-data/03-essential-statistics.html">Essential statistics</a> shows how a larger dataset and a sum released alongside a count do better.</p>
+</section>
+<section id="sec-first-refused" class="level2" data-number="1.5">
+<h2 data-number="1.5" class="anchored" data-anchor-id="sec-first-refused"><span class="header-section-number">1.5</span> What the context refuses</h2>
+<p>The context keeps count. After the count and the mean, two of the three shares are spent, and the script reads them back.</p>
+<pre class="text"><code>budget spent after two queries: [0.3333, 0.3333]</code></pre>
+<p>A third query takes the last share. A fourth has nothing left to take, and the context raises an error instead of releasing anything.</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb14" data-excerpt="first-refused"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a><span class="cf">try</span>:</span>
+<span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a>    context.query().count().laplace().release()</span>
+<span id="cb14-3"><a href="#cb14-3" aria-hidden="true" tabindex="-1"></a>    refusal <span class="op">=</span> <span class="st">"released"</span></span>
+<span id="cb14-4"><a href="#cb14-4" aria-hidden="true" tabindex="-1"></a><span class="cf">except</span> <span class="pp">ValueError</span> <span class="im">as</span> err:</span>
+<span id="cb14-5"><a href="#cb14-5" aria-hidden="true" tabindex="-1"></a>    refusal <span class="op">=</span> <span class="bu">str</span>(err)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<pre class="text"><code>fourth query: Privacy allowance has been exhausted</code></pre>
+<p>This refusal is the reason to use a context rather than loose mechanisms. With the framework alone, nothing stops you from calling a measurement twice and spending twice, and the guarantee you can claim is whatever you tracked by hand. With a context, the budget is a hard limit, and the claim is what you declared at the start.</p>
+<p>Finally the releases of one run, read against the error bars.</p>
+<pre class="text"><code>released (one run):
+  count 105  (true 100, within 9.4 with probability 0.95)
+  mean scale 2.8571  mean 53.32  (true 50.93)
+  third query, a second count 108</code></pre>
+<p>The count landed within its error bar, as it should about 19 times in 20. The mean’s scale came out below 3 because the released count was above 100, and the mean itself landed within its bar too. Comparing a release with the truth is possible here only because the data are a toy. On real data you cannot run that check, so you make these decisions on public or historical data while you develop, and release the real data once.</p>
+</section>
+<section id="summary" class="level2" data-number="1.6">
+<h2 data-number="1.6" class="anchored" data-anchor-id="summary"><span class="header-section-number">1.6</span> Summary</h2>
+<div id="tbl-first-summary" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-tbl figure">
+<figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl" id="tbl-first-summary-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Table&nbsp;1.1: The calls of a first release, what each does, and the rule of thumb that goes with it.
+</figcaption>
+<div aria-describedby="tbl-first-summary-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<table class="caption-top table">
+<colgroup>
+<col style="width: 33%">
+<col style="width: 33%">
+<col style="width: 33%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>Call or concept</th>
+<th>What it does</th>
+<th>Rule of thumb</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><code>dp.enable_features("contrib")</code></td>
+<td>Switches on the components whose proofs are not yet vetted</td>
+<td>Put it at the top of every script; leave it out to see what is vetted</td>
+</tr>
+<tr class="even">
+<td><code>space &gt;&gt; dp.m.then_laplace(scale)</code></td>
+<td>A Laplace measurement on a domain and a metric</td>
+<td>The scale is the sensitivity over <span class="math inline">\(\varepsilon\)</span></td>
+</tr>
+<tr class="odd">
+<td><code>measurement.map(d_in)</code></td>
+<td>The largest <span class="math inline">\(\varepsilon\)</span> for inputs at most <code>d_in</code> apart</td>
+<td>Read it before releasing; it costs nothing</td>
+</tr>
+<tr class="even">
+<td><code>measurement.check(d_in, d_out)</code></td>
+<td>Whether the map at <code>d_in</code> stays within <code>d_out</code></td>
+<td>What the context runs for you when it searches for a scale</td>
+</tr>
+<tr class="odd">
+<td><code>dp.unit_of(contributions=1)</code></td>
+<td>The privacy unit: neighbours add or remove one row</td>
+<td>Choose it before anything else; one row per person is the default case</td>
+</tr>
+<tr class="even">
+<td><code>dp.loss_of(epsilon=1.0)</code></td>
+<td>The privacy budget under pure differential privacy</td>
+<td><span class="math inline">\(\varepsilon = 1\)</span> is a common start; the registry lists real values</td>
+</tr>
+<tr class="odd">
+<td><code>dp.Context.compositor(...)</code></td>
+<td>Holds the data, the unit, the budget and its split</td>
+<td>One context per release; delete your own reference to the data</td>
+</tr>
+<tr class="even">
+<td><code>context.query().count().laplace()</code></td>
+<td>A query whose scale the context fills in from the budget</td>
+<td>Read <code>param()</code> and the accuracy before <code>release()</code></td>
+</tr>
+<tr class="odd">
+<td><code>impute_constant</code>, <code>clamp</code>, <code>resize</code></td>
+<td>Make the mean’s sensitivity finite</td>
+<td>Bounds and imputed values come from public information</td>
+</tr>
+<tr class="even">
+<td>A fourth query on a budget split in three</td>
+<td><code>ValueError: Privacy allowance has been exhausted</code></td>
+<td>The refusal is the point of the context</td>
+</tr>
+</tbody>
+</table>
+</div>
+</figure>
+</div>
+</section>
+<section id="references" class="level2" data-number="1.7">
+<h2 data-number="1.7" class="anchored" data-anchor-id="references"><span class="header-section-number">1.7</span> References</h2>
+<ul>
+<li>OpenDP documentation: “Quickstart”, “Typical Workflow”, and “Context” in the API user guide.</li>
+<li>Dwork, McSherry, Nissim and Smith, “Calibrating Noise to Sensitivity in Private Data Analysis” (2006): the Laplace mechanism and the definition it satisfies.</li>
+<li>Gaboardi, Hay and Vadhan, “A Programming Framework for OpenDP” (2020): the framework of domains, metrics, measures and maps behind every call.</li>
+<li>The full edition’s chapters on <a href="../../book-full/part03-dp-foundations/01-definition.html">the definition</a>, <a href="../../book-full/part03-dp-foundations/02-properties.html">post-processing and composition</a> and <a href="../../book-full/part03-dp-foundations/03-laplace-gaussian.html">the Laplace and Gaussian mechanisms</a> derive the results this chapter states.</li>
+</ul>
+
+
+</section>
+
+</main> <!-- /main -->
+<script id="quarto-html-after-body" type="application/javascript">
+  window.document.addEventListener("DOMContentLoaded", function (event) {
+    const icon = "";
+    const anchorJS = new window.AnchorJS();
+    anchorJS.options = {
+      placement: 'right',
+      icon: icon
+    };
+    anchorJS.add('.anchored');
+    const isCodeAnnotation = (el) => {
+      for (const clz of el.classList) {
+        if (clz.startsWith('code-annotation-')) {                     
+          return true;
+        }
+      }
+      return false;
+    }
+    const onCopySuccess = function(e) {
+      // button target
+      const button = e.trigger;
+      // don't keep focus
+      button.blur();
+      // flash "checked"
+      button.classList.add('code-copy-button-checked');
+      var currentTitle = button.getAttribute("title");
+      button.setAttribute("title", "Copied!");
+      let tooltip;
+      if (window.bootstrap) {
+        button.setAttribute("data-bs-toggle", "tooltip");
+        button.setAttribute("data-bs-placement", "left");
+        button.setAttribute("data-bs-title", "Copied!");
+        tooltip = new bootstrap.Tooltip(button, 
+          { trigger: "manual", 
+            customClass: "code-copy-button-tooltip",
+            offset: [0, -8]});
+        tooltip.show();    
+      }
+      setTimeout(function() {
+        if (tooltip) {
+          tooltip.hide();
+          button.removeAttribute("data-bs-title");
+          button.removeAttribute("data-bs-toggle");
+          button.removeAttribute("data-bs-placement");
+        }
+        button.setAttribute("title", currentTitle);
+        button.classList.remove('code-copy-button-checked');
+      }, 1000);
+      // clear code selection
+      e.clearSelection();
+    }
+    const getTextToCopy = function(trigger) {
+      const outerScaffold = trigger.parentElement.cloneNode(true);
+      const codeEl = outerScaffold.querySelector('code');
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
+        }
+      }
+      return codeEl.innerText;
+    }
+    const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
+      text: getTextToCopy
+    });
+    clipboard.on('success', onCopySuccess);
+    if (window.document.getElementById('quarto-embedded-source-code-modal')) {
+      const clipboardModal = new window.ClipboardJS('.code-copy-button[data-in-quarto-modal]', {
+        text: getTextToCopy,
+        container: window.document.getElementById('quarto-embedded-source-code-modal')
+      });
+      clipboardModal.on('success', onCopySuccess);
+    }
+      var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+      var mailtoRegex = new RegExp(/^mailto:/);
+        var filterRegex = new RegExp('/' + window.location.host + '/');
+      var isInternal = (href) => {
+          return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+      }
+      // Inspect non-navigation links and adorn them if external
+     var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool):not(.about-link)');
+      for (var i=0; i<links.length; i++) {
+        const link = links[i];
+        if (!isInternal(link.href)) {
+          // undo the damage that might have been done by quarto-nav.js in the case of
+          // links that we want to consider external
+          if (link.dataset.originalHref !== undefined) {
+            link.href = link.dataset.originalHref;
+          }
+        }
+      }
+    function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+      const config = {
+        allowHTML: true,
+        maxWidth: 500,
+        delay: 100,
+        arrow: false,
+        appendTo: function(el) {
+            return el.parentElement;
+        },
+        interactive: true,
+        interactiveBorder: 10,
+        theme: 'quarto',
+        placement: 'bottom-start',
+      };
+      if (contentFn) {
+        config.content = contentFn;
+      }
+      if (onTriggerFn) {
+        config.onTrigger = onTriggerFn;
+      }
+      if (onUntriggerFn) {
+        config.onUntrigger = onUntriggerFn;
+      }
+      window.tippy(el, config); 
+    }
+    const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+    for (var i=0; i<noterefs.length; i++) {
+      const ref = noterefs[i];
+      tippyHover(ref, function() {
+        // use id or data attribute instead here
+        let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+        try { href = new URL(href).hash; } catch {}
+        const id = href.replace(/^#\/?/, "");
+        const note = window.document.getElementById(id);
+        if (note) {
+          return note.innerHTML;
+        } else {
+          return "";
+        }
+      });
+    }
+    const xrefs = window.document.querySelectorAll('a.quarto-xref');
+    const processXRef = (id, note) => {
+      // Strip column container classes
+      const stripColumnClz = (el) => {
+        el.classList.remove("page-full", "page-columns");
+        if (el.children) {
+          for (const child of el.children) {
+            stripColumnClz(child);
+          }
+        }
+      }
+      stripColumnClz(note)
+      if (id === null || id.startsWith('sec-')) {
+        // Special case sections, only their first couple elements
+        const container = document.createElement("div");
+        if (note.children && note.children.length > 2) {
+          container.appendChild(note.children[0].cloneNode(true));
+          for (let i = 1; i < note.children.length; i++) {
+            const child = note.children[i];
+            if (child.tagName === "P" && child.innerText === "") {
+              continue;
+            } else {
+              container.appendChild(child.cloneNode(true));
+              break;
+            }
+          }
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(container);
+          }
+          return container.innerHTML
+        } else {
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(note);
+          }
+          return note.innerHTML;
+        }
+      } else {
+        // Remove any anchor links if they are present
+        const anchorLink = note.querySelector('a.anchorjs-link');
+        if (anchorLink) {
+          anchorLink.remove();
+        }
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(note);
+        }
+        if (note.classList.contains("callout")) {
+          return note.outerHTML;
+        } else {
+          return note.innerHTML;
+        }
+      }
+    }
+    for (var i=0; i<xrefs.length; i++) {
+      const xref = xrefs[i];
+      tippyHover(xref, undefined, function(instance) {
+        instance.disable();
+        let url = xref.getAttribute('href');
+        let hash = undefined; 
+        if (url.startsWith('#')) {
+          hash = url;
+        } else {
+          try { hash = new URL(url).hash; } catch {}
+        }
+        if (hash) {
+          const id = hash.replace(/^#\/?/, "");
+          const note = window.document.getElementById(id);
+          if (note !== null) {
+            try {
+              const html = processXRef(id, note.cloneNode(true));
+              instance.setContent(html);
+            } finally {
+              instance.enable();
+              instance.show();
+            }
+          } else {
+            // See if we can fetch this
+            fetch(url.split('#')[0])
+            .then(res => res.text())
+            .then(html => {
+              const parser = new DOMParser();
+              const htmlDoc = parser.parseFromString(html, "text/html");
+              const note = htmlDoc.getElementById(id);
+              if (note !== null) {
+                const html = processXRef(id, note);
+                instance.setContent(html);
+              } 
+            }).finally(() => {
+              instance.enable();
+              instance.show();
+            });
+          }
+        } else {
+          // See if we can fetch a full url (with no hash to target)
+          // This is a special case and we should probably do some content thinning / targeting
+          fetch(url)
+          .then(res => res.text())
+          .then(html => {
+            const parser = new DOMParser();
+            const htmlDoc = parser.parseFromString(html, "text/html");
+            const note = htmlDoc.querySelector('main.content');
+            if (note !== null) {
+              // This should only happen for chapter cross references
+              // (since there is no id in the URL)
+              // remove the first header
+              if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
+                note.children[0].remove();
+              }
+              const html = processXRef(null, note);
+              instance.setContent(html);
+            } 
+          }).finally(() => {
+            instance.enable();
+            instance.show();
+          });
+        }
+      }, function(instance) {
+      });
+    }
+        let selectedAnnoteEl;
+        const selectorForAnnotation = ( cell, annotation) => {
+          let cellAttr = 'data-code-cell="' + cell + '"';
+          let lineAttr = 'data-code-annotation="' +  annotation + '"';
+          const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+          return selector;
+        }
+        const selectCodeLines = (annoteEl) => {
+          const doc = window.document;
+          const targetCell = annoteEl.getAttribute("data-target-cell");
+          const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+          const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+          const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+          const lineIds = lines.map((line) => {
+            return targetCell + "-" + line;
+          })
+          let top = null;
+          let height = null;
+          let parent = null;
+          if (lineIds.length > 0) {
+              //compute the position of the single el (top and bottom and make a div)
+              const el = window.document.getElementById(lineIds[0]);
+              top = el.offsetTop;
+              height = el.offsetHeight;
+              parent = el.parentElement.parentElement;
+            if (lineIds.length > 1) {
+              const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+              const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+              height = bottom - top;
+            }
+            if (top !== null && height !== null && parent !== null) {
+              // cook up a div (if necessary) and position it 
+              let div = window.document.getElementById("code-annotation-line-highlight");
+              if (div === null) {
+                div = window.document.createElement("div");
+                div.setAttribute("id", "code-annotation-line-highlight");
+                div.style.position = 'absolute';
+                parent.appendChild(div);
+              }
+              div.style.top = top - 2 + "px";
+              div.style.height = height + 4 + "px";
+              div.style.left = 0;
+              let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+              if (gutterDiv === null) {
+                gutterDiv = window.document.createElement("div");
+                gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+                gutterDiv.style.position = 'absolute';
+                const codeCell = window.document.getElementById(targetCell);
+                const gutter = codeCell.querySelector('.code-annotation-gutter');
+                gutter.appendChild(gutterDiv);
+              }
+              gutterDiv.style.top = top - 2 + "px";
+              gutterDiv.style.height = height + 4 + "px";
+            }
+            selectedAnnoteEl = annoteEl;
+          }
+        };
+        const unselectCodeLines = () => {
+          const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+          elementsIds.forEach((elId) => {
+            const div = window.document.getElementById(elId);
+            if (div) {
+              div.remove();
+            }
+          });
+          selectedAnnoteEl = undefined;
+        };
+          // Handle positioning of the toggle
+      window.addEventListener(
+        "resize",
+        throttle(() => {
+          elRect = undefined;
+          if (selectedAnnoteEl) {
+            selectCodeLines(selectedAnnoteEl);
+          }
+        }, 10)
+      );
+      function throttle(fn, ms) {
+      let throttle = false;
+      let timer;
+        return (...args) => {
+          if(!throttle) { // first call gets through
+              fn.apply(this, args);
+              throttle = true;
+          } else { // all the others get throttled
+              if(timer) clearTimeout(timer); // cancel #2
+              timer = setTimeout(() => {
+                fn.apply(this, args);
+                timer = throttle = false;
+              }, ms);
+          }
+        };
+      }
+        // Attach click handler to the DT
+        const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+        for (const annoteDlNode of annoteDls) {
+          annoteDlNode.addEventListener('click', (event) => {
+            const clickedEl = event.target;
+            if (clickedEl !== selectedAnnoteEl) {
+              unselectCodeLines();
+              const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+              if (activeEl) {
+                activeEl.classList.remove('code-annotation-active');
+              }
+              selectCodeLines(clickedEl);
+              clickedEl.classList.add('code-annotation-active');
+            } else {
+              // Unselect the line
+              unselectCodeLines();
+              clickedEl.classList.remove('code-annotation-active');
+            }
+          });
+        }
+    const findCites = (el) => {
+      const parentEl = el.parentElement;
+      if (parentEl) {
+        const cites = parentEl.dataset.cites;
+        if (cites) {
+          return {
+            el,
+            cites: cites.split(' ')
+          };
+        } else {
+          return findCites(el.parentElement)
+        }
+      } else {
+        return undefined;
+      }
+    };
+    var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+    for (var i=0; i<bibliorefs.length; i++) {
+      const ref = bibliorefs[i];
+      const citeInfo = findCites(ref);
+      if (citeInfo) {
+        tippyHover(citeInfo.el, function() {
+          var popup = window.document.createElement('div');
+          citeInfo.cites.forEach(function(cite) {
+            var citeDiv = window.document.createElement('div');
+            citeDiv.classList.add('hanging-indent');
+            citeDiv.classList.add('csl-entry');
+            var biblioDiv = window.document.getElementById('ref-' + cite);
+            if (biblioDiv) {
+              citeDiv.innerHTML = biblioDiv.innerHTML;
+            }
+            popup.appendChild(citeDiv);
+          });
+          return popup.innerHTML;
+        });
+      }
+    }
+  });
+  </script>
+<nav class="page-navigation">
+  <div class="nav-page nav-page-previous">
+      <a href="../part01-getting-started/00-introduction.html" class="pagination-link" aria-label="Getting started">
+        <i class="bi bi-arrow-left-short"></i> <span class="nav-page-text">Getting started</span>
+      </a>          
+  </div>
+  <div class="nav-page nav-page-next">
+      <a href="../part01-getting-started/02-the-data-and-the-context.html" class="pagination-link" aria-label="The data and the context">
+        <span class="nav-page-text"><span class="chapter-number">2</span>&nbsp; <span class="chapter-title">The data and the context</span></span> <i class="bi bi-arrow-right-short"></i>
+      </a>
+  </div>
+</nav>
+</div> <!-- /content -->
+
+
+
+
+</body></html>

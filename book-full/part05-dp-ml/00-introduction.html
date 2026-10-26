@@ -794,19 +794,19 @@ Table&nbsp;2: Notation used throughout this part, in addition to that of the ear
 <tbody>
 <tr class="odd">
 <td><span class="math inline">\(D = (z_1, \dots, z_n)\)</span>, <span class="math inline">\(z_i = (x_i, y_i)\)</span></td>
-<td>A training set of <span class="math inline">\(n\)</span> records with features <span class="math inline">\(x_i\)</span> and labels <span class="math inline">\(y_i\)</span></td>
+<td>A training set of <span class="math inline">\(n\)</span> records with features <span class="math inline">\(x_i\)</span> and labels <span class="math inline">\(y_i\)</span>; a neighbouring dataset <span class="math inline">\(D'\)</span> adds or removes one record, <span class="math inline">\(D \sim D'\)</span></td>
 </tr>
 <tr class="even">
-<td><span class="math inline">\(w\)</span>, <span class="math inline">\(\ell(w, z)\)</span>, <span class="math inline">\(J(w; D)\)</span></td>
-<td>Model weights; the loss on one record; the training objective</td>
+<td><span class="math inline">\(\theta \in \mathbb R^d\)</span>, <span class="math inline">\(\ell(\theta; z)\)</span>, <span class="math inline">\(\mathcal L(\theta; D)\)</span></td>
+<td>The model parameters; the loss on one record; the empirical risk, the training objective (with its regularizer, when there is one)</td>
 </tr>
 <tr class="odd">
-<td><span class="math inline">\(w^*\)</span>, <span class="math inline">\(\tilde w\)</span></td>
-<td>The non-private minimizer; a private release</td>
+<td><span class="math inline">\(\theta_t\)</span>, <span class="math inline">\(\theta^*\)</span>, <span class="math inline">\(\tilde\theta\)</span></td>
+<td>The iterate at step <span class="math inline">\(t\)</span>; the non-private minimizer; a private release</td>
 </tr>
 <tr class="even">
-<td><span class="math inline">\(g_i = \nabla_w\ell(w, z_i)\)</span></td>
-<td>The gradient of record <span class="math inline">\(i\)</span>’s loss, a per-example gradient</td>
+<td><span class="math inline">\(g_i = \nabla_\theta\ell(\theta; z_i)\)</span>, <span class="math inline">\(\bar g_i\)</span></td>
+<td>The gradient of record <span class="math inline">\(i\)</span>’s loss, a per-example gradient; the clipped one</td>
 </tr>
 <tr class="odd">
 <td><span class="math inline">\(C\)</span></td>
@@ -817,10 +817,14 @@ Table&nbsp;2: Notation used throughout this part, in addition to that of the ear
 <td>The noise multiplier: the noise standard deviation in units of <span class="math inline">\(C\)</span></td>
 </tr>
 <tr class="odd">
-<td><span class="math inline">\(q\)</span>, <span class="math inline">\(B\)</span>, <span class="math inline">\(T\)</span></td>
-<td>The sampling rate; the expected batch size <span class="math inline">\(qn\)</span>; the number of steps</td>
+<td><span class="math inline">\(q\)</span>, <span class="math inline">\(B = qn\)</span>, <span class="math inline">\(T\)</span></td>
+<td>The sampling rate; the expected batch size; the number of steps</td>
 </tr>
 <tr class="even">
+<td><span class="math inline">\(\eta\)</span></td>
+<td>The learning rate</td>
+</tr>
+<tr class="odd">
 <td><span class="math inline">\(\mu(\varepsilon, \delta)\)</span></td>
 <td>The largest ratio of sensitivity to noise standard deviation for which a Gaussian mechanism is <span class="math inline">\((\varepsilon, \delta)\)</span>-DP</td>
 </tr>

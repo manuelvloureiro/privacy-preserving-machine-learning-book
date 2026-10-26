@@ -706,9 +706,18 @@ window.Quarto = {
   <li><a href="#checking-it-6" id="toc-checking-it-6" class="nav-link" data-scroll-target="#checking-it-6"><span class="header-section-number">A.7.5</span> Checking it</a></li>
   <li><a href="#recipe-and-pitfalls-6" id="toc-recipe-and-pitfalls-6" class="nav-link" data-scroll-target="#recipe-and-pitfalls-6"><span class="header-section-number">A.7.6</span> Recipe and pitfalls</a></li>
   </ul></li>
-  <li><a href="#sec-apx-cal-recipes" id="toc-sec-apx-cal-recipes" class="nav-link" data-scroll-target="#sec-apx-cal-recipes"><span class="header-section-number">A.8</span> All the recipes in one table</a></li>
-  <li><a href="#code" id="toc-code" class="nav-link" data-scroll-target="#code"><span class="header-section-number">A.9</span> Code</a></li>
-  <li><a href="#references" id="toc-references" class="nav-link" data-scroll-target="#references"><span class="header-section-number">A.10</span> References</a></li>
+  <li><a href="#sec-apx-cal-tradeoffs" id="toc-sec-apx-cal-tradeoffs" class="nav-link" data-scroll-target="#sec-apx-cal-tradeoffs"><span class="header-section-number">A.8</span> How ε, δ, σ and the sensitivity trade off</a>
+  <ul class="collapse">
+  <li><a href="#the-question-7" id="toc-the-question-7" class="nav-link" data-scroll-target="#the-question-7"><span class="header-section-number">A.8.1</span> The question</a></li>
+  <li><a href="#the-answer-7" id="toc-the-answer-7" class="nav-link" data-scroll-target="#the-answer-7"><span class="header-section-number">A.8.2</span> The answer</a></li>
+  <li><a href="#a-worked-example-7" id="toc-a-worked-example-7" class="nav-link" data-scroll-target="#a-worked-example-7"><span class="header-section-number">A.8.3</span> A worked example</a></li>
+  <li><a href="#why-it-works-7" id="toc-why-it-works-7" class="nav-link" data-scroll-target="#why-it-works-7"><span class="header-section-number">A.8.4</span> Why it works</a></li>
+  <li><a href="#checking-it-7" id="toc-checking-it-7" class="nav-link" data-scroll-target="#checking-it-7"><span class="header-section-number">A.8.5</span> Checking it</a></li>
+  <li><a href="#recipe-and-pitfalls-7" id="toc-recipe-and-pitfalls-7" class="nav-link" data-scroll-target="#recipe-and-pitfalls-7"><span class="header-section-number">A.8.6</span> Recipe and pitfalls</a></li>
+  </ul></li>
+  <li><a href="#sec-apx-cal-recipes" id="toc-sec-apx-cal-recipes" class="nav-link" data-scroll-target="#sec-apx-cal-recipes"><span class="header-section-number">A.9</span> All the recipes in one table</a></li>
+  <li><a href="#code" id="toc-code" class="nav-link" data-scroll-target="#code"><span class="header-section-number">A.10</span> Code</a></li>
+  <li><a href="#references" id="toc-references" class="nav-link" data-scroll-target="#references"><span class="header-section-number">A.11</span> References</a></li>
   </ul>
 </nav>
     </div>
@@ -759,37 +768,42 @@ Table&nbsp;A.1: The calibration formulas derived in this appendix and the chapte
 <tr class="odd">
 <td><a href="#sec-apx-cal-dp" class="quarto-xref"><span>Section A.1</span></a></td>
 <td>The definition, the privacy loss and the exact <span class="math inline">\(\delta\)</span></td>
-<td><a href="../part03-dp-foundations/01-definition.html#sec-dpdef-neighbours" class="quarto-xref"><span>Section 18.3</span></a>, <a href="../part03-dp-foundations/01-definition.html#sec-dpdef-definition" class="quarto-xref"><span>Section 18.4</span></a>, <a href="../part03-dp-foundations/01-definition.html#sec-dpdef-divergences" class="quarto-xref"><span>Section 18.6</span></a></td>
+<td><a href="../part03-dp-foundations/01-definition.html#sec-dpdef-neighbours" class="quarto-xref"><span>Section 18.1</span></a>, <a href="../part03-dp-foundations/01-definition.html#sec-dpdef-definition" class="quarto-xref"><span>Section 18.2</span></a>, <a href="../part03-dp-foundations/01-definition.html#sec-dpdef-divergences" class="quarto-xref"><span>Section 18.4</span></a></td>
 </tr>
 <tr class="even">
 <td><a href="#sec-apx-cal-sensitivity" class="quarto-xref"><span>Section A.2</span></a></td>
 <td>Sensitivity of counts, sums, means and histograms</td>
-<td><a href="../part03-dp-foundations/03-laplace-gaussian.html#sec-lg-sensitivity" class="quarto-xref"><span>Section 20.3</span></a></td>
+<td><a href="../part03-dp-foundations/03-laplace-gaussian.html#sec-lg-sensitivity" class="quarto-xref"><span>Section 20.1</span></a></td>
 </tr>
 <tr class="odd">
 <td><a href="#sec-apx-cal-laplace" class="quarto-xref"><span>Section A.3</span></a></td>
 <td>Laplace noise of scale <span class="math inline">\(\Delta_1/\varepsilon\)</span> gives <span class="math inline">\(\varepsilon\)</span>-DP</td>
-<td><a href="../part03-dp-foundations/03-laplace-gaussian.html#sec-lg-laplace" class="quarto-xref"><span>Section 20.4</span></a></td>
+<td><a href="../part03-dp-foundations/03-laplace-gaussian.html#sec-lg-laplace" class="quarto-xref"><span>Section 20.2</span></a></td>
 </tr>
 <tr class="even">
 <td><a href="#sec-apx-cal-rr" class="quarto-xref"><span>Section A.4</span></a></td>
 <td>Randomized response and its unbiased estimate</td>
-<td><a href="../part03-dp-foundations/01-definition.html#sec-dpdef-rr" class="quarto-xref"><span>Section 18.5</span></a></td>
+<td><a href="../part03-dp-foundations/01-definition.html#sec-dpdef-rr" class="quarto-xref"><span>Section 18.3</span></a></td>
 </tr>
 <tr class="odd">
 <td><a href="#sec-apx-cal-exponential" class="quarto-xref"><span>Section A.5</span></a></td>
 <td>The exponential mechanism and its utility</td>
-<td><a href="../part03-dp-foundations/05-selection.html#sec-sel-exp" class="quarto-xref"><span>Section 22.3</span></a>, <a href="../part03-dp-foundations/05-selection.html#sec-sel-utility" class="quarto-xref"><span>Section 22.4</span></a></td>
+<td><a href="../part03-dp-foundations/05-selection.html#sec-sel-exp" class="quarto-xref"><span>Section 22.1</span></a>, <a href="../part03-dp-foundations/05-selection.html#sec-sel-utility" class="quarto-xref"><span>Section 22.2</span></a></td>
 </tr>
 <tr class="even">
 <td><a href="#sec-apx-cal-gauss-classic" class="quarto-xref"><span>Section A.6</span></a></td>
 <td>The classic Gaussian formula <span class="math inline">\(\sigma = \Delta_2\sqrt{2\ln(1.25/\delta)}/\varepsilon\)</span></td>
-<td><a href="../part03-dp-foundations/03-laplace-gaussian.html#sec-lg-gauss-classic" class="quarto-xref"><span>Section 20.5</span></a></td>
+<td><a href="../part03-dp-foundations/03-laplace-gaussian.html#sec-lg-gauss-classic" class="quarto-xref"><span>Section 20.3</span></a></td>
 </tr>
 <tr class="odd">
 <td><a href="#sec-apx-cal-gauss-exact" class="quarto-xref"><span>Section A.7</span></a></td>
 <td>The exact Gaussian <span class="math inline">\(\delta(\varepsilon)\)</span> and the smallest <span class="math inline">\(\sigma\)</span></td>
-<td><a href="../part03-dp-foundations/03-laplace-gaussian.html#sec-lg-analytic" class="quarto-xref"><span>Section 20.6</span></a>, <a href="../part03-dp-foundations/03-laplace-gaussian.html#sec-lg-high-dim" class="quarto-xref"><span>Section 20.7</span></a></td>
+<td><a href="../part03-dp-foundations/03-laplace-gaussian.html#sec-lg-analytic" class="quarto-xref"><span>Section 20.4</span></a>, <a href="../part03-dp-foundations/03-laplace-gaussian.html#sec-lg-high-dim" class="quarto-xref"><span>Section 20.5</span></a></td>
+</tr>
+<tr class="even">
+<td><a href="#sec-apx-cal-tradeoffs" class="quarto-xref"><span>Section A.8</span></a></td>
+<td>Computing <span class="math inline">\(\delta\)</span> in code, and how <span class="math inline">\(\varepsilon\)</span>, <span class="math inline">\(\delta\)</span>, <span class="math inline">\(\sigma\)</span> and <span class="math inline">\(\Delta_2\)</span> trade off</td>
+<td><a href="../part03-dp-foundations/03-laplace-gaussian.html#sec-lg-analytic" class="quarto-xref"><span>Section 20.4</span></a>, <a href="../part05-dp-ml/09-choosing-epsilon.html#sec-epsc-delta" class="quarto-xref"><span>Section 46.7</span></a></td>
 </tr>
 </tbody>
 </table>
@@ -804,7 +818,7 @@ Table&nbsp;A.1: The calibration formulas derived in this appendix and the chapte
 </section>
 <section id="the-answer" class="level3" data-number="A.1.2">
 <h3 data-number="A.1.2" class="anchored" data-anchor-id="the-answer"><span class="header-section-number">A.1.2</span> The answer</h3>
-<p>A dataset is a collection of records, one per person. Two datasets <span class="math inline">\(D\)</span> and <span class="math inline">\(D'\)</span> are <strong>neighbours</strong> if they differ in one person’s record. The book uses two versions of this. Under <strong>add/remove</strong>, <span class="math inline">\(D'\)</span> is <span class="math inline">\(D\)</span> with one record added or removed, so the two have different numbers of records. The size <span class="math inline">\(n\)</span> is then itself protected, because the output must not reveal which size is true. Under <strong>replace</strong>, <span class="math inline">\(D'\)</span> is <span class="math inline">\(D\)</span> with one record changed, so <span class="math inline">\(n\)</span> is the same on both and treated as public. This appendix uses add/remove unless it says otherwise, as the chapters do for counts and histograms.</p>
+<p>A dataset is a collection of records, one per person. Two datasets <span class="math inline">\(D\)</span> and <span class="math inline">\(D'\)</span> are <strong>neighbours</strong> if they differ in one person’s record. The book uses two versions of this. Under <strong>add/remove</strong>, <span class="math inline">\(D'\)</span> is <span class="math inline">\(D\)</span> with one record added or removed, so the two have different numbers of records. The size <span class="math inline">\(n\)</span> is then itself protected, because the output must not reveal which size is true. Under <strong>replace-one</strong>, <span class="math inline">\(D'\)</span> is <span class="math inline">\(D\)</span> with one record changed, so <span class="math inline">\(n\)</span> is the same on both and treated as public. This appendix uses add/remove unless it says otherwise, as the chapters do for counts and histograms.</p>
 <p>A <strong>mechanism</strong> <span class="math inline">\(M\)</span> is a randomized algorithm: run on a dataset <span class="math inline">\(D\)</span>, it returns a random output <span class="math inline">\(M(D)\)</span>. Write <span class="math inline">\(p_D(y)\)</span> for the probability (or density) that <span class="math inline">\(M(D)\)</span> outputs <span class="math inline">\(y\)</span>, and <span class="math inline">\(p_{D'}(y)\)</span> for the same on the neighbour. An <strong>event</strong> <span class="math inline">\(S\)</span> is any set of outputs, such as “the released count is above 1240”. The privacy parameter <span class="math inline">\(\varepsilon \ge 0\)</span> says how much one record may change the probability of an event: by at most a factor <span class="math inline">\(e^\varepsilon\)</span>, so a small <span class="math inline">\(\varepsilon\)</span> means a factor close to 1. Formally, <span class="math inline">\(M\)</span> is <strong><span class="math inline">\(\varepsilon\)</span>-differentially private</strong> (<span class="math inline">\(\varepsilon\)</span>-DP) if for every pair of neighbours and every event <span class="math inline">\(S\)</span>, <span id="eq-auto-01calibration-1"><span class="math display">\[\Pr[M(D) \in S] \le e^\varepsilon\,\Pr[M(D') \in S]. \tag{A.1}\]</span></span></p>
 <p>The weaker version allows a small slack <span class="math inline">\(\delta\)</span> on top of the factor. A mechanism is <strong><span class="math inline">\((\varepsilon, \delta)\)</span>-differentially private</strong> if, for every pair of neighbours and every event <span class="math inline">\(S\)</span>, <span id="eq-apx-cal-def"><span class="math display">\[\Pr[M(D) \in S] \le e^\varepsilon\,\Pr[M(D') \in S] + \delta. \tag{A.2}\]</span></span> Read it as “the factor <span class="math inline">\(e^\varepsilon\)</span> holds, except for a <span class="math inline">\(\delta\)</span> of probability”. Both definitions must hold with <span class="math inline">\(D\)</span> and <span class="math inline">\(D'\)</span> swapped too, since a neighbour of <span class="math inline">\(D'\)</span> is <span class="math inline">\(D\)</span>.</p>
 <p>The quantity that decides both is the <strong>privacy loss</strong> of an output <span class="math inline">\(y\)</span>. It is the log of how much more likely <span class="math inline">\(y\)</span> is on <span class="math inline">\(D\)</span> than on <span class="math inline">\(D'\)</span>: <span id="eq-apx-cal-loss"><span class="math display">\[L(y) = \ln\frac{p_D(y)}{p_{D'}(y)}. \tag{A.3}\]</span></span> A loss of 0 means <span class="math inline">\(y\)</span> is equally likely on both datasets and says nothing about which one was used. A loss of <span class="math inline">\(\varepsilon\)</span> means <span class="math inline">\(y\)</span> is <span class="math inline">\(e^\varepsilon\)</span> times more likely on <span class="math inline">\(D\)</span>. Two facts, proved below, turn the definitions into statements about <span class="math inline">\(L\)</span>. First, if <span class="math inline">\(L(y) \le \varepsilon\)</span> for every output <span class="math inline">\(y\)</span> and every ordered pair of neighbours, the mechanism is <span class="math inline">\(\varepsilon\)</span>-DP. Second, call the outputs where the loss exceeds <span class="math inline">\(\varepsilon\)</span> the <strong>bad set</strong>, <span class="math inline">\(B = \{y : L(y) &gt; \varepsilon\}\)</span>. The smallest <span class="math inline">\(\delta\)</span> that works for one pair at a given <span class="math inline">\(\varepsilon\)</span> is the probability of the bad set on <span class="math inline">\(D\)</span>, minus <span class="math inline">\(e^\varepsilon\)</span> times its probability on <span class="math inline">\(D'\)</span>: <span id="eq-apx-cal-exact-delta"><span class="math display">\[\delta(\varepsilon) = \Pr[M(D) \in B] - e^\varepsilon\,\Pr[M(D') \in B]. \tag{A.4}\]</span></span></p>
@@ -893,7 +907,7 @@ Figure&nbsp;A.1: The three-output example. Blue bars are the probabilities on <s
 <section id="recipe-and-pitfalls" class="level3" data-number="A.1.6">
 <h3 data-number="A.1.6" class="anchored" data-anchor-id="recipe-and-pitfalls"><span class="header-section-number">A.1.6</span> Recipe and pitfalls</h3>
 <p>To check a mechanism, write down its privacy loss for a pair of neighbours. If the loss never exceeds <span class="math inline">\(\varepsilon\)</span>, you have <span class="math inline">\(\varepsilon\)</span>-DP. If it does, the exact <span class="math inline">\(\delta\)</span> is the excess mass of <a href="#eq-apx-cal-exact-delta" class="quarto-xref">Equation&nbsp;<span>A.4</span></a>, maximized over pairs of neighbours.</p>
-<p>The most common mistake is to apply <span class="math inline">\(\delta\)</span> to each output instead of each event. “Every output has <span class="math inline">\(p_D(y) \le e^\varepsilon p_{D'}(y) + \delta\)</span>” pays the slack once per output, and with many outputs that allows a mechanism that reveals everything (<a href="../part03-dp-foundations/01-definition.html#sec-dpdef-definition" class="quarto-xref"><span>Section 18.4</span></a> gives the example). The second mistake is to forget the neighbouring relation. A replacement is a removal followed by an addition, so a guarantee under replace can cost up to twice the <span class="math inline">\(\varepsilon\)</span> of one under add/remove. Every guarantee should therefore say which relation it uses. <a href="../part03-dp-foundations/01-definition.html#sec-dpdef-divergences" class="quarto-xref"><span>Section 18.6</span></a> writes the same exact <span class="math inline">\(\delta\)</span> as a divergence, and <a href="04-conversions.html#sec-apx-conv-testing" class="quarto-xref"><span>Section D.1</span></a> explains what <span class="math inline">\(\varepsilon\)</span> means for an attacker.</p>
+<p>The most common mistake is to apply <span class="math inline">\(\delta\)</span> to each output instead of each event. “Every output has <span class="math inline">\(p_D(y) \le e^\varepsilon p_{D'}(y) + \delta\)</span>” pays the slack once per output, and with many outputs that allows a mechanism that reveals everything (<a href="../part03-dp-foundations/01-definition.html#sec-dpdef-definition" class="quarto-xref"><span>Section 18.2</span></a> gives the example). The second mistake is to forget the neighbouring relation. A replacement is a removal followed by an addition, so a guarantee under replace-one can cost up to twice the <span class="math inline">\(\varepsilon\)</span> of one under add/remove. Every guarantee should therefore say which relation it uses. <a href="../part03-dp-foundations/01-definition.html#sec-dpdef-divergences" class="quarto-xref"><span>Section 18.4</span></a> writes the same exact <span class="math inline">\(\delta\)</span> as a divergence, and <a href="04-conversions.html#sec-apx-conv-testing" class="quarto-xref"><span>Section D.1</span></a> explains what <span class="math inline">\(\varepsilon\)</span> means for an attacker.</p>
 </section>
 </section>
 <section id="sec-apx-cal-sensitivity" class="level2" data-number="A.2">
@@ -904,7 +918,7 @@ Figure&nbsp;A.1: The three-output example. Blue bars are the probabilities on <s
 </section>
 <section id="the-answer-1" class="level3" data-number="A.2.2">
 <h3 data-number="A.2.2" class="anchored" data-anchor-id="the-answer-1"><span class="header-section-number">A.2.2</span> The answer</h3>
-<p>Let <span class="math inline">\(f\)</span> be the query, a function that takes a dataset and returns <span class="math inline">\(d\)</span> numbers. The <strong>sensitivity</strong> of <span class="math inline">\(f\)</span> is the largest change that one person can cause, over all pairs of neighbours. Because the answer is a list of numbers, the change <span class="math inline">\(v = f(D) - f(D')\)</span> is a list too, and its size can be measured in two ways. The <strong><span class="math inline">\(\ell_1\)</span> norm</strong> <span class="math inline">\(\|v\|_1 = |v_1| + \dots + |v_d|\)</span> adds up the absolute changes, and Laplace noise is calibrated to it. The <strong><span class="math inline">\(\ell_2\)</span> norm</strong> <span class="math inline">\(\|v\|_2 = \sqrt{v_1^2 + \dots + v_d^2}\)</span> is the straight-line length of the change, and Gaussian noise is calibrated to it. So there are two sensitivities, one for each norm: <span id="eq-auto-01calibration-2"><span class="math display">\[\Delta_1 = \max_{D, D' \text{ neighbours}}\|f(D) - f(D')\|_1, \qquad \Delta_2 = \max_{D, D' \text{ neighbours}}\|f(D) - f(D')\|_2. \tag{A.5}\]</span></span> <a href="#tbl-apx-cal-sens" class="quarto-xref">Table&nbsp;<span>A.3</span></a> gives them for the standard queries. Values are <strong>clipped</strong> to a range <span class="math inline">\([0, B]\)</span>: any value above <span class="math inline">\(B\)</span> is replaced by <span class="math inline">\(B\)</span> before the query runs, so no record can contribute more than <span class="math inline">\(B\)</span>.</p>
+<p>Let <span class="math inline">\(f\)</span> be the query, a function that takes a dataset and returns <span class="math inline">\(d\)</span> numbers. The <strong>sensitivity</strong> of <span class="math inline">\(f\)</span> is the largest change that one person can cause, over all pairs of neighbours. Because the answer is a list of numbers, the change <span class="math inline">\(v = f(D) - f(D')\)</span> is a list too, and its size can be measured in two ways. The <strong><span class="math inline">\(\ell_1\)</span> norm</strong> <span class="math inline">\(\|v\|_1 = |v_1| + \dots + |v_d|\)</span> adds up the absolute changes, and Laplace noise is calibrated to it. The <strong><span class="math inline">\(\ell_2\)</span> norm</strong> <span class="math inline">\(\|v\|_2 = \sqrt{v_1^2 + \dots + v_d^2}\)</span> is the straight-line length of the change, and Gaussian noise is calibrated to it. So there are two sensitivities, one for each norm: <span id="eq-auto-01calibration-2"><span class="math display">\[\Delta_1 = \max_{D \sim D'}\|f(D) - f(D')\|_1, \qquad \Delta_2 = \max_{D \sim D'}\|f(D) - f(D')\|_2. \tag{A.5}\]</span></span> <a href="#tbl-apx-cal-sens" class="quarto-xref">Table&nbsp;<span>A.3</span></a> gives them for the standard queries. Values are <strong>clipped</strong> to a range <span class="math inline">\([0, C]\)</span>: any value above <span class="math inline">\(C\)</span> is replaced by <span class="math inline">\(C\)</span> before the query runs, so no record can contribute more than <span class="math inline">\(C\)</span>.</p>
 <div id="tbl-apx-cal-sens" class="quarto-float quarto-figure quarto-figure-center anchored">
 <figure class="quarto-float quarto-float-tbl figure">
 <figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl" id="tbl-apx-cal-sens-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
@@ -924,8 +938,8 @@ Table&nbsp;A.3: Sensitivities of the standard queries under the two neighbouring
 <th>Query</th>
 <th>Add/remove <span class="math inline">\(\Delta_1\)</span></th>
 <th>Add/remove <span class="math inline">\(\Delta_2\)</span></th>
-<th>Replace <span class="math inline">\(\Delta_1\)</span></th>
-<th>Replace <span class="math inline">\(\Delta_2\)</span></th>
+<th>Replace-one <span class="math inline">\(\Delta_1\)</span></th>
+<th>Replace-one <span class="math inline">\(\Delta_2\)</span></th>
 </tr>
 </thead>
 <tbody>
@@ -937,18 +951,18 @@ Table&nbsp;A.3: Sensitivities of the standard queries under the two neighbouring
 <td>0</td>
 </tr>
 <tr class="even">
-<td>Sum of values clipped to <span class="math inline">\([0, B]\)</span></td>
-<td><span class="math inline">\(B\)</span></td>
-<td><span class="math inline">\(B\)</span></td>
-<td><span class="math inline">\(B\)</span></td>
-<td><span class="math inline">\(B\)</span></td>
+<td>Sum of values clipped to <span class="math inline">\([0, C]\)</span></td>
+<td><span class="math inline">\(C\)</span></td>
+<td><span class="math inline">\(C\)</span></td>
+<td><span class="math inline">\(C\)</span></td>
+<td><span class="math inline">\(C\)</span></td>
 </tr>
 <tr class="odd">
 <td>Mean of <span class="math inline">\(n\)</span> clipped values, <span class="math inline">\(n\)</span> public</td>
 <td>no useful bound</td>
 <td>no useful bound</td>
-<td><span class="math inline">\(B/n\)</span></td>
-<td><span class="math inline">\(B/n\)</span></td>
+<td><span class="math inline">\(C/n\)</span></td>
+<td><span class="math inline">\(C/n\)</span></td>
 </tr>
 <tr class="even">
 <td>Histogram, each record in one bin</td>
@@ -972,28 +986,28 @@ Table&nbsp;A.3: Sensitivities of the standard queries under the two neighbouring
 </section>
 <section id="a-worked-example-1" class="level3" data-number="A.2.3">
 <h3 data-number="A.2.3" class="anchored" data-anchor-id="a-worked-example-1"><span class="header-section-number">A.2.3</span> A worked example</h3>
-<p>A study releases the mean age of <span class="math inline">\(n = 1000\)</span> patients, with ages clipped to <span class="math inline">\([0, 100]\)</span>, under replace. One patient’s age can change from 0 to 100 at most, so the sum moves by at most <span class="math inline">\(B = 100\)</span>. The mean is the sum divided by the fixed <span class="math inline">\(n\)</span>, so it moves by at most <span class="math inline">\(100/1000 = 0.1\)</span> years. That is the sensitivity, <span class="math inline">\(\Delta_1 = \Delta_2 = 0.1\)</span>, however old the patients actually are.</p>
+<p>A study releases the mean age of <span class="math inline">\(n = 1000\)</span> patients, with ages clipped to <span class="math inline">\([0, 100]\)</span>, under replace-one. One patient’s age can change from 0 to 100 at most, so the sum moves by at most <span class="math inline">\(C = 100\)</span>. The mean is the sum divided by the fixed <span class="math inline">\(n\)</span>, so it moves by at most <span class="math inline">\(100/1000 = 0.1\)</span> years. That is the sensitivity, <span class="math inline">\(\Delta_1 = \Delta_2 = 0.1\)</span>, however old the patients actually are.</p>
 </section>
 <section id="why-it-works-1" class="level3" data-number="A.2.4">
 <h3 data-number="A.2.4" class="anchored" data-anchor-id="why-it-works-1"><span class="header-section-number">A.2.4</span> Why it works</h3>
 <p>Each row asks what the single worst record can do.</p>
 <ol type="1">
-<li><strong>Count.</strong> Adding or removing a person changes the count by exactly 1. Replacing a person leaves it unchanged, which is why under replace the count of all records is public anyway.</li>
-<li><strong>Sum of clipped values.</strong> Adding a person with value <span class="math inline">\(x\)</span> in <span class="math inline">\([0, B]\)</span> changes the sum by <span class="math inline">\(x\)</span>, at most <span class="math inline">\(B\)</span>. Replacing <span class="math inline">\(x\)</span> by <span class="math inline">\(x'\)</span> changes it by <span class="math inline">\(|x - x'|\)</span>, again at most <span class="math inline">\(B\)</span>. Both bounds are reached with <span class="math inline">\(x = B\)</span> and <span class="math inline">\(x' = 0\)</span>.</li>
-<li><strong>Mean.</strong> Under replace, the mean is the sum divided by the public <span class="math inline">\(n\)</span>, so its sensitivity is the sum’s divided by <span class="math inline">\(n\)</span>, which is <span class="math inline">\(B/n\)</span>. Under add/remove the divisor changes too, and the change depends on <span class="math inline">\(n\)</span>, which is private. The script finds that for datasets of 1 to 3 values in <span class="math inline">\([0, 3]\)</span> one record can move the mean by 1.5, from the mean of <span class="math inline">\(\{0\}\)</span> to the mean of <span class="math inline">\(\{0, 3\}\)</span>. The usual fix is to release a noisy sum and a noisy count separately and divide them.</li>
-<li><strong>Histogram.</strong> Under add/remove the person lands in one bin, so one bin changes by 1. Both norms of the change are 1. Under replace one bin loses 1 and another gains 1, so the <span class="math inline">\(\ell_1\)</span> norm is <span class="math inline">\(1 + 1 = 2\)</span> and the <span class="math inline">\(\ell_2\)</span> norm is <span class="math inline">\(\sqrt{1^2 + 1^2} = \sqrt2\)</span>.</li>
+<li><strong>Count.</strong> Adding or removing a person changes the count by exactly 1. Replacing a person leaves it unchanged, which is why under replace-one the count of all records is public anyway.</li>
+<li><strong>Sum of clipped values.</strong> Adding a person with value <span class="math inline">\(x\)</span> in <span class="math inline">\([0, C]\)</span> changes the sum by <span class="math inline">\(x\)</span>, at most <span class="math inline">\(C\)</span>. Replacing <span class="math inline">\(x\)</span> by <span class="math inline">\(x'\)</span> changes it by <span class="math inline">\(|x - x'|\)</span>, again at most <span class="math inline">\(C\)</span>. Both bounds are reached with <span class="math inline">\(x = C\)</span> and <span class="math inline">\(x' = 0\)</span>.</li>
+<li><strong>Mean.</strong> Under replace-one, the mean is the sum divided by the public <span class="math inline">\(n\)</span>, so its sensitivity is the sum’s divided by <span class="math inline">\(n\)</span>, which is <span class="math inline">\(C/n\)</span>. Under add/remove the divisor changes too, and the change depends on <span class="math inline">\(n\)</span>, which is private. The script finds that for datasets of 1 to 3 values in <span class="math inline">\([0, 3]\)</span> one record can move the mean by 1.5, from the mean of <span class="math inline">\(\{0\}\)</span> to the mean of <span class="math inline">\(\{0, 3\}\)</span>. The usual fix is to release a noisy sum and a noisy count separately and divide them.</li>
+<li><strong>Histogram.</strong> Under add/remove the person lands in one bin, so one bin changes by 1. Both norms of the change are 1. Under replace-one one bin loses 1 and another gains 1, so the <span class="math inline">\(\ell_1\)</span> norm is <span class="math inline">\(1 + 1 = 2\)</span> and the <span class="math inline">\(\ell_2\)</span> norm is <span class="math inline">\(\sqrt{1^2 + 1^2} = \sqrt2\)</span>.</li>
 <li><strong>Counts that one person can all touch.</strong> Suppose each person answers <span class="math inline">\(d\)</span> yes/no questions and you release the number of “yes” answers to each. One person who says yes to all <span class="math inline">\(d\)</span> moves every count by 1, so the <span class="math inline">\(\ell_1\)</span> norm of the change is <span class="math inline">\(d\)</span> and the <span class="math inline">\(\ell_2\)</span> norm is <span class="math inline">\(\sqrt{d \cdot 1^2} = \sqrt d\)</span>.</li>
 </ol>
-<p>The last row shows why the two norms matter. When one person spreads their effect over many coordinates, <span class="math inline">\(\Delta_1\)</span> grows like <span class="math inline">\(d\)</span> but <span class="math inline">\(\Delta_2\)</span> only like <span class="math inline">\(\sqrt d\)</span>, Since the noise is scaled to the sensitivity, as the next sections show, this is why Gaussian noise wins for long vectors (<a href="../part03-dp-foundations/03-laplace-gaussian.html#sec-lg-high-dim" class="quarto-xref"><span>Section 20.7</span></a>).</p>
+<p>The last row shows why the two norms matter. When one person spreads their effect over many coordinates, <span class="math inline">\(\Delta_1\)</span> grows like <span class="math inline">\(d\)</span> but <span class="math inline">\(\Delta_2\)</span> only like <span class="math inline">\(\sqrt d\)</span>. Since the noise is scaled to the sensitivity, as the next sections show, this is why Gaussian noise wins for long vectors (<a href="../part03-dp-foundations/03-laplace-gaussian.html#sec-lg-high-dim" class="quarto-xref"><span>Section 20.5</span></a>).</p>
 </section>
 <section id="checking-it-1" class="level3" data-number="A.2.5">
 <h3 data-number="A.2.5" class="anchored" data-anchor-id="checking-it-1"><span class="header-section-number">A.2.5</span> Checking it</h3>
-<p>The script lists every dataset of 1 to 3 records and every neighbour under both relations, and takes the largest change. Values are in <span class="math inline">\(\{0, 1, 2, 3\}\)</span>, so <span class="math inline">\(B = 3\)</span> and the histogram has 4 bins, and the vector query uses <span class="math inline">\(d = 3\)</span> questions. It reproduces every row of <a href="#tbl-apx-cal-sens" class="quarto-xref">Table&nbsp;<span>A.3</span></a>. For example, the histogram has <span class="math inline">\(\ell_1\)</span> sensitivity 1 under add/remove and 2 under replace, with <span class="math inline">\(\ell_2\)</span> sensitivity 1.4142 under replace. The three counts have 3 and 1.7321. For the mean of exactly 3 records under replace it finds <span class="math inline">\(3/3 = 1.0000\)</span>.</p>
+<p>The script lists every dataset of 1 to 3 records and every neighbour under both relations, and takes the largest change. Values are in <span class="math inline">\(\{0, 1, 2, 3\}\)</span>, so <span class="math inline">\(C = 3\)</span> and the histogram has 4 bins, and the vector query uses <span class="math inline">\(d = 3\)</span> questions. It reproduces every row of <a href="#tbl-apx-cal-sens" class="quarto-xref">Table&nbsp;<span>A.3</span></a>. For example, the histogram has <span class="math inline">\(\ell_1\)</span> sensitivity 1 under add/remove and 2 under replace-one, with <span class="math inline">\(\ell_2\)</span> sensitivity 1.4142 under replace-one. The three counts have 3 and 1.7321. For the mean of exactly 3 records under replace-one it finds <span class="math inline">\(3/3 = 1.0000\)</span>.</p>
 </section>
 <section id="recipe-and-pitfalls-1" class="level3" data-number="A.2.6">
 <h3 data-number="A.2.6" class="anchored" data-anchor-id="recipe-and-pitfalls-1"><span class="header-section-number">A.2.6</span> Recipe and pitfalls</h3>
 <p>First fix the neighbouring relation, then ask what the worst single record can do to each coordinate, and add the changes up in the norm your noise needs. Compute the sensitivity before you look at the data, because it is a worst case over everything the domain allows, not over the data you hold.</p>
-<p>Unbounded data has infinite sensitivity. If ages, incomes or gradients can be as large as anyone likes, one record can move a sum by any amount, and no finite noise hides it. Clip every value to a fixed range first, and calibrate to the clipping bound. A second pitfall is a person who contributes many records: if one person can add 5 ratings, a count of ratings has sensitivity 5 per person, not 1. <a href="03-dp-sgd.html#sec-apx-sgd-clipping" class="quarto-xref"><span>Section C.1</span></a> applies the same reasoning to clipped gradients.</p>
+<p>Unbounded data has infinite sensitivity. If ages, incomes or gradients can be as large as anyone likes, one record can move a sum by any amount, and no finite noise hides it. Clip every value to a fixed range first, and calibrate to the clipping norm. A second pitfall is a person who contributes many records: if one person can add 5 ratings, a count of ratings has sensitivity 5 per person, not 1. <a href="03-dp-sgd.html#sec-apx-sgd-clipping" class="quarto-xref"><span>Section C.1</span></a> applies the same reasoning to clipped gradients.</p>
 </section>
 </section>
 <section id="sec-apx-cal-laplace" class="level2" data-number="A.3">
@@ -1004,7 +1018,7 @@ Table&nbsp;A.3: Sensitivities of the standard queries under the two neighbouring
 </section>
 <section id="the-answer-2" class="level3" data-number="A.3.2">
 <h3 data-number="A.3.2" class="anchored" data-anchor-id="the-answer-2"><span class="header-section-number">A.3.2</span> The answer</h3>
-<p>The <strong>Laplace distribution</strong> is a two-sided exponential, peaked at 0. With scale <span class="math inline">\(b\)</span>, its typical size, it puts density <span class="math inline">\(\frac{1}{2b}e^{-|z|/b}\)</span> at each value <span class="math inline">\(z\)</span>. The <strong>Laplace mechanism</strong> adds independent Laplace noise to each of the <span class="math inline">\(d\)</span> numbers, with the scale set to the <span class="math inline">\(\ell_1\)</span> sensitivity divided by <span class="math inline">\(\varepsilon\)</span>: <span id="eq-apx-cal-laplace"><span class="math display">\[M(D) = f(D) + (Z_1, \dots, Z_d), \qquad Z_i \sim \mathrm{Lap}(b), \qquad b = \frac{\Delta_1}{\varepsilon}. \tag{A.6}\]</span></span> It is <span class="math inline">\(\varepsilon\)</span>-DP. For one number, the error is the noise itself, and it exceeds a threshold <span class="math inline">\(t\)</span> with probability exactly <span class="math inline">\(e^{-t/b}\)</span>. So with probability 0.95 the error is at most <span class="math inline">\(b\ln 20\)</span>.</p>
+<p>The <strong>Laplace distribution</strong> is a two-sided exponential, peaked at 0. With scale <span class="math inline">\(b\)</span>, its typical size, it puts density <span class="math inline">\(\frac{1}{2b}e^{-|z|/b}\)</span> at each value <span class="math inline">\(z\)</span>. The <strong>Laplace mechanism</strong> adds independent Laplace noise to each of the <span class="math inline">\(d\)</span> numbers, with the scale set to the <span class="math inline">\(\ell_1\)</span> sensitivity divided by <span class="math inline">\(\varepsilon\)</span>: <span id="eq-apx-cal-laplace"><span class="math display">\[M(D) = f(D) + (Z_1, \dots, Z_d), \qquad Z_i \sim \mathrm{Lap}(b), \qquad b = \frac{\Delta_1}{\varepsilon}. \tag{A.6}\]</span></span> It is <span class="math inline">\(\varepsilon\)</span>-DP. For one number, the error is the noise itself, and it exceeds a threshold <span class="math inline">\(\tau\)</span> with probability exactly <span class="math inline">\(e^{-\tau/b}\)</span>. So with probability 0.95 the error is at most <span class="math inline">\(b\ln 20\)</span>.</p>
 </section>
 <section id="a-worked-example-2" class="level3" data-number="A.3.3">
 <h3 data-number="A.3.3" class="anchored" data-anchor-id="a-worked-example-2"><span class="header-section-number">A.3.3</span> A worked example</h3>
@@ -1076,7 +1090,7 @@ Table&nbsp;A.4: The Laplace mechanism for a count with <span class="math inline"
 <li><strong>The shift is at most the sensitivity.</strong> So <span class="math inline">\(L(y) \le |a - a'|/b \le \Delta_1/b\)</span>, and with <span class="math inline">\(b = \Delta_1/\varepsilon\)</span> that is <span class="math inline">\(\varepsilon\)</span>. This holds at every output <span class="math inline">\(y\)</span>.</li>
 <li><strong>Several numbers.</strong> With <span class="math inline">\(d\)</span> coordinates and independent noise, the density of the output is the product of the <span class="math inline">\(d\)</span> coordinate densities. The log of a product is a sum, so the privacy loss is the sum of the coordinate losses. Each is at most <span class="math inline">\(|a_i - a'_i|/b\)</span> by step 2, and their sum is at most <span class="math inline">\(\|a - a'\|_1/b \le \Delta_1/b = \varepsilon\)</span>.</li>
 <li><strong>Conclude.</strong> The loss is at most <span class="math inline">\(\varepsilon\)</span> at every output, for every pair of neighbours in either order. So by step 1 of <a href="#sec-apx-cal-dp" class="quarto-xref"><span>Section A.1</span></a> the mechanism is <span class="math inline">\(\varepsilon\)</span>-DP.</li>
-<li><strong>Accuracy.</strong> The absolute error <span class="math inline">\(|Z|\)</span> has density <span class="math inline">\(\frac{1}{b}e^{-z/b}\)</span> for <span class="math inline">\(z \ge 0\)</span>, twice the Laplace density on one side. Its integral from <span class="math inline">\(t\)</span> to infinity is <span class="math inline">\(e^{-t/b}\)</span>. Setting <span class="math inline">\(e^{-t/b} = 0.05\)</span> and solving gives <span class="math inline">\(t = b\ln 20\)</span>. The same density has average <span class="math inline">\(\int_0^\infty z\frac1be^{-z/b}\,dz = b\)</span>, so the typical error is <span class="math inline">\(b\)</span>.</li>
+<li><strong>Accuracy.</strong> The absolute error <span class="math inline">\(|Z|\)</span> has density <span class="math inline">\(\frac{1}{b}e^{-z/b}\)</span> for <span class="math inline">\(z \ge 0\)</span>, twice the Laplace density on one side. Its integral from <span class="math inline">\(\tau\)</span> to infinity is <span class="math inline">\(e^{-\tau/b}\)</span>. Setting <span class="math inline">\(e^{-\tau/b} = 0.05\)</span> and solving gives <span class="math inline">\(\tau = b\ln 20\)</span>. The same density has average <span class="math inline">\(\int_0^\infty z\frac1be^{-z/b}\,\mathrm dz = b\)</span>, so the typical error is <span class="math inline">\(b\)</span>.</li>
 </ol>
 <p>The bound of step 2 is reached, with equality, at every output below both true answers. So with a smaller scale <span class="math inline">\(b\)</span> the loss there would be <span class="math inline">\(1/b &gt; \varepsilon\)</span>, and those outputs would break the factor <span class="math inline">\(e^\varepsilon\)</span>. For the count above, the event “the output is at most 1234” has probability 0.5 on <span class="math inline">\(D\)</span> and <span class="math inline">\(\frac12e^{-1/b} = 0.3033\)</span> on <span class="math inline">\(D'\)</span>, a ratio of exactly <span class="math inline">\(e^{0.5}\)</span>.</p>
 </section>
@@ -1113,7 +1127,7 @@ Figure&nbsp;A.3: The privacy loss <span class="math inline">\(L(y)\)</span> of t
 <li>Set <span class="math inline">\(b = \Delta_1/\varepsilon\)</span> and add independent <span class="math inline">\(\mathrm{Lap}(b)\)</span> noise to every coordinate.</li>
 <li>Quote the error: <span class="math inline">\(b\)</span> on average, and <span class="math inline">\(b\ln 20\)</span> with probability 0.95 for each coordinate.</li>
 </ol>
-<p>The noise does not depend on the number of people, so a count of a million people and a count of ten get the same noise. Small groups are therefore expensive. Use fresh noise for every release, because reusing the same noise draw lets an analyst subtract it out. Releasing the same count <span class="math inline">\(k\)</span> times with fresh noise costs <span class="math inline">\(k\varepsilon\)</span>, which <a href="02-composition.html#sec-apx-ccomp-basic" class="quarto-xref"><span>Section B.1</span></a> derives. <a href="../part03-dp-foundations/03-laplace-gaussian.html#sec-lg-laplace" class="quarto-xref"><span>Section 20.4</span></a> adds the bound on the largest error over <span class="math inline">\(d\)</span> coordinates.</p>
+<p>The noise does not depend on the number of people, so a count of a million people and a count of ten get the same noise. Small groups are therefore expensive. Use fresh noise for every release, because reusing the same noise draw lets an analyst subtract it out. Releasing the same count <span class="math inline">\(k\)</span> times with fresh noise costs <span class="math inline">\(k\varepsilon\)</span>, which <a href="02-composition.html#sec-apx-ccomp-basic" class="quarto-xref"><span>Section B.1</span></a> derives. <a href="../part03-dp-foundations/03-laplace-gaussian.html#sec-lg-laplace" class="quarto-xref"><span>Section 20.2</span></a> adds the bound on the largest error over <span class="math inline">\(d\)</span> coordinates.</p>
 </section>
 </section>
 <section id="sec-apx-cal-rr" class="level2" data-number="A.4">
@@ -1124,7 +1138,7 @@ Figure&nbsp;A.3: The privacy loss <span class="math inline">\(L(y)\)</span> of t
 </section>
 <section id="the-answer-3" class="level3" data-number="A.4.2">
 <h3 data-number="A.4.2" class="anchored" data-anchor-id="the-answer-3"><span class="header-section-number">A.4.2</span> The answer</h3>
-<p>Each person reports their true bit with probability <span class="math inline">\(t\)</span> and the flipped bit with probability <span class="math inline">\(1 - t\)</span>, where <span id="eq-auto-01calibration-4"><span class="math display">\[t = \frac{e^\varepsilon}{1 + e^\varepsilon}. \tag{A.8}\]</span></span> This is <span class="math inline">\(\varepsilon\)</span>-DP under replace. If <span class="math inline">\(\bar y\)</span> is the fraction of reported ones among <span class="math inline">\(n\)</span> people, an unbiased estimate of the true fraction <span class="math inline">\(\pi\)</span> of ones is <span id="eq-auto-01calibration-5"><span class="math display">\[\hat\pi = \frac{\bar y - (1 - t)}{2t - 1}, \qquad \operatorname{sd}(\hat\pi) = \frac{\sqrt{t(1 - t)}}{(2t - 1)\sqrt n}. \tag{A.9}\]</span></span></p>
+<p>Each person reports their true bit with probability <span class="math inline">\(t\)</span> and the flipped bit with probability <span class="math inline">\(1 - t\)</span>, where <span id="eq-auto-01calibration-4"><span class="math display">\[t = \frac{e^\varepsilon}{1 + e^\varepsilon}. \tag{A.8}\]</span></span> This is <span class="math inline">\(\varepsilon\)</span>-DP under replace-one. If <span class="math inline">\(\bar y\)</span> is the fraction of reported ones among <span class="math inline">\(n\)</span> people, an unbiased estimate of the true fraction <span class="math inline">\(\pi\)</span> of ones is <span id="eq-auto-01calibration-5"><span class="math display">\[\hat\pi = \frac{\bar y - (1 - t)}{2t - 1}, \qquad \operatorname{sd}(\hat\pi) = \frac{\sqrt{t(1 - t)}}{(2t - 1)\sqrt n}. \tag{A.9}\]</span></span></p>
 </section>
 <section id="a-worked-example-3" class="level3" data-number="A.4.3">
 <h3 data-number="A.4.3" class="anchored" data-anchor-id="a-worked-example-3"><span class="header-section-number">A.4.3</span> A worked example</h3>
@@ -1135,7 +1149,7 @@ Figure&nbsp;A.3: The privacy loss <span class="math inline">\(L(y)\)</span> of t
 <h3 data-number="A.4.4" class="anchored" data-anchor-id="why-it-works-3"><span class="header-section-number">A.4.4</span> Why it works</h3>
 <ol type="1">
 <li><strong>Privacy.</strong> There are two inputs and two outputs. A report of 1 has probability <span class="math inline">\(t\)</span> if the bit is 1 and <span class="math inline">\(1 - t\)</span> if it is 0, so its privacy loss is <span class="math inline">\(\ln(t/(1 - t))\)</span>. With <span class="math inline">\(t = e^\varepsilon/(1 + e^\varepsilon)\)</span>, the ratio is <span class="math inline">\(t/(1 - t) = e^\varepsilon\)</span>. A report of 0 has the inverse ratio, so <span class="math inline">\(|L| \le \varepsilon\)</span> at both outputs.</li>
-<li><strong>Many people.</strong> People flip their own coins independently, so the probability of all the reports is a product with one factor per person. Under replace, neighbours differ in one person’s bit, so every other factor is the same on both datasets and cancels in the ratio. The loss is that one person’s loss.</li>
+<li><strong>Many people.</strong> People flip their own coins independently, so the probability of all the reports is a product with one factor per person. Under replace-one, neighbours differ in one person’s bit, so every other factor is the same on both datasets and cancels in the ratio. The loss is that one person’s loss.</li>
 <li><strong>The expected report.</strong> A person with bit 1 reports 1 with probability <span class="math inline">\(t\)</span>, and a person with bit 0 with probability <span class="math inline">\(1 - t\)</span>. Averaging over the population gives <span class="math inline">\(\mathbb E[\bar y] = \pi t + (1 - \pi)(1 - t) = (1 - t) + \pi(2t - 1)\)</span>.</li>
 <li><strong>Unbias it.</strong> Solving that equation for <span class="math inline">\(\pi\)</span> gives <span class="math inline">\(\hat\pi\)</span>. It is a linear function of <span class="math inline">\(\bar y\)</span>, so its average is the true <span class="math inline">\(\pi\)</span>.</li>
 <li><strong>The spread.</strong> Each report is a 0/1 variable with variance <span class="math inline">\(t(1 - t)\)</span>, whatever the true bit, and the reports are independent. So <span class="math inline">\(\bar y\)</span> has variance <span class="math inline">\(t(1 - t)/n\)</span>. Dividing by <span class="math inline">\(2t - 1\)</span> divides the standard deviation by <span class="math inline">\(2t - 1\)</span>.</li>
@@ -1148,7 +1162,7 @@ Figure&nbsp;A.3: The privacy loss <span class="math inline">\(L(y)\)</span> of t
 <section id="recipe-and-pitfalls-3" class="level3" data-number="A.4.6">
 <h3 data-number="A.4.6" class="anchored" data-anchor-id="recipe-and-pitfalls-3"><span class="header-section-number">A.4.6</span> Recipe and pitfalls</h3>
 <p>Set <span class="math inline">\(t = e^\varepsilon/(1 + e^\varepsilon)\)</span>, collect the reports, and compute <span class="math inline">\(\hat\pi\)</span>. Expect an error of about <span class="math inline">\(1/(\varepsilon\sqrt n)\)</span> for small <span class="math inline">\(\varepsilon\)</span>. The reason is that <span class="math inline">\(e^\varepsilon \approx 1 + \varepsilon\)</span> there, so <span class="math inline">\(t \approx (1 + \varepsilon)/2\)</span>, which makes <span class="math inline">\(2t - 1 \approx \varepsilon/2\)</span> and <span class="math inline">\(t(1 - t) \approx \frac14\)</span>.</p>
-<p>The price of trusting nobody is large. If one trusted party could see the true bits, it could add <span class="math inline">\(\mathrm{Lap}(1/\varepsilon)\)</span> noise to their count instead, and the error on the fraction would fall like <span class="math inline">\(1/n\)</span>, not like <span class="math inline">\(1/\sqrt n\)</span>. The guarantee also holds only under replace. Under add/remove the neighbour has one report more or fewer, and the number of reports, which is published, shows the difference at once. <a href="../part03-dp-foundations/01-definition.html#sec-dpdef-rr" class="quarto-xref"><span>Section 18.5</span></a> compares the two designs, and Warner’s original survey design is the same mechanism.</p>
+<p>The price of trusting nobody is large. If one trusted party could see the true bits, it could add <span class="math inline">\(\mathrm{Lap}(1/\varepsilon)\)</span> noise to their count instead, and the error on the fraction would fall like <span class="math inline">\(1/n\)</span>, not like <span class="math inline">\(1/\sqrt n\)</span>. The guarantee also holds only under replace-one. Under add/remove the neighbour has one report more or fewer, and the number of reports, which is published, shows the difference at once. <a href="../part03-dp-foundations/01-definition.html#sec-dpdef-rr" class="quarto-xref"><span>Section 18.3</span></a> compares the two designs, and Warner’s original survey design is the same mechanism.</p>
 </section>
 </section>
 <section id="sec-apx-cal-exponential" class="level2" data-number="A.5">
@@ -1159,13 +1173,13 @@ Figure&nbsp;A.3: The privacy loss <span class="math inline">\(L(y)\)</span> of t
 </section>
 <section id="the-answer-4" class="level3" data-number="A.5.2">
 <h3 data-number="A.5.2" class="anchored" data-anchor-id="the-answer-4"><span class="header-section-number">A.5.2</span> The answer</h3>
-<p>Fix a list of candidates <span class="math inline">\(\mathcal R\)</span> in advance, and write <span class="math inline">\(k\)</span> for their number. For each candidate <span class="math inline">\(r\)</span>, a score <span class="math inline">\(u(D, r)\)</span> says how good it is on dataset <span class="math inline">\(D\)</span>, where higher is better. Let <span class="math inline">\(\Delta\)</span> be the sensitivity of the score, the most that one person can change any one candidate’s score.</p>
-<p>The <strong>exponential mechanism</strong> gives each candidate a weight <span class="math inline">\(\exp(\varepsilon u(D, r)/(2\Delta))\)</span>, which grows with its score. It then picks a candidate with probability equal to its share of the total weight <span class="math inline">\(Z(D)\)</span>, the <strong>normalizer</strong>: <span id="eq-auto-01calibration-6"><span class="math display">\[\Pr[M_E(D) = r] = \frac{\exp\big(\frac{\varepsilon\,u(D, r)}{2\Delta}\big)}{Z(D)}, \qquad Z(D) = \sum_{s \in \mathcal R}\exp\Big(\frac{\varepsilon\,u(D, s)}{2\Delta}\Big). \tag{A.10}\]</span></span> Dividing by the normalizer makes the probabilities add up to 1. The mechanism is <span class="math inline">\(\varepsilon\)</span>-DP, and its choice is rarely far below the best score <span class="math inline">\(\mathrm{OPT}(D)\)</span>. For every <span class="math inline">\(t &gt; 0\)</span>, <span id="eq-auto-01calibration-7"><span class="math display">\[\Pr\Big[u(D, M_E(D)) \le \mathrm{OPT}(D) - \frac{2\Delta}{\varepsilon}(\ln k + t)\Big] \le e^{-t}. \tag{A.11}\]</span></span></p>
+<p>Fix a list of candidates <span class="math inline">\(\mathcal R\)</span> in advance, and write <span class="math inline">\(|\mathcal R|\)</span> for their number. For each candidate <span class="math inline">\(r\)</span>, a score <span class="math inline">\(u(D, r)\)</span> says how good it is on dataset <span class="math inline">\(D\)</span>, where higher is better. Let <span class="math inline">\(\Delta u\)</span> be the sensitivity of the score, the most that one person can change any one candidate’s score.</p>
+<p>The <strong>exponential mechanism</strong> gives each candidate a weight <span class="math inline">\(\exp(\varepsilon u(D, r)/(2\Delta u))\)</span>, which grows with its score. It then picks a candidate with probability equal to its share of the total weight <span class="math inline">\(W(D)\)</span>, the <strong>normalizer</strong>: <span id="eq-auto-01calibration-6"><span class="math display">\[\Pr[M_E(D) = r] = \frac{\exp\big(\frac{\varepsilon\,u(D, r)}{2\Delta u}\big)}{W(D)}, \qquad W(D) = \sum_{s \in \mathcal R}\exp\Big(\frac{\varepsilon\,u(D, s)}{2\Delta u}\Big). \tag{A.10}\]</span></span> Dividing by the normalizer makes the probabilities add up to 1. The mechanism is <span class="math inline">\(\varepsilon\)</span>-DP, and its choice is rarely far below the best score <span class="math inline">\(\mathrm{OPT}(D)\)</span>. For every <span class="math inline">\(t &gt; 0\)</span>, <span id="eq-auto-01calibration-7"><span class="math display">\[\Pr\Big[u(D, M_E(D)) \le \mathrm{OPT}(D) - \frac{2\Delta u}{\varepsilon}(\ln |\mathcal R| + t)\Big] \le e^{-t}. \tag{A.11}\]</span></span></p>
 </section>
 <section id="a-worked-example-4" class="level3" data-number="A.5.3">
 <h3 data-number="A.5.3" class="anchored" data-anchor-id="a-worked-example-4"><span class="header-section-number">A.5.3</span> A worked example</h3>
-<p>Six people vote among options A, B, C and D. On <span class="math inline">\(D\)</span> the counts are <span class="math inline">\((3, 2, 1, 0)\)</span>, and on the neighbour <span class="math inline">\(D'\)</span> one more person votes for B, so the counts are <span class="math inline">\((3, 3, 1, 0)\)</span>. The score is the count, so <span class="math inline">\(\Delta = 1\)</span>. Take <span class="math inline">\(\varepsilon = 1\)</span>, so each weight is <span class="math inline">\(e^{u/2}\)</span>.</p>
-<p>On <span class="math inline">\(D\)</span> the weights are <span class="math inline">\(e^{1.5} = 4.4817\)</span>, <span class="math inline">\(e^{1} = 2.7183\)</span>, <span class="math inline">\(e^{0.5} = 1.6487\)</span> and <span class="math inline">\(e^0 = 1\)</span>, which sum to <span class="math inline">\(Z(D) = 9.8487\)</span>. So A is chosen with probability <span class="math inline">\(4.4817/9.8487 = 0.4551\)</span>. On <span class="math inline">\(D'\)</span> B’s weight rises to <span class="math inline">\(e^{1.5}\)</span> and the normalizer to <span class="math inline">\(Z(D') = 11.6121\)</span>. <a href="#tbl-apx-cal-em" class="quarto-xref">Table&nbsp;<span>A.5</span></a> lists all four probabilities.</p>
+<p>Six people vote among options A, B, C and D. On <span class="math inline">\(D\)</span> the counts are <span class="math inline">\((3, 2, 1, 0)\)</span>, and on the neighbour <span class="math inline">\(D'\)</span> one more person votes for B, so the counts are <span class="math inline">\((3, 3, 1, 0)\)</span>. The score is the count, so <span class="math inline">\(\Delta u = 1\)</span>. Take <span class="math inline">\(\varepsilon = 1\)</span>, so each weight is <span class="math inline">\(e^{u/2}\)</span>.</p>
+<p>On <span class="math inline">\(D\)</span> the weights are <span class="math inline">\(e^{1.5} = 4.4817\)</span>, <span class="math inline">\(e^{1} = 2.7183\)</span>, <span class="math inline">\(e^{0.5} = 1.6487\)</span> and <span class="math inline">\(e^0 = 1\)</span>, which sum to <span class="math inline">\(W(D) = 9.8487\)</span>. So A is chosen with probability <span class="math inline">\(4.4817/9.8487 = 0.4551\)</span>. On <span class="math inline">\(D'\)</span> B’s weight rises to <span class="math inline">\(e^{1.5}\)</span> and the normalizer to <span class="math inline">\(W(D') = 11.6121\)</span>. <a href="#tbl-apx-cal-em" class="quarto-xref">Table&nbsp;<span>A.5</span></a> lists all four probabilities.</p>
 <div id="tbl-apx-cal-em" class="quarto-float quarto-figure quarto-figure-center anchored">
 <figure class="quarto-float quarto-float-tbl figure">
 <figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl" id="tbl-apx-cal-em-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
@@ -1213,19 +1227,19 @@ Table&nbsp;A.5: The exponential mechanism with <span class="math inline">\(\vare
 </section>
 <section id="why-it-works-4" class="level3" data-number="A.5.4">
 <h3 data-number="A.5.4" class="anchored" data-anchor-id="why-it-works-4"><span class="header-section-number">A.5.4</span> Why it works</h3>
-<p><strong>Privacy.</strong> The probability of <span class="math inline">\(r\)</span> is a weight divided by a total, and one person can change both. So split the ratio of the probabilities on <span class="math inline">\(D\)</span> and <span class="math inline">\(D'\)</span> into two factors: <span id="eq-auto-01calibration-8"><span class="math display">\[\frac{\Pr[M_E(D) = r]}{\Pr[M_E(D') = r]} = \exp\Big(\frac{\varepsilon\big(u(D, r) - u(D', r)\big)}{2\Delta}\Big) \cdot \frac{Z(D')}{Z(D)}. \tag{A.12}\]</span></span></p>
+<p><strong>Privacy.</strong> The probability of <span class="math inline">\(r\)</span> is a weight divided by a total, and one person can change both. So split the ratio of the probabilities on <span class="math inline">\(D\)</span> and <span class="math inline">\(D'\)</span> into two factors: <span id="eq-auto-01calibration-8"><span class="math display">\[\frac{\Pr[M_E(D) = r]}{\Pr[M_E(D') = r]} = \exp\Big(\frac{\varepsilon\big(u(D, r) - u(D', r)\big)}{2\Delta u}\Big) \cdot \frac{W(D')}{W(D)}. \tag{A.12}\]</span></span></p>
 <ol type="1">
-<li><strong>The own-weight factor.</strong> One person changes <span class="math inline">\(r\)</span>’s score by at most <span class="math inline">\(\Delta\)</span>, so the exponent is at most <span class="math inline">\(\varepsilon\Delta/(2\Delta) = \varepsilon/2\)</span>. The factor is at most <span class="math inline">\(e^{\varepsilon/2}\)</span>.</li>
-<li><strong>The normalizer factor.</strong> Every candidate’s score on <span class="math inline">\(D'\)</span> is at most <span class="math inline">\(\Delta\)</span> above its score on <span class="math inline">\(D\)</span>, so every term of <span class="math inline">\(Z(D')\)</span> is at most <span class="math inline">\(e^{\varepsilon/2}\)</span> times the matching term of <span class="math inline">\(Z(D)\)</span>. Adding up the terms, <span class="math inline">\(Z(D') \le e^{\varepsilon/2}Z(D)\)</span>.</li>
+<li><strong>The own-weight factor.</strong> One person changes <span class="math inline">\(r\)</span>’s score by at most <span class="math inline">\(\Delta u\)</span>, so the exponent is at most <span class="math inline">\(\varepsilon\Delta u/(2\Delta u) = \varepsilon/2\)</span>. The factor is at most <span class="math inline">\(e^{\varepsilon/2}\)</span>.</li>
+<li><strong>The normalizer factor.</strong> Every candidate’s score on <span class="math inline">\(D'\)</span> is at most <span class="math inline">\(\Delta u\)</span> above its score on <span class="math inline">\(D\)</span>, so every term of <span class="math inline">\(W(D')\)</span> is at most <span class="math inline">\(e^{\varepsilon/2}\)</span> times the matching term of <span class="math inline">\(W(D)\)</span>. Adding up the terms, <span class="math inline">\(W(D') \le e^{\varepsilon/2}W(D)\)</span>.</li>
 <li><strong>Multiply.</strong> The ratio is at most <span class="math inline">\(e^{\varepsilon/2} \cdot e^{\varepsilon/2} = e^\varepsilon\)</span>. The candidate and the pair were arbitrary, and the same argument works with <span class="math inline">\(D\)</span> and <span class="math inline">\(D'\)</span> swapped, so by step 1 of <a href="#sec-apx-cal-dp" class="quarto-xref"><span>Section A.1</span></a> the mechanism is <span class="math inline">\(\varepsilon\)</span>-DP.</li>
 </ol>
 <p>The 2 in the exponent is there because both factors can be large at once. One person can raise <span class="math inline">\(r\)</span>’s score and lower all the others, so each factor needs its own half of the budget.</p>
 <p><strong>Utility.</strong> Call a candidate poor if its score is at least <span class="math inline">\(c\)</span> below the best.</p>
 <ol type="1">
-<li><strong>Poor candidates are light.</strong> Each has weight at most <span class="math inline">\(e^{\varepsilon(\mathrm{OPT} - c)/(2\Delta)}\)</span>, since the weight grows with the score.</li>
-<li><strong>The normalizer is heavy.</strong> It contains the weight of a best candidate, so <span class="math inline">\(Z(D) \ge e^{\varepsilon\,\mathrm{OPT}/(2\Delta)}\)</span>.</li>
-<li><strong>Divide.</strong> There are at most <span class="math inline">\(k\)</span> poor candidates, so together they have probability at most <span class="math inline">\(k\,e^{\varepsilon(\mathrm{OPT} - c)/(2\Delta)}/e^{\varepsilon\,\mathrm{OPT}/(2\Delta)} = k\,e^{-\varepsilon c/(2\Delta)}\)</span>.</li>
-<li><strong>Solve for <span class="math inline">\(c\)</span>.</strong> Setting <span class="math inline">\(k\,e^{-\varepsilon c/(2\Delta)} = e^{-t}\)</span> and taking logs gives <span class="math inline">\(c = \frac{2\Delta}{\varepsilon}(\ln k + t)\)</span>.</li>
+<li><strong>Poor candidates are light.</strong> Each has weight at most <span class="math inline">\(e^{\varepsilon(\mathrm{OPT} - c)/(2\Delta u)}\)</span>, since the weight grows with the score.</li>
+<li><strong>The normalizer is heavy.</strong> It contains the weight of a best candidate, so <span class="math inline">\(W(D) \ge e^{\varepsilon\,\mathrm{OPT}/(2\Delta u)}\)</span>.</li>
+<li><strong>Divide.</strong> There are at most <span class="math inline">\(|\mathcal R|\)</span> poor candidates, so together they have probability at most <span class="math inline">\(|\mathcal R|\,e^{\varepsilon(\mathrm{OPT} - c)/(2\Delta u)}/e^{\varepsilon\,\mathrm{OPT}/(2\Delta u)} = |\mathcal R|\,e^{-\varepsilon c/(2\Delta u)}\)</span>.</li>
+<li><strong>Solve for <span class="math inline">\(c\)</span>.</strong> Setting <span class="math inline">\(|\mathcal R|\,e^{-\varepsilon c/(2\Delta u)} = e^{-t}\)</span> and taking logs gives <span class="math inline">\(c = \frac{2\Delta u}{\varepsilon}(\ln |\mathcal R| + t)\)</span>.</li>
 </ol>
 </section>
 <section id="checking-it-4" class="level3" data-number="A.5.5">
@@ -1241,16 +1255,16 @@ Figure&nbsp;A.4: Left: the probability that the exponential mechanism with <span
 </figcaption>
 </figure>
 </div>
-<p>The utility bound is weak for so small an example. The probability of choosing C or D, at least <span class="math inline">\(c = 2\)</span> below A, is 0.2689. Step 3 with <span class="math inline">\(k = 4\)</span> bounds it by <span class="math inline">\(4e^{-1} = 1.4715\)</span>, which says nothing. It helps when there are many candidates. Take 50 models scored by their correct predictions, <span class="math inline">\(900, 899, \dots, 851\)</span>, so that <span class="math inline">\(\Delta = 1\)</span>. With <span class="math inline">\(\varepsilon = 1\)</span> and <span class="math inline">\(t = 3\)</span>, the bound says the gap exceeds <span class="math inline">\(2(\ln 50 + 3) = 13.82\)</span> with probability at most <span class="math inline">\(e^{-3} = 0.0498\)</span>. The exact probability is <span class="math inline">\(9.12\times10^{-4}\)</span>, much smaller, because most models are far below the best and much lighter than the bound assumes.</p>
+<p>The utility bound is weak for so small an example. The probability of choosing C or D, at least <span class="math inline">\(c = 2\)</span> below A, is 0.2689. Step 3 with <span class="math inline">\(|\mathcal R| = 4\)</span> bounds it by <span class="math inline">\(4e^{-1} = 1.4715\)</span>, which says nothing. It helps when there are many candidates. Take 50 models scored by their correct predictions, <span class="math inline">\(900, 899, \dots, 851\)</span>, so that <span class="math inline">\(\Delta u = 1\)</span>. With <span class="math inline">\(\varepsilon = 1\)</span> and <span class="math inline">\(t = 3\)</span>, the bound says the gap exceeds <span class="math inline">\(2(\ln 50 + 3) = 13.82\)</span> with probability at most <span class="math inline">\(e^{-3} = 0.0498\)</span>. The exact probability is <span class="math inline">\(9.12\times10^{-4}\)</span>, much smaller, because most models are far below the best and much lighter than the bound assumes.</p>
 </section>
 <section id="recipe-and-pitfalls-4" class="level3" data-number="A.5.6">
 <h3 data-number="A.5.6" class="anchored" data-anchor-id="recipe-and-pitfalls-4"><span class="header-section-number">A.5.6</span> Recipe and pitfalls</h3>
 <ol type="1">
 <li>Fix the list of candidates before looking at the data, and choose a score <span class="math inline">\(u(D, r)\)</span>.</li>
-<li>Find the score’s sensitivity <span class="math inline">\(\Delta\)</span>.</li>
-<li>Sample <span class="math inline">\(r\)</span> with probability proportional to <span class="math inline">\(\exp(\varepsilon u(D, r)/(2\Delta))\)</span>.</li>
+<li>Find the score’s sensitivity <span class="math inline">\(\Delta u\)</span>.</li>
+<li>Sample <span class="math inline">\(r\)</span> with probability proportional to <span class="math inline">\(\exp(\varepsilon u(D, r)/(2\Delta u))\)</span>.</li>
 </ol>
-<p>The candidate list must not depend on the data, because the proof compares the same list on <span class="math inline">\(D\)</span> and <span class="math inline">\(D'\)</span>. Watch numerical overflow too: subtract the largest score before taking exponentials, which changes no probability. When every score moves the same way under each change of one person, as counts under add/remove do, the two factors cannot both be large, and the 2 can be dropped (<a href="../part03-dp-foundations/05-selection.html#sec-sel-exp" class="quarto-xref"><span>Section 22.3</span></a>). <a href="../part03-dp-foundations/05-selection.html#sec-sel-utility" class="quarto-xref"><span>Section 22.4</span></a> adds the expected gap and the applications.</p>
+<p>The candidate list must not depend on the data, because the proof compares the same list on <span class="math inline">\(D\)</span> and <span class="math inline">\(D'\)</span>. Watch numerical overflow too: subtract the largest score before taking exponentials, which changes no probability. When every score moves the same way under each change of one person, as counts under add/remove do, the two factors cannot both be large, and the 2 can be dropped (<a href="../part03-dp-foundations/05-selection.html#sec-sel-exp" class="quarto-xref"><span>Section 22.1</span></a>). <a href="../part03-dp-foundations/05-selection.html#sec-sel-utility" class="quarto-xref"><span>Section 22.2</span></a> adds the expected gap and the applications.</p>
 </section>
 </section>
 <section id="sec-apx-cal-gauss-classic" class="level2" data-number="A.6">
@@ -1276,7 +1290,7 @@ Figure&nbsp;A.4: Left: the probability that the exponential mechanism with <span
 <li><strong>A small chance of a large loss is enough.</strong> Let <span class="math inline">\(B\)</span> be the bad set, the outputs with <span class="math inline">\(L &gt; \varepsilon\)</span>, and suppose its probability on <span class="math inline">\(D\)</span> is at most <span class="math inline">\(\delta\)</span>. Split any event <span class="math inline">\(S\)</span> into its part inside <span class="math inline">\(B\)</span> and its part outside. The part inside has probability at most <span class="math inline">\(\delta\)</span>, because it is part of <span class="math inline">\(B\)</span>. On the part outside, every output has <span class="math inline">\(p_D(y) \le e^\varepsilon p_{D'}(y)\)</span>, so summing over it gives at most <span class="math inline">\(e^\varepsilon\Pr[M(D') \in S]\)</span>. Adding the two parts gives <span id="eq-auto-01calibration-10"><span class="math display">\[\Pr[M(D) \in S] \le e^\varepsilon\Pr[M(D') \in S] + \delta, \tag{A.15}\]</span></span> which is <a href="#eq-apx-cal-def" class="quarto-xref">Equation&nbsp;<span>A.2</span></a>. The pair in the other order has the same loss distribution, by the symmetry of the normal curve, so it needs nothing new.</li>
 <li><strong>The bad event is a normal tail.</strong> Standardize the loss by subtracting its mean <span class="math inline">\(\mu^2/2\)</span> and dividing by its standard deviation <span class="math inline">\(\mu\)</span>. The result is a standard normal variable, and <span class="math inline">\(L &gt; \varepsilon\)</span> exactly when it exceeds the point <span class="math inline">\(t = (\varepsilon - \mu^2/2)/\mu = \varepsilon/\mu - \mu/2\)</span>. By the symmetry of the normal curve, <span class="math inline">\(\Pr[L &gt; \varepsilon] = \Phi(-t)\)</span>. A larger shift makes <span class="math inline">\(t\)</span> smaller and the tail heavier, so the worst pair has the largest shift, <span class="math inline">\(s = \Delta_2\)</span>.</li>
 <li><strong>Put in the formula.</strong> Write <span class="math inline">\(c = \sqrt{2\ln(1.25/\delta)}\)</span>, so <a href="#eq-apx-cal-classic" class="quarto-xref">Equation&nbsp;<span>A.13</span></a> is <span class="math inline">\(\sigma = c\Delta_2/\varepsilon\)</span>. Then <span class="math inline">\(\mu = \Delta_2/\sigma = \varepsilon/c\)</span>, and <span id="eq-auto-01calibration-11"><span class="math display">\[t = \frac{\varepsilon}{\mu} - \frac{\mu}{2} = c - \frac{\varepsilon}{2c}. \tag{A.16}\]</span></span></li>
-<li><strong>Bound the normal tail.</strong> For <span class="math inline">\(t &gt; 0\)</span>, every point <span class="math inline">\(z\)</span> beyond <span class="math inline">\(t\)</span> has <span class="math inline">\(z/t \ge 1\)</span>, so the tail <span class="math inline">\(\int_t^\infty\varphi(z)\,dz\)</span> is at most <span class="math inline">\(\int_t^\infty\frac{z}{t}\varphi(z)\,dz\)</span>. The derivative of <span class="math inline">\(\varphi(z)\)</span> is <span class="math inline">\(-z\varphi(z)\)</span>, so the second integral equals <span class="math inline">\(\varphi(t)/t\)</span>. This is the <strong>Mills-ratio bound</strong>: <span id="eq-auto-01calibration-12"><span class="math display">\[\Phi(-t) \le \frac{e^{-t^2/2}}{t\sqrt{2\pi}}. \tag{A.17}\]</span></span></li>
+<li><strong>Bound the normal tail.</strong> For <span class="math inline">\(t &gt; 0\)</span>, every point <span class="math inline">\(z\)</span> beyond <span class="math inline">\(t\)</span> has <span class="math inline">\(z/t \ge 1\)</span>, so the tail <span class="math inline">\(\int_t^\infty\varphi(z)\,\mathrm dz\)</span> is at most <span class="math inline">\(\int_t^\infty\frac{z}{t}\varphi(z)\,\mathrm dz\)</span>. The derivative of <span class="math inline">\(\varphi(z)\)</span> is <span class="math inline">\(-z\varphi(z)\)</span>, so the second integral equals <span class="math inline">\(\varphi(t)/t\)</span>. This is the <strong>Mills-ratio bound</strong>: <span id="eq-auto-01calibration-12"><span class="math display">\[\Phi(-t) \le \frac{e^{-t^2/2}}{t\sqrt{2\pi}}. \tag{A.17}\]</span></span></li>
 <li><strong>Expand <span class="math inline">\(t^2\)</span>.</strong> Squaring step 5 gives <span class="math inline">\(t^2 = c^2 - \varepsilon + \varepsilon^2/(4c^2)\)</span>, which is at least <span class="math inline">\(c^2 - \varepsilon\)</span>. So <span class="math inline">\(e^{-t^2/2} \le e^{-c^2/2}e^{\varepsilon/2}\)</span>. By the definition of <span class="math inline">\(c\)</span>, <span class="math inline">\(e^{-c^2/2} = \delta/1.25\)</span>. Together with step 6, <span id="eq-auto-01calibration-13"><span class="math display">\[\Pr[L &gt; \varepsilon] \le \delta \cdot \frac{e^{\varepsilon/2}}{1.25\sqrt{2\pi}\,t}. \tag{A.18}\]</span></span></li>
 <li><strong>This is where 1.25 and <span class="math inline">\(\varepsilon &lt; 1\)</span> come in.</strong> The bound is at most <span class="math inline">\(\delta\)</span> when the fraction is at most 1, that is when <span class="math inline">\(t \ge e^{\varepsilon/2}/(1.25\sqrt{2\pi})\)</span>. For <span class="math inline">\(\varepsilon &lt; 1\)</span>, the right side is below <span class="math inline">\(e^{1/2}/(1.25\sqrt{2\pi}) = 0.5262\)</span>. It remains to show that <span class="math inline">\(t\)</span> is that large. For <span class="math inline">\(\varepsilon &lt; 1\)</span>, step 5 gives <span class="math inline">\(t = c - \varepsilon/(2c) \ge c - 1/(2c)\)</span>. This lower bound grows with <span class="math inline">\(c\)</span>, and it equals 0.5262 at <span class="math inline">\(c = 1.0176\)</span>, the positive root of <span class="math inline">\(c^2 - 0.5262c - \frac12 = 0\)</span>. Since <span class="math inline">\(c\)</span> grows as <span class="math inline">\(\delta\)</span> shrinks, <span class="math inline">\(c \ge 1.0176\)</span> holds whenever <span class="math inline">\(\delta \le 1.25e^{-1.0176^2/2} = 0.7448\)</span>. So the constant 1.25 absorbs the factor <span class="math inline">\(e^{\varepsilon/2}/(t\sqrt{2\pi})\)</span>, and the condition <span class="math inline">\(\varepsilon &lt; 1\)</span> keeps <span class="math inline">\(e^{\varepsilon/2}\)</span> below <span class="math inline">\(e^{1/2}\)</span>.</li>
 </ol>
@@ -1347,7 +1361,7 @@ Figure&nbsp;A.5: The <span class="math inline">\(\delta\)</span> that the classi
 <li>For <span class="math inline">\(\varepsilon &lt; 1\)</span>, set <span class="math inline">\(\sigma = \Delta_2\sqrt{2\ln(1.25/\delta)}/\varepsilon\)</span>.</li>
 <li>Add independent normal noise with that <span class="math inline">\(\sigma\)</span> to every coordinate.</li>
 </ol>
-<p>The formula is valid but wasteful, as the table shows. The proof says nothing for <span class="math inline">\(\varepsilon \ge 1\)</span>, and <a href="#sec-apx-cal-gauss-exact" class="quarto-xref"><span>Section A.7</span></a> shows that the formula eventually becomes wrong there. Choose <span class="math inline">\(\delta\)</span> much smaller than <span class="math inline">\(1/n\)</span>. A mechanism that publishes each person’s record in full with probability <span class="math inline">\(\delta\)</span> satisfies the definition, and with <span class="math inline">\(n\)</span> people and <span class="math inline">\(\delta = 1/n\)</span> it publishes about one person’s record every time. <a href="../part03-dp-foundations/03-laplace-gaussian.html#sec-lg-gauss-classic" class="quarto-xref"><span>Section 20.5</span></a> gives the same proof with the vector case in full.</p>
+<p>The formula is valid but wasteful, as the table shows. The proof says nothing for <span class="math inline">\(\varepsilon \ge 1\)</span>, and <a href="#sec-apx-cal-gauss-exact" class="quarto-xref"><span>Section A.7</span></a> shows that the formula eventually becomes wrong there. Choose <span class="math inline">\(\delta\)</span> much smaller than <span class="math inline">\(1/n\)</span>. A mechanism that publishes each person’s record in full with probability <span class="math inline">\(\delta\)</span> satisfies the definition, and with <span class="math inline">\(n\)</span> people and <span class="math inline">\(\delta = 1/n\)</span> it publishes about one person’s record every time. <a href="../part03-dp-foundations/03-laplace-gaussian.html#sec-lg-gauss-classic" class="quarto-xref"><span>Section 20.3</span></a> gives the same proof with the vector case in full.</p>
 </section>
 </section>
 <section id="sec-apx-cal-gauss-exact" class="level2" data-number="A.7">
@@ -1391,7 +1405,7 @@ Figure&nbsp;A.6: The exact <span class="math inline">\(\delta\)</span> of the Ga
 </figcaption>
 </figure>
 </div>
-<p>The script checks the closed form in three ways. First, it integrates the excess <span class="math inline">\(p_D - e^\varepsilon p_{D'}\)</span> over the bad set numerically (by Simpson’s rule, on a fine grid), and at <span class="math inline">\(\mu = 1\)</span>, <span class="math inline">\(\varepsilon = 1\)</span> this gives 0.1269. The same <span class="math inline">\(\delta\)</span> is also the average of <span class="math inline">\((1 - e^{\varepsilon - L})_+\)</span> over losses drawn on <span class="math inline">\(D\)</span>, where <span class="math inline">\((x)_+\)</span> means <span class="math inline">\(\max(x, 0)\)</span> (<a href="../part03-dp-foundations/01-definition.html#sec-dpdef-divergences" class="quarto-xref"><span>Section 18.6</span></a> shows why). A Monte Carlo average of it over a million random draws gives 0.1270. Second, over 22 pairs of <span class="math inline">\(\varepsilon\)</span> and <span class="math inline">\(\mu\)</span>, the largest relative difference between the closed form and the numerical integral is <span class="math inline">\(3.1\times10^{-6}\)</span>. Third, a numerical derivative in <span class="math inline">\(\mu\)</span> agrees with <span class="math inline">\(\varphi(\alpha)\)</span> of step 5 to within <span class="math inline">\(10^{-9}\)</span> on a grid of 16 pairs.</p>
+<p>The script checks the closed form in three ways. First, it integrates the excess <span class="math inline">\(p_D - e^\varepsilon p_{D'}\)</span> over the bad set numerically (by Simpson’s rule, on a fine grid), and at <span class="math inline">\(\mu = 1\)</span>, <span class="math inline">\(\varepsilon = 1\)</span> this gives 0.1269. The same <span class="math inline">\(\delta\)</span> is also the average of <span class="math inline">\((1 - e^{\varepsilon - L})_+\)</span> over losses drawn on <span class="math inline">\(D\)</span>, where <span class="math inline">\((x)_+\)</span> means <span class="math inline">\(\max(x, 0)\)</span> (<a href="../part03-dp-foundations/01-definition.html#sec-dpdef-divergences" class="quarto-xref"><span>Section 18.4</span></a> shows why). A Monte Carlo average of it over a million random draws gives 0.1270. Second, over 22 pairs of <span class="math inline">\(\varepsilon\)</span> and <span class="math inline">\(\mu\)</span>, the largest relative difference between the closed form and the numerical integral is <span class="math inline">\(3.1\times10^{-6}\)</span>. Third, a numerical derivative in <span class="math inline">\(\mu\)</span> agrees with <span class="math inline">\(\varphi(\alpha)\)</span> of step 5 to within <span class="math inline">\(10^{-9}\)</span> on a grid of 16 pairs.</p>
 <p><a href="#tbl-apx-cal-sigma" class="quarto-xref">Table&nbsp;<span>A.7</span></a> compares the two calibrations at <span class="math inline">\(\delta = 10^{-5}\)</span>, and <a href="#fig-apx-cal-sigma" class="quarto-xref">Figure&nbsp;<span>A.7</span></a> draws them over a wider range.</p>
 <div id="tbl-apx-cal-sigma" class="quarto-float quarto-figure quarto-figure-center anchored">
 <figure class="quarto-float quarto-float-tbl figure">
@@ -1481,16 +1495,539 @@ Figure&nbsp;A.7: Left: the noise <span class="math inline">\(\sigma/\Delta_2\)</
 <li>Solve <span class="math inline">\(\delta(\varepsilon) = \delta\)</span> for <span class="math inline">\(\mu\)</span> by bisection, using <a href="#eq-apx-cal-exact" class="quarto-xref">Equation&nbsp;<span>A.19</span></a> with <span class="math inline">\(\Phi(x)\)</span> computed as <code>0.5 * math.erfc(-x / math.sqrt(2))</code> in Python. Then set <span class="math inline">\(\sigma = \Delta_2/\mu\)</span>.</li>
 <li>Check the answer by putting <span class="math inline">\(\sigma\)</span> back into <a href="#eq-apx-cal-exact" class="quarto-xref">Equation&nbsp;<span>A.19</span></a>.</li>
 </ol>
-<p>Because only <span class="math inline">\(\mu = \Delta_2/\sigma\)</span> enters, you can solve once for <span class="math inline">\(\Delta_2 = 1\)</span> and scale: at <span class="math inline">\(\varepsilon = 1\)</span> and <span class="math inline">\(\delta = 10^{-5}\)</span> the noise is <span class="math inline">\(3.7306\,\Delta_2\)</span>. Never use the classic formula for <span class="math inline">\(\varepsilon \ge 1\)</span>. One Gaussian mechanism satisfies a whole curve of <span class="math inline">\((\varepsilon, \delta)\)</span> pairs, so quote <span class="math inline">\(\mu\)</span> or the curve rather than one pair. <a href="../part03-dp-foundations/03-laplace-gaussian.html#sec-lg-analytic" class="quarto-xref"><span>Section 20.6</span></a> derives the same formula through a divergence between the two output distributions, and <a href="02-composition.html#sec-apx-ccomp-gaussian" class="quarto-xref"><span>Section B.3</span></a> shows that many Gaussian releases combine into one.</p>
+<p>Because only <span class="math inline">\(\mu = \Delta_2/\sigma\)</span> enters, you can solve once for <span class="math inline">\(\Delta_2 = 1\)</span> and scale: at <span class="math inline">\(\varepsilon = 1\)</span> and <span class="math inline">\(\delta = 10^{-5}\)</span> the noise is <span class="math inline">\(3.7306\,\Delta_2\)</span>. Never use the classic formula for <span class="math inline">\(\varepsilon \ge 1\)</span>. One Gaussian mechanism satisfies a whole curve of <span class="math inline">\((\varepsilon, \delta)\)</span> pairs, so quote <span class="math inline">\(\mu\)</span> or the curve rather than one pair. <a href="../part03-dp-foundations/03-laplace-gaussian.html#sec-lg-analytic" class="quarto-xref"><span>Section 20.4</span></a> derives the same formula through a divergence between the two output distributions, and <a href="02-composition.html#sec-apx-ccomp-gaussian" class="quarto-xref"><span>Section B.3</span></a> shows that many Gaussian releases combine into one. <a href="#sec-apx-cal-tradeoffs" class="quarto-xref"><span>Section A.8</span></a> works through the formula by hand and in code, and shows how the noise changes when you move <span class="math inline">\(\varepsilon\)</span>, <span class="math inline">\(\delta\)</span> or the number of releases.</p>
 </section>
 </section>
-<section id="sec-apx-cal-recipes" class="level2" data-number="A.8">
-<h2 data-number="A.8" class="anchored" data-anchor-id="sec-apx-cal-recipes"><span class="header-section-number">A.8</span> All the recipes in one table</h2>
-<p><a href="#tbl-apx-cal-recipes" class="quarto-xref">Table&nbsp;<span>A.8</span></a> collects the calibrations of this appendix. Every row assumes you have fixed the neighbouring relation first, since the sensitivity depends on it.</p>
+<section id="sec-apx-cal-tradeoffs" class="level2" data-number="A.8">
+<h2 data-number="A.8" class="anchored" data-anchor-id="sec-apx-cal-tradeoffs"><span class="header-section-number">A.8</span> How ε, δ, σ and the sensitivity trade off</h2>
+<section id="the-question-7" class="level3" data-number="A.8.1">
+<h3 data-number="A.8.1" class="anchored" data-anchor-id="the-question-7"><span class="header-section-number">A.8.1</span> The question</h3>
+<p>The last section gave a formula for the exact <span class="math inline">\(\delta\)</span> of the Gaussian mechanism and a way to solve it for <span class="math inline">\(\sigma\)</span>. In practice you start from what you can give up, a privacy budget of <span class="math inline">\(\varepsilon\)</span> and <span class="math inline">\(\delta\)</span>, or from the noise you can afford, and you want to know how the four quantities move together. They are the privacy parameter <span class="math inline">\(\varepsilon\)</span>, the slack <span class="math inline">\(\delta\)</span>, the noise standard deviation <span class="math inline">\(\sigma\)</span> and the <span class="math inline">\(\ell_2\)</span> sensitivity <span class="math inline">\(\Delta_2\)</span>. How do you compute <span class="math inline">\(\delta\)</span> from normal probabilities, by hand and in code? And if you halve <span class="math inline">\(\varepsilon\)</span>, make <span class="math inline">\(\delta\)</span> a thousand times smaller or release the answer ten times, how much more noise do you need?</p>
+</section>
+<section id="the-answer-7" class="level3" data-number="A.8.2">
+<h3 data-number="A.8.2" class="anchored" data-anchor-id="the-answer-7"><span class="header-section-number">A.8.2</span> The answer</h3>
+<p>Everything follows from the exact formula of <a href="#sec-apx-cal-gauss-exact" class="quarto-xref"><span>Section A.7</span></a>. Write <span class="math inline">\(\Phi(x)\)</span> for the probability that a standard normal variable is below <span class="math inline">\(x\)</span>, and <span class="math inline">\(\mu = \Delta_2/\sigma\)</span> for the sensitivity measured in units of the noise. The mechanism is <span class="math inline">\((\varepsilon, \delta)\)</span>-DP exactly when <span class="math inline">\(\delta\)</span> is at least <span id="eq-auto-01calibration-15"><span class="math display">\[\delta(\varepsilon) = \Phi\Big(\frac\mu2 - \frac\varepsilon\mu\Big) - e^\varepsilon\,\Phi\Big(-\frac\mu2 - \frac\varepsilon\mu\Big). \tag{A.21}\]</span></span> Six facts about it answer the questions.</p>
+<ol type="1">
+<li><strong>Only the ratio <span class="math inline">\(\mu = \Delta_2/\sigma\)</span> matters.</strong> The formula sees <span class="math inline">\(\Delta_2\)</span> and <span class="math inline">\(\sigma\)</span> only through <span class="math inline">\(\mu\)</span>. Doubling the sensitivity and doubling <span class="math inline">\(\sigma\)</span> therefore gives the same guarantee, and you can solve once for <span class="math inline">\(\Delta_2 = 1\)</span> and multiply the resulting <span class="math inline">\(\sigma\)</span> by <span class="math inline">\(\Delta_2\)</span>.</li>
+<li><strong>One <span class="math inline">\(\sigma\)</span> gives a whole curve.</strong> For a fixed <span class="math inline">\(\mu\)</span>, <span class="math inline">\(\delta(\varepsilon)\)</span> falls as <span class="math inline">\(\varepsilon\)</span> grows. So a Gaussian mechanism is <span class="math inline">\((\varepsilon, \delta(\varepsilon))\)</span>-DP for every <span class="math inline">\(\varepsilon\)</span> at once, not for one pair.</li>
+<li><strong>The noise falls roughly like <span class="math inline">\(1/\varepsilon\)</span>, then more slowly.</strong> Write <span class="math inline">\(z_\delta\)</span> for the point a standard normal variable exceeds with probability <span class="math inline">\(\delta\)</span>, so that <span class="math inline">\(\Phi(-z_\delta) = \delta\)</span>. The exact <span class="math inline">\(\delta\)</span> is never more than the probability of the bad set, a normal tail. So asking only that this tail be <span class="math inline">\(\delta\)</span> gives a simple <strong>tail rule</strong>, which always gives enough noise: <span id="eq-apx-cal-tail-rule"><span class="math display">\[\sigma_{\text{tail}} = \Delta_2\,\frac{z_\delta + \sqrt{z_\delta^2 + 2\varepsilon}}{2\varepsilon}, \tag{A.22}\]</span></span> The rule is about <span class="math inline">\(\Delta_2 z_\delta/\varepsilon\)</span> when <span class="math inline">\(\varepsilon\)</span> is small compared with <span class="math inline">\(z_\delta^2/2\)</span>, and about <span class="math inline">\(\Delta_2/\sqrt{2\varepsilon}\)</span> when it is large. At <span class="math inline">\(\delta = 10^{-5}\)</span> it uses 1.39 times the exact noise for <span class="math inline">\(\varepsilon = 0.1\)</span>. The excess shrinks as <span class="math inline">\(\varepsilon\)</span> grows, to 1.02 times at <span class="math inline">\(\varepsilon = 32\)</span>.</li>
+<li><strong>The noise grows only slowly as <span class="math inline">\(\delta\)</span> shrinks.</strong> The point <span class="math inline">\(z_\delta\)</span> grows like <span class="math inline">\(\sqrt{2\ln(1/\delta)}\)</span>, and by fact 3 the noise is roughly proportional to <span class="math inline">\(z_\delta\)</span>. Near <span class="math inline">\(\delta = 10^{-5}\)</span>, each factor of 10 in <span class="math inline">\(\delta\)</span> adds only about 13% to 15% more noise at <span class="math inline">\(\varepsilon\)</span> of 0.5 or 1.</li>
+<li><strong>Repeating costs <span class="math inline">\(\sqrt k\)</span>.</strong> Releasing <span class="math inline">\(k\)</span> answers, each with sensitivity <span class="math inline">\(\Delta_2\)</span> and its own independent noise <span class="math inline">\(\sigma\)</span>, gives exactly the guarantee of one release with <span class="math inline">\(\mu\sqrt k\)</span>. Then <span class="math inline">\(k\)</span> releases need <span class="math inline">\(\sqrt k\)</span> times the noise of one for the same <span class="math inline">\((\varepsilon, \delta)\)</span>.</li>
+<li><strong>Choose <span class="math inline">\(\delta\)</span> from the number of people <span class="math inline">\(n\)</span>.</strong> Take <span class="math inline">\(\delta\)</span> well below <span class="math inline">\(1/n\)</span>, for example <span class="math inline">\(1/n^2\)</span>. The reason, shown in step 7 below, is that a mechanism that publishes each record with probability <span class="math inline">\(\delta\)</span> is <span class="math inline">\((0, \delta)\)</span>-DP, and with <span class="math inline">\(\delta = 1/n\)</span> it publishes someone’s record with probability about 0.63.</li>
+</ol>
+</section>
+<section id="a-worked-example-7" class="level3" data-number="A.8.3">
+<h3 data-number="A.8.3" class="anchored" data-anchor-id="a-worked-example-7"><span class="header-section-number">A.8.3</span> A worked example</h3>
+<p><strong>By hand.</strong> Take <span class="math inline">\(\Delta_2 = 1\)</span>, <span class="math inline">\(\sigma = 4\)</span> and <span class="math inline">\(\varepsilon = 1\)</span>. <a href="#tbl-apx-cal-byhand" class="quarto-xref">Table&nbsp;<span>A.8</span></a> follows the formula one number at a time, for a dataset <span class="math inline">\(D\)</span> and a neighbour <span class="math inline">\(D'\)</span>. First compute <span class="math inline">\(\mu\)</span>, then the two arguments of <span class="math inline">\(\Phi\)</span>, which <a href="#sec-apx-cal-gauss-exact" class="quarto-xref"><span>Section A.7</span></a> called <span class="math inline">\(\alpha\)</span> and <span class="math inline">\(\beta\)</span>. Then look up <span class="math inline">\(\Phi\)</span> of each in a normal table or compute it, and finally combine them. The second term, <span class="math inline">\(e^\varepsilon\Phi(\beta)\)</span>, is the <strong>correction</strong> that turns the probability of the bad set into the exact <span class="math inline">\(\delta\)</span>.</p>
+<div id="tbl-apx-cal-byhand" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-tbl figure">
+<figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl" id="tbl-apx-cal-byhand-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Table&nbsp;A.8: The exact <span class="math inline">\(\delta\)</span> of the Gaussian mechanism with <span class="math inline">\(\Delta_2 = 1\)</span>, <span class="math inline">\(\sigma = 4\)</span> and <span class="math inline">\(\varepsilon = 1\)</span>, one step at a time.
+</figcaption>
+<div aria-describedby="tbl-apx-cal-byhand-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<table class="caption-top table">
+<colgroup>
+<col style="width: 33%">
+<col style="width: 33%">
+<col style="width: 33%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>Step</th>
+<th>Formula</th>
+<th>Value</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>Sensitivity in noise units</td>
+<td><span class="math inline">\(\mu = \Delta_2/\sigma\)</span></td>
+<td>0.2500</td>
+</tr>
+<tr class="even">
+<td>First argument</td>
+<td><span class="math inline">\(\alpha = \mu/2 - \varepsilon/\mu = 0.125 - 4\)</span></td>
+<td><span class="math inline">\(-3.8750\)</span></td>
+</tr>
+<tr class="odd">
+<td>Second argument</td>
+<td><span class="math inline">\(\beta = -\mu/2 - \varepsilon/\mu = -0.125 - 4\)</span></td>
+<td><span class="math inline">\(-4.1250\)</span></td>
+</tr>
+<tr class="even">
+<td>Probability of the bad set on <span class="math inline">\(D\)</span></td>
+<td><span class="math inline">\(\Phi(\alpha)\)</span></td>
+<td><span class="math inline">\(5.3312\times10^{-5}\)</span></td>
+</tr>
+<tr class="odd">
+<td>Same set on <span class="math inline">\(D'\)</span></td>
+<td><span class="math inline">\(\Phi(\beta)\)</span></td>
+<td><span class="math inline">\(1.8537\times10^{-5}\)</span></td>
+</tr>
+<tr class="even">
+<td>Correction</td>
+<td><span class="math inline">\(e^\varepsilon\,\Phi(\beta) = 2.7183 \times 1.8537\times10^{-5}\)</span></td>
+<td><span class="math inline">\(5.0388\times10^{-5}\)</span></td>
+</tr>
+<tr class="odd">
+<td>Exact <span class="math inline">\(\delta\)</span></td>
+<td><span class="math inline">\(\Phi(\alpha) - e^\varepsilon\Phi(\beta)\)</span></td>
+<td><span class="math inline">\(2.9243\times10^{-6}\)</span></td>
+</tr>
+</tbody>
+</table>
+</div>
+</figure>
+</div>
+<p>So noise of standard deviation 4 on a count, whose sensitivity is 1, gives <span class="math inline">\((1, 2.92\times10^{-6})\)</span>-DP. Notice how much the correction removes. The first term, the probability of the bad set, is 18.2 times the final <span class="math inline">\(\delta\)</span>, so using it alone would overstate <span class="math inline">\(\delta\)</span> eighteen-fold.</p>
+<p><strong>By computer.</strong> Most languages have no <span class="math inline">\(\Phi\)</span> built in, but they all have the <strong>complementary error function</strong> <span class="math inline">\(\operatorname{erfc}\)</span>, which Python calls <code>math.erfc</code>. In terms of it, <span id="eq-auto-01calibration-16"><span class="math display">\[\Phi(x) = \tfrac12\operatorname{erfc}\big(-x/\sqrt2\big), \qquad 1 - \Phi(x) = \tfrac12\operatorname{erfc}\big(x/\sqrt2\big). \tag{A.23}\]</span></span> Use these forms, and never compute a small tail as 1 minus something close to 1. A double-precision number carries about 16 significant digits. So when <span class="math inline">\(\Phi(x)\)</span> is within <span class="math inline">\(10^{-16}\)</span> of 1, the subtraction <span class="math inline">\(1 - \Phi(x)\)</span> keeps none of the digits that matter. <a href="#tbl-apx-cal-tails" class="quarto-xref">Table&nbsp;<span>A.9</span></a> shows this at <span class="math inline">\(x = 8\)</span> and <span class="math inline">\(x = 9\)</span>. The textbook form <span class="math inline">\(\Phi(x) = \frac12(1 + \operatorname{erf}(x/\sqrt2))\)</span>, with the plain error function <span class="math inline">\(\operatorname{erf}\)</span>, has the same problem for negative <span class="math inline">\(x\)</span>, because <span class="math inline">\(\operatorname{erf}\)</span> is then close to <span class="math inline">\(-1\)</span>.</p>
+<div id="tbl-apx-cal-tails" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-tbl figure">
+<figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl" id="tbl-apx-cal-tails-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Table&nbsp;A.9: The probability that a standard normal variable exceeds <span class="math inline">\(x\)</span>, computed three ways in double precision. Only the last is right.
+</figcaption>
+<div aria-describedby="tbl-apx-cal-tails-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<table class="caption-top table">
+<colgroup>
+<col style="width: 33%">
+<col style="width: 33%">
+<col style="width: 33%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>Way of computing the upper tail at <span class="math inline">\(x\)</span></th>
+<th><span class="math inline">\(x = 8\)</span></th>
+<th><span class="math inline">\(x = 9\)</span></th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><span class="math inline">\(1 - \Phi(x)\)</span>, by subtraction</td>
+<td><span class="math inline">\(6.6613\times10^{-16}\)</span></td>
+<td>0</td>
+</tr>
+<tr class="even">
+<td><span class="math inline">\(\Phi(-x)\)</span> with the <span class="math inline">\(\operatorname{erf}\)</span> form</td>
+<td><span class="math inline">\(6.1062\times10^{-16}\)</span></td>
+<td>0</td>
+</tr>
+<tr class="odd">
+<td><span class="math inline">\(\frac12\operatorname{erfc}(x/\sqrt2)\)</span></td>
+<td><span class="math inline">\(6.2210\times10^{-16}\)</span></td>
+<td><span class="math inline">\(1.1286\times10^{-19}\)</span></td>
+</tr>
+</tbody>
+</table>
+</div>
+</figure>
+</div>
+<p>The same cancellation spoils <span class="math inline">\(\delta\)</span> itself when <span class="math inline">\(\delta\)</span> is tiny. Then <span class="math inline">\(\alpha\)</span> and <span class="math inline">\(\beta\)</span> are far out in the lower tail, where <span class="math inline">\(\operatorname{erf}\)</span> is close to <span class="math inline">\(-1\)</span> and the erf form adds 1 to it. The script that comes with this appendix calibrates <span class="math inline">\(\sigma\)</span> at <span class="math inline">\(\varepsilon = 1\)</span> for four targets. It puts each <span class="math inline">\(\sigma\)</span> back into the formula, computing <span class="math inline">\(\Phi\)</span> once with <span class="math inline">\(\operatorname{erfc}\)</span> and once with <span class="math inline">\(\operatorname{erf}\)</span>, and <a href="#tbl-apx-cal-precision" class="quarto-xref">Table&nbsp;<span>A.10</span></a> shows the result. With <span class="math inline">\(\operatorname{erfc}\)</span>, every target comes back correct to five digits. With <span class="math inline">\(\operatorname{erf}\)</span>, the target <span class="math inline">\(10^{-12}\)</span> is already off in the fifth digit. The error then grows fast, so that <span class="math inline">\(10^{-15}\)</span> comes back 4% too small and <span class="math inline">\(10^{-18}\)</span> comes back 55 times too large.</p>
+<div id="tbl-apx-cal-precision" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-tbl figure">
+<figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl" id="tbl-apx-cal-precision-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Table&nbsp;A.10: The exact <span class="math inline">\(\delta\)</span> at <span class="math inline">\(\varepsilon = 1\)</span>, recomputed at the calibrated <span class="math inline">\(\sigma\)</span> with <span class="math inline">\(\Phi\)</span> from <span class="math inline">\(\operatorname{erfc}\)</span> and from <span class="math inline">\(\operatorname{erf}\)</span>. The last column is how much larger the first term is than the difference.
+</figcaption>
+<div aria-describedby="tbl-apx-cal-precision-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<table class="caption-top table">
+<colgroup>
+<col style="width: 20%">
+<col style="width: 20%">
+<col style="width: 20%">
+<col style="width: 20%">
+<col style="width: 20%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>Target <span class="math inline">\(\delta\)</span></th>
+<th><span class="math inline">\(\sigma/\Delta_2\)</span></th>
+<th><span class="math inline">\(\delta\)</span> with <span class="math inline">\(\operatorname{erfc}\)</span></th>
+<th><span class="math inline">\(\delta\)</span> with <span class="math inline">\(\operatorname{erf}\)</span></th>
+<th>First term / <span class="math inline">\(\delta\)</span></th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><span class="math inline">\(10^{-9}\)</span></td>
+<td>5.4953</td>
+<td><span class="math inline">\(1.0000\times10^{-9}\)</span></td>
+<td><span class="math inline">\(1.0000\times10^{-9}\)</span></td>
+<td>32.5</td>
+</tr>
+<tr class="even">
+<td><span class="math inline">\(10^{-12}\)</span></td>
+<td>6.5578</td>
+<td><span class="math inline">\(1.0000\times10^{-12}\)</span></td>
+<td><span class="math inline">\(9.9997\times10^{-13}\)</span></td>
+<td>45.4</td>
+</tr>
+<tr class="odd">
+<td><span class="math inline">\(10^{-15}\)</span></td>
+<td>7.4870</td>
+<td><span class="math inline">\(1.0000\times10^{-15}\)</span></td>
+<td><span class="math inline">\(9.6226\times10^{-16}\)</span></td>
+<td>58.5</td>
+</tr>
+<tr class="even">
+<td><span class="math inline">\(10^{-18}\)</span></td>
+<td>8.3220</td>
+<td><span class="math inline">\(1.0000\times10^{-18}\)</span></td>
+<td><span class="math inline">\(5.5511\times10^{-17}\)</span></td>
+<td>71.7</td>
+</tr>
+</tbody>
+</table>
+</div>
+</figure>
+</div>
+<p>Even with <span class="math inline">\(\operatorname{erfc}\)</span>, the formula subtracts two nearly equal terms, and a subtraction loses digits too. The last column says how many. When the first term is <span class="math inline">\(r\)</span> times the difference, the subtraction loses about <span class="math inline">\(\log_{10} r\)</span> digits. Here <span class="math inline">\(r\)</span> is at most 72, and <span class="math inline">\(\log_{10} 72 = 1.86\)</span>, so the subtraction loses at most 2 of the 16 digits. To check this independently, the script also integrates the excess <span class="math inline">\(p_D - e^\varepsilon p_{D'}\)</span> over the bad set directly. Measure the noise in units of <span class="math inline">\(\sigma\)</span> as <span class="math inline">\(y\)</span>, so that its privacy loss is <span class="math inline">\(L(y) = \mu^2/2 - \mu y\)</span>. The integrand is then <span class="math inline">\(\varphi(y)\,(1 - e^{\varepsilon - L(y)})\)</span>, which is never a difference of two tails. That integral agrees with the <span class="math inline">\(\operatorname{erfc}\)</span> formula to about one part in <span class="math inline">\(10^{12}\)</span> at all four targets.</p>
+<p><strong>Scaling.</strong> Now take a sum of values clipped to <span class="math inline">\([0, 2]\)</span>, so that <span class="math inline">\(\Delta_2 = 2\)</span>, with <span class="math inline">\(\sigma = 8\)</span>. The ratio is still <span class="math inline">\(\mu = 0.25\)</span>, so <span class="math inline">\(\delta\)</span> is again <span class="math inline">\(2.9243\times10^{-6}\)</span>, and the same holds for <span class="math inline">\(\Delta_2 = 0.5\)</span> with <span class="math inline">\(\sigma = 2\)</span>.</p>
+<p><strong>The curve.</strong> The same <span class="math inline">\(\sigma = 4\)</span> gives a whole curve of guarantees. It is <span class="math inline">\((1, 2.92\times10^{-6})\)</span>-DP, and also <span class="math inline">\((2, 5.09\times10^{-17})\)</span>-DP and <span class="math inline">\((0.9263, 10^{-5})\)</span>-DP. <a href="#fig-apx-cal-delta-curves" class="quarto-xref">Figure&nbsp;<span>A.8</span></a> draws the curve for four noise levels. Each falls steeply as <span class="math inline">\(\varepsilon\)</span> grows, and each crosses <span class="math inline">\(\delta = 10^{-5}\)</span> at its own <span class="math inline">\(\varepsilon\)</span>.</p>
+<div id="fig-apx-cal-delta-curves" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-apx-cal-delta-curves-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="figures/cal_delta_curves.svg" class="img-fluid figure-img">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-apx-cal-delta-curves-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;A.8: The exact <span class="math inline">\(\delta(\varepsilon)\)</span> of the Gaussian mechanism against <span class="math inline">\(\varepsilon\)</span>, on a log scale, for four noise levels <span class="math inline">\(\mu = \Delta_2/\sigma\)</span>. A single <span class="math inline">\(\sigma\)</span> is <span class="math inline">\((\varepsilon, \delta(\varepsilon))\)</span>-DP for every <span class="math inline">\(\varepsilon\)</span> on its curve. The dots mark the <span class="math inline">\(\varepsilon\)</span> each one gives at <span class="math inline">\(\delta = 10^{-5}\)</span>: 0.93 for <span class="math inline">\(\sigma = 4\Delta_2\)</span>, 1.99 for <span class="math inline">\(2\Delta_2\)</span>, 4.38 for <span class="math inline">\(\Delta_2\)</span> and 10.00 for <span class="math inline">\(\Delta_2/2\)</span>.
+</figcaption>
+</figure>
+</div>
+</section>
+<section id="why-it-works-7" class="level3" data-number="A.8.4">
+<h3 data-number="A.8.4" class="anchored" data-anchor-id="why-it-works-7"><span class="header-section-number">A.8.4</span> Why it works</h3>
+<ol type="1">
+<li><strong>Only <span class="math inline">\(\mu\)</span> matters.</strong> In the formula, <span class="math inline">\(\Delta_2\)</span> and <span class="math inline">\(\sigma\)</span> appear only in <span class="math inline">\(\mu/2\)</span> and <span class="math inline">\(\varepsilon/\mu\)</span>. So any sensitivity and noise with the same ratio give the same curve. In particular, the smallest <span class="math inline">\(\sigma\)</span> for a target is <span class="math inline">\(\Delta_2\)</span> times the smallest <span class="math inline">\(\sigma\)</span> for a sensitivity of 1. The reason behind it is that measuring the output in units of <span class="math inline">\(\sigma\)</span> turns every Gaussian mechanism into one with noise 1 and shift <span class="math inline">\(\mu\)</span>.</li>
+<li><strong>The curve falls.</strong> Write <span class="math inline">\(\alpha = \mu/2 - \varepsilon/\mu\)</span> and <span class="math inline">\(\beta = -\mu/2 - \varepsilon/\mu\)</span> as before, and <span class="math inline">\(\varphi\)</span> for the standard normal density. Step 5 of <a href="#sec-apx-cal-gauss-exact" class="quarto-xref"><span>Section A.7</span></a> showed that <span class="math inline">\(e^\varepsilon\varphi(\beta) = \varphi(\alpha)\)</span>. Both arguments fall by <span class="math inline">\(1/\mu\)</span> for each unit of <span class="math inline">\(\varepsilon\)</span>, so differentiating in <span class="math inline">\(\varepsilon\)</span> gives <span id="eq-auto-01calibration-17"><span class="math display">\[\frac{\mathrm d\delta}{\mathrm d\varepsilon} = -\frac{\varphi(\alpha)}{\mu} - e^\varepsilon\Phi(\beta) + \frac{e^\varepsilon\varphi(\beta)}{\mu} = -e^\varepsilon\,\Phi(\beta) &lt; 0. \tag{A.24}\]</span></span> The first and last terms cancel, and what is left is negative. So a larger <span class="math inline">\(\varepsilon\)</span> always comes with a smaller <span class="math inline">\(\delta\)</span>, and one mechanism traces a curve. The same step 5 showed that <span class="math inline">\(\delta\)</span> grows with <span class="math inline">\(\mu\)</span>. More noise means a smaller <span class="math inline">\(\mu\)</span>, so it lowers the whole curve.</li>
+<li><strong>A safe rule from the bad set alone.</strong> Step 4 of <a href="#sec-apx-cal-dp" class="quarto-xref"><span>Section A.1</span></a> showed that the exact <span class="math inline">\(\delta\)</span> is never more than the probability of the bad set, which step 4 of <a href="#sec-apx-cal-gauss-classic" class="quarto-xref"><span>Section A.6</span></a> computed: <span id="eq-auto-01calibration-18"><span class="math display">\[\Pr[L &gt; \varepsilon] = \Phi(\alpha). \tag{A.25}\]</span></span> So any <span class="math inline">\(\sigma\)</span> that makes <span class="math inline">\(\Phi(\alpha) = \delta\)</span> is enough. Since <span class="math inline">\(\Phi(-z_\delta) = \delta\)</span>, that means <span class="math inline">\(\alpha = -z_\delta\)</span>, which is <span class="math inline">\(\mu/2 - \varepsilon/\mu = -z_\delta\)</span>. Multiplying by <span class="math inline">\(2\mu\)</span> gives the quadratic <span class="math inline">\(\mu^2 + 2z_\delta\mu - 2\varepsilon = 0\)</span>, whose positive root is <span class="math inline">\(\mu = \sqrt{z_\delta^2 + 2\varepsilon} - z_\delta\)</span>. Then <span class="math inline">\(\sigma = \Delta_2/\mu\)</span>, and multiplying the top and bottom by <span class="math inline">\(\sqrt{z_\delta^2 + 2\varepsilon} + z_\delta\)</span> gives <a href="#eq-apx-cal-tail-rule" class="quarto-xref">Equation&nbsp;<span>A.22</span></a>. Solving the same equation for <span class="math inline">\(\varepsilon\)</span> instead gives the matching rule for the <span class="math inline">\(\varepsilon\)</span> of a given <span class="math inline">\(\sigma\)</span>: <span id="eq-auto-01calibration-19"><span class="math display">\[\varepsilon_{\text{tail}} = z_\delta\mu + \frac{\mu^2}{2}. \tag{A.26}\]</span></span></li>
+<li><strong>Its two regimes.</strong> When <span class="math inline">\(2\varepsilon\)</span> is small compared with <span class="math inline">\(z_\delta^2\)</span>, the square root is close to <span class="math inline">\(z_\delta\)</span>, so <span class="math inline">\(\sigma_{\text{tail}} \approx \Delta_2 z_\delta/\varepsilon\)</span>, which is proportional to <span class="math inline">\(1/\varepsilon\)</span>. When <span class="math inline">\(2\varepsilon\)</span> is large compared with <span class="math inline">\(z_\delta^2\)</span>, the square root is close to <span class="math inline">\(\sqrt{2\varepsilon}\)</span> and dominates <span class="math inline">\(z_\delta\)</span>, so <span class="math inline">\(\sigma_{\text{tail}} \approx \Delta_2/\sqrt{2\varepsilon}\)</span>. The bend between the two is near <span class="math inline">\(\varepsilon = z_\delta^2/2\)</span>. At <span class="math inline">\(\delta = 10^{-5}\)</span>, where <span class="math inline">\(z_\delta = 4.2649\)</span>, that is <span class="math inline">\(\varepsilon = 9.09\)</span>. The classic formula has the same <span class="math inline">\(1/\varepsilon\)</span> shape with <span class="math inline">\(\sqrt{2\ln(1.25/\delta)}\)</span> in place of <span class="math inline">\(z_\delta\)</span>, but it never bends, which is why it fails at large <span class="math inline">\(\varepsilon\)</span> (<a href="#sec-apx-cal-gauss-exact" class="quarto-xref"><span>Section A.7</span></a>).</li>
+<li><strong>Why <span class="math inline">\(\delta\)</span> costs little.</strong> By the Mills-ratio bound of <a href="#sec-apx-cal-gauss-classic" class="quarto-xref"><span>Section A.6</span></a>, <span class="math inline">\(\Phi(-z_\delta)\)</span> is close to <span class="math inline">\(e^{-z_\delta^2/2}/(z_\delta\sqrt{2\pi})\)</span>. So <span class="math inline">\(\delta\)</span> shrinks like <span class="math inline">\(e^{-z_\delta^2/2}\)</span>, and <span class="math inline">\(z_\delta\)</span> grows only like <span class="math inline">\(\sqrt{2\ln(1/\delta)}\)</span>. Dividing <span class="math inline">\(\delta\)</span> by 10 adds about <span class="math inline">\(2\ln 10 = 4.61\)</span> to <span class="math inline">\(z_\delta^2\)</span>. At <span class="math inline">\(\delta = 10^{-5}\)</span> this makes <span class="math inline">\(z_\delta\)</span> grow from 4.2649 to 4.7534, a factor of 1.115, and the tail rule’s noise of about <span class="math inline">\(\Delta_2 z_\delta/\varepsilon\)</span> grows by the same factor. The exact noise grows a little faster, as the checks below show.</li>
+<li><strong>Repeating adds the losses.</strong> Suppose the <span class="math inline">\(k\)</span> questions are fixed in advance, each answer has sensitivity <span class="math inline">\(\Delta_2\)</span>, and each gets independent noise <span class="math inline">\(\sigma\)</span>. Together the <span class="math inline">\(k\)</span> answers are one vector, with <span class="math inline">\(\ell_2\)</span> sensitivity <span class="math inline">\(\sqrt{k\Delta_2^2} = \sqrt k\,\Delta_2\)</span>. Step 2 of <a href="#sec-apx-cal-gauss-classic" class="quarto-xref"><span>Section A.6</span></a> showed that a vector release behaves like one number shifted by the <span class="math inline">\(\ell_2\)</span> length of the change. So the <span class="math inline">\(k\)</span> releases have the exact curve of one release with <span class="math inline">\(\mu\sqrt k\)</span>. To keep <span class="math inline">\(\mu\sqrt k\)</span> at the value one release needs, <span class="math inline">\(\sigma\)</span> must grow by <span class="math inline">\(\sqrt k\)</span>. When a question may depend on earlier answers, the <span class="math inline">\(k\)</span> answers are no longer one fixed vector query, so this argument does not apply as it stands. <a href="02-composition.html#sec-apx-ccomp-gaussian" class="quarto-xref"><span>Section B.3</span></a> proves the same result for that case.</li>
+<li><strong>Why <span class="math inline">\(\delta\)</span> must be below <span class="math inline">\(1/n\)</span>.</strong> Take the mechanism that publishes each record in full with probability <span class="math inline">\(\delta\)</span>, independently. One record changes the output only when its own coin publishes it, so the two probabilities of any event differ by at most <span class="math inline">\(\delta\)</span>, and the mechanism is <span class="math inline">\((0, \delta)\)</span>-DP. Each of <span class="math inline">\(n\)</span> records stays hidden with probability <span class="math inline">\(1 - \delta\)</span>, so someone is exposed with probability <span class="math inline">\(1 - (1 - \delta)^n\)</span>. With <span class="math inline">\(\delta = 1/n\)</span> this is about 0.63. The reason is that <span class="math inline">\(n\ln(1 - 1/n)\)</span> is close to <span class="math inline">\(-1\)</span> for large <span class="math inline">\(n\)</span>, so <span id="eq-auto-01calibration-20"><span class="math display">\[(1 - 1/n)^n = e^{n\ln(1 - 1/n)} \approx e^{-1}, \tag{A.27}\]</span></span> and <span class="math inline">\(1 - e^{-1} = 0.63\)</span>. A guarantee that allows this mechanism promises little, so <span class="math inline">\(n\delta\)</span> must be far below 1.</li>
+</ol>
+</section>
+<section id="checking-it-7" class="level3" data-number="A.8.5">
+<h3 data-number="A.8.5" class="anchored" data-anchor-id="checking-it-7"><span class="header-section-number">A.8.5</span> Checking it</h3>
+<p><a href="#tbl-apx-cal-grid" class="quarto-xref">Table&nbsp;<span>A.11</span></a> is the reference table of this section. It gives the exact <span class="math inline">\(\sigma/\Delta_2\)</span> for five values of <span class="math inline">\(\varepsilon\)</span> and four of <span class="math inline">\(\delta\)</span>, each found by bisection and checked by putting it back into the formula. Read along a row to see the cost of a smaller <span class="math inline">\(\delta\)</span>, and up a column to see the cost of a smaller <span class="math inline">\(\varepsilon\)</span>.</p>
+<div id="tbl-apx-cal-grid" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-tbl figure">
+<figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl" id="tbl-apx-cal-grid-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Table&nbsp;A.11: The smallest <span class="math inline">\(\sigma/\Delta_2\)</span> for <span class="math inline">\((\varepsilon, \delta)\)</span>-DP, from the exact calibration. Multiply by <span class="math inline">\(\Delta_2\)</span> to get <span class="math inline">\(\sigma\)</span>.
+</figcaption>
+<div aria-describedby="tbl-apx-cal-grid-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<table class="caption-top table">
+<colgroup>
+<col style="width: 20%">
+<col style="width: 20%">
+<col style="width: 20%">
+<col style="width: 20%">
+<col style="width: 20%">
+</colgroup>
+<thead>
+<tr class="header">
+<th><span class="math inline">\(\varepsilon\)</span></th>
+<th><span class="math inline">\(\delta = 10^{-3}\)</span></th>
+<th><span class="math inline">\(\delta = 10^{-5}\)</span></th>
+<th><span class="math inline">\(\delta = 10^{-7}\)</span></th>
+<th><span class="math inline">\(\delta = 10^{-9}\)</span></th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>0.1</td>
+<td>17.4044</td>
+<td>30.7496</td>
+<td>41.3295</td>
+<td>50.2098</td>
+</tr>
+<tr class="even">
+<td>0.5</td>
+<td>4.6101</td>
+<td>7.0318</td>
+<td>8.9957</td>
+<td>10.6739</td>
+</tr>
+<tr class="odd">
+<td>1</td>
+<td>2.5747</td>
+<td>3.7306</td>
+<td>4.6787</td>
+<td>5.4953</td>
+</tr>
+<tr class="even">
+<td>2</td>
+<td>1.4452</td>
+<td>1.9938</td>
+<td>2.4491</td>
+<td>2.8445</td>
+</tr>
+<tr class="odd">
+<td>4</td>
+<td>0.8231</td>
+<td>1.0812</td>
+<td>1.2978</td>
+<td>1.4878</td>
+</tr>
+</tbody>
+</table>
+</div>
+</figure>
+</div>
+<p>Moving along a row, to a smaller <span class="math inline">\(\delta\)</span>, changes the noise much less than moving up a column, to a smaller <span class="math inline">\(\varepsilon\)</span>. At <span class="math inline">\(\varepsilon = 0.5\)</span>, for example, a <span class="math inline">\(\delta\)</span> ten thousand times smaller costs 1.518 times the noise. Halving <span class="math inline">\(\varepsilon\)</span> instead, to 0.25, costs 1.889 times the noise (<a href="#tbl-apx-cal-sigma" class="quarto-xref">Table&nbsp;<span>A.7</span></a> has the value at 0.25). <a href="#fig-apx-cal-tradeoff-map" class="quarto-xref">Figure&nbsp;<span>A.9</span></a> shows the whole plane. On the left each line is one noise level, and the lines are nearly vertical because <span class="math inline">\(\sigma\)</span> depends mostly on <span class="math inline">\(\varepsilon\)</span>. On the right, the product <span class="math inline">\(\varepsilon\sigma/\Delta_2\)</span> would be a flat line if <span class="math inline">\(\sigma\)</span> were exactly proportional to <span class="math inline">\(1/\varepsilon\)</span>.</p>
+<div id="fig-apx-cal-tradeoff-map" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-apx-cal-tradeoff-map-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="figures/cal_tradeoff_map.svg" class="img-fluid figure-img">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-apx-cal-tradeoff-map-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;A.9: Left: contour lines of the exact <span class="math inline">\(\sigma/\Delta_2\)</span> over <span class="math inline">\(\varepsilon\)</span> (log scale) and <span class="math inline">\(\log_{10}\delta\)</span>, with <span class="math inline">\(\delta = 10^{-5}\)</span> dotted. The lines are nearly vertical, so <span class="math inline">\(\varepsilon\)</span> decides the noise far more than <span class="math inline">\(\delta\)</span> does. Right: the product <span class="math inline">\(\varepsilon\sigma/\Delta_2\)</span> against <span class="math inline">\(\varepsilon\)</span> for three values of <span class="math inline">\(\delta\)</span>, exact (solid) and by the tail rule (dashed). The tail rule is nearly flat for small <span class="math inline">\(\varepsilon\)</span>, where it is close to <span class="math inline">\(z_\delta/\varepsilon\)</span>, and the exact product sags below it there, because the correction term matters most at small <span class="math inline">\(\varepsilon\)</span>. Both rise at large <span class="math inline">\(\varepsilon\)</span>, where the noise falls more slowly than <span class="math inline">\(1/\varepsilon\)</span>.
+</figcaption>
+</figure>
+</div>
+<p><strong>Noise against <span class="math inline">\(\varepsilon\)</span>.</strong> <a href="#tbl-apx-cal-tail-rule" class="quarto-xref">Table&nbsp;<span>A.12</span></a> compares the tail rule with the exact calibration at <span class="math inline">\(\delta = 10^{-5}\)</span>. The rule is always enough, as step 3 promises. Its excess over the exact noise is 39% at <span class="math inline">\(\varepsilon = 0.1\)</span>, and it shrinks steadily as <span class="math inline">\(\varepsilon\)</span> grows. The reason is the correction term that the rule ignores. At <span class="math inline">\(\varepsilon = 0.1\)</span> and the exact <span class="math inline">\(\sigma\)</span>, the probability of the bad set is 111 times the final <span class="math inline">\(\delta\)</span>, so the correction removes almost all of it. At <span class="math inline">\(\varepsilon = 8\)</span> it is only 3.6 times the final <span class="math inline">\(\delta\)</span>, and the correction matters much less. In the exact calibration, the product <span class="math inline">\(\varepsilon\sigma/\Delta_2\)</span> grows by only a factor of 1.213 from <span class="math inline">\(\varepsilon = 0.1\)</span> to <span class="math inline">\(\varepsilon = 1\)</span>. So “<span class="math inline">\(\sigma\)</span> is proportional to <span class="math inline">\(1/\varepsilon\)</span>” is a fair first guess below <span class="math inline">\(\varepsilon = 1\)</span>. It fails at large <span class="math inline">\(\varepsilon\)</span>, where the product keeps growing, up to 6.5579 at <span class="math inline">\(\varepsilon = 32\)</span>.</p>
+<div id="tbl-apx-cal-tail-rule" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-tbl figure">
+<figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl" id="tbl-apx-cal-tail-rule-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Table&nbsp;A.12: The noise for <span class="math inline">\((\varepsilon, 10^{-5})\)</span>-DP: the exact calibration, the tail rule of <a href="#eq-apx-cal-tail-rule" class="quarto-xref">Equation&nbsp;<span>A.22</span></a> and its two limits, with <span class="math inline">\(z_\delta = 4.2649\)</span>.
+</figcaption>
+<div aria-describedby="tbl-apx-cal-tail-rule-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<table class="caption-top table">
+<colgroup>
+<col style="width: 14%">
+<col style="width: 14%">
+<col style="width: 14%">
+<col style="width: 14%">
+<col style="width: 14%">
+<col style="width: 14%">
+<col style="width: 14%">
+</colgroup>
+<thead>
+<tr class="header">
+<th><span class="math inline">\(\varepsilon\)</span></th>
+<th>Exact <span class="math inline">\(\sigma/\Delta_2\)</span></th>
+<th><span class="math inline">\(\varepsilon\sigma/\Delta_2\)</span></th>
+<th>Tail rule</th>
+<th>Tail / exact</th>
+<th><span class="math inline">\(z_\delta/\varepsilon\)</span></th>
+<th><span class="math inline">\(1/\sqrt{2\varepsilon}\)</span></th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>0.1</td>
+<td>30.7496</td>
+<td>3.0750</td>
+<td>42.7658</td>
+<td>1.391</td>
+<td>42.6489</td>
+<td>2.2361</td>
+</tr>
+<tr class="even">
+<td>0.5</td>
+<td>7.0318</td>
+<td>3.5159</td>
+<td>8.6454</td>
+<td>1.229</td>
+<td>8.5298</td>
+<td>1.0000</td>
+</tr>
+<tr class="odd">
+<td>1</td>
+<td>3.7306</td>
+<td>3.7306</td>
+<td>4.3791</td>
+<td>1.174</td>
+<td>4.2649</td>
+<td>0.7071</td>
+</tr>
+<tr class="even">
+<td>2</td>
+<td>1.9938</td>
+<td>3.9876</td>
+<td>2.2439</td>
+<td>1.125</td>
+<td>2.1324</td>
+<td>0.5000</td>
+</tr>
+<tr class="odd">
+<td>4</td>
+<td>1.0812</td>
+<td>4.3246</td>
+<td>1.1728</td>
+<td>1.085</td>
+<td>1.0662</td>
+<td>0.3536</td>
+</tr>
+<tr class="even">
+<td>8</td>
+<td>0.6002</td>
+<td>4.8018</td>
+<td>0.6320</td>
+<td>1.053</td>
+<td>0.5331</td>
+<td>0.2500</td>
+</tr>
+<tr class="odd">
+<td>32</td>
+<td>0.2049</td>
+<td>6.5579</td>
+<td>0.2083</td>
+<td>1.016</td>
+<td>0.1333</td>
+<td>0.1250</td>
+</tr>
+</tbody>
+</table>
+</div>
+</figure>
+</div>
+<p>The last two columns show the two regimes of step 4. At <span class="math inline">\(\varepsilon = 0.1\)</span> the rule is almost exactly <span class="math inline">\(z_\delta/\varepsilon\)</span>. At <span class="math inline">\(\varepsilon = 32\)</span> the rule has moved well away from <span class="math inline">\(z_\delta/\varepsilon\)</span> and towards <span class="math inline">\(1/\sqrt{2\varepsilon}\)</span>, but it is still above that limit, because <span class="math inline">\(z_\delta\)</span> is not yet small next to <span class="math inline">\(\sqrt{2\varepsilon} = 8\)</span>.</p>
+<p><strong>Noise against <span class="math inline">\(\delta\)</span>.</strong> Starting from <span class="math inline">\(\delta = 10^{-5}\)</span>, making <span class="math inline">\(\delta\)</span> ten times smaller raises the exact noise by a factor of 1.146 at <span class="math inline">\(\varepsilon = 0.5\)</span>. There <span class="math inline">\(\sigma/\Delta_2\)</span> goes from 7.0318 to 8.0576, while at <span class="math inline">\(\varepsilon = 1\)</span> the factor is 1.132. Both are a little above the 1.115 that step 5 predicted from <span class="math inline">\(z_\delta\)</span> alone, so the estimate from <span class="math inline">\(z_\delta\)</span> alone is slightly low.</p>
+<p><strong>The privacy a noise level buys.</strong> Turning the question around, <a href="#tbl-apx-cal-eps-of-sigma" class="quarto-xref">Table&nbsp;<span>A.13</span></a> gives the <span class="math inline">\(\varepsilon\)</span> that a chosen <span class="math inline">\(\sigma\)</span> buys at <span class="math inline">\(\delta = 10^{-5}\)</span>, exactly and by the tail rule <span class="math inline">\(\varepsilon_{\text{tail}} = z_\delta\mu + \mu^2/2\)</span>. For large <span class="math inline">\(\sigma\)</span> the <span class="math inline">\(z_\delta\mu\)</span> term dominates, so <span class="math inline">\(\varepsilon\)</span> falls like <span class="math inline">\(1/\sigma\)</span>, the inverse of the noise rule. Again the rule is safe, because it never reports a smaller <span class="math inline">\(\varepsilon\)</span> than the exact one.</p>
+<div id="tbl-apx-cal-eps-of-sigma" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-tbl figure">
+<figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl" id="tbl-apx-cal-eps-of-sigma-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Table&nbsp;A.13: The <span class="math inline">\(\varepsilon\)</span> that a given noise level buys at <span class="math inline">\(\delta = 10^{-5}\)</span>.
+</figcaption>
+<div aria-describedby="tbl-apx-cal-eps-of-sigma-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<table class="caption-top table">
+<colgroup>
+<col style="width: 14%">
+<col style="width: 14%">
+<col style="width: 14%">
+<col style="width: 14%">
+<col style="width: 14%">
+<col style="width: 14%">
+<col style="width: 14%">
+</colgroup>
+<thead>
+<tr class="header">
+<th><span class="math inline">\(\sigma/\Delta_2\)</span></th>
+<th>0.5</th>
+<th>1</th>
+<th>2</th>
+<th>5</th>
+<th>10</th>
+<th>20</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>Exact <span class="math inline">\(\varepsilon\)</span></td>
+<td>9.9973</td>
+<td>4.3772</td>
+<td>1.9931</td>
+<td>0.7255</td>
+<td>0.3407</td>
+<td>0.1600</td>
+</tr>
+<tr class="even">
+<td>Tail rule <span class="math inline">\(z_\delta\mu + \mu^2/2\)</span></td>
+<td>10.5298</td>
+<td>4.7649</td>
+<td>2.2574</td>
+<td>0.8730</td>
+<td>0.4315</td>
+<td>0.2145</td>
+</tr>
+</tbody>
+</table>
+</div>
+</figure>
+</div>
+<p><strong>Repeating.</strong> Suppose ten releases must together be <span class="math inline">\((1, 10^{-5})\)</span>-DP. Then by step 6 each needs <span class="math inline">\(\sqrt{10}\)</span> times the noise of one release, so <span class="math inline">\(\sigma = 11.7973\)</span>. As a check, putting <span class="math inline">\(\mu = \sqrt{10}/11.7973\)</span> back into the formula gives <span class="math inline">\(\delta = 1.000\times10^{-5}\)</span>. The tempting alternative is to split the budget instead. Basic composition, which <a href="02-composition.html#sec-apx-ccomp-basic" class="quarto-xref"><span>Section B.1</span></a> derives, says that the <span class="math inline">\(\varepsilon\)</span>s and the <span class="math inline">\(\delta\)</span>s of separate releases add up, so ten <span class="math inline">\((0.1, 10^{-6})\)</span>-DP releases are together <span class="math inline">\((1, 10^{-5})\)</span>-DP. That needs <span class="math inline">\(\sigma = 36.3047\)</span>, which is 3.08 times more noise. With 100 releases the gap grows to 9.70 times. Splitting gives each release only <span class="math inline">\(\varepsilon/k\)</span>, and the noise grows roughly like <span class="math inline">\(1/\varepsilon\)</span>, so it grows like <span class="math inline">\(k\)</span> rather than <span class="math inline">\(\sqrt k\)</span>.</p>
+<p><strong>Choosing <span class="math inline">\(\delta\)</span> from <span class="math inline">\(n\)</span>.</strong> <a href="#tbl-apx-cal-delta-n" class="quarto-xref">Table&nbsp;<span>A.14</span></a> gives the noise at <span class="math inline">\(\varepsilon = 1\)</span> for four choices of <span class="math inline">\(\delta\)</span>, and how often the publish-a-record mechanism of step 7 would expose someone. A fixed <span class="math inline">\(\delta = 10^{-5}\)</span> is fine for a thousand people, with exposure 0.00995. For a million people it is ten times <span class="math inline">\(1/n\)</span>, and the exposure is 0.99995. A rule sometimes used to get “a little below <span class="math inline">\(1/n\)</span>”, <span class="math inline">\(\delta = 1/n^{1.1}\)</span>, is not far enough below, since its exposure is still 0.328 for ten thousand people. By contrast, <span class="math inline">\(\delta = 1/n^2\)</span> makes <span class="math inline">\(n\delta = 1/n\)</span>, which keeps the exposure near <span class="math inline">\(1/n\)</span>, and its noise is modest. For ten thousand people it needs only 1.367 times the noise of <span class="math inline">\(\delta = 10^{-5}\)</span>.</p>
+<div id="tbl-apx-cal-delta-n" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-tbl figure">
+<figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl" id="tbl-apx-cal-delta-n-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Table&nbsp;A.14: The exact <span class="math inline">\(\sigma/\Delta_2\)</span> at <span class="math inline">\(\varepsilon = 1\)</span> for four ways of choosing <span class="math inline">\(\delta\)</span>, and the probability <span class="math inline">\(1 - (1 - \delta)^n\)</span> that publishing each record with probability <span class="math inline">\(\delta\)</span> exposes someone. At <span class="math inline">\(\delta = 1/n\)</span> that probability is 0.632 for every <span class="math inline">\(n\)</span> shown.
+</figcaption>
+<div aria-describedby="tbl-apx-cal-delta-n-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<table class="caption-top table">
+<colgroup>
+<col style="width: 14%">
+<col style="width: 14%">
+<col style="width: 14%">
+<col style="width: 14%">
+<col style="width: 14%">
+<col style="width: 14%">
+<col style="width: 14%">
+</colgroup>
+<thead>
+<tr class="header">
+<th><span class="math inline">\(n\)</span></th>
+<th><span class="math inline">\(\delta = 10^{-5}\)</span></th>
+<th><span class="math inline">\(\delta = 1/n\)</span></th>
+<th><span class="math inline">\(\delta = 1/n^{1.1}\)</span></th>
+<th><span class="math inline">\(\delta = 1/n^2\)</span></th>
+<th>Exposure at <span class="math inline">\(10^{-5}\)</span></th>
+<th>Exposure at <span class="math inline">\(1/n^{1.1}\)</span></th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>1,000</td>
+<td>3.7306</td>
+<td>2.5747</td>
+<td>2.7660</td>
+<td>4.2247</td>
+<td>0.00995</td>
+<td>0.394</td>
+</tr>
+<tr class="even">
+<td>10,000</td>
+<td>3.7306</td>
+<td>3.1857</td>
+<td>3.4106</td>
+<td>5.1003</td>
+<td>0.0952</td>
+<td>0.328</td>
+</tr>
+<tr class="odd">
+<td>100,000</td>
+<td>3.7306</td>
+<td>3.7306</td>
+<td>3.9833</td>
+<td>5.8678</td>
+<td>0.632</td>
+<td>0.271</td>
+</tr>
+<tr class="even">
+<td>1,000,000</td>
+<td>3.7306</td>
+<td>4.2247</td>
+<td>4.5013</td>
+<td>6.5578</td>
+<td>0.99995</td>
+<td>0.222</td>
+</tr>
+</tbody>
+</table>
+</div>
+</figure>
+</div>
+</section>
+<section id="recipe-and-pitfalls-7" class="level3" data-number="A.8.6">
+<h3 data-number="A.8.6" class="anchored" data-anchor-id="recipe-and-pitfalls-7"><span class="header-section-number">A.8.6</span> Recipe and pitfalls</h3>
+<p>Decide the quantities in this order, because the later steps use the earlier choices.</p>
+<ol type="1">
+<li><strong>Fix the neighbouring relation and compute <span class="math inline">\(\Delta_2\)</span></strong>, as in <a href="#sec-apx-cal-sensitivity" class="quarto-xref"><span>Section A.2</span></a>. Clip first if the data are unbounded.</li>
+<li><strong>Pick <span class="math inline">\(\delta\)</span> from the number of people <span class="math inline">\(n\)</span></strong>, well below <span class="math inline">\(1/n\)</span>. The choice <span class="math inline">\(\delta = 1/n^2\)</span> is cheap, as <a href="#tbl-apx-cal-delta-n" class="quarto-xref">Table&nbsp;<span>A.14</span></a> shows, and <a href="../part05-dp-ml/09-choosing-epsilon.html#sec-epsc-delta" class="quarto-xref"><span>Section 46.7</span></a> discusses other rules.</li>
+<li><strong>Pick <span class="math inline">\(\varepsilon\)</span>.</strong> It decides the noise far more than <span class="math inline">\(\delta\)</span> does, so spend your judgement here.</li>
+<li><strong>Count the releases <span class="math inline">\(k\)</span></strong> that must share the budget. If they are Gaussian releases of the same sensitivity, solve for one and multiply <span class="math inline">\(\sigma\)</span> by <span class="math inline">\(\sqrt k\)</span>.</li>
+<li><strong>Solve for <span class="math inline">\(\sigma\)</span> by bisection</strong> on the exact formula with <span class="math inline">\(\Delta_2 = 1\)</span>, computing <span class="math inline">\(\Phi\)</span> with <span class="math inline">\(\operatorname{erfc}\)</span>, and multiply by <span class="math inline">\(\Delta_2\)</span>. <a href="#tbl-apx-cal-grid" class="quarto-xref">Table&nbsp;<span>A.11</span></a> gives a first estimate, and <a href="#eq-apx-cal-tail-rule" class="quarto-xref">Equation&nbsp;<span>A.22</span></a> gives a safe closed form if you cannot run bisection.</li>
+<li><strong>Check by plugging back.</strong> Put <span class="math inline">\(\mu = \Delta_2/\sigma\)</span> into the formula and confirm that <span class="math inline">\(\delta(\varepsilon)\)</span> is at most your target.</li>
+<li><strong>Report <span class="math inline">\(\mu\)</span>, or the curve,</strong> not only one pair, so that a reader can find <span class="math inline">\(\delta\)</span> at any <span class="math inline">\(\varepsilon\)</span>.</li>
+</ol>
+<p>The common mistakes follow from the facts above. Quoting <span class="math inline">\(\varepsilon\)</span> without <span class="math inline">\(\delta\)</span> says nothing, because one Gaussian mechanism has every <span class="math inline">\(\varepsilon\)</span> on its curve. A <span class="math inline">\(\delta\)</span> of <span class="math inline">\(1/n\)</span> or more allows a mechanism that publishes a whole record. Computing <span class="math inline">\(1 - \Phi(x)\)</span> by subtraction, or <span class="math inline">\(\Phi\)</span> with <span class="math inline">\(\operatorname{erf}\)</span>, silently loses accuracy from about <span class="math inline">\(\delta = 10^{-12}\)</span> and gives nonsense by <span class="math inline">\(10^{-18}\)</span>. The classic formula is unproved above <span class="math inline">\(\varepsilon = 1\)</span> and wrong above 8.42 at <span class="math inline">\(\delta = 10^{-5}\)</span>. And forgetting composition is the most expensive mistake of all, because <span class="math inline">\(k\)</span> releases at the <span class="math inline">\(\sigma\)</span> of one are only <span class="math inline">\((\varepsilon, \delta)\)</span>-DP for a much larger <span class="math inline">\(\varepsilon\)</span>. Splitting the budget evenly fixes that, but at about <span class="math inline">\(k\)</span> times the noise of one release instead of <span class="math inline">\(\sqrt k\)</span> times. <a href="02-composition.html#sec-apx-ccomp-gaussian" class="quarto-xref"><span>Section B.3</span></a> and <a href="02-composition.html#sec-apx-ccomp-compare" class="quarto-xref"><span>Section B.5</span></a> compare the ways to account for repeated releases.</p>
+</section>
+</section>
+<section id="sec-apx-cal-recipes" class="level2" data-number="A.9">
+<h2 data-number="A.9" class="anchored" data-anchor-id="sec-apx-cal-recipes"><span class="header-section-number">A.9</span> All the recipes in one table</h2>
+<p><a href="#tbl-apx-cal-recipes" class="quarto-xref">Table&nbsp;<span>A.15</span></a> collects the calibrations of this appendix. Every row assumes you have fixed the neighbouring relation first, since the sensitivity depends on it.</p>
 <div id="tbl-apx-cal-recipes" class="quarto-float quarto-figure quarto-figure-center anchored">
 <figure class="quarto-float quarto-float-tbl figure">
 <figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl" id="tbl-apx-cal-recipes-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-Table&nbsp;A.8: The calibration recipes of this appendix.
+Table&nbsp;A.15: The calibration recipes of this appendix.
 </figcaption>
 <div aria-describedby="tbl-apx-cal-recipes-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
 <table class="caption-top table">
@@ -1517,15 +2054,15 @@ Table&nbsp;A.8: The calibration recipes of this appendix.
 </tr>
 <tr class="even">
 <td>Randomized response</td>
-<td>one bit, under replace</td>
+<td>one bit, under replace-one</td>
 <td>truth with probability <span class="math inline">\(e^\varepsilon/(1 + e^\varepsilon)\)</span></td>
 <td><span class="math inline">\(\varepsilon\)</span>-DP; error about <span class="math inline">\(1/(\varepsilon\sqrt n)\)</span></td>
 </tr>
 <tr class="odd">
 <td>Exponential mechanism</td>
-<td><span class="math inline">\(\Delta\)</span> of the score</td>
-<td>choose <span class="math inline">\(r\)</span> with probability <span class="math inline">\(\propto e^{\varepsilon u(D, r)/(2\Delta)}\)</span></td>
-<td><span class="math inline">\(\varepsilon\)</span>-DP; gap <span class="math inline">\(\le \frac{2\Delta}{\varepsilon}(\ln k + t)\)</span> with probability <span class="math inline">\(1 - e^{-t}\)</span></td>
+<td><span class="math inline">\(\Delta u\)</span> of the score</td>
+<td>choose <span class="math inline">\(r\)</span> with probability <span class="math inline">\(\propto e^{\varepsilon u(D, r)/(2\Delta u)}\)</span></td>
+<td><span class="math inline">\(\varepsilon\)</span>-DP; gap <span class="math inline">\(\le \frac{2\Delta u}{\varepsilon}(\ln |\mathcal R| + t)\)</span> with probability <span class="math inline">\(1 - e^{-t}\)</span></td>
 </tr>
 <tr class="even">
 <td>Gaussian, classic</td>
@@ -1539,21 +2076,27 @@ Table&nbsp;A.8: The calibration recipes of this appendix.
 <td><span class="math inline">\(\sigma = \Delta_2/\mu\)</span> with <span class="math inline">\(\delta(\varepsilon) = \delta\)</span> by bisection</td>
 <td><span class="math inline">\((\varepsilon, \delta)\)</span>-DP for every <span class="math inline">\(\varepsilon\)</span>; tight</td>
 </tr>
+<tr class="even">
+<td>Gaussian, <span class="math inline">\(k\)</span> releases</td>
+<td><span class="math inline">\(\Delta_2\)</span> of each release</td>
+<td><span class="math inline">\(\sqrt k\)</span> times the exact <span class="math inline">\(\sigma\)</span> of one, with <span class="math inline">\(\delta\)</span> well below <span class="math inline">\(1/n\)</span></td>
+<td><span class="math inline">\((\varepsilon, \delta)\)</span>-DP for all <span class="math inline">\(k\)</span> together</td>
+</tr>
 </tbody>
 </table>
 </div>
 </figure>
 </div>
 </section>
-<section id="code" class="level2" data-number="A.9">
-<h2 data-number="A.9" class="anchored" data-anchor-id="code"><span class="header-section-number">A.9</span> Code</h2>
-<p>The script computes every number on this page and draws every figure. It checks the three-output example against all events, finds every sensitivity by brute force over small datasets, and simulates the Laplace error and randomized response. For the Gaussian mechanism it compares the closed form with numerical integration and with Monte Carlo, checks the derivative of step 5, and solves the exact calibration by bisection. From the repository root:</p>
+<section id="code" class="level2" data-number="A.10">
+<h2 data-number="A.10" class="anchored" data-anchor-id="code"><span class="header-section-number">A.10</span> Code</h2>
+<p>The script computes every number on this page and draws every figure. It checks the three-output example against all events, finds every sensitivity by brute force over small datasets, and simulates the Laplace error and randomized response. For the Gaussian mechanism it compares the closed form with numerical integration and with Monte Carlo, checks the derivative of step 5, and solves the exact calibration by bisection. For the trade-offs it computes <span class="math inline">\(\Phi\)</span> three ways and checks tiny values of <span class="math inline">\(\delta\)</span> against an integral over the bad set. It also tabulates the noise as each quantity moves. From the repository root:</p>
 <div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb1"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="ex">uv</span> run python code/appendix-derivations/apx_core_calibration.py</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-<p><a href="#tbl-apx-cal-code" class="quarto-xref">Table&nbsp;<span>A.9</span></a> summarizes its output with the default random seed, 0.</p>
+<p><a href="#tbl-apx-cal-code" class="quarto-xref">Table&nbsp;<span>A.16</span></a> summarizes its output with the default random seed, 0.</p>
 <div id="tbl-apx-cal-code" class="quarto-float quarto-figure quarto-figure-center anchored">
 <figure class="quarto-float quarto-float-tbl figure">
 <figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl" id="tbl-apx-cal-code-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-Table&nbsp;A.9: The script’s output with the default seed.
+Table&nbsp;A.16: The script’s output with the default seed.
 </figcaption>
 <div aria-describedby="tbl-apx-cal-code-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
 <table class="caption-top table">
@@ -1612,6 +2155,22 @@ Table&nbsp;A.9: The script’s output with the default seed.
 <td>Classic formula fails at <span class="math inline">\(\delta = 10^{-5}\)</span></td>
 <td>For <span class="math inline">\(\varepsilon &gt; 8.42\)</span></td>
 </tr>
+<tr class="even">
+<td>Exact <span class="math inline">\(\delta\)</span> by hand, <span class="math inline">\(\Delta_2 = 1\)</span>, <span class="math inline">\(\sigma = 4\)</span>, <span class="math inline">\(\varepsilon = 1\)</span></td>
+<td><span class="math inline">\(2.9243\times10^{-6}\)</span> (bad-set integral the same)</td>
+</tr>
+<tr class="odd">
+<td><span class="math inline">\(\Phi\)</span> from <span class="math inline">\(\operatorname{erf}\)</span> at <span class="math inline">\(\delta = 10^{-18}\)</span></td>
+<td><span class="math inline">\(5.5511\times10^{-17}\)</span>, against <span class="math inline">\(1.0000\times10^{-18}\)</span> from <span class="math inline">\(\operatorname{erfc}\)</span></td>
+</tr>
+<tr class="even">
+<td>Tail rule against exact, <span class="math inline">\(\delta = 10^{-5}\)</span></td>
+<td>1.391 times at <span class="math inline">\(\varepsilon = 0.1\)</span>, 1.016 times at <span class="math inline">\(\varepsilon = 32\)</span></td>
+</tr>
+<tr class="odd">
+<td>Ten releases at <span class="math inline">\((1, 10^{-5})\)</span></td>
+<td><span class="math inline">\(\sigma = 11.7973\)</span> each, against 36.3047 when the budget is split</td>
+</tr>
 </tbody>
 </table>
 </div>
@@ -1619,8 +2178,8 @@ Table&nbsp;A.9: The script’s output with the default seed.
 </div>
 <p><a href="https://github.com/manuelvloureiro/privacy-preserving-machine-learning-book/blob/main/tests/test_appendix_core_calibration.py">tests/test_appendix_core_calibration.py</a> checks that the output still matches. Three things stand out. Every formula agrees with brute force or simulation to within sampling error. The Laplace and exponential mechanisms meet their bounds exactly on some outputs, so their noise cannot be reduced. And the classic Gaussian formula is safe but wasteful for small <span class="math inline">\(\varepsilon\)</span>, and unsafe for very large <span class="math inline">\(\varepsilon\)</span>, which is why the exact calibration should be the default.</p>
 </section>
-<section id="references" class="level2" data-number="A.10">
-<h2 data-number="A.10" class="anchored" data-anchor-id="references"><span class="header-section-number">A.10</span> References</h2>
+<section id="references" class="level2" data-number="A.11">
+<h2 data-number="A.11" class="anchored" data-anchor-id="references"><span class="header-section-number">A.11</span> References</h2>
 <ul>
 <li>Dwork, McSherry, Nissim &amp; Smith, “Calibrating Noise to Sensitivity in Private Data Analysis” (TCC 2006): sensitivity and the Laplace mechanism.</li>
 <li>Warner, “Randomized Response: A Survey Technique for Eliminating Evasive Answer Bias” (1965): randomized response.</li>

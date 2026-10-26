@@ -350,7 +350,7 @@ window.Quarto = {
   <li><a href="#sec-att-genomics" id="toc-sec-att-genomics" class="nav-link" data-scroll-target="#sec-att-genomics"><span class="header-section-number">1.4</span> Releasing statistics: genomic studies</a></li>
   <li><a href="#sec-att-kanon" id="toc-sec-att-kanon" class="nav-link" data-scroll-target="#sec-att-kanon"><span class="header-section-number">1.5</span> Removing identifiers: <span class="math inline">\(k\)</span>-anonymity</a></li>
   <li><a href="#sec-att-summary" id="toc-sec-att-summary" class="nav-link" data-scroll-target="#sec-att-summary"><span class="header-section-number">1.6</span> Summary</a></li>
-  <li><a href="#sec-att-notes" id="toc-sec-att-notes" class="nav-link" data-scroll-target="#sec-att-notes"><span class="header-section-number">1.7</span> Notes</a></li>
+  <li><a href="#sec-att-notes" id="toc-sec-att-notes" class="nav-link" data-scroll-target="#sec-att-notes"><span class="header-section-number">1.7</span> References</a></li>
   </ul>
 </nav>
     </div>
@@ -381,12 +381,13 @@ window.Quarto = {
 <section id="sec-att-taxi" class="level2" data-number="1.1">
 <h2 data-number="1.1" class="anchored" data-anchor-id="sec-att-taxi"><span class="header-section-number">1.1</span> Pseudonyms: the taxi trips</h2>
 <p>In 2014, a public-records request obtained from New York City’s taxi regulator the record of every taxi trip and fare in the city in 2013, about 19 gigabytes of data. A trip record holds the pickup and drop-off times, their coordinates, the distance, the duration and the number of passengers. It also holds two identifiers, the number of the cab’s medallion and the number of the driver’s licence. These two would reveal where each driver worked and how much they earned, so the regulator did not publish them as they were. It replaced each by a string of 32 hexadecimal digits.</p>
+<p>Replacing each identifier by a code in this way is called pseudonymization. The definition below names the one property such a code must have, that the same identifier always gets the same code, because the attack depends on exactly that.</p>
 <div id="def-att-pseudonym" class="theorem definition">
 <p><span class="theorem-title"><strong>Definition 1.1 (Pseudonymization)</strong></span> Let <span class="math inline">\(\mathcal U\)</span> be a set of identifiers, such as licence numbers. A <strong>pseudonymization</strong> replaces each identifier <span class="math inline">\(u \in \mathcal U\)</span> in a table by <span class="math inline">\(h(u)\)</span>, where <span class="math inline">\(h\)</span> is a fixed injective function, so that the same person gets the same pseudonym in every row.</p>
 </div>
-<p>The pseudonyms did not hold for long. An analyst noticed that one licence pseudonym earned far more per day than any driver could. That pseudonym turned out to be the MD5 hash of the string <code>0</code>, a placeholder for a missing licence, so many drivers’ trips had been pooled under it. The discovery revealed the function <span class="math inline">\(h\)</span>, which was MD5 with no secret key. A hash function is hard to invert on inputs drawn from a huge set, but the identifier formats allowed only about 22 million strings, about 3 million licence numbers and 19 million medallion numbers.</p>
+<p>The pseudonyms did not hold for long. An analyst noticed that one licence pseudonym earned far more per day than any driver could. That pseudonym turned out to be the MD5 hash of the string <code>0</code>, a placeholder for a missing licence, so many drivers’ trips had been pooled under it. The discovery revealed the function <span class="math inline">\(h\)</span>, which was MD5 with no secret key. A hash function is hard to invert on inputs drawn from a huge set, but the identifier formats allowed only about 22 million strings, about 3 million licence numbers and 19 million medallion numbers. With so few possible inputs, anyone can apply the function to all of them and look each pseudonym up, as the next result says.</p>
 <div id="prp-att-dictionary" class="theorem proposition">
-<p><span class="theorem-title"><strong>Proposition 1.1 (Dictionary attack)</strong></span> Let <span class="math inline">\(\mathcal U\)</span> be finite and let <span class="math inline">\(h\)</span> be injective and computable by anyone. Then <span class="math inline">\(|\mathcal U|\)</span> evaluations of <span class="math inline">\(h\)</span> recover the identifier behind every pseudonym in the table.</p>
+<p><span class="theorem-title"><strong>Proposition 1.1 (Dictionary attack)</strong></span> Let the set of identifiers <span class="math inline">\(\mathcal U\)</span> be finite, and let the pseudonymization function <span class="math inline">\(h\)</span> be injective and computable by anyone. Then <span class="math inline">\(|\mathcal U|\)</span> evaluations of <span class="math inline">\(h\)</span> recover the identifier behind every pseudonym in the table.</p>
 </div>
 <div class="proof">
 <p><span class="proof-title"><em>Proof</em>. </span></p>
@@ -395,7 +396,7 @@ window.Quarto = {
 <li>For each pseudonym <span class="math inline">\(v\)</span> in the released table, look up <span class="math inline">\(v\)</span>. Since <span class="math inline">\(h\)</span> is injective, exactly one stored pair has first entry <span class="math inline">\(v\)</span>, and its second entry is the identifier.</li>
 </ol>
 </div>
-<p>A licence number is not yet a name. The second step joined the decoded table with a public list of licensed drivers, which gives each licence number its holder’s name. Every driver’s trips, home area and income were then public. This step has a name.</p>
+<p>A licence number is not yet a name. The second step joined the decoded table with a public list of licensed drivers, which gives each licence number its holder’s name. Every driver’s trips, home area and income were then public. Joining a release with a second table that names people is the step that turns every attack in this chapter into a disclosure, so it gets its own definition.</p>
 <div id="def-att-linkage" class="theorem definition">
 <p><span class="theorem-title"><strong>Definition 1.2 (Linkage attack)</strong></span> Let <span class="math inline">\(T\)</span> be a released table and <span class="math inline">\(T'\)</span> an auxiliary table that names people, and let <span class="math inline">\(Q\)</span> be a set of attributes that both tables contain. A <strong>linkage attack</strong> joins <span class="math inline">\(T\)</span> and <span class="math inline">\(T'\)</span> on <span class="math inline">\(Q\)</span>. A row of <span class="math inline">\(T\)</span> is <strong>re-identified</strong> when its values on <span class="math inline">\(Q\)</span> match exactly one row of <span class="math inline">\(T'\)</span> and no other row of <span class="math inline">\(T\)</span>.</p>
 </div>
@@ -409,15 +410,15 @@ window.Quarto = {
 </section>
 <section id="sec-att-memorization" class="level2" data-number="1.3">
 <h2 data-number="1.3" class="anchored" data-anchor-id="sec-att-memorization"><span class="header-section-number">1.3</span> Releasing a model: memorization</h2>
-<p>The first two releases were whole tables. Releasing only a function of the data seems safer, such as a model trained on it. Carlini and coauthors tested this in 2019 on language models, which assign a probability to every sequence of words. Such a model predicts each word from the ones before it, using a vector of parameters <span class="math inline">\(\theta\)</span> learned from a corpus of text.</p>
+<p>The first two releases were whole tables. Releasing only a function of the data seems safer, such as a model trained on it. Carlini and coauthors tested this in 2019 on language models, which assign a probability to every sequence of words. Such a model predicts each word from the ones before it, using a vector of parameters <span class="math inline">\(\theta\)</span> learned from a corpus of text. To test whether a model has memorized a string, the authors measured how surprised the model is by it, counted in bits. A string the model finds likely gets a small score.</p>
 <div id="def-att-perplexity" class="theorem definition">
-<p><span class="theorem-title"><strong>Definition 1.3 (Log-perplexity)</strong></span> The <strong>log-perplexity</strong> of a sequence <span class="math inline">\(x_1, \dots, x_\ell\)</span> under a model with parameters <span class="math inline">\(\theta\)</span> is</p>
+<p><span class="theorem-title"><strong>Definition 1.3 (Log-perplexity)</strong></span> Write <span class="math inline">\(\Pr_\theta\)</span> for the probability that the model with parameters <span class="math inline">\(\theta\)</span> assigns to a sequence of words, or to the next word given the words before it. The <strong>log-perplexity</strong> of a sequence <span class="math inline">\(x_1, \dots, x_\ell\)</span> of <span class="math inline">\(\ell\)</span> words under this model is</p>
 <p><span id="eq-auto-01attempts-1"><span class="math display">\[
 P_\theta(x_1, \dots, x_\ell) = -\log_2 \Pr_\theta[x_1, \dots, x_\ell] = \sum_{i=1}^{\ell} -\log_2 \Pr_\theta\left[x_i \mid x_1, \dots, x_{i-1}\right].
 \tag{1.1}\]</span></span></p>
 </div>
 <p>The second form is the chain rule of probability. Low log-perplexity means high probability. A model of English gives “the cat sat on the mat” a low score and a string of unrelated words a high one. The question is whether a rare string that appears in the training text, such as a password or an identity number, gets a much lower score than it otherwise would. If it does, the model has memorized it, and anyone who can query the model may find it.</p>
-<p>To measure this, the authors inserted a <strong>canary</strong> into the training text: a sentence of a fixed format with a random secret, such as “my identity number is 314-15-9265”. They then compared its score with those of all the other sentences of the same format.</p>
+<p>To measure this, the authors inserted a <strong>canary</strong> into the training text: a sentence of a fixed format with a random secret, such as “my identity number is 314-15-9265”. They then compared its score with those of all the other sentences of the same format. Exposure turns that comparison into a number, which is large when the model ranks the true canary above most of the alternatives.</p>
 <div id="def-att-exposure" class="theorem definition">
 <p><span class="theorem-title"><strong>Definition 1.4 (Exposure)</strong></span> Let <span class="math inline">\(\mathcal R\)</span> be the finite set of candidate secrets, all sentences of the canary’s format, and let <span class="math inline">\(N = |\mathcal R|\)</span>. Sort <span class="math inline">\(\mathcal R\)</span> by increasing log-perplexity under the model, and let <span class="math inline">\(\operatorname{rank}(r) \in \{1, \dots, N\}\)</span> be the position of <span class="math inline">\(r\)</span>, so that rank <span class="math inline">\(1\)</span> is the most likely candidate. The <strong>exposure</strong> of <span class="math inline">\(r\)</span> is</p>
 <p><span id="eq-auto-01attempts-2"><span class="math display">\[
@@ -440,7 +441,7 @@ P_\theta(x_1, \dots, x_\ell) = -\log_2 \Pr_\theta[x_1, \dots, x_\ell] = \sum_{i=
 <li>Since <span class="math inline">\(\ln\)</span> is increasing, <span class="math inline">\(\ln k\)</span> is at least the integral of <span class="math inline">\(\ln x\)</span> over <span class="math inline">\([k-1, k]\)</span> for <span class="math inline">\(k \ge 2\)</span>. Summing over <span class="math inline">\(k\)</span> gives</li>
 </ol>
 <p><span id="eq-auto-01attempts-4"><span class="math display">\[
-\ln N! \ge \int_1^N \ln x\,dx = N\ln N - N + 1.
+\ln N! \ge \int_1^N \ln x\,\mathrm d x = N\ln N - N + 1.
 \tag{1.4}\]</span></span></p>
 <ol start="5" type="1">
 <li>Steps 3 and 4 give <span class="math inline">\(\mathbb E[\operatorname{exposure}(r)] \le \frac{N-1}{N\ln 2} &lt; \frac{1}{\ln 2}\)</span>.</li>
@@ -458,7 +459,7 @@ P_\theta(x_1, \dots, x_\ell) = -\log_2 \Pr_\theta[x_1, \dots, x_\ell] = \sum_{i=
 <h2 data-number="1.5" class="anchored" data-anchor-id="sec-att-kanon"><span class="header-section-number">1.5</span> Removing identifiers: <span class="math inline">\(k\)</span>-anonymity</h2>
 <p>In the mid-1990s, the Group Insurance Commission of Massachusetts let researchers request the hospital records of every state employee. Each record held the patient’s name, social security number, ZIP code, date of birth, sex and diagnosis. The commission removed the names and social security numbers, and the governor, William Weld, assured the public that patients’ privacy was protected.</p>
 <p>Latanya Sweeney, then a graduate student, bought the voter roll of Cambridge, Massachusetts, for $20. It lists every registered voter’s name, address, ZIP code, date of birth and sex. A linkage attack on ZIP code, date of birth and sex found the governor’s hospital records, and she mailed them to him. The attack works at scale. Sweeney later estimated that 87% of the population of the United States is the only person with their combination of five-digit ZIP code, sex and date of birth.</p>
-<p>Her answer, with Samarati, was a property of the released table. Its attributes fall into three kinds. <strong>Identifiers</strong>, such as names, are removed. <strong>Quasi-identifiers</strong>, such as ZIP code, age and sex, are harmless alone but identify people in combination. <strong>Sensitive attributes</strong>, such as the diagnosis, are what the release is for, so they stay. The quasi-identifiers are coarsened, for example by replacing a ZIP code by its first three digits or an age by a range, until no combination is rare.</p>
+<p>Her answer, with Samarati, was a property of the released table. Its attributes fall into three kinds. <strong>Identifiers</strong>, such as names, are removed. <strong>Quasi-identifiers</strong>, such as ZIP code, age and sex, are harmless alone but identify people in combination. <strong>Sensitive attributes</strong>, such as the diagnosis, are what the release is for, so they stay. The quasi-identifiers are coarsened, for example by replacing a ZIP code by its first three digits or an age by a range, until no combination is rare. The goal is that every person hides in a crowd of at least <span class="math inline">\(k\)</span> rows that look the same on the quasi-identifiers, and the definition states that goal.</p>
 <div id="def-att-kanon" class="theorem definition">
 <p><span class="theorem-title"><strong>Definition 1.5 (<span class="math inline">\(k\)</span>-anonymity)</strong></span> Let <span class="math inline">\(k \ge 1\)</span> be an integer. A table is <strong><span class="math inline">\(k\)</span>-anonymous</strong> with respect to a set of quasi-identifiers if every combination of quasi-identifier values that appears in the table appears in at least <span class="math inline">\(k\)</span> rows. The rows that share a combination form an <strong>equivalence class</strong>.</p>
 </div>
@@ -578,9 +579,11 @@ Table&nbsp;1.2: Hospital B’s release, <span class="math inline">\(3\)</span>-a
 </div>
 </figure>
 </div>
+<p>The first example uses only hospital A’s table. It shows that a class whose rows all share one sensitive value hides nothing.</p>
 <div id="exm-att-homogeneity" class="theorem example">
 <p><span class="theorem-title"><strong>Example 1.1 (Homogeneity)</strong></span> A neighbour aged 35, living in ZIP code 02139, was a patient of hospital A. In <a href="#tbl-att-hospital-a" class="quarto-xref">Table&nbsp;<span>1.1</span></a>, the neighbour must be in the class with ZIP code 021** and age 30–39. All three of its rows say hepatitis, so the attacker learns the diagnosis without knowing which row is the neighbour’s.</p>
 </div>
+<p>The second example needs classes with varied diagnoses, so homogeneity is not the problem. Instead, it combines the two hospitals’ releases.</p>
 <div id="exm-att-intersection" class="theorem example">
 <p><span class="theorem-title"><strong>Example 1.2 (Intersection)</strong></span> A colleague aged 27, living in ZIP code 02139, was treated at both hospitals for the same condition. In <a href="#tbl-att-hospital-a" class="quarto-xref">Table&nbsp;<span>1.1</span></a> the colleague’s class allows influenza, asthma or diabetes. In <a href="#tbl-att-hospital-b" class="quarto-xref">Table&nbsp;<span>1.2</span></a> the class with age 25–34 allows diabetes, migraine or fracture. Only diabetes is in both lists, so the two releases together reveal the diagnosis, although each is <span class="math inline">\(3\)</span>-anonymous.</p>
 </div>
@@ -646,7 +649,7 @@ Table&nbsp;1.3: The chapter’s results.
 </div>
 </section>
 <section id="sec-att-notes" class="level2" data-number="1.7">
-<h2 data-number="1.7" class="anchored" data-anchor-id="sec-att-notes"><span class="header-section-number">1.7</span> Notes</h2>
+<h2 data-number="1.7" class="anchored" data-anchor-id="sec-att-notes"><span class="header-section-number">1.7</span> References</h2>
 <ul>
 <li>Vijay Pandurangan, “On Taxis and Rainbows”, 2014. The inversion of the hashed medallion and licence numbers.</li>
 <li>Arvind Narayanan and Vitaly Shmatikov, “Robust De-anonymization of Large Sparse Datasets”, 2008. The linkage of the Netflix Prize data with public reviews, and the statistics of how few ratings identify a record.</li>

@@ -373,7 +373,7 @@ window.Quarto = {
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../part04-privacy-accounting/09-choosing-an-accountant.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">31</span>&nbsp; <span class="chapter-title">Report and review an ε claim</span></span></a>
+ <span class="menu-text"><span class="chapter-number">31</span>&nbsp; <span class="chapter-title">Choosing an accountant</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
@@ -591,9 +591,9 @@ window.Quarto = {
 <p>This part is a mathematical toolkit, and it contains no privacy yet. You do not need to read it first. Later chapters link back to the facts they use, so come here when a link sends you.</p>
 <section id="what-each-chapter-is-for" class="level2">
 <h2 class="anchored" data-anchor-id="what-each-chapter-is-for">What each chapter is for</h2>
-<p>Two ideas run through the part. The first is the <strong>likelihood ratio</strong>, how many times more likely an observation is under one explanation than under another. The second is the <strong>effect of one input</strong>, how far a single example can move a result.</p>
+<p>Two ideas run through the part. The first is the <strong>likelihood ratio</strong>, how many times more likely an observation is under one explanation than under another. The second is the <strong>effect of one input</strong>, how far a single record can move a result.</p>
 <p><a href="../part01-prerequisites/04-hypothesis-testing.html">Hypothesis testing</a> is the one full chapter, because the rest of the book leans on it most. It shows how to read a detector’s trade-off curve at a low false positive rate. It also shows how to put an honest interval on a rate measured from a few hundred cases.</p>
-<p>The other seven are short reference pages, each with the result, when you meet it, how to use it and what goes wrong. <a href="../part01-prerequisites/01-distributions.html">Probability distributions</a> and <a href="../part01-prerequisites/02-concentration.html">Concentration inequalities</a> give you the noise families, their scales in NumPy and SciPy, and the error bars and sample sizes you attach to a measured number. <a href="../part01-prerequisites/03-divergences.html">Divergences</a> compares two distributions with a single number. <a href="../part01-prerequisites/05-information-theory.html">Information theory</a> bounds what an output reveals about a hidden value. <a href="../part01-prerequisites/06-optimization.html">Optimization</a> gives the constants and step sizes of gradient descent, and <a href="../part01-prerequisites/07-stability-generalization.html">Algorithmic stability and generalization</a> explains why a reused holdout set misleads you. <a href="../part01-prerequisites/08-crypto-basics.html">Cryptography basics</a> teaches you to read a security claim stated as a game.</p>
+<p>The other seven are short reference pages, each with the result, when you meet it, how to use it and what goes wrong. <a href="../part01-prerequisites/01-distributions.html">Probability distributions</a> and <a href="../part01-prerequisites/02-concentration.html">Concentration inequalities</a> give you the noise families, their scales in NumPy and SciPy, and the error bars and sample sizes you attach to a measured number. <a href="../part01-prerequisites/03-divergences.html">Divergences</a> compares two distributions with a single number. <a href="../part01-prerequisites/05-information-theory.html">Information theory</a> bounds what an output reveals about a hidden value. <a href="../part01-prerequisites/06-optimization.html">Optimization</a> gives the constants and learning rates of gradient descent, and <a href="../part01-prerequisites/07-stability-generalization.html">Algorithmic stability and generalization</a> explains why a reused holdout set misleads you. <a href="../part01-prerequisites/08-crypto-basics.html">Cryptography basics</a> teaches you to read a security claim stated as a game.</p>
 </section>
 <section id="notation" class="level2">
 <h2 class="anchored" data-anchor-id="notation">Notation</h2>
@@ -616,7 +616,7 @@ Table&nbsp;1: Notation used throughout the book.
 </thead>
 <tbody>
 <tr class="odd">
-<td><span class="math inline">\(\Pr\)</span>, <span class="math inline">\(\mathbb E\)</span>, <span class="math inline">\(\mathrm{Var}\)</span></td>
+<td><span class="math inline">\(\Pr\)</span>, <span class="math inline">\(\mathbb E\)</span>, <span class="math inline">\(\operatorname{Var}\)</span></td>
 <td>Probability, expectation, variance</td>
 </tr>
 <tr class="even">
@@ -628,12 +628,12 @@ Table&nbsp;1: Notation used throughout the book.
 <td>Natural logarithm (nats) and base-2 logarithm (bits)</td>
 </tr>
 <tr class="even">
-<td><span class="math inline">\(\lVert w\rVert\)</span></td>
-<td>Euclidean length of a vector</td>
+<td><span class="math inline">\(\|x\|\)</span></td>
+<td>Euclidean length of a vector <span class="math inline">\(x\)</span></td>
 </tr>
 <tr class="odd">
-<td><span class="math inline">\(D\)</span>, <span class="math inline">\(\ell(w, z)\)</span></td>
-<td>A dataset, and the loss of a model <span class="math inline">\(w\)</span> on an example <span class="math inline">\(z\)</span></td>
+<td><span class="math inline">\(D\)</span>, <span class="math inline">\(\theta\)</span>, <span class="math inline">\(\ell(\theta; z)\)</span></td>
+<td>A dataset, the parameters of a model, and its loss on one record <span class="math inline">\(z\)</span></td>
 </tr>
 </tbody>
 </table>

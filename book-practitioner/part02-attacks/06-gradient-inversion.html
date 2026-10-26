@@ -408,7 +408,7 @@ window.Quarto = {
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../part04-privacy-accounting/09-choosing-an-accountant.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">31</span>&nbsp; <span class="chapter-title">Report and review an ε claim</span></span></a>
+ <span class="menu-text"><span class="chapter-number">31</span>&nbsp; <span class="chapter-title">Choosing an accountant</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
@@ -603,7 +603,7 @@ window.Quarto = {
   <li><a href="#sec-gradinv-batch" id="toc-sec-gradinv-batch" class="nav-link" data-scroll-target="#sec-gradinv-batch"><span class="header-section-number">14.6</span> Batches and averaging</a></li>
   <li><a href="#sec-gradinv-defences" id="toc-sec-gradinv-defences" class="nav-link" data-scroll-target="#sec-gradinv-defences"><span class="header-section-number">14.7</span> What to do as a deployer</a></li>
   <li><a href="#cheat-sheet" id="toc-cheat-sheet" class="nav-link" data-scroll-target="#cheat-sheet"><span class="header-section-number">14.8</span> Cheat sheet</a></li>
-  <li><a href="#further-reading" id="toc-further-reading" class="nav-link" data-scroll-target="#further-reading"><span class="header-section-number">14.9</span> Further reading</a></li>
+  <li><a href="#references" id="toc-references" class="nav-link" data-scroll-target="#references"><span class="header-section-number">14.9</span> References</a></li>
   </ul>
 </nav>
     </div>
@@ -631,17 +631,17 @@ window.Quarto = {
 
 <section id="why-this-matters" class="level2" data-number="14.1">
 <h2 data-number="14.1" class="anchored" data-anchor-id="why-this-matters"><span class="header-section-number">14.1</span> Why this matters</h2>
-<p>A phone keyboard learns from what its users type, and the raw text never leaves the phones. Instead, a server sends the current model to each phone, the phone computes the gradient of the loss on its own few examples, and it sends back only that gradient. The server averages them and takes a training step. This is <strong>federated learning (FL)</strong>, often called private because “the data stay on the device”.</p>
+<p>A phone keyboard learns from what its users type, and the raw text never leaves the phones. Instead, a server sends the current model to each phone, the phone computes the gradient of the loss on its own few records, and it sends back only that gradient. The server averages them and takes a training step. This is <strong>federated learning (FL)</strong>, often called private because “the data stay on the device”.</p>
 <p>Before you deploy it, ask what a single client’s gradient reveals about its data. Often, everything. A gradient holds one derivative for every parameter, and many of them are simple functions of the input, so the input can be read back. Averaging over a batch protects much less than people expect (<a href="#sec-gradinv-batch" class="quarto-xref"><span>Section 14.6</span></a>), so treat a per-client update as being as sensitive as the data it came from.</p>
 </section>
 <section id="sec-gradinv-setting" class="level2" data-number="14.2">
 <h2 data-number="14.2" class="anchored" data-anchor-id="sec-gradinv-setting"><span class="header-section-number">14.2</span> The attacker and what it sees</h2>
-<p>The attacker is the server, which sees each client’s own update and knows every parameter, since it sent the model out. In the terms of <a href="../part02-attacks/01-threat-models.html">Threat models and privacy games</a>, its access is therefore the <strong>transcript</strong>, everything training exposes along the way. Assume first that it is <strong>honest-but-curious</strong>, so it only analyses what it receives. What it receives is simple, because each client holds a batch of <span class="math inline">\(B\)</span> examples and sends the average of their gradients. Write <span class="math inline">\(\ell_i\)</span> for the loss on example <span class="math inline">\(i\)</span>, which depends on all the parameters <span class="math inline">\(\theta\)</span>. The client then sends <span id="eq-auto-06gradientinversion-1"><span class="math display">\[g = \frac1B\sum_{i=1}^B\nabla_\theta\ell_i. \tag{14.1}\]</span></span></p>
+<p>The attacker is the server, which sees each client’s own update and knows every parameter, since it sent the model out. In the terms of <a href="../part02-attacks/01-threat-models.html">Threat models and privacy games</a>, its access is therefore the <strong>transcript</strong>, everything training exposes along the way. Assume first that it is <strong>honest-but-curious</strong>, so it only analyses what it receives. What it receives is simple, because each client holds a batch of <span class="math inline">\(B\)</span> records and sends the average of their gradients. Write <span class="math inline">\(\ell_i\)</span> for the loss on record <span class="math inline">\(i\)</span>, which depends on all the parameters <span class="math inline">\(\theta\)</span>. The client then sends <span id="eq-auto-06gradientinversion-1"><span class="math display">\[g = \frac1B\sum_{i=1}^B\nabla_\theta\ell_i. \tag{14.1}\]</span></span></p>
 </section>
 <section id="sec-gradinv-exact" class="level2" data-number="14.3">
 <h2 data-number="14.3" class="anchored" data-anchor-id="sec-gradinv-exact"><span class="header-section-number">14.3</span> Exact recovery from a fully connected layer</h2>
-<p>The most common first layer, a fully connected layer with a bias, gives its input back by one division. Write <span class="math inline">\(W_1\)</span> and <span class="math inline">\(b_1\)</span> for this first layer’s weights and bias. Each unit <span class="math inline">\(j\)</span> multiplies the input <span class="math inline">\(x\)</span> by its row of weights and adds its bias. Its backward signal <span class="math inline">\(\delta_j\)</span> is how fast the loss responds to its output, and the chain rule turns it into the weight and bias gradients <span id="eq-gradinv-outer"><span class="math display">\[\nabla_{W_1}\ell = \delta\,x^\top, \qquad \nabla_{b_1}\ell = \delta. \tag{14.2}\]</span></span> So row <span class="math inline">\(j\)</span> of the weight gradient is the input scaled by <span class="math inline">\(\delta_j\)</span>, and entry <span class="math inline">\(j\)</span> of the bias gradient is that same scale. For a single example, dividing one by the other gives the input exactly, for every unit whose bias gradient is not zero: <span id="eq-gradinv-ratio"><span class="math display">\[x = \frac{(\nabla_{W_1}\ell)_{j,:}}{(\nabla_{b_1}\ell)_j}. \tag{14.3}\]</span></span></p>
-<p>Everything above the layer, including the depth of the network, the loss and the label, sits inside the scale <span class="math inline">\(\delta_j\)</span> and cancels. So the attack needs no optimization and no knowledge of the data. The snippet plays one client with one image of scikit-learn’s bundled digits in PyTorch. Its last line reads the label, as <a href="#sec-gradinv-labels" class="quarto-xref"><span>Section 14.4</span></a> explains.</p>
+<p>The most common first layer, a fully connected layer with a bias, gives its input back by one division. Write <span class="math inline">\(W_1\)</span> and <span class="math inline">\(b_1\)</span> for this first layer’s weights and bias. Each unit <span class="math inline">\(j\)</span> multiplies the input <span class="math inline">\(x\)</span> by its row of weights and adds its bias. Its backward signal <span class="math inline">\(u_j\)</span> is how fast the loss responds to its output, and the chain rule turns it into the weight and bias gradients <span id="eq-gradinv-outer"><span class="math display">\[\nabla_{W_1}\ell = u\,x^\top, \qquad \nabla_{b_1}\ell = u. \tag{14.2}\]</span></span> So row <span class="math inline">\(j\)</span> of the weight gradient is the input scaled by <span class="math inline">\(u_j\)</span>, and entry <span class="math inline">\(j\)</span> of the bias gradient is that same scale. For a single record, dividing one by the other gives the input exactly, for every unit whose bias gradient is not zero: <span id="eq-gradinv-ratio"><span class="math display">\[x = \frac{(\nabla_{W_1}\ell)_{j,:}}{(\nabla_{b_1}\ell)_j}. \tag{14.3}\]</span></span></p>
+<p>Everything above the layer, including the depth of the network, the loss and the label, sits inside the scale <span class="math inline">\(u_j\)</span> and cancels. So the attack needs no optimization and no knowledge of the data. The snippet plays one client with one image of scikit-learn’s bundled digits in PyTorch. Its last line reads the label, as <a href="#sec-gradinv-labels" class="quarto-xref"><span>Section 14.4</span></a> explains.</p>
 <div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb1"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> torch</span>
 <span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> torch.nn.functional <span class="im">as</span> F</span>
 <span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> sklearn.datasets <span class="im">import</span> load_digits</span>
@@ -662,19 +662,19 @@ window.Quarto = {
 </section>
 <section id="sec-gradinv-labels" class="level2" data-number="14.4">
 <h2 data-number="14.4" class="anchored" data-anchor-id="sec-gradinv-labels"><span class="header-section-number">14.4</span> Label recovery from the last layer</h2>
-<p>The label is often the most sensitive part of an example, such as a diagnosis. It can be read off the last layer without any search (Zhao, Mopuri &amp; Bilen 2020), if that layer has a bias and feeds the softmax and cross-entropy loss. Write <span class="math inline">\(p\)</span> for the predicted probabilities and <span class="math inline">\(e_y\)</span> for the vector with a 1 at the position of the label <span class="math inline">\(y\)</span>. The gradient of the last layer’s bias <span class="math inline">\(b_2\)</span> is then <span class="math inline">\(p - e_y\)</span>, which is negative only at the true label. So for a single example <span id="eq-gradinv-labels"><span class="math display">\[y = \arg\min_k(\nabla_{b_2}\ell)_k, \tag{14.4}\]</span></span> which is the snippet’s <code>argmin</code>. The one failure is a very confident model. If its true-label probability <span class="math inline">\(p_y\)</span> rounds to 1 in floating point, the label’s entry becomes zero, so no entry is negative.</p>
-<p>A batch hides which example has which label, but not how many examples there are of each class. Each entry of the bias gradient is the class’s average predicted probability minus its share of the batch. So a server that estimates the average prediction on data of its own can read off each class’s count. In the full edition’s experiment, every batch of 4 gave all its counts exactly. Even among batches of 64, 52.5% of the batches did.</p>
+<p>The label is often the most sensitive part of an example, such as a diagnosis. It can be read off the last layer without any search (Zhao, Mopuri &amp; Bilen 2020), if that layer has a bias and feeds the softmax and cross-entropy loss. Write <span class="math inline">\(p\)</span> for the predicted probabilities and <span class="math inline">\(e_y\)</span> for the vector with a 1 at the position of the label <span class="math inline">\(y\)</span>. The gradient of the last layer’s bias <span class="math inline">\(b_2\)</span> is then <span class="math inline">\(p - e_y\)</span>, which is negative only at the true label. So for a single record <span id="eq-gradinv-labels"><span class="math display">\[y = \arg\min_k(\nabla_{b_2}\ell)_k, \tag{14.4}\]</span></span> which is the snippet’s <code>argmin</code>. The one failure is a very confident model. If its true-label probability <span class="math inline">\(p_y\)</span> rounds to 1 in floating point, the label’s entry becomes zero, so no entry is negative.</p>
+<p>A batch hides which record has which label, but not how many records there are of each class. Each entry of the bias gradient is the class’s average predicted probability minus its share of the batch. So a server that estimates the average prediction on data of its own can read off each class’s count. In the full edition’s experiment, every batch of 4 gave all its counts exactly. Even among batches of 64, 52.5% of the batches did.</p>
 </section>
 <section id="sec-gradinv-dlg" class="level2" data-number="14.5">
 <h2 data-number="14.5" class="anchored" data-anchor-id="sec-gradinv-dlg"><span class="header-section-number">14.5</span> Deep Leakage from Gradients</h2>
-<p>When the division does not apply, the attacker searches. <strong>Deep Leakage from Gradients (DLG)</strong> (Zhu, Liu &amp; Han 2019) guesses an input and computes the gradient it would produce, then moves the guess until that gradient matches the observed one. Write <span class="math inline">\(x_i'\)</span> for the guessed inputs, <span class="math inline">\(y_i\)</span> for their labels, read first as in <a href="#sec-gradinv-labels" class="quarto-xref"><span>Section 14.4</span></a>, and <span class="math inline">\(\ell(\theta; x', y)\)</span> for the loss of one guess. The <strong>matching loss</strong> <span class="math inline">\(R\)</span> is the squared distance between the guesses’ average gradient and the observed one, so the attack looks for the guesses that make it smallest: <span id="eq-gradinv-dlg"><span class="math display">\[\hat x_1, \dots, \hat x_B = \arg\min_{x_1', \dots, x_B'}R(x'), \qquad R(x') = \Big\lVert\frac1B\sum_{i=1}^B\nabla_\theta\ell(\theta; x_i', y_i) - g\Big\rVert^2. \tag{14.5}\]</span></span> In PyTorch the attack is a short loop around one call. With <code>create_graph=True</code>, <code>torch.autograd.grad</code> returns the guess’s gradient in a form that can itself be differentiated. An optimizer such as Adam can then follow the slope of <span class="math inline">\(R\)</span> back to the input.</p>
-<p>Two things decide whether the search works. The activation’s slope must vary, because the search differentiates a gradient, and the ReLU’s slope is constant on each side of zero. So Zhu et al.&nbsp;used the sigmoid. And because <span class="math inline">\(R\)</span> is not convex, the search can get stuck. So run it until <span class="math inline">\(R\)</span> stops falling, and judge the final value against the squared size <span class="math inline">\(\lVert g\rVert^2\)</span> of the observed gradient <span class="math inline">\(g\)</span>, in the precision you compute in.</p>
-<p>The full edition’s experiment runs 600 steps of Adam in double precision, with a step size starting at 0.05 and decaying linearly to zero. There a successful run ends near <span class="math inline">\(10^{-27}\)</span> and a stuck one near <span class="math inline">\(10^{-5}\)</span>, and one image comes back exact to about 13 significant digits. Another input can also give a small <span class="math inline">\(R\)</span>, so restart from several random guesses, and trust an image only when the restarts agree on it.</p>
+<p>When the division does not apply, the attacker searches. <strong>Deep Leakage from Gradients (DLG)</strong> (Zhu, Liu &amp; Han 2019) guesses an input and computes the gradient it would produce, then moves the guess until that gradient matches the observed one. Write <span class="math inline">\(x_i'\)</span> for the guessed inputs, <span class="math inline">\(y_i\)</span> for their labels, read first as in <a href="#sec-gradinv-labels" class="quarto-xref"><span>Section 14.4</span></a>, and <span class="math inline">\(\ell(\theta; x', y)\)</span> for the loss of one guess. The <strong>matching loss</strong> <span class="math inline">\(R\)</span> is the squared distance between the guesses’ average gradient and the observed one, so the attack looks for the guesses that make it smallest: <span id="eq-gradinv-dlg"><span class="math display">\[\hat x_1, \dots, \hat x_B = \arg\min_{x_1', \dots, x_B'}R(x'), \qquad R(x') = \Big\|\frac1B\sum_{i=1}^B\nabla_\theta\ell(\theta; x_i', y_i) - g\Big\|^2. \tag{14.5}\]</span></span> In PyTorch the attack is a short loop around one call. With <code>create_graph=True</code>, <code>torch.autograd.grad</code> returns the guess’s gradient in a form that can itself be differentiated. An optimizer such as Adam can then follow the slope of <span class="math inline">\(R\)</span> back to the input.</p>
+<p>Two things decide whether the search works. The activation’s slope must vary, because the search differentiates a gradient, and the ReLU’s slope is constant on each side of zero. So Zhu et al.&nbsp;used the sigmoid. And because <span class="math inline">\(R\)</span> is not convex, the search can get stuck. So run it until <span class="math inline">\(R\)</span> stops falling, and judge the final value against the squared size <span class="math inline">\(\|g\|^2\)</span> of the observed gradient <span class="math inline">\(g\)</span>, in the precision you compute in.</p>
+<p>The full edition’s experiment runs 600 steps of Adam in double precision, with a learning rate starting at 0.05 and decaying linearly to zero. There a successful run ends near <span class="math inline">\(10^{-27}\)</span> and a stuck one near <span class="math inline">\(10^{-5}\)</span>, and one image comes back exact to about 13 significant digits. Another input can also give a small <span class="math inline">\(R\)</span>, so restart from several random guesses, and trust an image only when the restarts agree on it.</p>
 </section>
 <section id="sec-gradinv-batch" class="level2" data-number="14.6">
 <h2 data-number="14.6" class="anchored" data-anchor-id="sec-gradinv-batch"><span class="header-section-number">14.6</span> Batches and averaging</h2>
-<p>Clients usually send the average over a batch, or the change in their parameters after several training steps on the device (<strong>local steps</strong>). Averaging breaks the division and makes the search harder, but much of the structure survives. Each example adds one outer product to the first-layer gradient, so every row of that gradient is a combination of the <span class="math inline">\(B\)</span> inputs. The server therefore learns the <strong>span</strong> of the batch, the set of all such combinations, which contains every example.</p>
-<p>The division also still recovers an example exactly when some ReLU unit is switched on for that example only. That unit then <strong>isolates</strong> the example. If units switched on like independent fair coins, a unit would isolate a given example with probability <span class="math inline">\(2^{-B}\)</span>, so isolation would become rare as the batch grows. But real images make a unit fire on many examples or on few, so far more units fire on just one. Take the full edition’s network with 1,024 hidden units and batches of 16 synthetic <span class="math inline">\(8\times8\)</span> images. The coin model predicts that 1.6% of the batch is exposed, but 69.1% was.</p>
+<p>Clients usually send the average over a batch, or the change in their parameters after several training steps on the device (<strong>local steps</strong>). Averaging breaks the division and makes the search harder, but much of the structure survives. Each record adds one outer product to the first-layer gradient, so every row of that gradient is a combination of the <span class="math inline">\(B\)</span> inputs. The server therefore learns the <strong>span</strong> of the batch, the set of all such combinations, which contains every record.</p>
+<p>The division also still recovers an example exactly when some ReLU unit is switched on for that example only. That unit then <strong>isolates</strong> the record. If units switched on like independent fair coins, a unit would isolate a given record with probability <span class="math inline">\(2^{-B}\)</span>, so isolation would become rare as the batch grows. But real images make a unit fire on many records or on few, so far more units fire on just one. Take the full edition’s network with 1,024 hidden units and batches of 16 synthetic <span class="math inline">\(8\times8\)</span> images. The coin model predicts that 1.6% of the batch is exposed, but 69.1% was.</p>
 <p>The share exposed depends on both the batch size and the width of the first layer, so report both. <a href="#tbl-gradinv-isolation" class="quarto-xref">Table&nbsp;<span>14.1</span></a> gives the shares from the same experiment.</p>
 <div id="tbl-gradinv-isolation" class="quarto-float quarto-figure quarto-figure-center anchored">
 <figure class="quarto-float quarto-float-tbl figure">
@@ -716,8 +716,8 @@ Table&nbsp;14.1: Isolation attack on synthetic images, from the full edition.
 </div>
 </figure>
 </div>
-<p>A larger batch or a narrower layer lowers the share, but a malicious server undoes both. So measure at your own width and batch size, and treat any isolated example as a breach.</p>
-<p>DLG suffers more from batching. On the full edition’s sigmoid network with 32 hidden units, the median run from a batch of 4 gets stuck. That is a harder search, not less information: the isolation attack recovered all four images of such a batch. Local steps do not protect a single example either. Each step’s first-layer gradient is an outer product with the same input, and only the backward signal changes, so the division still works on the total change. And a <strong>malicious</strong> server that chooses the weights can plant units that fire only on rare inputs, each isolating one example. It then recovers most examples of even a large batch by design (Boenisch et al.&nbsp;2023; Fowl et al.&nbsp;2022).</p>
+<p>A larger batch or a narrower layer lowers the share, but a malicious server undoes both. So measure at your own width and batch size, and treat any isolated record as a breach.</p>
+<p>DLG suffers more from batching. On the full edition’s sigmoid network with 32 hidden units, the median run from a batch of 4 gets stuck. That is a harder search, not less information: the isolation attack recovered all four images of such a batch. Local steps do not protect a single record either. Each step’s first-layer gradient is an outer product with the same input, and only the backward signal changes, so the division still works on the total change. And a <strong>malicious</strong> server that chooses the weights can plant units that fire only on rare inputs, each isolating one record. It then recovers most records of even a large batch by design (Boenisch et al.&nbsp;2023; Fowl et al.&nbsp;2022).</p>
 </section>
 <section id="sec-gradinv-defences" class="level2" data-number="14.7">
 <h2 data-number="14.7" class="anchored" data-anchor-id="sec-gradinv-defences"><span class="header-section-number">14.7</span> What to do as a deployer</h2>
@@ -743,18 +743,18 @@ Table&nbsp;14.2: Gradient leakage by FL setting, and the response.
 </thead>
 <tbody>
 <tr class="odd">
-<td>One example per update, fully connected first layer with bias</td>
+<td>One record per update, fully connected first layer with bias</td>
 <td>The input exactly, and the label</td>
 <td>Never deploy without protection</td>
 </tr>
 <tr class="even">
 <td>Batches of any size, or several local steps</td>
-<td>Label counts, the span of the batch, isolated examples, and the rest by search in small batches</td>
+<td>Label counts, the span of the batch, isolated records, and the rest by search in small batches</td>
 <td>Treat each update as raw data</td>
 </tr>
 <tr class="odd">
 <td>Server not trusted to choose weights</td>
-<td>Most examples of any batch</td>
+<td>Most records of any batch</td>
 <td>Batch size is no defence; treat each update as raw data</td>
 </tr>
 <tr class="even">
@@ -796,13 +796,13 @@ Table&nbsp;14.3: The results of this chapter.
 </thead>
 <tbody>
 <tr class="odd">
-<td>Exact recovery, one example</td>
+<td>Exact recovery, one record</td>
 <td><span class="math inline">\(x = (\nabla_{W_1}\ell)_{j,:}/(\nabla_{b_1}\ell)_j\)</span></td>
 <td>Fully connected first layer with bias</td>
 <td>Convolutional first layer; batches, in part</td>
 </tr>
 <tr class="even">
-<td>Label, one example</td>
+<td>Label, one record</td>
 <td><span class="math inline">\(y = \arg\min_k(\nabla_{b_2}\ell)_k\)</span></td>
 <td>Softmax and cross-entropy</td>
 <td><span class="math inline">\(p_y\)</span> rounds to 1</td>
@@ -815,7 +815,7 @@ Table&nbsp;14.3: The results of this chapter.
 </tr>
 <tr class="even">
 <td>Isolation, batch</td>
-<td>Isolated examples recovered exactly</td>
+<td>Isolated records recovered exactly</td>
 <td>Fully connected first layer, ReLU units</td>
 <td>Rarely on real data</td>
 </tr>
@@ -829,8 +829,8 @@ Table&nbsp;14.3: The results of this chapter.
 <li>Secure aggregation needs a minimum cohort, and only client-level DP bounds what any update reveals.</li>
 </ul>
 </section>
-<section id="further-reading" class="level2" data-number="14.9">
-<h2 data-number="14.9" class="anchored" data-anchor-id="further-reading"><span class="header-section-number">14.9</span> Further reading</h2>
+<section id="references" class="level2" data-number="14.9">
+<h2 data-number="14.9" class="anchored" data-anchor-id="references"><span class="header-section-number">14.9</span> References</h2>
 <ul>
 <li>Zhu, Liu &amp; Han, “Deep Leakage from Gradients” (NeurIPS 2019): the gradient-matching attack.</li>
 <li>Geiping, Bauermeister, Dröge &amp; Moeller, “Inverting Gradients — How easy is it to break privacy in federated learning?” (NeurIPS 2020): cosine matching with an image prior, on trained networks, local steps and batches.</li>

@@ -450,7 +450,7 @@ window.Quarto = {
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../part05-dp-ml/05-private-prediction.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">42</span>&nbsp; <span class="chapter-title">Exercises: Private prediction</span></span></a>
+ <span class="menu-text"><span class="chapter-number">42</span>&nbsp; <span class="chapter-title">Exercises: Private prediction: PATE and in-context learning</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
@@ -501,14 +501,14 @@ window.Quarto = {
     <h2 id="toc-title">Table of contents</h2>
    
   <ul>
-  <li><a href="#sec-sol-divergences-1" id="toc-sec-sol-divergences-1" class="nav-link active" data-scroll-target="#sec-sol-divergences-1"><span class="header-section-number">3.1</span> Chain rule for KL</a></li>
-  <li><a href="#sec-sol-divergences-2" id="toc-sec-sol-divergences-2" class="nav-link" data-scroll-target="#sec-sol-divergences-2"><span class="header-section-number">3.2</span> Gaussians with different variances</a></li>
-  <li><a href="#sec-sol-divergences-3" id="toc-sec-sol-divergences-3" class="nav-link" data-scroll-target="#sec-sol-divergences-3"><span class="header-section-number">3.3</span> Bhattacharyya and Hellinger</a></li>
-  <li><a href="#sec-sol-divergences-4" id="toc-sec-sol-divergences-4" class="nav-link" data-scroll-target="#sec-sol-divergences-4"><span class="header-section-number">3.4</span> Rejection sampling</a></li>
-  <li><a href="#sec-sol-divergences-5" id="toc-sec-sol-divergences-5" class="nav-link" data-scroll-target="#sec-sol-divergences-5"><span class="header-section-number">3.5</span> DPI for <span class="math inline">\(E_\gamma\)</span> directly</a></li>
-  <li><a href="#sec-sol-divergences-6" id="toc-sec-sol-divergences-6" class="nav-link" data-scroll-target="#sec-sol-divergences-6"><span class="header-section-number">3.6</span> Pinsker’s constant is sharp</a></li>
-  <li><a href="#sec-sol-divergences-7" id="toc-sec-sol-divergences-7" class="nav-link" data-scroll-target="#sec-sol-divergences-7"><span class="header-section-number">3.7</span> Samples needed for two coins</a></li>
-  <li><a href="#sec-sol-divergences-8" id="toc-sec-sol-divergences-8" class="nav-link" data-scroll-target="#sec-sol-divergences-8"><span class="header-section-number">3.8</span> Monotonicity of TV over samples</a></li>
+  <li><a href="#sec-sol-div-1" id="toc-sec-sol-div-1" class="nav-link active" data-scroll-target="#sec-sol-div-1"><span class="header-section-number">3.1</span> Chain rule for KL</a></li>
+  <li><a href="#sec-sol-div-2" id="toc-sec-sol-div-2" class="nav-link" data-scroll-target="#sec-sol-div-2"><span class="header-section-number">3.2</span> Gaussians with different variances</a></li>
+  <li><a href="#sec-sol-div-3" id="toc-sec-sol-div-3" class="nav-link" data-scroll-target="#sec-sol-div-3"><span class="header-section-number">3.3</span> Bhattacharyya and Hellinger</a></li>
+  <li><a href="#sec-sol-div-4" id="toc-sec-sol-div-4" class="nav-link" data-scroll-target="#sec-sol-div-4"><span class="header-section-number">3.4</span> Rejection sampling</a></li>
+  <li><a href="#sec-sol-div-5" id="toc-sec-sol-div-5" class="nav-link" data-scroll-target="#sec-sol-div-5"><span class="header-section-number">3.5</span> DPI for <span class="math inline">\(E_\gamma\)</span> directly</a></li>
+  <li><a href="#sec-sol-div-6" id="toc-sec-sol-div-6" class="nav-link" data-scroll-target="#sec-sol-div-6"><span class="header-section-number">3.6</span> Pinsker’s constant is sharp</a></li>
+  <li><a href="#sec-sol-div-7" id="toc-sec-sol-div-7" class="nav-link" data-scroll-target="#sec-sol-div-7"><span class="header-section-number">3.7</span> Samples needed for two coins</a></li>
+  <li><a href="#sec-sol-div-8" id="toc-sec-sol-div-8" class="nav-link" data-scroll-target="#sec-sol-div-8"><span class="header-section-number">3.8</span> Monotonicity of TV over samples</a></li>
   </ul>
 </nav>
     </div>
@@ -536,8 +536,8 @@ window.Quarto = {
 
 <p>Exercises for <a href="../../book-full/part01-prerequisites/03-divergences.html">Divergences</a>, each with a worked solution. Try each exercise before opening its solution. The script <code>code/part01-prerequisites/solutions_divergences.py</code> computes every number quoted here; run it with <code>uv run python code/part01-prerequisites/solutions_divergences.py</code>.</p>
 <p>The solutions use the chapter’s notation and its three acronyms: the Kullback–Leibler (KL) divergence, the total variation (TV) distance and the data processing inequality (DPI). <span class="math inline">\(r = p/q\)</span> is the likelihood ratio and <span class="math inline">\(L = \ln r\)</span> the log-likelihood ratio, logarithms are natural, and on the die <span class="math inline">\(P\)</span> is the loaded die and <span class="math inline">\(Q\)</span> the fair one (<a href="../../book-full/part01-prerequisites/03-divergences.html#tbl-div-die">Table&nbsp;3.1</a>).</p>
-<section id="sec-sol-divergences-1" class="level2" data-number="3.1">
-<h2 data-number="3.1" class="anchored" data-anchor-id="sec-sol-divergences-1"><span class="header-section-number">3.1</span> Chain rule for KL</h2>
+<section id="sec-sol-div-1" class="level2" data-number="3.1">
+<h2 data-number="3.1" class="anchored" data-anchor-id="sec-sol-div-1"><span class="header-section-number">3.1</span> Chain rule for KL</h2>
 <blockquote class="blockquote">
 <p><strong>Exercise 1.</strong> <strong>Chain rule for KL.</strong> For joint distributions <span class="math inline">\(P_{XY}\)</span> and <span class="math inline">\(Q_{XY}\)</span>, show <span class="math inline">\(D_{\mathrm{KL}}(P_{XY}\|Q_{XY}) = D_{\mathrm{KL}}(P_X\|Q_X) + \mathbb E_{x\sim P_X}\big[D_{\mathrm{KL}}(P_{Y\mid x}\|Q_{Y\mid x})\big]\)</span>, and recover additivity as the special case of independent coordinates. <em>Hint: factor <span class="math inline">\(p(x, y) = p(x)p(y\mid x)\)</span> inside the logarithm.</em> <em>(KL, additivity)</em></p>
 </blockquote>
@@ -611,8 +611,8 @@ Table&nbsp;3.1: The chain rule on the die, with <span class="math inline">\(X\)<
 </div>
 </div>
 </section>
-<section id="sec-sol-divergences-2" class="level2" data-number="3.2">
-<h2 data-number="3.2" class="anchored" data-anchor-id="sec-sol-divergences-2"><span class="header-section-number">3.2</span> Gaussians with different variances</h2>
+<section id="sec-sol-div-2" class="level2" data-number="3.2">
+<h2 data-number="3.2" class="anchored" data-anchor-id="sec-sol-div-2"><span class="header-section-number">3.2</span> Gaussians with different variances</h2>
 <blockquote class="blockquote">
 <p><strong>Exercise 2.</strong> <strong>Gaussians with different variances.</strong> Show <span class="math inline">\(D_{\mathrm{KL}}(\mathcal N(m_0, \sigma_0^2)\|\mathcal N(m_1, \sigma_1^2)) = \ln\frac{\sigma_1}{\sigma_0} + \frac{\sigma_0^2 + (m_0 - m_1)^2}{2\sigma_1^2} - \frac12\)</span>. <em>Check: <span class="math inline">\(D_{\mathrm{KL}}(\mathcal N(0, 1)\|\mathcal N(0, 4)) = \ln2 + \frac18 - \frac12 = 0.3181\)</span>.</em> For the Rényi divergence, repeat route 1 of the Gaussian section and find the condition on <span class="math inline">\(\alpha\)</span> under which the integral is finite. <em>Hint: the coefficient of <span class="math inline">\(x^2\)</span> must stay negative: <span class="math inline">\(\alpha/\sigma_0^2 + (1-\alpha)/\sigma_1^2 &gt; 0\)</span>.</em> <em>(Completing the square)</em></p>
 </blockquote>
@@ -628,24 +628,24 @@ Table&nbsp;3.1: The chain rule on the die, with <span class="math inline">\(X\)<
 </div>
 <div id="callout-2" class="callout-2-contents callout-collapse collapse">
 <div class="callout-body-container callout-body">
-<p>Write <span class="math inline">\(P = \mathcal N(m_0, \sigma_0^2)\)</span> and <span class="math inline">\(Q = \mathcal N(m_1, \sigma_1^2)\)</span>, with means <span class="math inline">\(m_0, m_1\)</span>, and <span class="math inline">\(\Delta = m_0 - m_1\)</span>.</p>
+<p>Write <span class="math inline">\(P = \mathcal N(m_0, \sigma_0^2)\)</span> and <span class="math inline">\(Q = \mathcal N(m_1, \sigma_1^2)\)</span>, with means <span class="math inline">\(m_0, m_1\)</span>, and <span class="math inline">\(s = m_0 - m_1\)</span>.</p>
 <p><strong>KL.</strong></p>
 <ol type="1">
 <li><strong>The log-likelihood ratio.</strong> The normal density is <span class="math inline">\(\frac{1}{\sigma\sqrt{2\pi}}e^{-(x - m)^2/(2\sigma^2)}\)</span> for mean <span class="math inline">\(m\)</span>, so <span id="eq-auto-03divergences-2"><span class="math display">\[L(x) = \ln\frac{\sigma_1}{\sigma_0} - \frac{(x - m_0)^2}{2\sigma_0^2} + \frac{(x - m_1)^2}{2\sigma_1^2}. \tag{3.2}\]</span></span> Unlike the equal-variance case, <span class="math inline">\(L\)</span> is quadratic in <span class="math inline">\(x\)</span>.</li>
-<li><strong>Two second moments under <span class="math inline">\(P\)</span>.</strong> <span class="math inline">\(\mathbb E_P(X - m_0)^2 = \sigma_0^2\)</span>. For the other, write <span class="math inline">\(X - m_1 = (X - m_0) + \Delta\)</span>; the cross term averages to 0, so <span class="math inline">\(\mathbb E_P(X - m_1)^2 = \sigma_0^2 + \Delta^2\)</span>.</li>
-<li><strong>Average <span class="math inline">\(L\)</span> under <span class="math inline">\(P\)</span>:</strong> <span class="math inline">\(D_{\mathrm{KL}} = \ln\frac{\sigma_1}{\sigma_0} - \frac12 + \frac{\sigma_0^2 + \Delta^2}{2\sigma_1^2}\)</span>, the claimed formula.</li>
-<li><strong>Check.</strong> For <span class="math inline">\(\mathcal N(0, 1)\|\mathcal N(0, 4)\)</span>: <span class="math inline">\(\sigma_0 = 1\)</span>, <span class="math inline">\(\sigma_1 = 2\)</span>, <span class="math inline">\(\Delta = 0\)</span>, so <span class="math inline">\(D_{\mathrm{KL}} = \ln2 + \frac18 - \frac12 = 0.3181\)</span>. A numerical integral of <span class="math inline">\(p\ln(p/q)\)</span> gives 0.3181 as well. In the other direction, <span class="math inline">\(D_{\mathrm{KL}}(\mathcal N(0, 4)\|\mathcal N(0, 1)) = -\ln2 + 2 - \frac12 = 0.8069\)</span>: KL is not symmetric here. With <span class="math inline">\(\sigma_0 = \sigma_1\)</span> the formula reduces to <span class="math inline">\(\Delta^2/(2\sigma^2)\)</span>, as in <a href="../../book-full/part01-prerequisites/03-divergences.html#eq-gauss-renyi">Equation&nbsp;3.15</a>.</li>
+<li><strong>Two second moments under <span class="math inline">\(P\)</span>.</strong> <span class="math inline">\(\mathbb E_P(X - m_0)^2 = \sigma_0^2\)</span>. For the other, write <span class="math inline">\(X - m_1 = (X - m_0) + s\)</span>; the cross term averages to 0, so <span class="math inline">\(\mathbb E_P(X - m_1)^2 = \sigma_0^2 + s^2\)</span>.</li>
+<li><strong>Average <span class="math inline">\(L\)</span> under <span class="math inline">\(P\)</span>:</strong> <span class="math inline">\(D_{\mathrm{KL}} = \ln\frac{\sigma_1}{\sigma_0} - \frac12 + \frac{\sigma_0^2 + s^2}{2\sigma_1^2}\)</span>, the claimed formula.</li>
+<li><strong>Check.</strong> For <span class="math inline">\(\mathcal N(0, 1)\|\mathcal N(0, 4)\)</span>: <span class="math inline">\(\sigma_0 = 1\)</span>, <span class="math inline">\(\sigma_1 = 2\)</span>, <span class="math inline">\(s = 0\)</span>, so <span class="math inline">\(D_{\mathrm{KL}} = \ln2 + \frac18 - \frac12 = 0.3181\)</span>. A numerical integral of <span class="math inline">\(p\ln(p/q)\)</span> gives 0.3181 as well. In the other direction, <span class="math inline">\(D_{\mathrm{KL}}(\mathcal N(0, 4)\|\mathcal N(0, 1)) = -\ln2 + 2 - \frac12 = 0.8069\)</span>: KL is not symmetric here. With <span class="math inline">\(\sigma_0 = \sigma_1\)</span> the formula reduces to <span class="math inline">\(s^2/(2\sigma^2)\)</span>, as in <a href="../../book-full/part01-prerequisites/03-divergences.html#eq-gauss-renyi">Equation&nbsp;3.15</a>.</li>
 </ol>
 <p><strong>Rényi, by route 1.</strong></p>
 <ol type="1">
 <li><strong>Constants.</strong> <span class="math inline">\(p^\alpha q^{1-\alpha}\)</span> has the constant factor <span class="math inline">\(\frac{1}{\sqrt{2\pi}}\sigma_0^{-\alpha}\sigma_1^{-(1-\alpha)}\)</span> times <span class="math inline">\(\exp\big(-\frac12B(x)\big)\)</span>, with <span id="eq-auto-03divergences-3"><span class="math display">\[B(x) = w_0(x - m_0)^2 + w_1(x - m_1)^2, \qquad w_0 = \frac{\alpha}{\sigma_0^2},\quad w_1 = \frac{1 - \alpha}{\sigma_1^2}. \tag{3.3}\]</span></span></li>
 <li><strong>Finiteness.</strong> The coefficient of <span class="math inline">\(x^2\)</span> in <span class="math inline">\(-\frac12B\)</span> is <span class="math inline">\(-\frac12(w_0 + w_1)\)</span>. If <span class="math inline">\(w_0 + w_1 \le 0\)</span>, the integrand does not decay in at least one direction (it grows like <span class="math inline">\(e^{cx^2}\)</span>, or, when the coefficient is exactly 0, like <span class="math inline">\(e^{cx}\)</span> or a constant), and the integral is infinite. So the integral is finite exactly when <span id="eq-auto-03divergences-4"><span class="math display">\[w_0 + w_1 = \frac{\alpha}{\sigma_0^2} + \frac{1 - \alpha}{\sigma_1^2} &gt; 0 \iff \sigma_\alpha^2 := \alpha\sigma_1^2 + (1 - \alpha)\sigma_0^2 &gt; 0 \tag{3.4}\]</span></span> (multiply by <span class="math inline">\(\sigma_0^2\sigma_1^2 &gt; 0\)</span>). Note <span class="math inline">\(w_0 + w_1 = \sigma_\alpha^2/(\sigma_0^2\sigma_1^2)\)</span>.</li>
-<li><strong>Complete the square.</strong> For weights with <span class="math inline">\(w_0 + w_1 &gt; 0\)</span>, <span class="math inline">\(w_0(x - m_0)^2 + w_1(x - m_1)^2 = (w_0 + w_1)(x - \bar m)^2 + \frac{w_0w_1}{w_0 + w_1}\Delta^2\)</span> with <span class="math inline">\(\bar m = \frac{w_0m_0 + w_1m_1}{w_0 + w_1}\)</span>. (Expand both sides: the <span class="math inline">\(x^2\)</span> and <span class="math inline">\(x\)</span> terms match by the choice of <span class="math inline">\(\bar m\)</span>, and the constant is what is left.) Here <span class="math inline">\(\frac{w_0w_1}{w_0 + w_1} = \frac{\alpha(1-\alpha)}{\sigma_0^2\sigma_1^2}\cdot\frac{\sigma_0^2\sigma_1^2}{\sigma_\alpha^2} = \frac{\alpha(1 - \alpha)}{\sigma_\alpha^2}\)</span>.</li>
-<li><strong>Integrate.</strong> <span class="math inline">\(\int e^{-(w_0 + w_1)(x - \bar m)^2/2}dx = \sqrt{2\pi/(w_0 + w_1)} = \sqrt{2\pi}\,\sigma_0\sigma_1/\sigma_\alpha\)</span>. So <span id="eq-auto-03divergences-5"><span class="math display">\[\int p^\alpha q^{1-\alpha}\,dx = \frac{\sigma_0^{1-\alpha}\sigma_1^{\alpha}}{\sigma_\alpha}\exp\left(-\frac{\alpha(1-\alpha)\Delta^2}{2\sigma_\alpha^2}\right). \tag{3.5}\]</span></span></li>
-<li><strong>Take the logarithm and divide by <span class="math inline">\(\alpha - 1\)</span>.</strong> The exponent gives <span class="math inline">\(\frac{\alpha\Delta^2}{2\sigma_\alpha^2}\)</span>, as in the equal-variance case. The prefactor gives <span class="math inline">\(\frac{(1-\alpha)\ln\sigma_0 + \alpha\ln\sigma_1 - \ln\sigma_\alpha}{\alpha - 1} = \ln\frac{\sigma_1}{\sigma_0} + \frac{\ln\sigma_1 - \ln\sigma_\alpha}{\alpha - 1}\)</span>. Together, <span id="eq-auto-03divergences-6"><span class="math display">\[D_\alpha(P\|Q) = \ln\frac{\sigma_1}{\sigma_0} + \frac{1}{2(\alpha - 1)}\ln\frac{\sigma_1^2}{\sigma_\alpha^2} + \frac{\alpha\Delta^2}{2\sigma_\alpha^2} \quad\text{if } \sigma_\alpha^2 &gt; 0, \qquad D_\alpha = \infty \text{ otherwise}. \tag{3.6}\]</span></span></li>
+<li><strong>Complete the square.</strong> For weights with <span class="math inline">\(w_0 + w_1 &gt; 0\)</span>, <span class="math inline">\(w_0(x - m_0)^2 + w_1(x - m_1)^2 = (w_0 + w_1)(x - \bar m)^2 + \frac{w_0w_1}{w_0 + w_1}s^2\)</span> with <span class="math inline">\(\bar m = \frac{w_0m_0 + w_1m_1}{w_0 + w_1}\)</span>. (Expand both sides: the <span class="math inline">\(x^2\)</span> and <span class="math inline">\(x\)</span> terms match by the choice of <span class="math inline">\(\bar m\)</span>, and the constant is what is left.) Here <span class="math inline">\(\frac{w_0w_1}{w_0 + w_1} = \frac{\alpha(1-\alpha)}{\sigma_0^2\sigma_1^2}\cdot\frac{\sigma_0^2\sigma_1^2}{\sigma_\alpha^2} = \frac{\alpha(1 - \alpha)}{\sigma_\alpha^2}\)</span>.</li>
+<li><strong>Integrate.</strong> <span class="math inline">\(\int e^{-(w_0 + w_1)(x - \bar m)^2/2}\mathrm dx = \sqrt{2\pi/(w_0 + w_1)} = \sqrt{2\pi}\,\sigma_0\sigma_1/\sigma_\alpha\)</span>. So <span id="eq-auto-03divergences-5"><span class="math display">\[\int p^\alpha q^{1-\alpha}\,\mathrm dx = \frac{\sigma_0^{1-\alpha}\sigma_1^{\alpha}}{\sigma_\alpha}\exp\left(-\frac{\alpha(1-\alpha)s^2}{2\sigma_\alpha^2}\right). \tag{3.5}\]</span></span></li>
+<li><strong>Take the logarithm and divide by <span class="math inline">\(\alpha - 1\)</span>.</strong> The exponent gives <span class="math inline">\(\frac{\alpha s^2}{2\sigma_\alpha^2}\)</span>, as in the equal-variance case. The prefactor gives <span class="math inline">\(\frac{(1-\alpha)\ln\sigma_0 + \alpha\ln\sigma_1 - \ln\sigma_\alpha}{\alpha - 1} = \ln\frac{\sigma_1}{\sigma_0} + \frac{\ln\sigma_1 - \ln\sigma_\alpha}{\alpha - 1}\)</span>. Together, <span id="eq-auto-03divergences-6"><span class="math display">\[D_\alpha(P\|Q) = \ln\frac{\sigma_1}{\sigma_0} + \frac{1}{2(\alpha - 1)}\ln\frac{\sigma_1^2}{\sigma_\alpha^2} + \frac{\alpha s^2}{2\sigma_\alpha^2} \quad\text{if } \sigma_\alpha^2 &gt; 0, \qquad D_\alpha = \infty \text{ otherwise}. \tag{3.6}\]</span></span></li>
 </ol>
 <p><strong>When is it finite?</strong> For <span class="math inline">\(0 &lt; \alpha &lt; 1\)</span>, <span class="math inline">\(\sigma_\alpha^2\)</span> is a weighted average of two positive numbers, so always positive. For <span class="math inline">\(\alpha &gt; 1\)</span>, <span class="math inline">\(\sigma_\alpha^2 = \sigma_0^2 + \alpha(\sigma_1^2 - \sigma_0^2)\)</span>. If <span class="math inline">\(\sigma_1 \ge \sigma_0\)</span> (the second distribution is at least as wide), it is positive for every <span class="math inline">\(\alpha\)</span>. If <span class="math inline">\(\sigma_1 &lt; \sigma_0\)</span>, it is positive only for <span id="eq-auto-03divergences-7"><span class="math display">\[\alpha &lt; \frac{\sigma_0^2}{\sigma_0^2 - \sigma_1^2}. \tag{3.7}\]</span></span> The reason: <span class="math inline">\(r^{\alpha-1}\)</span> grows like <span class="math inline">\(e^{cx^2}\)</span> in the tails when <span class="math inline">\(Q\)</span> is the narrower one, and for large <span class="math inline">\(\alpha\)</span> that beats the decay of <span class="math inline">\(p\)</span>.</p>
-<p><strong>Checks.</strong> As <span class="math inline">\(\alpha \to 1\)</span>, <span class="math inline">\(\sigma_\alpha^2 \to \sigma_1^2\)</span> and <span class="math inline">\(\frac{1}{\alpha - 1}\ln\frac{\sigma_1^2}{\sigma_\alpha^2} \to -\frac{\sigma_1^2 - \sigma_0^2}{\sigma_1^2}\)</span> (the derivative of <span class="math inline">\(-\ln\sigma_\alpha^2\)</span> at <span class="math inline">\(\alpha = 1\)</span>), so <span class="math inline">\(D_\alpha \to \ln\frac{\sigma_1}{\sigma_0} + \frac{\sigma_0^2}{2\sigma_1^2} - \frac12 + \frac{\Delta^2}{2\sigma_1^2}\)</span>, the KL above. With <span class="math inline">\(\sigma_0 = \sigma_1\)</span>, <span class="math inline">\(\sigma_\alpha = \sigma\)</span> and only <span class="math inline">\(\alpha\Delta^2/(2\sigma^2)\)</span> remains, which is <a href="../../book-full/part01-prerequisites/03-divergences.html#eq-gauss-renyi">Equation&nbsp;3.15</a>. <a href="#tbl-sol-divergences-gauss" class="quarto-xref">Table&nbsp;<span>3.2</span></a> compares the formula with a numerical integral.</p>
+<p><strong>Checks.</strong> As <span class="math inline">\(\alpha \to 1\)</span>, <span class="math inline">\(\sigma_\alpha^2 \to \sigma_1^2\)</span> and <span class="math inline">\(\frac{1}{\alpha - 1}\ln\frac{\sigma_1^2}{\sigma_\alpha^2} \to -\frac{\sigma_1^2 - \sigma_0^2}{\sigma_1^2}\)</span> (the derivative of <span class="math inline">\(-\ln\sigma_\alpha^2\)</span> at <span class="math inline">\(\alpha = 1\)</span>), so <span class="math inline">\(D_\alpha \to \ln\frac{\sigma_1}{\sigma_0} + \frac{\sigma_0^2}{2\sigma_1^2} - \frac12 + \frac{s^2}{2\sigma_1^2}\)</span>, the KL above. With <span class="math inline">\(\sigma_0 = \sigma_1\)</span>, <span class="math inline">\(\sigma_\alpha = \sigma\)</span> and only <span class="math inline">\(\alpha s^2/(2\sigma^2)\)</span> remains, which is <a href="../../book-full/part01-prerequisites/03-divergences.html#eq-gauss-renyi">Equation&nbsp;3.15</a>. <a href="#tbl-sol-divergences-gauss" class="quarto-xref">Table&nbsp;<span>3.2</span></a> compares the formula with a numerical integral.</p>
 <div id="tbl-sol-divergences-gauss" class="quarto-float quarto-figure quarto-figure-center anchored">
 <figure class="quarto-float quarto-float-tbl figure">
 <figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl" id="tbl-sol-divergences-gauss-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
@@ -703,8 +703,8 @@ Table&nbsp;3.2: Rényi divergences between Gaussians with different variances, f
 </div>
 </div>
 </section>
-<section id="sec-sol-divergences-3" class="level2" data-number="3.3">
-<h2 data-number="3.3" class="anchored" data-anchor-id="sec-sol-divergences-3"><span class="header-section-number">3.3</span> Bhattacharyya and Hellinger</h2>
+<section id="sec-sol-div-3" class="level2" data-number="3.3">
+<h2 data-number="3.3" class="anchored" data-anchor-id="sec-sol-div-3"><span class="header-section-number">3.3</span> Bhattacharyya and Hellinger</h2>
 <blockquote class="blockquote">
 <p><strong>Exercise 3.</strong> <strong>Bhattacharyya and Hellinger.</strong> Show <span class="math inline">\(D_{1/2}(P\|Q) = -2\ln\big(1 - \frac12H^2\big)\)</span> with <span class="math inline">\(H^2 = \sum(\sqrt p - \sqrt q)^2\)</span>, and check it on the die using <a href="../../book-full/part01-prerequisites/03-divergences.html#tbl-div-f">Table&nbsp;3.11</a> and <a href="../../book-full/part01-prerequisites/03-divergences.html#tbl-div-die-renyi">Table&nbsp;3.6</a>. For the Gaussian pair, show <span class="math inline">\(D_{1/2} = \mu^2/4\)</span>. <em>(Rényi, f-divergences)</em></p>
 </blockquote>
@@ -728,7 +728,7 @@ Table&nbsp;3.2: Rényi divergences between Gaussians with different variances, f
 <p><strong>On the die.</strong> <a href="../../book-full/part01-prerequisites/03-divergences.html#tbl-div-f">Table&nbsp;3.11</a> gives <span class="math inline">\(H^2 = 0.1317\)</span>. Then <span class="math inline">\(\mathrm{BC} = 1 - 0.06585 = 0.9342\)</span> and <span class="math inline">\(-2\ln0.9342 = 0.1362\)</span>, the <span class="math inline">\(\alpha = 0.5\)</span> entry of <a href="../../book-full/part01-prerequisites/03-divergences.html#tbl-div-die-renyi">Table&nbsp;3.6</a> in both directions.</p>
 <p><strong>For the Gaussian pair.</strong> <span class="math inline">\(P = \mathcal N(0, \sigma^2)\)</span>, <span class="math inline">\(Q = \mathcal N(s, \sigma^2)\)</span>, <span class="math inline">\(\mu = s/\sigma\)</span>.</p>
 <ol type="1">
-<li>Step 4 of route 1 in the Gaussian section, at <span class="math inline">\(\alpha = \frac12\)</span>, gives <span class="math inline">\(\mathrm{BC} = \int\sqrt{pq}\,dx = \exp\big(-\frac{\frac12\cdot\frac12 s^2}{2\sigma^2}\big) = e^{-\mu^2/8}\)</span>.</li>
+<li>Step 4 of route 1 in the Gaussian section, at <span class="math inline">\(\alpha = \frac12\)</span>, gives <span class="math inline">\(\mathrm{BC} = \int\sqrt{pq}\,\mathrm dx = \exp\big(-\frac{\frac12\cdot\frac12 s^2}{2\sigma^2}\big) = e^{-\mu^2/8}\)</span>.</li>
 <li>So <span class="math inline">\(D_{1/2} = -2\ln e^{-\mu^2/8} = \mu^2/4\)</span>. This is <a href="../../book-full/part01-prerequisites/03-divergences.html#eq-gauss-renyi">Equation&nbsp;3.15</a> at <span class="math inline">\(\alpha = \frac12\)</span>.</li>
 <li>As a by-product, <span class="math inline">\(H^2 = 2\big(1 - e^{-\mu^2/8}\big)\)</span>.</li>
 </ol>
@@ -738,10 +738,10 @@ Table&nbsp;3.2: Rényi divergences between Gaussians with different variances, f
 </div>
 </div>
 </section>
-<section id="sec-sol-divergences-4" class="level2" data-number="3.4">
-<h2 data-number="3.4" class="anchored" data-anchor-id="sec-sol-divergences-4"><span class="header-section-number">3.4</span> Rejection sampling</h2>
+<section id="sec-sol-div-4" class="level2" data-number="3.4">
+<h2 data-number="3.4" class="anchored" data-anchor-id="sec-sol-div-4"><span class="header-section-number">3.4</span> Rejection sampling</h2>
 <blockquote class="blockquote">
-<p><strong>Exercise 4.</strong> <strong>Rejection sampling.</strong> In the rejection-sampling example, show in general that <span class="math inline">\(\mathrm{TV}(P, M) \le E_\gamma(P\|Q)\)</span>. <em>Hint: write <span class="math inline">\(\min(p, \gamma q) = p - e\)</span> with <span class="math inline">\(e = (p - \gamma q)_+\)</span>, so <span class="math inline">\(m = (p - e)/(1 - E_\gamma)\)</span>, and use <span class="math inline">\(e \le p\)</span>.</em> <em>(Hockey-stick)</em></p>
+<p><strong>Exercise 4.</strong> <strong>Rejection sampling.</strong> In the rejection-sampling example, show in general that <span class="math inline">\(\mathrm{TV}(P, \tilde P) \le E_\gamma(P\|Q)\)</span>. <em>Hint: write <span class="math inline">\(\min(p, \gamma q) = p - e\)</span> with <span class="math inline">\(e = (p - \gamma q)_+\)</span>, so <span class="math inline">\(\tilde p = (p - e)/(1 - E_\gamma)\)</span>, and use <span class="math inline">\(e \le p\)</span>.</em> <em>(Hockey-stick)</em></p>
 </blockquote>
 <div class="callout callout-style-default callout-tip callout-titled" title="Solution">
 <div class="callout-header d-flex align-content-center collapsed" data-bs-toggle="collapse" data-bs-target=".callout-4-contents" aria-controls="callout-4" aria-expanded="false" aria-label="Toggle callout">
@@ -758,10 +758,10 @@ Table&nbsp;3.2: Rényi divergences between Gaussians with different variances, f
 <p>Write <span class="math inline">\(E = E_\gamma(P\|Q)\)</span> and assume <span class="math inline">\(E &lt; 1\)</span>, so that some proposals are accepted.</p>
 <ol type="1">
 <li><strong>The uncovered part.</strong> <span class="math inline">\(\min(p, \gamma q) = p - (p - \gamma q)_+ = p - e\)</span>. (Where <span class="math inline">\(p \le \gamma q\)</span>, <span class="math inline">\(e = 0\)</span> and the min is <span class="math inline">\(p\)</span>; where <span class="math inline">\(p &gt; \gamma q\)</span>, the min is <span class="math inline">\(\gamma q = p - e\)</span>.)</li>
-<li><strong>Normalize.</strong> <span class="math inline">\(\sum_xe(x) = E\)</span> by the definition of <span class="math inline">\(E_\gamma\)</span>, so <span class="math inline">\(\sum_x\min(p, \gamma q) = 1 - E\)</span> and <span class="math inline">\(m = (p - e)/(1 - E)\)</span>.</li>
-<li><strong>The difference <span class="math inline">\(p - m\)</span>.</strong> <span class="math inline">\(p - m = \frac{p(1 - E) - p + e}{1 - E} = \frac{e - pE}{1 - E}\)</span>.</li>
+<li><strong>Normalize.</strong> <span class="math inline">\(\sum_xe(x) = E\)</span> by the definition of <span class="math inline">\(E_\gamma\)</span>, so <span class="math inline">\(\sum_x\min(p, \gamma q) = 1 - E\)</span> and <span class="math inline">\(\tilde p = (p - e)/(1 - E)\)</span>.</li>
+<li><strong>The difference <span class="math inline">\(p - \tilde p\)</span>.</strong> <span class="math inline">\(p - \tilde p = \frac{p(1 - E) - p + e}{1 - E} = \frac{e - pE}{1 - E}\)</span>.</li>
 <li><strong>Use <span class="math inline">\(e \le p\)</span>.</strong> Since <span class="math inline">\(e \le p\)</span> and <span class="math inline">\(E \ge 0\)</span>, <span class="math inline">\(e - pE \le e - eE = e(1 - E)\)</span>. The right side is non-negative, so <span class="math inline">\((e - pE)_+ \le e(1 - E)\)</span>.</li>
-<li><strong>Sum, using the form <span class="math inline">\(\mathrm{TV} = \sum(p - m)_+\)</span> of <a href="../../book-full/part01-prerequisites/03-divergences.html#eq-tv">Equation&nbsp;3.20</a>:</strong> <span id="eq-auto-03divergences-8"><span class="math display">\[\mathrm{TV}(P, M) = \frac{1}{1 - E}\sum_x(e - pE)_+ \le \frac{1}{1 - E}\sum_xe(1 - E) = E. \tag{3.8}\]</span></span></li>
+<li><strong>Sum, using the form <span class="math inline">\(\mathrm{TV} = \sum(p - \tilde p)_+\)</span> of <a href="../../book-full/part01-prerequisites/03-divergences.html#eq-tv">Equation&nbsp;3.20</a>:</strong> <span id="eq-auto-03divergences-8"><span class="math display">\[\mathrm{TV}(P, \tilde P) = \frac{1}{1 - E}\sum_x(e - pE)_+ \le \frac{1}{1 - E}\sum_xe(1 - E) = E. \tag{3.8}\]</span></span></li>
 </ol>
 <p><strong>On the die.</strong> <a href="#tbl-sol-divergences-reject" class="quarto-xref">Table&nbsp;<span>3.3</span></a> runs the envelope <span class="math inline">\(\gamma\cdot\)</span>fair over the range <span class="math inline">\(1 \le \gamma \le 3\)</span>. The bound holds everywhere, and both sides reach 0 at <span class="math inline">\(\gamma = 3 = \max r\)</span>.</p>
 <div id="tbl-sol-divergences-reject" class="quarto-float quarto-figure quarto-figure-center anchored">
@@ -771,6 +771,14 @@ Table&nbsp;3.3: Rejection sampling from the loaded die with a fair-die proposal 
 </figcaption>
 <div aria-describedby="tbl-sol-divergences-reject-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
 <table class="caption-top table">
+<colgroup>
+<col style="width: 16%">
+<col style="width: 16%">
+<col style="width: 16%">
+<col style="width: 16%">
+<col style="width: 16%">
+<col style="width: 16%">
+</colgroup>
 <thead>
 <tr class="header">
 <th><span class="math inline">\(\gamma\)</span></th>
@@ -783,7 +791,7 @@ Table&nbsp;3.3: Rejection sampling from the loaded die with a fair-die proposal 
 </thead>
 <tbody>
 <tr class="odd">
-<td><span class="math inline">\(m(6)\)</span></td>
+<td><span class="math inline">\(\tilde p(6)\)</span></td>
 <td>0.2500</td>
 <td>0.3333</td>
 <td>0.4000</td>
@@ -791,7 +799,7 @@ Table&nbsp;3.3: Rejection sampling from the loaded die with a fair-die proposal 
 <td>0.5000</td>
 </tr>
 <tr class="even">
-<td><span class="math inline">\(\mathrm{TV}(P, M)\)</span></td>
+<td><span class="math inline">\(\mathrm{TV}(P, \tilde P)\)</span></td>
 <td>0.2500</td>
 <td>0.1667</td>
 <td>0.1000</td>
@@ -811,14 +819,14 @@ Table&nbsp;3.3: Rejection sampling from the loaded die with a fair-die proposal 
 </div>
 </figure>
 </div>
-<p>The bound is loose by the factor <span class="math inline">\(1 - E\)</span> lost in step 4: the deficit <span class="math inline">\(e\)</span> is not all removed from <span class="math inline">\(m\)</span>, because renormalizing gives part of it back.</p>
+<p>The bound is loose by the factor <span class="math inline">\(1 - E\)</span> lost in step 4: the deficit <span class="math inline">\(e\)</span> is not all removed from <span class="math inline">\(\tilde p\)</span>, because renormalizing gives part of it back.</p>
 <p><em>A low envelope costs at most <span class="math inline">\(E_\gamma\)</span> in total variation, so <span class="math inline">\(E_\gamma\)</span> tells you how low an envelope you can afford.</em></p>
 </div>
 </div>
 </div>
 </section>
-<section id="sec-sol-divergences-5" class="level2" data-number="3.5">
-<h2 data-number="3.5" class="anchored" data-anchor-id="sec-sol-divergences-5"><span class="header-section-number">3.5</span> DPI for <span class="math inline">\(E_\gamma\)</span> directly</h2>
+<section id="sec-sol-div-5" class="level2" data-number="3.5">
+<h2 data-number="3.5" class="anchored" data-anchor-id="sec-sol-div-5"><span class="header-section-number">3.5</span> DPI for <span class="math inline">\(E_\gamma\)</span> directly</h2>
 <blockquote class="blockquote">
 <p><strong>Exercise 5.</strong> <strong>DPI for <span class="math inline">\(E_\gamma\)</span> directly.</strong> Without the f-divergence machinery, show <span class="math inline">\(E_\gamma(PK\|QK) \le E_\gamma(P\|Q)\)</span>. <em>Hint: <span class="math inline">\(PK(B) - \gamma QK(B) = \sum_xK(B\mid x)\big(p(x) - \gamma q(x)\big)\)</span> with <span class="math inline">\(K(B\mid x) \in [0, 1]\)</span>; use the randomized version of Fact 3.</em> <em>(Fact 3, DPI)</em></p>
 </blockquote>
@@ -851,10 +859,10 @@ Table&nbsp;3.3: Rejection sampling from the loaded die with a fair-die proposal 
 </div>
 </div>
 </section>
-<section id="sec-sol-divergences-6" class="level2" data-number="3.6">
-<h2 data-number="3.6" class="anchored" data-anchor-id="sec-sol-divergences-6"><span class="header-section-number">3.6</span> Pinsker’s constant is sharp</h2>
+<section id="sec-sol-div-6" class="level2" data-number="3.6">
+<h2 data-number="3.6" class="anchored" data-anchor-id="sec-sol-div-6"><span class="header-section-number">3.6</span> Pinsker’s constant is sharp</h2>
 <blockquote class="blockquote">
-<p><strong>Exercise 6.</strong> <strong>Pinsker’s constant is sharp.</strong> For <span class="math inline">\(P = \mathrm{Bernoulli}(\frac12 + \delta)\)</span> and <span class="math inline">\(Q = \mathrm{Bernoulli}(\frac12)\)</span>, show <span class="math inline">\(\mathrm{kl}(\frac12 + \delta, \frac12)/(2\delta^2) \to 1\)</span> as <span class="math inline">\(\delta \to 0\)</span>. <em>Hint: expand <span class="math inline">\(\ln(1 \pm 2\delta)\)</span> to second order.</em> <em>(Pinsker)</em></p>
+<p><strong>Exercise 6.</strong> <strong>Pinsker’s constant is sharp.</strong> For <span class="math inline">\(P = \mathrm{Bern}(\frac12 + \xi)\)</span> and <span class="math inline">\(Q = \mathrm{Bern}(\frac12)\)</span>, show <span class="math inline">\(\mathrm{kl}(\frac12 + \xi\|\frac12)/(2\xi^2) \to 1\)</span> as <span class="math inline">\(\xi \to 0\)</span>. <em>Hint: expand <span class="math inline">\(\ln(1 \pm 2\xi)\)</span> to second order.</em> <em>(Pinsker)</em></p>
 </blockquote>
 <div class="callout callout-style-default callout-tip callout-titled" title="Solution">
 <div class="callout-header d-flex align-content-center collapsed" data-bs-toggle="collapse" data-bs-target=".callout-6-contents" aria-controls="callout-6" aria-expanded="false" aria-label="Toggle callout">
@@ -869,17 +877,17 @@ Table&nbsp;3.3: Rejection sampling from the loaded die with a fair-die proposal 
 <div id="callout-6" class="callout-6-contents callout-collapse collapse">
 <div class="callout-body-container callout-body">
 <ol type="1">
-<li><strong>Write out kl.</strong> <span class="math inline">\(\mathrm{kl}(\frac12 + \delta, \frac12) = (\frac12 + \delta)\ln\frac{1/2 + \delta}{1/2} + (\frac12 - \delta)\ln\frac{1/2 - \delta}{1/2} = (\frac12 + \delta)\ln(1 + 2\delta) + (\frac12 - \delta)\ln(1 - 2\delta)\)</span>.</li>
-<li><strong>Expand the logarithms.</strong> <span class="math inline">\(\ln(1 + u) = u - \frac{u^2}2 + O(u^3)\)</span>, so <span class="math inline">\(\ln(1 \pm 2\delta) = \pm2\delta - 2\delta^2 + O(\delta^3)\)</span>.</li>
-<li><strong>Multiply out</strong>, keeping terms up to <span class="math inline">\(\delta^2\)</span>: <span id="eq-auto-03divergences-10"><span class="math display">\[(\tfrac12 + \delta)(2\delta - 2\delta^2) = \delta - \delta^2 + 2\delta^2 + O(\delta^3), \qquad (\tfrac12 - \delta)(-2\delta - 2\delta^2) = -\delta - \delta^2 + 2\delta^2 + O(\delta^3). \tag{3.10}\]</span></span></li>
-<li><strong>Add.</strong> The <span class="math inline">\(\delta\)</span> terms cancel and the <span class="math inline">\(\delta^2\)</span> terms give <span class="math inline">\(2\delta^2\)</span>: <span class="math inline">\(\mathrm{kl}(\frac12 + \delta, \frac12) = 2\delta^2 + O(\delta^3)\)</span>. Divide by <span class="math inline">\(2\delta^2\)</span>: the ratio is <span class="math inline">\(1 + O(\delta) \to 1\)</span>.</li>
+<li><strong>Write out kl.</strong> <span class="math inline">\(\mathrm{kl}(\frac12 + \xi\|\frac12) = (\frac12 + \xi)\ln\frac{1/2 + \xi}{1/2} + (\frac12 - \xi)\ln\frac{1/2 - \xi}{1/2} = (\frac12 + \xi)\ln(1 + 2\xi) + (\frac12 - \xi)\ln(1 - 2\xi)\)</span>.</li>
+<li><strong>Expand the logarithms.</strong> <span class="math inline">\(\ln(1 + u) = u - \frac{u^2}2 + O(u^3)\)</span>, so <span class="math inline">\(\ln(1 \pm 2\xi) = \pm2\xi - 2\xi^2 + O(\xi^3)\)</span>.</li>
+<li><strong>Multiply out</strong>, keeping terms up to <span class="math inline">\(\xi^2\)</span>: <span id="eq-auto-03divergences-10"><span class="math display">\[(\tfrac12 + \xi)(2\xi - 2\xi^2) = \xi - \xi^2 + 2\xi^2 + O(\xi^3), \qquad (\tfrac12 - \xi)(-2\xi - 2\xi^2) = -\xi - \xi^2 + 2\xi^2 + O(\xi^3). \tag{3.10}\]</span></span></li>
+<li><strong>Add.</strong> The <span class="math inline">\(\xi\)</span> terms cancel and the <span class="math inline">\(\xi^2\)</span> terms give <span class="math inline">\(2\xi^2\)</span>: <span class="math inline">\(\mathrm{kl}(\frac12 + \xi\|\frac12) = 2\xi^2 + O(\xi^3)\)</span>. Divide by <span class="math inline">\(2\xi^2\)</span>: the ratio is <span class="math inline">\(1 + O(\xi) \to 1\)</span>.</li>
 </ol>
-<p><strong>Why this makes the constant sharp.</strong> Here <span class="math inline">\(\mathrm{TV}(P, Q) = \delta\)</span> (one outcome gains <span class="math inline">\(\delta\)</span>, the other loses it). Pinsker says <span class="math inline">\(\mathrm{KL} \ge 2\,\mathrm{TV}^2 = 2\delta^2\)</span>. If some constant <span class="math inline">\(c &gt; 2\)</span> worked, <span class="math inline">\(\mathrm{KL} \ge c\,\mathrm{TV}^2\)</span>, the ratio <span class="math inline">\(\mathrm{kl}/(2\delta^2)\)</span> would stay at least <span class="math inline">\(c/2 &gt; 1\)</span> for all <span class="math inline">\(\delta\)</span>, which contradicts the limit 1.</p>
-<p><strong>How fast.</strong> kl is even in <span class="math inline">\(\delta\)</span> (swapping heads and tails maps <span class="math inline">\(\delta\)</span> to <span class="math inline">\(-\delta\)</span>), so the <span class="math inline">\(O(\delta^3)\)</span> term is in fact zero; carrying the expansion one order further gives the ratio <span class="math inline">\(1 + \frac23\delta^2 + O(\delta^4)\)</span>. <a href="#tbl-sol-divergences-pinsker" class="quarto-xref">Table&nbsp;<span>3.4</span></a> shows it.</p>
+<p><strong>Why this makes the constant sharp.</strong> Here <span class="math inline">\(\mathrm{TV}(P, Q) = \xi\)</span> (one outcome gains <span class="math inline">\(\xi\)</span>, the other loses it). Pinsker says <span class="math inline">\(D_{\mathrm{KL}}(P\|Q) \ge 2\,\mathrm{TV}(P, Q)^2 = 2\xi^2\)</span>. If some constant <span class="math inline">\(c &gt; 2\)</span> worked, <span class="math inline">\(D_{\mathrm{KL}}(P\|Q) \ge c\,\mathrm{TV}(P, Q)^2\)</span>, the ratio <span class="math inline">\(\mathrm{kl}(\frac12 + \xi\|\frac12)/(2\xi^2)\)</span> would stay at least <span class="math inline">\(c/2 &gt; 1\)</span> for all <span class="math inline">\(\xi\)</span>, which contradicts the limit 1.</p>
+<p><strong>How fast.</strong> kl is even in <span class="math inline">\(\xi\)</span> (swapping heads and tails maps <span class="math inline">\(\xi\)</span> to <span class="math inline">\(-\xi\)</span>), so the <span class="math inline">\(O(\xi^3)\)</span> term is in fact zero; carrying the expansion one order further gives the ratio <span class="math inline">\(1 + \frac23\xi^2 + O(\xi^4)\)</span>. <a href="#tbl-sol-divergences-pinsker" class="quarto-xref">Table&nbsp;<span>3.4</span></a> shows it.</p>
 <div id="tbl-sol-divergences-pinsker" class="quarto-float quarto-figure quarto-figure-center anchored">
 <figure class="quarto-float quarto-float-tbl figure">
 <figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl" id="tbl-sol-divergences-pinsker-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-Table&nbsp;3.4: The ratio of the binary KL to Pinsker’s lower bound <span class="math inline">\(2\delta^2\)</span>, for a coin with bias <span class="math inline">\(\frac12 + \delta\)</span> against a fair coin.
+Table&nbsp;3.4: The ratio of the binary KL to Pinsker’s lower bound <span class="math inline">\(2\xi^2\)</span>, for a coin with bias <span class="math inline">\(\frac12 + \xi\)</span> against a fair coin.
 </figcaption>
 <div aria-describedby="tbl-sol-divergences-pinsker-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
 <table class="caption-top table">
@@ -891,7 +899,7 @@ Table&nbsp;3.4: The ratio of the binary KL to Pinsker’s lower bound <span clas
 </colgroup>
 <thead>
 <tr class="header">
-<th><span class="math inline">\(\delta\)</span></th>
+<th><span class="math inline">\(\xi\)</span></th>
 <th>0.2</th>
 <th>0.1</th>
 <th>0.01</th>
@@ -899,13 +907,13 @@ Table&nbsp;3.4: The ratio of the binary KL to Pinsker’s lower bound <span clas
 </thead>
 <tbody>
 <tr class="odd">
-<td><span class="math inline">\(\mathrm{kl}(\frac12 + \delta, \frac12)/(2\delta^2)\)</span></td>
+<td><span class="math inline">\(\mathrm{kl}(\frac12 + \xi\|\frac12)/(2\xi^2)\)</span></td>
 <td>1.0285</td>
 <td>1.0068</td>
 <td>1.0001</td>
 </tr>
 <tr class="even">
-<td><span class="math inline">\(1 + \frac23\delta^2\)</span></td>
+<td><span class="math inline">\(1 + \frac23\xi^2\)</span></td>
 <td>1.0267</td>
 <td>1.0067</td>
 <td>1.0001</td>
@@ -920,10 +928,10 @@ Table&nbsp;3.4: The ratio of the binary KL to Pinsker’s lower bound <span clas
 </div>
 </div>
 </section>
-<section id="sec-sol-divergences-7" class="level2" data-number="3.7">
-<h2 data-number="3.7" class="anchored" data-anchor-id="sec-sol-divergences-7"><span class="header-section-number">3.7</span> Samples needed for two coins</h2>
+<section id="sec-sol-div-7" class="level2" data-number="3.7">
+<h2 data-number="3.7" class="anchored" data-anchor-id="sec-sol-div-7"><span class="header-section-number">3.7</span> Samples needed for two coins</h2>
 <blockquote class="blockquote">
-<p><strong>Exercise 7.</strong> <strong>Samples needed for two coins.</strong> You flip a coin that is either fair or has heads probability 0.6. Use additivity and Pinsker to find how many flips <span class="math inline">\(n\)</span> are necessary before the TV between <span class="math inline">\(n\)</span> flips of the two coins can reach 0.8. <em>Check: <span class="math inline">\(\mathrm{kl}(0.6, 0.5) = 0.02014\)</span>, so <span class="math inline">\(n \ge 2\times0.8^2/0.02014\)</span>, that is <span class="math inline">\(n \ge 64\)</span>.</em> Is this a lower or an upper bound on the flips you need? <em>(Additivity, Pinsker)</em></p>
+<p><strong>Exercise 7.</strong> <strong>Samples needed for two coins.</strong> You flip a coin that is either fair or has heads probability 0.6. Use additivity and Pinsker to find how many flips <span class="math inline">\(n\)</span> are necessary before the TV between <span class="math inline">\(n\)</span> flips of the two coins can reach 0.8. <em>Check: <span class="math inline">\(\mathrm{kl}(0.6\|0.5) = 0.02014\)</span>, so <span class="math inline">\(n \ge 2\times0.8^2/0.02014\)</span>, that is <span class="math inline">\(n \ge 64\)</span>.</em> Is this a lower or an upper bound on the flips you need? <em>(Additivity, Pinsker)</em></p>
 </blockquote>
 <div class="callout callout-style-default callout-tip callout-titled" title="Solution">
 <div class="callout-header d-flex align-content-center collapsed" data-bs-toggle="collapse" data-bs-target=".callout-7-contents" aria-controls="callout-7" aria-expanded="false" aria-label="Toggle callout">
@@ -938,9 +946,9 @@ Table&nbsp;3.4: The ratio of the binary KL to Pinsker’s lower bound <span clas
 <div id="callout-7" class="callout-7-contents callout-collapse collapse">
 <div class="callout-body-container callout-body">
 <ol type="1">
-<li><strong>One flip.</strong> <span class="math inline">\(\mathrm{kl}(0.6, 0.5) = 0.6\ln\frac{0.6}{0.5} + 0.4\ln\frac{0.4}{0.5} = 0.6\ln1.2 + 0.4\ln0.8 = 0.02014\)</span>.</li>
-<li><strong><span class="math inline">\(n\)</span> flips, by additivity</strong> (<a href="../../book-full/part01-prerequisites/03-divergences.html#eq-kl-additive">Equation&nbsp;3.6</a>): <span class="math inline">\(\mathrm{KL}_n = 0.02014\,n\)</span>.</li>
-<li><strong>Pinsker</strong> (<a href="../../book-full/part01-prerequisites/03-divergences.html#eq-pinsker">Equation&nbsp;3.32</a>): <span class="math inline">\(\mathrm{TV}_n \le \sqrt{\mathrm{KL}_n/2} = \sqrt{0.02014\,n/2}\)</span>.</li>
+<li><strong>One flip.</strong> <span class="math inline">\(\mathrm{kl}(0.6\|0.5) = 0.6\ln\frac{0.6}{0.5} + 0.4\ln\frac{0.4}{0.5} = 0.6\ln1.2 + 0.4\ln0.8 = 0.02014\)</span>.</li>
+<li><strong><span class="math inline">\(n\)</span> flips, by additivity</strong> (<a href="../../book-full/part01-prerequisites/03-divergences.html#eq-kl-additive">Equation&nbsp;3.6</a>): <span class="math inline">\(D_{\mathrm{KL}}(P^n\|Q^n) = 0.02014\,n\)</span>, where <span class="math inline">\(P\)</span> is the biased coin and <span class="math inline">\(Q\)</span> the fair one.</li>
+<li><strong>Pinsker</strong> (<a href="../../book-full/part01-prerequisites/03-divergences.html#eq-pinsker">Equation&nbsp;3.32</a>): <span class="math inline">\(\mathrm{TV}(P^n, Q^n) \le \sqrt{D_{\mathrm{KL}}(P^n\|Q^n)/2} = \sqrt{0.02014\,n/2}\)</span>.</li>
 <li><strong>Require TV to reach 0.8.</strong> That needs <span class="math inline">\(\sqrt{0.02014\,n/2} \ge 0.8\)</span>, that is <span class="math inline">\(n \ge 2\times0.8^2/0.02014 = 63.6\)</span>. Since <span class="math inline">\(n\)</span> is an integer, <span class="math inline">\(n \ge 64\)</span>. The check value is right.</li>
 </ol>
 <p><strong>Lower or upper bound?</strong> A <strong>lower bound</strong>. Pinsker caps the TV, so with fewer than 64 flips <em>no</em> test can reach TV 0.8. It does not say 64 flips are enough. The exact TV (computed on the number of heads, which is a sufficient statistic, so by the equality case of the DPI it has the same TV as the whole sequence) is only 0.5805 at <span class="math inline">\(n = 64\)</span>, and first reaches 0.8 at <span class="math inline">\(n = 162\)</span>. Pinsker is off by a factor of about 2.5 here, because it is tight only near TV <span class="math inline">\(= 0\)</span>. Bretagnolle–Huber (<a href="../../book-full/part01-prerequisites/03-divergences.html#eq-bh">Equation&nbsp;3.33</a>) gives the weaker requirement <span class="math inline">\(n \ge \ln\frac{1}{1 - 0.64}/0.02014\)</span>, that is <span class="math inline">\(n \ge 51\)</span>: the KL that Pinsker needs for TV <span class="math inline">\(= 0.8\)</span> is <span class="math inline">\(2\times0.8^2 = 1.28\)</span>, below the crossover 1.59 of <a href="../../book-full/part01-prerequisites/03-divergences.html#sec-div-pinsker">Section&nbsp;3.11</a>, so Pinsker is the stronger of the two here.</p>
@@ -949,8 +957,8 @@ Table&nbsp;3.4: The ratio of the binary KL to Pinsker’s lower bound <span clas
 </div>
 </div>
 </section>
-<section id="sec-sol-divergences-8" class="level2" data-number="3.8">
-<h2 data-number="3.8" class="anchored" data-anchor-id="sec-sol-divergences-8"><span class="header-section-number">3.8</span> Monotonicity of TV over samples</h2>
+<section id="sec-sol-div-8" class="level2" data-number="3.8">
+<h2 data-number="3.8" class="anchored" data-anchor-id="sec-sol-div-8"><span class="header-section-number">3.8</span> Monotonicity of TV over samples</h2>
 <blockquote class="blockquote">
 <p><strong>Exercise 8.</strong> <strong>Monotonicity of TV over samples.</strong> Show that <span class="math inline">\(\mathrm{TV}(P^n, Q^n)\)</span> is non-decreasing in <span class="math inline">\(n\)</span>. <em>Hint: dropping the last sample is a channel.</em> <em>(DPI)</em></p>
 </blockquote>

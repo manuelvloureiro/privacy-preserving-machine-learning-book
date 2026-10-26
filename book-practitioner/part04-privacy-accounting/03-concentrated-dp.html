@@ -408,7 +408,7 @@ window.Quarto = {
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../part04-privacy-accounting/09-choosing-an-accountant.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">31</span>&nbsp; <span class="chapter-title">Report and review an ε claim</span></span></a>
+ <span class="menu-text"><span class="chapter-number">31</span>&nbsp; <span class="chapter-title">Choosing an accountant</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
@@ -599,7 +599,7 @@ window.Quarto = {
   <li><a href="#when-you-meet-it" id="toc-when-you-meet-it" class="nav-link" data-scroll-target="#when-you-meet-it"><span class="header-section-number">39.2</span> When you meet it</a></li>
   <li><a href="#sec-cdp-pure" id="toc-sec-cdp-pure" class="nav-link" data-scroll-target="#sec-cdp-pure"><span class="header-section-number">39.3</span> How to use it</a></li>
   <li><a href="#what-goes-wrong" id="toc-what-goes-wrong" class="nav-link" data-scroll-target="#what-goes-wrong"><span class="header-section-number">39.4</span> What goes wrong</a></li>
-  <li><a href="#further-reading" id="toc-further-reading" class="nav-link" data-scroll-target="#further-reading"><span class="header-section-number">39.5</span> Further reading</a></li>
+  <li><a href="#references" id="toc-references" class="nav-link" data-scroll-target="#references"><span class="header-section-number">39.5</span> References</a></li>
   </ul>
 </nav>
     </div>
@@ -628,7 +628,7 @@ window.Quarto = {
 <section id="sec-cdp-definition" class="level2" data-number="39.1">
 <h2 data-number="39.1" class="anchored" data-anchor-id="sec-cdp-definition"><span class="header-section-number">39.1</span> What it is</h2>
 <p>Zero-concentrated differential privacy (zCDP) keeps a differential privacy (DP) budget as one number that adds up. It builds on the curve of <a href="../part04-privacy-accounting/01-renyi-dp.html">Rényi differential privacy</a> (RDP), which bounds how far apart a mechanism’s outputs on neighbouring datasets can be, one value for each order <span class="math inline">\(\alpha\)</span>. A mechanism is <strong><span class="math inline">\(\rho\)</span>-zCDP</strong> when that curve lies under the straight line <span class="math inline">\(\rho\alpha\)</span> through the origin, so <span class="math inline">\(\rho\)</span> is a slope. Composition adds the slopes, even when each step is chosen after seeing the earlier outputs.</p>
-<p>The Gaussian mechanism’s curve is exactly such a line. Write <span class="math inline">\(\sigma\)</span> for the standard deviation of its noise and <span class="math inline">\(\Delta\)</span> for the query’s <span class="math inline">\(\ell_2\)</span> sensitivity, the most one record can move the query in Euclidean distance. One release then costs <span id="eq-auto-03concentrateddp-1"><span class="math display">\[\rho = \frac{\Delta^2}{2\sigma^2}. \tag{39.1}\]</span></span> So a release with noise multiplier 1 (<span class="math inline">\(\sigma = \Delta\)</span>) costs <span class="math inline">\(\rho = 0.5\)</span>, and doubling the noise cuts <span class="math inline">\(\rho\)</span> to a quarter.</p>
+<p>The Gaussian mechanism’s curve is exactly such a line. Write <span class="math inline">\(\sigma\)</span> for the standard deviation of its noise. The query <span class="math inline">\(f\)</span> has an <span class="math inline">\(\ell_2\)</span> sensitivity <span class="math inline">\(\Delta_2 f\)</span>, the most one record can move it in Euclidean distance. One release then costs <span id="eq-auto-03concentrateddp-1"><span class="math display">\[\rho = \frac{(\Delta_2 f)^2}{2\sigma^2}. \tag{39.1}\]</span></span> So a release with noise multiplier 1 (<span class="math inline">\(\sigma = \Delta_2 f\)</span>) costs <span class="math inline">\(\rho = 0.5\)</span>, and doubling the noise cuts <span class="math inline">\(\rho\)</span> to a quarter.</p>
 </section>
 <section id="when-you-meet-it" class="level2" data-number="39.2">
 <h2 data-number="39.2" class="anchored" data-anchor-id="when-you-meet-it"><span class="header-section-number">39.2</span> When you meet it</h2>
@@ -658,8 +658,8 @@ Table&nbsp;39.1: What each kind of step costs in a zCDP ledger.
 </thead>
 <tbody>
 <tr class="odd">
-<td>Gaussian, sensitivity <span class="math inline">\(\Delta\)</span>, noise <span class="math inline">\(\sigma\)</span></td>
-<td><span class="math inline">\(\Delta^2/(2\sigma^2)\)</span></td>
+<td>Gaussian, sensitivity <span class="math inline">\(\Delta_2 f\)</span>, noise <span class="math inline">\(\sigma\)</span></td>
+<td><span class="math inline">\((\Delta_2 f)^2/(2\sigma^2)\)</span></td>
 <td>Exact</td>
 </tr>
 <tr class="even">
@@ -674,7 +674,7 @@ Table&nbsp;39.1: What each kind of step costs in a zCDP ledger.
 </tr>
 <tr class="even">
 <td>Poisson-subsampled Gaussian</td>
-<td><span class="math inline">\(\Delta^2/(2\sigma^2)\)</span>, as without sampling</td>
+<td><span class="math inline">\((\Delta_2 f)^2/(2\sigma^2)\)</span>, as without sampling</td>
 <td>No amplification</td>
 </tr>
 </tbody>
@@ -703,8 +703,8 @@ Table&nbsp;39.1: What each kind of step costs in a zCDP ledger.
 <p>Several records of one user cost more: a group of <span class="math inline">\(m\)</span> records costs <span class="math inline">\(m^2\rho\)</span>, so four records in a 0.1-zCDP release cost <span class="math inline">\(\rho = 1.6\)</span>.</p>
 <p>A budget never renews, because next year’s releases about the same people compose with this year’s, so fix the period and its total in advance (<a href="../part05-dp-ml/12-release-governance.html#sec-relgov-after">Release and governance</a>). Diffprivlib’s <code>BudgetAccountant</code> (<a href="../part03-dp-foundations/02-properties.html#sec-dpprop-budget">Keeping a budget</a>) adds <span class="math inline">\(\varepsilon\)</span> by plain composition, so keep a long ledger in <span class="math inline">\(\rho\)</span>.</p>
 </section>
-<section id="further-reading" class="level2" data-number="39.5">
-<h2 data-number="39.5" class="anchored" data-anchor-id="further-reading"><span class="header-section-number">39.5</span> Further reading</h2>
+<section id="references" class="level2" data-number="39.5">
+<h2 data-number="39.5" class="anchored" data-anchor-id="references"><span class="header-section-number">39.5</span> References</h2>
 <ul>
 <li>Bun &amp; Steinke, “Concentrated Differential Privacy: Simplifications, Extensions, and Lower Bounds” (TCC 2016): the definition.</li>
 <li>Canonne, Kamath &amp; Steinke, “The Discrete Gaussian for Differential Privacy” (NeurIPS 2020): the improved conversion.</li>

@@ -408,7 +408,7 @@ window.Quarto = {
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../part04-privacy-accounting/09-choosing-an-accountant.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">31</span>&nbsp; <span class="chapter-title">Report and review an ε claim</span></span></a>
+ <span class="menu-text"><span class="chapter-number">31</span>&nbsp; <span class="chapter-title">Choosing an accountant</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
@@ -599,7 +599,7 @@ window.Quarto = {
   <li><a href="#when-you-meet-it" id="toc-when-you-meet-it" class="nav-link" data-scroll-target="#when-you-meet-it"><span class="header-section-number">17.2</span> When you meet it</a></li>
   <li><a href="#how-to-use-it" id="toc-how-to-use-it" class="nav-link" data-scroll-target="#how-to-use-it"><span class="header-section-number">17.3</span> How to use it</a></li>
   <li><a href="#what-goes-wrong" id="toc-what-goes-wrong" class="nav-link" data-scroll-target="#what-goes-wrong"><span class="header-section-number">17.4</span> What goes wrong</a></li>
-  <li><a href="#further-reading" id="toc-further-reading" class="nav-link" data-scroll-target="#further-reading"><span class="header-section-number">17.5</span> Further reading</a></li>
+  <li><a href="#references" id="toc-references" class="nav-link" data-scroll-target="#references"><span class="header-section-number">17.5</span> References</a></li>
   </ul>
 </nav>
     </div>
@@ -637,21 +637,26 @@ window.Quarto = {
 </section>
 <section id="how-to-use-it" class="level2" data-number="17.3">
 <h2 data-number="17.3" class="anchored" data-anchor-id="how-to-use-it"><span class="header-section-number">17.3</span> How to use it</h2>
-<p>To audit an aggregate release, first count the equations. If the published cells or allowed queries outnumber the people, exact answers can pin down every secret, and only the noise protects them. Then plug your noise level and number of queries into <a href="#eq-recon-ls-random" class="quarto-xref">Equation&nbsp;<span>17.2</span></a>, and run the attack if the prediction is far above the majority guess, as the snippet does. The release fails when either decoder beats that guess.</p>
+<p>To audit an aggregate release, first count the equations. If the published cells or allowed queries outnumber the people, exact answers can pin down every secret, and only the noise protects them. Then plug your noise level and number of queries into <a href="#eq-recon-ls-random" class="quarto-xref">Equation&nbsp;<span>17.2</span></a>, and run the attack if the prediction is far above the majority guess. The release fails when either decoder beats that guess. The snippet draws the noise from OpenDP’s Gaussian mechanism, as a release would, and runs least squares, the textbook attack. OpenDP’s noise cannot be seeded, so the snippet checks the share of bits recovered against the prediction instead of printing it.</p>
 <div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb1"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> statistics <span class="im">import</span> NormalDist</span>
 <span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> numpy <span class="im">as</span> np</span>
-<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a>rng <span class="op">=</span> np.random.default_rng(<span class="dv">0</span>)</span>
-<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a>n, m <span class="op">=</span> <span class="dv">500</span>, <span class="dv">2000</span>  <span class="co"># people with a secret bit each, and random subset-sum queries</span></span>
-<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a>sigma <span class="op">=</span> <span class="fl">0.25</span> <span class="op">*</span> np.sqrt(n)  <span class="co"># noise sd added to each answer</span></span>
-<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a>secret <span class="op">=</span> rng.integers(<span class="dv">0</span>, <span class="dv">2</span>, n)</span>
-<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a>queries <span class="op">=</span> rng.integers(<span class="dv">0</span>, <span class="dv">2</span>, (m, n))</span>
-<span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a>answers <span class="op">=</span> queries <span class="op">@</span> secret <span class="op">+</span> rng.normal(<span class="dv">0</span>, sigma, m)</span>
-<span id="cb1-11"><a href="#cb1-11" aria-hidden="true" tabindex="-1"></a>estimate <span class="op">=</span> np.linalg.lstsq(queries, answers, rcond<span class="op">=</span><span class="va">None</span>)[<span class="dv">0</span>]</span>
-<span id="cb1-12"><a href="#cb1-12" aria-hidden="true" tabindex="-1"></a>recovered <span class="op">=</span> np.mean(np.clip(estimate, <span class="dv">0</span>, <span class="dv">1</span>).<span class="bu">round</span>() <span class="op">==</span> secret)</span>
-<span id="cb1-13"><a href="#cb1-13" aria-hidden="true" tabindex="-1"></a>predicted <span class="op">=</span> NormalDist().cdf(np.sqrt(m <span class="op">-</span> n) <span class="op">/</span> (<span class="dv">4</span> <span class="op">*</span> sigma))</span>
-<span id="cb1-14"><a href="#cb1-14" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"recovered </span><span class="sc">{</span>recovered<span class="sc">:.4f}</span><span class="ss">, predicted </span><span class="sc">{</span>predicted<span class="sc">:.4f}</span><span class="ss">"</span>)  <span class="co"># recovered 0.9660, predicted 0.9584</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> opendp.prelude <span class="im">as</span> dp</span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a>dp.enable_features(<span class="st">"contrib"</span>)</span>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a>rng <span class="op">=</span> np.random.default_rng(<span class="dv">0</span>)</span>
+<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a>n, m <span class="op">=</span> <span class="dv">500</span>, <span class="dv">2000</span>  <span class="co"># people with a secret bit each, and random subset-sum queries</span></span>
+<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a>sigma <span class="op">=</span> <span class="fl">0.25</span> <span class="op">*</span> np.sqrt(n)  <span class="co"># noise sd added to each answer</span></span>
+<span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a>secret <span class="op">=</span> rng.integers(<span class="dv">0</span>, <span class="dv">2</span>, n)</span>
+<span id="cb1-11"><a href="#cb1-11" aria-hidden="true" tabindex="-1"></a>queries <span class="op">=</span> rng.integers(<span class="dv">0</span>, <span class="dv">2</span>, (m, n))</span>
+<span id="cb1-12"><a href="#cb1-12" aria-hidden="true" tabindex="-1"></a>space <span class="op">=</span> dp.vector_domain(dp.atom_domain(T<span class="op">=</span><span class="bu">float</span>, nan<span class="op">=</span><span class="va">False</span>)), dp.l2_distance(T<span class="op">=</span><span class="bu">float</span>)</span>
+<span id="cb1-13"><a href="#cb1-13" aria-hidden="true" tabindex="-1"></a>gaussian <span class="op">=</span> dp.m.make_gaussian(<span class="op">*</span>space, scale<span class="op">=</span>sigma)  <span class="co"># OpenDP's Gaussian mechanism on all m answers</span></span>
+<span id="cb1-14"><a href="#cb1-14" aria-hidden="true" tabindex="-1"></a>answers <span class="op">=</span> np.array(gaussian((queries <span class="op">@</span> secret).astype(<span class="bu">float</span>).tolist()))</span>
+<span id="cb1-15"><a href="#cb1-15" aria-hidden="true" tabindex="-1"></a>estimate <span class="op">=</span> np.linalg.lstsq(queries, answers, rcond<span class="op">=</span><span class="va">None</span>)[<span class="dv">0</span>]  <span class="co"># the textbook attack: least squares</span></span>
+<span id="cb1-16"><a href="#cb1-16" aria-hidden="true" tabindex="-1"></a>recovered <span class="op">=</span> np.mean(np.clip(estimate, <span class="dv">0</span>, <span class="dv">1</span>).<span class="bu">round</span>() <span class="op">==</span> secret)</span>
+<span id="cb1-17"><a href="#cb1-17" aria-hidden="true" tabindex="-1"></a>predicted <span class="op">=</span> NormalDist().cdf(np.sqrt(m <span class="op">-</span> n) <span class="op">/</span> (<span class="dv">4</span> <span class="op">*</span> sigma))</span>
+<span id="cb1-18"><a href="#cb1-18" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"predicted </span><span class="sc">{</span>predicted<span class="sc">:.4f}</span><span class="ss">"</span>)  <span class="co"># predicted 0.9584</span></span>
+<span id="cb1-19"><a href="#cb1-19" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"recovered within 0.04 of it: </span><span class="sc">{</span><span class="bu">abs</span>(recovered <span class="op">-</span> predicted) <span class="op">&lt;</span> <span class="fl">0.04</span><span class="sc">}</span><span class="ss">"</span>)  <span class="co"># recovered within 0.04 of it: True</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <p>The number of queries matters as much as the noise. With noise of twice <span class="math inline">\(\sqrt n\)</span>, four queries per person recovered only 0.5875 of the bits in the full edition’s simulation, so the curator looks safe. But solving <a href="#eq-recon-ls-random" class="quarto-xref">Equation&nbsp;<span>17.2</span></a> at that noise shows that 106.1 queries per person recover 90%. So the noise must grow with the number of answers, which is what differential privacy provides.</p>
 <p>For queries that are not random, Dinur and Nissim’s linear-programming decoder fits unknowns between 0 and 1 to the answers with <code>scipy.optimize.linprog</code>. For published tables, write each cell as a constraint on whole-number unknowns, solve with <code>scipy.optimize.milp</code>, and count the solutions, since a single one rebuilds the records.</p>
 </section>
@@ -660,8 +665,8 @@ window.Quarto = {
 <p>The usual mistake is to treat rounding, swapping households or small-cell suppression as noise. An attacker can round the answers of each dataset it tries, so rounding hides nothing. Swapping leaves most constraints exact, and a suppressed cell even adds one, since it says the count is below the threshold. Sticky noise, which repeats the same answer to a repeated query, only stops repeats, which the attack never needs.</p>
 <p>A second is to test one table at a time, when the risk lies in the union of all releases. A third is to trust least squares alone, because errors chosen against it hurt it more than random noise does. So reconstruct your own release with both decoders before publishing it, and record the result in <a href="../part02-attacks/10-risk-assessment.html">Pre-release privacy risk assessment</a>.</p>
 </section>
-<section id="further-reading" class="level2" data-number="17.5">
-<h2 data-number="17.5" class="anchored" data-anchor-id="further-reading"><span class="header-section-number">17.5</span> Further reading</h2>
+<section id="references" class="level2" data-number="17.5">
+<h2 data-number="17.5" class="anchored" data-anchor-id="references"><span class="header-section-number">17.5</span> References</h2>
 <ul>
 <li>Cohen &amp; Nissim, “Linear Program Reconstruction in Practice” (Journal of Privacy and Confidentiality, 2020): the attack on Diffix.</li>
 <li>Garfinkel, Abowd &amp; Martindale, “Understanding Database Reconstruction Attacks on Public Data” (2019): a census block rebuilt with a solver.</li>

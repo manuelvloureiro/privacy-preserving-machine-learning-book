@@ -408,7 +408,7 @@ window.Quarto = {
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../part04-privacy-accounting/09-choosing-an-accountant.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">31</span>&nbsp; <span class="chapter-title">Report and review an ε claim</span></span></a>
+ <span class="menu-text"><span class="chapter-number">31</span>&nbsp; <span class="chapter-title">Choosing an accountant</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
@@ -601,7 +601,7 @@ window.Quarto = {
   <li><a href="#sec-memo-exposure" id="toc-sec-memo-exposure" class="nav-link" data-scroll-target="#sec-memo-exposure"><span class="header-section-number">13.4</span> Auditing with canaries and exposure</a></li>
   <li><a href="#sec-memo-attack" id="toc-sec-memo-attack" class="nav-link" data-scroll-target="#sec-memo-attack"><span class="header-section-number">13.5</span> Extraction without the prefix: generate, rank, verify</a></li>
   <li><a href="#cheat-sheet" id="toc-cheat-sheet" class="nav-link" data-scroll-target="#cheat-sheet"><span class="header-section-number">13.6</span> Cheat sheet</a></li>
-  <li><a href="#further-reading" id="toc-further-reading" class="nav-link" data-scroll-target="#further-reading"><span class="header-section-number">13.7</span> Further reading</a></li>
+  <li><a href="#references" id="toc-references" class="nav-link" data-scroll-target="#references"><span class="header-section-number">13.7</span> References</a></li>
   </ul>
 </nav>
     </div>
@@ -707,10 +707,14 @@ Table&nbsp;13.1: The notions of memorization and when to use each. The first thr
 <span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> logprobs.<span class="bu">sum</span>(dim<span class="op">=</span>(<span class="dv">1</span>, <span class="dv">2</span>)).double().numpy()</span>
 <span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb1-11"><a href="#cb1-11" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-12"><a href="#cb1-12" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> exposure(canary_score: <span class="bu">float</span>, candidate_scores: Scores) <span class="op">-&gt;</span> <span class="bu">float</span>:</span>
-<span id="cb1-13"><a href="#cb1-13" aria-hidden="true" tabindex="-1"></a>    <span class="co">"""log2 of 1 / (the share of candidates the model finds at least as likely), canary included."""</span></span>
-<span id="cb1-14"><a href="#cb1-14" aria-hidden="true" tabindex="-1"></a>    at_least <span class="op">=</span> <span class="dv">1</span> <span class="op">+</span> np.<span class="bu">sum</span>(candidate_scores <span class="op">&gt;=</span> canary_score)</span>
-<span id="cb1-15"><a href="#cb1-15" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> math.log2((<span class="bu">len</span>(candidate_scores) <span class="op">+</span> <span class="dv">1</span>) <span class="op">/</span> at_least)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<span id="cb1-12"><a href="#cb1-12" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> canary_exposure(</span>
+<span id="cb1-13"><a href="#cb1-13" aria-hidden="true" tabindex="-1"></a>    model: PeftModel, tokenizer: PreTrainedTokenizerBase, canary: Canary, candidates: <span class="bu">list</span>[<span class="bu">str</span>]</span>
+<span id="cb1-14"><a href="#cb1-14" aria-hidden="true" tabindex="-1"></a>) <span class="op">-&gt;</span> <span class="bu">tuple</span>[<span class="bu">float</span>, <span class="bu">float</span>]:</span>
+<span id="cb1-15"><a href="#cb1-15" aria-hidden="true" tabindex="-1"></a>    <span class="co">"""The exposure of the canary's secret among the candidates, measured and extrapolated past the cap."""</span></span>
+<span id="cb1-16"><a href="#cb1-16" aria-hidden="true" tabindex="-1"></a>    candidate_scores <span class="op">=</span> scores_batched(model, tokenizer, canary.prefix, candidates)</span>
+<span id="cb1-17"><a href="#cb1-17" aria-hidden="true" tabindex="-1"></a>    score <span class="op">=</span> <span class="bu">float</span>(scores_batched(model, tokenizer, canary.prefix, [canary.secret])[<span class="dv">0</span>])</span>
+<span id="cb1-18"><a href="#cb1-18" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> exposure(score, candidate_scores), extrapolated_exposure(score, candidate_scores, SECRET_SPACE)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>The model comes from <code>transformers</code> and its adapters from <code>peft</code>, but no maintained library computes exposure. So <code>exposure</code> and <code>extrapolated_exposure</code> come from the book’s helper module <a href="https://github.com/manuelvloureiro/privacy-preserving-machine-learning-book/blob/main/code/practitioner_privacy_tests.py">practitioner_privacy_tests.py</a>, which follows the reference code in TensorFlow Privacy.</p>
 <p>The model trains on 1,024 sequences of Tiny Shakespeare, a public extract of Shakespeare’s plays. The script inserts three canaries at each copy count from 1 to 64, keeps three as controls, and ranks each value among 2,000 random candidates. The command <code>uv run python code/part05-dp-ml/practitioner_lora.py</code> runs it in about two and a half minutes on an idle CPU, and several times longer on a busy one. Each line gives a group’s mean exposure, then that exposure extrapolated past the cap the candidates set (explained below), and how many of its secrets greedy decoding wrote out.</p>
 <pre class="text"><code>non-private 1 copies: mean exposure 2.0 bits  extrapolated 2.0  extracted 0/3
 non-private 4 copies: mean exposure 5.9 bits  extrapolated 5.7  extracted 0/3
@@ -725,7 +729,7 @@ non-private controls: mean exposure 1.4 bits  extrapolated 1.5  extracted 0/3</c
 <h2 data-number="13.5" class="anchored" data-anchor-id="sec-memo-attack"><span class="header-section-number">13.5</span> Extraction without the prefix: generate, rank, verify</h2>
 <p>A real attacker has only the model. Carlini et al.&nbsp;(2021) extracted data from GPT-2 by generating many samples, ranking them by how likely each was to be memorized, and checking the top against public sources. The ranking is the hard step, because a model finds a string likely either because it is ordinary text or because it was memorized. A <strong>reference model</strong>, trained on similar data but not on the target’s training set, stands in for ordinary text. Write <span class="math inline">\(p_\theta(x)\)</span> for the target’s probability of a string <span class="math inline">\(x\)</span>, and <span class="math inline">\(p_{\mathrm{ref}}(x)\)</span> for the reference’s. Rank by the log-likelihood ratio <span id="eq-memo-ratio"><span class="math display">\[\Lambda(x) = \ln p_\theta(x) - \ln p_{\mathrm{ref}}(x). \tag{13.4}\]</span></span></p>
 <p>Raw likelihood puts first the strings that any model finds likely, such as software licences and boilerplate, which reveal nothing, and the ratio cancels them. A crude reference works. Carlini et al.&nbsp;(2021) used a smaller model of the same family. They also used the compressed length of the text, <code>len(zlib.compress(text.encode()))</code>, which measures how predictable the text is without any model. To audit your own fine-tuned model this way, the base model before fine-tuning is a natural reference.</p>
-<p>An attacker without the prefix extracts less than the discoverable rate suggests, but production models are not safe. Nasr et al.&nbsp;(2023) asked ChatGPT to repeat one word forever, until it left the assistant behaviour that alignment training gives it and wrote memorized text. For about 200 US dollars of queries they extracted over 10,000 examples, so alignment hides memorization from casual use without removing it.</p>
+<p>An attacker without the prefix extracts less than the discoverable rate suggests, but production models are not safe. Nasr et al.&nbsp;(2023) asked ChatGPT to repeat one word forever, until it left the assistant behaviour that alignment training gives it and wrote memorized text. For about 200 US dollars of queries they extracted over 10,000 records, so alignment hides memorization from casual use without removing it.</p>
 </section>
 <section id="cheat-sheet" class="level2" data-number="13.6">
 <h2 data-number="13.6" class="anchored" data-anchor-id="cheat-sheet"><span class="header-section-number">13.6</span> Cheat sheet</h2>
@@ -773,8 +777,8 @@ Table&nbsp;13.2: The results of this chapter.
 <li>A verbatim rate is a lower bound on the leak, not a measure of it.</li>
 </ul>
 </section>
-<section id="further-reading" class="level2" data-number="13.7">
-<h2 data-number="13.7" class="anchored" data-anchor-id="further-reading"><span class="header-section-number">13.7</span> Further reading</h2>
+<section id="references" class="level2" data-number="13.7">
+<h2 data-number="13.7" class="anchored" data-anchor-id="references"><span class="header-section-number">13.7</span> References</h2>
 <ul>
 <li>Carlini, Liu, Erlingsson, Kos &amp; Song, “The Secret Sharer: Evaluating and Testing Unintended Memorization in Neural Networks” (USENIX Security 2019): canaries, exposure and how to estimate it.</li>
 <li>Carlini, Ippolito, Jagielski, Lee, Tramèr &amp; Zhang, “Quantifying Memorization Across Neural Language Models” (ICLR 2023): how memorization scales with duplication, model size and prompt length.</li>

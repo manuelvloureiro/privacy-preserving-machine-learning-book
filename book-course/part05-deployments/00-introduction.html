@@ -367,12 +367,12 @@ window.Quarto = {
 <p>The earlier parts built differential privacy (DP) as mathematics, with a trusted curator who holds the data and releases noisy answers. This part asks what happens when the definition meets real systems, with millions of users, daily data collection and analysts outside the company. The deployments studied here are not just applications of earlier results. Each forced a new idea, and most of those ideas turned into theory of their own.</p>
 <p>The first chapter removes the trusted curator. In the local model each person randomizes their own data before sending it, so no one ever sees a raw record. The price is an error about <span class="math inline">\(\sqrt n\)</span> times larger than in the central model for <span class="math inline">\(n\)</span> people, and a lower bound shows that no noninteractive protocol can avoid it. Google, Apple and Microsoft accepted this price because they have hundreds of millions of users, and each solved a practical problem along the way. They had to handle questions repeated every day, find values that no one knew to ask about, and send numbers in a single bit.</p>
 <p>The second chapter looks for a middle ground and then returns to the central model. A shuffler that only mixes messages lets each person add far less noise, and a sum of bits can then be estimated with an error that does not grow with <span class="math inline">\(n\)</span>. A query service for advertisers brings a sharper analysis of the exponential mechanism and a fast way to select the top items of a histogram. Two large public data releases show how deployments choose what a neighbouring dataset is, and how they account for privacy with zero-concentrated differential privacy.</p>
-<div id="tbl-dep-chapters" class="quarto-float quarto-figure quarto-figure-center anchored">
+<div id="tbl-p5-chapters" class="quarto-float quarto-figure quarto-figure-center anchored">
 <figure class="quarto-float quarto-float-tbl figure">
-<figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl" id="tbl-dep-chapters-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl" id="tbl-p5-chapters-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
 Table&nbsp;1: The chapters of this part.
 </figcaption>
-<div aria-describedby="tbl-dep-chapters-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<div aria-describedby="tbl-p5-chapters-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
 <table class="caption-top table">
 <thead>
 <tr class="header">

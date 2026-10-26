@@ -450,7 +450,7 @@ window.Quarto = {
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../part05-dp-ml/05-private-prediction.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">42</span>&nbsp; <span class="chapter-title">Exercises: Private prediction</span></span></a>
+ <span class="menu-text"><span class="chapter-number">42</span>&nbsp; <span class="chapter-title">Exercises: Private prediction: PATE and in-context learning</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
@@ -501,12 +501,12 @@ window.Quarto = {
     <h2 id="toc-title">Table of contents</h2>
    
   <ul>
-  <li><a href="#sec-sol-subsampling-1" id="toc-sec-sol-subsampling-1" class="nav-link active" data-scroll-target="#sec-sol-subsampling-1"><span class="header-section-number">33.1</span> Subsampling twice</a></li>
-  <li><a href="#sec-sol-subsampling-2" id="toc-sec-sol-subsampling-2" class="nav-link" data-scroll-target="#sec-sol-subsampling-2"><span class="header-section-number">33.2</span> The binomial sum at α = 3</a></li>
-  <li><a href="#sec-sol-subsampling-3" id="toc-sec-sol-subsampling-3" class="nav-link" data-scroll-target="#sec-sol-subsampling-3"><span class="header-section-number">33.3</span> Replace-one under Poisson sampling, exactly</a></li>
-  <li><a href="#sec-sol-subsampling-4" id="toc-sec-sol-subsampling-4" class="nav-link" data-scroll-target="#sec-sol-subsampling-4"><span class="header-section-number">33.4</span> Inverting the accountant</a></li>
-  <li><a href="#sec-sol-subsampling-5" id="toc-sec-sol-subsampling-5" class="nav-link" data-scroll-target="#sec-sol-subsampling-5"><span class="header-section-number">33.5</span> Fixed-size batches, honestly</a></li>
-  <li><a href="#sec-sol-subsampling-6" id="toc-sec-sol-subsampling-6" class="nav-link" data-scroll-target="#sec-sol-subsampling-6"><span class="header-section-number">33.6</span> The first direction, exactly</a></li>
+  <li><a href="#sec-sol-sub-1" id="toc-sec-sol-sub-1" class="nav-link active" data-scroll-target="#sec-sol-sub-1"><span class="header-section-number">33.1</span> Subsampling twice</a></li>
+  <li><a href="#sec-sol-sub-2" id="toc-sec-sol-sub-2" class="nav-link" data-scroll-target="#sec-sol-sub-2"><span class="header-section-number">33.2</span> The binomial sum at α = 3</a></li>
+  <li><a href="#sec-sol-sub-3" id="toc-sec-sol-sub-3" class="nav-link" data-scroll-target="#sec-sol-sub-3"><span class="header-section-number">33.3</span> Replace-one under Poisson sampling, exactly</a></li>
+  <li><a href="#sec-sol-sub-4" id="toc-sec-sol-sub-4" class="nav-link" data-scroll-target="#sec-sol-sub-4"><span class="header-section-number">33.4</span> Inverting the accountant</a></li>
+  <li><a href="#sec-sol-sub-5" id="toc-sec-sol-sub-5" class="nav-link" data-scroll-target="#sec-sol-sub-5"><span class="header-section-number">33.5</span> Fixed-size batches, honestly</a></li>
+  <li><a href="#sec-sol-sub-6" id="toc-sec-sol-sub-6" class="nav-link" data-scroll-target="#sec-sol-sub-6"><span class="header-section-number">33.6</span> The first direction, exactly</a></li>
   </ul>
 </nav>
     </div>
@@ -534,8 +534,8 @@ window.Quarto = {
 
 <p>Exercises for <a href="../../book-full/part04-privacy-accounting/05-subsampling.html">Amplification by subsampling</a>, each with a worked solution. Try each exercise before opening its solution. The script <code>code/part04-privacy-accounting/solutions_subsampling.py</code> computes every number quoted here; run it with <code>uv run python code/part04-privacy-accounting/solutions_subsampling.py</code>.</p>
 <p>The solutions use the chapter’s notation. <span class="math inline">\(q\)</span> is the sampling rate, never a density. <span class="math inline">\(P_0 = \mathcal N(0, \sigma^2)\)</span> and <span class="math inline">\(P_1 = \mathcal N(1, \sigma^2)\)</span> are the outputs of one Gaussian step without and with the record, and <span class="math inline">\(\varepsilon(\alpha)\)</span> is the Rényi differential privacy (RDP) curve of the subsampled step. Stochastic gradient descent (SGD) with per-example clipping and Gaussian noise gives differential privacy (DP), and is called DP-SGD.</p>
-<section id="sec-sol-subsampling-1" class="level2" data-number="33.1">
-<h2 data-number="33.1" class="anchored" data-anchor-id="sec-sol-subsampling-1"><span class="header-section-number">33.1</span> Subsampling twice</h2>
+<section id="sec-sol-sub-1" class="level2" data-number="33.1">
+<h2 data-number="33.1" class="anchored" data-anchor-id="sec-sol-sub-1"><span class="header-section-number">33.1</span> Subsampling twice</h2>
 <blockquote class="blockquote">
 <p><strong>Exercise 1.</strong> <strong>Subsampling twice.</strong> Show that a Poisson sample with rate <span class="math inline">\(q_2\)</span> of a Poisson sample with rate <span class="math inline">\(q_1\)</span> is a Poisson sample with rate <span class="math inline">\(q_1q_2\)</span>, and that applying <a href="../../book-full/part04-privacy-accounting/05-subsampling.html#eq-sub-amplify">Equation&nbsp;33.5</a> twice gives the same <span class="math inline">\((\varepsilon', \delta')\)</span> as applying it once with <span class="math inline">\(q_1q_2\)</span>. <em>Check: <span class="math inline">\(\varepsilon = 1\)</span>, <span class="math inline">\(q_1 = q_2 = 0.1\)</span> gives 0.1586 after one stage and 0.01704 after two.</em> <em>(Composition of the amplification map)</em></p>
 </blockquote>
@@ -562,8 +562,8 @@ window.Quarto = {
 </div>
 </div>
 </section>
-<section id="sec-sol-subsampling-2" class="level2" data-number="33.2">
-<h2 data-number="33.2" class="anchored" data-anchor-id="sec-sol-subsampling-2"><span class="header-section-number">33.2</span> The binomial sum at α = 3</h2>
+<section id="sec-sol-sub-2" class="level2" data-number="33.2">
+<h2 data-number="33.2" class="anchored" data-anchor-id="sec-sol-sub-2"><span class="header-section-number">33.2</span> The binomial sum at α = 3</h2>
 <blockquote class="blockquote">
 <p><strong>Exercise 2.</strong> <strong>The binomial sum at <span class="math inline">\(\alpha = 3\)</span>.</strong> Write out the four terms of <a href="../../book-full/part04-privacy-accounting/05-subsampling.html#eq-sub-binomial">Equation&nbsp;33.11</a> for <span class="math inline">\(\alpha = 3\)</span>, <span class="math inline">\(q = 0.01\)</span>, <span class="math inline">\(\sigma = 1\)</span>, and compute <span class="math inline">\(\varepsilon(3)\)</span>. <em>Check: <span class="math inline">\(\varepsilon(3) = 2.6464 \times 10^{-4}\)</span>.</em> Which term carries most of the privacy cost? <em>(Binomial expansion, Gaussian moments)</em></p>
 </blockquote>
@@ -637,8 +637,8 @@ Table&nbsp;33.1: The four terms of <span class="math inline">\(A_3\)</span> for 
 </div>
 </div>
 </section>
-<section id="sec-sol-subsampling-3" class="level2" data-number="33.3">
-<h2 data-number="33.3" class="anchored" data-anchor-id="sec-sol-subsampling-3"><span class="header-section-number">33.3</span> Replace-one under Poisson sampling, exactly</h2>
+<section id="sec-sol-sub-3" class="level2" data-number="33.3">
+<h2 data-number="33.3" class="anchored" data-anchor-id="sec-sol-sub-3"><span class="header-section-number">33.3</span> Replace-one under Poisson sampling, exactly</h2>
 <blockquote class="blockquote">
 <p><strong>Exercise 3.</strong> <strong>Replace-one under Poisson sampling, exactly.</strong> Let <span class="math inline">\(M\)</span> be <span class="math inline">\(\varepsilon\)</span>-DP (<span class="math inline">\(\delta = 0\)</span>) for add/remove neighbours, and run it on a Poisson sample with rate <span class="math inline">\(q\)</span>. Show that for replace-one neighbours the subsampled mechanism is <span class="math inline">\(\varepsilon'\)</span>-DP with <span class="math inline">\(\varepsilon'\)</span> from <a href="../../book-full/part04-privacy-accounting/05-subsampling.html#eq-sub-replace-pure">Equation&nbsp;33.8</a>, and that the Laplace mechanism on a sum of values in <span class="math inline">\([-1, 1]\)</span> attains it. Compare with the group-privacy bound <span class="math inline">\(\ln(1 + q(e^{2\varepsilon} - 1))\)</span> for small and large <span class="math inline">\(\varepsilon\)</span>. <em>Hint: the ratio of two mixtures that share the part <span class="math inline">\(R\)</span> is largest when one component ratio is as large and the other as small as DP allows.</em> <em>Check: at <span class="math inline">\(q = 0.01\)</span>, <span class="math inline">\(\varepsilon = 1\)</span>, 0.02338 against 0.06193, and 0.01704 for add/remove.</em> <em>(Likelihood-ratio bounds on mixtures)</em></p>
 </blockquote>
@@ -655,11 +655,11 @@ Table&nbsp;33.1: The four terms of <span class="math inline">\(A_3\)</span> for 
 <div id="callout-3" class="callout-3-contents callout-collapse collapse">
 <div class="callout-body-container callout-body">
 <ol type="1">
-<li><strong>Condition on the rest of the sample.</strong> Let <span class="math inline">\(D\)</span> hold <span class="math inline">\(x\)</span> and <span class="math inline">\(D'\)</span> hold <span class="math inline">\(x'\)</span> in its place, and let <span class="math inline">\(T\)</span> be the Poisson sample of the other records. Given <span class="math inline">\(T\)</span>, the outputs are <span class="math inline">\((1 - q)R + qP\)</span> and <span class="math inline">\((1 - q)R + qP'\)</span>, with <span class="math inline">\(R = M(T)\)</span>, <span class="math inline">\(P = M(T \cup \{x\})\)</span> and <span class="math inline">\(P' = M(T \cup \{x'\})\)</span>.</li>
-<li><strong>Bound the component ratios.</strong> <span class="math inline">\(T \cup \{x\}\)</span> and <span class="math inline">\(T\)</span> are add/remove neighbours, and so are <span class="math inline">\(T \cup \{x'\}\)</span> and <span class="math inline">\(T\)</span>. For pure DP the densities then satisfy <span class="math inline">\(a = P(y)/R(y) \in [e^{-\varepsilon}, e^\varepsilon]\)</span> and <span class="math inline">\(b = P'(y)/R(y) \in [e^{-\varepsilon}, e^\varepsilon]\)</span> at every output <span class="math inline">\(y\)</span>.</li>
+<li><strong>Condition on the rest of the sample.</strong> Let <span class="math inline">\(D\)</span> hold <span class="math inline">\(x\)</span> and <span class="math inline">\(D'\)</span> hold <span class="math inline">\(x'\)</span> in its place, and let <span class="math inline">\(\tilde D\)</span> be the Poisson sample of the other records. Given <span class="math inline">\(\tilde D\)</span>, the outputs are <span class="math inline">\((1 - q)R + qP\)</span> and <span class="math inline">\((1 - q)R + qP'\)</span>, with <span class="math inline">\(R = M(\tilde D)\)</span>, <span class="math inline">\(P = M(\tilde D \cup \{x\})\)</span> and <span class="math inline">\(P' = M(\tilde D \cup \{x'\})\)</span>.</li>
+<li><strong>Bound the component ratios.</strong> <span class="math inline">\(\tilde D \cup \{x\}\)</span> and <span class="math inline">\(\tilde D\)</span> are add/remove neighbours, and so are <span class="math inline">\(\tilde D \cup \{x'\}\)</span> and <span class="math inline">\(\tilde D\)</span>. For pure DP the densities then satisfy <span class="math inline">\(a = P(y)/R(y) \in [e^{-\varepsilon}, e^\varepsilon]\)</span> and <span class="math inline">\(b = P'(y)/R(y) \in [e^{-\varepsilon}, e^\varepsilon]\)</span> at every output <span class="math inline">\(y\)</span>.</li>
 <li><strong>Bound the mixture ratio.</strong> At each <span class="math inline">\(y\)</span>, the ratio of the two mixtures is <span class="math inline">\(\frac{(1 - q) + qa}{(1 - q) + qb}\)</span>. It increases in <span class="math inline">\(a\)</span> and decreases in <span class="math inline">\(b\)</span>, so it is at most <span class="math inline">\(\frac{1 - q + qe^\varepsilon}{1 - q + qe^{-\varepsilon}}\)</span>. Swapping <span class="math inline">\(x\)</span> and <span class="math inline">\(x'\)</span> gives the same bound for the other order.</li>
-<li><strong>Average over <span class="math inline">\(T\)</span>.</strong> Each conditional density of the first run is at most <span class="math inline">\(e^{\varepsilon'}\)</span> times that of the second, with the same weights over <span class="math inline">\(T\)</span>, so the same holds for the averages. Taking logarithms, <span class="math inline">\(\varepsilon' = \ln(1 + q(e^\varepsilon - 1)) - \ln(1 - q(1 - e^{-\varepsilon}))\)</span>, which is <a href="../../book-full/part04-privacy-accounting/05-subsampling.html#eq-sub-replace-pure">Equation&nbsp;33.8</a>.</li>
-<li><strong>The Laplace mechanism attains it.</strong> Let <span class="math inline">\(M\)</span> add Laplace noise of scale <span class="math inline">\(1/\varepsilon\)</span> to the sum. Values lie in <span class="math inline">\([-1, 1]\)</span>, so adding or removing one changes the sum by at most 1 and <span class="math inline">\(M\)</span> is <span class="math inline">\(\varepsilon\)</span>-DP. Set every other record to 0, <span class="math inline">\(x = 1\)</span> and <span class="math inline">\(x' = -1\)</span>. Then <span class="math inline">\(R\)</span>, <span class="math inline">\(P\)</span>, <span class="math inline">\(P'\)</span> are Laplace distributions centred at 0, 1 and <span class="math inline">\(-1\)</span> for every <span class="math inline">\(T\)</span>. On the event <span class="math inline">\(\{Y &gt; 1\}\)</span>, <span class="math inline">\(P(Y &gt; 1) = \frac12\)</span>, <span class="math inline">\(R(Y &gt; 1) = \frac12e^{-\varepsilon}\)</span> and <span class="math inline">\(P'(Y &gt; 1) = \frac12e^{-2\varepsilon}\)</span>. The two mixtures give this event probabilities in the ratio <span id="eq-auto-05subsampling-2"><span class="math display">\[\frac{(1 - q)e^{-\varepsilon} + q}{(1 - q)e^{-\varepsilon} + qe^{-2\varepsilon}} = \frac{1 - q + qe^\varepsilon}{1 - q + qe^{-\varepsilon}} \tag{33.2}\]</span></span> (multiply above and below by <span class="math inline">\(e^\varepsilon\)</span>). An event with this ratio rules out any smaller <span class="math inline">\(\varepsilon'\)</span>.</li>
+<li><strong>Average over <span class="math inline">\(\tilde D\)</span>.</strong> Each conditional density of the first run is at most <span class="math inline">\(e^{\varepsilon'}\)</span> times that of the second, with the same weights over <span class="math inline">\(\tilde D\)</span>, so the same holds for the averages. Taking logarithms, <span class="math inline">\(\varepsilon' = \ln(1 + q(e^\varepsilon - 1)) - \ln(1 - q(1 - e^{-\varepsilon}))\)</span>, which is <a href="../../book-full/part04-privacy-accounting/05-subsampling.html#eq-sub-replace-pure">Equation&nbsp;33.8</a>.</li>
+<li><strong>The Laplace mechanism attains it.</strong> Let <span class="math inline">\(M\)</span> add Laplace noise of scale <span class="math inline">\(1/\varepsilon\)</span> to the sum. Values lie in <span class="math inline">\([-1, 1]\)</span>, so adding or removing one changes the sum by at most 1 and <span class="math inline">\(M\)</span> is <span class="math inline">\(\varepsilon\)</span>-DP. Set every other record to 0, <span class="math inline">\(x = 1\)</span> and <span class="math inline">\(x' = -1\)</span>. Then <span class="math inline">\(R\)</span>, <span class="math inline">\(P\)</span>, <span class="math inline">\(P'\)</span> are Laplace distributions centred at 0, 1 and <span class="math inline">\(-1\)</span> for every <span class="math inline">\(\tilde D\)</span>. On the event <span class="math inline">\(\{Y &gt; 1\}\)</span>, <span class="math inline">\(P(Y &gt; 1) = \frac12\)</span>, <span class="math inline">\(R(Y &gt; 1) = \frac12e^{-\varepsilon}\)</span> and <span class="math inline">\(P'(Y &gt; 1) = \frac12e^{-2\varepsilon}\)</span>. The two mixtures give this event probabilities in the ratio <span id="eq-auto-05subsampling-2"><span class="math display">\[\frac{(1 - q)e^{-\varepsilon} + q}{(1 - q)e^{-\varepsilon} + qe^{-2\varepsilon}} = \frac{1 - q + qe^\varepsilon}{1 - q + qe^{-\varepsilon}} \tag{33.2}\]</span></span> (multiply above and below by <span class="math inline">\(e^\varepsilon\)</span>). An event with this ratio rules out any smaller <span class="math inline">\(\varepsilon'\)</span>.</li>
 <li><strong>Compare</strong> (<a href="#tbl-sol-subsampling-replace" class="quarto-xref">Table&nbsp;<span>33.2</span></a>). The script computes the three values and the log-ratio of the Laplace event, which equals the exact value in every row.</li>
 </ol>
 <div id="tbl-sol-subsampling-replace" class="quarto-float quarto-figure quarto-figure-center anchored">
@@ -723,8 +723,8 @@ Table&nbsp;33.2: Replace-one neighbours under Poisson sampling at <span class="m
 </div>
 </div>
 </section>
-<section id="sec-sol-subsampling-4" class="level2" data-number="33.4">
-<h2 data-number="33.4" class="anchored" data-anchor-id="sec-sol-subsampling-4"><span class="header-section-number">33.4</span> Inverting the accountant</h2>
+<section id="sec-sol-sub-4" class="level2" data-number="33.4">
+<h2 data-number="33.4" class="anchored" data-anchor-id="sec-sol-sub-4"><span class="header-section-number">33.4</span> Inverting the accountant</h2>
 <blockquote class="blockquote">
 <p><strong>Exercise 4.</strong> <strong>Inverting the accountant.</strong> Find the smallest <span class="math inline">\(\sigma\)</span> for which DP-SGD with <span class="math inline">\(q = 0.01\)</span>, 10,000 steps and <span class="math inline">\(\delta = 10^{-5}\)</span> has <span class="math inline">\(\varepsilon \le 1\)</span> under the RDP accountant with the improved conversion. <em>Hint: <span class="math inline">\(\varepsilon\)</span> decreases in <span class="math inline">\(\sigma\)</span>; bisect.</em> <em>Check: <span class="math inline">\(\sigma = 4.126\)</span>.</em> <em>(Monotonicity, bisection)</em></p>
 </blockquote>
@@ -796,8 +796,8 @@ Table&nbsp;33.3: The noise multiplier that reaches each target <span class="math
 </div>
 </div>
 </section>
-<section id="sec-sol-subsampling-5" class="level2" data-number="33.5">
-<h2 data-number="33.5" class="anchored" data-anchor-id="sec-sol-subsampling-5"><span class="header-section-number">33.5</span> Fixed-size batches, honestly</h2>
+<section id="sec-sol-sub-5" class="level2" data-number="33.5">
+<h2 data-number="33.5" class="anchored" data-anchor-id="sec-sol-sub-5"><span class="header-section-number">33.5</span> Fixed-size batches, honestly</h2>
 <blockquote class="blockquote">
 <p><strong>Exercise 5.</strong> <strong>Fixed-size batches, honestly.</strong> A team trains with a fresh random batch of exactly 1% of the data at every step, <span class="math inline">\(\sigma = 1\)</span>, for 10,000 steps, and reports the Poisson value 6.71. Using <a href="../../book-full/part04-privacy-accounting/05-subsampling.html#tbl-sub-matching">Table&nbsp;33.4</a>, what is the honest RDP value, and what noise multiplier would make the honest value equal 6.71? <em>Check: 47.42; <span class="math inline">\(\sigma = 2\)</span>.</em> <em>(Matching sampling scheme and neighbouring relation)</em></p>
 </blockquote>
@@ -824,8 +824,8 @@ Table&nbsp;33.3: The noise multiplier that reaches each target <span class="math
 </div>
 </div>
 </section>
-<section id="sec-sol-subsampling-6" class="level2" data-number="33.6">
-<h2 data-number="33.6" class="anchored" data-anchor-id="sec-sol-subsampling-6"><span class="header-section-number">33.6</span> The first direction, exactly</h2>
+<section id="sec-sol-sub-6" class="level2" data-number="33.6">
+<h2 data-number="33.6" class="anchored" data-anchor-id="sec-sol-sub-6"><span class="header-section-number">33.6</span> The first direction, exactly</h2>
 <blockquote class="blockquote">
 <p><strong>Exercise 6.</strong> <strong>The first direction, exactly.</strong> Show that for any pair <span class="math inline">\((P_0, P_1)\)</span> and <span class="math inline">\(e^{\varepsilon'} = 1 + q(e^\varepsilon - 1)\)</span>, <span class="math inline">\(E_{e^{\varepsilon'}}((1 - q)P_0 + qP_1\|P_0) = q\,E_{e^\varepsilon}(P_1\|P_0)\)</span>, and that the other direction is 0 whenever <span class="math inline">\(e^{\varepsilon'} \ge 1/(1-q)\)</span>. Check it numerically for the subsampled Gaussian with <span class="math inline">\(q = 0.01\)</span>, <span class="math inline">\(\sigma = 1\)</span>. <em>Check: at <span class="math inline">\(\varepsilon = 2\)</span>, both sides equal <span class="math inline">\(2.09236 \times 10^{-4}\)</span>.</em> <em>(Hockey-stick divergence, the mixture lemma with equality)</em></p>
 </blockquote>

@@ -26,6 +26,41 @@ ul.task-list li input[type="checkbox"] {
   margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
   vertical-align: middle;
 }
+/* CSS for syntax highlighting */
+html { -webkit-text-size-adjust: 100%; }
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
 </style>
 
 
@@ -373,7 +408,7 @@ window.Quarto = {
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../part04-privacy-accounting/09-choosing-an-accountant.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">31</span>&nbsp; <span class="chapter-title">Report and review an ε claim</span></span></a>
+ <span class="menu-text"><span class="chapter-number">31</span>&nbsp; <span class="chapter-title">Choosing an accountant</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
@@ -564,7 +599,7 @@ window.Quarto = {
   <li><a href="#when-you-meet-it" id="toc-when-you-meet-it" class="nav-link" data-scroll-target="#when-you-meet-it"><span class="header-section-number">11.2</span> When you meet it</a></li>
   <li><a href="#how-to-use-it" id="toc-how-to-use-it" class="nav-link" data-scroll-target="#how-to-use-it"><span class="header-section-number">11.3</span> How to use it</a></li>
   <li><a href="#what-goes-wrong" id="toc-what-goes-wrong" class="nav-link" data-scroll-target="#what-goes-wrong"><span class="header-section-number">11.4</span> What goes wrong</a></li>
-  <li><a href="#further-reading" id="toc-further-reading" class="nav-link" data-scroll-target="#further-reading"><span class="header-section-number">11.5</span> Further reading</a></li>
+  <li><a href="#references" id="toc-references" class="nav-link" data-scroll-target="#references"><span class="header-section-number">11.5</span> References</a></li>
   </ul>
 </nav>
     </div>
@@ -597,22 +632,40 @@ window.Quarto = {
 </section>
 <section id="when-you-meet-it" class="level2" data-number="11.2">
 <h2 data-number="11.2" class="anchored" data-anchor-id="when-you-meet-it"><span class="header-section-number">11.2</span> When you meet it</h2>
-<p>You meet it when someone claims that “the model reveals” a sensitive field, or asks whether dropping a column made a model safe. The Adversarial Robustness Toolbox, a Python library of attacks, offers <code>AttributeInferenceBlackBox</code>. The attribute advantage decides how to classify a finding. Success up to what the population allows would be there without the person’s record, so it is a question for policy and fairness. But success on members beyond non-members is a privacy leak.</p>
+<p>You meet it when someone claims that “the model reveals” a sensitive field, or asks whether dropping a column made a model safe. The Adversarial Robustness Toolbox (ART), a Python library of attacks, offers <code>AttributeInferenceBlackBox</code>, and <code>AttributeInferenceBaselineTrueLabel</code> for the baseline below. The attribute advantage decides how to classify a finding. Success up to what the population allows would be there without the person’s record, so it is a question for policy and fairness. But success on members beyond non-members is a privacy leak.</p>
 </section>
 <section id="how-to-use-it" class="level2" data-number="11.3">
 <h2 data-number="11.3" class="anchored" data-anchor-id="how-to-use-it"><span class="header-section-number">11.3</span> How to use it</h2>
-<p>Start with the <strong>imputation baseline</strong>, the success of the best guess of the sensitive value from the public features and label alone, without the model. Jayaraman &amp; Evans (2022) found that many published attacks do no better, so it is the number to beat. To estimate it, take records from the same population that the model never saw. On half of them, fit a classifier such as scikit-learn’s <code>HistGradientBoostingClassifier</code> to predict the sensitive field from the public features and label, and measure its accuracy on the other half.</p>
+<p>Start with the <strong>imputation baseline</strong>, the success of the best guess of the sensitive value from the public features and label alone, without the model. Jayaraman &amp; Evans (2022) found that many published attacks do no better, so it is the number to beat. To estimate it, fit a classifier that predicts the sensitive field from the public features and label, on records from the same population that the model never saw.</p>
 <p>Then run the attack. <strong>Model inversion</strong> (Fredrikson et al.&nbsp;2014) scores each candidate value <span class="math inline">\(s\)</span> of the sensitive field by two numbers. The first is how likely a person with the target’s public features <span class="math inline">\(x\)</span> is to have that value, the probability <span class="math inline">\(p(s \mid x)\)</span>, which the attacker estimates from population data. The second is <span class="math inline">\(f_y(x, s)\)</span>, the model’s confidence in the known label <span class="math inline">\(y\)</span> when it is fed <span class="math inline">\(x\)</span> and the candidate. The maximum a posteriori (MAP) inversion attack then guesses <span id="eq-attr-map-inversion"><span class="math display">\[\hat s = \arg\max_s\; p(s \mid x)\, f_y(x, s). \tag{11.2}\]</span></span> Against a scikit-learn model, each candidate costs one call to <code>predict_proba</code>, from which you read the column of the known label.</p>
-<p>Give the attacker every column it could hold, because a near-copy of the sensitive field, such as a relationship column next to marital status, moves the baseline most. Run the attack on training members and on an equal number of held-out non-members. Report the baseline and both success rates, each with a confidence interval (<a href="../part01-prerequisites/04-hypothesis-testing.html">Hypothesis testing</a>). Report their difference, the advantage, with its own interval too. <a href="../part02-attacks/10-risk-assessment.html#sec-risk-threat">Pre-release privacy risk assessment</a> blocks a release when the advantage’s interval lies above zero.</p>
-<p>The full edition measures them on a synthetic population, averaging 200 small logistic regressions trained on 100 records each. There, the best population guess is right 0.7517 of the time. Inversion is right on 0.7832 of members, but also on 0.7262 of non-members. So the attribute advantage is only 0.0569, and most of the attack’s success on members would be there even if they had never been in the training data. On non-members the true baseline is a ceiling, since the model never saw them. An attack whose interval there lies above your baseline’s means your imputer is weak.</p>
+<p>Give the attacker every column it could hold, because a near-copy of the sensitive field, such as a relationship column next to marital status, moves the baseline most. Run the attack on training members and on an equal number of held-out non-members. Then report the baseline and both success rates with <a href="../part01-prerequisites/04-hypothesis-testing.html">confidence intervals</a>, and give their difference, the advantage, its own interval too. <a href="../part02-attacks/10-risk-assessment.html#sec-risk-threat">Pre-release privacy risk assessment</a> blocks a release when the advantage’s interval lies above zero.</p>
+<p>The script <a href="https://github.com/manuelvloureiro/privacy-preserving-machine-learning-book/blob/main/code/part02-attacks/practitioner_attribute.py">practitioner_attribute.py</a> runs ART on Adult, census records of 45,222 people, with <code>uv run python code/part02-attacks/practitioner_attribute.py</code>. A random forest predicts whether income exceeds $50K from every column, and sex is the sensitive field. The attacker holds 4,000 records of its own, and everyone’s other columns and income.</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb1" data-excerpt="attribute-art"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> label(rows: IntArray) <span class="op">-&gt;</span> Array:  <span class="co"># the label the model returns for each record, as a column</span></span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> np.argmax(target.predict(x[rows]), axis<span class="op">=</span><span class="dv">1</span>).reshape(<span class="op">-</span><span class="dv">1</span>, <span class="dv">1</span>).astype(np.float64)</span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a>np.random.seed(seed)  <span class="co"># ART builds its random forests unseeded, from NumPy's global generator</span></span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a>attack <span class="op">=</span> AttributeInferenceBlackBox(target, attack_model_type<span class="op">=</span><span class="st">"rf"</span>, attack_feature<span class="op">=</span>SENSITIVE)</span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a>attack.fit(x[attacker])  <span class="co"># the attacker's own records, sensitive field included</span></span>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a>baseline <span class="op">=</span> AttributeInferenceBaselineTrueLabel(attack_model_type<span class="op">=</span><span class="st">"rf"</span>, attack_feature<span class="op">=</span>SENSITIVE)</span>
+<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a>baseline.fit(x[attacker], y[attacker])  <span class="co"># the same records and the true label, without the model</span></span>
+<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a>hits: <span class="bu">dict</span>[<span class="bu">str</span>, <span class="bu">list</span>[<span class="bu">int</span>]] <span class="op">=</span> {}</span>
+<span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> name, rows <span class="kw">in</span> ((<span class="st">"members"</span>, members), (<span class="st">"non-members"</span>, others)):</span>
+<span id="cb1-11"><a href="#cb1-11" aria-hidden="true" tabindex="-1"></a>    known <span class="op">=</span> np.delete(x[rows], SENSITIVE, axis<span class="op">=</span><span class="dv">1</span>)  <span class="co"># everything but the sensitive field</span></span>
+<span id="cb1-12"><a href="#cb1-12" aria-hidden="true" tabindex="-1"></a>    guess <span class="op">=</span> attack.infer(known, pred<span class="op">=</span>label(rows), values<span class="op">=</span>[<span class="fl">0.0</span>, <span class="fl">1.0</span>])</span>
+<span id="cb1-13"><a href="#cb1-13" aria-hidden="true" tabindex="-1"></a>    imputed <span class="op">=</span> baseline.infer(known, y<span class="op">=</span>y[rows], values<span class="op">=</span>[<span class="fl">0.0</span>, <span class="fl">1.0</span>])</span>
+<span id="cb1-14"><a href="#cb1-14" aria-hidden="true" tabindex="-1"></a>    hits[name] <span class="op">=</span> [<span class="bu">int</span>(np.count_nonzero(np.equal(g.ravel(), female[rows]))) <span class="cf">for</span> g <span class="kw">in</span> (guess, imputed)]</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<pre class="text"><code>ART black-box attack: right on members 0.8300 [0.8180, 0.8415]  on non-members 0.8423 [0.8306, 0.8534]
+ART black-box attack: advantage -0.0123 [-0.0285, +0.0040]
+imputation baseline: right on members 0.8307 [0.8188, 0.8423]  on non-members 0.8417 [0.8301, 0.8529]</code></pre>
+<p>The attack is right on 0.8300 of the members, and the baseline, which never queries the model, on 0.8307. So the success comes from the population, and the advantage’s interval contains zero, which passes the rule. The full edition finds the same on a synthetic population. There, inversion is right on 0.7832 of members but also on 0.7262 of non-members. Its advantage is only 0.0569.</p>
 </section>
 <section id="what-goes-wrong" class="level2" data-number="11.4">
 <h2 data-number="11.4" class="anchored" data-anchor-id="what-goes-wrong"><span class="header-section-number">11.4</span> What goes wrong</h2>
 <p>The commonest error is to report one success rate, such as the 0.7832 on members, without the baseline and the rate on non-members, which overstates the leak. Measuring only on fresh records understates it. A model is too sure of the true label on its own members, which is the generalization gap of <a href="../part02-attacks/02-membership-inference.html">Membership inference</a>, so the attack does better on them.</p>
 <p>Dropping the sensitive column from the inputs does not stop population inference, because its correlates remain. <strong>Confidence masking</strong>, which rounds the confidences or returns only the top label, puts no bound on the gap between members and non-members, and that gap can grow. In the same experiment, returning labels only raised the advantage from 0.0569 to 0.0650, because success fell more on non-members than on members. Less overfitting shrinks the member gap, and <a href="../part03-dp-foundations/01-definition.html">differential privacy</a> bounds it for every attacker and every output format.</p>
 </section>
-<section id="further-reading" class="level2" data-number="11.5">
-<h2 data-number="11.5" class="anchored" data-anchor-id="further-reading"><span class="header-section-number">11.5</span> Further reading</h2>
+<section id="references" class="level2" data-number="11.5">
+<h2 data-number="11.5" class="anchored" data-anchor-id="references"><span class="header-section-number">11.5</span> References</h2>
 <ul>
 <li>Fredrikson, Jha &amp; Ristenpart, “Model Inversion Attacks that Exploit Confidence Information and Basic Countermeasures” (CCS 2015): inversion from confidences, and rounding as a countermeasure.</li>
 <li>Jayaraman &amp; Evans, “Are Attribute Inference Attacks Just Imputation?” (CCS 2022): the imputation baseline, and what it takes to beat it.</li>

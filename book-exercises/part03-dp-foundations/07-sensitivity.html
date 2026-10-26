@@ -450,7 +450,7 @@ window.Quarto = {
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../part05-dp-ml/05-private-prediction.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">42</span>&nbsp; <span class="chapter-title">Exercises: Private prediction</span></span></a>
+ <span class="menu-text"><span class="chapter-number">42</span>&nbsp; <span class="chapter-title">Exercises: Private prediction: PATE and in-context learning</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
@@ -501,15 +501,15 @@ window.Quarto = {
     <h2 id="toc-title">Table of contents</h2>
    
   <ul>
-  <li><a href="#sec-sol-sensitivity-1" id="toc-sec-sol-sensitivity-1" class="nav-link active" data-scroll-target="#sec-sol-sensitivity-1"><span class="header-section-number">24.1</span> Local sensitivity of the mean</a></li>
-  <li><a href="#sec-sol-sensitivity-2" id="toc-sec-sol-sensitivity-2" class="nav-link" data-scroll-target="#sec-sol-sensitivity-2"><span class="header-section-number">24.2</span> A sharper Cauchy</a></li>
-  <li><a href="#sec-sol-sensitivity-3" id="toc-sec-sol-sensitivity-3" class="nav-link" data-scroll-target="#sec-sol-sensitivity-3"><span class="header-section-number">24.3</span> Other quantiles</a></li>
-  <li><a href="#sec-sol-sensitivity-4" id="toc-sec-sol-sensitivity-4" class="nav-link" data-scroll-target="#sec-sol-sensitivity-4"><span class="header-section-number">24.4</span> Sizing the proposal</a></li>
-  <li><a href="#sec-sol-sensitivity-5" id="toc-sec-sol-sensitivity-5" class="nav-link" data-scroll-target="#sec-sol-sensitivity-5"><span class="header-section-number">24.5</span> The number of blocks</a></li>
-  <li><a href="#sec-sol-sensitivity-6" id="toc-sec-sol-sensitivity-6" class="nav-link" data-scroll-target="#sec-sol-sensitivity-6"><span class="header-section-number">24.6</span> Clipping exponential data</a></li>
-  <li><a href="#sec-sol-sensitivity-7" id="toc-sec-sol-sensitivity-7" class="nav-link" data-scroll-target="#sec-sol-sensitivity-7"><span class="header-section-number">24.7</span> Smoothness at work</a></li>
-  <li><a href="#sec-sol-sensitivity-8" id="toc-sec-sol-sensitivity-8" class="nav-link" data-scroll-target="#sec-sol-sensitivity-8"><span class="header-section-number">24.8</span> Inverse sensitivity for a quantile</a></li>
-  <li><a href="#sec-sol-sensitivity-9" id="toc-sec-sol-sensitivity-9" class="nav-link" data-scroll-target="#sec-sol-sensitivity-9"><span class="header-section-number">24.9</span> The stable mode under add/remove</a></li>
+  <li><a href="#sec-sol-sens-1" id="toc-sec-sol-sens-1" class="nav-link active" data-scroll-target="#sec-sol-sens-1"><span class="header-section-number">24.1</span> Local sensitivity of the mean</a></li>
+  <li><a href="#sec-sol-sens-2" id="toc-sec-sol-sens-2" class="nav-link" data-scroll-target="#sec-sol-sens-2"><span class="header-section-number">24.2</span> A sharper Cauchy</a></li>
+  <li><a href="#sec-sol-sens-3" id="toc-sec-sol-sens-3" class="nav-link" data-scroll-target="#sec-sol-sens-3"><span class="header-section-number">24.3</span> Other quantiles</a></li>
+  <li><a href="#sec-sol-sens-4" id="toc-sec-sol-sens-4" class="nav-link" data-scroll-target="#sec-sol-sens-4"><span class="header-section-number">24.4</span> Sizing the proposal</a></li>
+  <li><a href="#sec-sol-sens-5" id="toc-sec-sol-sens-5" class="nav-link" data-scroll-target="#sec-sol-sens-5"><span class="header-section-number">24.5</span> The number of blocks</a></li>
+  <li><a href="#sec-sol-sens-6" id="toc-sec-sol-sens-6" class="nav-link" data-scroll-target="#sec-sol-sens-6"><span class="header-section-number">24.6</span> Clipping exponential data</a></li>
+  <li><a href="#sec-sol-sens-7" id="toc-sec-sol-sens-7" class="nav-link" data-scroll-target="#sec-sol-sens-7"><span class="header-section-number">24.7</span> Smoothness at work</a></li>
+  <li><a href="#sec-sol-sens-8" id="toc-sec-sol-sens-8" class="nav-link" data-scroll-target="#sec-sol-sens-8"><span class="header-section-number">24.8</span> Inverse sensitivity for a quantile</a></li>
+  <li><a href="#sec-sol-sens-9" id="toc-sec-sol-sens-9" class="nav-link" data-scroll-target="#sec-sol-sens-9"><span class="header-section-number">24.9</span> The stable mode under add/remove</a></li>
   </ul>
 </nav>
     </div>
@@ -537,8 +537,8 @@ window.Quarto = {
 
 <p>Exercises for <a href="../../book-full/part03-dp-foundations/07-sensitivity.html">Beyond global sensitivity</a>, each with a worked solution. Try each exercise before opening its solution. The script <code>code/part03-dp-foundations/solutions_sensitivity.py</code> computes every number quoted here; run it with <code>uv run python code/part03-dp-foundations/solutions_sensitivity.py</code>.</p>
 <p>The solutions use the chapter’s notation. Datasets have a fixed size <span class="math inline">\(n\)</span>, neighbours differ in one replaced record, <span class="math inline">\(d\)</span> is the Hamming distance, and <span class="math inline">\(\varepsilon\)</span>, <span class="math inline">\(\delta\)</span> are the parameters of differential privacy (DP). Sorted values are <span class="math inline">\(x_1 \le \dots \le x_n\)</span> in <span class="math inline">\([0, \Lambda]\)</span>, padded with <span class="math inline">\(x_i = 0\)</span> for <span class="math inline">\(i \le 0\)</span> and <span class="math inline">\(x_i = \Lambda\)</span> for <span class="math inline">\(i &gt; n\)</span>. <span class="math inline">\(A^{(k)}(D)\)</span> is the largest local sensitivity within distance <span class="math inline">\(k\)</span> of <span class="math inline">\(D\)</span>, and <span class="math inline">\(S^*_\beta(D) = \max_k e^{-k\beta}A^{(k)}(D)\)</span>. “The ages” are the chapter’s 1,001 synthetic ages (seed 0), with <span class="math inline">\(\Lambda = 100\)</span> and <span class="math inline">\(\varepsilon = 1\)</span>.</p>
-<section id="sec-sol-sensitivity-1" class="level2" data-number="24.1">
-<h2 data-number="24.1" class="anchored" data-anchor-id="sec-sol-sensitivity-1"><span class="header-section-number">24.1</span> Local sensitivity of the mean</h2>
+<section id="sec-sol-sens-1" class="level2" data-number="24.1">
+<h2 data-number="24.1" class="anchored" data-anchor-id="sec-sol-sens-1"><span class="header-section-number">24.1</span> Local sensitivity of the mean</h2>
 <blockquote class="blockquote">
 <p><strong>Exercise 1.</strong> <strong>Local sensitivity of the mean.</strong> For values in <span class="math inline">\([0, \Lambda]\)</span> under the replace relation, show <span class="math inline">\(\mathrm{LS}_{\mathrm{mean}}(D) = \max_i\max(x_i, \Lambda - x_i)/n\)</span>, and deduce <span class="math inline">\(\Lambda/(2n) \le \mathrm{LS}_{\mathrm{mean}}(D) \le \Lambda/n\)</span>. Why can smooth sensitivity never gain more than a factor of 2 over global sensitivity for the mean? <em>Check: the 1,001 ages of the chapter include an age clipped to 0, so <span class="math inline">\(\mathrm{LS} = \Delta = 0.0999\)</span>.</em> <em>(Local sensitivity)</em></p>
 </blockquote>
@@ -567,8 +567,8 @@ window.Quarto = {
 </div>
 </div>
 </section>
-<section id="sec-sol-sensitivity-2" class="level2" data-number="24.2">
-<h2 data-number="24.2" class="anchored" data-anchor-id="sec-sol-sensitivity-2"><span class="header-section-number">24.2</span> A sharper Cauchy</h2>
+<section id="sec-sol-sens-2" class="level2" data-number="24.2">
+<h2 data-number="24.2" class="anchored" data-anchor-id="sec-sol-sens-2"><span class="header-section-number">24.2</span> A sharper Cauchy</h2>
 <blockquote class="blockquote">
 <p><strong>Exercise 2.</strong> <strong>A sharper Cauchy.</strong> Show that <span class="math inline">\(\sup_{u \ge 0}\gamma u^{\gamma-1}/(1 + u^\gamma) = (\gamma - 1)^{(\gamma-1)/\gamma}\)</span>, so for the Cauchy the sliding constant is 1 rather than <span class="math inline">\(\gamma = 2\)</span>. Redo the pure-DP condition with this constant and find the largest <span class="math inline">\(\alpha\)</span> for <span class="math inline">\(\beta = \varepsilon/6\)</span>. <em>Check: <span class="math inline">\(\alpha = \varepsilon/2\)</span>, and the noise scale for the median age drops from 0.979 to 0.326.</em> <em>(Admissible noise)</em></p>
 </blockquote>
@@ -586,14 +586,14 @@ window.Quarto = {
 <div class="callout-body-container callout-body">
 <ol type="1">
 <li><strong>Find the maximum.</strong> Let <span class="math inline">\(g(u) = \gamma u^{\gamma-1}/(1 + u^\gamma)\)</span>. It is 0 at <span class="math inline">\(u = 0\)</span> (for <span class="math inline">\(\gamma &gt; 1\)</span>) and tends to 0 as <span class="math inline">\(u \to \infty\)</span>, so its maximum is at a critical point. By the quotient rule, <span class="math inline">\(g'(u) = 0\)</span> when <span id="eq-auto-07sensitivity-1"><span class="math display">\[(\gamma - 1)u^{\gamma-2}(1 + u^\gamma) = \gamma u^{\gamma-1}\cdot u^{\gamma-1}\quad\Longleftrightarrow\quad(\gamma - 1)(1 + u^\gamma) = \gamma u^\gamma\quad\Longleftrightarrow\quad u^\gamma = \gamma - 1. \tag{24.1}\]</span></span></li>
-<li><strong>Evaluate.</strong> There <span class="math inline">\(1 + u^\gamma = \gamma\)</span>, so <span class="math inline">\(g = u^{\gamma-1} = (\gamma - 1)^{(\gamma-1)/\gamma}\)</span>. A numerical maximum on a fine grid agrees (<a href="#tbl-sol-sensitivity-sliding" class="quarto-xref">Table&nbsp;<span>24.1</span></a>).</li>
+<li><strong>Evaluate.</strong> There <span class="math inline">\(1 + u^\gamma = \gamma\)</span>, so <span class="math inline">\(g = u^{\gamma-1} = (\gamma - 1)^{(\gamma-1)/\gamma}\)</span>. A numerical maximum on a fine grid agrees (<a href="#tbl-sol-sens-sliding" class="quarto-xref">Table&nbsp;<span>24.1</span></a>).</li>
 </ol>
-<div id="tbl-sol-sensitivity-sliding" class="quarto-float quarto-figure quarto-figure-center anchored">
+<div id="tbl-sol-sens-sliding" class="quarto-float quarto-figure quarto-figure-center anchored">
 <figure class="quarto-float quarto-float-tbl figure">
-<figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl" id="tbl-sol-sensitivity-sliding-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl" id="tbl-sol-sens-sliding-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
 Table&nbsp;24.1: The sliding constant <span class="math inline">\(\sup_u \gamma u^{\gamma-1}/(1 + u^\gamma)\)</span> for three tail exponents, against the bound <span class="math inline">\(\gamma\)</span>.
 </figcaption>
-<div aria-describedby="tbl-sol-sensitivity-sliding-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<div aria-describedby="tbl-sol-sens-sliding-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
 <table class="caption-top table">
 <colgroup>
 <col style="width: 25%">
@@ -634,7 +634,7 @@ Table&nbsp;24.1: The sliding constant <span class="math inline">\(\sup_u \gamma 
 </figure>
 </div>
 <ol start="3" type="1">
-<li><strong>Redo the privacy loss.</strong> In step 4 of the chapter’s derivation, the mean value theorem now gives a sliding term of at most <span class="math inline">\(c_\gamma\alpha\)</span> with <span class="math inline">\(c_\gamma = (\gamma - 1)^{(\gamma-1)/\gamma}\)</span>. The scale term (<span class="math inline">\(\beta\)</span>) and the dilation term (<span class="math inline">\(\gamma\beta\)</span>) are unchanged. So the condition becomes <span class="math inline">\(c_\gamma\alpha + (\gamma + 1)\beta \le \varepsilon\)</span>.</li>
+<li><strong>Redo the privacy loss.</strong> In step 4 of the proof of <a href="../../book-full/part03-dp-foundations/07-sensitivity.html#thm-sens-cauchy">Theorem&nbsp;24.1</a>, the mean value theorem now gives a sliding term of at most <span class="math inline">\(c_\gamma\alpha\)</span> with <span class="math inline">\(c_\gamma = (\gamma - 1)^{(\gamma-1)/\gamma}\)</span>. The scale term (<span class="math inline">\(\beta\)</span>) and the dilation term (<span class="math inline">\(\gamma\beta\)</span>) are unchanged. So the condition becomes <span class="math inline">\(c_\gamma\alpha + (\gamma + 1)\beta \le \varepsilon\)</span>.</li>
 <li><strong>The Cauchy.</strong> With <span class="math inline">\(\gamma = 2\)</span>, <span class="math inline">\(c_2 = 1\)</span> and <span class="math inline">\(\beta = \varepsilon/6\)</span>: <span class="math inline">\(\alpha \le \varepsilon - 3\varepsilon/6 = \varepsilon/2\)</span>.</li>
 <li><strong>The median age.</strong> <span class="math inline">\(S^*_{1/6} = 0.1632\)</span> does not change, since <span class="math inline">\(\beta\)</span> did not. The noise scale <span class="math inline">\(S^*/\alpha\)</span> goes from <span class="math inline">\(6S^*/\varepsilon = 0.979\)</span> to <span class="math inline">\(2S^*/\varepsilon = 0.326\)</span>, three times smaller.</li>
 </ol>
@@ -643,10 +643,10 @@ Table&nbsp;24.1: The sliding constant <span class="math inline">\(\sup_u \gamma 
 </div>
 </div>
 </section>
-<section id="sec-sol-sensitivity-3" class="level2" data-number="24.3">
-<h2 data-number="24.3" class="anchored" data-anchor-id="sec-sol-sensitivity-3"><span class="header-section-number">24.3</span> Other quantiles</h2>
+<section id="sec-sol-sens-3" class="level2" data-number="24.3">
+<h2 data-number="24.3" class="anchored" data-anchor-id="sec-sol-sens-3"><span class="header-section-number">24.3</span> Other quantiles</h2>
 <blockquote class="blockquote">
-<p><strong>Exercise 3.</strong> <strong>Other quantiles.</strong> Generalize <a href="../../book-full/part03-dp-foundations/07-sensitivity.html#eq-sens-median-ak">Equation&nbsp;24.15</a> to the <span class="math inline">\(r\)</span>-th order statistic and compute the smooth sensitivity of the 90th percentile (<span class="math inline">\(r = 901\)</span>) of the 1,001 ages with <span class="math inline">\(\beta = 1/6\)</span>. Why is it larger than the median’s although its local sensitivity is smaller? <em>Check: <span class="math inline">\(\mathrm{LS} = 0.0114\)</span>, <span class="math inline">\(S^* = 0.2666\)</span> at <span class="math inline">\(k = 7\)</span>.</em> <em>(Smooth sensitivity)</em></p>
+<p><strong>Exercise 3.</strong> <strong>Other quantiles.</strong> Generalize <a href="../../book-full/part03-dp-foundations/07-sensitivity.html#eq-sens-median-ak">Equation&nbsp;24.9</a> to the <span class="math inline">\(r\)</span>-th order statistic and compute the smooth sensitivity of the 90th percentile (<span class="math inline">\(r = 901\)</span>) of the 1,001 ages with <span class="math inline">\(\beta = 1/6\)</span>. Why is it larger than the median’s although its local sensitivity is smaller? <em>Check: <span class="math inline">\(\mathrm{LS} = 0.0114\)</span>, <span class="math inline">\(S^* = 0.2666\)</span> at <span class="math inline">\(k = 7\)</span>.</em> <em>(Smooth sensitivity)</em></p>
 </blockquote>
 <div class="callout callout-style-default callout-tip callout-titled" title="Solution">
 <div class="callout-header d-flex align-content-center collapsed" data-bs-toggle="collapse" data-bs-target=".callout-3-contents" aria-controls="callout-3" aria-expanded="false" aria-label="Toggle callout">
@@ -661,8 +661,8 @@ Table&nbsp;24.1: The sliding constant <span class="math inline">\(\sup_u \gamma 
 <div id="callout-3" class="callout-3-contents callout-collapse collapse">
 <div class="callout-body-container callout-body">
 <ol type="1">
-<li><strong>Local sensitivity.</strong> Replacing one record moves the <span class="math inline">\(r\)</span>-th order statistic to anywhere in <span class="math inline">\([x_{r-1}, x_{r+1}]\)</span> (Fact 4 of the chapter with <span class="math inline">\(j = r\)</span>, and the same two replacements, by 0 and by <span class="math inline">\(\Lambda\)</span>, attain both ends). So <span class="math inline">\(\mathrm{LS}_r(D) = \max(x_r - x_{r-1}, x_{r+1} - x_r)\)</span>.</li>
-<li><strong>Distance <span class="math inline">\(k\)</span>.</strong> The derivation of the median formula used the rank <span class="math inline">\(m\)</span> only through “exactly <span class="math inline">\(m\)</span> values are at or below the order statistic”. Replacing <span class="math inline">\(m\)</span> by <span class="math inline">\(r\)</span> everywhere gives <span id="eq-auto-07sensitivity-2"><span class="math display">\[A^{(k)}_r(D) = \max_{0 \le t \le k+1}\big(x_{r+t} - x_{r+t-k-1}\big), \tag{24.2}\]</span></span> with the same padding: the windows now slide around rank <span class="math inline">\(r\)</span>. The script’s function <code>order_stat_a_profile</code> takes <span class="math inline">\(r\)</span> as a parameter, and the median is the case <span class="math inline">\(r = (n + 1)/2\)</span>.</li>
+<li><strong>Local sensitivity.</strong> Replacing one record moves the <span class="math inline">\(r\)</span>-th order statistic to anywhere in <span class="math inline">\([x_{r-1}, x_{r+1}]\)</span> (<a href="../../book-full/part03-dp-foundations/07-sensitivity.html#lem-sens-order">Lemma&nbsp;24.1</a> with <span class="math inline">\(k = 1\)</span> and <span class="math inline">\(j = r\)</span>, and the replacements by 0 and by <span class="math inline">\(\Lambda\)</span> of the proof of <a href="../../book-full/part03-dp-foundations/07-sensitivity.html#prp-sens-median-ls">Proposition&nbsp;24.1</a> attain both ends). So <span class="math inline">\(\mathrm{LS}_r(D) = \max(x_r - x_{r-1}, x_{r+1} - x_r)\)</span>.</li>
+<li><strong>Distance <span class="math inline">\(k\)</span>.</strong> The proof of <a href="../../book-full/part03-dp-foundations/07-sensitivity.html#prp-sens-median-ak">Proposition&nbsp;24.4</a> used the rank <span class="math inline">\(m\)</span> only through “exactly <span class="math inline">\(m\)</span> values are at or below the order statistic”. Replacing <span class="math inline">\(m\)</span> by <span class="math inline">\(r\)</span> everywhere gives <span id="eq-auto-07sensitivity-2"><span class="math display">\[A^{(k)}_r(D) = \max_{0 \le t \le k+1}\big(x_{r+t} - x_{r+t-k-1}\big), \tag{24.2}\]</span></span> with the same padding: the windows now slide around rank <span class="math inline">\(r\)</span>. The script’s function <code>order_stat_a_profile</code> takes <span class="math inline">\(r\)</span> as a parameter, and the median is the case <span class="math inline">\(r = (n + 1)/2\)</span>.</li>
 <li><strong>Compute.</strong> For the ages, <span class="math inline">\(x_{901} = 55.21\)</span>, <span class="math inline">\(\mathrm{LS} = 0.0114\)</span>, and <span class="math inline">\(S^*_{1/6} = 0.2666\)</span> at <span class="math inline">\(k = 7\)</span>. The median has <span class="math inline">\(\mathrm{LS} = 0.1386\)</span> but <span class="math inline">\(S^*_{1/6} = 0.1632\)</span>, also at <span class="math inline">\(k = 7\)</span>. With Cauchy noise the 90th percentile gets scale <span class="math inline">\(6S^*/\varepsilon = 1.599\)</span>.</li>
 <li><strong>Why the order flips.</strong> The local sensitivity is one gap, and a single gap is noisy: the 90th percentile happened to sit between two close values. The smooth sensitivity is governed by <span class="math inline">\(A^{(7)}\)</span>, the span of 8 consecutive values. Near the 90th percentile the data are sparser than near the median (the normal density is lower about 1.2 standard deviations above the mean), so 8 consecutive values span more.</li>
 </ol>
@@ -671,8 +671,8 @@ Table&nbsp;24.1: The sliding constant <span class="math inline">\(\sup_u \gamma 
 </div>
 </div>
 </section>
-<section id="sec-sol-sensitivity-4" class="level2" data-number="24.4">
-<h2 data-number="24.4" class="anchored" data-anchor-id="sec-sol-sensitivity-4"><span class="header-section-number">24.4</span> Sizing the proposal</h2>
+<section id="sec-sol-sens-4" class="level2" data-number="24.4">
+<h2 data-number="24.4" class="anchored" data-anchor-id="sec-sol-sens-4"><span class="header-section-number">24.4</span> Sizing the proposal</h2>
 <blockquote class="blockquote">
 <p><strong>Exercise 4.</strong> <strong>Sizing the proposal.</strong> With <span class="math inline">\(\varepsilon = 1\)</span> and <span class="math inline">\(\delta = 10^{-6}\)</span>, how large must <span class="math inline">\(\operatorname{dist}_b(D)\)</span> be for propose-test-release to answer with probability at least 0.99? For the ages, what is the smallest <span class="math inline">\(b\)</span> that achieves it? <em>Check: distance 18 (17.73 rounded up), pass probability 0.9924; <span class="math inline">\(b = A^{(17)} = 0.7892\)</span>.</em> <em>(Propose-test-release)</em></p>
 </blockquote>
@@ -689,9 +689,9 @@ Table&nbsp;24.1: The sliding constant <span class="math inline">\(\sup_u \gamma 
 <div id="callout-4" class="callout-4-contents callout-collapse collapse">
 <div class="callout-body-container callout-body">
 <ol type="1">
-<li><strong>The pass probability.</strong> With threshold <span class="math inline">\(T = \ln(1/\delta)/\varepsilon = 13.82\)</span> and distance <span class="math inline">\(d \ge T\)</span>, the test passes when <span class="math inline">\(\mathrm{Lap}(1/\varepsilon) &gt; T - d\)</span>, which has probability <span class="math inline">\(1 - \frac12e^{-\varepsilon(d - T)}\)</span>.</li>
-<li><strong>Solve for 0.99.</strong> <span class="math inline">\(\frac12e^{-\varepsilon(d - T)} \le 0.01\)</span> means <span class="math inline">\(d \ge T + \ln(50)/\varepsilon = 13.82 + 3.91 = 17.73\)</span>.</li>
-<li><strong>Round up.</strong> The distance counts records, so it is an integer: <span class="math inline">\(d \ge 18\)</span>. At <span class="math inline">\(d = 18\)</span> the pass probability is <span class="math inline">\(1 - \frac12e^{-(18 - 13.82)} = 0.9924\)</span>.</li>
+<li><strong>The pass probability.</strong> With threshold <span class="math inline">\(\tau = \ln(1/\delta)/\varepsilon = 13.82\)</span> and distance <span class="math inline">\(k \ge \tau\)</span>, the test passes when <span class="math inline">\(\mathrm{Lap}(1/\varepsilon) &gt; \tau - k\)</span>, which has probability <span class="math inline">\(1 - \frac12e^{-\varepsilon(k - \tau)}\)</span>.</li>
+<li><strong>Solve for 0.99.</strong> <span class="math inline">\(\frac12e^{-\varepsilon(k - \tau)} \le 0.01\)</span> means <span class="math inline">\(k \ge \tau + \ln(50)/\varepsilon = 13.82 + 3.91 = 17.73\)</span>.</li>
+<li><strong>Round up.</strong> The distance counts records, so it is an integer: <span class="math inline">\(k \ge 18\)</span>. At <span class="math inline">\(k = 18\)</span> the pass probability is <span class="math inline">\(1 - \frac12e^{-(18 - 13.82)} = 0.9924\)</span>.</li>
 <li><strong>Translate into <span class="math inline">\(b\)</span>.</strong> <span class="math inline">\(\operatorname{dist}_b(D) = \min\{k : A^{(k)}(D) &gt; b\}\)</span>, and <span class="math inline">\(A^{(k)}\)</span> is non-decreasing in <span class="math inline">\(k\)</span>. So <span class="math inline">\(\operatorname{dist}_b(D) \ge 18\)</span> exactly when <span class="math inline">\(A^{(17)}(D) \le b\)</span>.</li>
 <li><strong>The ages.</strong> <span class="math inline">\(A^{(17)} = 0.7892\)</span>, so the smallest proposal that passes with probability 0.99 is <span class="math inline">\(b = 0.7892\)</span> years; the script confirms <span class="math inline">\(\operatorname{dist}_{0.7892} = 18\)</span>. The chapter’s <span class="math inline">\(b = 1\)</span> has distance 21, with room to spare.</li>
 </ol>
@@ -700,10 +700,10 @@ Table&nbsp;24.1: The sliding constant <span class="math inline">\(\sup_u \gamma 
 </div>
 </div>
 </section>
-<section id="sec-sol-sensitivity-5" class="level2" data-number="24.5">
-<h2 data-number="24.5" class="anchored" data-anchor-id="sec-sol-sensitivity-5"><span class="header-section-number">24.5</span> The number of blocks</h2>
+<section id="sec-sol-sens-5" class="level2" data-number="24.5">
+<h2 data-number="24.5" class="anchored" data-anchor-id="sec-sol-sens-5"><span class="header-section-number">24.5</span> The number of blocks</h2>
 <blockquote class="blockquote">
-<p><strong>Exercise 5.</strong> <strong>The number of blocks.</strong> Approximate <a href="../../book-full/part03-dp-foundations/07-sensitivity.html#eq-sens-saa-error">Equation&nbsp;24.23</a> by <span class="math inline">\((\theta B/n)^2 + \theta^2/n + 2(R/(B\varepsilon))^2\)</span> and find the minimizing <span class="math inline">\(B\)</span> in closed form. Compare with the exact optimum over the divisors of <span class="math inline">\(n = 10{,}000\)</span>. <em>Check: <span class="math inline">\(B^* = (2R^2n^2/(\theta\varepsilon)^2)^{1/4} = 265.9\)</span>; the best divisor is 250.</em> <em>(Bias–variance trade-off)</em></p>
+<p><strong>Exercise 5.</strong> <strong>The number of blocks.</strong> Approximate <a href="../../book-full/part03-dp-foundations/07-sensitivity.html#eq-sens-saa-error">Equation&nbsp;24.24</a> by <span class="math inline">\((\theta B/n)^2 + \theta^2/n + 2(R/(B\varepsilon))^2\)</span> and find the minimizing <span class="math inline">\(B\)</span> in closed form. Compare with the exact optimum over the divisors of <span class="math inline">\(n = 10{,}000\)</span>. <em>Check: <span class="math inline">\(B^* = (2R^2n^2/(\theta\varepsilon)^2)^{1/4} = 265.9\)</span>; the best divisor is 250.</em> <em>(Bias–variance trade-off)</em></p>
 </blockquote>
 <div class="callout callout-style-default callout-tip callout-titled" title="Solution">
 <div class="callout-header d-flex align-content-center collapsed" data-bs-toggle="collapse" data-bs-target=".callout-5-contents" aria-controls="callout-5" aria-expanded="false" aria-label="Toggle callout">
@@ -722,17 +722,17 @@ Table&nbsp;24.1: The sliding constant <span class="math inline">\(\sup_u \gamma 
 <li><strong>Differentiate</strong> <span class="math inline">\(g(B) = \theta^2B^2/n^2 + 2R^2/(B^2\varepsilon^2)\)</span>: <span class="math inline">\(g'(B) = 2\theta^2B/n^2 - 4R^2/(B^3\varepsilon^2)\)</span>.</li>
 <li><strong>Set to zero:</strong> <span class="math inline">\(B^4 = 2R^2n^2/(\theta^2\varepsilon^2)\)</span>, so <span class="math inline">\(B^* = \big(2R^2n^2/(\theta\varepsilon)^2\big)^{1/4}\)</span>. The second derivative is positive, so this is a minimum.</li>
 <li><strong>Numbers.</strong> With <span class="math inline">\(R = 5\)</span>, <span class="math inline">\(n = 10^4\)</span>, <span class="math inline">\(\theta = \varepsilon = 1\)</span>: <span class="math inline">\(B^* = (2 \times 25 \times 10^8)^{1/4} = 265.9\)</span>.</li>
-<li><strong>Exact optimum.</strong> <span class="math inline">\(B\)</span> must divide <span class="math inline">\(n\)</span> for equal blocks. Evaluating the exact error <a href="../../book-full/part03-dp-foundations/07-sensitivity.html#eq-sens-saa-error">Equation&nbsp;24.23</a> at every divisor, the best is <span class="math inline">\(B = 250\)</span> (blocks of 40), with error <span class="math inline">\(0.0396\)</span>. The neighbouring divisors are worse: 200 gives <span class="math inline">\(0.0421\)</span> and 400 gives <span class="math inline">\(0.0465\)</span>.</li>
+<li><strong>Exact optimum.</strong> <span class="math inline">\(B\)</span> must divide <span class="math inline">\(n\)</span> for equal blocks. Evaluating the exact error <a href="../../book-full/part03-dp-foundations/07-sensitivity.html#eq-sens-saa-error">Equation&nbsp;24.24</a> at every divisor, the best is <span class="math inline">\(B = 250\)</span> (blocks of 40), with error <span class="math inline">\(0.0396\)</span>. The neighbouring divisors are worse: 200 gives <span class="math inline">\(0.0421\)</span> and 400 gives <span class="math inline">\(0.0465\)</span>.</li>
 </ol>
 <p><em>At the optimum, bias and noise are of the same size, and <span class="math inline">\(B^*\)</span> grows like <span class="math inline">\(\sqrt{n}\)</span>: more data buys more, smaller blocks.</em></p>
 </div>
 </div>
 </div>
 </section>
-<section id="sec-sol-sensitivity-6" class="level2" data-number="24.6">
-<h2 data-number="24.6" class="anchored" data-anchor-id="sec-sol-sensitivity-6"><span class="header-section-number">24.6</span> Clipping exponential data</h2>
+<section id="sec-sol-sens-6" class="level2" data-number="24.6">
+<h2 data-number="24.6" class="anchored" data-anchor-id="sec-sol-sens-6"><span class="header-section-number">24.6</span> Clipping exponential data</h2>
 <blockquote class="blockquote">
-<p><strong>Exercise 6.</strong> <strong>Clipping exponential data.</strong> For <span class="math inline">\(X \sim \mathrm{Exponential}(1)\)</span>, show <span class="math inline">\(\mathbb E[(X - C)_+] = e^{-C}\)</span> and, ignoring the sampling term, that the best clip bound solves <span class="math inline">\(e^{-2C} = 2C/(n\varepsilon)^2\)</span>. <em>Check: <span class="math inline">\(C^* = 5.692\)</span> for <span class="math inline">\(n = 1000\)</span>, <span class="math inline">\(\varepsilon = 1\)</span>; <span class="math inline">\(3.616\)</span> for <span class="math inline">\(n = 100\)</span> and <span class="math inline">\(7.834\)</span> for <span class="math inline">\(n = 10{,}000\)</span>.</em> <em>(Clipping)</em></p>
+<p><strong>Exercise 6.</strong> <strong>Clipping exponential data.</strong> For <span class="math inline">\(X \sim \mathrm{Exp}(1)\)</span>, show <span class="math inline">\(\mathbb E[(X - C)_+] = e^{-C}\)</span> and, ignoring the sampling term, that the best clipping norm solves <span class="math inline">\(e^{-2C} = 2C/(n\varepsilon)^2\)</span>. <em>Check: <span class="math inline">\(C^* = 5.692\)</span> for <span class="math inline">\(n = 1000\)</span>, <span class="math inline">\(\varepsilon = 1\)</span>; <span class="math inline">\(3.616\)</span> for <span class="math inline">\(n = 100\)</span> and <span class="math inline">\(7.834\)</span> for <span class="math inline">\(n = 10{,}000\)</span>.</em> <em>(Clipping)</em></p>
 </blockquote>
 <div class="callout callout-style-default callout-tip callout-titled" title="Solution">
 <div class="callout-header d-flex align-content-center collapsed" data-bs-toggle="collapse" data-bs-target=".callout-6-contents" aria-controls="callout-6" aria-expanded="false" aria-label="Toggle callout">
@@ -747,19 +747,19 @@ Table&nbsp;24.1: The sliding constant <span class="math inline">\(\sup_u \gamma 
 <div id="callout-6" class="callout-6-contents callout-collapse collapse">
 <div class="callout-body-container callout-body">
 <ol type="1">
-<li><strong>The bias.</strong> <span class="math inline">\(\mathbb E[(X - C)_+] = \int_C^\infty(x - C)e^{-x}\,dx\)</span>. Substitute <span class="math inline">\(u = x - C\)</span>: <span class="math inline">\(e^{-C}\int_0^\infty ue^{-u}\,du = e^{-C}\)</span>. (This is memorylessness: given <span class="math inline">\(X &gt; C\)</span>, the excess is again <span class="math inline">\(\mathrm{Exponential}(1)\)</span>, with mean 1, and <span class="math inline">\(\Pr[X &gt; C] = e^{-C}\)</span>.)</li>
+<li><strong>The bias.</strong> <span class="math inline">\(\mathbb E[(X - C)_+] = \int_C^\infty(x - C)e^{-x}\,\mathrm dx\)</span>. Substitute <span class="math inline">\(u = x - C\)</span>: <span class="math inline">\(e^{-C}\int_0^\infty ue^{-u}\,\mathrm du = e^{-C}\)</span>. (This is memorylessness: given <span class="math inline">\(X &gt; C\)</span>, the excess is again <span class="math inline">\(\mathrm{Exp}(1)\)</span>, with mean 1, and <span class="math inline">\(\Pr[X &gt; C] = e^{-C}\)</span>.)</li>
 <li><strong>The objective without the sampling term:</strong> <span class="math inline">\(e^{-2C} + 2C^2/(n\varepsilon)^2\)</span>.</li>
 <li><strong>Differentiate and set to zero:</strong> <span class="math inline">\(-2e^{-2C} + 4C/(n\varepsilon)^2 = 0\)</span>, that is <span class="math inline">\(e^{-2C} = 2C/(n\varepsilon)^2\)</span>. The left side falls and the right side rises in <span class="math inline">\(C\)</span>, so there is exactly one root, which bisection finds.</li>
 <li><strong>Numbers.</strong> For <span class="math inline">\(n = 1000\)</span>, <span class="math inline">\(\varepsilon = 1\)</span>: <span class="math inline">\(C^* = 5.692\)</span>, where the bias is <span class="math inline">\(e^{-5.692} = 0.0034\)</span>, the noise standard deviation <span class="math inline">\(\sqrt2\,C^*/1000 = 0.0080\)</span>, and their combined root-mean-square error <span class="math inline">\(0.0087\)</span>. For <span class="math inline">\(n = 100\)</span>, <span class="math inline">\(C^* = 3.616\)</span>; for <span class="math inline">\(n = 10{,}000\)</span>, <span class="math inline">\(C^* = 7.834\)</span>.</li>
 <li><strong>Growth with <span class="math inline">\(n\)</span>.</strong> Taking logarithms, <span class="math inline">\(2C^* = 2\ln(n\varepsilon) - \ln(2C^*)\)</span>, so <span class="math inline">\(C^* \approx \ln(n\varepsilon)\)</span> minus a slowly growing correction: each factor of 10 in <span class="math inline">\(n\)</span> adds about <span class="math inline">\(\ln 10 = 2.3\)</span> minus a little, as the three values show.</li>
 </ol>
-<p><em>For a light (exponential) tail, the clip bound grows only logarithmically with <span class="math inline">\(n\varepsilon\)</span>. For heavier tails, such as the chapter’s log-normal incomes, it grows much faster.</em></p>
+<p><em>For a light (exponential) tail, the clipping norm grows only logarithmically with <span class="math inline">\(n\varepsilon\)</span>. For heavier tails, such as the chapter’s log-normal incomes, it grows much faster.</em></p>
 </div>
 </div>
 </div>
 </section>
-<section id="sec-sol-sensitivity-7" class="level2" data-number="24.7">
-<h2 data-number="24.7" class="anchored" data-anchor-id="sec-sol-sensitivity-7"><span class="header-section-number">24.7</span> Smoothness at work</h2>
+<section id="sec-sol-sens-7" class="level2" data-number="24.7">
+<h2 data-number="24.7" class="anchored" data-anchor-id="sec-sol-sens-7"><span class="header-section-number">24.7</span> Smoothness at work</h2>
 <blockquote class="blockquote">
 <p><strong>Exercise 7.</strong> <strong>Smoothness at work.</strong> For the degenerate pair <span class="math inline">\(D = (0, 0, 0, 0, 100)\)</span> and <span class="math inline">\(D' = (0, 0, 0, 100, 100)\)</span> with <span class="math inline">\(\beta = 1/6\)</span>, compute <span class="math inline">\(A^{(k)}\)</span> for both and the smooth sensitivities. Check that their ratio is at most <span class="math inline">\(e^\beta\)</span>, and explain why it is exactly <span class="math inline">\(e^\beta\)</span> here. <em>Check: <span class="math inline">\(S^*(D) = 84.648\)</span> at <span class="math inline">\(k = 1\)</span>, <span class="math inline">\(S^*(D') = 100\)</span>, ratio <span class="math inline">\(1.1814 = e^{1/6}\)</span>.</em> <em>(Smooth sensitivity)</em></p>
 </blockquote>
@@ -777,15 +777,15 @@ Table&nbsp;24.1: The sliding constant <span class="math inline">\(\sup_u \gamma 
 <div class="callout-body-container callout-body">
 <ol type="1">
 <li><strong><span class="math inline">\(D\)</span>, distance 0.</strong> <span class="math inline">\(n = 5\)</span>, <span class="math inline">\(m = 3\)</span>, so <span class="math inline">\(\mathrm{LS}(D) = \max(x_3 - x_2, x_4 - x_3) = \max(0, 0) = 0\)</span>.</li>
-<li><strong><span class="math inline">\(D\)</span>, distance <span class="math inline">\(k \ge 1\)</span>.</strong> With <span class="math inline">\(k = 1\)</span> the windows are <span class="math inline">\(x_3 - x_1 = 0\)</span>, <span class="math inline">\(x_4 - x_2 = 0\)</span> and <span class="math inline">\(x_5 - x_3 = 100\)</span>, so <span class="math inline">\(A^{(1)} = 100\)</span>: replace <span class="math inline">\(x_4 = 0\)</span> by 100 and the median sits at the bottom of a gap of 100. Since <span class="math inline">\(A^{(k)} \le \Lambda = 100\)</span>, <span class="math inline">\(A^{(k)} = 100\)</span> for all <span class="math inline">\(k \ge 1\)</span> (<a href="#tbl-sol-sensitivity-degenerate" class="quarto-xref">Table&nbsp;<span>24.2</span></a>).</li>
+<li><strong><span class="math inline">\(D\)</span>, distance <span class="math inline">\(k \ge 1\)</span>.</strong> With <span class="math inline">\(k = 1\)</span> the windows are <span class="math inline">\(x_3 - x_1 = 0\)</span>, <span class="math inline">\(x_4 - x_2 = 0\)</span> and <span class="math inline">\(x_5 - x_3 = 100\)</span>, so <span class="math inline">\(A^{(1)} = 100\)</span>: replace <span class="math inline">\(x_4 = 0\)</span> by 100 and the median sits at the bottom of a gap of 100. Since <span class="math inline">\(A^{(k)} \le \Lambda = 100\)</span>, <span class="math inline">\(A^{(k)} = 100\)</span> for all <span class="math inline">\(k \ge 1\)</span> (<a href="#tbl-sol-sens-degenerate" class="quarto-xref">Table&nbsp;<span>24.2</span></a>).</li>
 <li><strong><span class="math inline">\(D'\)</span>.</strong> Already <span class="math inline">\(\mathrm{LS}(D') = x_4 - x_3 = 100\)</span>, so <span class="math inline">\(A^{(k)} = 100\)</span> for every <span class="math inline">\(k\)</span>.</li>
 </ol>
-<div id="tbl-sol-sensitivity-degenerate" class="quarto-float quarto-figure quarto-figure-center anchored">
+<div id="tbl-sol-sens-degenerate" class="quarto-float quarto-figure quarto-figure-center anchored">
 <figure class="quarto-float quarto-float-tbl figure">
-<figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl" id="tbl-sol-sensitivity-degenerate-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl" id="tbl-sol-sens-degenerate-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
 Table&nbsp;24.2: <span class="math inline">\(A^{(k)}\)</span> for the degenerate pair <span class="math inline">\(D = (0, 0, 0, 0, 100)\)</span> and <span class="math inline">\(D' = (0, 0, 0, 100, 100)\)</span> with <span class="math inline">\(\Lambda = 100\)</span>.
 </figcaption>
-<div aria-describedby="tbl-sol-sensitivity-degenerate-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<div aria-describedby="tbl-sol-sens-degenerate-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
 <table class="caption-top table">
 <thead>
 <tr class="header">
@@ -825,17 +825,17 @@ Table&nbsp;24.2: <span class="math inline">\(A^{(k)}\)</span> for the degenerate
 <ol start="4" type="1">
 <li><strong>Smooth sensitivities.</strong> For <span class="math inline">\(D'\)</span> the maximum of <span class="math inline">\(e^{-k/6}\times100\)</span> is at <span class="math inline">\(k = 0\)</span>: <span class="math inline">\(S^*(D') = 100\)</span>. For <span class="math inline">\(D\)</span> the <span class="math inline">\(k = 0\)</span> term is 0, and the largest of the rest is at <span class="math inline">\(k = 1\)</span>: <span class="math inline">\(S^*(D) = 100e^{-1/6} = 84.648\)</span>.</li>
 <li><strong>The ratio</strong> is <span class="math inline">\(100/84.648 = 1.1814 = e^{1/6}\)</span>, exactly the largest ratio smoothness allows.</li>
-<li><strong>Why it is tight.</strong> <span class="math inline">\(D\)</span>’s largest discounted term is <span class="math inline">\(D'\)</span> itself, one step away. So <span class="math inline">\(S^*(D)\)</span> is <span class="math inline">\(S^*(D')\)</span> discounted by exactly one factor <span class="math inline">\(e^{-\beta}\)</span>, which is step 2 of the chapter’s smoothness proof holding with equality.</li>
+<li><strong>Why it is tight.</strong> <span class="math inline">\(D\)</span>’s largest discounted term is <span class="math inline">\(D'\)</span> itself, one step away. So <span class="math inline">\(S^*(D)\)</span> is <span class="math inline">\(S^*(D')\)</span> discounted by exactly one factor <span class="math inline">\(e^{-\beta}\)</span>, which is step 2 of the proof of <a href="../../book-full/part03-dp-foundations/07-sensitivity.html#prp-sens-smooth-bound">Proposition&nbsp;24.3</a> holding with equality.</li>
 </ol>
 <p><em>Compare with local sensitivity, which jumps from 0 to 100 on this pair and makes the release on <span class="math inline">\(D\)</span> deterministic. Smooth sensitivity sees <span class="math inline">\(D'\)</span> coming and already adds noise of scale 84.6/α on <span class="math inline">\(D\)</span>.</em></p>
 </div>
 </div>
 </div>
 </section>
-<section id="sec-sol-sensitivity-8" class="level2" data-number="24.8">
-<h2 data-number="24.8" class="anchored" data-anchor-id="sec-sol-sensitivity-8"><span class="header-section-number">24.8</span> Inverse sensitivity for a quantile</h2>
+<section id="sec-sol-sens-8" class="level2" data-number="24.8">
+<h2 data-number="24.8" class="anchored" data-anchor-id="sec-sol-sens-8"><span class="header-section-number">24.8</span> Inverse sensitivity for a quantile</h2>
 <blockquote class="blockquote">
-<p><strong>Exercise 8.</strong> <strong>Inverse sensitivity for a quantile.</strong> Generalize <a href="../../book-full/part03-dp-foundations/07-sensitivity.html#eq-sens-inverse-median">Equation&nbsp;24.19</a> from the median to the <span class="math inline">\(r\)</span>-th order statistic: show that a candidate <span class="math inline">\(t\)</span> in the gap <span class="math inline">\((x_i, x_{i+1})\)</span> needs <span class="math inline">\(r - i\)</span> changes when <span class="math inline">\(i &lt; r\)</span> and <span class="math inline">\(i - r + 1\)</span> when <span class="math inline">\(i \ge r\)</span>. Then release the 90th percentile of the ages (<span class="math inline">\(r = 901\)</span>) with <span class="math inline">\(\varepsilon = 1\)</span> and compare its median absolute error with the smooth-sensitivity noise scale of Exercise 3. <em>Check: 0.1592 years, against 1.599; for <span class="math inline">\(r = 501\)</span> the formula gives back the chapter’s 0.0783.</em> <em>(Inverse sensitivity)</em></p>
+<p><strong>Exercise 8.</strong> <strong>Inverse sensitivity for a quantile.</strong> Generalize <a href="../../book-full/part03-dp-foundations/07-sensitivity.html#eq-sens-inverse-median">Equation&nbsp;24.20</a> from the median to the <span class="math inline">\(r\)</span>-th order statistic: show that a candidate <span class="math inline">\(t\)</span> in the gap <span class="math inline">\((x_i, x_{i+1})\)</span> needs <span class="math inline">\(r - i\)</span> changes when <span class="math inline">\(i &lt; r\)</span> and <span class="math inline">\(i - r + 1\)</span> when <span class="math inline">\(i \ge r\)</span>. Then release the 90th percentile of the ages (<span class="math inline">\(r = 901\)</span>) with <span class="math inline">\(\varepsilon = 1\)</span> and compare its median absolute error with the smooth-sensitivity noise scale of Exercise 3. <em>Check: 0.1592 years, against 1.599; for <span class="math inline">\(r = 501\)</span> the formula gives back the chapter’s 0.0783.</em> <em>(Inverse sensitivity)</em></p>
 </blockquote>
 <div class="callout callout-style-default callout-tip callout-titled" title="Solution">
 <div class="callout-header d-flex align-content-center collapsed" data-bs-toggle="collapse" data-bs-target=".callout-8-contents" aria-controls="callout-8" aria-expanded="false" aria-label="Toggle callout">
@@ -850,9 +850,9 @@ Table&nbsp;24.2: <span class="math inline">\(A^{(k)}\)</span> for the degenerate
 <div id="callout-8" class="callout-8-contents callout-collapse collapse">
 <div class="callout-body-container callout-body">
 <ol type="1">
-<li><strong>Above the target rank.</strong> Take <span class="math inline">\(t\)</span> in <span class="math inline">\((x_i, x_{i+1})\)</span> with <span class="math inline">\(i \ge r\)</span>, so <span class="math inline">\(i\)</span> values lie below <span class="math inline">\(t\)</span>. For the <span class="math inline">\(r\)</span>-th smallest value of a dataset to be <span class="math inline">\(t\)</span>, at most <span class="math inline">\(r - 1\)</span> values can lie below <span class="math inline">\(t\)</span> and one must equal <span class="math inline">\(t\)</span>. Each change removes at most one value from below <span class="math inline">\(t\)</span>, so at least <span class="math inline">\(i - r + 1\)</span> changes are needed. That many suffice: move one value from below <span class="math inline">\(t\)</span> to <span class="math inline">\(t\)</span> and the other <span class="math inline">\(i - r\)</span> to <span class="math inline">\(\Lambda\)</span>.</li>
-<li><strong>Below the target rank.</strong> Take <span class="math inline">\(t\)</span> in <span class="math inline">\((x_i, x_{i+1})\)</span> with <span class="math inline">\(i &lt; r\)</span>, so <span class="math inline">\(n - i\)</span> values lie above <span class="math inline">\(t\)</span>. The <span class="math inline">\(r\)</span>-th smallest equals <span class="math inline">\(t\)</span> only if at most <span class="math inline">\(n - r\)</span> values lie above <span class="math inline">\(t\)</span>, and one equals <span class="math inline">\(t\)</span>. So at least <span class="math inline">\((n - i) - (n - r) = r - i\)</span> changes are needed, and moving one value from above <span class="math inline">\(t\)</span> to <span class="math inline">\(t\)</span> and the rest to 0 shows they suffice. For <span class="math inline">\(r = m\)</span> this is <a href="../../book-full/part03-dp-foundations/07-sensitivity.html#eq-sens-inverse-median">Equation&nbsp;24.19</a>, without the reflection argument, which needed <span class="math inline">\(n + 1 = 2m\)</span>.</li>
-<li><strong>Privacy.</strong> Each count is a distance to a set of datasets, so Fact 3 gives sensitivity 1 and the release is the chapter’s exponential mechanism, <span class="math inline">\(\varepsilon\)</span>-DP for every <span class="math inline">\(r\)</span>.</li>
+<li><strong>Above the target rank.</strong> Step 1 of the proof of <a href="../../book-full/part03-dp-foundations/07-sensitivity.html#prp-sens-inverse-median">Proposition&nbsp;24.5</a> used the rank <span class="math inline">\(m\)</span> only as the number of values at or below the target. With <span class="math inline">\(r\)</span> in its place, a candidate <span class="math inline">\(t\)</span> in <span class="math inline">\((x_i, x_{i+1})\)</span> with <span class="math inline">\(i \ge r\)</span> needs exactly <span class="math inline">\(i - r + 1\)</span> changes.</li>
+<li><strong>Below the target rank.</strong> Take <span class="math inline">\(t\)</span> in <span class="math inline">\((x_i, x_{i+1})\)</span> with <span class="math inline">\(i &lt; r\)</span>, so <span class="math inline">\(n - i\)</span> values lie above <span class="math inline">\(t\)</span>. The <span class="math inline">\(r\)</span>-th smallest equals <span class="math inline">\(t\)</span> only if at most <span class="math inline">\(n - r\)</span> values lie above <span class="math inline">\(t\)</span>, and one equals <span class="math inline">\(t\)</span>. So at least <span class="math inline">\((n - i) - (n - r) = r - i\)</span> changes are needed, and moving one value from above <span class="math inline">\(t\)</span> to <span class="math inline">\(t\)</span> and the rest to 0 shows they suffice. For <span class="math inline">\(r = m\)</span> this is <a href="../../book-full/part03-dp-foundations/07-sensitivity.html#eq-sens-inverse-median">Equation&nbsp;24.20</a>, without the reflection argument, which needed <span class="math inline">\(n + 1 = 2m\)</span>.</li>
+<li><strong>Privacy.</strong> Each count is a distance to a set of datasets, so it has sensitivity 1 by <a href="../../book-full/part03-dp-foundations/07-sensitivity.html#lem-sens-distance">Lemma&nbsp;24.2</a>, and the release is <span class="math inline">\(\varepsilon\)</span>-DP for every <span class="math inline">\(r\)</span> by <a href="../../book-full/part03-dp-foundations/07-sensitivity.html#thm-sens-inverse">Theorem&nbsp;24.4</a>.</li>
 <li><strong>The numbers.</strong> The script weights each gap by its length times <span class="math inline">\(e^{-\varepsilon\,\mathrm{len}/2}\)</span>, with <span class="math inline">\(\varepsilon = 1\)</span>, and finds the median of the distance from <span class="math inline">\(x_{901}\)</span> by bisection. The median absolute error is 0.1592 years, against the noise scale 1.599 of smooth sensitivity with Cauchy noise, which is also its median absolute error, since a standard Cauchy variable has median absolute value 1. At <span class="math inline">\(r = 501\)</span> the same code gives 0.0783, the chapter’s value for the median.</li>
 </ol>
 <p><em>The 90th percentile sits where the ages are sparser than at the median, so its gaps are wider and its error is about twice the median’s. Smooth sensitivity loses by a factor of ten here, as it did at the median.</em></p>
@@ -860,8 +860,8 @@ Table&nbsp;24.2: <span class="math inline">\(A^{(k)}\)</span> for the degenerate
 </div>
 </div>
 </section>
-<section id="sec-sol-sensitivity-9" class="level2" data-number="24.9">
-<h2 data-number="24.9" class="anchored" data-anchor-id="sec-sol-sensitivity-9"><span class="header-section-number">24.9</span> The stable mode under add/remove</h2>
+<section id="sec-sol-sens-9" class="level2" data-number="24.9">
+<h2 data-number="24.9" class="anchored" data-anchor-id="sec-sol-sens-9"><span class="header-section-number">24.9</span> The stable mode under add/remove</h2>
 <blockquote class="blockquote">
 <p><strong>Exercise 9.</strong> <strong>The stable mode under add/remove.</strong> Under add/remove neighbours, one dataset has one more record than the other. Show that <span class="math inline">\(s(D) = \max(0, g - 1)\)</span>, with <span class="math inline">\(g\)</span> the lead of the mode, works for the stability-based release of the mode, and find the smallest lead that answers with probability 0.95 at <span class="math inline">\(\varepsilon = 1\)</span> and <span class="math inline">\(\delta = 10^{-6}\)</span>. Why is it about half the 35 records needed under replacement? <em>Check: a lead of 18 records; at a lead of 20 the release answers with probability 0.9972 under add/remove, and 0.004052 under replacement.</em> <em>(Stability-based release)</em></p>
 </blockquote>
@@ -878,7 +878,7 @@ Table&nbsp;24.2: <span class="math inline">\(A^{(k)}\)</span> for the degenerate
 <div id="callout-9" class="callout-9-contents callout-collapse collapse">
 <div class="callout-body-container callout-body">
 <ol type="1">
-<li><strong>Sensitivity.</strong> Adding or removing one record changes one count by 1. The largest and second-largest counts then each move by at most 1, and since only one count changes, at most one of them moves. So the lead moves by at most 1, and so does <span class="math inline">\(\max(0, g - 1)\)</span>.</li>
+<li><strong>Sensitivity.</strong> The proof follows that of <a href="../../book-full/part03-dp-foundations/07-sensitivity.html#prp-sens-mode">Proposition&nbsp;24.6</a>. Adding or removing one record changes one count by 1. The largest and second-largest counts then each move by at most 1, and since only one count changes, at most one of them moves. So the lead moves by at most 1, and so does <span class="math inline">\(\max(0, g - 1)\)</span>.</li>
 <li><strong>Zero where the answer can flip.</strong> If <span class="math inline">\(g \ge 2\)</span>, one change leaves the old mode ahead by at least <span class="math inline">\(g - 1 \ge 1\)</span>, so the mode cannot change. A dataset whose neighbour has a different mode therefore has <span class="math inline">\(g \le 1\)</span>, where <span class="math inline">\(s = 0\)</span>.</li>
 <li><strong>The lead for 0.95.</strong> The release answers when <span class="math inline">\(s + \mathrm{Lap}(1/\varepsilon) &gt; \ln(1/\delta)/\varepsilon = 13.82\)</span>. For <span class="math inline">\(s\)</span> above the threshold the probability is <span class="math inline">\(1 - \frac12e^{-(s - 13.82)}\)</span>, which reaches 0.95 at <span class="math inline">\(s = 13.82 + \ln 10 = 16.12\)</span>. So <span class="math inline">\(g - 1 \ge 17\)</span>, and the script confirms that the smallest lead is 18.</li>
 <li><strong>At a lead of 20.</strong> Add/remove gives <span class="math inline">\(s = 19\)</span> and probability 0.9972. Replacement gives <span class="math inline">\(s = \lceil 20/2\rceil - 1 = 9\)</span>, below the threshold, and probability 0.004052.</li>

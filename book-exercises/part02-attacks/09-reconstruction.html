@@ -450,7 +450,7 @@ window.Quarto = {
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../part05-dp-ml/05-private-prediction.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">42</span>&nbsp; <span class="chapter-title">Exercises: Private prediction</span></span></a>
+ <span class="menu-text"><span class="chapter-number">42</span>&nbsp; <span class="chapter-title">Exercises: Private prediction: PATE and in-context learning</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
@@ -501,16 +501,16 @@ window.Quarto = {
     <h2 id="toc-title">Table of contents</h2>
    
   <ul>
-  <li><a href="#sec-sol-reconstruction-1" id="toc-sec-sol-reconstruction-1" class="nav-link active" data-scroll-target="#sec-sol-reconstruction-1"><span class="header-section-number">17.1</span> A rounding curator</a></li>
-  <li><a href="#sec-sol-reconstruction-2" id="toc-sec-sol-reconstruction-2" class="nav-link" data-scroll-target="#sec-sol-reconstruction-2"><span class="header-section-number">17.2</span> Another Paley–Zygmund threshold</a></li>
-  <li><a href="#sec-sol-reconstruction-3" id="toc-sec-sol-reconstruction-3" class="nav-link" data-scroll-target="#sec-sol-reconstruction-3"><span class="header-section-number">17.3</span> The fourth moment</a></li>
-  <li><a href="#sec-sol-reconstruction-4" id="toc-sec-sol-reconstruction-4" class="nav-link" data-scroll-target="#sec-sol-reconstruction-4"><span class="header-section-number">17.4</span> The inverse of <span class="math inline">\(I + b\mathbf 1\mathbf 1^\top\)</span></a></li>
-  <li><a href="#sec-sol-reconstruction-5" id="toc-sec-sol-reconstruction-5" class="nav-link" data-scroll-target="#sec-sol-reconstruction-5"><span class="header-section-number">17.5</span> Queries that beat noise</a></li>
-  <li><a href="#sec-sol-reconstruction-6" id="toc-sec-sol-reconstruction-6" class="nav-link" data-scroll-target="#sec-sol-reconstruction-6"><span class="header-section-number">17.6</span> Information bound for rounded counts</a></li>
-  <li><a href="#sec-sol-reconstruction-7" id="toc-sec-sol-reconstruction-7" class="nav-link" data-scroll-target="#sec-sol-reconstruction-7"><span class="header-section-number">17.7</span> A sampling curator that keeps more</a></li>
-  <li><a href="#sec-sol-reconstruction-8" id="toc-sec-sol-reconstruction-8" class="nav-link" data-scroll-target="#sec-sol-reconstruction-8"><span class="header-section-number">17.8</span> Redundant statistics</a></li>
-  <li><a href="#sec-sol-reconstruction-9" id="toc-sec-sol-reconstruction-9" class="nav-link" data-scroll-target="#sec-sol-reconstruction-9"><span class="header-section-number">17.9</span> Queries for a deployed system</a></li>
-  <li><a href="#sec-sol-reconstruction-10" id="toc-sec-sol-reconstruction-10" class="nav-link" data-scroll-target="#sec-sol-reconstruction-10"><span class="header-section-number">17.10</span> Noise that grows with the number of queries</a></li>
+  <li><a href="#sec-sol-recon-1" id="toc-sec-sol-recon-1" class="nav-link active" data-scroll-target="#sec-sol-recon-1"><span class="header-section-number">17.1</span> A rounding curator</a></li>
+  <li><a href="#sec-sol-recon-2" id="toc-sec-sol-recon-2" class="nav-link" data-scroll-target="#sec-sol-recon-2"><span class="header-section-number">17.2</span> Another Paley–Zygmund threshold</a></li>
+  <li><a href="#sec-sol-recon-3" id="toc-sec-sol-recon-3" class="nav-link" data-scroll-target="#sec-sol-recon-3"><span class="header-section-number">17.3</span> The fourth moment</a></li>
+  <li><a href="#sec-sol-recon-4" id="toc-sec-sol-recon-4" class="nav-link" data-scroll-target="#sec-sol-recon-4"><span class="header-section-number">17.4</span> The inverse of <span class="math inline">\(I + b\mathbf 1\mathbf 1^\top\)</span></a></li>
+  <li><a href="#sec-sol-recon-5" id="toc-sec-sol-recon-5" class="nav-link" data-scroll-target="#sec-sol-recon-5"><span class="header-section-number">17.5</span> Queries that beat noise</a></li>
+  <li><a href="#sec-sol-recon-6" id="toc-sec-sol-recon-6" class="nav-link" data-scroll-target="#sec-sol-recon-6"><span class="header-section-number">17.6</span> Information bound for rounded counts</a></li>
+  <li><a href="#sec-sol-recon-7" id="toc-sec-sol-recon-7" class="nav-link" data-scroll-target="#sec-sol-recon-7"><span class="header-section-number">17.7</span> A sampling curator that keeps more</a></li>
+  <li><a href="#sec-sol-recon-8" id="toc-sec-sol-recon-8" class="nav-link" data-scroll-target="#sec-sol-recon-8"><span class="header-section-number">17.8</span> Redundant statistics</a></li>
+  <li><a href="#sec-sol-recon-9" id="toc-sec-sol-recon-9" class="nav-link" data-scroll-target="#sec-sol-recon-9"><span class="header-section-number">17.9</span> Queries for a deployed system</a></li>
+  <li><a href="#sec-sol-recon-10" id="toc-sec-sol-recon-10" class="nav-link" data-scroll-target="#sec-sol-recon-10"><span class="header-section-number">17.10</span> Noise that grows with the number of queries</a></li>
   </ul>
 </nav>
     </div>
@@ -537,9 +537,9 @@ window.Quarto = {
 
 
 <p>Exercises for <a href="../../book-full/part02-attacks/09-reconstruction.html">Reconstruction attacks</a>, each with a worked solution. Try each exercise before opening its solution. The script <code>code/part02-attacks/solutions_reconstruction.py</code> computes every number quoted here; run it with <code>uv run python code/part02-attacks/solutions_reconstruction.py</code>.</p>
-<p>The solutions use the chapter’s notation: <span class="math inline">\(d \in \{0, 1\}^n\)</span> is the secret database, a query is a subset <span class="math inline">\(S\)</span> with indicator <span class="math inline">\(q\)</span>, the curator answers <span class="math inline">\(a = Ad + e\)</span>, <span class="math inline">\(E\)</span> bounds every <span class="math inline">\(|e_j|\)</span>, <span class="math inline">\(\beta\)</span> is a fraction of wrong bits and <span class="math inline">\(\eta\)</span> a failure probability. Logarithms are natural unless written <span class="math inline">\(\log_2\)</span>.</p>
-<section id="sec-sol-reconstruction-1" class="level2" data-number="17.1">
-<h2 data-number="17.1" class="anchored" data-anchor-id="sec-sol-reconstruction-1"><span class="header-section-number">17.1</span> A rounding curator</h2>
+<p>The solutions use the chapter’s notation: <span class="math inline">\(d \in \{0, 1\}^n\)</span> is the secret database, a query is a subset <span class="math inline">\(S\)</span> with indicator <span class="math inline">\(f\)</span>, the curator answers <span class="math inline">\(a = Ad + e\)</span>, <span class="math inline">\(E\)</span> bounds every <span class="math inline">\(|e_j|\)</span>, <span class="math inline">\(\gamma\)</span> is a fraction of wrong bits and <span class="math inline">\(\beta\)</span> a failure probability. We write <span class="math inline">\(\ln\)</span> for the natural logarithm and <span class="math inline">\(\log_2\)</span> for the logarithm in base 2.</p>
+<section id="sec-sol-recon-1" class="level2" data-number="17.1">
+<h2 data-number="17.1" class="anchored" data-anchor-id="sec-sol-recon-1"><span class="header-section-number">17.1</span> A rounding curator</h2>
 <blockquote class="blockquote">
 <p><strong>Exercise 1.</strong> <strong>A rounding curator.</strong> A curator answers all <span class="math inline">\(2^n\)</span> subset sums rounded to the nearest multiple of <span class="math inline">\(w\)</span>, so its error is at most <span class="math inline">\(w/2\)</span>. Explain why the worst-case analysis allows <span class="math inline">\(4E = 2w\)</span> wrong bits while, on the database of <a href="../../book-full/part02-attacks/09-reconstruction.html#tbl-recon-exp">Table&nbsp;17.3</a> with <span class="math inline">\(w = 4\)</span>, only <span class="math inline">\(d\)</span> itself is consistent. <em>Hint: flipping bit <span class="math inline">\(i\)</span> changes the sum of every subset containing <span class="math inline">\(i\)</span> by 1, and rounding to multiples of 4 separates <span class="math inline">\(s\)</span> from <span class="math inline">\(s + 1\)</span> when <span class="math inline">\(s \equiv 1 \pmod 4\)</span>. Check: at least 128 of the 1024 subsets separate <span class="math inline">\(d\)</span> from every one-bit change of it.</em> <em>(Exponential attack)</em></p>
 </blockquote>
@@ -571,10 +571,10 @@ window.Quarto = {
 </div>
 </div>
 </section>
-<section id="sec-sol-reconstruction-2" class="level2" data-number="17.2">
-<h2 data-number="17.2" class="anchored" data-anchor-id="sec-sol-reconstruction-2"><span class="header-section-number">17.2</span> Another Paley–Zygmund threshold</h2>
+<section id="sec-sol-recon-2" class="level2" data-number="17.2">
+<h2 data-number="17.2" class="anchored" data-anchor-id="sec-sol-recon-2"><span class="header-section-number">17.2</span> Another Paley–Zygmund threshold</h2>
 <blockquote class="blockquote">
-<p><strong>Exercise 2.</strong> <strong>Another Paley–Zygmund threshold.</strong> Redo the lemma with <span class="math inline">\(\theta = \frac19\)</span>. Show that the escape probability becomes <span class="math inline">\((8/9)^2/3 = 64/243\)</span> at threshold <span class="math inline">\(\sqrt{\beta n}/18\)</span>, and compute the error tolerance and the number of queries the theorem then needs at <span class="math inline">\(n = 1000\)</span>, <span class="math inline">\(\beta = 0.1\)</span>, <span class="math inline">\(\eta = 0.01\)</span>. <em>Check: escape 0.2634, <span class="math inline">\(E \le 0.0278\)</span>, <span class="math inline">\(m \ge 22\,617\)</span>.</em> Which choice is better? <em>(Paley–Zygmund, union bound)</em></p>
+<p><strong>Exercise 2.</strong> <strong>Another Paley–Zygmund threshold.</strong> Redo the lemma with <span class="math inline">\(\lambda = \frac19\)</span>. Show that the escape probability becomes <span class="math inline">\((8/9)^2/3 = 64/243\)</span> at threshold <span class="math inline">\(\sqrt{\gamma n}/18\)</span>, and compute the error tolerance and the number of queries the theorem then needs at <span class="math inline">\(n = 1000\)</span>, <span class="math inline">\(\gamma = 0.1\)</span>, <span class="math inline">\(\beta = 0.01\)</span>. <em>Check: escape 0.2634, <span class="math inline">\(E \le 0.0278\)</span>, <span class="math inline">\(m \ge 22\,617\)</span>.</em> Which choice is better? <em>(Paley–Zygmund, union bound)</em></p>
 </blockquote>
 <div class="callout callout-style-default callout-tip callout-titled" title="Solution">
 <div class="callout-header d-flex align-content-center collapsed" data-bs-toggle="collapse" data-bs-target=".callout-2-contents" aria-controls="callout-2" aria-expanded="false" aria-label="Toggle callout">
@@ -589,11 +589,11 @@ window.Quarto = {
 <div id="callout-2" class="callout-2-contents callout-collapse collapse">
 <div class="callout-body-container callout-body">
 <ol type="1">
-<li><strong>Steps 1–6 of the lemma do not involve <span class="math inline">\(\theta\)</span>.</strong> They give <span class="math inline">\(\Pr[|Y| &gt; \sqrt\theta\,\tau] \ge (1 - \theta)^2/3\)</span> with <span class="math inline">\(\tau \ge \sqrt{\beta n}/6\)</span>, where <span class="math inline">\(\tau\)</span> is the standard deviation of the random-sign part of the subset sum.</li>
-<li><strong>Set <span class="math inline">\(\theta = \frac19\)</span>.</strong> Then <span class="math inline">\(\sqrt\theta = \frac13\)</span>, so the threshold is <span class="math inline">\(\frac13\cdot\frac{\sqrt{\beta n}}6 = \frac{\sqrt{\beta n}}{18}\)</span>, and the probability is <span class="math inline">\((8/9)^2/3 = \frac{64}{81 \cdot 3} = \frac{64}{243} = 0.2634\)</span>.</li>
-<li><strong>Error tolerance.</strong> The theorem needs <span class="math inline">\(2E + \frac12 \le \sqrt{\beta n}/18 = 10/18 = 0.5556\)</span>, so <span class="math inline">\(E \le (0.5556 - 0.5)/2 = 0.0278\)</span>.</li>
+<li><strong>Steps 1–6 of the lemma do not involve <span class="math inline">\(\lambda\)</span>.</strong> They give <span class="math inline">\(\Pr[|Y| &gt; \sqrt\lambda\,\tau] \ge (1 - \lambda)^2/3\)</span> with <span class="math inline">\(\tau \ge \sqrt{\gamma n}/6\)</span>, where <span class="math inline">\(\tau\)</span> is the standard deviation of the random-sign part of the subset sum.</li>
+<li><strong>Set <span class="math inline">\(\lambda = \frac19\)</span>.</strong> Then <span class="math inline">\(\sqrt\lambda = \frac13\)</span>, so the threshold is <span class="math inline">\(\frac13\cdot\frac{\sqrt{\gamma n}}6 = \frac{\sqrt{\gamma n}}{18}\)</span>, and the probability is <span class="math inline">\((8/9)^2/3 = \frac{64}{81 \cdot 3} = \frac{64}{243} = 0.2634\)</span>.</li>
+<li><strong>Error tolerance.</strong> The theorem needs <span class="math inline">\(2E + \frac12 \le \sqrt{\gamma n}/18 = 10/18 = 0.5556\)</span>, so <span class="math inline">\(E \le (0.5556 - 0.5)/2 = 0.0278\)</span>.</li>
 <li><strong>Queries.</strong> Step 4 of the theorem now uses survival probability <span class="math inline">\(1 - \frac{64}{243} = \frac{179}{243}\)</span> per query, so <span id="eq-auto-09reconstruction-1"><span class="math display">\[m \ge \frac{1000\ln1001 + \ln100}{\ln(243/179)} = \frac{6913.4}{0.3057} = 22\,616.7, \tag{17.1}\]</span></span> so at least 22 617 queries.</li>
-<li><strong>Compare with <span class="math inline">\(\theta = \frac14\)</span>:</strong> escape 0.1875, <span class="math inline">\(E \le 0.1667\)</span>, <span class="math inline">\(m \ge 33\,296\)</span>.</li>
+<li><strong>Compare with <span class="math inline">\(\lambda = \frac14\)</span>:</strong> escape 0.1875, <span class="math inline">\(E \le 0.1667\)</span>, <span class="math inline">\(m \ge 33\,296\)</span>.</li>
 </ol>
 <div id="tbl-sol-reconstruction-theta" class="quarto-float quarto-figure quarto-figure-center anchored">
 <figure class="quarto-float quarto-float-tbl figure">
@@ -611,9 +611,9 @@ Table&nbsp;17.1: The lemma’s threshold trades the error the theorem tolerates 
 </colgroup>
 <thead>
 <tr class="header">
-<th><span class="math inline">\(\theta\)</span></th>
+<th><span class="math inline">\(\lambda\)</span></th>
 <th>Escape probability</th>
-<th>Threshold at <span class="math inline">\(n = 1000\)</span>, <span class="math inline">\(\beta = 0.1\)</span></th>
+<th>Threshold at <span class="math inline">\(n = 1000\)</span>, <span class="math inline">\(\gamma = 0.1\)</span></th>
 <th>Error tolerance</th>
 <th>Queries needed</th>
 </tr>
@@ -638,13 +638,13 @@ Table&nbsp;17.1: The lemma’s threshold trades the error the theorem tolerates 
 </div>
 </figure>
 </div>
-<p><em>A smaller <span class="math inline">\(\theta\)</span> makes each query a likelier catch, so fewer queries are needed, but only for a much smaller error. Since the point of the theorem is the error scale, the larger <span class="math inline">\(\theta = \frac14\)</span> is the better choice; neither changes the <span class="math inline">\(\sqrt{\beta n}\)</span> scaling.</em></p>
+<p><em>A smaller <span class="math inline">\(\lambda\)</span> makes each query a likelier catch, so fewer queries are needed, but only for a much smaller error. Since the point of the theorem is the error scale, the larger <span class="math inline">\(\lambda = \frac14\)</span> is the better choice; neither changes the <span class="math inline">\(\sqrt{\gamma n}\)</span> scaling.</em></p>
 </div>
 </div>
 </div>
 </section>
-<section id="sec-sol-reconstruction-3" class="level2" data-number="17.3">
-<h2 data-number="17.3" class="anchored" data-anchor-id="sec-sol-reconstruction-3"><span class="header-section-number">17.3</span> The fourth moment</h2>
+<section id="sec-sol-recon-3" class="level2" data-number="17.3">
+<h2 data-number="17.3" class="anchored" data-anchor-id="sec-sol-recon-3"><span class="header-section-number">17.3</span> The fourth moment</h2>
 <blockquote class="blockquote">
 <p><strong>Exercise 3.</strong> <strong>The fourth moment.</strong> Prove <span class="math inline">\(\mathbb E\big(\sum_is_ia_i\big)^4 = 3(\sum_ia_i^2)^2 - 2\sum_ia_i^4\)</span> by counting index patterns, and check it by enumeration for <span class="math inline">\(a = (1, 2)\)</span> and <span class="math inline">\(a = (\frac12, \frac12, \frac12, \frac12)\)</span>. <em>Check: 41 and 2.5.</em> <em>(Fact 2)</em></p>
 </blockquote>
@@ -677,8 +677,8 @@ Table&nbsp;17.1: The lemma’s threshold trades the error the theorem tolerates 
 </div>
 </div>
 </section>
-<section id="sec-sol-reconstruction-4" class="level2" data-number="17.4">
-<h2 data-number="17.4" class="anchored" data-anchor-id="sec-sol-reconstruction-4"><span class="header-section-number">17.4</span> The inverse of <span class="math inline">\(I + b\mathbf 1\mathbf 1^\top\)</span></h2>
+<section id="sec-sol-recon-4" class="level2" data-number="17.4">
+<h2 data-number="17.4" class="anchored" data-anchor-id="sec-sol-recon-4"><span class="header-section-number">17.4</span> The inverse of <span class="math inline">\(I + b\mathbf 1\mathbf 1^\top\)</span></h2>
 <blockquote class="blockquote">
 <p><strong>Exercise 4.</strong> <strong>The inverse of <span class="math inline">\(I + b\mathbf 1\mathbf 1^\top\)</span>.</strong> Show <span class="math inline">\((I + b\mathbf 1\mathbf 1^\top)^{-1} = I - \frac{b}{1 + nb}\mathbf 1\mathbf 1^\top\)</span>, and deduce that the diagonal of <span class="math inline">\(\big(\mathbb E[A^\top A]\big)^{-1}\)</span> is <span class="math inline">\(\frac4m\cdot\frac{n}{n + 1}\)</span>. <em>Check: <span class="math inline">\(\frac{n}{n + 1} = 0.9980\)</span> at <span class="math inline">\(n = 500\)</span>.</em> <em>(Linear algebra for least squares)</em></p>
 </blockquote>
@@ -707,8 +707,8 @@ Table&nbsp;17.1: The lemma’s threshold trades the error the theorem tolerates 
 </div>
 </div>
 </section>
-<section id="sec-sol-reconstruction-5" class="level2" data-number="17.5">
-<h2 data-number="17.5" class="anchored" data-anchor-id="sec-sol-reconstruction-5"><span class="header-section-number">17.5</span> Queries that beat noise</h2>
+<section id="sec-sol-recon-5" class="level2" data-number="17.5">
+<h2 data-number="17.5" class="anchored" data-anchor-id="sec-sol-recon-5"><span class="header-section-number">17.5</span> Queries that beat noise</h2>
 <blockquote class="blockquote">
 <p><strong>Exercise 5.</strong> <strong>Queries that beat noise.</strong> Using <a href="../../book-full/part02-attacks/09-reconstruction.html#eq-recon-ls-random">Equation&nbsp;17.10</a>, find the number of queries per person at which least squares recovers 90% of the bits when <span class="math inline">\(\sigma = 5\sqrt n\)</span>. Then check the prediction for <span class="math inline">\(\sigma = 2\sqrt n\)</span> by simulation at <span class="math inline">\(n = 100\)</span>. <em>Check: <span class="math inline">\(m/n = 657.9\)</span>; at <span class="math inline">\(\sigma = 2\sqrt n\)</span>, <span class="math inline">\(m = 10\,611\)</span> queries give 0.9100 in simulation against 0.9011 predicted.</em> <em>(Least squares under random noise)</em></p>
 </blockquote>
@@ -735,8 +735,8 @@ Table&nbsp;17.1: The lemma’s threshold trades the error the theorem tolerates 
 </div>
 </div>
 </section>
-<section id="sec-sol-reconstruction-6" class="level2" data-number="17.6">
-<h2 data-number="17.6" class="anchored" data-anchor-id="sec-sol-reconstruction-6"><span class="header-section-number">17.6</span> Information bound for rounded counts</h2>
+<section id="sec-sol-recon-6" class="level2" data-number="17.6">
+<h2 data-number="17.6" class="anchored" data-anchor-id="sec-sol-recon-6"><span class="header-section-number">17.6</span> Information bound for rounded counts</h2>
 <blockquote class="blockquote">
 <p><strong>Exercise 6.</strong> <strong>Information bound for rounded counts.</strong> A curator rounds every count of <span class="math inline">\(n = 1000\)</span> bits to a multiple of 10. How many queries does any attack need to get at most 1% of the bits wrong? <em>Check: <span class="math inline">\(h(0.01) = 0.0808\)</span>, <span class="math inline">\(V = 102\)</span>, <span class="math inline">\(m \ge 137.8\)</span>, so at least 138.</em> <em>(Fano, entropy)</em></p>
 </blockquote>
@@ -763,10 +763,10 @@ Table&nbsp;17.1: The lemma’s threshold trades the error the theorem tolerates 
 </div>
 </div>
 </section>
-<section id="sec-sol-reconstruction-7" class="level2" data-number="17.7">
-<h2 data-number="17.7" class="anchored" data-anchor-id="sec-sol-reconstruction-7"><span class="header-section-number">17.7</span> A sampling curator that keeps more</h2>
+<section id="sec-sol-recon-7" class="level2" data-number="17.7">
+<h2 data-number="17.7" class="anchored" data-anchor-id="sec-sol-recon-7"><span class="header-section-number">17.7</span> A sampling curator that keeps more</h2>
 <blockquote class="blockquote">
-<p><strong>Exercise 7.</strong> <strong>A sampling curator that keeps more.</strong> Repeat the sampling-curator analysis with keep probability <span class="math inline">\(p = 0.9\)</span>. Find the Hoeffding error bound at <span class="math inline">\(n = 500\)</span>, <span class="math inline">\(m = 2000\)</span>, failure probability <span class="math inline">\(\eta = 0.05\)</span>, and the ceiling on the fraction any attacker recovers. <em>Check: 59.03 and 0.95; in simulation the largest error is 12.00 and least squares recovers 0.9420.</em> <em>(Hoeffding, union bound)</em></p>
+<p><strong>Exercise 7.</strong> <strong>A sampling curator that keeps more.</strong> Repeat the sampling-curator analysis with the sampling rate <span class="math inline">\(q\)</span> raised to 0.9. Find the Hoeffding error bound at <span class="math inline">\(n = 500\)</span>, <span class="math inline">\(m = 2000\)</span>, failure probability <span class="math inline">\(\beta = 0.05\)</span>, and the ceiling on the fraction any attacker recovers. <em>Check: 59.03 and 0.95; in simulation the largest error is 12.00 and least squares recovers 0.9420.</em> <em>(Hoeffding, union bound)</em></p>
 </blockquote>
 <div class="callout callout-style-default callout-tip callout-titled" title="Solution">
 <div class="callout-header d-flex align-content-center collapsed" data-bs-toggle="collapse" data-bs-target=".callout-7-contents" aria-controls="callout-7" aria-expanded="false" aria-label="Toggle callout">
@@ -781,8 +781,8 @@ Table&nbsp;17.1: The lemma’s threshold trades the error the theorem tolerates 
 <div id="callout-7" class="callout-7-contents callout-collapse collapse">
 <div class="callout-body-container callout-body">
 <ol type="1">
-<li><strong>The error terms.</strong> Each term <span class="math inline">\(d_i(t_i/p - 1)\)</span> is 0 when <span class="math inline">\(d_i = 0\)</span>, and otherwise <span class="math inline">\(\frac1{0.9} - 1 = 0.111\)</span> with probability 0.9 or <span class="math inline">\(-1\)</span> with probability 0.1. The mean is <span class="math inline">\(0.9 \times 0.111 - 0.1 = 0\)</span> and the range is <span class="math inline">\(\frac1p = 1.111\)</span>.</li>
-<li><strong>Hoeffding and the union bound,</strong> exactly as in the chapter: <span class="math inline">\(\Pr[\text{some error} \ge u] \le 2m\exp(-2p^2u^2/n)\)</span>. Setting it to <span class="math inline">\(\eta = 0.05\)</span>: <span id="eq-auto-09reconstruction-2"><span class="math display">\[u = \sqrt{\frac{n\ln(2m/\eta)}{2p^2}} = \sqrt{\frac{500\ln80\,000}{2 \times 0.81}} = \sqrt{\frac{500 \times 11.290}{1.62}} = 59.03. \tag{17.2}\]</span></span></li>
+<li><strong>The error terms.</strong> Each term <span class="math inline">\(d_i(t_i/q - 1)\)</span> is 0 when <span class="math inline">\(d_i = 0\)</span>, and otherwise <span class="math inline">\(\frac1{0.9} - 1 = 0.111\)</span> with probability 0.9 or <span class="math inline">\(-1\)</span> with probability 0.1. The mean is <span class="math inline">\(0.9 \times 0.111 - 0.1 = 0\)</span> and the range is <span class="math inline">\(\frac1q = 1.111\)</span>.</li>
+<li><strong>Hoeffding and the union bound,</strong> exactly as in the chapter: <span class="math inline">\(\Pr[\text{some error} \ge u] \le 2m\exp(-2q^2u^2/n)\)</span>. Setting it to <span class="math inline">\(\beta = 0.05\)</span>: <span id="eq-auto-09reconstruction-2"><span class="math display">\[u = \sqrt{\frac{n\ln(2m/\beta)}{2q^2}} = \sqrt{\frac{500\ln80\,000}{2 \times 0.81}} = \sqrt{\frac{500 \times 11.290}{1.62}} = 59.03. \tag{17.2}\]</span></span></li>
 <li><strong>The ceiling.</strong> The people outside the sample <span class="math inline">\(T\)</span> are hidden, so the attacker is right on at most all of the sampled people (fraction 0.9) and half of the others: <span class="math inline">\(0.9 + 0.1/2 = 0.95\)</span>.</li>
 <li><strong>Simulation.</strong> The script keeps 445 of the 500 people. The largest error over 2000 queries is 12.00, well below the bound, and least squares recovers 0.9420: it gets the 445 sampled people right and, among the 55 others, exactly those whose bit is 0 (it estimates their bit as 0).</li>
 </ol>
@@ -791,8 +791,8 @@ Table&nbsp;17.1: The lemma’s threshold trades the error the theorem tolerates 
 </div>
 </div>
 </section>
-<section id="sec-sol-reconstruction-8" class="level2" data-number="17.8">
-<h2 data-number="17.8" class="anchored" data-anchor-id="sec-sol-reconstruction-8"><span class="header-section-number">17.8</span> Redundant statistics</h2>
+<section id="sec-sol-recon-8" class="level2" data-number="17.8">
+<h2 data-number="17.8" class="anchored" data-anchor-id="sec-sol-recon-8"><span class="header-section-number">17.8</span> Redundant statistics</h2>
 <blockquote class="blockquote">
 <p><strong>Exercise 8.</strong> <strong>Redundant statistics.</strong> Show that withholding any one of the total, female and male means from <a href="../../book-full/part02-attacks/09-reconstruction.html#tbl-recon-census-published">Table&nbsp;17.6</a> leaves the attacker’s information unchanged, and explain why withholding the married mean does not. <em>Check: withholding the married mean leaves 45 consistent blocks; withholding any of the other five means leaves 1.</em> <em>(Census reconstruction)</em></p>
 </blockquote>
@@ -819,8 +819,8 @@ Table&nbsp;17.1: The lemma’s threshold trades the error the theorem tolerates 
 </div>
 </div>
 </section>
-<section id="sec-sol-reconstruction-9" class="level2" data-number="17.9">
-<h2 data-number="17.9" class="anchored" data-anchor-id="sec-sol-reconstruction-9"><span class="header-section-number">17.9</span> Queries for a deployed system</h2>
+<section id="sec-sol-recon-9" class="level2" data-number="17.9">
+<h2 data-number="17.9" class="anchored" data-anchor-id="sec-sol-recon-9"><span class="header-section-number">17.9</span> Queries for a deployed system</h2>
 <blockquote class="blockquote">
 <p><strong>Exercise 9.</strong> <strong>Queries for a deployed system.</strong> The attack of <a href="../../book-full/part02-attacks/09-reconstruction.html#sec-recon-diffix">Section&nbsp;17.7</a> targets <span class="math inline">\(n = 142\)</span> records with digit-predicate queries. Each query includes some fraction <span class="math inline">\(\rho\)</span> of the records, and the average of <span class="math inline">\(\rho(1 - \rho)\)</span> over the queries, the information <span class="math inline">\(v\)</span> of <a href="../../book-full/part02-attacks/09-reconstruction.html#eq-recon-diffix">Equation&nbsp;17.13</a>, is 0.2, and the system adds noise of standard deviation <span class="math inline">\(\sigma = 4\)</span>. Using <a href="../../book-full/part02-attacks/09-reconstruction.html#eq-recon-diffix">Equation&nbsp;17.13</a>, how many queries does least squares need to recover 99% of the bits? How many would it need if every query included each record with probability <span class="math inline">\(\frac12\)</span>? <em>Check: 1875 and 1529. In simulation, 1875 digit-predicate queries recover 0.9923 of the bits against 0.9900 predicted.</em> <em>(Least squares, inclusion rate)</em></p>
 </blockquote>
@@ -848,8 +848,8 @@ Table&nbsp;17.1: The lemma’s threshold trades the error the theorem tolerates 
 </div>
 </div>
 </section>
-<section id="sec-sol-reconstruction-10" class="level2" data-number="17.10">
-<h2 data-number="17.10" class="anchored" data-anchor-id="sec-sol-reconstruction-10"><span class="header-section-number">17.10</span> Noise that grows with the number of queries</h2>
+<section id="sec-sol-recon-10" class="level2" data-number="17.10">
+<h2 data-number="17.10" class="anchored" data-anchor-id="sec-sol-recon-10"><span class="header-section-number">17.10</span> Noise that grows with the number of queries</h2>
 <blockquote class="blockquote">
 <p><strong>Exercise 10.</strong> <strong>Noise that grows with the number of queries.</strong> A designer wants least squares to recover at most 75% of <span class="math inline">\(n = 73\)</span> bits, against digit-predicate queries with <span class="math inline">\(v = 0.2\)</span>. What noise standard deviation does that take if the attacker asks 3,500 queries, and what if it asks 35,000? What does this say about a system that fixes its noise in advance? <em>Check: 19.4 and 62.0, a ratio of 3.19.</em> <em>(Fundamental Law)</em></p>
 </blockquote>

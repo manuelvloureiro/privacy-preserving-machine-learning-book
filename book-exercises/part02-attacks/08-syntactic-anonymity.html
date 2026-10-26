@@ -450,7 +450,7 @@ window.Quarto = {
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../part05-dp-ml/05-private-prediction.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">42</span>&nbsp; <span class="chapter-title">Exercises: Private prediction</span></span></a>
+ <span class="menu-text"><span class="chapter-number">42</span>&nbsp; <span class="chapter-title">Exercises: Private prediction: PATE and in-context learning</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
@@ -551,9 +551,9 @@ window.Quarto = {
 <div id="callout-1" class="callout-1-contents callout-collapse collapse">
 <div class="callout-body-container callout-body">
 <ol type="1">
-<li><strong>The condition.</strong> By <a href="../../book-full/part02-attacks/08-syntactic-anonymity.html#eq-anon-k-violate">Equation&nbsp;16.5</a>, the fraction of records in classes smaller than 10 is <span class="math inline">\(\Pr[\mathrm{Poisson}(\lambda) \le 8]\)</span> with <span class="math inline">\(\lambda = n/M\)</span>. It falls as <span class="math inline">\(\lambda\)</span> grows.</li>
+<li><strong>The condition.</strong> By <a href="../../book-full/part02-attacks/08-syntactic-anonymity.html#eq-anon-k-violate">Equation&nbsp;16.5</a>, the fraction of records in classes smaller than 10 is <span class="math inline">\(\Pr[\mathrm{Poisson}(\lambda) \le 8]\)</span> with <span class="math inline">\(\lambda = n/K\)</span>. It falls as <span class="math inline">\(\lambda\)</span> grows.</li>
 <li><strong>Solve for <span class="math inline">\(\lambda\)</span>.</strong> Bisection on <span class="math inline">\(\Pr[\mathrm{Poisson}(\lambda) \le 8] = 0.01\)</span> gives <span class="math inline">\(\lambda_{10} = 17.40\)</span>. It does not depend on <span class="math inline">\(n\)</span>.</li>
-<li><strong>Convert to bits.</strong> <span class="math inline">\(M = n/\lambda_{10}\)</span>, so <span class="math inline">\(b = \log_2 n - \log_2\lambda_{10} = 19.93 - 4.12 = 15.81\)</span> bits.</li>
+<li><strong>Convert to bits.</strong> <span class="math inline">\(K = n/\lambda_{10}\)</span>, so <span class="math inline">\(b = \log_2 n - \log_2\lambda_{10} = 19.93 - 4.12 = 15.81\)</span> bits.</li>
 <li><strong>The ratio.</strong> <span class="math inline">\(\lambda_2 = 4.61\)</span>, <span class="math inline">\(\lambda_{10} = 17.40\)</span> and <span class="math inline">\(\lambda_{100} = 123.61\)</span>, so <span class="math inline">\(\lambda_k/k = 2.30\)</span>, 1.74 and 1.24.</li>
 <li><strong>Why it tends to 1.</strong> A Poisson variable with mean <span class="math inline">\(\lambda\)</span> has standard deviation <span class="math inline">\(\sqrt\lambda\)</span>, and for large <span class="math inline">\(\lambda\)</span> it is close to normal. Its lower 1% point is about <span class="math inline">\(\lambda - 2.33\sqrt\lambda\)</span>. Setting this equal to <span class="math inline">\(k - 2\)</span> gives <span class="math inline">\(\lambda_k \approx k + 2.33\sqrt k\)</span>, up to lower-order terms, so <span class="math inline">\(\lambda_k/k \approx 1 + 2.33/\sqrt k \to 1\)</span>. The approximation gives 1.74 at <span class="math inline">\(k = 10\)</span> and 1.23 at <span class="math inline">\(k = 100\)</span>. It is poor at <span class="math inline">\(k = 2\)</span> (2.65 against 2.30), where the Poisson distribution is far from normal.</li>
 </ol>
@@ -565,7 +565,7 @@ window.Quarto = {
 <section id="sec-sol-anon-2" class="level2" data-number="16.2">
 <h2 data-number="16.2" class="anchored" data-anchor-id="sec-sol-anon-2"><span class="header-section-number">16.2</span> Entropy diversity and the top value</h2>
 <blockquote class="blockquote">
-<p><strong>Exercise 2.</strong> <strong>Entropy diversity and the top value.</strong> A class has one value with share <span class="math inline">\(q\)</span> and the rest spread evenly over the other 7 of 8 values. Find the largest <span class="math inline">\(q\)</span> for which the class is entropy 3-diverse, and compare it with the bound that recursive <span class="math inline">\((c, 3)\)</span>-diversity would impose. <em>Check: <span class="math inline">\(q = 0.733\)</span>.</em> <em>(Entropy)</em></p>
+<p><strong>Exercise 2.</strong> <strong>Entropy diversity and the top value.</strong> A class has one value with share <span class="math inline">\(\rho\)</span> and the rest spread evenly over the other 7 of 8 values. Find the largest <span class="math inline">\(\rho\)</span> for which the class is entropy 3-diverse, and compare it with the bound that recursive <span class="math inline">\((c, 3)\)</span>-diversity would impose. <em>Check: <span class="math inline">\(\rho = 0.733\)</span>.</em> <em>(Entropy)</em></p>
 </blockquote>
 <div class="callout callout-style-default callout-tip callout-titled" title="Solution">
 <div class="callout-header d-flex align-content-center collapsed" data-bs-toggle="collapse" data-bs-target=".callout-2-contents" aria-controls="callout-2" aria-expanded="false" aria-label="Toggle callout">
@@ -580,10 +580,10 @@ window.Quarto = {
 <div id="callout-2" class="callout-2-contents callout-collapse collapse">
 <div class="callout-body-container callout-body">
 <ol type="1">
-<li><strong>The entropy.</strong> The class has <span class="math inline">\(H(q) = -q\log_2q - (1 - q)\log_2\frac{1 - q}{7}\)</span> bits. At <span class="math inline">\(q = \frac18\)</span> this is <span class="math inline">\(\log_2 8 = 3\)</span> bits, and it falls to 0 as <span class="math inline">\(q \to 1\)</span>.</li>
-<li><strong>Solve <span class="math inline">\(H(q) = \log_2 3 = 1.5850\)</span>.</strong> <span class="math inline">\(H\)</span> decreases in <span class="math inline">\(q\)</span> on <span class="math inline">\([\frac18, 1)\)</span>, so bisection gives the largest share, <span class="math inline">\(q = 0.733\)</span>.</li>
-<li><strong>Recursive diversity.</strong> The tail beyond the two most common values is the 6 smallest counts, a share <span class="math inline">\(6(1 - q)/7\)</span>. Recursive <span class="math inline">\((c, 3)\)</span>-diversity requires <span class="math inline">\(q &lt; c \cdot 6(1 - q)/7\)</span>. With <span class="math inline">\(c = 2\)</span> this is <span class="math inline">\(7q &lt; 12(1 - q)\)</span>, that is <span class="math inline">\(q &lt; 12/19 = 0.632\)</span>.</li>
-<li><strong>The comparison.</strong> The entropy 3-diverse class with <span class="math inline">\(q = 0.733\)</span> is recursive <span class="math inline">\((c, 3)\)</span>-diverse only for <span class="math inline">\(c &gt; 7q/(6(1 - q)) = 3.21\)</span>, where the bound of <a href="../../book-full/part02-attacks/08-syntactic-anonymity.html#eq-anon-recursive">Equation&nbsp;16.6</a> is <span class="math inline">\(c/(1 + c) = 0.762\)</span>.</li>
+<li><strong>The entropy.</strong> The class has <span class="math inline">\(H(\rho) = -\rho\log_2\rho - (1 - \rho)\log_2\frac{1 - \rho}{7}\)</span> bits. At <span class="math inline">\(\rho = \frac18\)</span> this is <span class="math inline">\(\log_2 8 = 3\)</span> bits, and it falls to 0 as <span class="math inline">\(\rho \to 1\)</span>.</li>
+<li><strong>Solve <span class="math inline">\(H(\rho) = \log_2 3 = 1.5850\)</span>.</strong> <span class="math inline">\(H\)</span> decreases in <span class="math inline">\(\rho\)</span> on <span class="math inline">\([\frac18, 1)\)</span>, so bisection gives the largest share, <span class="math inline">\(\rho = 0.733\)</span>.</li>
+<li><strong>Recursive diversity.</strong> The tail beyond the two most common values is the 6 smallest counts, a share <span class="math inline">\(6(1 - \rho)/7\)</span>. Recursive <span class="math inline">\((c, 3)\)</span>-diversity requires <span class="math inline">\(\rho &lt; c \cdot 6(1 - \rho)/7\)</span>. With <span class="math inline">\(c = 2\)</span> this is <span class="math inline">\(7\rho &lt; 12(1 - \rho)\)</span>, that is <span class="math inline">\(\rho &lt; 12/19 = 0.632\)</span>.</li>
+<li><strong>The comparison.</strong> The entropy 3-diverse class with <span class="math inline">\(\rho = 0.733\)</span> is recursive <span class="math inline">\((c, 3)\)</span>-diverse only for <span class="math inline">\(c &gt; 7\rho/(6(1 - \rho)) = 3.21\)</span>, where the bound of <a href="../../book-full/part02-attacks/08-syntactic-anonymity.html#eq-anon-recursive">Equation&nbsp;16.6</a> is <span class="math inline">\(c/(1 + c) = 0.762\)</span>.</li>
 </ol>
 <p><em>Entropy 3-diversity sounds like “about as uncertain as three equally likely values”, yet it allows one value in almost three quarters of the class. The entropy counts the spread of the rare values, which the adversary does not care about.</em></p>
 </div>

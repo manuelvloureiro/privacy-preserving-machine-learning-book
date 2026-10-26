@@ -408,7 +408,7 @@ window.Quarto = {
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../part04-privacy-accounting/09-choosing-an-accountant.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">31</span>&nbsp; <span class="chapter-title">Report and review an ε claim</span></span></a>
+ <span class="menu-text"><span class="chapter-number">31</span>&nbsp; <span class="chapter-title">Choosing an accountant</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
@@ -599,7 +599,7 @@ window.Quarto = {
   <li><a href="#when-you-meet-it" id="toc-when-you-meet-it" class="nav-link" data-scroll-target="#when-you-meet-it"><span class="header-section-number">36.2</span> When you meet it</a></li>
   <li><a href="#how-to-use-it" id="toc-how-to-use-it" class="nav-link" data-scroll-target="#how-to-use-it"><span class="header-section-number">36.3</span> How to use it</a></li>
   <li><a href="#what-goes-wrong" id="toc-what-goes-wrong" class="nav-link" data-scroll-target="#what-goes-wrong"><span class="header-section-number">36.4</span> What goes wrong</a></li>
-  <li><a href="#further-reading" id="toc-further-reading" class="nav-link" data-scroll-target="#further-reading"><span class="header-section-number">36.5</span> Further reading</a></li>
+  <li><a href="#references" id="toc-references" class="nav-link" data-scroll-target="#references"><span class="header-section-number">36.5</span> References</a></li>
   </ul>
 </nav>
     </div>
@@ -628,7 +628,7 @@ window.Quarto = {
 <section id="sec-num-pld" class="level2" data-number="36.1">
 <h2 data-number="36.1" class="anchored" data-anchor-id="sec-num-pld"><span class="header-section-number">36.1</span> What it is</h2>
 <p>A privacy loss distribution (PLD) accountant computes the privacy level <span class="math inline">\(\varepsilon\)</span> of a whole differential privacy (DP) run numerically. To define it, take a dataset and a neighbour that differs in one record, and run the mechanism on the first. The <strong>privacy loss</strong> <span class="math inline">\(L\)</span> of that run is the logarithm of how much likelier the output is on the first dataset than on the second. Because the output is random, <span class="math inline">\(L\)</span> is too, and its distribution is the PLD. Only outputs whose loss exceeds <span class="math inline">\(\varepsilon\)</span> add to the slack <span class="math inline">\(\delta\)</span> that goes with <span class="math inline">\(\varepsilon\)</span>. With <span class="math inline">\((\cdot)_+\)</span> turning a negative value into 0, the smallest slack is <span id="eq-auto-06numericalaccounting-1"><span class="math display">\[\delta(\varepsilon) = \mathbb E\big[(1 - e^{\varepsilon - L})_+\big]. \tag{36.1}\]</span></span></p>
-<p>When steps draw their noise independently, their losses add up. So the PLD of a run is the convolution of the steps’ PLDs, the exact distribution of their sum. All the error comes from storing each PLD on a grid of losses with spacing <span class="math inline">\(h\)</span>, which rounds every loss to a grid point. Rounding up can only raise <span class="math inline">\(\delta\)</span>, so the <span class="math inline">\(\varepsilon\)</span> it gives is an upper bound, the <strong>pessimistic</strong> side. Rounding down gives a lower bound, the <strong>optimistic</strong> side. Each rounding moves a step’s loss by at most <span class="math inline">\(h\)</span>. After a number <span class="math inline">\(k\)</span> of steps, the two values of <span class="math inline">\(\varepsilon\)</span> are therefore at most <span class="math inline">\(kh\)</span> apart, a width known before running anything.</p>
+<p>When steps draw their noise independently, their losses add up. So the PLD of a run is the convolution of the steps’ PLDs, the exact distribution of their sum. All the error comes from storing each PLD on a grid of losses with spacing <span class="math inline">\(h\)</span>, which rounds every loss to a grid point. Rounding up can only raise <span class="math inline">\(\delta\)</span>, so the <span class="math inline">\(\varepsilon\)</span> it gives is an upper bound, the <strong>pessimistic</strong> side. Rounding down gives a lower bound, the <strong>optimistic</strong> side. Each rounding moves a step’s loss by at most <span class="math inline">\(h\)</span>. After a number <span class="math inline">\(T\)</span> of steps, the two values of <span class="math inline">\(\varepsilon\)</span> are therefore at most <span class="math inline">\(Th\)</span> apart, a width known before running anything.</p>
 </section>
 <section id="when-you-meet-it" class="level2" data-number="36.2">
 <h2 data-number="36.2" class="anchored" data-anchor-id="when-you-meet-it"><span class="header-section-number">36.2</span> When you meet it</h2>
@@ -703,8 +703,8 @@ Table&nbsp;36.1: <span class="math inline">\(\varepsilon\)</span> at <span class
 <p>Under add-or-remove neighbours, a record can be removed or added, and a subsampled step has a different PLD in each direction. Neither is the larger in general, so an accountant must compose both and report the larger, as <code>dp_accounting</code> does by default. Opacus’s PRV accountant models only removal, the larger direction in the running example. Both assume Poisson sampling, which shuffled or fixed-size batches break (<a href="../part04-privacy-accounting/05-subsampling.html#sec-sub-schemes">Amplification by subsampling</a>).</p>
 <p>A run whose number of steps or noise is chosen from the outputs needs a filter, which enforces a budget fixed in advance (<a href="../part04-privacy-accounting/08-adaptive-composition.html">Adaptive composition</a>). And if two libraries’ answers for the same run fall outside each other’s error bars, one has a bug or a different input (<a href="../part04-privacy-accounting/09-choosing-an-accountant.html#sec-choose-check">checking an accountant</a>).</p>
 </section>
-<section id="further-reading" class="level2" data-number="36.5">
-<h2 data-number="36.5" class="anchored" data-anchor-id="further-reading"><span class="header-section-number">36.5</span> Further reading</h2>
+<section id="references" class="level2" data-number="36.5">
+<h2 data-number="36.5" class="anchored" data-anchor-id="references"><span class="header-section-number">36.5</span> References</h2>
 <ul>
 <li>Gopi, Lee &amp; Wutschitz, “Numerical Composition of Differential Privacy” (NeurIPS 2021): the PRV accountant, with explicit error bounds.</li>
 </ul>

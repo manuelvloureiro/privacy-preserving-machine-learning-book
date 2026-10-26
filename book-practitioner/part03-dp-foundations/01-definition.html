@@ -408,7 +408,7 @@ window.Quarto = {
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../part04-privacy-accounting/09-choosing-an-accountant.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">31</span>&nbsp; <span class="chapter-title">Report and review an ε claim</span></span></a>
+ <span class="menu-text"><span class="chapter-number">31</span>&nbsp; <span class="chapter-title">Choosing an accountant</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
@@ -606,7 +606,7 @@ window.Quarto = {
   <li><a href="#sec-dpdef-statement" id="toc-sec-dpdef-statement" class="nav-link" data-scroll-target="#sec-dpdef-statement"><span class="header-section-number">19.9</span> Writing the guarantee down</a></li>
   <li><a href="#sec-dpdef-code" id="toc-sec-dpdef-code" class="nav-link" data-scroll-target="#sec-dpdef-code"><span class="header-section-number">19.10</span> Code</a></li>
   <li><a href="#cheat-sheet" id="toc-cheat-sheet" class="nav-link" data-scroll-target="#cheat-sheet"><span class="header-section-number">19.11</span> Cheat sheet</a></li>
-  <li><a href="#further-reading" id="toc-further-reading" class="nav-link" data-scroll-target="#further-reading"><span class="header-section-number">19.12</span> Further reading</a></li>
+  <li><a href="#references" id="toc-references" class="nav-link" data-scroll-target="#references"><span class="header-section-number">19.12</span> References</a></li>
   </ul>
 </nav>
     </div>
@@ -639,7 +639,7 @@ window.Quarto = {
 <section id="sec-dpdef-neighbours" class="level2" data-number="19.2">
 <h2 data-number="19.2" class="anchored" data-anchor-id="sec-dpdef-neighbours"><span class="header-section-number">19.2</span> Neighbouring datasets</h2>
 <p>The first question about any claim is what “differ in one record” means, and the <strong>neighbouring relation</strong> answers it. Under <strong>add/remove</strong>, two datasets are neighbours when one is the other with one record added or taken away. The guarantee then hides whether a person is in the data at all. Under <strong>replace</strong>, the two datasets have the same size and differ in the value of one record, so only what the record says is hidden. A replacement is a removal followed by an addition, two steps that each cost the privacy level <span class="math inline">\(\varepsilon\)</span> of <a href="#sec-dpdef-definition" class="quarto-xref"><span>Section 19.3</span></a>, so a guarantee converts as <span id="eq-dpdef-replace"><span class="math display">\[\varepsilon\text{-DP under add/remove} \implies 2\varepsilon\text{-DP under replace}. \tag{19.1}\]</span></span> The reverse fails, because replace never compares datasets of different sizes, so it cannot hide whether someone is in the data.</p>
-<p>You also choose the <strong>unit of privacy</strong>, what one record is. At the <strong>example level</strong>, it is one training example or one event, and at the <strong>user level</strong>, all the data of one person. Under example-level DP, a user who wrote 200 messages is a group of 200 records. A group of <span class="math inline">\(k\)</span> records is protected only at <span class="math inline">\(k\varepsilon\)</span> (<a href="../part03-dp-foundations/02-properties.html">Post-processing, group privacy and composition</a>), so check that the claim protects the person. The guarantee must also hide every record the data format allows, even a person aged 900. That is why private algorithms clip each input to a fixed range before they add noise.</p>
+<p>You also choose the <strong>unit of privacy</strong>, what one record is. At the <strong>example level</strong>, it is one training record or one event, and at the <strong>user level</strong>, all the data of one person. Under example-level DP, a user who wrote 200 messages is a group of 200 records. A group of <span class="math inline">\(k\)</span> records is protected only at <span class="math inline">\(k\varepsilon\)</span> (<a href="../part03-dp-foundations/02-properties.html">Post-processing, group privacy and composition</a>), so check that the claim protects the person. The guarantee must also hide every record the data format allows, even a person aged 900. That is why private algorithms clip each input to a fixed range before they add noise.</p>
 </section>
 <section id="sec-dpdef-definition" class="level2" data-number="19.3">
 <h2 data-number="19.3" class="anchored" data-anchor-id="sec-dpdef-definition"><span class="header-section-number">19.3</span> The definition</h2>
@@ -735,7 +735,7 @@ Table&nbsp;19.1: What a pure <span class="math inline">\(\varepsilon\)</span>-DP
 </section>
 <section id="sec-dpdef-statement" class="level2" data-number="19.9">
 <h2 data-number="19.9" class="anchored" data-anchor-id="sec-dpdef-statement"><span class="header-section-number">19.9</span> Writing the guarantee down</h2>
-<p>A reviewer can check only what a claim writes down, so a guarantee needs more than its two numbers. It names the unit with its neighbouring relation, and <span class="math inline">\(\varepsilon\)</span> and <span class="math inline">\(\delta\)</span> for the whole release rather than per query. It also names the mechanism, the library version, the trust model and what was treated as public, since public information is not protected. The example uses the <strong>central model</strong>, in which a trusted curator holds the raw data and adds the noise. For example:</p>
+<p>A reviewer can check only what a claim writes down, so a guarantee needs more than its two numbers. It names the unit with its neighbouring relation, and <span class="math inline">\(\varepsilon\)</span> and <span class="math inline">\(\delta\)</span> for the whole release rather than per query. It also names the mechanism, the library version, the trust model and what was treated as public, since public information is not protected. The record uses the <strong>central model</strong>, in which a trusted curator holds the raw data and adds the noise. For example:</p>
 <blockquote class="blockquote">
 <p>This release satisfies <span class="math inline">\((1, 10^{-5})\)</span>-DP for adding or removing one customer and all their invoice lines, at most 100 per customer, under the central model, with Gaussian noise from OpenDP 0.16.0. The market list was fixed in advance.</p>
 </blockquote>
@@ -797,8 +797,8 @@ Table&nbsp;19.2: The results of this chapter.
 <li>An <span class="math inline">\(\varepsilon\)</span> is never a probability of re-identification. Under pure DP it bounds how far any output can shift an attacker’s odds.</li>
 </ul>
 </section>
-<section id="further-reading" class="level2" data-number="19.12">
-<h2 data-number="19.12" class="anchored" data-anchor-id="further-reading"><span class="header-section-number">19.12</span> Further reading</h2>
+<section id="references" class="level2" data-number="19.12">
+<h2 data-number="19.12" class="anchored" data-anchor-id="references"><span class="header-section-number">19.12</span> References</h2>
 <ul>
 <li>Dwork &amp; Roth, <em>The Algorithmic Foundations of Differential Privacy</em> (2014), ch.&nbsp;2: the definition and what DP promises.</li>
 <li>Kairouz, Oh &amp; Viswanath, “The Composition Theorem for Differential Privacy” (ICML 2015): the hypothesis-testing reading behind the attack cap.</li>

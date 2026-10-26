@@ -450,7 +450,7 @@ window.Quarto = {
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../part05-dp-ml/05-private-prediction.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">42</span>&nbsp; <span class="chapter-title">Exercises: Private prediction</span></span></a>
+ <span class="menu-text"><span class="chapter-number">42</span>&nbsp; <span class="chapter-title">Exercises: Private prediction: PATE and in-context learning</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
@@ -501,12 +501,12 @@ window.Quarto = {
     <h2 id="toc-title">Table of contents</h2>
    
   <ul>
-  <li><a href="#sec-sol-attribute-inference-1" id="toc-sec-sol-attribute-inference-1" class="nav-link active" data-scroll-target="#sec-sol-attribute-inference-1"><span class="header-section-number">11.1</span> A balanced prior</a></li>
-  <li><a href="#sec-sol-attribute-inference-2" id="toc-sec-sol-attribute-inference-2" class="nav-link" data-scroll-target="#sec-sol-attribute-inference-2"><span class="header-section-number">11.2</span> The marginal prior</a></li>
-  <li><a href="#sec-sol-attribute-inference-3" id="toc-sec-sol-attribute-inference-3" class="nav-link" data-scroll-target="#sec-sol-attribute-inference-3"><span class="header-section-number">11.3</span> The reduction at low false positive rate</a></li>
-  <li><a href="#sec-sol-attribute-inference-4" id="toc-sec-sol-attribute-inference-4" class="nav-link" data-scroll-target="#sec-sol-attribute-inference-4"><span class="header-section-number">11.4</span> Label-only inversion</a></li>
-  <li><a href="#sec-sol-attribute-inference-5" id="toc-sec-sol-attribute-inference-5" class="nav-link" data-scroll-target="#sec-sol-attribute-inference-5"><span class="header-section-number">11.5</span> Two independent clues</a></li>
-  <li><a href="#sec-sol-attribute-inference-6" id="toc-sec-sol-attribute-inference-6" class="nav-link" data-scroll-target="#sec-sol-attribute-inference-6"><span class="header-section-number">11.6</span> A model that memorizes</a></li>
+  <li><a href="#sec-sol-attr-1" id="toc-sec-sol-attr-1" class="nav-link active" data-scroll-target="#sec-sol-attr-1"><span class="header-section-number">11.1</span> A balanced prior</a></li>
+  <li><a href="#sec-sol-attr-2" id="toc-sec-sol-attr-2" class="nav-link" data-scroll-target="#sec-sol-attr-2"><span class="header-section-number">11.2</span> The marginal prior</a></li>
+  <li><a href="#sec-sol-attr-3" id="toc-sec-sol-attr-3" class="nav-link" data-scroll-target="#sec-sol-attr-3"><span class="header-section-number">11.3</span> The reduction at low false positive rate</a></li>
+  <li><a href="#sec-sol-attr-4" id="toc-sec-sol-attr-4" class="nav-link" data-scroll-target="#sec-sol-attr-4"><span class="header-section-number">11.4</span> Label-only inversion</a></li>
+  <li><a href="#sec-sol-attr-5" id="toc-sec-sol-attr-5" class="nav-link" data-scroll-target="#sec-sol-attr-5"><span class="header-section-number">11.5</span> Two independent clues</a></li>
+  <li><a href="#sec-sol-attr-6" id="toc-sec-sol-attr-6" class="nav-link" data-scroll-target="#sec-sol-attr-6"><span class="header-section-number">11.6</span> A model that memorizes</a></li>
   </ul>
 </nav>
     </div>
@@ -534,8 +534,8 @@ window.Quarto = {
 
 <p>Exercises for <a href="../../book-full/part02-attacks/03-attribute-inference.html">Attribute inference and model inversion</a>, each with a worked solution. Try each exercise before opening its solution. The script <code>code/part02-attacks/solutions_attribute_inference.py</code> computes every number quoted here; run it with <code>uv run python code/part02-attacks/solutions_attribute_inference.py</code>.</p>
 <p>The solutions use the chapter’s notation. A record is <span class="math inline">\((s, x, y)\)</span>, <span class="math inline">\(f_y(x, s)\)</span> is the model’s confidence in label <span class="math inline">\(y\)</span>, and <span class="math inline">\(V(S \mid O) = \sum_o\max_s p(s, o)\)</span> is the success of the best guess of <span class="math inline">\(s\)</span> from <span class="math inline">\(O\)</span>, the maximum a posteriori (MAP) guess. A membership test has a true positive rate (TPR) on members and a false positive rate (FPR) on non-members. In the smoking table of the chapter, <span class="math inline">\(s = 1\)</span> is “smoker”, <span class="math inline">\(x\)</span> the age band and <span class="math inline">\(y = 1\)</span> “has the disease”.</p>
-<section id="sec-sol-attribute-inference-1" class="level2" data-number="11.1">
-<h2 data-number="11.1" class="anchored" data-anchor-id="sec-sol-attribute-inference-1"><span class="header-section-number">11.1</span> A balanced prior</h2>
+<section id="sec-sol-attr-1" class="level2" data-number="11.1">
+<h2 data-number="11.1" class="anchored" data-anchor-id="sec-sol-attr-1"><span class="header-section-number">11.1</span> A balanced prior</h2>
 <blockquote class="blockquote">
 <p><strong>Exercise 1.</strong> <strong>A balanced prior.</strong> Redo the smoking table with <span class="math inline">\(\Pr[\text{smoker}] = 0.5\)</span> and everything else unchanged. Compute <span class="math inline">\(V(S)\)</span>, <span class="math inline">\(V(S \mid X)\)</span>, <span class="math inline">\(V(S \mid X, Y)\)</span> and the two leakages. <em>Check: <span class="math inline">\(V(S \mid X) = 0.6\)</span>, <span class="math inline">\(V(S \mid X, Y) = 0.7\)</span>.</em> Why does age now change the guess when it did not before? <em>(MAP guess, vulnerability)</em></p>
 </blockquote>
@@ -616,8 +616,8 @@ Table&nbsp;11.1: The smoking table with a balanced prior, column maxima in bold.
 </div>
 </div>
 </section>
-<section id="sec-sol-attribute-inference-2" class="level2" data-number="11.2">
-<h2 data-number="11.2" class="anchored" data-anchor-id="sec-sol-attribute-inference-2"><span class="header-section-number">11.2</span> The marginal prior</h2>
+<section id="sec-sol-attr-2" class="level2" data-number="11.2">
+<h2 data-number="11.2" class="anchored" data-anchor-id="sec-sol-attr-2"><span class="header-section-number">11.2</span> The marginal prior</h2>
 <blockquote class="blockquote">
 <p><strong>Exercise 2.</strong> <strong>The marginal prior.</strong> Fredrikson et al.’s attack uses <span class="math inline">\(p(s)\)</span> in place of <span class="math inline">\(p(s \mid x)\)</span>. On the smoking table, with a calibrated model, compute the success of <span class="math inline">\(\arg\max_s p(s)\,f_y(x, s)\)</span>, breaking ties towards “non-smoker”. <em>Check: 0.706, against 0.748 for imputation.</em> Which cell causes the loss? <em>(Bayes’ rule, Fact 1)</em></p>
 </blockquote>
@@ -650,8 +650,8 @@ Table&nbsp;11.1: The smoking table with a balanced prior, column maxima in bold.
 </div>
 </div>
 </section>
-<section id="sec-sol-attribute-inference-3" class="level2" data-number="11.3">
-<h2 data-number="11.3" class="anchored" data-anchor-id="sec-sol-attribute-inference-3"><span class="header-section-number">11.3</span> The reduction at low false positive rate</h2>
+<section id="sec-sol-attr-3" class="level2" data-number="11.3">
+<h2 data-number="11.3" class="anchored" data-anchor-id="sec-sol-attr-3"><span class="header-section-number">11.3</span> The reduction at low false positive rate</h2>
 <blockquote class="blockquote">
 <p><strong>Exercise 3.</strong> <strong>The reduction at low false positive rate.</strong> The membership test <span class="math inline">\(\mathcal B\)</span> built from the toy attack has TPR 0.7832 at FPR 0.7262. Using the mixing of tests in <a href="../../book-full/part01-prerequisites/04-hypothesis-testing.html">Hypothesis testing</a>, find the best TPR it can reach at FPR <span class="math inline">\(10^{-3}\)</span>. <em>Check: <span class="math inline">\(0.00108\)</span>.</em> Why can it not do better? <em>Hint: its only output is one bit.</em> <em>(Neyman–Pearson, mixing tests)</em></p>
 </blockquote>
@@ -679,8 +679,8 @@ Table&nbsp;11.1: The smoking table with a balanced prior, column maxima in bold.
 </div>
 </div>
 </section>
-<section id="sec-sol-attribute-inference-4" class="level2" data-number="11.4">
-<h2 data-number="11.4" class="anchored" data-anchor-id="sec-sol-attribute-inference-4"><span class="header-section-number">11.4</span> Label-only inversion</h2>
+<section id="sec-sol-attr-4" class="level2" data-number="11.4">
+<h2 data-number="11.4" class="anchored" data-anchor-id="sec-sol-attr-4"><span class="header-section-number">11.4</span> Label-only inversion</h2>
 <blockquote class="blockquote">
 <p><strong>Exercise 4.</strong> <strong>Label-only inversion.</strong> The hospital releases only a label: “disease” when <span class="math inline">\(\Pr[y = 1 \mid x, s] &gt; \frac12\)</span>. On the smoking table, the adversary queries the label at both values of <span class="math inline">\(s\)</span>, scores <span class="math inline">\(p(s \mid x)\,\mathbf 1[\mathrm{label}(x, s) = y]\)</span>, and breaks ties with <span class="math inline">\(p(s \mid x)\)</span>. Compute its success. <em>Check: 0.742, a loss of 0.006 against imputation.</em> <em>(Fact 3, MAP guess)</em></p>
 </blockquote>
@@ -713,8 +713,8 @@ Table&nbsp;11.1: The smoking table with a balanced prior, column maxima in bold.
 </div>
 </div>
 </section>
-<section id="sec-sol-attribute-inference-5" class="level2" data-number="11.5">
-<h2 data-number="11.5" class="anchored" data-anchor-id="sec-sol-attribute-inference-5"><span class="header-section-number">11.5</span> Two independent clues</h2>
+<section id="sec-sol-attr-5" class="level2" data-number="11.5">
+<h2 data-number="11.5" class="anchored" data-anchor-id="sec-sol-attr-5"><span class="header-section-number">11.5</span> Two independent clues</h2>
 <blockquote class="blockquote">
 <p><strong>Exercise 5.</strong> <strong>Two independent clues.</strong> Let <span class="math inline">\(s \in \{-1, +1\}\)</span> be uniform, and let <span class="math inline">\(u \sim \mathcal N(as, 1)\)</span> and <span class="math inline">\(v \sim \mathcal N(bs, 1)\)</span> be independent given <span class="math inline">\(s\)</span>. Show that the imputation success from <span class="math inline">\((u, v)\)</span> is <span class="math inline">\(\Phi\big(\sqrt{a^2 + b^2}\big)\)</span>. <em>Check: with <span class="math inline">\(a = 0.5\)</span> and <span class="math inline">\(b = 1\)</span>, <span class="math inline">\(\Phi(1.1180) = 0.8682\)</span>, against <span class="math inline">\(\Phi(0.5) = 0.6915\)</span> from <span class="math inline">\(u\)</span> alone.</em> <em>Hint: the log-likelihood ratios add.</em> <em>(Likelihood ratios, Gaussian tails)</em></p>
 </blockquote>
@@ -743,8 +743,8 @@ Table&nbsp;11.1: The smoking table with a balanced prior, column maxima in bold.
 </div>
 </div>
 </section>
-<section id="sec-sol-attribute-inference-6" class="level2" data-number="11.6">
-<h2 data-number="11.6" class="anchored" data-anchor-id="sec-sol-attribute-inference-6"><span class="header-section-number">11.6</span> A model that memorizes</h2>
+<section id="sec-sol-attr-6" class="level2" data-number="11.6">
+<h2 data-number="11.6" class="anchored" data-anchor-id="sec-sol-attr-6"><span class="header-section-number">11.6</span> A model that memorizes</h2>
 <blockquote class="blockquote">
 <p><strong>Exercise 6.</strong> <strong>A model that memorizes.</strong> A lookup model stores each training record under a unique record identifier, such as a patient number. Queried with a person’s identifier and a candidate <span class="math inline">\((x, s, y)\)</span>, it returns <span class="math inline">\(f_y(x, s) = 1\)</span> when that person is a training member and the candidate is their stored record, and the population’s <span class="math inline">\(p(y \mid x, s)\)</span> for every other query. The lookup is keyed on the identifier, not on the values, because the smoking table has only eight kinds of record and many people share each one. So a non-member’s query never hits a stored record, and a member’s query hits only at the member’s own true values. On the smoking table, compute the success of MAP inversion on members and on non-members. <em>Check: 0.874 on members, 0.748 on non-members, an advantage of 0.126.</em> Which members does the attack still get wrong? <em>(The game, the non-member ceiling)</em></p>
 </blockquote>

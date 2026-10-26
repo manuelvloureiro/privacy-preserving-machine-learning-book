@@ -7,7 +7,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
 
-<title>31&nbsp; Report and review an ε claim – Privacy-Preserving Machine Learning for Practitioners</title>
+<title>31&nbsp; Choosing an accountant – Privacy-Preserving Machine Learning for Practitioners</title>
 <style>
 /* Default styles provided by pandoc.
 ** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
@@ -152,7 +152,7 @@ window.Quarto = {
       <button type="button" class="quarto-btn-toggle btn" data-bs-toggle="collapse" role="button" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
         <i class="bi bi-layout-text-sidebar-reverse"></i>
       </button>
-        <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../part04-privacy-accounting/00-introduction.html">Privacy accounting</a></li><li class="breadcrumb-item"><a href="../part04-privacy-accounting/09-choosing-an-accountant.html"><span class="chapter-number">31</span>&nbsp; <span class="chapter-title">Report and review an ε claim</span></a></li></ol></nav>
+        <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../part04-privacy-accounting/00-introduction.html">Privacy accounting</a></li><li class="breadcrumb-item"><a href="../part04-privacy-accounting/09-choosing-an-accountant.html"><span class="chapter-number">31</span>&nbsp; <span class="chapter-title">Choosing an accountant</span></a></li></ol></nav>
         <a class="flex-grow-1" role="navigation" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">      
         </a>
       <button type="button" class="btn quarto-search-button" aria-label="Search" onclick="window.quartoOpenSearch();">
@@ -408,7 +408,7 @@ window.Quarto = {
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../part04-privacy-accounting/09-choosing-an-accountant.html" class="sidebar-item-text sidebar-link active">
- <span class="menu-text"><span class="chapter-number">31</span>&nbsp; <span class="chapter-title">Report and review an ε claim</span></span></a>
+ <span class="menu-text"><span class="chapter-number">31</span>&nbsp; <span class="chapter-title">Choosing an accountant</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
@@ -604,16 +604,16 @@ window.Quarto = {
   <li><a href="#sec-choose-review" id="toc-sec-choose-review" class="nav-link" data-scroll-target="#sec-choose-review"><span class="header-section-number">31.7</span> Reviewing someone else’s claim</a></li>
   <li><a href="#sec-choose-check" id="toc-sec-choose-check" class="nav-link" data-scroll-target="#sec-choose-check"><span class="header-section-number">31.8</span> Checking an accountant</a></li>
   <li><a href="#cheat-sheet" id="toc-cheat-sheet" class="nav-link" data-scroll-target="#cheat-sheet"><span class="header-section-number">31.9</span> Cheat sheet</a></li>
-  <li><a href="#further-reading" id="toc-further-reading" class="nav-link" data-scroll-target="#further-reading"><span class="header-section-number">31.10</span> Further reading</a></li>
+  <li><a href="#references" id="toc-references" class="nav-link" data-scroll-target="#references"><span class="header-section-number">31.10</span> References</a></li>
   </ul>
 </nav>
     </div>
 <!-- main -->
 <main class="content" id="quarto-document-content">
 
-<header id="title-block-header" class="quarto-title-block default"><nav class="quarto-page-breadcrumbs quarto-title-breadcrumbs d-none d-lg-block" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../part04-privacy-accounting/00-introduction.html">Privacy accounting</a></li><li class="breadcrumb-item"><a href="../part04-privacy-accounting/09-choosing-an-accountant.html"><span class="chapter-number">31</span>&nbsp; <span class="chapter-title">Report and review an ε claim</span></a></li></ol></nav>
+<header id="title-block-header" class="quarto-title-block default"><nav class="quarto-page-breadcrumbs quarto-title-breadcrumbs d-none d-lg-block" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../part04-privacy-accounting/00-introduction.html">Privacy accounting</a></li><li class="breadcrumb-item"><a href="../part04-privacy-accounting/09-choosing-an-accountant.html"><span class="chapter-number">31</span>&nbsp; <span class="chapter-title">Choosing an accountant</span></a></li></ol></nav>
 <div class="quarto-title">
-<h1 class="title"><span class="chapter-number">31</span>&nbsp; <span class="chapter-title">Report and review an ε claim</span></h1>
+<h1 class="title"><span class="chapter-number">31</span>&nbsp; <span class="chapter-title">Choosing an accountant</span></h1>
 </div>
 
 
@@ -632,7 +632,7 @@ window.Quarto = {
 
 <section id="why-this-matters" class="level2" data-number="31.1">
 <h2 data-number="31.1" class="anchored" data-anchor-id="why-this-matters"><span class="header-section-number">31.1</span> Why this matters</h2>
-<p>You have trained a model with differential privacy (DP), and a paper or a model card needs one sentence. It says that the model is DP with a privacy level <span class="math inline">\(\varepsilon\)</span> and a small failure probability <span class="math inline">\(\delta\)</span>. The same run can be reported as 6.24 or as 24,379.55, depending on the procedure that computed it, and nobody can check either value without knowing what that procedure assumed.</p>
+<p>You have trained a model with differential privacy (DP), and a paper or a model card needs one sentence. It says that the model is DP with a privacy level <span class="math inline">\(\varepsilon\)</span> and a small slack <span class="math inline">\(\delta\)</span>. The same run can be reported as 6.24 or as 24,379.55, depending on the procedure that computed it, and nobody can check either value without knowing what that procedure assumed.</p>
 <p>The run in <a href="#tbl-choose-main" class="quarto-xref">Table&nbsp;<span>31.1</span></a> is private stochastic gradient descent (SGD), called DP-SGD. Each record joins each batch with probability <span class="math inline">\(q = 0.01\)</span>, the sampling rate, and the noise multiplier <span class="math inline">\(\sigma\)</span>, the noise as a multiple of the clipping norm, is 1. The run has one true <span class="math inline">\(\varepsilon\)</span> that nobody can compute exactly, and a procedure that bounds or estimates it is an <strong>accountant</strong>. The table compares advanced composition, Rényi differential privacy (RDP) and the privacy loss distribution (PLD).</p>
 <div id="tbl-choose-main" class="quarto-float quarto-figure quarto-figure-center anchored">
 <figure class="quarto-float quarto-float-tbl figure">
@@ -739,7 +739,7 @@ Table&nbsp;31.2: Which accountant to report for which mechanism.
 <section id="sec-choose-delta" class="level2" data-number="31.4">
 <h2 data-number="31.4" class="anchored" data-anchor-id="sec-choose-delta"><span class="header-section-number">31.4</span> Choosing δ</h2>
 <p>Roughly, treat <span class="math inline">\(\delta\)</span> as the chance that the guarantee fails for someone, possibly badly. With <span class="math inline">\(n\)</span> people, a mechanism that publishes one randomly chosen record in full meets a <span class="math inline">\(\delta\)</span> of about <span class="math inline">\(1/n\)</span> with an <span class="math inline">\(\varepsilon\)</span> of zero, yet it exposes someone completely. So <span class="math inline">\(\delta\)</span> must sit well below <span class="math inline">\(1/n\)</span>.</p>
-<p>Following the convention of Ponomareva et al.&nbsp;(2023), this book chooses <span id="eq-choose-delta"><span class="math display">\[\delta \le \frac{1}{n^{1.1}}, \quad \text{rounded down to a power of ten.} \tag{31.1}\]</span></span> Count <span class="math inline">\(n\)</span> in the unit the claim protects, which at the user level means users, not examples.</p>
+<p>Following the convention of Ponomareva et al.&nbsp;(2023), this book chooses <span id="eq-choose-delta"><span class="math display">\[\delta \le \frac{1}{n^{1.1}}, \quad \text{rounded down to a power of ten.} \tag{31.1}\]</span></span> Count <span class="math inline">\(n\)</span> in the unit the claim protects, which at the user level means users, not records.</p>
 <p>For example, put the longer run of <a href="#tbl-choose-main" class="quarto-xref">Table&nbsp;<span>31.1</span></a> on 50,000 records, which makes it 100 epochs. Then <span class="math inline">\(1/n^{1.1}\)</span> is <span class="math inline">\(6.8\times10^{-6}\)</span>, which rounds down to <span class="math inline">\(10^{-6}\)</span>. The comparison point <span class="math inline">\(10^{-5}\)</span> is half of <span class="math inline">\(1/n\)</span>, so it fails the rule. The US National Institute of Standards and Technology (NIST) recommends the stricter <span class="math inline">\(1/n^2\)</span>, so report <span class="math inline">\(\varepsilon\)</span> at both values of <span class="math inline">\(\delta\)</span>.</p>
 </section>
 <section id="sec-choose-report" class="level2" data-number="31.5">
@@ -769,7 +769,7 @@ Table&nbsp;31.3: A filled privacy statement.
 </tr>
 <tr class="even">
 <td>Unit and neighbours</td>
-<td>One example per person; neighbours add or remove one example</td>
+<td>One record per person; neighbours add or remove one record</td>
 </tr>
 <tr class="odd">
 <td>Training</td>
@@ -831,8 +831,8 @@ Table&nbsp;31.4: A checklist for matching the accountant to the training code.
 </tr>
 <tr class="odd">
 <td>Unit</td>
-<td>One example</td>
-<td>Can one person give several examples?</td>
+<td>One record</td>
+<td>Can one person give several records?</td>
 <td>Clip and sample per user, or pay for the group (<a href="../part05-dp-ml/07-user-level.html">User-level DP</a>)</td>
 </tr>
 <tr class="even">
@@ -947,8 +947,8 @@ Table&nbsp;31.5: Reporting and reviewing an <span class="math inline">\(\varepsi
 <li>Never publish <span class="math inline">\(\varepsilon\)</span> without <span class="math inline">\(\delta\)</span>, the unit, the relation, the accountant and its version, and the inputs to recompute it.</li>
 </ul>
 </section>
-<section id="further-reading" class="level2" data-number="31.10">
-<h2 data-number="31.10" class="anchored" data-anchor-id="further-reading"><span class="header-section-number">31.10</span> Further reading</h2>
+<section id="references" class="level2" data-number="31.10">
+<h2 data-number="31.10" class="anchored" data-anchor-id="references"><span class="header-section-number">31.10</span> References</h2>
 <ul>
 <li>Ponomareva et al., “How to DP-fy ML: A Practical Guide to Machine Learning with Differential Privacy” (JAIR 2023): matching the accounting to the pipeline, and what to report.</li>
 <li>Near, Darais, Lefkovitz &amp; Howarth, “Guidelines for Evaluating Differential Privacy Guarantees” (NIST SP 800-226, 2025): what an evaluator will ask of your claim.</li>

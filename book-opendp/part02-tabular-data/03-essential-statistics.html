@@ -1,0 +1,1099 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.10.19">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+
+<title>3&nbsp; Essential statistics – Differential Privacy with OpenDP</title>
+<style>
+/* Default styles provided by pandoc.
+** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
+*/
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: 1.5em;}
+div.column{flex: auto;}
+@media screen {
+div.columns{gap: min(4vw, 1.5em);}
+div.column{overflow-x: auto;}
+}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+/* CSS for syntax highlighting */
+html { -webkit-text-size-adjust: 100%; }
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+</style>
+
+
+<script src="../site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="../site_libs/quarto-nav/headroom.min.js"></script>
+<script src="../site_libs/clipboard/clipboard.min.js"></script>
+<script src="../site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="../site_libs/quarto-search/fuse.min.js"></script>
+<script src="../site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="../">
+<link href="../part02-tabular-data/04-grouping.html" rel="next">
+<link href="../part02-tabular-data/00-introduction.html" rel="prev">
+<script src="../site_libs/quarto-html/quarto.js" type="module"></script>
+<script src="../site_libs/quarto-html/tabsets/tabsets.js" type="module"></script>
+<script src="../site_libs/quarto-html/popper.min.js"></script>
+<script src="../site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="../site_libs/quarto-html/anchor.min.js"></script>
+<link href="../site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="../site_libs/quarto-html/quarto-syntax-highlighting-bf27225e3a48a9273f3daa8f8e829971.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="../site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="../site_libs/bootstrap/bootstrap-78f503ea39f784e8964cd205807fbe37.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
+<script id="quarto-search-options" type="application/json">{
+  "location": "sidebar",
+  "copy-button": false,
+  "collapse-after": 3,
+  "panel-placement": "start",
+  "type": "textbox",
+  "limit": 50,
+  "keyboard-shortcut": [
+    "f",
+    "/",
+    "s"
+  ],
+  "show-item-context": false,
+  "language": {
+    "search-no-results-text": "No results",
+    "search-matching-documents-text": "matching documents",
+    "search-copy-link-title": "Copy link to search",
+    "search-hide-matches-text": "Hide additional matches",
+    "search-more-match-text": "more match in this document",
+    "search-more-matches-text": "more matches in this document",
+    "search-clear-button-title": "Clear",
+    "search-text-placeholder": "",
+    "search-detached-cancel-button-title": "Cancel",
+    "search-submit-button-title": "Submit",
+    "search-label": "Search"
+  }
+}</script>
+
+  <script src="https://cdnjs.cloudflare.com/polyfill/v3/polyfill.min.js?features=es6"></script>
+  <script defer="" src="https://cdn.jsdelivr.net/npm/mathjax@4/tex-chtml.js" type="text/javascript"></script>
+
+<script type="text/javascript">
+const typesetMath = (el) => {
+  if (window.MathJax) {
+    // MathJax Typeset
+    window.MathJax.typeset([el]);
+  } else if (window.katex) {
+    // KaTeX Render
+    var mathElements = el.getElementsByClassName("math");
+    var macros = [];
+    for (var i = 0; i < mathElements.length; i++) {
+      var texText = mathElements[i].firstChild;
+      if (mathElements[i].tagName == "SPAN" && texText && texText.data) {
+        window.katex.render(texText.data, mathElements[i], {
+          displayMode: mathElements[i].classList.contains('display'),
+          throwOnError: false,
+          macros: macros,
+          fleqn: false
+        });
+      }
+    }
+  }
+}
+window.Quarto = {
+  typesetMath
+};
+</script>
+
+</head>
+
+<body class="nav-sidebar floating quarto-light">
+
+<div id="quarto-search-results"></div>
+  <header id="quarto-header" class="headroom fixed-top">
+  <nav class="quarto-secondary-nav">
+    <div class="container-fluid d-flex">
+      <button type="button" class="quarto-btn-toggle btn" data-bs-toggle="collapse" role="button" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+        <i class="bi bi-layout-text-sidebar-reverse"></i>
+      </button>
+        <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../part02-tabular-data/00-introduction.html">Tabular data</a></li><li class="breadcrumb-item"><a href="../part02-tabular-data/03-essential-statistics.html"><span class="chapter-number">3</span>&nbsp; <span class="chapter-title">Essential statistics</span></a></li></ol></nav>
+        <a class="flex-grow-1" role="navigation" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">      
+        </a>
+      <button type="button" class="btn quarto-search-button" aria-label="Search" onclick="window.quartoOpenSearch();">
+        <i class="bi bi-search"></i>
+      </button>
+    </div>
+  </nav>
+</header>
+<!-- content -->
+<div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article">
+<!-- sidebar -->
+  <nav id="quarto-sidebar" class="sidebar collapse collapse-horizontal quarto-sidebar-collapse-item sidebar-navigation floating overflow-auto">
+    <div class="pt-lg-2 mt-2 text-left sidebar-header">
+    <div class="sidebar-title mb-0 py-0">
+      <a href="../">Differential Privacy with OpenDP</a> 
+    </div>
+      </div>
+        <div class="mt-2 flex-shrink-0 align-items-center">
+        <div class="sidebar-search">
+        <div id="quarto-search" class="" title="Search"></div>
+        </div>
+        </div>
+    <div class="sidebar-menu-container"> 
+    <ul class="list-unstyled mt-1">
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../index.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Preface</span></a>
+  </div>
+</li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a href="../part01-getting-started/00-introduction.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Getting started</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-1" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-1" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part01-getting-started/01-first-release.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">1</span>&nbsp; <span class="chapter-title">A first release</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part01-getting-started/02-the-data-and-the-context.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">2</span>&nbsp; <span class="chapter-title">The data and the context</span></span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a href="../part02-tabular-data/00-introduction.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Tabular data</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-2" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-2" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part02-tabular-data/03-essential-statistics.html" class="sidebar-item-text sidebar-link active">
+ <span class="menu-text"><span class="chapter-number">3</span>&nbsp; <span class="chapter-title">Essential statistics</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part02-tabular-data/04-grouping.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">4</span>&nbsp; <span class="chapter-title">Grouping</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part02-tabular-data/05-identifier-truncation.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">5</span>&nbsp; <span class="chapter-title">Identifier truncation and bounds</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part02-tabular-data/06-preparing-microdata.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">6</span>&nbsp; <span class="chapter-title">Preparing microdata</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part02-tabular-data/07-utility-and-noise.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">7</span>&nbsp; <span class="chapter-title">Assessing utility and choosing the noise</span></span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a href="../part03-framework/00-introduction.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">The framework</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-3" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-3" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part03-framework/08-a-framework-for-privacy.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">8</span>&nbsp; <span class="chapter-title">A framework to understand differential privacy</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part03-framework/09-transformations.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">9</span>&nbsp; <span class="chapter-title">Transformations</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part03-framework/10-measurements.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">10</span>&nbsp; <span class="chapter-title">Measurements</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part03-framework/11-combinators.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">11</span>&nbsp; <span class="chapter-title">Combinators</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part03-framework/12-utilities-and-the-context-api.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">12</span>&nbsp; <span class="chapter-title">Utilities and the Context API inside</span></span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a href="../part04-extending/00-introduction.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Extending the library</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-4" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-4" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part04-extending/13-plugins.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">13</span>&nbsp; <span class="chapter-title">Plugins</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part04-extending/14-statistical-modelling.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">14</span>&nbsp; <span class="chapter-title">Statistical modelling</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part04-extending/15-limitations-and-troubleshooting.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">15</span>&nbsp; <span class="chapter-title">Limitations and troubleshooting</span></span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a href="../part05-synthetic-data/00-introduction.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Synthetic data</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-5" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-5" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part05-synthetic-data/16-contingency-tables.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">16</span>&nbsp; <span class="chapter-title">Contingency tables</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part05-synthetic-data/17-aim-and-mst.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">17</span>&nbsp; <span class="chapter-title">Synthetic data with AIM and MST</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part05-synthetic-data/18-evaluating-synthetic-data.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">18</span>&nbsp; <span class="chapter-title">Evaluating and tuning synthetic data</span></span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-6" role="navigation" aria-expanded="true">
+ <span class="menu-text">Appendices</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-6" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-6" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../glossary.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">A</span>&nbsp; <span class="chapter-title">Glossary</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../term-index.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">B</span>&nbsp; <span class="chapter-title">Index</span></span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+    </ul>
+    </div>
+</nav>
+<div id="quarto-sidebar-glass" class="quarto-sidebar-collapse-item" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item"></div>
+<!-- margin-sidebar -->
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+        <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">Table of contents</h2>
+   
+  <ul>
+  <li><a href="#sec-stats-context" id="toc-sec-stats-context" class="nav-link active" data-scroll-target="#sec-stats-context"><span class="header-section-number">3.1</span> The context for this chapter</a></li>
+  <li><a href="#sec-stats-count" id="toc-sec-stats-count" class="nav-link" data-scroll-target="#sec-stats-count"><span class="header-section-number">3.2</span> Counting responses</a></li>
+  <li><a href="#sec-stats-bounds" id="toc-sec-stats-bounds" class="nav-link" data-scroll-target="#sec-stats-bounds"><span class="header-section-number">3.3</span> Where bounds come from</a></li>
+  <li><a href="#sec-stats-sum" id="toc-sec-stats-sum" class="nav-link" data-scroll-target="#sec-stats-sum"><span class="header-section-number">3.4</span> The sum of hours</a></li>
+  <li><a href="#sec-stats-mean" id="toc-sec-stats-mean" class="nav-link" data-scroll-target="#sec-stats-mean"><span class="header-section-number">3.5</span> The mean</a></li>
+  <li><a href="#sec-stats-quantiles" id="toc-sec-stats-quantiles" class="nav-link" data-scroll-target="#sec-stats-quantiles"><span class="header-section-number">3.6</span> The median and the quartiles</a></li>
+  <li><a href="#sec-stats-check" id="toc-sec-stats-check" class="nav-link" data-scroll-target="#sec-stats-check"><span class="header-section-number">3.7</span> A check against the truth</a></li>
+  <li><a href="#summary" id="toc-summary" class="nav-link" data-scroll-target="#summary"><span class="header-section-number">3.8</span> Summary</a></li>
+  <li><a href="#references" id="toc-references" class="nav-link" data-scroll-target="#references"><span class="header-section-number">3.9</span> References</a></li>
+  </ul>
+</nav>
+    </div>
+<!-- main -->
+<main class="content" id="quarto-document-content">
+
+<header id="title-block-header" class="quarto-title-block default"><nav class="quarto-page-breadcrumbs quarto-title-breadcrumbs d-none d-lg-block" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../part02-tabular-data/00-introduction.html">Tabular data</a></li><li class="breadcrumb-item"><a href="../part02-tabular-data/03-essential-statistics.html"><span class="chapter-number">3</span>&nbsp; <span class="chapter-title">Essential statistics</span></a></li></ol></nav>
+<div class="quarto-title">
+<h1 class="title"><span class="chapter-number">3</span>&nbsp; <span class="chapter-title">Essential statistics</span></h1>
+</div>
+
+
+
+<div class="quarto-title-meta">
+
+    
+  
+    
+  </div>
+  
+
+
+</header>
+
+
+<p>Once a context mediates access to a table, the everyday questions follow. They ask how many responses there are, how many hours people work in total and on average, and what a typical week looks like. This chapter answers them on the Labour Force Survey (LFS) sample with OpenDP’s Polars queries, and one idea runs through every answer. A statistic is released by adding noise, and the library works out the scale of that noise from two things you supply. One is a bound on what one person can change, and the other is a share of the budget. You read that scale and its error bar before you release anything, and only then decide whether the release is worth its share.</p>
+<p>The chapter follows the documentation’s tutorial on essential statistics and its page on aggregation. You will count rows, read a <code>summarize</code> table and decide where bounds come from. Then you will sum a column, release a mean in two ways, and choose a median and quartiles among candidates. By the end you will be able to say, for each of these statistics, what the library asked you for and what its error bar covers. <a href="../../book-practitioner/part03-dp-foundations/12-release-statistics.html">The practitioner edition’s workflow on releasing statistics</a> does the same job on a retail dataset in which a customer owns a varying number of rows. Here the privacy unit is the simplest one the survey allows.</p>
+<p>The script <a href="https://github.com/manuelvloureiro/privacy-preserving-machine-learning-book/blob/main/code/part02-tabular-data/opendp_essential_statistics.py">opendp_essential_statistics.py</a> runs every query on OpenDP 0.16.0. It reads the sample lazily through <code>practitioner_datasets.france_lfs()</code>, as the documentation reads the same file through <code>dp.examples.get_france_lfs_path()</code>. The noise scales, the error bars, the refusals and the true values it prints are the same on every run. The released values are not, because OpenDP’s noise cannot be seeded, so this page shows them in one block marked as one run.</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb1"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="ex">uv</span> run python code/part02-tabular-data/opendp_essential_statistics.py</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<section id="sec-stats-context" class="level2" data-number="3.1">
+<h2 data-number="3.1" class="anchored" data-anchor-id="sec-stats-context"><span class="header-section-number">3.1</span> The context for this chapter</h2>
+<p><a href="../part01-getting-started/02-the-data-and-the-context.html">The previous chapter</a> chose the privacy unit for this survey. A person answers at most once per quarter over nine years, so one person owns at most 36 rows, and <code>dp.unit_of(contributions=36)</code> says so. Two neighbouring datasets are therefore two tables that differ by one person’s rows, up to 36 of them, added or removed. The budget is a privacy loss <span class="math inline">\(\varepsilon\)</span> of 1 under pure differential privacy (DP), split evenly over five queries, so each query gets <span class="math inline">\(\varepsilon = 0.2\)</span>.</p>
+<p>The context adds one thing the first chapter’s did not: a <strong>margin</strong>, which is a set of facts about the table that you declare public. Here the only fact is <code>max_length</code>, an upper bound on the number of rows. The survey reaches about 50,000 households a quarter, with fewer than three people in each, so 150,000 responses a quarter is a safe public bound. Over 36 quarters that gives 5,400,000 rows. The sum, the mean and the quantiles below refuse to run without this bound, for a reason the section on the sum explains.</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb2" data-excerpt="stats-context"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> make_context(frame: pl.LazyFrame, invariant: Literal[<span class="st">"keys"</span>, <span class="st">"lengths"</span>] <span class="op">|</span> <span class="va">None</span> <span class="op">=</span> <span class="va">None</span>) <span class="op">-&gt;</span> dp.Context:</span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>    <span class="co">"""The chapter's context: 36 rows per person, epsilon = 1 split evenly over 5 queries, and one public margin."""</span></span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> dp.Context.compositor(</span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a>        data<span class="op">=</span>frame,</span>
+<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a>        privacy_unit<span class="op">=</span>dp.unit_of(contributions<span class="op">=</span>CONTRIBUTIONS),  <span class="co"># neighbours add or remove one person's 36 rows</span></span>
+<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a>        privacy_loss<span class="op">=</span>dp.loss_of(epsilon<span class="op">=</span>EPSILON),  <span class="co"># pure differential privacy</span></span>
+<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a>        split_evenly_over<span class="op">=</span>QUERIES,  <span class="co"># each query gets epsilon / 5</span></span>
+<span id="cb2-8"><a href="#cb2-8" aria-hidden="true" tabindex="-1"></a>        margins<span class="op">=</span>[dp.polars.Margin(max_length<span class="op">=</span>MAX_LENGTH, invariant<span class="op">=</span>invariant)],  <span class="co"># a public bound on the rows</span></span>
+<span id="cb2-9"><a href="#cb2-9" aria-hidden="true" tabindex="-1"></a>    )</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<pre class="text"><code>privacy unit: (SymmetricDistance(), 36)
+privacy loss: (MaxDivergence, 1.0)
+budget per query: [0.2, 0.2, 0.2, 0.2, 0.2]
+margin: max_length=5,400,000</code></pre>
+<p>The chapter’s five releases come from this one context: a count, a sum, a sum with a count, a median and three quartiles. A query takes the next share of the budget when it is built. So the comparisons on this page, which read scales without releasing anything, run on fresh contexts with the same settings. The documentation’s tutorial does the same, though a real analysis builds one context and plans its shares before the first query.</p>
+</section>
+<section id="sec-stats-count" class="level2" data-number="3.2">
+<h2 data-number="3.2" class="anchored" data-anchor-id="sec-stats-count"><span class="header-section-number">3.2</span> Counting responses</h2>
+<p>The simplest statistic is the number of rows. The query selects <code>dp.len</code>, OpenDP’s private version of Polars’ <code>len</code>, and the context fills in the noise.</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb4" data-excerpt="stats-count"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a>count_query <span class="op">=</span> context.query().select(dp.<span class="bu">len</span>(signed<span class="op">=</span><span class="va">True</span>))</span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>count_summary <span class="op">=</span> count_query.summarize(alpha<span class="op">=</span><span class="fl">0.05</span>)</span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a>dp_count <span class="op">=</span> count_query.release().collect().item()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>The method to call before <code>release</code> is <code>summarize</code>. It describes the measurement the context built without running it, one row per statistic.</p>
+<pre class="text"><code>shape: (1, 5)
+┌────────┬──────────────┬─────────────────┬───────┬────────────┐
+│ column ┆ aggregate    ┆ distribution    ┆ scale ┆ accuracy   │
+│ ---    ┆ ---          ┆ ---             ┆ ---   ┆ ---        │
+│ str    ┆ str          ┆ str             ┆ f64   ┆ f64        │
+╞════════╪══════════════╪═════════════════╪═══════╪════════════╡
+│ len    ┆ Frame Length ┆ Integer Laplace ┆ 180.0 ┆ 539.731115 │
+└────────┴──────────────┴─────────────────┴───────┴────────────┘</code></pre>
+<p>The column is <code>len</code>, the aggregate is the length of the frame, and the distribution is the integer Laplace distribution, because a count is an integer. The scale is 180, and the accuracy is the error bar at the level you passed as <code>alpha</code>. With probability 0.95, the released count is within 539.73 of the true one. The scale comes from the privacy unit. Removing a person removes up to 36 rows, so the <strong>sensitivity</strong> of the count, the most one person can change it, is 36. The Laplace scale is the sensitivity over the query’s <span class="math inline">\(\varepsilon\)</span>, and <a href="../../book-full/part03-dp-foundations/03-laplace-gaussian.html">the full edition’s chapter on the Laplace and Gaussian mechanisms</a> derives why that scale gives <span class="math inline">\(\varepsilon\)</span>-DP.</p>
+<p>The error bar depends on <code>alpha</code>, not on the data. Asking for more confidence widens it, so at <code>alpha=0.01</code> the same scale gives an error bar of 829.43. Both numbers cost nothing to read.</p>
+<pre class="text"><code>count: scale=180.0 95% accuracy=539.73 99% accuracy=829.43
+sensitivity 36 over epsilon 0.2: scale 180.0</code></pre>
+<p>The argument <code>signed=True</code> keeps the released count a signed integer, so a small count can come out negative when the noise outweighs it. Without the argument, the library clamps a negative count to zero and warns that this default will change.</p>
+<pre class="text"><code>without signed=True: FutureWarning: The default value is currently signed=False, and counts are clamped at zero, consistent with past releases, but the default will be changing to signed=True.</code></pre>
+<p>A column has its own counts, and the documentation’s aggregation page lists them. On a column, <code>.dp.len</code> counts the rows with nulls included, which equals the frame length unless an earlier expression changed the number of rows. The expression <code>.dp.count</code> counts the rows that are not null and <code>.dp.null_count</code> the rows that are, so the two add up to the length. Finally <code>.dp.n_unique</code> counts distinct values, with null as one of them. Each is as sensitive as the frame length, because one person’s rows can change any of them by at most 36. So each gets the same scale of 180 when it is the only statistic in a query.</p>
+<p>Which count you want depends on the question. The frame length counts responses, the non-null count counts those that answered the hours question, and the null count measures non-response. The distinct count tells you how many different answers appear, which is how you would notice that a column is coded rather than free. The excerpt asks for all five in one query.</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb8" data-excerpt="stats-variants"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a>five_counts <span class="op">=</span> variants.query().select(</span>
+<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a>    dp.<span class="bu">len</span>(signed<span class="op">=</span><span class="va">True</span>),  <span class="co"># rows of the frame</span></span>
+<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a>    hwusual.dp.<span class="bu">len</span>(signed<span class="op">=</span><span class="va">True</span>).alias(<span class="st">"expr_len"</span>),  <span class="co"># rows of the column, nulls included</span></span>
+<span id="cb8-4"><a href="#cb8-4" aria-hidden="true" tabindex="-1"></a>    hwusual.dp.count(signed<span class="op">=</span><span class="va">True</span>).alias(<span class="st">"count"</span>),  <span class="co"># rows of the column that are not null</span></span>
+<span id="cb8-5"><a href="#cb8-5" aria-hidden="true" tabindex="-1"></a>    hwusual.dp.null_count(signed<span class="op">=</span><span class="va">True</span>).alias(<span class="st">"null_count"</span>),  <span class="co"># rows of the column that are null</span></span>
+<span id="cb8-6"><a href="#cb8-6" aria-hidden="true" tabindex="-1"></a>    hwusual.dp.n_unique(signed<span class="op">=</span><span class="va">True</span>).alias(<span class="st">"n_unique"</span>),  <span class="co"># distinct values, null among them</span></span>
+<span id="cb8-7"><a href="#cb8-7" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb8-8"><a href="#cb8-8" aria-hidden="true" tabindex="-1"></a>five_summary <span class="op">=</span> five_counts.summarize(alpha<span class="op">=</span><span class="fl">0.05</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<pre class="text"><code>HWUSUAL len alone: scale=180.0
+HWUSUAL count alone: scale=180.0
+HWUSUAL null_count alone: scale=180.0
+HWUSUAL n_unique alone: scale=180.0
+five counts in one query: scale=900.0 each, 95% accuracy=2696.7</code></pre>
+<p>Five statistics in one query share that query’s <span class="math inline">\(\varepsilon = 0.2\)</span> equally, so each gets a fifth of it and five times the scale. This is the rule for every query on this page. A query’s share is divided evenly among its statistics unless you set their scales yourself. Putting several counts in one query is therefore cheap in budget but not in noise. <a href="../part02-tabular-data/04-grouping.html">Grouping</a> shows a better way to get the null and the non-null count together, by grouping on whether the value is null, which costs one count’s noise for both.</p>
+</section>
+<section id="sec-stats-bounds" class="level2" data-number="3.3">
+<h2 data-number="3.3" class="anchored" data-anchor-id="sec-stats-bounds"><span class="header-section-number">3.3</span> Where bounds come from</h2>
+<p>Every statistic after the count needs to know the range of its values. A sum and a mean need a lower and an upper bound, and a median or a quantile needs a list of candidates. The bounds set the sensitivity, because one person’s rows can move a sum by at most their number times the width of the bounds. That is the clipping idea, and <a href="../../book-full/part03-dp-foundations/07-sensitivity.html">the full edition’s chapter on sensitivity</a> derives it. Bounds that are too wide buy more noise than the data need. Bounds that are too narrow clip real values and bias the result, and the error bar says nothing about that bias.</p>
+<p>Three sources of bounds are legitimate. The first is domain knowledge, such as a working week of at most about 80 hours. The second is a comparable public dataset, from which you read the range. The third is the budget itself. You spend a share on a quantile query with widely spaced candidates to estimate the tails, and the rest on the statistic you wanted.</p>
+<p>The one source that is never legitimate is the private data. A bound read off the data, such as its maximum, depends on one person’s value and leaks it, and nothing in the guarantee accounts for that. This page takes its bounds from domain knowledge, with hours between 0 and 80. The candidates for the median are then the whole hours from 20 to 59.</p>
+</section>
+<section id="sec-stats-sum" class="level2" data-number="3.4">
+<h2 data-number="3.4" class="anchored" data-anchor-id="sec-stats-sum"><span class="header-section-number">3.4</span> The sum of hours</h2>
+<p>The column <code>HWUSUAL</code> holds the hours a person usually works in a week. The column codes “not applicable” as 99, so the query first filters those rows out, and OpenDP accounts for the filter as part of the query. Then <code>.dp.sum</code> clips every value into the bounds, sums, and adds noise.</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb10" data-excerpt="stats-sum"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a>hours: Any <span class="op">=</span> pl.col(<span class="st">"HWUSUAL"</span>).cast(<span class="bu">int</span>)  <span class="co"># Any: the .dp namespace is added at run time</span></span>
+<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a>sum_query <span class="op">=</span> (</span>
+<span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a>    context.query()</span>
+<span id="cb10-4"><a href="#cb10-4" aria-hidden="true" tabindex="-1"></a>    .<span class="bu">filter</span>(pl.col(<span class="st">"HWUSUAL"</span>) <span class="op">!=</span> <span class="fl">99.0</span>)  <span class="co"># 99 means "not applicable"</span></span>
+<span id="cb10-5"><a href="#cb10-5" aria-hidden="true" tabindex="-1"></a>    .select(hours.fill_null(<span class="dv">35</span>).dp.<span class="bu">sum</span>(bounds<span class="op">=</span>(<span class="dv">0</span>, <span class="dv">80</span>)))  <span class="co"># fill, clip, sum, add noise</span></span>
+<span id="cb10-6"><a href="#cb10-6" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb10-7"><a href="#cb10-7" aria-hidden="true" tabindex="-1"></a>sum_summary <span class="op">=</span> sum_query.summarize(alpha<span class="op">=</span><span class="fl">0.05</span>)</span>
+<span id="cb10-8"><a href="#cb10-8" aria-hidden="true" tabindex="-1"></a>dp_sum <span class="op">=</span> sum_query.release().collect().item()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<pre class="text"><code>sum HWUSUAL: Sum, Integer Laplace, scale=14,400.00 95% accuracy=43,139.0
+sensitivity 36 x 80 = 2,880 over epsilon 0.2: scale 14,400</code></pre>
+<p>One person owns at most 36 rows of at most 80 hours each. Adding or removing those rows changes the sum by at most 2,880, which is the sensitivity, and the scale is that sensitivity over the query’s <span class="math inline">\(\varepsilon\)</span>. The error bar of 43,139 hours looks large on its own, but it is small against a total near 56 million. The noise does not grow with the number of rows, so the relative error shrinks as the table grows.</p>
+<p>The sum needs the margin, and it says so when the margin is missing.</p>
+<pre class="text"><code>without a margin: must specify 'max_length' in a margin with by=[]</code></pre>
+<p>Why does a sum need a bound on the number of rows when the count did not? Because a sum is computed in finite arithmetic. Integers can overflow, and every addition of floats rounds, so the result of summing a column depends slightly on how many values were summed. The library accounts for that in the sensitivity, and it can only do so if it knows the largest number of rows a table can have. The <code>by=[]</code> in the message names the margin of the whole table, since no grouping is in play; <a href="../part02-tabular-data/04-grouping.html">Grouping</a> adds margins per group. The refusal does not depend on the data, as a snippet on three rows shows.</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb13"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> opendp.prelude <span class="im">as</span> dp</span>
+<span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> polars <span class="im">as</span> pl</span>
+<span id="cb13-3"><a href="#cb13-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-4"><a href="#cb13-4" aria-hidden="true" tabindex="-1"></a>dp.enable_features(<span class="st">"contrib"</span>)</span>
+<span id="cb13-5"><a href="#cb13-5" aria-hidden="true" tabindex="-1"></a>context <span class="op">=</span> dp.Context.compositor(</span>
+<span id="cb13-6"><a href="#cb13-6" aria-hidden="true" tabindex="-1"></a>    data<span class="op">=</span>pl.LazyFrame({<span class="st">"hours"</span>: [<span class="fl">35.0</span>, <span class="fl">39.0</span>, <span class="fl">40.0</span>]}),</span>
+<span id="cb13-7"><a href="#cb13-7" aria-hidden="true" tabindex="-1"></a>    privacy_unit<span class="op">=</span>dp.unit_of(contributions<span class="op">=</span><span class="dv">1</span>),</span>
+<span id="cb13-8"><a href="#cb13-8" aria-hidden="true" tabindex="-1"></a>    privacy_loss<span class="op">=</span>dp.loss_of(epsilon<span class="op">=</span><span class="fl">1.0</span>),</span>
+<span id="cb13-9"><a href="#cb13-9" aria-hidden="true" tabindex="-1"></a>    split_evenly_over<span class="op">=</span><span class="dv">1</span>,</span>
+<span id="cb13-10"><a href="#cb13-10" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb13-11"><a href="#cb13-11" aria-hidden="true" tabindex="-1"></a><span class="cf">try</span>:</span>
+<span id="cb13-12"><a href="#cb13-12" aria-hidden="true" tabindex="-1"></a>    context.query().select(pl.col(<span class="st">"hours"</span>).dp.<span class="bu">sum</span>(bounds<span class="op">=</span>(<span class="fl">0.0</span>, <span class="fl">80.0</span>))).summarize()</span>
+<span id="cb13-13"><a href="#cb13-13" aria-hidden="true" tabindex="-1"></a><span class="cf">except</span> dp.OpenDPException <span class="im">as</span> err:</span>
+<span id="cb13-14"><a href="#cb13-14" aria-hidden="true" tabindex="-1"></a>    <span class="bu">print</span>(err.message)  <span class="co"># must specify 'max_length' in a margin with by=[]</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>The integer cast is the second adjustment. The column is stored as floats, and a float sum pays for the rounding of every addition, up to <code>max_length</code> of them. At this chapter’s bound the price is small, a scale of 14,405.18 instead of 14,400. A careless bound of a billion rows raises the float scale to 192,035.68, while the integer scale does not move. Casting to an integer removes the rounding and with it the dependence on <code>max_length</code>, so cast whenever the values are whole numbers.</p>
+<pre class="text"><code>float sum, max_length 5,400,000: HWUSUAL: Sum, Float Laplace, scale=14,405.18 95% accuracy=43,154.1
+float sum, max_length 1,000,000,000: HWUSUAL: Sum, Float Laplace, scale=192,035.68 95% accuracy=575,287.5
+int sum, max_length 1,000,000,000: HWUSUAL: Sum, Integer Laplace, scale=14,400.00 95% accuracy=43,139.0</code></pre>
+<p>The third adjustment is <code>fill_null</code>, and it exists because a sum has no defined value when a row is null. The library therefore insists that the column it sums has no nulls, and if you write the clip and the sum by hand, it refuses a nullable column. The shortcut <code>.dp.sum</code> instead fills a null with the midpoint of the bounds, 40 here, before clipping. Writing <code>fill_null(35)</code> makes the choice yours, and 35 is the legal working week in France, a public fact. On this data the choice turns out not to matter, because the filter has already dropped every null. A null is not equal to 99, and Polars drops a row whose test is null, so the check at the end of the chapter finds none left. To confirm the midpoint rule on a release, the script also sums the whole column, where the nulls do remain.</p>
+<pre class="text"><code>sum without fill_null: scale=14,400.0 (accepted; a null becomes the midpoint 40)
+clip, sum and laplace by hand, without fill_null: input data (HWUSUAL) might contain nulls. Preprocess your data with `.fill_null`.</code></pre>
+<p>Finally, consider what the error bar covers. The released sum is within 43,139 of the <em>clipped</em> sum with probability 0.95. A value above 80 would be pulled down to 80 before summing, and no error bar reports that. Here no applicable value exceeds the bound, as the check at the end shows, so the clipped sum is the true sum.</p>
+</section>
+<section id="sec-stats-mean" class="level2" data-number="3.5">
+<h2 data-number="3.5" class="anchored" data-anchor-id="sec-stats-mean"><span class="header-section-number">3.5</span> The mean</h2>
+<p>A mean is a sum divided by a count, and under the add/remove relation both are private quantities. The documentation’s recommendation is to release the two in one query and divide afterwards. Dividing two released numbers is post-processing, which costs nothing, as <a href="../../book-full/part03-dp-foundations/02-properties.html">the full edition’s chapter on properties</a> proves.</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb16" data-excerpt="stats-mean-joint"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a>joint_query <span class="op">=</span> (</span>
+<span id="cb16-2"><a href="#cb16-2" aria-hidden="true" tabindex="-1"></a>    context.query()</span>
+<span id="cb16-3"><a href="#cb16-3" aria-hidden="true" tabindex="-1"></a>    .<span class="bu">filter</span>(pl.col(<span class="st">"HWUSUAL"</span>) <span class="op">!=</span> <span class="fl">99.0</span>)</span>
+<span id="cb16-4"><a href="#cb16-4" aria-hidden="true" tabindex="-1"></a>    .select(hours.dp.<span class="bu">sum</span>(bounds<span class="op">=</span>(<span class="dv">0</span>, <span class="dv">80</span>)), dp.<span class="bu">len</span>(signed<span class="op">=</span><span class="va">True</span>))  <span class="co"># a null becomes the midpoint, 40</span></span>
+<span id="cb16-5"><a href="#cb16-5" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb16-6"><a href="#cb16-6" aria-hidden="true" tabindex="-1"></a>joint_summary <span class="op">=</span> joint_query.summarize(alpha<span class="op">=</span><span class="fl">0.05</span>)</span>
+<span id="cb16-7"><a href="#cb16-7" aria-hidden="true" tabindex="-1"></a>joint <span class="op">=</span> joint_query.release().collect().with_columns(mean<span class="op">=</span>pl.col(<span class="st">"HWUSUAL"</span>) <span class="op">/</span> pl.col(<span class="st">"len"</span>))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<pre class="text"><code>joint HWUSUAL: Sum, Integer Laplace, scale=28,800.00 95% accuracy=86,277.6
+joint len: Frame Length, Integer Laplace, scale=360.00 95% accuracy=1,079.0</code></pre>
+<p>The query’s share is split evenly between its two statistics, so each has twice the scale it had alone: 28,800 for the sum and 360 for the count. The pair costs the same share as either did on its own, which is why the joint query is the recommended one. The sum here has no <code>fill_null</code>, so a null would become the midpoint, as the comment says. One released count can also serve several means, by dividing the sums of other columns by it. Calling <code>.dp.mean</code> on this context changes nothing: it releases the same noisy sum and noisy length, as the script’s comparison shows.</p>
+<pre class="text"><code>dp.mean on the add/remove context: HWUSUAL: Sum, Integer Laplace, scale=28,800.00 95% accuracy=86,277.6
+dp.mean on the add/remove context: HWUSUAL: Length, Integer Laplace, scale=360.00 95% accuracy=1,079.0</code></pre>
+<p>The alternative is to declare the number of rows public. The documentation calls this bounded DP. In the full edition’s terms the neighbouring relation becomes replace-one, where two neighbours have the same number of rows and differ in one person’s values. In a margin, <code>invariant="lengths"</code> declares the number of rows an invariant, and <code>.dp.mean</code> then adds noise to the sum alone and divides by the exact length.</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb19" data-excerpt="stats-mean-bounded"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true" tabindex="-1"></a>applicable_frame <span class="op">=</span> frame.<span class="bu">filter</span>(pl.col(<span class="st">"HWUSUAL"</span>) <span class="op">!=</span> <span class="fl">99.0</span>)  <span class="co"># filtered outside the context: see the text</span></span>
+<span id="cb19-2"><a href="#cb19-2" aria-hidden="true" tabindex="-1"></a>bounded <span class="op">=</span> make_context(applicable_frame, invariant<span class="op">=</span><span class="st">"lengths"</span>)  <span class="co"># the number of rows is public</span></span>
+<span id="cb19-3"><a href="#cb19-3" aria-hidden="true" tabindex="-1"></a>mean_query <span class="op">=</span> bounded.query().select(hours.dp.mean(bounds<span class="op">=</span>(<span class="dv">0</span>, <span class="dv">80</span>)))</span>
+<span id="cb19-4"><a href="#cb19-4" aria-hidden="true" tabindex="-1"></a>mean_summary <span class="op">=</span> mean_query.summarize(alpha<span class="op">=</span><span class="fl">0.05</span>)</span>
+<span id="cb19-5"><a href="#cb19-5" aria-hidden="true" tabindex="-1"></a>dp_mean <span class="op">=</span> mean_query.release().collect().item()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<pre class="text"><code>bounded mean HWUSUAL: Sum, Integer Laplace, scale=7,200.00 95% accuracy=21,569.8
+bounded mean HWUSUAL: Length, Integer Laplace, scale=0.00 95% accuracy=none</code></pre>
+<p>The sum’s scale is 7,200, half of what the sum had with a whole share under add/remove. When the length is fixed, changing one row counts as one removal and one addition. A distance of 36 under the privacy unit’s metric therefore means at most 18 replaced rows, so the sensitivity halves. The length row shows a scale of zero and no accuracy, because the length is released exactly. That is the weaker guarantee you accept. The release still hides what a person answered, but not how many rows the table has, and so not whether a person is in it.</p>
+<p>There is a second cost, visible in the excerpt. The filter on the code 99 runs outside the context, on the LazyFrame itself. Inside the context, a filter makes the number of remaining rows unknown again, so the invariant is lost. Then <code>.dp.mean</code> falls back to a noisy sum and a noisy length, which the script confirms. Filtering outside the context is only sound if the number of applicable responses is truly public information, as the documentation says. If it is not, use the joint query.</p>
+<pre class="text"><code>dp.mean after a filter inside the bounded context: HWUSUAL: Sum, Integer Laplace, scale=28,800.00 95% accuracy=86,277.6
+dp.mean after a filter inside the bounded context: HWUSUAL: Length, Integer Laplace, scale=360.00 95% accuracy=1,079.0</code></pre>
+</section>
+<section id="sec-stats-quantiles" class="level2" data-number="3.6">
+<h2 data-number="3.6" class="anchored" data-anchor-id="sec-stats-quantiles"><span class="header-section-number">3.6</span> The median and the quartiles</h2>
+<p>A median cannot be released by adding noise to it. When few values lie near the middle, one person’s rows can move the median by an arbitrary amount, so no finite scale covers every dataset. OpenDP instead chooses the median among <strong>candidates</strong> you supply. It scores each candidate by how unbalanced the counts below and above it are, adds exponentially distributed noise to every score, and releases the candidate with the smallest noisy score. That is the exponential mechanism, which <a href="../../book-full/part03-dp-foundations/05-selection.html">the full edition’s chapter on selection</a> derives. The candidates here are the whole hours from 20 to 59.</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb22" data-excerpt="stats-median"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb22-1"><a href="#cb22-1" aria-hidden="true" tabindex="-1"></a>candidates <span class="op">=</span> <span class="bu">list</span>(<span class="bu">range</span>(<span class="dv">20</span>, <span class="dv">60</span>))  <span class="co"># whole hours from 20 to 59</span></span>
+<span id="cb22-2"><a href="#cb22-2" aria-hidden="true" tabindex="-1"></a>median_query <span class="op">=</span> context.query().<span class="bu">filter</span>(pl.col(<span class="st">"HWUSUAL"</span>) <span class="op">!=</span> <span class="fl">99.0</span>).select(hours.dp.median(candidates))</span>
+<span id="cb22-3"><a href="#cb22-3" aria-hidden="true" tabindex="-1"></a>median_summary <span class="op">=</span> median_query.summarize(alpha<span class="op">=</span><span class="fl">0.05</span>)</span>
+<span id="cb22-4"><a href="#cb22-4" aria-hidden="true" tabindex="-1"></a>dp_median <span class="op">=</span> median_query.release().collect().item()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<pre class="text"><code>median HWUSUAL: 0.5-Quantile, ExponentialMin, scale=360.00 95% accuracy=none
+score sensitivity 36: scale 2 x 36 / 0.2 = 360
+median without a margin: Must know max_length</code></pre>
+<p>The aggregate reads 0.5-quantile because <code>.dp.median</code> calls <code>.dp.quantile</code> with <code>alpha=0.5</code>. The distribution is named for the mechanism, exponential noise and a minimum. Its scale is twice the sensitivity of the score over the query’s <span class="math inline">\(\varepsilon\)</span>, with the factor of two that the exponential mechanism’s analysis carries. The accuracy is empty, and it has to be. The noise went into the scores, not into the answer, and the answer is whichever candidate won, so there is no error bar in hours. A candidate whose score is far above the best one is very unlikely to win, and the check at the end of the chapter puts numbers on that. The quantile also needs the margin, as the refusal shows, because the scores are computed in integers whose size depends on the number of rows.</p>
+<p>A quantile other than the median takes <code>alpha</code>, the share of values that lie below it. The excerpt asks for the three quartiles in one query.</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb24" data-excerpt="stats-quartiles"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb24-1"><a href="#cb24-1" aria-hidden="true" tabindex="-1"></a>quartile_query <span class="op">=</span> (</span>
+<span id="cb24-2"><a href="#cb24-2" aria-hidden="true" tabindex="-1"></a>    context.query()</span>
+<span id="cb24-3"><a href="#cb24-3" aria-hidden="true" tabindex="-1"></a>    .<span class="bu">filter</span>(pl.col(<span class="st">"HWUSUAL"</span>) <span class="op">!=</span> <span class="fl">99.0</span>)</span>
+<span id="cb24-4"><a href="#cb24-4" aria-hidden="true" tabindex="-1"></a>    .select(hours.dp.quantile(a, candidates).alias(<span class="ss">f"</span><span class="sc">{</span>a<span class="sc">}</span><span class="ss">-Quantile"</span>) <span class="cf">for</span> a <span class="kw">in</span> [<span class="fl">0.25</span>, <span class="fl">0.5</span>, <span class="fl">0.75</span>])</span>
+<span id="cb24-5"><a href="#cb24-5" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb24-6"><a href="#cb24-6" aria-hidden="true" tabindex="-1"></a>quartile_summary <span class="op">=</span> quartile_query.summarize()</span>
+<span id="cb24-7"><a href="#cb24-7" aria-hidden="true" tabindex="-1"></a>dp_quartiles <span class="op">=</span> quartile_query.release().collect().row(<span class="dv">0</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<pre class="text"><code>quartiles 0.25-Quantile: 0.25-Quantile, ExponentialMin, scale=3,240.00 95% accuracy=none
+quartiles 0.5-Quantile: 0.5-Quantile, ExponentialMin, scale=1,080.00 95% accuracy=none
+quartiles 0.75-Quantile: 0.75-Quantile, ExponentialMin, scale=3,240.00 95% accuracy=none
+0.25-quantile alone: scale=1,080.0</code></pre>
+<p>Three quantiles in one query split its share three ways, so the median’s scale triples from 360 to 1,080. The quartiles’ scales are three times larger again, which looks as if the median got more of the budget, and the documentation says it did not. The reason is internal to the score. A quantile’s score is counted in integers scaled by the denominator of <code>alpha</code>, which is four for a quartile and two for the median. So a quartile’s score moves three times as far when one person’s rows change, and its noise scales with it. The last line shows the even split directly. The first quartile on its own gets a scale of 1,080, a third of what it has inside the trio, so each of the three had the same <span class="math inline">\(\varepsilon\)</span>.</p>
+</section>
+<section id="sec-stats-check" class="level2" data-number="3.7">
+<h2 data-number="3.7" class="anchored" data-anchor-id="sec-stats-check"><span class="header-section-number">3.7</span> A check against the truth</h2>
+<p>The sample is public, so the script computes the true values at development time and reads one run’s releases against them. On private data you cannot do this, which is why you do it on public or historical data while you develop, and release the real data once.</p>
+<pre class="text"><code>true responses: 3,811,932
+true responses with HWUSUAL not 99: 1,496,192 (nulls among them: 0; in the whole column: 20,819)
+true sum of hours after the filter, clipped to [0, 80]: 56,315,594 (values above 80: 0)
+true sum of the whole column, clipped: 240,742,034 with nulls as 40, 239,909,274 with nulls dropped
+true mean: 37.64  (bounded mean 95% accuracy: 0.0144)
+true quartiles: 35, 37, 40
+score gap from the true quartile to the nearest other candidate: 0.25: 219,506  0.5: 74,383  0.75: 116,811</code></pre>
+<p>Two of these lines settle questions left open above. The filter leaves no nulls among the applicable responses, so the imputed value never entered the sum, and no applicable value exceeds 80, so clipping changed nothing. The bounded mean’s error bar is the sum’s error bar divided by the exact length, which gives 0.0144 hours. The last line is the quantiles’ substitute for an error bar. The nearest competing candidate scores at least 74,383 above the true quartile, against a noise scale of at most 3,240. A wrong candidate is therefore far too unlikely to see in any number of runs. The test therefore requires the exact quartiles.</p>
+<pre class="text"><code>released (one run):
+  responses 3,811,961  (true 3,811,932, within 539.7 with probability 0.95)
+  sum of hours 56,308,788  (true 56,315,594, within 43,139.0)
+  joint: sum 56,335,491  count 1,495,681  mean 37.67  (true 37.64)
+  bounded mean 37.6411  (true 37.6393, within 0.0144)
+  median 37  quartiles 35, 37, 40  (true 37; 35, 37, 40)
+  sum of the whole column 240,726,542  (true with nulls as 40: 240,742,034)</code></pre>
+<p>The count and the sum landed inside their error bars, as they should about 19 times in 20. The joint mean is off in the second decimal, because it divides two noisy numbers, each with twice the scale of a lone release. The bounded mean is far closer, inside a bar of about a hundredth of an hour, which is what declaring the length public buys. The median and the quartiles came out exactly as the score gaps predicted. The sum of the whole column landed inside its bar of the total that counts each null as 40 hours, and more than 800,000 hours from the total that drops them, which confirms what <code>.dp.sum</code> does with a null.</p>
+</section>
+<section id="summary" class="level2" data-number="3.8">
+<h2 data-number="3.8" class="anchored" data-anchor-id="summary"><span class="header-section-number">3.8</span> Summary</h2>
+<div id="tbl-stats-summary" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-tbl figure">
+<figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl" id="tbl-stats-summary-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Table&nbsp;3.1: The calls of this chapter, what each does, and the rule of thumb that goes with it.
+</figcaption>
+<div aria-describedby="tbl-stats-summary-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<table class="caption-top table">
+<colgroup>
+<col style="width: 33%">
+<col style="width: 33%">
+<col style="width: 33%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>Call or concept</th>
+<th>What it does</th>
+<th>Rule of thumb</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><code>dp.unit_of(contributions=36)</code></td>
+<td>The privacy unit: neighbours differ by one person’s rows, up to 36</td>
+<td>Count the most rows one person can own, not the typical number</td>
+</tr>
+<tr class="even">
+<td><code>dp.polars.Margin(max_length=...)</code></td>
+<td>A public bound on the number of rows</td>
+<td>Sums, means and quantiles refuse to run without it; take it from public facts</td>
+</tr>
+<tr class="odd">
+<td><code>dp.len(signed=True)</code></td>
+<td>The number of rows, with Laplace noise of scale sensitivity over <span class="math inline">\(\varepsilon\)</span></td>
+<td>Without <code>signed=True</code> a negative count is clamped to zero</td>
+</tr>
+<tr class="even">
+<td><code>.dp.len</code>, <code>.dp.count</code>, <code>.dp.null_count</code>, <code>.dp.n_unique</code></td>
+<td>A column’s rows, non-nulls, nulls and distinct values</td>
+<td>Each is as sensitive as the frame length; several in one query share its <span class="math inline">\(\varepsilon\)</span></td>
+</tr>
+<tr class="odd">
+<td><code>query.summarize(alpha=0.05)</code></td>
+<td>The column, aggregate, distribution, scale and error bar of each statistic</td>
+<td>Read it before <code>release</code>; a smaller <code>alpha</code> widens the bar</td>
+</tr>
+<tr class="even">
+<td><code>.dp.sum(bounds=(0, 80))</code></td>
+<td>Fills nulls with the midpoint, clips, sums, adds noise</td>
+<td>Cast to an integer; the error bar excludes the bias of clipping</td>
+</tr>
+<tr class="odd">
+<td>Sum and <code>dp.len</code> in one query</td>
+<td>A mean under add/remove, by dividing afterwards</td>
+<td>Each statistic gets twice the scale; the division is free post-processing</td>
+</tr>
+<tr class="even">
+<td><code>invariant="lengths"</code> and <code>.dp.mean</code></td>
+<td>A bounded-DP mean: noise on the sum, the exact length</td>
+<td>Weaker guarantee; filter outside the context only if the row count is truly public</td>
+</tr>
+<tr class="odd">
+<td><code>.dp.median(candidates)</code>, <code>.dp.quantile(alpha, candidates)</code></td>
+<td>The candidate nearest the quantile, by the exponential mechanism</td>
+<td>No error bar; candidates from domain knowledge; several quantiles split the share evenly</td>
+</tr>
+</tbody>
+</table>
+</div>
+</figure>
+</div>
+</section>
+<section id="references" class="level2" data-number="3.9">
+<h2 data-number="3.9" class="anchored" data-anchor-id="references"><span class="header-section-number">3.9</span> References</h2>
+<ul>
+<li>OpenDP documentation: “Essential Statistics” in the tutorial on tabular data, and “Aggregation” in the Polars user guide.</li>
+<li>Dwork, McSherry, Nissim and Smith, “Calibrating Noise to Sensitivity in Private Data Analysis” (2006): the Laplace mechanism behind the counts and sums.</li>
+<li>McSherry and Talwar, “Mechanism Design via Differential Privacy” (2007): the exponential mechanism behind the median and the quantiles.</li>
+<li>The full edition’s chapters on <a href="../../book-full/part03-dp-foundations/03-laplace-gaussian.html">the Laplace and Gaussian mechanisms</a>, <a href="../../book-full/part03-dp-foundations/02-properties.html">post-processing and composition</a>, <a href="../../book-full/part03-dp-foundations/05-selection.html">selection</a> and <a href="../../book-full/part03-dp-foundations/07-sensitivity.html">sensitivity</a> derive the results this chapter states.</li>
+</ul>
+
+
+</section>
+
+</main> <!-- /main -->
+<script id="quarto-html-after-body" type="application/javascript">
+  window.document.addEventListener("DOMContentLoaded", function (event) {
+    const icon = "";
+    const anchorJS = new window.AnchorJS();
+    anchorJS.options = {
+      placement: 'right',
+      icon: icon
+    };
+    anchorJS.add('.anchored');
+    const isCodeAnnotation = (el) => {
+      for (const clz of el.classList) {
+        if (clz.startsWith('code-annotation-')) {                     
+          return true;
+        }
+      }
+      return false;
+    }
+    const onCopySuccess = function(e) {
+      // button target
+      const button = e.trigger;
+      // don't keep focus
+      button.blur();
+      // flash "checked"
+      button.classList.add('code-copy-button-checked');
+      var currentTitle = button.getAttribute("title");
+      button.setAttribute("title", "Copied!");
+      let tooltip;
+      if (window.bootstrap) {
+        button.setAttribute("data-bs-toggle", "tooltip");
+        button.setAttribute("data-bs-placement", "left");
+        button.setAttribute("data-bs-title", "Copied!");
+        tooltip = new bootstrap.Tooltip(button, 
+          { trigger: "manual", 
+            customClass: "code-copy-button-tooltip",
+            offset: [0, -8]});
+        tooltip.show();    
+      }
+      setTimeout(function() {
+        if (tooltip) {
+          tooltip.hide();
+          button.removeAttribute("data-bs-title");
+          button.removeAttribute("data-bs-toggle");
+          button.removeAttribute("data-bs-placement");
+        }
+        button.setAttribute("title", currentTitle);
+        button.classList.remove('code-copy-button-checked');
+      }, 1000);
+      // clear code selection
+      e.clearSelection();
+    }
+    const getTextToCopy = function(trigger) {
+      const outerScaffold = trigger.parentElement.cloneNode(true);
+      const codeEl = outerScaffold.querySelector('code');
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
+        }
+      }
+      return codeEl.innerText;
+    }
+    const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
+      text: getTextToCopy
+    });
+    clipboard.on('success', onCopySuccess);
+    if (window.document.getElementById('quarto-embedded-source-code-modal')) {
+      const clipboardModal = new window.ClipboardJS('.code-copy-button[data-in-quarto-modal]', {
+        text: getTextToCopy,
+        container: window.document.getElementById('quarto-embedded-source-code-modal')
+      });
+      clipboardModal.on('success', onCopySuccess);
+    }
+      var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+      var mailtoRegex = new RegExp(/^mailto:/);
+        var filterRegex = new RegExp('/' + window.location.host + '/');
+      var isInternal = (href) => {
+          return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+      }
+      // Inspect non-navigation links and adorn them if external
+     var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool):not(.about-link)');
+      for (var i=0; i<links.length; i++) {
+        const link = links[i];
+        if (!isInternal(link.href)) {
+          // undo the damage that might have been done by quarto-nav.js in the case of
+          // links that we want to consider external
+          if (link.dataset.originalHref !== undefined) {
+            link.href = link.dataset.originalHref;
+          }
+        }
+      }
+    function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+      const config = {
+        allowHTML: true,
+        maxWidth: 500,
+        delay: 100,
+        arrow: false,
+        appendTo: function(el) {
+            return el.parentElement;
+        },
+        interactive: true,
+        interactiveBorder: 10,
+        theme: 'quarto',
+        placement: 'bottom-start',
+      };
+      if (contentFn) {
+        config.content = contentFn;
+      }
+      if (onTriggerFn) {
+        config.onTrigger = onTriggerFn;
+      }
+      if (onUntriggerFn) {
+        config.onUntrigger = onUntriggerFn;
+      }
+      window.tippy(el, config); 
+    }
+    const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+    for (var i=0; i<noterefs.length; i++) {
+      const ref = noterefs[i];
+      tippyHover(ref, function() {
+        // use id or data attribute instead here
+        let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+        try { href = new URL(href).hash; } catch {}
+        const id = href.replace(/^#\/?/, "");
+        const note = window.document.getElementById(id);
+        if (note) {
+          return note.innerHTML;
+        } else {
+          return "";
+        }
+      });
+    }
+    const xrefs = window.document.querySelectorAll('a.quarto-xref');
+    const processXRef = (id, note) => {
+      // Strip column container classes
+      const stripColumnClz = (el) => {
+        el.classList.remove("page-full", "page-columns");
+        if (el.children) {
+          for (const child of el.children) {
+            stripColumnClz(child);
+          }
+        }
+      }
+      stripColumnClz(note)
+      if (id === null || id.startsWith('sec-')) {
+        // Special case sections, only their first couple elements
+        const container = document.createElement("div");
+        if (note.children && note.children.length > 2) {
+          container.appendChild(note.children[0].cloneNode(true));
+          for (let i = 1; i < note.children.length; i++) {
+            const child = note.children[i];
+            if (child.tagName === "P" && child.innerText === "") {
+              continue;
+            } else {
+              container.appendChild(child.cloneNode(true));
+              break;
+            }
+          }
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(container);
+          }
+          return container.innerHTML
+        } else {
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(note);
+          }
+          return note.innerHTML;
+        }
+      } else {
+        // Remove any anchor links if they are present
+        const anchorLink = note.querySelector('a.anchorjs-link');
+        if (anchorLink) {
+          anchorLink.remove();
+        }
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(note);
+        }
+        if (note.classList.contains("callout")) {
+          return note.outerHTML;
+        } else {
+          return note.innerHTML;
+        }
+      }
+    }
+    for (var i=0; i<xrefs.length; i++) {
+      const xref = xrefs[i];
+      tippyHover(xref, undefined, function(instance) {
+        instance.disable();
+        let url = xref.getAttribute('href');
+        let hash = undefined; 
+        if (url.startsWith('#')) {
+          hash = url;
+        } else {
+          try { hash = new URL(url).hash; } catch {}
+        }
+        if (hash) {
+          const id = hash.replace(/^#\/?/, "");
+          const note = window.document.getElementById(id);
+          if (note !== null) {
+            try {
+              const html = processXRef(id, note.cloneNode(true));
+              instance.setContent(html);
+            } finally {
+              instance.enable();
+              instance.show();
+            }
+          } else {
+            // See if we can fetch this
+            fetch(url.split('#')[0])
+            .then(res => res.text())
+            .then(html => {
+              const parser = new DOMParser();
+              const htmlDoc = parser.parseFromString(html, "text/html");
+              const note = htmlDoc.getElementById(id);
+              if (note !== null) {
+                const html = processXRef(id, note);
+                instance.setContent(html);
+              } 
+            }).finally(() => {
+              instance.enable();
+              instance.show();
+            });
+          }
+        } else {
+          // See if we can fetch a full url (with no hash to target)
+          // This is a special case and we should probably do some content thinning / targeting
+          fetch(url)
+          .then(res => res.text())
+          .then(html => {
+            const parser = new DOMParser();
+            const htmlDoc = parser.parseFromString(html, "text/html");
+            const note = htmlDoc.querySelector('main.content');
+            if (note !== null) {
+              // This should only happen for chapter cross references
+              // (since there is no id in the URL)
+              // remove the first header
+              if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
+                note.children[0].remove();
+              }
+              const html = processXRef(null, note);
+              instance.setContent(html);
+            } 
+          }).finally(() => {
+            instance.enable();
+            instance.show();
+          });
+        }
+      }, function(instance) {
+      });
+    }
+        let selectedAnnoteEl;
+        const selectorForAnnotation = ( cell, annotation) => {
+          let cellAttr = 'data-code-cell="' + cell + '"';
+          let lineAttr = 'data-code-annotation="' +  annotation + '"';
+          const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+          return selector;
+        }
+        const selectCodeLines = (annoteEl) => {
+          const doc = window.document;
+          const targetCell = annoteEl.getAttribute("data-target-cell");
+          const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+          const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+          const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+          const lineIds = lines.map((line) => {
+            return targetCell + "-" + line;
+          })
+          let top = null;
+          let height = null;
+          let parent = null;
+          if (lineIds.length > 0) {
+              //compute the position of the single el (top and bottom and make a div)
+              const el = window.document.getElementById(lineIds[0]);
+              top = el.offsetTop;
+              height = el.offsetHeight;
+              parent = el.parentElement.parentElement;
+            if (lineIds.length > 1) {
+              const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+              const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+              height = bottom - top;
+            }
+            if (top !== null && height !== null && parent !== null) {
+              // cook up a div (if necessary) and position it 
+              let div = window.document.getElementById("code-annotation-line-highlight");
+              if (div === null) {
+                div = window.document.createElement("div");
+                div.setAttribute("id", "code-annotation-line-highlight");
+                div.style.position = 'absolute';
+                parent.appendChild(div);
+              }
+              div.style.top = top - 2 + "px";
+              div.style.height = height + 4 + "px";
+              div.style.left = 0;
+              let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+              if (gutterDiv === null) {
+                gutterDiv = window.document.createElement("div");
+                gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+                gutterDiv.style.position = 'absolute';
+                const codeCell = window.document.getElementById(targetCell);
+                const gutter = codeCell.querySelector('.code-annotation-gutter');
+                gutter.appendChild(gutterDiv);
+              }
+              gutterDiv.style.top = top - 2 + "px";
+              gutterDiv.style.height = height + 4 + "px";
+            }
+            selectedAnnoteEl = annoteEl;
+          }
+        };
+        const unselectCodeLines = () => {
+          const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+          elementsIds.forEach((elId) => {
+            const div = window.document.getElementById(elId);
+            if (div) {
+              div.remove();
+            }
+          });
+          selectedAnnoteEl = undefined;
+        };
+          // Handle positioning of the toggle
+      window.addEventListener(
+        "resize",
+        throttle(() => {
+          elRect = undefined;
+          if (selectedAnnoteEl) {
+            selectCodeLines(selectedAnnoteEl);
+          }
+        }, 10)
+      );
+      function throttle(fn, ms) {
+      let throttle = false;
+      let timer;
+        return (...args) => {
+          if(!throttle) { // first call gets through
+              fn.apply(this, args);
+              throttle = true;
+          } else { // all the others get throttled
+              if(timer) clearTimeout(timer); // cancel #2
+              timer = setTimeout(() => {
+                fn.apply(this, args);
+                timer = throttle = false;
+              }, ms);
+          }
+        };
+      }
+        // Attach click handler to the DT
+        const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+        for (const annoteDlNode of annoteDls) {
+          annoteDlNode.addEventListener('click', (event) => {
+            const clickedEl = event.target;
+            if (clickedEl !== selectedAnnoteEl) {
+              unselectCodeLines();
+              const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+              if (activeEl) {
+                activeEl.classList.remove('code-annotation-active');
+              }
+              selectCodeLines(clickedEl);
+              clickedEl.classList.add('code-annotation-active');
+            } else {
+              // Unselect the line
+              unselectCodeLines();
+              clickedEl.classList.remove('code-annotation-active');
+            }
+          });
+        }
+    const findCites = (el) => {
+      const parentEl = el.parentElement;
+      if (parentEl) {
+        const cites = parentEl.dataset.cites;
+        if (cites) {
+          return {
+            el,
+            cites: cites.split(' ')
+          };
+        } else {
+          return findCites(el.parentElement)
+        }
+      } else {
+        return undefined;
+      }
+    };
+    var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+    for (var i=0; i<bibliorefs.length; i++) {
+      const ref = bibliorefs[i];
+      const citeInfo = findCites(ref);
+      if (citeInfo) {
+        tippyHover(citeInfo.el, function() {
+          var popup = window.document.createElement('div');
+          citeInfo.cites.forEach(function(cite) {
+            var citeDiv = window.document.createElement('div');
+            citeDiv.classList.add('hanging-indent');
+            citeDiv.classList.add('csl-entry');
+            var biblioDiv = window.document.getElementById('ref-' + cite);
+            if (biblioDiv) {
+              citeDiv.innerHTML = biblioDiv.innerHTML;
+            }
+            popup.appendChild(citeDiv);
+          });
+          return popup.innerHTML;
+        });
+      }
+    }
+  });
+  </script>
+<nav class="page-navigation">
+  <div class="nav-page nav-page-previous">
+      <a href="../part02-tabular-data/00-introduction.html" class="pagination-link" aria-label="Tabular data">
+        <i class="bi bi-arrow-left-short"></i> <span class="nav-page-text">Tabular data</span>
+      </a>          
+  </div>
+  <div class="nav-page nav-page-next">
+      <a href="../part02-tabular-data/04-grouping.html" class="pagination-link" aria-label="Grouping">
+        <span class="nav-page-text"><span class="chapter-number">4</span>&nbsp; <span class="chapter-title">Grouping</span></span> <i class="bi bi-arrow-right-short"></i>
+      </a>
+  </div>
+</nav>
+</div> <!-- /content -->
+
+
+
+
+</body></html>

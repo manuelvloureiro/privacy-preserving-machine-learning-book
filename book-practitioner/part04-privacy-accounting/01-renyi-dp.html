@@ -408,7 +408,7 @@ window.Quarto = {
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../part04-privacy-accounting/09-choosing-an-accountant.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">31</span>&nbsp; <span class="chapter-title">Report and review an ε claim</span></span></a>
+ <span class="menu-text"><span class="chapter-number">31</span>&nbsp; <span class="chapter-title">Choosing an accountant</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
@@ -604,7 +604,7 @@ window.Quarto = {
   <li><a href="#sec-rdp-orders" id="toc-sec-rdp-orders" class="nav-link" data-scroll-target="#sec-rdp-orders"><span class="header-section-number">34.7</span> Check the order grid</a></li>
   <li><a href="#sec-rdp-library" id="toc-sec-rdp-library" class="nav-link" data-scroll-target="#sec-rdp-library"><span class="header-section-number">34.8</span> Accounting with a library</a></li>
   <li><a href="#cheat-sheet" id="toc-cheat-sheet" class="nav-link" data-scroll-target="#cheat-sheet"><span class="header-section-number">34.9</span> Cheat sheet</a></li>
-  <li><a href="#further-reading" id="toc-further-reading" class="nav-link" data-scroll-target="#further-reading"><span class="header-section-number">34.10</span> Further reading</a></li>
+  <li><a href="#references" id="toc-references" class="nav-link" data-scroll-target="#references"><span class="header-section-number">34.10</span> References</a></li>
   </ul>
 </nav>
     </div>
@@ -703,13 +703,13 @@ Table&nbsp;34.1: RDP curves of the three basic mechanisms with sensitivity 1.
 <section id="sec-rdp-composition" class="level2" data-number="34.4">
 <h2 data-number="34.4" class="anchored" data-anchor-id="sec-rdp-composition"><span class="header-section-number">34.4</span> Composition adds curves</h2>
 <p>Training runs thousands of mechanisms in sequence, and each may depend on what the earlier ones released, as a gradient step depends on the current model. RDP composes by adding curves order by order. Write <span class="math inline">\(\varepsilon_i\)</span> for the curve of the <span class="math inline">\(i\)</span>-th step. Then a whole run of <span class="math inline">\(k\)</span> steps has a curve <span class="math inline">\(\varepsilon_M\)</span> with <span id="eq-auto-01renyidp-2"><span class="math display">\[\varepsilon_M(\alpha) \le \sum_{i=1}^k \varepsilon_i(\alpha) \qquad\text{for every order } \alpha. \tag{34.2}\]</span></span> Different mechanisms mix freely, because you only add numbers at the same order.</p>
-<p>Two conditions come with the sum. First, every curve must describe the same neighbouring relation, such as add/remove or replace-one, and the same unit of privacy, such as one example or one user. For example, the RDP accountant of <code>dp_accounting</code> 0.6.0 composes a <code>PoissonSampledDpEvent</code> under its default add/remove relation. But it refuses a <code>RandomizedResponseDpEvent</code> there, since it computes that curve only for replaced records. Second, each step’s curve must be fixed in advance. Steps may adapt to earlier outputs, but the noise level and the number of steps must not be chosen from the data during the run. Otherwise the curves themselves would depend on the data. If you stop when a validation metric looks good, you need <a href="../part04-privacy-accounting/08-adaptive-composition.html">Adaptive composition</a> instead.</p>
+<p>Two conditions come with the sum. First, every curve must describe the same neighbouring relation, such as add/remove or replace-one, and the same unit of privacy, such as one record or one user. For example, the RDP accountant of <code>dp_accounting</code> 0.6.0 composes a <code>PoissonSampledDpEvent</code> under its default add/remove relation. But it refuses a <code>RandomizedResponseDpEvent</code> there, since it computes that curve only for replaced records. Second, each step’s curve must be fixed in advance. Steps may adapt to earlier outputs, but the noise level and the number of steps must not be chosen from the data during the run. Otherwise the curves themselves would depend on the data. If you stop when a validation metric looks good, you need <a href="../part04-privacy-accounting/08-adaptive-composition.html">Adaptive composition</a> instead.</p>
 <p>For Gaussian steps the sum has a useful shortcut. Adding <span class="math inline">\(k\)</span> copies of the straight line gives the curve of a single Gaussian step with noise multiplier <span class="math inline">\(\sigma/\sqrt k\)</span>, whose exact <span class="math inline">\(\varepsilon\)</span> you can compute. The shortcut also shows why DP-SGD needs subsampling. This part’s running example is a DP-SGD run of 10,000 steps with noise multiplier 1, each on a random 1% of the data. If every step used the full dataset, the run would act like one step with noise multiplier 0.01. Its exact <span class="math inline">\(\varepsilon\)</span> at <span class="math inline">\(\delta = 10^{-5}\)</span> would be 5425.5, which is no guarantee at all.</p>
 </section>
 <section id="sec-rdp-properties" class="level2" data-number="34.5">
 <h2 data-number="34.5" class="anchored" data-anchor-id="sec-rdp-properties"><span class="header-section-number">34.5</span> Post-processing and group privacy</h2>
 <p>Post-processing is free in RDP. Any computation on the output that does not look at the data again leaves the curve no larger at any order. So releasing the trained model or its predictions costs nothing beyond the training run.</p>
-<p>Groups are harder, because when one user contributes several records, you need a guarantee for all of them at once. RDP has a generic group rule, but it is loose, so for Gaussian noise use the group’s sensitivity instead. A group of <span class="math inline">\(m\)</span> records moves the answer by at most <span class="math inline">\(m\)</span> times as much as one record, so the curve becomes <span id="eq-auto-01renyidp-3"><span class="math display">\[\varepsilon_{\text{group}}(\alpha) = \frac{m^2\alpha}{2\sigma^2}, \tag{34.3}\]</span></span> which is <span class="math inline">\(m^2\)</span> times the single-record curve. That grows fast. So when users have many records, clip each user’s whole contribution and account per user (<a href="../part05-dp-ml/07-user-level.html">User-level privacy</a>), which keeps the sensitivity at one clipping norm.</p>
+<p>Groups are harder, because when one user contributes several records, you need a guarantee for all of them at once. RDP has a generic group rule, but it is loose, so for Gaussian noise use the group’s sensitivity instead. A group of <span class="math inline">\(m\)</span> records moves the answer by at most <span class="math inline">\(m\)</span> times as much as one record, so the curve becomes <span id="eq-auto-01renyidp-3"><span class="math display">\[\varepsilon_{\mathrm{group}}(\alpha) = \frac{m^2\alpha}{2\sigma^2}, \tag{34.3}\]</span></span> which is <span class="math inline">\(m^2\)</span> times the single-record curve. That grows fast. So when users have many records, clip each user’s whole contribution and account per user (<a href="../part05-dp-ml/07-user-level.html">User-level privacy</a>), which keeps the sensitivity at one clipping norm.</p>
 </section>
 <section id="sec-rdp-conversion" class="level2" data-number="34.6">
 <h2 data-number="34.6" class="anchored" data-anchor-id="sec-rdp-conversion"><span class="header-section-number">34.6</span> Compose, then convert once</h2>
@@ -801,8 +801,8 @@ Table&nbsp;34.2: The results of this chapter.
 <li>In Opacus, name the accountant in both <code>PrivacyEngine</code> and <code>get_noise_multiplier</code>.</li>
 </ul>
 </section>
-<section id="further-reading" class="level2" data-number="34.10">
-<h2 data-number="34.10" class="anchored" data-anchor-id="further-reading"><span class="header-section-number">34.10</span> Further reading</h2>
+<section id="references" class="level2" data-number="34.10">
+<h2 data-number="34.10" class="anchored" data-anchor-id="references"><span class="header-section-number">34.10</span> References</h2>
 <ul>
 <li>Mironov, “Rényi Differential Privacy” (IEEE CSF 2017): the definition, composition, the curves of the basic mechanisms and group privacy.</li>
 <li>Abadi et al., “Deep Learning with Differential Privacy” (CCS 2016): DP-SGD and the moments accountant.</li>

@@ -767,12 +767,12 @@ Table&nbsp;1: The chapters of this part, the question each one answers, and the 
 <h2 class="anchored" data-anchor-id="how-to-read-this-part">How to read this part</h2>
 <p><strong>Order.</strong> Chapters 18 to 21 are the core and should be read in order: the definition, the properties that make it usable, the two mechanisms everything else is built from, and advanced and optimal composition, which finishes the story of composition that chapter 19 starts and introduces the privacy loss random variable that the next part uses throughout. Chapter 22 adds mechanisms for selection, and chapter 23 builds on them to answer many queries at once, by releasing synthetic data with private multiplicative weights. Chapter 24 handles data whose worst case is far from typical. Chapter 25 is short and practical: read it before you implement any mechanism yourself. Chapter 26 changes who is trusted with the raw data. Chapter 27 is the most theoretical; it ties back to reconstruction and membership attacks and says what privacy must cost. Chapter 28 closes the part by putting these tools together on the most common statistical task, estimating a mean, and matches each of its error rates with a lower bound from chapter 27.</p>
 <p><strong>Structure of a chapter.</strong> Every chapter has the same shape as in the earlier parts: why it matters, a toolkit, one section per result with a statement, derivation, interpretation, worked example and two <em>check yourself</em> questions, then code, references and a cheat sheet. Exercises with worked solutions are collected in the exercise book, a companion website, with a link at the end of each chapter.</p>
-<p><strong>Proofs you can check by computer.</strong> Most privacy claims in this part are checked numerically as well as proved: the exact privacy curve of a mechanism is computed and compared with its bound, a composition formula is compared with brute-force enumeration, and a buggy mechanism is shown to leak by computing its privacy loss. Running the scripts is the fastest way to see how loose each bound is. From the repository root, for example,</p>
+<p><strong>Proofs you can check by computer.</strong> Most privacy claims in this part are checked numerically as well as proved: the exact privacy profile of a mechanism is computed and compared with its bound, a composition formula is compared with brute-force enumeration, and a buggy mechanism is shown to leak by computing its privacy loss. Running the scripts is the fastest way to see how loose each bound is. From the repository root, for example,</p>
 <div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb1"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="ex">uv</span> run python code/part03-dp-foundations/laplace_gaussian.py</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </section>
 <section id="notation" class="level2">
 <h2 class="anchored" data-anchor-id="notation">Notation</h2>
-<p>The chapters share the conventions in <a href="#tbl-dp-notation" class="quarto-xref">Table&nbsp;<span>2</span></a>, set in <a href="../part03-dp-foundations/01-definition.html">The definition of differential privacy</a>. The next part uses the same notation, except that <span class="math inline">\(\sigma\)</span> there is the noise multiplier (the noise standard deviation per unit of sensitivity) and an attacker’s two error rates are written <span class="math inline">\(a\)</span> and <span class="math inline">\(b\)</span>.</p>
+<p>The chapters share the conventions in <a href="#tbl-dp-notation" class="quarto-xref">Table&nbsp;<span>2</span></a>, set in <a href="../part03-dp-foundations/01-definition.html">the definition of differential privacy</a> and fixed for the whole book. The next part uses the same notation. There the noise multiplier, the noise standard deviation per unit of sensitivity, is usually written <span class="math inline">\(\sigma\)</span>; it equals the standard deviation when the sensitivity is 1.</p>
 <div id="tbl-dp-notation" class="quarto-float quarto-figure quarto-figure-center anchored">
 <figure class="quarto-float quarto-float-tbl figure">
 <figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl" id="tbl-dp-notation-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
@@ -792,11 +792,19 @@ Table&nbsp;2: Notation shared by the chapters of this part and the next.
 </thead>
 <tbody>
 <tr class="odd">
-<td><span class="math inline">\(M\)</span></td>
-<td>A randomized mechanism, mapping a dataset to a random output</td>
+<td><span class="math inline">\(D = (x_1, \dots, x_n)\)</span>, <span class="math inline">\(\mathcal X\)</span></td>
+<td>A dataset of <span class="math inline">\(n\)</span> records, each from the data universe <span class="math inline">\(\mathcal X\)</span>, so <span class="math inline">\(D \in \mathcal X^n\)</span></td>
 </tr>
 <tr class="even">
-<td><span class="math inline">\(D \simeq D'\)</span></td>
+<td><span class="math inline">\(M\)</span>; <span class="math inline">\(M_1, \dots, M_k\)</span></td>
+<td>A mechanism, a randomized algorithm whose privacy is analysed; <span class="math inline">\(k\)</span> mechanisms in a composition</td>
+</tr>
+<tr class="odd">
+<td><span class="math inline">\(y \in \mathcal Y\)</span>, <span class="math inline">\(S \subseteq \mathcal Y\)</span></td>
+<td>An output, the output space and an event; <span class="math inline">\(Y = M(D)\)</span> is the random output</td>
+</tr>
+<tr class="even">
+<td><span class="math inline">\(D \sim D'\)</span></td>
 <td>Neighbouring datasets: by default one is the other with one record added or removed; “replace one record” is named explicitly when used</td>
 </tr>
 <tr class="odd">
@@ -805,23 +813,43 @@ Table&nbsp;2: Notation shared by the chapters of this part and the next.
 </tr>
 <tr class="even">
 <td><span class="math inline">\(\varepsilon\)</span>, <span class="math inline">\(\delta\)</span></td>
-<td>The privacy parameters of <span class="math inline">\((\varepsilon, \delta)\)</span>-DP; pure DP is <span class="math inline">\(\delta = 0\)</span></td>
+<td>The privacy parameters: <span class="math inline">\(\varepsilon\)</span>-DP is pure DP, <span class="math inline">\((\varepsilon, \delta)\)</span>-DP approximate DP</td>
 </tr>
 <tr class="odd">
-<td><span class="math inline">\(\Delta_1 f\)</span>, <span class="math inline">\(\Delta_2 f\)</span></td>
-<td>The <span class="math inline">\(\ell_1\)</span> and <span class="math inline">\(\ell_2\)</span> sensitivities of a query <span class="math inline">\(f\)</span></td>
+<td><span class="math inline">\(f\)</span>; <span class="math inline">\(\Delta_1 f\)</span>, <span class="math inline">\(\Delta_2 f\)</span></td>
+<td>A query <span class="math inline">\(f\colon \mathcal X^n \to \mathbb R^d\)</span> with output dimension <span class="math inline">\(d\)</span>; its <span class="math inline">\(\ell_1\)</span> and <span class="math inline">\(\ell_2\)</span> sensitivities, written <span class="math inline">\(\Delta f\)</span> when the norm is clear</td>
 </tr>
 <tr class="even">
 <td><span class="math inline">\(L_{D,D'}(y) = \ln\frac{p_{M(D)}(y)}{p_{M(D')}(y)}\)</span></td>
-<td>The privacy loss of output <span class="math inline">\(y\)</span>; <span class="math inline">\(L_{D,D'}(Y)\)</span> with <span class="math inline">\(Y \sim M(D)\)</span> is the privacy loss random variable</td>
+<td>The privacy loss of output <span class="math inline">\(y\)</span>; <span class="math inline">\(L = L_{D,D'}(Y)\)</span> with <span class="math inline">\(Y \sim M(D)\)</span> is the privacy loss random variable</td>
 </tr>
 <tr class="odd">
-<td><span class="math inline">\(E_{e^\varepsilon}(P \,\|\, Q)\)</span></td>
-<td>The hockey-stick divergence; <span class="math inline">\((\varepsilon,\delta)\)</span>-DP means <span class="math inline">\(E_{e^\varepsilon}(M(D) \,\|\, M(D')) \le \delta\)</span> for all <span class="math inline">\(D \simeq D'\)</span></td>
+<td><span class="math inline">\(E_\gamma(P \,\|\, Q)\)</span>, <span class="math inline">\(\delta(\varepsilon)\)</span></td>
+<td>The hockey-stick divergence at level <span class="math inline">\(\gamma \ge 1\)</span>; <span class="math inline">\((\varepsilon,\delta)\)</span>-DP means <span class="math inline">\(E_{e^\varepsilon}(M(D) \,\|\, M(D')) \le \delta\)</span> for all <span class="math inline">\(D \sim D'\)</span>, and the privacy profile <span class="math inline">\(\delta(\varepsilon)\)</span> is the smallest such <span class="math inline">\(\delta\)</span></td>
 </tr>
 <tr class="even">
 <td><span class="math inline">\(\mathrm{Lap}(b)\)</span>, <span class="math inline">\(\mathcal N(0, \sigma^2)\)</span></td>
-<td>Laplace noise with scale <span class="math inline">\(b\)</span>; normal noise with variance <span class="math inline">\(\sigma^2\)</span></td>
+<td>Laplace noise with scale <span class="math inline">\(b = \Delta_1 f/\varepsilon\)</span>; normal noise with standard deviation <span class="math inline">\(\sigma\)</span></td>
+</tr>
+<tr class="odd">
+<td><span class="math inline">\(r \in \mathcal R\)</span>, <span class="math inline">\(u(D, r)\)</span>, <span class="math inline">\(\Delta u\)</span></td>
+<td>The exponential mechanism’s candidates, its score function and the score’s sensitivity</td>
+</tr>
+<tr class="even">
+<td><span class="math inline">\(\mathcal Q\)</span>, <span class="math inline">\(\tau\)</span>, <span class="math inline">\(\bot\)</span>, <span class="math inline">\(\top\)</span></td>
+<td>A workload of counting queries; the sparse vector technique’s threshold and its answers “below” and “above”</td>
+</tr>
+<tr class="odd">
+<td><span class="math inline">\((\alpha, \beta)\)</span></td>
+<td>An <span class="math inline">\((\alpha, \beta)\)</span>-accurate mechanism errs by at most <span class="math inline">\(\alpha\)</span> with probability at least <span class="math inline">\(1 - \beta\)</span>; <span class="math inline">\(\beta\)</span> is a failure probability</td>
+</tr>
+<tr class="even">
+<td><span class="math inline">\(\mathrm{FPR}\)</span>, <span class="math inline">\(\mathrm{FNR}\)</span></td>
+<td>A test’s false positive and false negative rates, its type I and type II errors, written <span class="math inline">\(\alpha\)</span> and <span class="math inline">\(\beta\)</span> on a page without an accuracy guarantee</td>
+</tr>
+<tr class="odd">
+<td><span class="math inline">\(R\colon \mathcal X \to \mathcal Y\)</span>, <span class="math inline">\(\varepsilon_0\)</span></td>
+<td>A local randomizer and its privacy parameter</td>
 </tr>
 </tbody>
 </table>
@@ -837,7 +865,7 @@ Table&nbsp;2: Notation shared by the chapters of this part and the next.
 <li>prove post-processing, group privacy and basic composition, and say what does not compose;</li>
 <li>calibrate the Laplace and Gaussian mechanisms, including the exact (analytic) Gaussian calibration;</li>
 <li>derive advanced composition and compute optimal composition exactly;</li>
-<li>prove the exponential mechanism, report-noisy-max and the sparse vector technique private, and recognise the common broken variants of the last;</li>
+<li>prove the exponential mechanism, report-noisy-max and the sparse vector technique private, and recognize the common broken variants of the last;</li>
 <li>handle data-dependent sensitivity with smooth sensitivity, propose-test-release, subsample-and-aggregate and clipping;</li>
 <li>implement discrete Laplace and discrete Gaussian samplers exactly, and explain why naive floating-point noise is not private;</li>
 <li>design frequency estimation in the local model and explain what shuffling and secure aggregation buy;</li>

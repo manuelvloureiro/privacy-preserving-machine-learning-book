@@ -1,0 +1,1150 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.10.19">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+
+<title>6&nbsp; Preparing microdata – Differential Privacy with OpenDP</title>
+<style>
+/* Default styles provided by pandoc.
+** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
+*/
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: 1.5em;}
+div.column{flex: auto;}
+@media screen {
+div.columns{gap: min(4vw, 1.5em);}
+div.column{overflow-x: auto;}
+}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+/* CSS for syntax highlighting */
+html { -webkit-text-size-adjust: 100%; }
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+</style>
+
+
+<script src="../site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="../site_libs/quarto-nav/headroom.min.js"></script>
+<script src="../site_libs/clipboard/clipboard.min.js"></script>
+<script src="../site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="../site_libs/quarto-search/fuse.min.js"></script>
+<script src="../site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="../">
+<link href="../part02-tabular-data/07-utility-and-noise.html" rel="next">
+<link href="../part02-tabular-data/05-identifier-truncation.html" rel="prev">
+<script src="../site_libs/quarto-html/quarto.js" type="module"></script>
+<script src="../site_libs/quarto-html/tabsets/tabsets.js" type="module"></script>
+<script src="../site_libs/quarto-html/popper.min.js"></script>
+<script src="../site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="../site_libs/quarto-html/anchor.min.js"></script>
+<link href="../site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="../site_libs/quarto-html/quarto-syntax-highlighting-bf27225e3a48a9273f3daa8f8e829971.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="../site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="../site_libs/bootstrap/bootstrap-78f503ea39f784e8964cd205807fbe37.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
+<script id="quarto-search-options" type="application/json">{
+  "location": "sidebar",
+  "copy-button": false,
+  "collapse-after": 3,
+  "panel-placement": "start",
+  "type": "textbox",
+  "limit": 50,
+  "keyboard-shortcut": [
+    "f",
+    "/",
+    "s"
+  ],
+  "show-item-context": false,
+  "language": {
+    "search-no-results-text": "No results",
+    "search-matching-documents-text": "matching documents",
+    "search-copy-link-title": "Copy link to search",
+    "search-hide-matches-text": "Hide additional matches",
+    "search-more-match-text": "more match in this document",
+    "search-more-matches-text": "more matches in this document",
+    "search-clear-button-title": "Clear",
+    "search-text-placeholder": "",
+    "search-detached-cancel-button-title": "Cancel",
+    "search-submit-button-title": "Submit",
+    "search-label": "Search"
+  }
+}</script>
+
+  <script src="https://cdnjs.cloudflare.com/polyfill/v3/polyfill.min.js?features=es6"></script>
+  <script defer="" src="https://cdn.jsdelivr.net/npm/mathjax@4/tex-chtml.js" type="text/javascript"></script>
+
+<script type="text/javascript">
+const typesetMath = (el) => {
+  if (window.MathJax) {
+    // MathJax Typeset
+    window.MathJax.typeset([el]);
+  } else if (window.katex) {
+    // KaTeX Render
+    var mathElements = el.getElementsByClassName("math");
+    var macros = [];
+    for (var i = 0; i < mathElements.length; i++) {
+      var texText = mathElements[i].firstChild;
+      if (mathElements[i].tagName == "SPAN" && texText && texText.data) {
+        window.katex.render(texText.data, mathElements[i], {
+          displayMode: mathElements[i].classList.contains('display'),
+          throwOnError: false,
+          macros: macros,
+          fleqn: false
+        });
+      }
+    }
+  }
+}
+window.Quarto = {
+  typesetMath
+};
+</script>
+
+</head>
+
+<body class="nav-sidebar floating quarto-light">
+
+<div id="quarto-search-results"></div>
+  <header id="quarto-header" class="headroom fixed-top">
+  <nav class="quarto-secondary-nav">
+    <div class="container-fluid d-flex">
+      <button type="button" class="quarto-btn-toggle btn" data-bs-toggle="collapse" role="button" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+        <i class="bi bi-layout-text-sidebar-reverse"></i>
+      </button>
+        <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../part02-tabular-data/00-introduction.html">Tabular data</a></li><li class="breadcrumb-item"><a href="../part02-tabular-data/06-preparing-microdata.html"><span class="chapter-number">6</span>&nbsp; <span class="chapter-title">Preparing microdata</span></a></li></ol></nav>
+        <a class="flex-grow-1" role="navigation" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">      
+        </a>
+      <button type="button" class="btn quarto-search-button" aria-label="Search" onclick="window.quartoOpenSearch();">
+        <i class="bi bi-search"></i>
+      </button>
+    </div>
+  </nav>
+</header>
+<!-- content -->
+<div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article">
+<!-- sidebar -->
+  <nav id="quarto-sidebar" class="sidebar collapse collapse-horizontal quarto-sidebar-collapse-item sidebar-navigation floating overflow-auto">
+    <div class="pt-lg-2 mt-2 text-left sidebar-header">
+    <div class="sidebar-title mb-0 py-0">
+      <a href="../">Differential Privacy with OpenDP</a> 
+    </div>
+      </div>
+        <div class="mt-2 flex-shrink-0 align-items-center">
+        <div class="sidebar-search">
+        <div id="quarto-search" class="" title="Search"></div>
+        </div>
+        </div>
+    <div class="sidebar-menu-container"> 
+    <ul class="list-unstyled mt-1">
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../index.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Preface</span></a>
+  </div>
+</li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a href="../part01-getting-started/00-introduction.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Getting started</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-1" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-1" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part01-getting-started/01-first-release.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">1</span>&nbsp; <span class="chapter-title">A first release</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part01-getting-started/02-the-data-and-the-context.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">2</span>&nbsp; <span class="chapter-title">The data and the context</span></span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a href="../part02-tabular-data/00-introduction.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Tabular data</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-2" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-2" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part02-tabular-data/03-essential-statistics.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">3</span>&nbsp; <span class="chapter-title">Essential statistics</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part02-tabular-data/04-grouping.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">4</span>&nbsp; <span class="chapter-title">Grouping</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part02-tabular-data/05-identifier-truncation.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">5</span>&nbsp; <span class="chapter-title">Identifier truncation and bounds</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part02-tabular-data/06-preparing-microdata.html" class="sidebar-item-text sidebar-link active">
+ <span class="menu-text"><span class="chapter-number">6</span>&nbsp; <span class="chapter-title">Preparing microdata</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part02-tabular-data/07-utility-and-noise.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">7</span>&nbsp; <span class="chapter-title">Assessing utility and choosing the noise</span></span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a href="../part03-framework/00-introduction.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">The framework</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-3" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-3" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part03-framework/08-a-framework-for-privacy.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">8</span>&nbsp; <span class="chapter-title">A framework to understand differential privacy</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part03-framework/09-transformations.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">9</span>&nbsp; <span class="chapter-title">Transformations</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part03-framework/10-measurements.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">10</span>&nbsp; <span class="chapter-title">Measurements</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part03-framework/11-combinators.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">11</span>&nbsp; <span class="chapter-title">Combinators</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part03-framework/12-utilities-and-the-context-api.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">12</span>&nbsp; <span class="chapter-title">Utilities and the Context API inside</span></span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a href="../part04-extending/00-introduction.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Extending the library</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-4" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-4" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part04-extending/13-plugins.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">13</span>&nbsp; <span class="chapter-title">Plugins</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part04-extending/14-statistical-modelling.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">14</span>&nbsp; <span class="chapter-title">Statistical modelling</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part04-extending/15-limitations-and-troubleshooting.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">15</span>&nbsp; <span class="chapter-title">Limitations and troubleshooting</span></span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a href="../part05-synthetic-data/00-introduction.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Synthetic data</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-5" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-5" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part05-synthetic-data/16-contingency-tables.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">16</span>&nbsp; <span class="chapter-title">Contingency tables</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part05-synthetic-data/17-aim-and-mst.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">17</span>&nbsp; <span class="chapter-title">Synthetic data with AIM and MST</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part05-synthetic-data/18-evaluating-synthetic-data.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">18</span>&nbsp; <span class="chapter-title">Evaluating and tuning synthetic data</span></span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-6" role="navigation" aria-expanded="true">
+ <span class="menu-text">Appendices</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-6" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-6" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../glossary.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">A</span>&nbsp; <span class="chapter-title">Glossary</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../term-index.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">B</span>&nbsp; <span class="chapter-title">Index</span></span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+    </ul>
+    </div>
+</nav>
+<div id="quarto-sidebar-glass" class="quarto-sidebar-collapse-item" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item"></div>
+<!-- margin-sidebar -->
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+        <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">Table of contents</h2>
+   
+  <ul>
+  <li><a href="#sec-prep-inside" id="toc-sec-prep-inside" class="nav-link active" data-scroll-target="#sec-prep-inside"><span class="header-section-number">6.1</span> Prepare inside the query</a></li>
+  <li><a href="#sec-prep-contexts" id="toc-sec-prep-contexts" class="nav-link" data-scroll-target="#sec-prep-contexts"><span class="header-section-number">6.2</span> Columns, filters and groups</a></li>
+  <li><a href="#sec-prep-types" id="toc-sec-prep-types" class="nav-link" data-scroll-target="#sec-prep-types"><span class="header-section-number">6.3</span> The types OpenDP tracks</a></li>
+  <li><a href="#sec-prep-fill" id="toc-sec-prep-fill" class="nav-link" data-scroll-target="#sec-prep-fill"><span class="header-section-number">6.4</span> Casting, filling and clipping</a></li>
+  <li><a href="#sec-prep-operators" id="toc-sec-prep-operators" class="nav-link" data-scroll-target="#sec-prep-operators"><span class="header-section-number">6.5</span> Predicates and arithmetic</a></li>
+  <li><a href="#sec-prep-dates" id="toc-sec-prep-dates" class="nav-link" data-scroll-target="#sec-prep-dates"><span class="header-section-number">6.6</span> Strings and dates</a></li>
+  <li><a href="#sec-prep-worked" id="toc-sec-prep-worked" class="nav-link" data-scroll-target="#sec-prep-worked"><span class="header-section-number">6.7</span> A worked preparation: hours lost to absence</a></li>
+  <li><a href="#sec-prep-refused" id="toc-sec-prep-refused" class="nav-link" data-scroll-target="#sec-prep-refused"><span class="header-section-number">6.8</span> What a refused expression looks like</a></li>
+  <li><a href="#summary" id="toc-summary" class="nav-link" data-scroll-target="#summary"><span class="header-section-number">6.9</span> Summary</a></li>
+  <li><a href="#references" id="toc-references" class="nav-link" data-scroll-target="#references"><span class="header-section-number">6.10</span> References</a></li>
+  </ul>
+</nav>
+    </div>
+<!-- main -->
+<main class="content" id="quarto-document-content">
+
+<header id="title-block-header" class="quarto-title-block default"><nav class="quarto-page-breadcrumbs quarto-title-breadcrumbs d-none d-lg-block" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../part02-tabular-data/00-introduction.html">Tabular data</a></li><li class="breadcrumb-item"><a href="../part02-tabular-data/06-preparing-microdata.html"><span class="chapter-number">6</span>&nbsp; <span class="chapter-title">Preparing microdata</span></a></li></ol></nav>
+<div class="quarto-title">
+<h1 class="title"><span class="chapter-number">6</span>&nbsp; <span class="chapter-title">Preparing microdata</span></h1>
+</div>
+
+
+
+<div class="quarto-title-meta">
+
+    
+  
+    
+  </div>
+  
+
+
+</header>
+
+
+<p>Survey data rarely arrive in the form a statistic needs. Hours of work come as floats, with a 99 for “not applicable” and a null where the answer is missing. The date of a response sits in two integer columns, the year and the quarter. Before you release anything you cast, fill, clip, filter and recode. This chapter is about where that work happens. The one idea is that OpenDP reads the whole lazy query before it runs, preparation included, and accounts for every step. So preparation belongs inside the query, where the guarantee covers it, and not in a script that runs before the context exists.</p>
+<p>The chapter follows the documentation’s tutorial on preparing microdata, its page on data types and its pages on the expressions it accepts. You will see which Polars contexts and expressions OpenDP allows, and what it changes about them and why. You will also see how it tracks nulls, undefined floats and bounds in the domain of a column. The chapter ends with a worked preparation of the Labour Force Survey (LFS) that releases one statistic. It is the mean difference between the hours people actually worked and the hours they usually work. The last section shows what an expression OpenDP refuses looks like.</p>
+<p>The script <a href="https://github.com/manuelvloureiro/privacy-preserving-machine-learning-book/blob/main/code/part02-tabular-data/opendp_preparing_microdata.py">opendp_preparing_microdata.py</a> runs every step on OpenDP 0.16.0 with Polars 1.36.1. The noise scales, the error bars, the thresholds, the error messages and the true values it prints are the same on every run. The released counts and the released mean are not, because OpenDP draws its noise from a generator that cannot be seeded. This page therefore shows them in one block marked as one run.</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb1"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="ex">uv</span> run python code/part02-tabular-data/opendp_preparing_microdata.py</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<section id="sec-prep-inside" class="level2" data-number="6.1">
+<h2 data-number="6.1" class="anchored" data-anchor-id="sec-prep-inside"><span class="header-section-number">6.1</span> Prepare inside the query</h2>
+<p>A context built around a Polars LazyFrame reads only the frame’s schema, which the library treats as public. The data are not touched until a query is released. Each query you submit is a lazy plan, and OpenDP parses it into a chain of transformations before anything runs, the chain that <a href="../part03-framework/09-transformations.html">Transformations</a> opens. For each step the library works out how much one person’s rows can change the output. So a filter or a fill in the middle of the plan is part of the accounting.</p>
+<p>Preparation before the context is different. What the library sees is the prepared frame, and its guarantee is a guarantee about that frame. Suppose the step was a fixed function of each row, such as renaming a column or parsing a date with a known format. Then every person still owns the same rows afterwards, and the guarantee means what it says. But the library did not check it, so the claim is yours. Suppose instead that the step read the data. An imputation by the column’s own mean, a bound set at its maximum, or a filter at a quantile each carries information about everyone into the release. The accounting never saw that path, so the stated guarantee no longer covers the original data. The facts you may use freely are the public ones, such as the schema, the code book and the published bound on the sample’s size.</p>
+<p>The context is the one the documentation uses on these pages. The privacy unit is 36 rows, because a person answers at most once a quarter over nine years. So two neighbouring datasets differ by one person’s rows, at most 36 of them. The budget is approximate differential privacy with the privacy budget <span class="math inline">\(\varepsilon\)</span> at 1 and the slack <span class="math inline">\(\delta\)</span> at <span class="math inline">\(10^{-7}\)</span>, as in <a href="../part02-tabular-data/03-essential-statistics.html">Essential statistics</a>, split evenly over four queries. The margin is the public bound on the number of rows from <a href="../part02-tabular-data/05-identifier-truncation.html">Identifier truncation and bounds</a>.</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb2" data-excerpt="prep-context"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> make_context(frame: pl.LazyFrame) <span class="op">-&gt;</span> dp.Context:</span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>    <span class="co">"""The documentation's context: 36 rows per person, (epsilon = 1, delta = 1e-7) split evenly over 4 queries."""</span></span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> dp.Context.compositor(</span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a>        data<span class="op">=</span>frame,</span>
+<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a>        privacy_unit<span class="op">=</span>dp.unit_of(contributions<span class="op">=</span>CONTRIBUTIONS),</span>
+<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a>        privacy_loss<span class="op">=</span>dp.loss_of(epsilon<span class="op">=</span>EPSILON, delta<span class="op">=</span>DELTA),</span>
+<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a>        split_evenly_over<span class="op">=</span>QUERIES,</span>
+<span id="cb2-8"><a href="#cb2-8" aria-hidden="true" tabindex="-1"></a>        margins<span class="op">=</span>[dp.polars.Margin(max_length<span class="op">=</span>MAX_LENGTH)],  <span class="co"># public: a bound on the number of rows</span></span>
+<span id="cb2-9"><a href="#cb2-9" aria-hidden="true" tabindex="-1"></a>    )</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<pre class="text"><code>privacy unit: (SymmetricDistance(), 36)
+privacy loss: (Approximate(MaxDivergence), (1.0, 1e-07))
+budget per query: epsilon=0.25 delta=2.5e-08
+schema: PIDENT=Int64  YEAR=Int64  QUARTER=Int64  SEX=Int64  AGE=Float64  HWUSUAL=Float64  HWACTUAL=Float64  ILOSTAT=Int64</code></pre>
+<p>Each query gets a quarter of the budget. The schema line is all the context knows about the data at this point, and it assumes that any column may hold nulls.</p>
+</section>
+<section id="sec-prep-contexts" class="level2" data-number="6.2">
+<h2 data-number="6.2" class="anchored" data-anchor-id="sec-prep-contexts"><span class="header-section-number">6.2</span> Columns, filters and groups</h2>
+<p>Polars applies an expression in one of five contexts, and OpenDP treats them in two groups. Expressions in <code>.select</code> and <code>.agg</code> may change the number and the order of rows, because an aggregation does exactly that. Expressions in <code>.with_columns</code>, <code>.filter</code> and <code>.group_by</code> must be <strong>row-by-row</strong>, which means they could be written as a function applied to each row on its own. The reason is the privacy unit. A row-by-row expression keeps each person’s rows aligned with their contributions, so 36 rows in means 36 rows out. An expression that sorted or shifted the column would mix people’s rows, and the library could no longer say what one person changes.</p>
+<p>The documentation’s first example adds a column with <code>.with_columns</code> and groups on it. The expression <code>cut</code> bins the usual hours into bands at fixed breaks, which is row-by-row, and it shadows <code>HWUSUAL</code> with its bin. The labels of the bins depend only on the breaks, not on the data, so they are public and can be passed as keys.</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb4" data-excerpt="prep-cut"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> binned_counts(context: dp.Context) <span class="op">-&gt;</span> LazyFrameQuery:</span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>    <span class="co">"""How many responses fall in each band of usual hours: a row-by-row `cut`, then a count per bin."""</span></span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a>    labels <span class="op">=</span> pl.Series(<span class="st">"HWUSUAL"</span>, cut_labels(BREAKS, left_closed<span class="op">=</span><span class="va">True</span>), dtype<span class="op">=</span>pl.Categorical)</span>
+<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> (</span>
+<span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a>        lazy_query(context)</span>
+<span id="cb4-6"><a href="#cb4-6" aria-hidden="true" tabindex="-1"></a>        .with_columns(pl.col(<span class="st">"HWUSUAL"</span>).cut(breaks<span class="op">=</span>BREAKS, left_closed<span class="op">=</span><span class="va">True</span>))  <span class="co"># shadows HWUSUAL with its bin</span></span>
+<span id="cb4-7"><a href="#cb4-7" aria-hidden="true" tabindex="-1"></a>        .group_by(<span class="st">"HWUSUAL"</span>)</span>
+<span id="cb4-8"><a href="#cb4-8" aria-hidden="true" tabindex="-1"></a>        .agg(dp.<span class="bu">len</span>(signed<span class="op">=</span><span class="va">True</span>))</span>
+<span id="cb4-9"><a href="#cb4-9" aria-hidden="true" tabindex="-1"></a>        .with_keys(pl.LazyFrame([labels]))  <span class="co"># the bin labels are public, so no threshold is needed</span></span>
+<span id="cb4-10"><a href="#cb4-10" aria-hidden="true" tabindex="-1"></a>    )</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<pre class="text"><code>binned counts: len Frame Length, Integer Laplace, scale=144.00 95% accuracy=431.9
+without keys: len Frame Length, Integer Laplace, scale=144.00 threshold=2,973
+true bins: null=20,819  [-inf, 0)=0  [0, 20)=89,495  [20, 40)=908,061  [40, 60)=406,947  [60, 80)=78,469  [80, 98)=13,220  [98, inf)=2,294,921</code></pre>
+<p>The scale is 144, which is the 36 rows one person can add to a bin, divided by the query’s share of the budget. The error bar on each count is about 432. With the keys supplied, every bin is released, including the empty one below zero, whose noisy count can be negative because the count is signed. Without the keys the library would have to learn from the data which bins exist. The same query then carries a threshold of 2,973 below which a bin is dropped, as <a href="../part02-tabular-data/04-grouping.html">Grouping</a> explained. The rows with a null <code>HWUSUAL</code> fall in a null bin that is not among the keys, so they are released nowhere. One more thing changes when a column is shadowed: any margin you declared about <code>HWUSUAL</code> applied to the original column, and the new column has none.</p>
+<p>A <code>.filter</code> masks rows with a boolean row-by-row expression. The documentation’s example casts the hours to integers, drops the rows coded 99 and sums the rest. Filtering only removes rows, so it keeps most of what the margins say. But it discards any invariant about the group keys and the group sizes, because those were facts about the dataset before the filter. Filtering also tells the library nothing about what remains. A column filtered to non-null values is still nullable in its domain, which the worked example will run into.</p>
+<pre class="text"><code>filtered sum: HWUSUAL Sum, Integer Laplace, scale=11,520.00 95% accuracy=34,511.3</code></pre>
+<p>The last context of the tutorial is a <code>.group_by</code> followed by <code>.agg</code> <em>before</em> the private aggregation. The documentation groups the rows a thousand ways by <code>PIDENT</code> modulo 1,000 and takes the minimum usual hours in each group. It then releases the mean of those thousand minima, which is its version of sample and aggregate. Any expression may go in that inner <code>.agg</code>, which is its appeal, but the price is noise. The script prints the scales of the mean with the context above, and then with a privacy unit that says each person’s rows all land in one group. That unit is the <code>Bound</code> of <a href="../part02-tabular-data/05-identifier-truncation.html">Identifier truncation and bounds</a>.</p>
+<pre class="text"><code>sample and aggregate: HWUSUAL Sum, Integer Laplace, scale=17,280.00
+sample and aggregate: HWUSUAL Length, Integer Laplace, scale=576.00
+one group per person: HWUSUAL Sum, Integer Laplace, scale=480.00
+one group per person: HWUSUAL Length, Integer Laplace, scale=16.00</code></pre>
+<p>The first context does not know that a person’s rows share a <code>PIDENT</code>, so it allows for 36 changed groups, and the bound brings the scales down by that factor. Even then the inner aggregation doubles the noise, because changing one row changes one aggregated row, which counts as removing a value and adding another.</p>
+</section>
+<section id="sec-prep-types" class="level2" data-number="6.3">
+<h2 data-number="6.3" class="anchored" data-anchor-id="sec-prep-types"><span class="header-section-number">6.3</span> The types OpenDP tracks</h2>
+<p>Every Polars column can hold nulls, and OpenDP assumes that every column does until an expression proves otherwise. Beyond that, the library keeps a few <strong>domain descriptors</strong> for each column, which are facts about its values that later aggregations need. For an integer column it tracks lower and upper bounds, which a <code>.clip</code> establishes and which some later steps drop. The supported integer types are the signed ones and the unsigned ones of 32 and 64 bits, so a <code>UInt8</code> column is refused. A float column has one more descriptor, whether the values may be NaN, the float that stands for an undefined number. A float sum therefore needs both <code>.fill_null</code> and <code>.fill_nan</code> before it. Booleans and strings carry no descriptors, and strings are the slowest type to work with.</p>
+<p>Categorical columns look like strings but store an integer code per value, with a table of labels. Two things about that table depend on the data, and the library refuses both. First, an expression that could add or remove a category, such as <code>.fill_null</code> or a binary operator, makes Polars rewrite the codes and emit a warning. That is a side effect that depends on the data. Second, the codes are assigned in the order the values first appear, so grouping by them would reveal the order of the rows. An <code>Enum</code> column fixes its categories in the schema, so neither problem arises. The <code>cut</code> expression is fine too, because its encoding depends only on the breaks.</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb8"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> polars <span class="im">as</span> pl</span>
+<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> opendp.prelude <span class="im">as</span> dp</span>
+<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-4"><a href="#cb8-4" aria-hidden="true" tabindex="-1"></a>dp.enable_features(<span class="st">"contrib"</span>)</span>
+<span id="cb8-5"><a href="#cb8-5" aria-hidden="true" tabindex="-1"></a>status <span class="op">=</span> [<span class="st">"working"</span>, <span class="st">"absent"</span>, <span class="st">"other"</span>] <span class="op">*</span> <span class="dv">100</span></span>
+<span id="cb8-6"><a href="#cb8-6" aria-hidden="true" tabindex="-1"></a>unit, loss <span class="op">=</span> dp.unit_of(contributions<span class="op">=</span><span class="dv">1</span>), dp.loss_of(epsilon<span class="op">=</span><span class="fl">1.0</span>, delta<span class="op">=</span><span class="fl">1e-7</span>)</span>
+<span id="cb8-7"><a href="#cb8-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-8"><a href="#cb8-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-9"><a href="#cb8-9" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> context_for(column: pl.Series) <span class="op">-&gt;</span> dp.Context:</span>
+<span id="cb8-10"><a href="#cb8-10" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> dp.Context.compositor(data<span class="op">=</span>pl.LazyFrame([column]), privacy_unit<span class="op">=</span>unit, privacy_loss<span class="op">=</span>loss, split_evenly_over<span class="op">=</span><span class="dv">1</span>)</span>
+<span id="cb8-11"><a href="#cb8-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-12"><a href="#cb8-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-13"><a href="#cb8-13" aria-hidden="true" tabindex="-1"></a>categorical <span class="op">=</span> context_for(pl.Series(<span class="st">"status"</span>, status, dtype<span class="op">=</span>pl.Categorical))</span>
+<span id="cb8-14"><a href="#cb8-14" aria-hidden="true" tabindex="-1"></a><span class="cf">try</span>:</span>
+<span id="cb8-15"><a href="#cb8-15" aria-hidden="true" tabindex="-1"></a>    categorical.query().group_by(<span class="st">"status"</span>).agg(dp.<span class="bu">len</span>(signed<span class="op">=</span><span class="va">True</span>)).summarize()</span>
+<span id="cb8-16"><a href="#cb8-16" aria-hidden="true" tabindex="-1"></a><span class="cf">except</span> dp.OpenDPException <span class="im">as</span> err:</span>
+<span id="cb8-17"><a href="#cb8-17" aria-hidden="true" tabindex="-1"></a>    <span class="bu">print</span>(err.message)  <span class="co"># Categories are data-dependent, which may reveal sensitive record ordering. Cast status to string before grouping.</span></span>
+<span id="cb8-18"><a href="#cb8-18" aria-hidden="true" tabindex="-1"></a>enum <span class="op">=</span> context_for(pl.Series(<span class="st">"status"</span>, status, dtype<span class="op">=</span>pl.Enum([<span class="st">"working"</span>, <span class="st">"absent"</span>, <span class="st">"other"</span>])))</span>
+<span id="cb8-19"><a href="#cb8-19" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"</span><span class="sc">{</span>enum<span class="sc">.</span>query()<span class="sc">.</span>group_by(<span class="st">'status'</span>)<span class="sc">.</span>agg(dp.<span class="bu">len</span>(signed<span class="op">=</span><span class="va">True</span>))<span class="sc">.</span>summarize()[<span class="st">'scale'</span>]<span class="sc">.</span>item()<span class="sc">:.4f}</span><span class="ss">"</span>)  <span class="co"># 1.0000</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>The error names the fix, which is to cast to string before grouping, and the enum query goes through. A released enum column comes back typed categorical, because the frame crosses from Rust to Python through Arrow, which does not tell the two apart. Dates, datetimes and times are supported too. A datetime’s time zone is part of the domain, so a column must have one zone throughout. The components of a date are read with the <code>.dt</code> expressions of <a href="#sec-prep-dates" class="quarto-xref"><span>Section 6.6</span></a>.</p>
+</section>
+<section id="sec-prep-fill" class="level2" data-number="6.4">
+<h2 data-number="6.4" class="anchored" data-anchor-id="sec-prep-fill"><span class="header-section-number">6.4</span> Casting, filling and clipping</h2>
+<p>The schema is read off the frame, so in ordinary use the columns are already typed and a cast is a choice, not a repair. The documentation’s reason to cast is the float sum. OpenDP accounts for the rounding error of floating-point addition, and on hundreds of thousands of rows with wide bounds that term shows in the noise scale. The script sums the usual hours both ways.</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb9" data-excerpt="prep-cast"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> hours_sum(context: dp.Context, as_integers: <span class="bu">bool</span>) <span class="op">-&gt;</span> pl.DataFrame:</span>
+<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a>    <span class="co">"""The noise scale of a sum of usual hours, on the float column or after casting it to integers."""</span></span>
+<span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a>    usual: Any <span class="op">=</span> pl.col(<span class="st">"HWUSUAL"</span>)  <span class="co"># typed Any: OpenDP adds the `.dp` namespace to expressions at run time</span></span>
+<span id="cb9-4"><a href="#cb9-4" aria-hidden="true" tabindex="-1"></a>    column <span class="op">=</span> usual.cast(<span class="bu">int</span>) <span class="cf">if</span> as_integers <span class="cf">else</span> usual</span>
+<span id="cb9-5"><a href="#cb9-5" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> lazy_query(context).select(column.dp.<span class="bu">sum</span>(HOUR_BOUNDS)).summarize(alpha<span class="op">=</span><span class="fl">0.05</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<pre class="text"><code>float sum: HWUSUAL Sum, Float Laplace, scale=14,405.18 95% accuracy=43,154.1
+integer sum: HWUSUAL Sum, Integer Laplace, scale=14,400.00 95% accuracy=43,139.0</code></pre>
+<p>On integers the scale is exactly 36 times the upper bound of 100 over the share of the budget, and on floats it is a little more. The difference is small here and grows with the bounds and the number of rows. A cast has one more effect. In Polars a value that cannot be converted raises an error, and whether it raises depends on the data. So OpenDP makes a failed cast return a null instead. The output domain of every cast is therefore nullable, and a statistic on a cast column needs a <code>.fill_null</code> first.</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb11"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> polars <span class="im">as</span> pl</span>
+<span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> opendp.prelude <span class="im">as</span> dp</span>
+<span id="cb11-3"><a href="#cb11-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-4"><a href="#cb11-4" aria-hidden="true" tabindex="-1"></a>dp.enable_features(<span class="st">"contrib"</span>)</span>
+<span id="cb11-5"><a href="#cb11-5" aria-hidden="true" tabindex="-1"></a>context <span class="op">=</span> dp.Context.compositor(</span>
+<span id="cb11-6"><a href="#cb11-6" aria-hidden="true" tabindex="-1"></a>    data<span class="op">=</span>pl.LazyFrame({<span class="st">"hours"</span>: [<span class="st">"40"</span>, <span class="st">"35"</span>, <span class="st">"n/a"</span>] <span class="op">*</span> <span class="dv">100</span>}),</span>
+<span id="cb11-7"><a href="#cb11-7" aria-hidden="true" tabindex="-1"></a>    privacy_unit<span class="op">=</span>dp.unit_of(contributions<span class="op">=</span><span class="dv">1</span>),</span>
+<span id="cb11-8"><a href="#cb11-8" aria-hidden="true" tabindex="-1"></a>    privacy_loss<span class="op">=</span>dp.loss_of(epsilon<span class="op">=</span><span class="fl">1.0</span>),</span>
+<span id="cb11-9"><a href="#cb11-9" aria-hidden="true" tabindex="-1"></a>    split_evenly_over<span class="op">=</span><span class="dv">1</span>,</span>
+<span id="cb11-10"><a href="#cb11-10" aria-hidden="true" tabindex="-1"></a>    margins<span class="op">=</span>[dp.polars.Margin(max_length<span class="op">=</span><span class="dv">1000</span>)],</span>
+<span id="cb11-11"><a href="#cb11-11" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb11-12"><a href="#cb11-12" aria-hidden="true" tabindex="-1"></a>hours <span class="op">=</span> pl.col(<span class="st">"hours"</span>).cast(<span class="bu">int</span>)  <span class="co"># OpenDP turns "n/a" into a null instead of raising an error</span></span>
+<span id="cb11-13"><a href="#cb11-13" aria-hidden="true" tabindex="-1"></a><span class="cf">try</span>:</span>
+<span id="cb11-14"><a href="#cb11-14" aria-hidden="true" tabindex="-1"></a>    context.query().select(hours.clip(<span class="dv">0</span>, <span class="dv">80</span>).<span class="bu">sum</span>().dp.noise()).summarize()</span>
+<span id="cb11-15"><a href="#cb11-15" aria-hidden="true" tabindex="-1"></a><span class="cf">except</span> dp.OpenDPException <span class="im">as</span> err:</span>
+<span id="cb11-16"><a href="#cb11-16" aria-hidden="true" tabindex="-1"></a>    <span class="bu">print</span>(err.message)  <span class="co"># input data (hours) might contain nulls. Preprocess your data with `.fill_null`.</span></span>
+<span id="cb11-17"><a href="#cb11-17" aria-hidden="true" tabindex="-1"></a>query <span class="op">=</span> context.query().select(hours.fill_null(<span class="dv">0</span>).clip(<span class="dv">0</span>, <span class="dv">80</span>).<span class="bu">sum</span>().dp.noise())</span>
+<span id="cb11-18"><a href="#cb11-18" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(query.summarize()[<span class="st">"scale"</span>].item())  <span class="co"># 80.0</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>The <code>.dp.sum</code> of the earlier chapters inserts the imputation and the clip for you. The snippet instead prepares the column by hand and adds noise to a plain <code>.sum</code>, which shows what the library checks. A <code>.clip</code> establishes the bounds descriptor, and the sum looks for it, since without bounds one person could move the sum by any amount. The order of the steps matters, because <code>.fill_null</code> and <code>.fill_nan</code> drop the bounds. Fill first, then clip. The script runs the same preparation on the survey in <code>.with_columns</code> and tries the wrong orders.</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb12" data-excerpt="prep-fill"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> prepared_sum(context: dp.Context, steps: pl.Expr) <span class="op">-&gt;</span> pl.DataFrame:</span>
+<span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a>    <span class="co">"""A sum with noise on a column prepared in with_columns: OpenDP checks the steps left it non-null and bounded."""</span></span>
+<span id="cb12-3"><a href="#cb12-3" aria-hidden="true" tabindex="-1"></a>    total: Any <span class="op">=</span> pl.col(<span class="st">"HWUSUAL"</span>).<span class="bu">sum</span>()</span>
+<span id="cb12-4"><a href="#cb12-4" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> lazy_query(context).with_columns(steps).select(total.dp.noise()).summarize()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<pre class="text"><code>prepared sum: HWUSUAL Sum, Integer Laplace, scale=14,400.00
+cast without fill_null: input data (HWUSUAL) might contain nulls. Preprocess your data with `.fill_null`.
+clip before fill_null: input domain must consist of bounded data. Either specify bounds in the input domain or use make_clamp.
+fill_null before fill_nan: input data (HWUSUAL) might contain nans. Preprocess your data with `.fill_nan`.
+float prepared sum: HWUSUAL Sum, Float Laplace, scale=14,405.18</code></pre>
+<p>The fill value need not be a constant. The documentation fills a person’s missing usual hours with their actual hours, which is a fill from another column. Then both the column and the fill must be row-by-row, so that they have the same length and line up. The fill must also be free of nulls itself, or the output could still hold one. The script fills <code>HWACTUAL</code> with 0 first and then uses it as the fill, which is accepted, and tries the unfilled column, which is not.</p>
+<pre class="text"><code>filled from a column: HWUSUAL Sum, Integer Laplace, scale=14,400.00
+filled from a nullable column: fill expression must not be nullable</code></pre>
+<p>Two expressions remove rows rather than fill them. <code>.drop_nulls</code> and <code>.drop_nans</code> guarantee a clean column, but they change its length. So the library forbids them in a row-by-row context, and they cost the invariants on the dataset’s size.</p>
+<pre class="text"><code>drop_nulls in with_columns: drop_nulls is not allowed in a row-by-row context</code></pre>
+<p>Recoding has two forms. The expression <code>.replace</code> swaps listed old values for new ones and keeps the type, while <code>.replace_strict</code> maps every value and may change the type. So a value that the second mapping leaves out needs somewhere to go, and it takes the <code>default</code>. The documentation says that OpenDP sets a missing <code>default</code> to null, so that the query cannot fail on an unexpected value. Version 0.16.0 does not do that. The script maps a toy column of three codes with a mapping for two of them. Then <code>summarize</code> accepts the query, but <code>release</code> raises the Polars error about an incomplete mapping. Give <code>replace_strict</code> a <code>default</code> yourself.</p>
+<pre class="text"><code>replace_strict without default: summarize scale=2.0; release: InvalidOperation(ErrString("incomplete mapping specified for `replace_strict`\n\nHint: Pass a `default` value to set unmapped values."))
+replace_strict with default: released keys one other two</code></pre>
+<p>The last expression of the page is <code>.to_physical</code>, which returns the integer codes behind a categorical or temporal column, under the same condition on the encoding.</p>
+</section>
+<section id="sec-prep-operators" class="level2" data-number="6.5">
+<h2 data-number="6.5" class="anchored" data-anchor-id="sec-prep-operators"><span class="header-section-number">6.5</span> Predicates and arithmetic</h2>
+<p>OpenDP accepts all of Polars’s comparison, conjunction and arithmetic operators, and treats each as row-by-row. Both sides of a binary operator must be row-by-row even inside <code>.select</code> or <code>.agg</code>, so that they have the same length and the rows line up. A mismatch would raise an error that depends on the data. The boolean tests are row-by-row too. They are <code>is_null</code> and <code>is_not_null</code> for any type and <code>is_nan</code>, <code>is_not_nan</code>, <code>is_finite</code> and <code>is_not_finite</code> for floats, and <code>.not_</code> negates a predicate. These expressions build filters and grouping columns. The documentation counts the respondents over retirement age by grouping on a comparison.</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb17" data-excerpt="prep-bool"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> over_retirement_age(context: dp.Context) <span class="op">-&gt;</span> LazyFrameQuery:</span>
+<span id="cb17-2"><a href="#cb17-2" aria-hidden="true" tabindex="-1"></a>    <span class="co">"""How many responses come from people over 64: a boolean expression as the grouping column."""</span></span>
+<span id="cb17-3"><a href="#cb17-3" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> (</span>
+<span id="cb17-4"><a href="#cb17-4" aria-hidden="true" tabindex="-1"></a>        lazy_query(context)</span>
+<span id="cb17-5"><a href="#cb17-5" aria-hidden="true" tabindex="-1"></a>        .group_by(pl.col(<span class="st">"AGE"</span>) <span class="op">&gt;</span> RETIREMENT_AGE)</span>
+<span id="cb17-6"><a href="#cb17-6" aria-hidden="true" tabindex="-1"></a>        .agg(dp.<span class="bu">len</span>(signed<span class="op">=</span><span class="va">True</span>))</span>
+<span id="cb17-7"><a href="#cb17-7" aria-hidden="true" tabindex="-1"></a>        .with_keys(pl.LazyFrame({<span class="st">"AGE"</span>: [<span class="va">True</span>, <span class="va">False</span>]}))  <span class="co"># a null age is in neither group and is dropped</span></span>
+<span id="cb17-8"><a href="#cb17-8" aria-hidden="true" tabindex="-1"></a>    )</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<pre class="text"><code>over 64: len Frame Length, Integer Laplace, scale=144.00 95% accuracy=431.9
+true over 64: true=1,190,845  false=2,620,832  null=255</code></pre>
+<p>A comparison with a null is null, so the 255 rows without an age form a third group that the keys leave out. The same question can be asked as a filter inside the aggregation, <code>pl.col("HWUSUAL").filter(pl.col("AGE") &gt; 64)</code>, which is not row-by-row but requires row-by-row inputs. The grouped form answers both halves of the question for the same price.</p>
+<p>Two operators you might reach for are not available in 0.16.0. Membership in a list, <code>is_in</code>, is refused with a message that says it is not yet supported, so write the test as a disjunction of equalities. The script counts the employed, who are working or absent from work, that way.</p>
+<pre class="text"><code>is_in: IsIn { nulls_equal: false } is not currently supported
+employed: len Frame Length, Integer Laplace, scale=144.00 95% accuracy=431.9</code></pre>
+<p>The absolute value is the other, and <a href="#sec-prep-refused" class="quarto-xref"><span>Section 6.8</span></a> shows its message. One more restriction comes from the columns page: an expression selects one column at a time, so a query over several columns lists one expression per column.</p>
+</section>
+<section id="sec-prep-dates" class="level2" data-number="6.6">
+<h2 data-number="6.6" class="anchored" data-anchor-id="sec-prep-dates"><span class="header-section-number">6.6</span> Strings and dates</h2>
+<p>Of the string expressions, OpenDP supports only parsing into a temporal type, with <code>.str.strptime</code> and its variants <code>to_date</code>, <code>to_datetime</code> and <code>to_time</code>. The <code>format</code> argument is mandatory. Polars can infer a format from the data, but the inferred format could change when one person’s rows are added or removed, which makes the step unstable. Parsing into nanosecond datetimes is refused as well, because the parser can panic on some inputs, and a panic is an error that depends on the data.</p>
+<pre class="text"><code>to_date without format: format must be specified; otherwise Polars will attempt to infer the format from the data, resulting in an unstable transformation
+nanosecond datetime: Nanoseconds are not currently supported due to potential panics when parsing inputs. Please open an issue on the OpenDP repository if you would find this functionality useful. Otherwise, consider parsing into micro- or millisecond datetimes instead.</code></pre>
+<p>The survey has no date column, only <code>YEAR</code> and <code>QUARTER</code>. The documentation builds one with <code>concat_str</code> before the context, because concatenation is not a supported expression. The script confirms that it is refused inside a query.</p>
+<pre class="text"><code>concat_str: Expr is not recognized at this time: ConcatHorizontal { delimiter: "-", ignore_nulls: false }. If you would like to see this supported, please file an issue.</code></pre>
+<p>Arithmetic is supported, so the same date can be built inside the query. Multiplying the year by 100 and adding three times the quarter gives an integer such as 200503. Cast to a string, it parses with the format <code>%Y%m</code> into the first day of the quarter’s last month. The components of the date are then read with the <code>.dt</code> expressions. For a date they cover the year, the quarter, the month, the week, the weekday and the day. For a time they cover the hour down to the nanosecond.</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb22" data-excerpt="prep-date"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb22-1"><a href="#cb22-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> quarter_end() <span class="op">-&gt;</span> pl.Expr:</span>
+<span id="cb22-2"><a href="#cb22-2" aria-hidden="true" tabindex="-1"></a>    <span class="co">"""The last month of the quarter as a date, built from YEAR and QUARTER and parsed with a fixed format."""</span></span>
+<span id="cb22-3"><a href="#cb22-3" aria-hidden="true" tabindex="-1"></a>    year_month <span class="op">=</span> pl.col(<span class="st">"YEAR"</span>) <span class="op">*</span> <span class="dv">100</span> <span class="op">+</span> pl.col(<span class="st">"QUARTER"</span>) <span class="op">*</span> <span class="dv">3</span>  <span class="co"># 2005 and 1 become 200503</span></span>
+<span id="cb22-4"><a href="#cb22-4" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> year_month.cast(<span class="bu">str</span>).<span class="bu">str</span>.to_date(<span class="bu">format</span><span class="op">=</span><span class="st">"%Y%m"</span>)</span>
+<span id="cb22-5"><a href="#cb22-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb22-6"><a href="#cb22-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb22-7"><a href="#cb22-7" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> responses_per_month(context: dp.Context) <span class="op">-&gt;</span> LazyFrameQuery:</span>
+<span id="cb22-8"><a href="#cb22-8" aria-hidden="true" tabindex="-1"></a>    <span class="co">"""How many responses carry each quarter-end month, read off the parsed date."""</span></span>
+<span id="cb22-9"><a href="#cb22-9" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> (</span>
+<span id="cb22-10"><a href="#cb22-10" aria-hidden="true" tabindex="-1"></a>        lazy_query(context)</span>
+<span id="cb22-11"><a href="#cb22-11" aria-hidden="true" tabindex="-1"></a>        .with_columns(DATE<span class="op">=</span>quarter_end())</span>
+<span id="cb22-12"><a href="#cb22-12" aria-hidden="true" tabindex="-1"></a>        .group_by(pl.col(<span class="st">"DATE"</span>).dt.month().alias(<span class="st">"MONTH"</span>))</span>
+<span id="cb22-13"><a href="#cb22-13" aria-hidden="true" tabindex="-1"></a>        .agg(dp.<span class="bu">len</span>(signed<span class="op">=</span><span class="va">True</span>))</span>
+<span id="cb22-14"><a href="#cb22-14" aria-hidden="true" tabindex="-1"></a>        .with_keys(pl.LazyFrame({<span class="st">"MONTH"</span>: pl.Series(QUARTER_END_MONTHS, dtype<span class="op">=</span>pl.Int8)}))</span>
+<span id="cb22-15"><a href="#cb22-15" aria-hidden="true" tabindex="-1"></a>    )</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<pre class="text"><code>first dates: 2005 Q1 -&gt; 2005-03-01  2005 Q2 -&gt; 2005-06-01
+per month: len Frame Length, Integer Laplace, scale=144.00 95% accuracy=431.9
+true per month: 3=953,695  6=958,396  9=933,257  12=966,584</code></pre>
+<p>The four months are public, since every quarter ends in one of them, so the keys are given and the counts cost no threshold. The key series is typed <code>Int8</code> because that is what <code>.dt.month</code> returns, and keys must match the grouping column’s type exactly.</p>
+</section>
+<section id="sec-prep-worked" class="level2" data-number="6.7">
+<h2 data-number="6.7" class="anchored" data-anchor-id="sec-prep-worked"><span class="header-section-number">6.7</span> A worked preparation: hours lost to absence</h2>
+<p>The statistic is the mean difference between the hours a person actually worked in the survey week and the hours they usually work, among people with a job. A negative mean means that holidays, illness and short weeks outweigh overtime. Each step of the preparation is a decision about the data, and each is inside the query. The rows are first restricted to <code>ILOSTAT</code> equal to 1, which the code book defines as working for pay or profit. Both hour columns are cast to integers, so that the sum later uses the integer noise of <a href="#sec-prep-fill" class="quarto-xref"><span>Section 6.4</span></a>. The usual hours are filled with 0 before the next filter rather than after it. The filter then keeps the rows whose usual hours are known. That excludes 0, the code for hours that vary, and 99, the code for not applicable.</p>
+<p>The reason for filling before filtering is the rule from <a href="#sec-prep-contexts" class="quarto-xref"><span>Section 6.2</span></a> that a filter proves nothing to the library. After the filter no null usual hours remain, but the column is still nullable in its domain. The next step wants to use it as a fill value, which is refused unless it is non-nullable. A row whose actual hours are missing gets the usual hours instead, which makes its difference zero, the least informative choice. Finally the difference is clipped to the public bounds of plus or minus 40 hours, because a sum needs bounds. The range of possible differences, plus or minus 80, would double the noise.</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb24" data-excerpt="prep-worked"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb24-1"><a href="#cb24-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> prepare[Frame: (LazyFrameQuery, pl.LazyFrame)](frame: Frame) <span class="op">-&gt;</span> Frame:</span>
+<span id="cb24-2"><a href="#cb24-2" aria-hidden="true" tabindex="-1"></a>    <span class="co">"""The rows of people who work, with their usual hours known, and the hours they lost that week, clipped."""</span></span>
+<span id="cb24-3"><a href="#cb24-3" aria-hidden="true" tabindex="-1"></a>    low, high <span class="op">=</span> LOST_BOUNDS</span>
+<span id="cb24-4"><a href="#cb24-4" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> (</span>
+<span id="cb24-5"><a href="#cb24-5" aria-hidden="true" tabindex="-1"></a>        frame.<span class="bu">filter</span>(pl.col(<span class="st">"ILOSTAT"</span>) <span class="op">==</span> <span class="dv">1</span>)  <span class="co"># working for pay or profit</span></span>
+<span id="cb24-6"><a href="#cb24-6" aria-hidden="true" tabindex="-1"></a>        .with_columns(pl.col(<span class="st">"HWUSUAL"</span>).cast(<span class="bu">int</span>).fill_null(<span class="dv">0</span>), pl.col(<span class="st">"HWACTUAL"</span>).cast(<span class="bu">int</span>))</span>
+<span id="cb24-7"><a href="#cb24-7" aria-hidden="true" tabindex="-1"></a>        .<span class="bu">filter</span>((pl.col(<span class="st">"HWUSUAL"</span>) <span class="op">&gt;</span> <span class="dv">0</span>) <span class="op">&amp;</span> (pl.col(<span class="st">"HWUSUAL"</span>) <span class="op">&lt;</span> <span class="dv">99</span>))  <span class="co"># 0 is "varies", 99 "not applicable"</span></span>
+<span id="cb24-8"><a href="#cb24-8" aria-hidden="true" tabindex="-1"></a>        .with_columns(pl.col(<span class="st">"HWACTUAL"</span>).fill_null(pl.col(<span class="st">"HWUSUAL"</span>)))  <span class="co"># unknown actual hours: assume the usual</span></span>
+<span id="cb24-9"><a href="#cb24-9" aria-hidden="true" tabindex="-1"></a>        .with_columns(LOST<span class="op">=</span>(pl.col(<span class="st">"HWACTUAL"</span>) <span class="op">-</span> pl.col(<span class="st">"HWUSUAL"</span>)).clip(low, high))</span>
+<span id="cb24-10"><a href="#cb24-10" aria-hidden="true" tabindex="-1"></a>    )</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>The function takes either a query or a plain LazyFrame. So the script runs one preparation through the context for the release, and on the frame for the dev-time check. The query ends in <code>pl.col("LOST").dp.mean(LOST_BOUNDS)</code>, and <code>summarize</code> shows what the mean costs.</p>
+<pre class="text"><code>hours lost: LOST Sum, Integer Laplace, scale=11,520.00 95% accuracy=34,511.3
+hours lost: LOST Length, Integer Laplace, scale=288.00 95% accuracy=863.3
+hours lost, bounds (-80, 80): LOST Sum, Integer Laplace, scale=23,040.00 95% accuracy=69,022.2</code></pre>
+<p>A mean is released as a noisy sum over a noisy count, and the query’s share of the budget is split between the two. So the sum’s scale is the 36 rows times the bound of 40, over an eighth of the budget. The count’s scale divides the same 36 rows by the same eighth. With bounds of plus or minus 80 the sum’s scale doubles, which is the third line. The clip is the trade of this chapter, since a narrower bound means less noise and more bias. How the sensitivity of a sum follows from its bounds is derived in <a href="../../book-full/part03-dp-foundations/07-sensitivity.html">the full edition’s chapter on sensitivity</a>.</p>
+<p>Because the survey is public, the script measures the bias at development time, which on real data you can do only with a public or historical copy.</p>
+<pre class="text"><code>true prepared rows: 1,490,113  true sum of hours lost: -9,289,648  true mean: -6.2342
+rows the clip changes: 42,830 (2.874%)  mean without the clip: -6.5319
+mean error bar at 95%: 0.0268</code></pre>
+<p>The preparation keeps 1,490,113 rows and the clip changes 42,830 of them, under three percent. Those rows move the true mean from -6.53 hours to -6.23. So the clip costs a bias of about a third of an hour. The noise is far smaller. The script turns the two accuracies into an error bar for the mean, which is the sum’s bar plus the mean times the count’s bar, all over the count. It comes to 0.027 hours. On this many rows the clip, not the noise, is what limits the result, and a wider bound would trade some of that bias for noise you can read off the table.</p>
+<pre class="text"><code>released (one run):
+  bins: [-inf, 0)=-129  [0, 20)=89,491  [20, 40)=907,895  [40, 60)=406,594  [60, 80)=78,436  [80, 98)=13,452  [98, inf)=2,294,708
+  over 64: true=1,190,894  false=2,620,771
+  per month: 3=953,684  6=958,313  9=933,077  12=966,807
+  hours lost: mean -6.2147  (true -6.2342, within 0.0268 with probability 0.95)
+budget spent: 4 of 4 queries</code></pre>
+<p>Every count landed within its bar of about 432, and the empty bin came out negative, as a signed count may. The mean landed within its bar of the clipped truth. The four releases used the four shares, and a fifth query would be refused. <a href="../part02-tabular-data/07-utility-and-noise.html">Assessing utility and choosing the noise</a> takes the error bars further, and shows what they leave out.</p>
+</section>
+<section id="sec-prep-refused" class="level2" data-number="6.8">
+<h2 data-number="6.8" class="anchored" data-anchor-id="sec-prep-refused"><span class="header-section-number">6.8</span> What a refused expression looks like</h2>
+<p>An expression that OpenDP cannot parse raises an <code>OpenDPException</code> while the query is built, before any data are read. The exception carries a variant and a message. The absolute value of the difference in hours is a case in point.</p>
+<pre class="text"><code>abs: Expr is not recognized at this time: [(col("HWACTUAL")) - (col("HWUSUAL"))].abs(). If you would like to see this supported, please file an issue.</code></pre>
+<p>The messages on this page come in two kinds. “Not recognized at this time” means the expression has not been implemented, and the message asks for an issue, which is how <code>concat_str</code> and <code>abs</code> fail. The others state a rule, such as that a format must be specified or that a fill must not be nullable. Each of those names its fix, which is to prepare differently inside the query. For an unimplemented expression you have two choices. Rewrite it with supported operators where you can, as <code>is_in</code> became a disjunction above. Otherwise apply it before the context, as the documentation does with <code>concat_str</code>, but only if it is a fixed function of each row. Then state that step alongside the release, because the library did not check it.</p>
+</section>
+<section id="summary" class="level2" data-number="6.9">
+<h2 data-number="6.9" class="anchored" data-anchor-id="summary"><span class="header-section-number">6.9</span> Summary</h2>
+<div id="tbl-prep-summary" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-tbl figure">
+<figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl" id="tbl-prep-summary-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Table&nbsp;6.1: The contexts and expressions of this chapter, what each does, and the rule of thumb that goes with it.
+</figcaption>
+<div aria-describedby="tbl-prep-summary-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<table class="caption-top table">
+<colgroup>
+<col style="width: 33%">
+<col style="width: 33%">
+<col style="width: 33%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>Call or concept</th>
+<th>What it does</th>
+<th>Rule of thumb</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>Preparation inside the query</td>
+<td>OpenDP parses every step and accounts for it</td>
+<td>Prepare before the context only with fixed row-by-row steps and public facts, and say so</td>
+</tr>
+<tr class="even">
+<td><code>.with_columns</code>, <code>.filter</code>, <code>.group_by</code></td>
+<td>Row-by-row contexts: each person’s rows stay their own</td>
+<td>A new column has no margins; a filter drops key and length invariants and proves nothing about what remains</td>
+</tr>
+<tr class="odd">
+<td><code>.select</code>, <code>.agg</code></td>
+<td>May change the number and order of rows</td>
+<td>Binary operators and fills inside them still need row-by-row inputs</td>
+</tr>
+<tr class="even">
+<td><code>.cut(breaks)</code></td>
+<td>Bins a number into categories with a data-independent encoding</td>
+<td>Pass the labels as keys to avoid a threshold</td>
+</tr>
+<tr class="odd">
+<td>Domain descriptors</td>
+<td>Nullable, may be NaN, bounds</td>
+<td>Every column starts nullable; floats need <code>.fill_null</code> and <code>.fill_nan</code>; <code>.clip</code> sets bounds</td>
+</tr>
+<tr class="even">
+<td><code>.cast</code></td>
+<td>A failed cast returns null instead of raising</td>
+<td>Follow it with <code>.fill_null</code>; cast to integers for a cheaper sum</td>
+</tr>
+<tr class="odd">
+<td><code>.fill_null</code>, <code>.fill_nan</code></td>
+<td>Impute; a column fill must be row-by-row and non-nullable</td>
+<td>Fill first, then clip, because filling drops the bounds</td>
+</tr>
+<tr class="even">
+<td><code>pl.Categorical</code> vs <code>pl.Enum</code></td>
+<td>Categories from the data vs fixed in the schema</td>
+<td>Group by enums; cast categoricals to string</td>
+</tr>
+<tr class="odd">
+<td><code>.replace_strict(mapping)</code></td>
+<td>Recodes every value</td>
+<td>Pass a <code>default</code>: in 0.16.0 a missing one fails at release</td>
+</tr>
+<tr class="even">
+<td>Comparisons, <code>&amp;</code>, <code>|</code>, arithmetic</td>
+<td>Row-by-row predicates and new columns</td>
+<td><code>is_in</code> and <code>abs</code> are not supported in 0.16.0</td>
+</tr>
+<tr class="odd">
+<td><code>.str.to_date(format=...)</code></td>
+<td>Parses a string into a date</td>
+<td>The format is mandatory; nanosecond datetimes are refused</td>
+</tr>
+<tr class="even">
+<td><code>.dt.month()</code> and the other components</td>
+<td>Reads a part of a date or time</td>
+<td>Keys for a component must match its type (<code>Int8</code> for a month)</td>
+</tr>
+<tr class="odd">
+<td><code>OpenDPException</code></td>
+<td>Raised when the plan is parsed, before any data are read</td>
+<td>“Not recognized” is unimplemented; the other messages state a rule and its fix</td>
+</tr>
+</tbody>
+</table>
+</div>
+</figure>
+</div>
+</section>
+<section id="references" class="level2" data-number="6.10">
+<h2 data-number="6.10" class="anchored" data-anchor-id="references"><span class="header-section-number">6.10</span> References</h2>
+<ul>
+<li>OpenDP documentation: “Preparing Microdata” in the tabular data tutorial; “Data Types” and the “Expressions” pages “Boolean”, “Columns”, “Manipulation”, “Operators”, “String” and “Temporal” in the Polars user guide.</li>
+<li>Nissim, Raskhodnikova and Smith, “Smooth Sensitivity and Sampling in Private Data Analysis” (2007): the sample and aggregate framework behind the stable <code>group_by/agg</code>.</li>
+<li>Gaboardi, Hay and Vadhan, “A Programming Framework for OpenDP” (2020): the stable transformations that each expression is parsed into.</li>
+<li>The full edition’s chapter on <a href="../../book-full/part03-dp-foundations/07-sensitivity.html">sensitivity</a> derives how the bounds of a clipped column fix the noise of its sum and mean.</li>
+</ul>
+
+
+</section>
+
+</main> <!-- /main -->
+<script id="quarto-html-after-body" type="application/javascript">
+  window.document.addEventListener("DOMContentLoaded", function (event) {
+    const icon = "";
+    const anchorJS = new window.AnchorJS();
+    anchorJS.options = {
+      placement: 'right',
+      icon: icon
+    };
+    anchorJS.add('.anchored');
+    const isCodeAnnotation = (el) => {
+      for (const clz of el.classList) {
+        if (clz.startsWith('code-annotation-')) {                     
+          return true;
+        }
+      }
+      return false;
+    }
+    const onCopySuccess = function(e) {
+      // button target
+      const button = e.trigger;
+      // don't keep focus
+      button.blur();
+      // flash "checked"
+      button.classList.add('code-copy-button-checked');
+      var currentTitle = button.getAttribute("title");
+      button.setAttribute("title", "Copied!");
+      let tooltip;
+      if (window.bootstrap) {
+        button.setAttribute("data-bs-toggle", "tooltip");
+        button.setAttribute("data-bs-placement", "left");
+        button.setAttribute("data-bs-title", "Copied!");
+        tooltip = new bootstrap.Tooltip(button, 
+          { trigger: "manual", 
+            customClass: "code-copy-button-tooltip",
+            offset: [0, -8]});
+        tooltip.show();    
+      }
+      setTimeout(function() {
+        if (tooltip) {
+          tooltip.hide();
+          button.removeAttribute("data-bs-title");
+          button.removeAttribute("data-bs-toggle");
+          button.removeAttribute("data-bs-placement");
+        }
+        button.setAttribute("title", currentTitle);
+        button.classList.remove('code-copy-button-checked');
+      }, 1000);
+      // clear code selection
+      e.clearSelection();
+    }
+    const getTextToCopy = function(trigger) {
+      const outerScaffold = trigger.parentElement.cloneNode(true);
+      const codeEl = outerScaffold.querySelector('code');
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
+        }
+      }
+      return codeEl.innerText;
+    }
+    const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
+      text: getTextToCopy
+    });
+    clipboard.on('success', onCopySuccess);
+    if (window.document.getElementById('quarto-embedded-source-code-modal')) {
+      const clipboardModal = new window.ClipboardJS('.code-copy-button[data-in-quarto-modal]', {
+        text: getTextToCopy,
+        container: window.document.getElementById('quarto-embedded-source-code-modal')
+      });
+      clipboardModal.on('success', onCopySuccess);
+    }
+      var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+      var mailtoRegex = new RegExp(/^mailto:/);
+        var filterRegex = new RegExp('/' + window.location.host + '/');
+      var isInternal = (href) => {
+          return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+      }
+      // Inspect non-navigation links and adorn them if external
+     var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool):not(.about-link)');
+      for (var i=0; i<links.length; i++) {
+        const link = links[i];
+        if (!isInternal(link.href)) {
+          // undo the damage that might have been done by quarto-nav.js in the case of
+          // links that we want to consider external
+          if (link.dataset.originalHref !== undefined) {
+            link.href = link.dataset.originalHref;
+          }
+        }
+      }
+    function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+      const config = {
+        allowHTML: true,
+        maxWidth: 500,
+        delay: 100,
+        arrow: false,
+        appendTo: function(el) {
+            return el.parentElement;
+        },
+        interactive: true,
+        interactiveBorder: 10,
+        theme: 'quarto',
+        placement: 'bottom-start',
+      };
+      if (contentFn) {
+        config.content = contentFn;
+      }
+      if (onTriggerFn) {
+        config.onTrigger = onTriggerFn;
+      }
+      if (onUntriggerFn) {
+        config.onUntrigger = onUntriggerFn;
+      }
+      window.tippy(el, config); 
+    }
+    const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+    for (var i=0; i<noterefs.length; i++) {
+      const ref = noterefs[i];
+      tippyHover(ref, function() {
+        // use id or data attribute instead here
+        let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+        try { href = new URL(href).hash; } catch {}
+        const id = href.replace(/^#\/?/, "");
+        const note = window.document.getElementById(id);
+        if (note) {
+          return note.innerHTML;
+        } else {
+          return "";
+        }
+      });
+    }
+    const xrefs = window.document.querySelectorAll('a.quarto-xref');
+    const processXRef = (id, note) => {
+      // Strip column container classes
+      const stripColumnClz = (el) => {
+        el.classList.remove("page-full", "page-columns");
+        if (el.children) {
+          for (const child of el.children) {
+            stripColumnClz(child);
+          }
+        }
+      }
+      stripColumnClz(note)
+      if (id === null || id.startsWith('sec-')) {
+        // Special case sections, only their first couple elements
+        const container = document.createElement("div");
+        if (note.children && note.children.length > 2) {
+          container.appendChild(note.children[0].cloneNode(true));
+          for (let i = 1; i < note.children.length; i++) {
+            const child = note.children[i];
+            if (child.tagName === "P" && child.innerText === "") {
+              continue;
+            } else {
+              container.appendChild(child.cloneNode(true));
+              break;
+            }
+          }
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(container);
+          }
+          return container.innerHTML
+        } else {
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(note);
+          }
+          return note.innerHTML;
+        }
+      } else {
+        // Remove any anchor links if they are present
+        const anchorLink = note.querySelector('a.anchorjs-link');
+        if (anchorLink) {
+          anchorLink.remove();
+        }
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(note);
+        }
+        if (note.classList.contains("callout")) {
+          return note.outerHTML;
+        } else {
+          return note.innerHTML;
+        }
+      }
+    }
+    for (var i=0; i<xrefs.length; i++) {
+      const xref = xrefs[i];
+      tippyHover(xref, undefined, function(instance) {
+        instance.disable();
+        let url = xref.getAttribute('href');
+        let hash = undefined; 
+        if (url.startsWith('#')) {
+          hash = url;
+        } else {
+          try { hash = new URL(url).hash; } catch {}
+        }
+        if (hash) {
+          const id = hash.replace(/^#\/?/, "");
+          const note = window.document.getElementById(id);
+          if (note !== null) {
+            try {
+              const html = processXRef(id, note.cloneNode(true));
+              instance.setContent(html);
+            } finally {
+              instance.enable();
+              instance.show();
+            }
+          } else {
+            // See if we can fetch this
+            fetch(url.split('#')[0])
+            .then(res => res.text())
+            .then(html => {
+              const parser = new DOMParser();
+              const htmlDoc = parser.parseFromString(html, "text/html");
+              const note = htmlDoc.getElementById(id);
+              if (note !== null) {
+                const html = processXRef(id, note);
+                instance.setContent(html);
+              } 
+            }).finally(() => {
+              instance.enable();
+              instance.show();
+            });
+          }
+        } else {
+          // See if we can fetch a full url (with no hash to target)
+          // This is a special case and we should probably do some content thinning / targeting
+          fetch(url)
+          .then(res => res.text())
+          .then(html => {
+            const parser = new DOMParser();
+            const htmlDoc = parser.parseFromString(html, "text/html");
+            const note = htmlDoc.querySelector('main.content');
+            if (note !== null) {
+              // This should only happen for chapter cross references
+              // (since there is no id in the URL)
+              // remove the first header
+              if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
+                note.children[0].remove();
+              }
+              const html = processXRef(null, note);
+              instance.setContent(html);
+            } 
+          }).finally(() => {
+            instance.enable();
+            instance.show();
+          });
+        }
+      }, function(instance) {
+      });
+    }
+        let selectedAnnoteEl;
+        const selectorForAnnotation = ( cell, annotation) => {
+          let cellAttr = 'data-code-cell="' + cell + '"';
+          let lineAttr = 'data-code-annotation="' +  annotation + '"';
+          const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+          return selector;
+        }
+        const selectCodeLines = (annoteEl) => {
+          const doc = window.document;
+          const targetCell = annoteEl.getAttribute("data-target-cell");
+          const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+          const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+          const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+          const lineIds = lines.map((line) => {
+            return targetCell + "-" + line;
+          })
+          let top = null;
+          let height = null;
+          let parent = null;
+          if (lineIds.length > 0) {
+              //compute the position of the single el (top and bottom and make a div)
+              const el = window.document.getElementById(lineIds[0]);
+              top = el.offsetTop;
+              height = el.offsetHeight;
+              parent = el.parentElement.parentElement;
+            if (lineIds.length > 1) {
+              const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+              const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+              height = bottom - top;
+            }
+            if (top !== null && height !== null && parent !== null) {
+              // cook up a div (if necessary) and position it 
+              let div = window.document.getElementById("code-annotation-line-highlight");
+              if (div === null) {
+                div = window.document.createElement("div");
+                div.setAttribute("id", "code-annotation-line-highlight");
+                div.style.position = 'absolute';
+                parent.appendChild(div);
+              }
+              div.style.top = top - 2 + "px";
+              div.style.height = height + 4 + "px";
+              div.style.left = 0;
+              let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+              if (gutterDiv === null) {
+                gutterDiv = window.document.createElement("div");
+                gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+                gutterDiv.style.position = 'absolute';
+                const codeCell = window.document.getElementById(targetCell);
+                const gutter = codeCell.querySelector('.code-annotation-gutter');
+                gutter.appendChild(gutterDiv);
+              }
+              gutterDiv.style.top = top - 2 + "px";
+              gutterDiv.style.height = height + 4 + "px";
+            }
+            selectedAnnoteEl = annoteEl;
+          }
+        };
+        const unselectCodeLines = () => {
+          const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+          elementsIds.forEach((elId) => {
+            const div = window.document.getElementById(elId);
+            if (div) {
+              div.remove();
+            }
+          });
+          selectedAnnoteEl = undefined;
+        };
+          // Handle positioning of the toggle
+      window.addEventListener(
+        "resize",
+        throttle(() => {
+          elRect = undefined;
+          if (selectedAnnoteEl) {
+            selectCodeLines(selectedAnnoteEl);
+          }
+        }, 10)
+      );
+      function throttle(fn, ms) {
+      let throttle = false;
+      let timer;
+        return (...args) => {
+          if(!throttle) { // first call gets through
+              fn.apply(this, args);
+              throttle = true;
+          } else { // all the others get throttled
+              if(timer) clearTimeout(timer); // cancel #2
+              timer = setTimeout(() => {
+                fn.apply(this, args);
+                timer = throttle = false;
+              }, ms);
+          }
+        };
+      }
+        // Attach click handler to the DT
+        const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+        for (const annoteDlNode of annoteDls) {
+          annoteDlNode.addEventListener('click', (event) => {
+            const clickedEl = event.target;
+            if (clickedEl !== selectedAnnoteEl) {
+              unselectCodeLines();
+              const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+              if (activeEl) {
+                activeEl.classList.remove('code-annotation-active');
+              }
+              selectCodeLines(clickedEl);
+              clickedEl.classList.add('code-annotation-active');
+            } else {
+              // Unselect the line
+              unselectCodeLines();
+              clickedEl.classList.remove('code-annotation-active');
+            }
+          });
+        }
+    const findCites = (el) => {
+      const parentEl = el.parentElement;
+      if (parentEl) {
+        const cites = parentEl.dataset.cites;
+        if (cites) {
+          return {
+            el,
+            cites: cites.split(' ')
+          };
+        } else {
+          return findCites(el.parentElement)
+        }
+      } else {
+        return undefined;
+      }
+    };
+    var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+    for (var i=0; i<bibliorefs.length; i++) {
+      const ref = bibliorefs[i];
+      const citeInfo = findCites(ref);
+      if (citeInfo) {
+        tippyHover(citeInfo.el, function() {
+          var popup = window.document.createElement('div');
+          citeInfo.cites.forEach(function(cite) {
+            var citeDiv = window.document.createElement('div');
+            citeDiv.classList.add('hanging-indent');
+            citeDiv.classList.add('csl-entry');
+            var biblioDiv = window.document.getElementById('ref-' + cite);
+            if (biblioDiv) {
+              citeDiv.innerHTML = biblioDiv.innerHTML;
+            }
+            popup.appendChild(citeDiv);
+          });
+          return popup.innerHTML;
+        });
+      }
+    }
+  });
+  </script>
+<nav class="page-navigation">
+  <div class="nav-page nav-page-previous">
+      <a href="../part02-tabular-data/05-identifier-truncation.html" class="pagination-link" aria-label="Identifier truncation and bounds">
+        <i class="bi bi-arrow-left-short"></i> <span class="nav-page-text"><span class="chapter-number">5</span>&nbsp; <span class="chapter-title">Identifier truncation and bounds</span></span>
+      </a>          
+  </div>
+  <div class="nav-page nav-page-next">
+      <a href="../part02-tabular-data/07-utility-and-noise.html" class="pagination-link" aria-label="Assessing utility and choosing the noise">
+        <span class="nav-page-text"><span class="chapter-number">7</span>&nbsp; <span class="chapter-title">Assessing utility and choosing the noise</span></span> <i class="bi bi-arrow-right-short"></i>
+      </a>
+  </div>
+</nav>
+</div> <!-- /content -->
+
+
+
+
+</body></html>

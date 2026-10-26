@@ -349,7 +349,7 @@ window.Quarto = {
   <li><a href="#sec-viol-inference" id="toc-sec-viol-inference" class="nav-link" data-scroll-target="#sec-viol-inference"><span class="header-section-number">12.3</span> Inferences from what people reveal</a></li>
   <li><a href="#sec-viol-violations" id="toc-sec-viol-violations" class="nav-link" data-scroll-target="#sec-viol-violations"><span class="header-section-number">12.4</span> What a violation looks like</a></li>
   <li><a href="#sec-viol-summary" id="toc-sec-viol-summary" class="nav-link" data-scroll-target="#sec-viol-summary"><span class="header-section-number">12.5</span> Summary</a></li>
-  <li><a href="#sec-viol-notes" id="toc-sec-viol-notes" class="nav-link" data-scroll-target="#sec-viol-notes"><span class="header-section-number">12.6</span> Notes</a></li>
+  <li><a href="#sec-viol-notes" id="toc-sec-viol-notes" class="nav-link" data-scroll-target="#sec-viol-notes"><span class="header-section-number">12.6</span> References</a></li>
   </ul>
 </nav>
     </div>
@@ -378,27 +378,28 @@ window.Quarto = {
 <p>Machine learning on sensitive data often produces results that feel invasive, and it is tempting to call each of them a privacy violation. This chapter separates the inferences that differential privacy (DP) is meant to prevent from those it is designed to allow. It gives a test for telling them apart, and proves the two facts behind it. A private learner can still discover a rule that predicts a person’s sensitive label. A private learner cannot memorize a secret that appears only in one person’s records.</p>
 <section id="sec-viol-checklist" class="level2" data-number="12.1">
 <h2 data-number="12.1" class="anchored" data-anchor-id="sec-viol-checklist"><span class="header-section-number">12.1</span> What the definition promises</h2>
-<p>Recall the definition from <a href="../part02-dp-basics/01-randomized-response.html">the randomized response chapter</a>. A mechanism <span class="math inline">\(M\)</span> is <span class="math inline">\(\varepsilon\)</span>-DP if, for all pairs of neighbouring datasets <span class="math inline">\(X \sim X'\)</span> and all sets of outputs <span class="math inline">\(T\)</span>,</p>
+<p>Recall the definition from <a href="../part02-dp-basics/01-randomized-response.html">the randomized response chapter</a>. A mechanism <span class="math inline">\(M\)</span> is <span class="math inline">\(\varepsilon\)</span>-DP if, for all pairs of neighbouring datasets <span class="math inline">\(D \sim D'\)</span>, which differ by replacing one record, and all sets of outputs <span class="math inline">\(S\)</span>,</p>
 <p><span id="eq-auto-01privacyviolations-1"><span class="math display">\[
-\Pr[M(X)\in T] \le e^\varepsilon \Pr[M(X')\in T].
+\Pr[M(D)\in S] \le e^\varepsilon \Pr[M(D')\in S].
 \tag{12.1}\]</span></span></p>
 <p>The definition says that the output changes little when one record changes, and it says nothing else. In particular, it does not stop statistics or learning from working, nor anything that follows from their results.</p>
-<p>Two properties from <a href="../part02-dp-basics/02-laplace-mechanism.html">the Laplace mechanism chapter</a> turn the definition into a statement about attackers. <strong>Post-processing</strong> says that a function of the output of an <span class="math inline">\(\varepsilon\)</span>-DP mechanism, computed with coins independent of the data, is again <span class="math inline">\(\varepsilon\)</span>-DP. <strong>Group privacy</strong> says that if <span class="math inline">\(X\)</span> and <span class="math inline">\(X'\)</span> differ in some number <span class="math inline">\(k\)</span> of entries, then</p>
+<p>Two properties from <a href="../part02-dp-basics/02-laplace-mechanism.html">the Laplace mechanism chapter</a> turn the definition into a statement about attackers. <strong>Post-processing</strong> says that a function of the output of an <span class="math inline">\(\varepsilon\)</span>-DP mechanism, computed with coins independent of the data, is again <span class="math inline">\(\varepsilon\)</span>-DP. <strong>Group privacy</strong> says that if <span class="math inline">\(D\)</span> and <span class="math inline">\(D'\)</span> differ in some number <span class="math inline">\(k\)</span> of entries, then</p>
 <p><span id="eq-auto-01privacyviolations-2"><span class="math display">\[
-\Pr[M(X)\in T] \le e^{k\varepsilon}\Pr[M(X')\in T].
+\Pr[M(D)\in S] \le e^{k\varepsilon}\Pr[M(D')\in S].
 \tag{12.2}\]</span></span></p>
-<p>Write <span class="math inline">\(X^{(i \leftarrow z)}\)</span> for the dataset <span class="math inline">\(X\)</span> with entry <span class="math inline">\(i\)</span> replaced by a record <span class="math inline">\(z\)</span>. An attacker is any function <span class="math inline">\(A\)</span> of the output, possibly randomized, that answers <span class="math inline">\(1\)</span> when it believes it has learned something harmful. The attacker may know every other record and any side information, since all of that is fixed in <span class="math inline">\(A\)</span>.</p>
+<p>Write <span class="math inline">\(D^{(i \leftarrow z)}\)</span> for the dataset <span class="math inline">\(D\)</span> with entry <span class="math inline">\(i\)</span> replaced by a record <span class="math inline">\(z\)</span>. An attacker is any function <span class="math inline">\(\mathcal A\)</span> of the output, possibly randomized, that answers <span class="math inline">\(1\)</span> when it believes it has learned something harmful. The attacker may know every other record and any side information, since all of that is fixed in <span class="math inline">\(\mathcal A\)</span>.</p>
+<p>The first fact behind the test says how much such an attacker gains from one person’s record. It compares the attacker’s chance of answering <span class="math inline">\(1\)</span> on the real dataset with its chance when that person’s record is replaced by any other.</p>
 <div id="prp-viol-participation" class="theorem proposition">
-<p><span class="theorem-title"><strong>Proposition 12.1 (What an attacker gains from one record)</strong></span> Let <span class="math inline">\(M\)</span> be <span class="math inline">\(\varepsilon\)</span>-DP, and let <span class="math inline">\(A\)</span> be a randomized function of the output whose coins are independent of the coins of <span class="math inline">\(M\)</span>. Then for every dataset <span class="math inline">\(X\)</span>, every index <span class="math inline">\(i\)</span> and every record <span class="math inline">\(z\)</span>,</p>
+<p><span class="theorem-title"><strong>Proposition 12.1 (What an attacker gains from one record)</strong></span> Let <span class="math inline">\(M\)</span> be <span class="math inline">\(\varepsilon\)</span>-DP, and let <span class="math inline">\(\mathcal A\)</span> be a randomized function of the output whose coins are independent of the coins of <span class="math inline">\(M\)</span>. Then for every dataset <span class="math inline">\(D\)</span>, every index <span class="math inline">\(i\)</span> and every record <span class="math inline">\(z\)</span>,</p>
 <p><span id="eq-auto-01privacyviolations-3"><span class="math display">\[
-\Pr\big[A(M(X)) = 1\big] \le e^{\varepsilon}\,\Pr\big[A(M(X^{(i\leftarrow z)})) = 1\big].
+\Pr\big[\mathcal A(M(D)) = 1\big] \le e^{\varepsilon}\,\Pr\big[\mathcal A(M(D^{(i\leftarrow z)})) = 1\big].
 \tag{12.3}\]</span></span></p>
 </div>
 <div class="proof">
 <p><span class="proof-title"><em>Proof</em>. </span></p>
 <ol type="1">
-<li>The composed algorithm <span class="math inline">\(A \circ M\)</span> is <span class="math inline">\(\varepsilon\)</span>-DP by post-processing.</li>
-<li>The datasets <span class="math inline">\(X\)</span> and <span class="math inline">\(X^{(i\leftarrow z)}\)</span> differ in at most one entry, so they are neighbours or equal. Applying the definition to the event <span class="math inline">\(\{1\}\)</span> gives the inequality.</li>
+<li>The composed algorithm <span class="math inline">\(\mathcal A \circ M\)</span> is <span class="math inline">\(\varepsilon\)</span>-DP by post-processing.</li>
+<li>The datasets <span class="math inline">\(D\)</span> and <span class="math inline">\(D^{(i\leftarrow z)}\)</span> differ in at most one entry, so they are neighbours or equal. Applying the definition to the event <span class="math inline">\(\{1\}\)</span> gives the inequality.</li>
 </ol>
 </div>
 <p>So any harm the output can cause a person is about as likely when their record is swapped for an arbitrary placeholder. An inference that would succeed just as well without the record is not something the definition tries to stop. This suggests three questions to ask of an alleged violation.</p>
@@ -419,29 +420,30 @@ window.Quarto = {
 <p>in which every label is one more than its feature. Any reasonable learner finds the rule <span class="math inline">\(y = x + 1\)</span>. Asked for the label of <span class="math inline">\(x = 4\)</span>, which is not in the training set, it answers <span class="math inline">\(5\)</span>, and no one would call that a violation. Asked for the label of <span class="math inline">\(x = \pi\)</span>, it answers <span class="math inline">\(\pi + 1\)</span>, which is the true label of a training record. That is not a violation either. The learner found a fact about the population, and the answer at <span class="math inline">\(x = \pi\)</span> would be the same if the record <span class="math inline">\((\pi, \pi+1)\)</span> had never been collected.</p>
 <p>The claim can be made exact. Each record determines an offset <span class="math inline">\(y_i - x_i\)</span>, and a rule of the form <span class="math inline">\(y = x + b\)</span> is a choice of offset. The stability-based histogram of <a href="../part03-query-release/03-beyond-global-sensitivity.html">the chapter on beyond global sensitivity</a> releases the offsets that many records share, even though offsets are real numbers and there are infinitely many possible bins. Its guarantee is approximate differential privacy, <span class="math inline">\((\varepsilon,\delta)\)</span>-DP, from <a href="../part02-dp-basics/03-approximate-dp.html">the approximate DP chapter</a>, which allows the bound of the definition an additive slack <span class="math inline">\(\delta\)</span>:</p>
 <p><span id="eq-auto-01privacyviolations-5"><span class="math display">\[
-\Pr[M(X)\in T] \le e^\varepsilon\Pr[M(X')\in T] + \delta \quad\text{for all } X \sim X' \text{ and all } T.
+\Pr[M(D)\in S] \le e^\varepsilon\Pr[M(D')\in S] + \delta \quad\text{for all } D \sim D' \text{ and all } S.
 \tag{12.5}\]</span></span></p>
+<p>The algorithm counts how many records share each offset, adds Laplace noise to each count, and releases the offsets whose noisy count clears a threshold. A threshold that is high enough keeps an offset that only one record holds from being released.</p>
 <div id="def-viol-histogram" class="theorem definition">
-<p><span class="theorem-title"><strong>Definition 12.1 (Stable histogram of offsets)</strong></span> Let <span class="math inline">\(\varepsilon &gt; 0\)</span> and <span class="math inline">\(\delta \in (0,1)\)</span>, and set <span class="math inline">\(\tau = 1 + 2\ln(1/\delta)/\varepsilon\)</span>. On input <span class="math inline">\(X = ((x_1,y_1),\dots,(x_n,y_n))\)</span> with real entries, let <span class="math inline">\(c_b = |\{i : y_i - x_i = b\}|\)</span> be the count of offset <span class="math inline">\(b\)</span>. For each <span class="math inline">\(b\)</span> with <span class="math inline">\(c_b &gt; 0\)</span>, draw an independent <span class="math inline">\(Z_b \sim \mathrm{Lap}(2/\varepsilon)\)</span>, and output the set</p>
+<p><span class="theorem-title"><strong>Definition 12.1 (Stable histogram of offsets)</strong></span> Let <span class="math inline">\(\varepsilon &gt; 0\)</span> and <span class="math inline">\(\delta \in (0,1)\)</span>, and set <span class="math inline">\(\tau = 1 + 2\ln(1/\delta)/\varepsilon\)</span>. On input <span class="math inline">\(D = ((x_1,y_1),\dots,(x_n,y_n))\)</span> with real entries, let <span class="math inline">\(c_b = |\{i : y_i - x_i = b\}|\)</span> be the number of records whose offset is <span class="math inline">\(b\)</span>. For each <span class="math inline">\(b\)</span> with <span class="math inline">\(c_b &gt; 0\)</span>, draw an independent <span class="math inline">\(Z_b\)</span> from the Laplace distribution <span class="math inline">\(\mathrm{Lap}(2/\varepsilon)\)</span> with scale <span class="math inline">\(2/\varepsilon\)</span>, and output the set</p>
 <p><span id="eq-auto-01privacyviolations-6"><span class="math display">\[
-M(X) = \{\, b : c_b &gt; 0 \text{ and } c_b + Z_b &gt; \tau \,\}.
+M(D) = \{\, b : c_b &gt; 0 \text{ and } c_b + Z_b &gt; \tau \,\}.
 \tag{12.6}\]</span></span></p>
 </div>
-<p>This is the stability-based histogram run on the offsets <span class="math inline">\(y_i - x_i\)</span>, with the noisy counts dropped from its output. Bins with count zero are never released, so the output only ever names offsets that occur in the data. The threshold <span class="math inline">\(\tau\)</span> keeps a bin held by a single record from being released, except with small probability.</p>
+<p>This is the stability-based histogram run on the offsets <span class="math inline">\(y_i - x_i\)</span>, with the noisy counts dropped from its output. Bins with count zero are never released, so the output only ever names offsets that occur in the data. The threshold <span class="math inline">\(\tau\)</span> keeps a bin held by a single record from being released, except with small probability. The privacy guarantee is inherited from the histogram.</p>
 <div id="thm-viol-histogram" class="theorem">
 <p><span class="theorem-title"><strong>Theorem 12.1</strong></span> The stable histogram of offsets is <span class="math inline">\((\varepsilon,\delta)\)</span>-DP.</p>
 </div>
 <div class="proof">
 <p><span class="proof-title"><em>Proof</em>. </span></p>
 <ol type="1">
-<li>Replacing one record changes at most one offset, so when <span class="math inline">\(X \sim X'\)</span> the two lists of offsets are neighbours or equal.</li>
+<li>Replacing one record changes at most one offset, so when <span class="math inline">\(D \sim D'\)</span> the two lists of offsets are neighbours or equal.</li>
 <li>The stability-based histogram is <span class="math inline">\((\varepsilon,\delta)\)</span>-DP on datasets of offsets, by the theorem of that chapter.</li>
-<li><span class="math inline">\(M(X)\)</span> is the set of elements on its list, a function of its output alone, so it is <span class="math inline">\((\varepsilon,\delta)\)</span>-DP by post-processing, which holds for approximate DP as well.</li>
+<li><span class="math inline">\(M(D)\)</span> is the set of elements on its list, a function of its output alone, so it is <span class="math inline">\((\varepsilon,\delta)\)</span>-DP by post-processing, which holds for approximate DP as well.</li>
 </ol>
 </div>
 <p>The privacy cost does not depend on how many records follow the rule. Accuracy, on the other hand, needs only enough of them to clear the threshold.</p>
 <div id="prp-viol-rule" class="theorem proposition">
-<p><span class="theorem-title"><strong>Proposition 12.2</strong></span> Suppose every record satisfies <span class="math inline">\(y_i = x_i + 1\)</span>, and let <span class="math inline">\(\beta \in (0, 1/2)\)</span>. If</p>
+<p><span class="theorem-title"><strong>Proposition 12.2</strong></span> Suppose every record satisfies <span class="math inline">\(y_i = x_i + 1\)</span>, let <span class="math inline">\(\tau\)</span> be the threshold of <a href="#def-viol-histogram" class="quarto-xref">Definition&nbsp;<span>12.1</span></a>, and let <span class="math inline">\(\beta \in (0, 1/2)\)</span> be a failure probability. If</p>
 <p><span id="eq-auto-01privacyviolations-7"><span class="math display">\[
 n \ge \tau + \frac{2}{\varepsilon}\ln\frac{1}{2\beta},
 \tag{12.7}\]</span></span></p>
@@ -455,6 +457,7 @@ n \ge \tau + \frac{2}{\varepsilon}\ln\frac{1}{2\beta},
 <li>The assumed bound on <span class="math inline">\(n\)</span> makes this at most <span class="math inline">\(\beta\)</span>.</li>
 </ol>
 </div>
+<p>Concrete values show how few records the rule needs.</p>
 <div id="exm-viol-rule" class="theorem example">
 <p><span class="theorem-title"><strong>Example 12.1</strong></span> Take <span class="math inline">\(\varepsilon = 1\)</span>, <span class="math inline">\(\delta = 10^{-6}\)</span> and <span class="math inline">\(\beta = 0.01\)</span>. The threshold is <span class="math inline">\(\tau = 1 + 2\ln(10^{6}) = 1 + 2 \times 13.82 = 28.63\)</span>. Adding <span class="math inline">\(2\ln 50 = 7.82\)</span> gives <span class="math inline">\(36.45\)</span>, so <span class="math inline">\(37\)</span> records that follow the rule suffice for the private algorithm to output it with probability at least <span class="math inline">\(0.99\)</span>.</p>
 </div>
@@ -472,21 +475,21 @@ n \ge \tau + \frac{2}{\varepsilon}\ln\frac{1}{2\beta},
 <h2 data-number="12.4" class="anchored" data-anchor-id="sec-viol-violations"><span class="header-section-number">12.4</span> What a violation looks like</h2>
 <p>A violation is an inference that depends on the person’s own sensitive record being in the dataset.</p>
 <p><strong>The Netflix Prize.</strong> Netflix released movie ratings with dates under pseudonymous user identifiers. Narayanan and Shmatikov linked the records to public reviews on the Internet Movie Database and recovered, for the users they matched, films those users had rated but never reviewed in public. Had a user’s record been withheld, that reidentification would have been impossible, so it fails the first question. Compare an analyst who sees only public reviews. If a user reviewed the first and third films of a trilogy, the analyst may guess that they watched the second. The guess may be right, but it uses only what the user chose to publish, so it is not a violation.</p>
-<p><strong>Memorized secrets.</strong> Carlini and coauthors trained language models on text that contained a secret, such as a nine-digit identification number, that one person had typed several times. The trained model assigned the secret an unusually high likelihood, and a search guided by those scores could extract it. This is a violation. A model that had learned only the language would have no reason to prefer one nine-digit number over another, so the preference comes from that person’s records. Differential privacy rules it out, with group privacy accounting for the repetitions.</p>
+<p><strong>Memorized secrets.</strong> Carlini and coauthors trained language models on text that contained a secret, such as a nine-digit identification number, that one person had typed several times. The trained model assigned the secret an unusually high likelihood, and a search guided by those scores could extract it. This is a violation. A model that had learned only the language would have no reason to prefer one nine-digit number over another, so the preference comes from that person’s records. Differential privacy rules it out, with group privacy accounting for the repetitions. The next proposition makes this exact. It bounds the chance that an attacker who sees the trained model guesses the secret, and compares it with blind guessing.</p>
 <div id="prp-viol-secret" class="theorem proposition">
-<p><span class="theorem-title"><strong>Proposition 12.3 (Secrets are not memorized)</strong></span> Let <span class="math inline">\(\mathcal S\)</span> be a finite set of <span class="math inline">\(N\)</span> possible secrets. For each <span class="math inline">\(s \in \mathcal S\)</span>, let <span class="math inline">\(X(s)\)</span> be a training set in which <span class="math inline">\(k\)</span> entries depend on <span class="math inline">\(s\)</span> and the other entries do not. Let <span class="math inline">\(M\)</span> be <span class="math inline">\(\varepsilon\)</span>-DP, and let <span class="math inline">\(G\)</span> be any guessing rule, with coins independent of <span class="math inline">\(M\)</span>, that maps the trained model to an element of <span class="math inline">\(\mathcal S\)</span>. If the secret <span class="math inline">\(s\)</span> is drawn uniformly from <span class="math inline">\(\mathcal S\)</span>, then</p>
+<p><span class="theorem-title"><strong>Proposition 12.3 (Secrets are not memorized)</strong></span> Let <span class="math inline">\(\mathcal S\)</span> be a finite set of <span class="math inline">\(N\)</span> possible secrets. For each <span class="math inline">\(s \in \mathcal S\)</span>, let <span class="math inline">\(D(s)\)</span> be a training set in which <span class="math inline">\(k\)</span> entries depend on <span class="math inline">\(s\)</span> and the other entries do not. Let <span class="math inline">\(M\)</span> be <span class="math inline">\(\varepsilon\)</span>-DP, and let <span class="math inline">\(G\)</span> be any guessing rule, with coins independent of <span class="math inline">\(M\)</span>, that maps the trained model to an element of <span class="math inline">\(\mathcal S\)</span>. If the secret <span class="math inline">\(s\)</span> is drawn uniformly from <span class="math inline">\(\mathcal S\)</span>, then</p>
 <p><span id="eq-auto-01privacyviolations-8"><span class="math display">\[
-\Pr\big[G(M(X(s))) = s\big] \le \frac{e^{k\varepsilon}}{N}.
+\Pr\big[G(M(D(s))) = s\big] \le \frac{e^{k\varepsilon}}{N}.
 \tag{12.8}\]</span></span></p>
 </div>
 <div class="proof">
 <p><span class="proof-title"><em>Proof</em>. </span></p>
 <ol type="1">
-<li>Let <span class="math inline">\(X_0\)</span> be the training set with the <span class="math inline">\(k\)</span> entries that depend on the secret replaced by fixed placeholder records. For every <span class="math inline">\(s\)</span>, the datasets <span class="math inline">\(X(s)\)</span> and <span class="math inline">\(X_0\)</span> differ in at most <span class="math inline">\(k\)</span> entries.</li>
-<li>By post-processing and group privacy, <span class="math inline">\(\Pr[G(M(X(s))) = s] \le e^{k\varepsilon}\Pr[G(M(X_0)) = s]\)</span> for every <span class="math inline">\(s\)</span>.</li>
-<li>The guess on <span class="math inline">\(X_0\)</span> does not depend on <span class="math inline">\(s\)</span>, and it equals at most one secret, so <span class="math inline">\(\sum_{s\in\mathcal S}\Pr[G(M(X_0)) = s] \le 1\)</span>.</li>
+<li>Let <span class="math inline">\(D_0\)</span> be the training set with the <span class="math inline">\(k\)</span> entries that depend on the secret replaced by fixed placeholder records. For every <span class="math inline">\(s\)</span>, the datasets <span class="math inline">\(D(s)\)</span> and <span class="math inline">\(D_0\)</span> differ in at most <span class="math inline">\(k\)</span> entries.</li>
+<li>By post-processing and group privacy, <span class="math inline">\(\Pr[G(M(D(s))) = s] \le e^{k\varepsilon}\Pr[G(M(D_0)) = s]\)</span> for every <span class="math inline">\(s\)</span>.</li>
+<li>The guess on <span class="math inline">\(D_0\)</span> does not depend on <span class="math inline">\(s\)</span>, and it equals at most one secret, so <span class="math inline">\(\sum_{s\in\mathcal S}\Pr[G(M(D_0)) = s] \le 1\)</span>.</li>
 <li>Averaging step 2 over the uniform secret and using step 3 gives <span id="eq-auto-01privacyviolations-9"><span class="math display">\[
-\Pr\big[G(M(X(s))) = s\big] = \frac1N\sum_{s\in\mathcal S}\Pr\big[G(M(X(s))) = s\big] \le \frac{e^{k\varepsilon}}{N}.
+\Pr\big[G(M(D(s))) = s\big] = \frac1N\sum_{s\in\mathcal S}\Pr\big[G(M(D(s))) = s\big] \le \frac{e^{k\varepsilon}}{N}.
 \tag{12.9}\]</span></span></li>
 </ol>
 </div>
@@ -536,7 +539,7 @@ Table&nbsp;12.1: The chapter’s results.
 </div>
 </section>
 <section id="sec-viol-notes" class="level2" data-number="12.6">
-<h2 data-number="12.6" class="anchored" data-anchor-id="sec-viol-notes"><span class="header-section-number">12.6</span> Notes</h2>
+<h2 data-number="12.6" class="anchored" data-anchor-id="sec-viol-notes"><span class="header-section-number">12.6</span> References</h2>
 <ul>
 <li>Frank McSherry, “Statistical Inference Considered Harmful”, 2016. A blog post arguing that inference from public facts, such as the cast, is not a privacy violation.</li>
 <li>Cynthia Dwork and Aaron Roth, <em>The Algorithmic Foundations of Differential Privacy</em>, 2014. Section 2.3 discusses what the definition promises and the smoking example.</li>

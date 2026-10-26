@@ -408,7 +408,7 @@ window.Quarto = {
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../part04-privacy-accounting/09-choosing-an-accountant.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">31</span>&nbsp; <span class="chapter-title">Report and review an ε claim</span></span></a>
+ <span class="menu-text"><span class="chapter-number">31</span>&nbsp; <span class="chapter-title">Choosing an accountant</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
@@ -603,7 +603,7 @@ window.Quarto = {
   <li><a href="#sec-link-sampling" id="toc-sec-link-sampling" class="nav-link" data-scroll-target="#sec-link-sampling"><span class="header-section-number">15.6</span> Does releasing a sample protect?</a></li>
   <li><a href="#sec-link-check" id="toc-sec-link-check" class="nav-link" data-scroll-target="#sec-link-check"><span class="header-section-number">15.7</span> A pre-release risk check</a></li>
   <li><a href="#cheat-sheet" id="toc-cheat-sheet" class="nav-link" data-scroll-target="#cheat-sheet"><span class="header-section-number">15.8</span> Cheat sheet</a></li>
-  <li><a href="#further-reading" id="toc-further-reading" class="nav-link" data-scroll-target="#further-reading"><span class="header-section-number">15.9</span> Further reading</a></li>
+  <li><a href="#references" id="toc-references" class="nav-link" data-scroll-target="#references"><span class="header-section-number">15.9</span> References</a></li>
   </ul>
 </nav>
     </div>
@@ -639,7 +639,7 @@ window.Quarto = {
 <p><strong>Direct identifiers</strong>, like a name or an email address, name a person on their own, while <strong>sensitive attributes</strong> such as a diagnosis are what the release is about. <strong>Quasi-identifiers</strong> sit in between. None of them names anyone alone, but together they often single out one person, and they appear in other datasets next to names.</p>
 <p>To score a release you hold, group its <span class="math inline">\(n\)</span> records into <strong>equivalence classes</strong>, the sets of records with identical quasi-identifiers, and write <span class="math inline">\(J\)</span> for the number of classes. Suppose an adversary knows the target’s quasi-identifiers and knows that the target is in the release. If the target is alone in its class, the adversary names its record for sure, and if the class holds <span class="math inline">\(k\)</span> look-alikes, a guess is right one time in <span class="math inline">\(k\)</span>. A class of <span class="math inline">\(k\)</span> records is drawn <span class="math inline">\(k\)</span> times as often as a single record, so every class adds one record’s worth of wins whatever its size. Averaged over all targets, the chance of naming the right record is therefore <span id="eq-link-success"><span class="math display">\[\Pr[\text{win}] = \frac{J}{n}, \tag{15.1}\]</span></span> and no adversary that sees only the quasi-identifiers can do better. This is the <strong>prosecutor model</strong>, the worst case, because it assumes the adversary knows the target is in the data.</p>
 <p>On real populations, most people are unique. From the 1990 census, Latanya Sweeney estimated that 87% of Americans were unique on ZIP code, birth date and sex.</p>
-<p>To see how fast uniqueness grows on a real table, the script <a href="https://github.com/manuelvloureiro/privacy-preserving-machine-learning-book/blob/main/code/part02-attacks/practitioner_table_risk.py">practitioner_table_risk.py</a> takes Adult, the 48,842 people of the 1994 US Current Population Survey in the UCI repository. Adult has no ZIP code or birth date, so the script starts from age, sex and race. It then adds one quasi-identifier at a time, with native country as the only geography. For each set it prints the share of unique records, the share in classes smaller than 5, the smallest class size and <span class="math inline">\(J/n\)</span>.</p>
+<p>To see how fast uniqueness grows on a real table, the script <a href="https://github.com/manuelvloureiro/privacy-preserving-machine-learning-book/blob/main/code/part02-attacks/practitioner_table_risk.py">practitioner_table_risk.py</a> takes Adult, the 48,842 people of the 1994 US Current Population Survey in the UCI repository. Adult has no ZIP code or birth date, so the script starts from age, sex and race. It then adds one quasi-identifier at a time, with native country as the only geography. For each set it prints the share of unique records, the share in classes smaller than 5, the smallest class size and <span class="math inline">\(J/n\)</span>. The counts are plain Polars group-bys, because no maintained Python package computes them, while ARX in Java and sdcMicro in R do.</p>
 <div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb1" data-excerpt="qi-uniqueness"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a>n <span class="op">=</span> df.height</span>
 <span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> qis <span class="kw">in</span> QI_SETS:</span>
 <span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a>    <span class="co"># One row per equivalence class (records that agree on every quasi-identifier), with its size.</span></span>
@@ -693,8 +693,8 @@ age + sex + race + native-country + marital-status + education + hours-per-week:
 </section>
 <section id="sec-link-sampling" class="level2" data-number="15.6">
 <h2 data-number="15.6" class="anchored" data-anchor-id="sec-link-sampling"><span class="header-section-number">15.6</span> Does releasing a sample protect?</h2>
-<p>Adult is itself a sample. Agencies release samples arguing that a sample-unique record may share its attributes with someone left out, but the argument is weaker than it sounds. Suppose the adversary knows a person and finds exactly one matching record in a release that holds a share <span class="math inline">\(\pi\)</span> of the population, the <strong>sampling fraction</strong>. Write <span class="math inline">\(\lambda\)</span> for the expected number of other people in the population who share the target’s cell. The record found can be a look-alike’s only if the target was left out, which happens with probability <span class="math inline">\(1 - \pi\)</span>. So for a rare cell, the probability <span class="math inline">\(\kappa\)</span> that the match is right is about <span id="eq-link-kappa"><span class="math display">\[\kappa \approx \frac{1}{1 + \lambda(1 - \pi)}. \tag{15.3}\]</span></span></p>
-<p>For example, take a rare cell, one expected to hold <span class="math inline">\(\lambda = 0.1\)</span> other people. Even a 1% sample leaves a match right with probability 0.910, and shrinking the sample further barely helps. Sampling enters only through <span class="math inline">\(1 - \pi\)</span>, which can never exceed 1, so the chance of a right match never falls below <span class="math inline">\(1/(1 + \lambda)\)</span>. Sampling therefore protects only people whose cells are crowded anyway.</p>
+<p>Adult is itself a sample. Agencies release samples arguing that a sample-unique record may share its attributes with someone left out, but the argument is weaker than it sounds. Suppose the adversary knows a person and finds exactly one matching record in a release that holds a share <span class="math inline">\(q\)</span> of the population, the <strong>sampling rate</strong>. Write <span class="math inline">\(\lambda\)</span> for the expected number of other people in the population who share the target’s cell. The record found can be a look-alike’s only if the target was left out, which happens with probability <span class="math inline">\(1 - q\)</span>. So for a rare cell, the probability <span class="math inline">\(\kappa\)</span> that the match is right is about <span id="eq-link-kappa"><span class="math display">\[\kappa \approx \frac{1}{1 + \lambda(1 - q)}. \tag{15.3}\]</span></span></p>
+<p>For example, take a rare cell, one expected to hold <span class="math inline">\(\lambda = 0.1\)</span> other people. Even a 1% sample leaves a match right with probability 0.910, and shrinking the sample further barely helps. Sampling enters only through <span class="math inline">\(1 - q\)</span>, which can never exceed 1, so the chance of a right match never falls below <span class="math inline">\(1/(1 + \lambda)\)</span>. Sampling therefore protects only people whose cells are crowded anyway.</p>
 <p>So the Adult figures above are <strong>sample uniqueness</strong>, exact when the target is known to be in the release. The <strong>population uniqueness</strong> behind them is lower, but not by much for rare cells, so estimate it with a model rather than assume the risk away. The open-source tool ARX offers the Pitman and Zayatz estimators for this. The R package sdcMicro estimates each record’s risk from its sampling weight, the number of people the record stands for.</p>
 </section>
 <section id="sec-link-check" class="level2" data-number="15.7">
@@ -741,7 +741,7 @@ Table&nbsp;15.1: The results of this chapter.
 </tr>
 <tr class="even">
 <td>Releasing a sample</td>
-<td><span class="math inline">\(\kappa \approx 1/(1 + \lambda(1 - \pi))\)</span></td>
+<td><span class="math inline">\(\kappa \approx 1/(1 + \lambda(1 - q))\)</span></td>
 <td>0.910 at <span class="math inline">\(\lambda = 0.1\)</span> in a 1% sample</td>
 </tr>
 </tbody>
@@ -756,8 +756,8 @@ Table&nbsp;15.1: The results of this chapter.
 <li>Hashing an identifier is not anonymization. Key the hash, and use a new key for each release.</li>
 </ul>
 </section>
-<section id="further-reading" class="level2" data-number="15.9">
-<h2 data-number="15.9" class="anchored" data-anchor-id="further-reading"><span class="header-section-number">15.9</span> Further reading</h2>
+<section id="references" class="level2" data-number="15.9">
+<h2 data-number="15.9" class="anchored" data-anchor-id="references"><span class="header-section-number">15.9</span> References</h2>
 <ul>
 <li>Sweeney, “Simple Demographics Often Identify People Uniquely” (2000): the 87% estimate and its variants with coarser geography.</li>
 <li>Narayanan &amp; Shmatikov, “Robust De-anonymization of Large Sparse Datasets” (2008): the Netflix attack.</li>

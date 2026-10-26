@@ -408,7 +408,7 @@ window.Quarto = {
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../part04-privacy-accounting/09-choosing-an-accountant.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">31</span>&nbsp; <span class="chapter-title">Report and review an ε claim</span></span></a>
+ <span class="menu-text"><span class="chapter-number">31</span>&nbsp; <span class="chapter-title">Choosing an accountant</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
@@ -607,7 +607,7 @@ window.Quarto = {
   <li><a href="#sec-llmwf-variants" id="toc-sec-llmwf-variants" class="nav-link" data-scroll-target="#sec-llmwf-variants"><span class="header-section-number">48.10</span> Variants</a></li>
   <li><a href="#sec-llmwf-report" id="toc-sec-llmwf-report" class="nav-link" data-scroll-target="#sec-llmwf-report"><span class="header-section-number">48.11</span> Report</a></li>
   <li><a href="#checklist" id="toc-checklist" class="nav-link" data-scroll-target="#checklist"><span class="header-section-number">48.12</span> Checklist</a></li>
-  <li><a href="#further-reading" id="toc-further-reading" class="nav-link" data-scroll-target="#further-reading"><span class="header-section-number">48.13</span> Further reading</a></li>
+  <li><a href="#references" id="toc-references" class="nav-link" data-scroll-target="#references"><span class="header-section-number">48.13</span> References</a></li>
   </ul>
 </nav>
     </div>
@@ -676,7 +676,7 @@ candidates: 2,000  exposure cap 10.97 bits  (full space 16.61)</code></pre>
 </section>
 <section id="sec-llmwf-lora" class="level2" data-number="48.5">
 <h2 data-number="48.5" class="anchored" data-anchor-id="sec-llmwf-lora"><span class="header-section-number">48.5</span> Choose what to train</h2>
-<p>DP-SGD adds noise to every weight it trains. So the noise on the averaged gradient grows with the square root of the number of trainable weights, while the clipped signal does not (<a href="../part05-dp-ml/06-public-data.html#sec-pub-dimension">Public data and private fine-tuning</a>). That makes the choice of trainable weights one of the two main levers on accuracy, with the step size. LoRA freezes each pretrained matrix and learns a correction to it, the product of two thin factors whose width is the rank.</p>
+<p>DP-SGD adds noise to every weight it trains. So the noise on the averaged gradient grows with the square root of the number of trainable weights, while the clipped signal does not (<a href="../part05-dp-ml/06-public-data.html#sec-pub-dimension">Public data and private fine-tuning</a>). That makes the choice of trainable weights one of the two main levers on accuracy, with the learning rate. LoRA freezes each pretrained matrix and learns a correction to it, the product of two thin factors whose width is the rank.</p>
 <div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb5" data-excerpt="lora-config"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a>attention_and_mlp <span class="op">=</span> [<span class="st">"query_key_value"</span>, <span class="st">"dense"</span>, <span class="st">"dense_h_to_4h"</span>, <span class="st">"dense_4h_to_h"</span>]  <span class="co"># every linear layer</span></span>
 <span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a>config <span class="op">=</span> LoraConfig(r<span class="op">=</span>rank, lora_alpha<span class="op">=</span><span class="dv">2</span> <span class="op">*</span> rank, target_modules<span class="op">=</span>attention_and_mlp, lora_dropout<span class="op">=</span><span class="fl">0.0</span>)</span>
 <span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a>lora_model <span class="op">=</span> get_peft_model(model, config)  <span class="co"># freezes the pretrained weights</span></span>
@@ -690,7 +690,7 @@ trainable parameters: LoRA 98,304  full fine-tuning 14,067,712</code></pre>
 </section>
 <section id="sec-llmwf-opacus" class="level2" data-number="48.6">
 <h2 data-number="48.6" class="anchored" data-anchor-id="sec-llmwf-opacus"><span class="header-section-number">48.6</span> Make the model Opacus-compatible</h2>
-<p>Opacus needs one gradient per sequence, and some layers make that impossible. Batch normalization is the usual culprit, because it mixes the examples of a batch. Opacus’s <code>ModuleValidator.validate</code> lists such layers before you train, and the script prints how many it found.</p>
+<p>Opacus needs one gradient per sequence, and some layers make that impossible. Batch normalization is the usual culprit, because it mixes the records of a batch. Opacus’s <code>ModuleValidator.validate</code> lists such layers before you train, and the script prints how many it found.</p>
 <pre class="text"><code>validator errors: 0</code></pre>
 <p>Pythia has none, and only the adapters train in any case. They are ordinary linear layers, which Opacus’s default hooks handle, so the script passes <code>grad_sample_mode="hooks"</code>. Opacus computes per-sequence gradients only for the weights that require gradients, so the 14 million frozen weights add no cost. For a trainable layer with no hook, Opacus falls back by itself to PyTorch’s slower functorch. Call <code>model.train()</code> before wrapping a model you have just evaluated, since Opacus rejects one in evaluation mode.</p>
 <p>One step comes after training. The hooks stay attached to the model when the training loop ends, and they slow down everything the model does next. So the script calls <code>remove_hooks()</code> on the private model before it evaluates it.</p>
@@ -756,11 +756,14 @@ held-out loss LoRA DP eps=8: 5.044 nats/token  perplexity 155.1</code></pre>
 <span id="cb13-9"><a href="#cb13-9" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> logprobs.<span class="bu">sum</span>(dim<span class="op">=</span>(<span class="dv">1</span>, <span class="dv">2</span>)).double().numpy()</span>
 <span id="cb13-10"><a href="#cb13-10" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb13-11"><a href="#cb13-11" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb13-12"><a href="#cb13-12" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> exposure(canary_score: <span class="bu">float</span>, candidate_scores: Scores) <span class="op">-&gt;</span> <span class="bu">float</span>:</span>
-<span id="cb13-13"><a href="#cb13-13" aria-hidden="true" tabindex="-1"></a>    <span class="co">"""log2 of 1 / (the share of candidates the model finds at least as likely), canary included."""</span></span>
-<span id="cb13-14"><a href="#cb13-14" aria-hidden="true" tabindex="-1"></a>    at_least <span class="op">=</span> <span class="dv">1</span> <span class="op">+</span> np.<span class="bu">sum</span>(candidate_scores <span class="op">&gt;=</span> canary_score)</span>
-<span id="cb13-15"><a href="#cb13-15" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> math.log2((<span class="bu">len</span>(candidate_scores) <span class="op">+</span> <span class="dv">1</span>) <span class="op">/</span> at_least)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-<p>The script ranks each secret among 2,000 random candidates, so a canary that beats them all reaches a cap of 10.97 bits. A secret the model has never seen averages about 1.44 bits (<span class="math inline">\(\log_2 e\)</span>), because its rank among the candidates is then random. Each line below gives a group’s mean exposure, the same past the cap (explained below), and how many of its three secrets greedy decoding wrote out.</p>
+<span id="cb13-12"><a href="#cb13-12" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> canary_exposure(</span>
+<span id="cb13-13"><a href="#cb13-13" aria-hidden="true" tabindex="-1"></a>    model: PeftModel, tokenizer: PreTrainedTokenizerBase, canary: Canary, candidates: <span class="bu">list</span>[<span class="bu">str</span>]</span>
+<span id="cb13-14"><a href="#cb13-14" aria-hidden="true" tabindex="-1"></a>) <span class="op">-&gt;</span> <span class="bu">tuple</span>[<span class="bu">float</span>, <span class="bu">float</span>]:</span>
+<span id="cb13-15"><a href="#cb13-15" aria-hidden="true" tabindex="-1"></a>    <span class="co">"""The exposure of the canary's secret among the candidates, measured and extrapolated past the cap."""</span></span>
+<span id="cb13-16"><a href="#cb13-16" aria-hidden="true" tabindex="-1"></a>    candidate_scores <span class="op">=</span> scores_batched(model, tokenizer, canary.prefix, candidates)</span>
+<span id="cb13-17"><a href="#cb13-17" aria-hidden="true" tabindex="-1"></a>    score <span class="op">=</span> <span class="bu">float</span>(scores_batched(model, tokenizer, canary.prefix, [canary.secret])[<span class="dv">0</span>])</span>
+<span id="cb13-18"><a href="#cb13-18" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> exposure(score, candidate_scores), extrapolated_exposure(score, candidate_scores, SECRET_SPACE)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>No maintained library computes exposure, so <code>exposure</code> and <code>extrapolated_exposure</code> come from the book’s helper module <a href="https://github.com/manuelvloureiro/privacy-preserving-machine-learning-book/blob/main/code/practitioner_privacy_tests.py">practitioner_privacy_tests.py</a>, after TensorFlow Privacy’s reference code. The script ranks each secret among 2,000 random candidates, so a canary that beats them all reaches a cap of 10.97 bits. A secret the model has never seen averages about 1.44 bits (<span class="math inline">\(\log_2 e\)</span>), because its rank among the candidates is then random. Each line below gives a group’s mean exposure, the same past the cap (explained below), and how many of its three secrets greedy decoding wrote out.</p>
 <pre class="text"><code>non-private 1 copies: mean exposure 2.0 bits  extrapolated 2.0  extracted 0/3
 non-private 4 copies: mean exposure 5.9 bits  extrapolated 5.7  extracted 0/3
 non-private 16 copies: mean exposure 10.0 bits  extrapolated 13.0  extracted 0/3
@@ -876,8 +879,8 @@ Table&nbsp;48.1: The steps of fine-tuning a language model privately, their defa
 </figure>
 </div>
 </section>
-<section id="further-reading" class="level2" data-number="48.13">
-<h2 data-number="48.13" class="anchored" data-anchor-id="further-reading"><span class="header-section-number">48.13</span> Further reading</h2>
+<section id="references" class="level2" data-number="48.13">
+<h2 data-number="48.13" class="anchored" data-anchor-id="references"><span class="header-section-number">48.13</span> References</h2>
 <ul>
 <li>Yu et al., “Differentially Private Fine-tuning of Language Models” (ICLR 2022): LoRA and other adapters with DP-SGD, and their accuracy.</li>
 <li>Li, Tramèr, Liang &amp; Hashimoto, “Large Language Models Can Be Strong Differentially Private Learners” (ICLR 2022): full fine-tuning with ghost clipping, and the hyperparameters that make it work.</li>

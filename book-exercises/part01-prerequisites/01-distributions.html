@@ -450,7 +450,7 @@ window.Quarto = {
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../part05-dp-ml/05-private-prediction.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">42</span>&nbsp; <span class="chapter-title">Exercises: Private prediction</span></span></a>
+ <span class="menu-text"><span class="chapter-number">42</span>&nbsp; <span class="chapter-title">Exercises: Private prediction: PATE and in-context learning</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
@@ -501,13 +501,13 @@ window.Quarto = {
     <h2 id="toc-title">Table of contents</h2>
    
   <ul>
-  <li><a href="#sec-sol-distributions-1" id="toc-sec-sol-distributions-1" class="nav-link active" data-scroll-target="#sec-sol-distributions-1"><span class="header-section-number">1.1</span> Binomial variance from the PMF</a></li>
-  <li><a href="#sec-sol-distributions-2" id="toc-sec-sol-distributions-2" class="nav-link" data-scroll-target="#sec-sol-distributions-2"><span class="header-section-number">1.2</span> Poisson thinning</a></li>
-  <li><a href="#sec-sol-distributions-3" id="toc-sec-sol-distributions-3" class="nav-link" data-scroll-target="#sec-sol-distributions-3"><span class="header-section-number">1.3</span> Quality of the Poisson approximation</a></li>
-  <li><a href="#sec-sol-distributions-4" id="toc-sec-sol-distributions-4" class="nav-link" data-scroll-target="#sec-sol-distributions-4"><span class="header-section-number">1.4</span> Median from absolute loss</a></li>
-  <li><a href="#sec-sol-distributions-5" id="toc-sec-sol-distributions-5" class="nav-link" data-scroll-target="#sec-sol-distributions-5"><span class="header-section-number">1.5</span> Laplace kurtosis</a></li>
-  <li><a href="#sec-sol-distributions-6" id="toc-sec-sol-distributions-6" class="nav-link" data-scroll-target="#sec-sol-distributions-6"><span class="header-section-number">1.6</span> Maximum of normals</a></li>
-  <li><a href="#sec-sol-distributions-7" id="toc-sec-sol-distributions-7" class="nav-link" data-scroll-target="#sec-sol-distributions-7"><span class="header-section-number">1.7</span> Random vectors are nearly orthogonal</a></li>
+  <li><a href="#sec-sol-dist-1" id="toc-sec-sol-dist-1" class="nav-link active" data-scroll-target="#sec-sol-dist-1"><span class="header-section-number">1.1</span> Binomial variance from the PMF</a></li>
+  <li><a href="#sec-sol-dist-2" id="toc-sec-sol-dist-2" class="nav-link" data-scroll-target="#sec-sol-dist-2"><span class="header-section-number">1.2</span> Poisson thinning</a></li>
+  <li><a href="#sec-sol-dist-3" id="toc-sec-sol-dist-3" class="nav-link" data-scroll-target="#sec-sol-dist-3"><span class="header-section-number">1.3</span> Quality of the Poisson approximation</a></li>
+  <li><a href="#sec-sol-dist-4" id="toc-sec-sol-dist-4" class="nav-link" data-scroll-target="#sec-sol-dist-4"><span class="header-section-number">1.4</span> Median from absolute loss</a></li>
+  <li><a href="#sec-sol-dist-5" id="toc-sec-sol-dist-5" class="nav-link" data-scroll-target="#sec-sol-dist-5"><span class="header-section-number">1.5</span> Laplace kurtosis</a></li>
+  <li><a href="#sec-sol-dist-6" id="toc-sec-sol-dist-6" class="nav-link" data-scroll-target="#sec-sol-dist-6"><span class="header-section-number">1.6</span> Maximum of normals</a></li>
+  <li><a href="#sec-sol-dist-7" id="toc-sec-sol-dist-7" class="nav-link" data-scroll-target="#sec-sol-dist-7"><span class="header-section-number">1.7</span> Random vectors are nearly orthogonal</a></li>
   </ul>
 </nav>
     </div>
@@ -535,10 +535,10 @@ window.Quarto = {
 
 <p>Exercises for <a href="../../book-full/part01-prerequisites/01-distributions.html">Probability distributions</a>, each with a worked solution. Try each exercise before opening its solution. The numbers come from <a href="https://github.com/manuelvloureiro/privacy-preserving-machine-learning-book/blob/main/code/part01-prerequisites/solutions_distributions.py">code/solutions_distributions.py</a>; run it from the repository root with <code>uv run python code/part01-prerequisites/solutions_distributions.py</code>.</p>
 <p>The solutions work with the probability mass function (PMF) and the moment generating function (MGF) of each family, exactly as the chapter defines them.</p>
-<section id="sec-sol-distributions-1" class="level2" data-number="1.1">
-<h2 data-number="1.1" class="anchored" data-anchor-id="sec-sol-distributions-1"><span class="header-section-number">1.1</span> Binomial variance from the PMF</h2>
+<section id="sec-sol-dist-1" class="level2" data-number="1.1">
+<h2 data-number="1.1" class="anchored" data-anchor-id="sec-sol-dist-1"><span class="header-section-number">1.1</span> Binomial variance from the PMF</h2>
 <blockquote class="blockquote">
-<p><strong>Exercise 1.</strong> <strong>Binomial variance from the PMF.</strong> Compute <span class="math inline">\(\mathbb E[S(S-1)]\)</span> for <span class="math inline">\(S \sim \mathrm{Binomial}(n, p)\)</span> directly from the PMF, and recover <span class="math inline">\(\operatorname{Var}S = np(1-p)\)</span>. Compare the effort with the decomposition argument. <em>(Binomial)</em></p>
+<p><strong>Exercise 1.</strong> <strong>Binomial variance from the PMF.</strong> Compute <span class="math inline">\(\mathbb E[S(S-1)]\)</span> for <span class="math inline">\(S \sim \mathrm{Bin}(n, p)\)</span> directly from the PMF, and recover <span class="math inline">\(\operatorname{Var}S = np(1-p)\)</span>. Compare the effort with the decomposition argument. <em>(Binomial)</em></p>
 </blockquote>
 <div class="callout callout-style-default callout-tip callout-titled" title="Solution">
 <div class="callout-header d-flex align-content-center collapsed" data-bs-toggle="collapse" data-bs-target=".callout-1-contents" aria-controls="callout-1" aria-expanded="false" aria-label="Toggle callout">
@@ -557,14 +557,14 @@ window.Quarto = {
 <li><p><strong>Write the expectation as a sum over the PMF.</strong> The terms <span class="math inline">\(k = 0\)</span> and <span class="math inline">\(k = 1\)</span> vanish because <span class="math inline">\(k(k-1) = 0\)</span>: <span id="eq-auto-01distributions-1"><span class="math display">\[\mathbb E[S(S-1)] = \sum_{k=2}^n k(k-1)\binom nk p^kq^{n-k}. \tag{1.1}\]</span></span></p></li>
 <li><p><strong>Absorb <span class="math inline">\(k(k-1)\)</span> into the binomial coefficient.</strong> For <span class="math inline">\(k \ge 2\)</span>, <span id="eq-auto-01distributions-2"><span class="math display">\[k(k-1)\binom nk = \frac{n!}{(k-2)!\,(n-k)!} = n(n-1)\binom{n-2}{k-2}. \tag{1.2}\]</span></span></p></li>
 <li><p><strong>Pull out <span class="math inline">\(n(n-1)p^2\)</span> and re-index with <span class="math inline">\(j = k - 2\)</span>:</strong> <span id="eq-auto-01distributions-3"><span class="math display">\[\mathbb E[S(S-1)] = n(n-1)p^2\sum_{j=0}^{n-2}\binom{n-2}{j}p^jq^{(n-2)-j}. \tag{1.3}\]</span></span></p></li>
-<li><p><strong>The remaining sum is a whole PMF.</strong> It is the sum of the <span class="math inline">\(\mathrm{Binomial}(n-2, p)\)</span> PMF over all its values, which is 1 (equivalently, <span class="math inline">\((p + q)^{n-2} = 1\)</span> by the binomial theorem). So <span id="eq-auto-01distributions-4"><span class="math display">\[\mathbb E[S(S-1)] = n(n-1)p^2. \tag{1.4}\]</span></span></p></li>
+<li><p><strong>The remaining sum is a whole PMF.</strong> It is the sum of the <span class="math inline">\(\mathrm{Bin}(n-2, p)\)</span> PMF over all its values, which is 1 (equivalently, <span class="math inline">\((p + q)^{n-2} = 1\)</span> by the binomial theorem). So <span id="eq-auto-01distributions-4"><span class="math display">\[\mathbb E[S(S-1)] = n(n-1)p^2. \tag{1.4}\]</span></span></p></li>
 <li><p><strong>Recover the variance.</strong> <span class="math inline">\(\mathbb E S^2 = \mathbb E[S(S-1)] + \mathbb E S\)</span>, and the same trick with one factor <span class="math inline">\(k\)</span> gives <span class="math inline">\(\mathbb E S = np\)</span>. So <span id="eq-auto-01distributions-5"><span class="math display">\[\operatorname{Var}S = n(n-1)p^2 + np - n^2p^2 = np - np^2 = np(1-p). \tag{1.5}\]</span></span></p></li>
 </ol>
 <p><strong>A small case.</strong> For <span class="math inline">\(n = 3\)</span>, <a href="#tbl-sol-distributions-binomial-n3" class="quarto-xref">Table&nbsp;<span>1.1</span></a> lists every term of the sum in step 1.</p>
 <div id="tbl-sol-distributions-binomial-n3" class="quarto-float quarto-figure quarto-figure-center anchored">
 <figure class="quarto-float quarto-float-tbl figure">
 <figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl" id="tbl-sol-distributions-binomial-n3-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-Table&nbsp;1.1: The terms of <span class="math inline">\(\mathbb E[S(S-1)]\)</span> for <span class="math inline">\(S \sim \mathrm{Binomial}(3, p)\)</span>, with <span class="math inline">\(q = 1 - p\)</span>.
+Table&nbsp;1.1: The terms of <span class="math inline">\(\mathbb E[S(S-1)]\)</span> for <span class="math inline">\(S \sim \mathrm{Bin}(3, p)\)</span>, with <span class="math inline">\(q = 1 - p\)</span>.
 </figcaption>
 <div aria-describedby="tbl-sol-distributions-binomial-n3-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
 <table class="caption-top table">
@@ -606,15 +606,15 @@ Table&nbsp;1.1: The terms of <span class="math inline">\(\mathbb E[S(S-1)]\)</sp
 </div>
 </figure>
 </div>
-<p>The total is <span class="math inline">\(6p^2q + 6p^3 = 6p^2(q + p) = 6p^2 = n(n-1)p^2\)</span>, as step 4 says. Summed numerically over the PMF, the script gets <span class="math inline">\(\mathbb E[S(S-1)] = 34.2000\)</span> and <span class="math inline">\(\operatorname{Var}S = 4.2000\)</span> for <span class="math inline">\(\mathrm{Binomial}(20, 0.3)\)</span>, and <span class="math inline">\(2497.5000\)</span> and <span class="math inline">\(47.5000\)</span> for <span class="math inline">\(\mathrm{Binomial}(1000, 0.05)\)</span>, matching <span class="math inline">\(n(n-1)p^2\)</span> and <span class="math inline">\(np(1-p)\)</span>.</p>
+<p>The total is <span class="math inline">\(6p^2q + 6p^3 = 6p^2(q + p) = 6p^2 = n(n-1)p^2\)</span>, as step 4 says. Summed numerically over the PMF, the script gets <span class="math inline">\(\mathbb E[S(S-1)] = 34.2000\)</span> and <span class="math inline">\(\operatorname{Var}S = 4.2000\)</span> for <span class="math inline">\(\mathrm{Bin}(20, 0.3)\)</span>, and <span class="math inline">\(2497.5000\)</span> and <span class="math inline">\(47.5000\)</span> for <span class="math inline">\(\mathrm{Bin}(1000, 0.05)\)</span>, matching <span class="math inline">\(n(n-1)p^2\)</span> and <span class="math inline">\(np(1-p)\)</span>.</p>
 <p><strong>The effort.</strong> The PMF route needs the factorial moment <span class="math inline">\(\mathbb E[S(S-1)]\)</span> (not <span class="math inline">\(\mathbb E S^2\)</span>, which does not telescope), an identity for the coefficient, a re-index, and the fact that a PMF sums to 1. The decomposition <span class="math inline">\(S = X_1 + \dots + X_n\)</span> needs one line: each Bernoulli has variance <span class="math inline">\(p(1-p)\)</span>, and independent variances add.</p>
 <p><em>Factorial moments are the moments that a PMF with factorials sums easily, but decomposing into independent pieces is shorter.</em></p>
 </div>
 </div>
 </div>
 </section>
-<section id="sec-sol-distributions-2" class="level2" data-number="1.2">
-<h2 data-number="1.2" class="anchored" data-anchor-id="sec-sol-distributions-2"><span class="header-section-number">1.2</span> Poisson thinning</h2>
+<section id="sec-sol-dist-2" class="level2" data-number="1.2">
+<h2 data-number="1.2" class="anchored" data-anchor-id="sec-sol-dist-2"><span class="header-section-number">1.2</span> Poisson thinning</h2>
 <blockquote class="blockquote">
 <p><strong>Exercise 2.</strong> <strong>Poisson thinning.</strong> <span class="math inline">\(N \sim \mathrm{Poisson}(\mu)\)</span> events occur, and each is kept independently with probability <span class="math inline">\(q\)</span>. Show the number kept is <span class="math inline">\(\mathrm{Poisson}(q\mu)\)</span>. <em>Hint: condition on <span class="math inline">\(N\)</span> and use the MGF.</em> <em>(Poisson)</em></p>
 </blockquote>
@@ -632,7 +632,7 @@ Table&nbsp;1.1: The terms of <span class="math inline">\(\mathbb E[S(S-1)]\)</sp
 <div class="callout-body-container callout-body">
 <p>Let <span class="math inline">\(K\)</span> be the number kept.</p>
 <ol type="1">
-<li><p><strong>Given <span class="math inline">\(N\)</span>, the count kept is binomial.</strong> If <span class="math inline">\(N = n\)</span>, then <span class="math inline">\(K\)</span> counts the successes in <span class="math inline">\(n\)</span> independent <span class="math inline">\(\mathrm{Bernoulli}(q)\)</span> trials, so <span class="math inline">\(K \sim \mathrm{Binomial}(n, q)\)</span>. Its MGF is the binomial MGF from the chapter: <span id="eq-auto-01distributions-6"><span class="math display">\[\mathbb E[e^{\lambda K} \mid N = n] = \big(1 + q(e^\lambda - 1)\big)^n. \tag{1.6}\]</span></span></p></li>
+<li><p><strong>Given <span class="math inline">\(N\)</span>, the count kept is binomial.</strong> If <span class="math inline">\(N = n\)</span>, then <span class="math inline">\(K\)</span> counts the successes in <span class="math inline">\(n\)</span> independent <span class="math inline">\(\mathrm{Bern}(q)\)</span> trials, so <span class="math inline">\(K \sim \mathrm{Bin}(n, q)\)</span>. Its MGF is the binomial MGF from the chapter: <span id="eq-auto-01distributions-6"><span class="math display">\[\mathbb E[e^{\lambda K} \mid N = n] = \big(1 + q(e^\lambda - 1)\big)^n. \tag{1.6}\]</span></span></p></li>
 <li><p><strong>Average over <span class="math inline">\(N\)</span>.</strong> The MGF of <span class="math inline">\(K\)</span> is the average of these conditional MGFs, weighted by <span class="math inline">\(\Pr[N = n]\)</span>: <span id="eq-auto-01distributions-7"><span class="math display">\[M_K(\lambda) = \sum_{n\ge0}\Pr[N = n]\,\big(1 + q(e^\lambda - 1)\big)^n = \mathbb E\big[c^N\big], \qquad c = 1 + q(e^\lambda - 1). \tag{1.7}\]</span></span></p></li>
 <li><p><strong>Recognize the Poisson MGF.</strong> Write <span class="math inline">\(c^N = e^{N\ln c}\)</span>, so <span class="math inline">\(\mathbb E[c^N] = M_N(\ln c) = \exp\big(\mu(e^{\ln c} - 1)\big) = \exp\big(\mu(c - 1)\big)\)</span>. Substituting <span class="math inline">\(c - 1 = q(e^\lambda - 1)\)</span>, <span id="eq-auto-01distributions-8"><span class="math display">\[M_K(\lambda) = \exp\big(q\mu(e^\lambda - 1)\big). \tag{1.8}\]</span></span></p></li>
 <li><p><strong>Identify the distribution.</strong> This is the <span class="math inline">\(\mathrm{Poisson}(q\mu)\)</span> MGF, for every <span class="math inline">\(\lambda\)</span>. Two distributions with the same MGF around 0 are the same (<a href="../../book-full/part01-prerequisites/01-distributions.html#sec-dist-mgf">Section&nbsp;1.2.2</a>), so <span class="math inline">\(K \sim \mathrm{Poisson}(q\mu)\)</span>.</p></li>
@@ -690,15 +690,15 @@ Table&nbsp;1.2: The four outcomes of keeping or dropping two events, each with p
 </div>
 <p>The conditional average is <span class="math inline">\((1-q)^2 + 2q(1-q)e^\lambda + q^2e^{2\lambda} = \big((1-q) + qe^\lambda\big)^2 = \big(1 + q(e^\lambda - 1)\big)^2\)</span>, which is step 1 with <span class="math inline">\(n = 2\)</span>. Step 2 does this for every <span class="math inline">\(n\)</span> and weights the results by <span class="math inline">\(\Pr[N = n]\)</span>.</p>
 <p>As a check, the script draws <span class="math inline">\(N \sim \mathrm{Poisson}(4)\)</span> a million times and keeps each event with probability <span class="math inline">\(q = 0.3\)</span>. The kept count has mean 1.198 and variance 1.200, against <span class="math inline">\(q\mu = 1.200\)</span> for both, as a Poisson needs.</p>
-<p><em>Randomly discarding events from a Poisson count leaves a Poisson count, with the mean scaled by the keep probability.</em></p>
+<p><em>Randomly discarding events from a Poisson count leaves a Poisson count, with the mean scaled by the sampling rate <span class="math inline">\(q\)</span>.</em></p>
 </div>
 </div>
 </div>
 </section>
-<section id="sec-sol-distributions-3" class="level2" data-number="1.3">
-<h2 data-number="1.3" class="anchored" data-anchor-id="sec-sol-distributions-3"><span class="header-section-number">1.3</span> Quality of the Poisson approximation</h2>
+<section id="sec-sol-dist-3" class="level2" data-number="1.3">
+<h2 data-number="1.3" class="anchored" data-anchor-id="sec-sol-dist-3"><span class="header-section-number">1.3</span> Quality of the Poisson approximation</h2>
 <blockquote class="blockquote">
-<p><strong>Exercise 3.</strong> <strong>Quality of the Poisson approximation.</strong> For <span class="math inline">\(\mathrm{Binomial}(n, 5/n)\)</span>, compute the total variation distance <span class="math inline">\(\frac12\sum_k|\Pr[S = k] - \Pr[N = k]|\)</span> to <span class="math inline">\(\mathrm{Poisson}(5)\)</span> for <span class="math inline">\(n = 10, 100, 1000\)</span> using the functions in the script. <em>Check: it shrinks roughly like <span class="math inline">\(1/n\)</span>.</em> <em>(Poisson limit)</em></p>
+<p><strong>Exercise 3.</strong> <strong>Quality of the Poisson approximation.</strong> For <span class="math inline">\(\mathrm{Bin}(n, 5/n)\)</span>, compute the total variation distance <span class="math inline">\(\frac12\sum_k|\Pr[S = k] - \Pr[N = k]|\)</span> to <span class="math inline">\(\mathrm{Poisson}(5)\)</span> for <span class="math inline">\(n = 10, 100, 1000\)</span> using the functions in the script. <em>Check: it shrinks roughly like <span class="math inline">\(1/n\)</span>.</em> <em>(Poisson limit)</em></p>
 </blockquote>
 <div class="callout callout-style-default callout-tip callout-titled" title="Solution">
 <div class="callout-header d-flex align-content-center collapsed" data-bs-toggle="collapse" data-bs-target=".callout-3-contents" aria-controls="callout-3" aria-expanded="false" aria-label="Toggle callout">
@@ -719,7 +719,7 @@ Table&nbsp;1.2: The four outcomes of keeping or dropping two events, each with p
 <div id="tbl-sol-distributions-tv" class="quarto-float quarto-figure quarto-figure-center anchored">
 <figure class="quarto-float quarto-float-tbl figure">
 <figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl" id="tbl-sol-distributions-tv-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-Table&nbsp;1.3: Total variation distance between <span class="math inline">\(\mathrm{Binomial}(n, 5/n)\)</span> and <span class="math inline">\(\mathrm{Poisson}(5)\)</span>.
+Table&nbsp;1.3: Total variation distance between <span class="math inline">\(\mathrm{Bin}(n, 5/n)\)</span> and <span class="math inline">\(\mathrm{Poisson}(5)\)</span>.
 </figcaption>
 <div aria-describedby="tbl-sol-distributions-tv-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
 <table class="caption-top table">
@@ -756,13 +756,13 @@ Table&nbsp;1.3: Total variation distance between <span class="math inline">\(\ma
 </ol>
 <p><strong>Why <span class="math inline">\(1/n\)</span>.</strong> The two distributions have the same mean <span class="math inline">\(\mu = 5\)</span>, but the binomial variance is <span class="math inline">\(np(1 - p) = \mu - \mu^2/n\)</span>, smaller than the Poisson’s <span class="math inline">\(\mu\)</span> by <span class="math inline">\(\mu^2/n = 25/n\)</span>. The binomial is narrower by an amount of order <span class="math inline">\(1/n\)</span>, which is the gap <a href="../../book-full/part01-prerequisites/01-distributions.html#fig-poisson-limit">Figure&nbsp;1.1</a> shows at <span class="math inline">\(n = 10\)</span>.</p>
 <p>(The chapter’s <code>binomial_pmf</code> evaluates <span class="math inline">\(\binom nk\)</span> as an exact integer and then converts it to a float. That conversion overflows once <span class="math inline">\(n\)</span> is a little above 1,000, so going further, to <span class="math inline">\(n = 10{,}000\)</span>, would need the PMF in log space, as <code>poisson_pmf</code> already does.)</p>
-<p><em>The Poisson approximation to <span class="math inline">\(\mathrm{Binomial}(n, \mu/n)\)</span> is off by an amount of order <span class="math inline">\(1/n\)</span>, because the two variances differ by <span class="math inline">\(\mu^2/n\)</span>.</em></p>
+<p><em>The Poisson approximation to <span class="math inline">\(\mathrm{Bin}(n, \mu/n)\)</span> is off by an amount of order <span class="math inline">\(1/n\)</span>, because the two variances differ by <span class="math inline">\(\mu^2/n\)</span>.</em></p>
 </div>
 </div>
 </div>
 </section>
-<section id="sec-sol-distributions-4" class="level2" data-number="1.4">
-<h2 data-number="1.4" class="anchored" data-anchor-id="sec-sol-distributions-4"><span class="header-section-number">1.4</span> Median from absolute loss</h2>
+<section id="sec-sol-dist-4" class="level2" data-number="1.4">
+<h2 data-number="1.4" class="anchored" data-anchor-id="sec-sol-dist-4"><span class="header-section-number">1.4</span> Median from absolute loss</h2>
 <blockquote class="blockquote">
 <p><strong>Exercise 4.</strong> <strong>Median from absolute loss.</strong> Show that <span class="math inline">\(\sum_i|y_i - m|\)</span> is minimized at any median of <span class="math inline">\(y_1, \dots, y_n\)</span>. <em>Hint: look at the slope in <span class="math inline">\(m\)</span>.</em> <em>(Laplace)</em></p>
 </blockquote>
@@ -838,8 +838,8 @@ Table&nbsp;1.4: Slope of <span class="math inline">\(f(m) = \sum_i|y_i - m|\)</s
 </div>
 </div>
 </section>
-<section id="sec-sol-distributions-5" class="level2" data-number="1.5">
-<h2 data-number="1.5" class="anchored" data-anchor-id="sec-sol-distributions-5"><span class="header-section-number">1.5</span> Laplace kurtosis</h2>
+<section id="sec-sol-dist-5" class="level2" data-number="1.5">
+<h2 data-number="1.5" class="anchored" data-anchor-id="sec-sol-dist-5"><span class="header-section-number">1.5</span> Laplace kurtosis</h2>
 <blockquote class="blockquote">
 <p><strong>Exercise 5.</strong> <strong>Laplace kurtosis.</strong> Show that <span class="math inline">\(\mathbb E X^4/(\mathbb E X^2)^2\)</span> is 6 for the Laplace and 3 for the normal. What does the larger value say about the shape? <em>(Laplace, normal)</em></p>
 </blockquote>
@@ -874,8 +874,8 @@ Table&nbsp;1.4: Slope of <span class="math inline">\(f(m) = \sum_i|y_i - m|\)</s
 </div>
 </div>
 </section>
-<section id="sec-sol-distributions-6" class="level2" data-number="1.6">
-<h2 data-number="1.6" class="anchored" data-anchor-id="sec-sol-distributions-6"><span class="header-section-number">1.6</span> Maximum of normals</h2>
+<section id="sec-sol-dist-6" class="level2" data-number="1.6">
+<h2 data-number="1.6" class="anchored" data-anchor-id="sec-sol-dist-6"><span class="header-section-number">1.6</span> Maximum of normals</h2>
 <blockquote class="blockquote">
 <p><strong>Exercise 6.</strong> <strong>Maximum of normals.</strong> For <span class="math inline">\(Z_1, \dots, Z_k \sim \mathcal N(0, 1)\)</span> (not necessarily independent), show <span class="math inline">\(\mathbb E\max_i Z_i \le \sqrt{2\ln k}\)</span>. <em>Hint: <span class="math inline">\(e^{\lambda\mathbb E\max} \le \mathbb E e^{\lambda\max} \le \sum_i\mathbb E e^{\lambda Z_i} = ke^{\lambda^2/2}\)</span>, then optimize <span class="math inline">\(\lambda\)</span>.</em> <em>(Normal MGF)</em></p>
 </blockquote>
@@ -958,8 +958,8 @@ Table&nbsp;1.5: Mean of the maximum of <span class="math inline">\(k\)</span> in
 </div>
 </div>
 </section>
-<section id="sec-sol-distributions-7" class="level2" data-number="1.7">
-<h2 data-number="1.7" class="anchored" data-anchor-id="sec-sol-distributions-7"><span class="header-section-number">1.7</span> Random vectors are nearly orthogonal</h2>
+<section id="sec-sol-dist-7" class="level2" data-number="1.7">
+<h2 data-number="1.7" class="anchored" data-anchor-id="sec-sol-dist-7"><span class="header-section-number">1.7</span> Random vectors are nearly orthogonal</h2>
 <blockquote class="blockquote">
 <p><strong>Exercise 7.</strong> <strong>Random vectors are nearly orthogonal.</strong> For independent <span class="math inline">\(X, Y \sim \mathcal N(0, I_d)\)</span>, show <span class="math inline">\(\langle X, Y\rangle/(\|X\|\|Y\|)\)</span> is of order <span class="math inline">\(1/\sqrt d\)</span>. Check by simulation for <span class="math inline">\(d = 10, 1000\)</span>. <em>(Rotation invariance, norm concentration)</em></p>
 </blockquote>
@@ -975,24 +975,24 @@ Table&nbsp;1.5: Mean of the maximum of <span class="math inline">\(k\)</span> in
 </div>
 <div id="callout-7" class="callout-7-contents callout-collapse collapse">
 <div class="callout-body-container callout-body">
-<p>Let <span class="math inline">\(C = \langle X, Y\rangle/(\|X\|\|Y\|)\)</span>, the cosine of the angle between <span class="math inline">\(X\)</span> and <span class="math inline">\(Y\)</span>.</p>
+<p>Let <span class="math inline">\(\rho = \langle X, Y\rangle/(\|X\|\|Y\|)\)</span>, the cosine of the angle between <span class="math inline">\(X\)</span> and <span class="math inline">\(Y\)</span>.</p>
 <ol type="1">
-<li><p><strong>Fix <span class="math inline">\(Y\)</span>.</strong> Condition on <span class="math inline">\(Y\)</span> and let <span class="math inline">\(u = Y/\|Y\|\)</span>, a fixed unit vector. Since <span class="math inline">\(X\)</span> is independent of <span class="math inline">\(Y\)</span>, <span class="math inline">\(X\)</span> is still <span class="math inline">\(\mathcal N(0, I_d)\)</span>, and <span id="eq-auto-01distributions-14"><span class="math display">\[C = \frac{\langle u, X\rangle}{\|X\|}. \tag{1.14}\]</span></span></p></li>
+<li><p><strong>Fix <span class="math inline">\(Y\)</span>.</strong> Condition on <span class="math inline">\(Y\)</span> and let <span class="math inline">\(u = Y/\|Y\|\)</span>, a fixed unit vector. Since <span class="math inline">\(X\)</span> is independent of <span class="math inline">\(Y\)</span>, <span class="math inline">\(X\)</span> is still <span class="math inline">\(\mathcal N(0, I_d)\)</span>, and <span id="eq-auto-01distributions-14"><span class="math display">\[\rho = \frac{\langle u, X\rangle}{\|X\|}. \tag{1.14}\]</span></span></p></li>
 <li><p><strong>Numerator: rotation invariance.</strong> <span class="math inline">\(\langle u, X\rangle \sim \mathcal N(0, 1)\)</span> for any unit <span class="math inline">\(u\)</span>. Its distribution does not depend on <span class="math inline">\(u\)</span>, so it does not depend on <span class="math inline">\(Y\)</span> either.</p></li>
 <li><p><strong>Denominator: norm concentration.</strong> <span class="math inline">\(\|X\| = \sqrt d\,\big(1 \pm O(1/\sqrt d)\big)\)</span>, by the chapter’s norm result.</p></li>
-<li><p><strong>Combine.</strong> <span class="math inline">\(C \approx \langle u, X\rangle/\sqrt d\)</span>: a standard normal divided by <span class="math inline">\(\sqrt d\)</span>. So <span class="math inline">\(C\)</span> is typically of size <span class="math inline">\(1/\sqrt d\)</span>.</p></li>
+<li><p><strong>Combine.</strong> <span class="math inline">\(\rho \approx \langle u, X\rangle/\sqrt d\)</span>: a standard normal divided by <span class="math inline">\(\sqrt d\)</span>. So <span class="math inline">\(\rho\)</span> is typically of size <span class="math inline">\(1/\sqrt d\)</span>.</p></li>
 </ol>
 <p><strong>The exact standard deviation.</strong> Steps 3 and 4 are approximate, but the second moment is exact.</p>
 <ol start="5" type="1">
-<li><p><strong>Turn <span class="math inline">\(u\)</span> into the first coordinate.</strong> The <span class="math inline">\(\mathcal N(0, I_d)\)</span> density <span class="math inline">\((2\pi)^{-d/2}e^{-\|x\|^2/2}\)</span> depends on <span class="math inline">\(x\)</span> only through <span class="math inline">\(\|x\|\)</span>. A rotation <span class="math inline">\(R\)</span> that maps <span class="math inline">\(u\)</span> to <span class="math inline">\(e_1 = (1, 0, \dots, 0)\)</span> preserves norms and inner products, so <span class="math inline">\(RX\)</span> has the same distribution as <span class="math inline">\(X\)</span>, and <span class="math inline">\(C = \langle Ru, RX\rangle/\|RX\| = \langle e_1, RX\rangle/\|RX\|\)</span>. So <span class="math inline">\(C\)</span> has the same distribution as <span class="math inline">\(X_1/\|X\|\)</span>. In <span class="math inline">\(d = 2\)</span>, for example, <span class="math inline">\(R\)</span> turns the plane until <span class="math inline">\(u\)</span> points along the first axis, and the circular contours of the density don’t move.</p></li>
+<li><p><strong>Turn <span class="math inline">\(u\)</span> into the first coordinate.</strong> The <span class="math inline">\(\mathcal N(0, I_d)\)</span> density <span class="math inline">\((2\pi)^{-d/2}e^{-\|x\|^2/2}\)</span> depends on <span class="math inline">\(x\)</span> only through <span class="math inline">\(\|x\|\)</span>. A rotation <span class="math inline">\(R\)</span> that maps <span class="math inline">\(u\)</span> to <span class="math inline">\(e_1 = (1, 0, \dots, 0)\)</span> preserves norms and inner products, so <span class="math inline">\(RX\)</span> has the same distribution as <span class="math inline">\(X\)</span>, and <span class="math inline">\(\rho = \langle Ru, RX\rangle/\|RX\| = \langle e_1, RX\rangle/\|RX\|\)</span>. So <span class="math inline">\(\rho\)</span> has the same distribution as <span class="math inline">\(X_1/\|X\|\)</span>. In <span class="math inline">\(d = 2\)</span>, for example, <span class="math inline">\(R\)</span> turns the plane until <span class="math inline">\(u\)</span> points along the first axis, and the circular contours of the density don’t move.</p></li>
 <li><p><strong>Symmetry among coordinates.</strong> The coordinates of <span class="math inline">\(X\)</span> are independent and identically distributed, so <span class="math inline">\(\mathbb E[X_i^2/\|X\|^2]\)</span> is the same for every <span class="math inline">\(i\)</span>. These <span class="math inline">\(d\)</span> numbers add up to <span class="math inline">\(\mathbb E[\sum_iX_i^2/\|X\|^2] = 1\)</span>, so each is <span class="math inline">\(1/d\)</span>.</p></li>
-<li><p><strong>Mean and standard deviation.</strong> <span class="math inline">\(X\)</span> and <span class="math inline">\(-X\)</span> have the same distribution, so <span class="math inline">\(\mathbb E C = 0\)</span>, and <span class="math inline">\(\operatorname{Var}C = \mathbb E C^2 = 1/d\)</span>. The standard deviation of <span class="math inline">\(C\)</span> is exactly <span class="math inline">\(1/\sqrt d\)</span>.</p></li>
+<li><p><strong>Mean and standard deviation.</strong> <span class="math inline">\(X\)</span> and <span class="math inline">\(-X\)</span> have the same distribution, so <span class="math inline">\(\mathbb E \rho = 0\)</span>, and <span class="math inline">\(\operatorname{Var}(\rho) = \mathbb E \rho^2 = 1/d\)</span>. The standard deviation of <span class="math inline">\(\rho\)</span> is exactly <span class="math inline">\(1/\sqrt d\)</span>.</p></li>
 </ol>
 <p><strong>Simulation.</strong> <a href="#tbl-sol-distributions-cosines" class="quarto-xref">Table&nbsp;<span>1.6</span></a> reports 10,000 pairs for each <span class="math inline">\(d\)</span>.</p>
 <div id="tbl-sol-distributions-cosines" class="quarto-float quarto-figure quarto-figure-center anchored">
 <figure class="quarto-float quarto-float-tbl figure">
 <figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl" id="tbl-sol-distributions-cosines-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-Table&nbsp;1.6: Cosine <span class="math inline">\(C\)</span> between independent <span class="math inline">\(X, Y \sim \mathcal N(0, I_d)\)</span>, over 10,000 pairs (seed 0).
+Table&nbsp;1.6: Cosine <span class="math inline">\(\rho\)</span> between independent <span class="math inline">\(X, Y \sim \mathcal N(0, I_d)\)</span>, over 10,000 pairs (seed 0).
 </figcaption>
 <div aria-describedby="tbl-sol-distributions-cosines-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
 <table class="caption-top table">
@@ -1007,11 +1007,11 @@ Table&nbsp;1.6: Cosine <span class="math inline">\(C\)</span> between independen
 <thead>
 <tr class="header">
 <th><span class="math inline">\(d\)</span></th>
-<th>Mean of <span class="math inline">\(C\)</span></th>
-<th>Std of <span class="math inline">\(C\)</span></th>
+<th>Mean of <span class="math inline">\(\rho\)</span></th>
+<th>Std of <span class="math inline">\(\rho\)</span></th>
 <th><span class="math inline">\(1/\sqrt d\)</span></th>
 <th><span class="math inline">\(\sqrt d \times\)</span> std</th>
-<th>Largest <span class="math inline">\(\lvert C\rvert\)</span></th>
+<th>Largest <span class="math inline">\(\lvert \rho\rvert\)</span></th>
 </tr>
 </thead>
 <tbody>
@@ -1036,7 +1036,7 @@ Table&nbsp;1.6: Cosine <span class="math inline">\(C\)</span> between independen
 </div>
 </figure>
 </div>
-<p>The standard deviation matches <span class="math inline">\(1/\sqrt d\)</span> to within 1%. At <span class="math inline">\(d = 10\)</span> some pairs are nearly parallel (largest <span class="math inline">\(|C|\)</span> 0.908). At <span class="math inline">\(d = 1{,}000\)</span>, none of the 10,000 pairs has <span class="math inline">\(|C|\)</span> above 0.121, an angle within 7.0° of a right angle.</p>
+<p>The standard deviation matches <span class="math inline">\(1/\sqrt d\)</span> to within 1%. At <span class="math inline">\(d = 10\)</span> some pairs are nearly parallel (largest <span class="math inline">\(|\rho|\)</span> 0.908). At <span class="math inline">\(d = 1{,}000\)</span>, none of the 10,000 pairs has <span class="math inline">\(|\rho|\)</span> above 0.121, an angle within 7.0° of a right angle.</p>
 <p><em>In high dimension, two independent random directions are almost orthogonal: their cosine has standard deviation exactly <span class="math inline">\(1/\sqrt d\)</span>.</em></p>
 </div>
 </div>

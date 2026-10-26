@@ -373,7 +373,7 @@ window.Quarto = {
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../part04-privacy-accounting/09-choosing-an-accountant.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">31</span>&nbsp; <span class="chapter-title">Report and review an ε claim</span></span></a>
+ <span class="menu-text"><span class="chapter-number">31</span>&nbsp; <span class="chapter-title">Choosing an accountant</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
@@ -564,7 +564,7 @@ window.Quarto = {
   <li><a href="#when-you-meet-it" id="toc-when-you-meet-it" class="nav-link" data-scroll-target="#when-you-meet-it"><span class="header-section-number">12.2</span> When you meet it</a></li>
   <li><a href="#how-to-use-it" id="toc-how-to-use-it" class="nav-link" data-scroll-target="#how-to-use-it"><span class="header-section-number">12.3</span> How to use it</a></li>
   <li><a href="#what-goes-wrong" id="toc-what-goes-wrong" class="nav-link" data-scroll-target="#what-goes-wrong"><span class="header-section-number">12.4</span> What goes wrong</a></li>
-  <li><a href="#further-reading" id="toc-further-reading" class="nav-link" data-scroll-target="#further-reading"><span class="header-section-number">12.5</span> Further reading</a></li>
+  <li><a href="#references" id="toc-references" class="nav-link" data-scroll-target="#references"><span class="header-section-number">12.5</span> References</a></li>
   </ul>
 </nav>
     </div>
@@ -597,7 +597,7 @@ window.Quarto = {
 </section>
 <section id="when-you-meet-it" class="level2" data-number="12.2">
 <h2 data-number="12.2" class="anchored" data-anchor-id="when-you-meet-it"><span class="header-section-number">12.2</span> When you meet it</h2>
-<p>You meet it when you share a model trained on your organisation’s data, or publish it. The first decision is whether the property is a secret at all. Learning that smokers get more lung cancer is the point of a medical study, not a breach. A property is harmful to reveal only when it describes the <em>data owner</em> rather than the world, such as one hospital’s patient mix. If it is not a secret, record that in the threat model of <a href="../part02-attacks/10-risk-assessment.html">Pre-release privacy risk assessment</a> and move on.</p>
+<p>You meet it when you share a model trained on your organization’s data, or publish it. The first decision is whether the property is a secret at all. Learning that smokers get more lung cancer is the point of a medical study, not a breach. A property is harmful to reveal only when it describes the <em>data owner</em> rather than the world, such as one hospital’s patient mix. If it is not a secret, record that in the threat model of <a href="../part02-attacks/10-risk-assessment.html">Pre-release privacy risk assessment</a> and move on.</p>
 <p>If it is a secret, differential privacy (DP) does not protect it. DP protects one record at a time, and its guarantee for a group multiplies the privacy level <span class="math inline">\(\varepsilon\)</span> by the group’s size (<a href="../part03-dp-foundations/02-properties.html">Post-processing, group privacy and composition</a>). For a hospital of 1,000 patients and shares a tenth apart, the group is the <span class="math inline">\(n g = 100\)</span> patients that differ between the two datasets. So the property gets only <span class="math inline">\(100\varepsilon\)</span>, which promises nothing at any useful <span class="math inline">\(\varepsilon\)</span>. A site’s data volume is a property too, and the group is then the records by which the two candidate sizes differ.</p>
 </section>
 <section id="how-to-use-it" class="level2" data-number="12.3">
@@ -610,8 +610,8 @@ window.Quarto = {
 <p>The commonest error is to assume that DP, or a passed membership audit, covers the property. A weak measured attack is not evidence of safety either, because with few records and a small gap, the meta-classifier, fitted to noisy shadow models, finds the shift badly.</p>
 <p>There is no cheap defence. Removing the group column leaves its correlates, which still move the model, and noise large enough to hide <span class="math inline">\(n g\)</span> records destroys the model’s use. If the property is a secret, the strongest option is not to release a model trained on that mix. If you must release, report the attack’s accuracy and state in the release notes that DP protects individuals only.</p>
 </section>
-<section id="further-reading" class="level2" data-number="12.5">
-<h2 data-number="12.5" class="anchored" data-anchor-id="further-reading"><span class="header-section-number">12.5</span> Further reading</h2>
+<section id="references" class="level2" data-number="12.5">
+<h2 data-number="12.5" class="anchored" data-anchor-id="references"><span class="header-section-number">12.5</span> References</h2>
 <ul>
 <li>Ganju, Wang, Yang, Gunter &amp; Borisov, “Property Inference Attacks on Fully Connected Neural Networks using Permutation Invariant Representations” (CCS 2018): the practical attack on neural networks, and why raw weights fail.</li>
 <li>Zhang, Tople &amp; Ohrimenko, “Leakage of Dataset Properties in Multi-Party Machine Learning” (USENIX Security 2021): property inference through queries alone.</li>

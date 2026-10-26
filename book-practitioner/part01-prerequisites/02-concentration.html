@@ -408,7 +408,7 @@ window.Quarto = {
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../part04-privacy-accounting/09-choosing-an-accountant.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">31</span>&nbsp; <span class="chapter-title">Report and review an ε claim</span></span></a>
+ <span class="menu-text"><span class="chapter-number">31</span>&nbsp; <span class="chapter-title">Choosing an accountant</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
@@ -669,7 +669,7 @@ Table&nbsp;2.1: Which bound to use, and the two-sided width it gives.
 <tr class="even">
 <td>A count with mean <span class="math inline">\(\mu\)</span></td>
 <td>Chernoff</td>
-<td>a miss by a fraction <span class="math inline">\(\delta\)</span> has chance <span class="math inline">\(\le e^{-\delta^2\mu/(2+\delta)}\)</span> above, <span class="math inline">\(e^{-\delta^2\mu/2}\)</span> below</td>
+<td>a miss by a fraction <span class="math inline">\(r\)</span> has chance <span class="math inline">\(\le e^{-r^2\mu/(2+r)}\)</span> above, <span class="math inline">\(e^{-r^2\mu/2}\)</span> below</td>
 </tr>
 <tr class="odd">
 <td>The mean of <span class="math inline">\(n\)</span> values in a range of length <span class="math inline">\(R\)</span></td>
@@ -686,7 +686,7 @@ Table&nbsp;2.1: Which bound to use, and the two-sided width it gives.
 </div>
 </figure>
 </div>
-<p><strong>Hoeffding’s inequality</strong> is the planning tool, because it needs only the range of the values. Solving its width for <span class="math inline">\(n\)</span> gives the sample size for a width <span class="math inline">\(t\)</span>: <span id="eq-auto-02concentration-2"><span class="math display">\[n \ge \frac{R^2\ln(2/\beta)}{2t^2}. \tag{2.2}\]</span></span> For accuracy, an average of zeros and ones, the range <span class="math inline">\(R\)</span> is 1. So measuring it to within one percentage point at 95% takes 18,445 test examples.</p>
+<p><strong>Hoeffding’s inequality</strong> is the planning tool, because it needs only the range of the values. Solving its width for <span class="math inline">\(n\)</span> gives the sample size for a width <span class="math inline">\(t\)</span>: <span id="eq-auto-02concentration-2"><span class="math display">\[n \ge \frac{R^2\ln(2/\beta)}{2t^2}. \tag{2.2}\]</span></span> For accuracy, an average of zeros and ones, the range <span class="math inline">\(R\)</span> is 1. So measuring it to within one percentage point at 95% takes 18,445 test records.</p>
 <p>For a small rate, Hoeffding is too wide: it assumes the largest variance the range allows. Take one false positive in 1,000 negatives, with one-sided 95% bounds. Hoeffding adds 0.039 to the measured rate, while <strong>Bernstein’s inequality</strong> uses the variance <span class="math inline">\(\sigma^2\)</span> and adds only 0.0045. For values in <span class="math inline">\([0, 1]\)</span> its width is <span class="math inline">\(\sqrt{2\sigma^2\ln(1/\beta)/n} + 2\ln(1/\beta)/(3n)\)</span>, and a variance estimated from the same data makes it a heuristic. The exact <strong>Clopper–Pearson</strong> bound, from the binomial distribution, gives 0.0047. With no errors it gives 0.0030, close to the “rule of three” bound <span class="math inline">\(3/n\)</span>.</p>
 <p>Noise of a known distribution needs only its quantile: Laplace noise of scale 2 lies within 5.99 of zero with 95% probability. For many draws at once, the <strong>union bound</strong> caps the chance of any failure at the sum of the chances, so give each of <span class="math inline">\(k\)</span> draws <span class="math inline">\(\beta/k\)</span>. Because the Laplace width grows only with the logarithm of <span class="math inline">\(k\)</span>, covering a thousand draws widens 5.99 only to 19.81.</p>
 <p>The snippet prints these numbers, with the one-sided bound for <span class="math inline">\(k\)</span> errors in <span class="math inline">\(n\)</span> as <code>stats.beta.ppf(0.95, k + 1, n - k)</code> and a two-sided interval for 10 errors in 10,000.</p>

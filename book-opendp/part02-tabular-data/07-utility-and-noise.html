@@ -1,0 +1,1140 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.10.19">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+
+<title>7&nbsp; Assessing utility and choosing the noise – Differential Privacy with OpenDP</title>
+<style>
+/* Default styles provided by pandoc.
+** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
+*/
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: 1.5em;}
+div.column{flex: auto;}
+@media screen {
+div.columns{gap: min(4vw, 1.5em);}
+div.column{overflow-x: auto;}
+}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+/* CSS for syntax highlighting */
+html { -webkit-text-size-adjust: 100%; }
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+</style>
+
+
+<script src="../site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="../site_libs/quarto-nav/headroom.min.js"></script>
+<script src="../site_libs/clipboard/clipboard.min.js"></script>
+<script src="../site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="../site_libs/quarto-search/fuse.min.js"></script>
+<script src="../site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="../">
+<link href="../part03-framework/00-introduction.html" rel="next">
+<link href="../part02-tabular-data/06-preparing-microdata.html" rel="prev">
+<script src="../site_libs/quarto-html/quarto.js" type="module"></script>
+<script src="../site_libs/quarto-html/tabsets/tabsets.js" type="module"></script>
+<script src="../site_libs/quarto-html/popper.min.js"></script>
+<script src="../site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="../site_libs/quarto-html/anchor.min.js"></script>
+<link href="../site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="../site_libs/quarto-html/quarto-syntax-highlighting-bf27225e3a48a9273f3daa8f8e829971.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="../site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="../site_libs/bootstrap/bootstrap-78f503ea39f784e8964cd205807fbe37.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
+<script id="quarto-search-options" type="application/json">{
+  "location": "sidebar",
+  "copy-button": false,
+  "collapse-after": 3,
+  "panel-placement": "start",
+  "type": "textbox",
+  "limit": 50,
+  "keyboard-shortcut": [
+    "f",
+    "/",
+    "s"
+  ],
+  "show-item-context": false,
+  "language": {
+    "search-no-results-text": "No results",
+    "search-matching-documents-text": "matching documents",
+    "search-copy-link-title": "Copy link to search",
+    "search-hide-matches-text": "Hide additional matches",
+    "search-more-match-text": "more match in this document",
+    "search-more-matches-text": "more matches in this document",
+    "search-clear-button-title": "Clear",
+    "search-text-placeholder": "",
+    "search-detached-cancel-button-title": "Cancel",
+    "search-submit-button-title": "Submit",
+    "search-label": "Search"
+  }
+}</script>
+
+  <script src="https://cdnjs.cloudflare.com/polyfill/v3/polyfill.min.js?features=es6"></script>
+  <script defer="" src="https://cdn.jsdelivr.net/npm/mathjax@4/tex-chtml.js" type="text/javascript"></script>
+
+<script type="text/javascript">
+const typesetMath = (el) => {
+  if (window.MathJax) {
+    // MathJax Typeset
+    window.MathJax.typeset([el]);
+  } else if (window.katex) {
+    // KaTeX Render
+    var mathElements = el.getElementsByClassName("math");
+    var macros = [];
+    for (var i = 0; i < mathElements.length; i++) {
+      var texText = mathElements[i].firstChild;
+      if (mathElements[i].tagName == "SPAN" && texText && texText.data) {
+        window.katex.render(texText.data, mathElements[i], {
+          displayMode: mathElements[i].classList.contains('display'),
+          throwOnError: false,
+          macros: macros,
+          fleqn: false
+        });
+      }
+    }
+  }
+}
+window.Quarto = {
+  typesetMath
+};
+</script>
+
+</head>
+
+<body class="nav-sidebar floating quarto-light">
+
+<div id="quarto-search-results"></div>
+  <header id="quarto-header" class="headroom fixed-top">
+  <nav class="quarto-secondary-nav">
+    <div class="container-fluid d-flex">
+      <button type="button" class="quarto-btn-toggle btn" data-bs-toggle="collapse" role="button" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+        <i class="bi bi-layout-text-sidebar-reverse"></i>
+      </button>
+        <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../part02-tabular-data/00-introduction.html">Tabular data</a></li><li class="breadcrumb-item"><a href="../part02-tabular-data/07-utility-and-noise.html"><span class="chapter-number">7</span>&nbsp; <span class="chapter-title">Assessing utility and choosing the noise</span></a></li></ol></nav>
+        <a class="flex-grow-1" role="navigation" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">      
+        </a>
+      <button type="button" class="btn quarto-search-button" aria-label="Search" onclick="window.quartoOpenSearch();">
+        <i class="bi bi-search"></i>
+      </button>
+    </div>
+  </nav>
+</header>
+<!-- content -->
+<div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article">
+<!-- sidebar -->
+  <nav id="quarto-sidebar" class="sidebar collapse collapse-horizontal quarto-sidebar-collapse-item sidebar-navigation floating overflow-auto">
+    <div class="pt-lg-2 mt-2 text-left sidebar-header">
+    <div class="sidebar-title mb-0 py-0">
+      <a href="../">Differential Privacy with OpenDP</a> 
+    </div>
+      </div>
+        <div class="mt-2 flex-shrink-0 align-items-center">
+        <div class="sidebar-search">
+        <div id="quarto-search" class="" title="Search"></div>
+        </div>
+        </div>
+    <div class="sidebar-menu-container"> 
+    <ul class="list-unstyled mt-1">
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../index.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Preface</span></a>
+  </div>
+</li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a href="../part01-getting-started/00-introduction.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Getting started</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-1" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-1" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part01-getting-started/01-first-release.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">1</span>&nbsp; <span class="chapter-title">A first release</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part01-getting-started/02-the-data-and-the-context.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">2</span>&nbsp; <span class="chapter-title">The data and the context</span></span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a href="../part02-tabular-data/00-introduction.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Tabular data</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-2" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-2" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part02-tabular-data/03-essential-statistics.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">3</span>&nbsp; <span class="chapter-title">Essential statistics</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part02-tabular-data/04-grouping.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">4</span>&nbsp; <span class="chapter-title">Grouping</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part02-tabular-data/05-identifier-truncation.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">5</span>&nbsp; <span class="chapter-title">Identifier truncation and bounds</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part02-tabular-data/06-preparing-microdata.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">6</span>&nbsp; <span class="chapter-title">Preparing microdata</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part02-tabular-data/07-utility-and-noise.html" class="sidebar-item-text sidebar-link active">
+ <span class="menu-text"><span class="chapter-number">7</span>&nbsp; <span class="chapter-title">Assessing utility and choosing the noise</span></span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a href="../part03-framework/00-introduction.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">The framework</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-3" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-3" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part03-framework/08-a-framework-for-privacy.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">8</span>&nbsp; <span class="chapter-title">A framework to understand differential privacy</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part03-framework/09-transformations.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">9</span>&nbsp; <span class="chapter-title">Transformations</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part03-framework/10-measurements.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">10</span>&nbsp; <span class="chapter-title">Measurements</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part03-framework/11-combinators.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">11</span>&nbsp; <span class="chapter-title">Combinators</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part03-framework/12-utilities-and-the-context-api.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">12</span>&nbsp; <span class="chapter-title">Utilities and the Context API inside</span></span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a href="../part04-extending/00-introduction.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Extending the library</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-4" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-4" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part04-extending/13-plugins.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">13</span>&nbsp; <span class="chapter-title">Plugins</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part04-extending/14-statistical-modelling.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">14</span>&nbsp; <span class="chapter-title">Statistical modelling</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part04-extending/15-limitations-and-troubleshooting.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">15</span>&nbsp; <span class="chapter-title">Limitations and troubleshooting</span></span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a href="../part05-synthetic-data/00-introduction.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Synthetic data</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-5" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-5" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part05-synthetic-data/16-contingency-tables.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">16</span>&nbsp; <span class="chapter-title">Contingency tables</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part05-synthetic-data/17-aim-and-mst.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">17</span>&nbsp; <span class="chapter-title">Synthetic data with AIM and MST</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part05-synthetic-data/18-evaluating-synthetic-data.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">18</span>&nbsp; <span class="chapter-title">Evaluating and tuning synthetic data</span></span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-6" role="navigation" aria-expanded="true">
+ <span class="menu-text">Appendices</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-6" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-6" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../glossary.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">A</span>&nbsp; <span class="chapter-title">Glossary</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../term-index.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">B</span>&nbsp; <span class="chapter-title">Index</span></span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+    </ul>
+    </div>
+</nav>
+<div id="quarto-sidebar-glass" class="quarto-sidebar-collapse-item" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item"></div>
+<!-- margin-sidebar -->
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+        <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">Table of contents</h2>
+   
+  <ul>
+  <li><a href="#sec-util-accuracy" id="toc-sec-util-accuracy" class="nav-link active" data-scroll-target="#sec-util-accuracy"><span class="header-section-number">7.1</span> What an accuracy statement means</a></li>
+  <li><a href="#sec-util-target" id="toc-sec-util-target" class="nav-link" data-scroll-target="#sec-util-target"><span class="header-section-number">7.2</span> A target error bar on the survey</a></li>
+  <li><a href="#sec-util-gaussian" id="toc-sec-util-gaussian" class="nav-link" data-scroll-target="#sec-util-gaussian"><span class="header-section-number">7.3</span> Laplace under pure DP, Gaussian under zCDP</a></li>
+  <li><a href="#sec-util-sensitivity" id="toc-sec-util-sensitivity" class="nav-link" data-scroll-target="#sec-util-sensitivity"><span class="header-section-number">7.4</span> One person in many groups: L1 against L2</a></li>
+  <li><a href="#sec-util-epsilon" id="toc-sec-util-epsilon" class="nav-link" data-scroll-target="#sec-util-epsilon"><span class="header-section-number">7.5</span> Stating the guarantee in epsilon</a></li>
+  <li><a href="#sec-util-signed" id="toc-sec-util-signed" class="nav-link" data-scroll-target="#sec-util-signed"><span class="header-section-number">7.6</span> Signed and unsigned counts</a></li>
+  <li><a href="#sec-util-choose" id="toc-sec-util-choose" class="nav-link" data-scroll-target="#sec-util-choose"><span class="header-section-number">7.7</span> Which noise to choose</a></li>
+  <li><a href="#sec-util-run" id="toc-sec-util-run" class="nav-link" data-scroll-target="#sec-util-run"><span class="header-section-number">7.8</span> The releases of one run</a></li>
+  <li><a href="#summary" id="toc-summary" class="nav-link" data-scroll-target="#summary"><span class="header-section-number">7.9</span> Summary</a></li>
+  <li><a href="#references" id="toc-references" class="nav-link" data-scroll-target="#references"><span class="header-section-number">7.10</span> References</a></li>
+  </ul>
+</nav>
+    </div>
+<!-- main -->
+<main class="content" id="quarto-document-content">
+
+<header id="title-block-header" class="quarto-title-block default"><nav class="quarto-page-breadcrumbs quarto-title-breadcrumbs d-none d-lg-block" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../part02-tabular-data/00-introduction.html">Tabular data</a></li><li class="breadcrumb-item"><a href="../part02-tabular-data/07-utility-and-noise.html"><span class="chapter-number">7</span>&nbsp; <span class="chapter-title">Assessing utility and choosing the noise</span></a></li></ol></nav>
+<div class="quarto-title">
+<h1 class="title"><span class="chapter-number">7</span>&nbsp; <span class="chapter-title">Assessing utility and choosing the noise</span></h1>
+</div>
+
+
+
+<div class="quarto-title-meta">
+
+    
+  
+    
+  </div>
+  
+
+
+</header>
+
+
+<p>Every query in the earlier chapters printed a scale and an accuracy before it was released. This chapter is about reading those two numbers and changing them. An <strong>accuracy</strong> is the half-width of an error bar: with a stated probability, the released value lies within that distance of the value the noise was added to. OpenDP converts a noise scale to an accuracy and back, for Laplace and for Gaussian noise. So you can work out what a target error bar costs before you spend anything.</p>
+<p>The second half of the chapter is about which noise to add. Under pure differential privacy (DP) the context adds Laplace noise, and under zero-concentrated differential privacy (zCDP) it adds Gaussian noise. Switching between them is one argument of <code>dp.loss_of</code>. The choice matters most when one person’s records fall in many groups. Gaussian noise is then calibrated to a sensitivity that grows with the square root of the number of groups, rather than with the number itself. On the survey, telling the library that a person answers at most once per quarter cuts the noise on a quarterly count six-fold, but only under zCDP. By the end you will be able to say what an error bar covers and what it leaves out. You will also convert a budget in <span class="math inline">\(\rho\)</span> back to an <span class="math inline">\(\varepsilon\)</span>, and choose the noise for a table.</p>
+<p>The script <a href="https://github.com/manuelvloureiro/privacy-preserving-machine-learning-book/blob/main/code/part02-tabular-data/opendp_utility_and_noise.py">opendp_utility_and_noise.py</a> runs every step on OpenDP 0.16.0 against the Labour Force Survey (LFS) sample of the earlier chapters. The conversions, scales, accuracies, thresholds and budgets it prints are the same on every run. The released counts and the means of a small clamping experiment are not, because OpenDP’s noise cannot be seeded, so this page shows them in blocks marked as one run.</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb1"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="ex">uv</span> run python code/part02-tabular-data/opendp_utility_and_noise.py</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<section id="sec-util-accuracy" class="level2" data-number="7.1">
+<h2 data-number="7.1" class="anchored" data-anchor-id="sec-util-accuracy"><span class="header-section-number">7.1</span> What an accuracy statement means</h2>
+<p>The documentation gives a template for reading the accuracy functions, and it is worth learning by heart. When the noise has a given scale, the released value differs from the true value by no more than the accuracy at a significance level <span class="math inline">\(\alpha\)</span>, or with confidence <span class="math inline">\((1 - \alpha) \times 100\%\)</span>. Every accuracy on a page of this book has <span class="math inline">\(\alpha = 0.05\)</span>, so the error bar holds with probability 0.95, and about one release in twenty lands outside it. A smaller <span class="math inline">\(\alpha\)</span> buys a wider bar, which <a href="../part02-tabular-data/03-essential-statistics.html">Essential statistics</a> showed by summarizing the same count at <span class="math inline">\(\alpha = 0.01\)</span>.</p>
+<p>The module <code>opendp.accuracy</code> has eight conversion functions, and the prelude exposes them under <code>dp</code>. Four convert a scale to an accuracy and back for continuous noise, <code>laplacian_scale_to_accuracy</code>, <code>accuracy_to_laplacian_scale</code>, <code>gaussian_scale_to_accuracy</code> and <code>accuracy_to_gaussian_scale</code>. The other four do the same for the discrete distributions, and their names carry <code>discrete_</code>. The documentation’s example asks for the Gaussian scale at which a release differs from its input by at most 2 with 95% confidence.</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb2"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> opendp.prelude <span class="im">as</span> dp</span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(dp.accuracy_to_gaussian_scale(accuracy<span class="op">=</span><span class="fl">2.0</span>, alpha<span class="op">=</span><span class="fl">0.05</span>))  <span class="co"># 1.020426913849308</span></span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(dp.gaussian_scale_to_accuracy(scale<span class="op">=</span><span class="fl">180.0</span>, alpha<span class="op">=</span><span class="fl">0.05</span>))  <span class="co"># 352.7935172172097</span></span>
+<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(dp.discrete_gaussian_scale_to_accuracy(scale<span class="op">=</span><span class="fl">180.0</span>, alpha<span class="op">=</span><span class="fl">0.05</span>))  <span class="co"># 354.0</span></span>
+<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(dp.laplacian_scale_to_accuracy(scale<span class="op">=</span><span class="fl">180.0</span>, alpha<span class="op">=</span><span class="fl">0.05</span>))  <span class="co"># 539.2318092397184</span></span>
+<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(dp.discrete_laplacian_scale_to_accuracy(scale<span class="op">=</span><span class="fl">180.0</span>, alpha<span class="op">=</span><span class="fl">0.05</span>))  <span class="co"># 539.7311147961669</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>The continuous functions are closed forms. For Laplace noise the accuracy is the scale times <span class="math inline">\(\ln(1/\alpha)\)</span>. For Gaussian noise it is the scale times the two-sided normal quantile, which is about 1.96 at the usual level. The discrete functions sum the probabilities of the integer noise instead, which is why a discrete Gaussian accuracy is a whole number. Use the discrete ones for counts, because OpenDP adds integer noise to an integer, and the continuous ones for sums and means of floats. The difference is small at a scale of 180, as the snippet shows. At a scale near 1 the discrete bars are noticeably wider, but <code>summarize</code> always picks the right one for you.</p>
+<p>The error bar is a statement about the noise and nothing else. The documentation says so in a note, and the point deserves a paragraph here, because it is the mistake a reader of an error bar makes most often. The accuracy functions describe how far the release can fall from the input to the noise mechanism. That input is the count, sum or mean of the data after every preparation step has run. Clipping values into public bounds, imputing a constant for missing values, truncating a person’s rows and resizing the frame all change that input. The error bar says nothing about the gap between the input and the quantity you had in mind.</p>
+<p>Clipping a sum pulls it toward the bounds, and truncation drops rows. Both are biases that no number of repeated releases averages away. The practitioner edition’s <a href="../../book-practitioner/part03-dp-foundations/12-release-statistics.html">release workflow</a> measures such a gap on another dataset, where truncation and clipping keep about half of the revenue. Here the quantity is a count of rows with no preparation, so the bar is the whole story.</p>
+</section>
+<section id="sec-util-target" class="level2" data-number="7.2">
+<h2 data-number="7.2" class="anchored" data-anchor-id="sec-util-target"><span class="header-section-number">7.2</span> A target error bar on the survey</h2>
+<p>Suppose you want the count of survey responses within 100 of the truth with 95% confidence. The count under the tutorial’s pure-DP budget of <span class="math inline">\(\varepsilon = 1\)</span>, split evenly over five queries, gives you a place to start. The excerpt summarizes it and then asks the discrete Laplace conversion for the scale the target needs.</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb3" data-excerpt="util-target"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a>laplace <span class="op">=</span> laplace_context(frame, EPSILON)</span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>count_laplace <span class="op">=</span> laplace.query().select(dp.<span class="bu">len</span>(signed<span class="op">=</span><span class="va">True</span>))</span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a>laplace_summary <span class="op">=</span> count_laplace.summarize(alpha<span class="op">=</span>ALPHA)</span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a>scale_needed <span class="op">=</span> <span class="bu">float</span>(dp.accuracy_to_discrete_laplacian_scale(accuracy<span class="op">=</span>TARGET, alpha<span class="op">=</span>ALPHA))</span>
+<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a>epsilon_needed <span class="op">=</span> CONTRIBUTIONS <span class="op">/</span> scale_needed  <span class="co"># the Laplace scale is the sensitivity over epsilon</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<pre class="text"><code>laplace count: Integer Laplace scale=180 95% accuracy=539.731
+budget per query: epsilon=0.2000
+error bar relative to the true count: 0.014%
+discrete laplace scale for accuracy 100: 33.2152
+epsilon that scale needs at sensitivity 36: 1.0838  (5.42 times the share)</code></pre>
+<p>The scale of 180 comes from the privacy unit and the budget. A person contributes at most 36 rows, so adding or removing a person changes the count by at most 36. That is the sensitivity, and the Laplace scale is the sensitivity over the query’s share of <span class="math inline">\(\varepsilon\)</span>, which is 0.2. The error bar of about 540 is 0.014% of the true count, which is small for a headline figure. The target of 100 needs a scale of 33.2. At sensitivity 36, that scale costs <span class="math inline">\(\varepsilon = 1.08\)</span> on this one query alone, which is more than the whole budget. The honest conclusion is that a bar of 100 is not available at this budget, not that the budget should grow to meet it.</p>
+<p>The conversion also tells you the exchange rate. Because the Laplace scale is the sensitivity over <span class="math inline">\(\varepsilon\)</span>, and the accuracy is proportional to the scale, halving the error bar means doubling the budget. The script checks this by rebuilding the context at <span class="math inline">\(\varepsilon = 2\)</span>, where the same query gets a scale of 90 and about half the error bar.</p>
+<pre class="text"><code>laplace count at epsilon 2: Integer Laplace scale=90 95% accuracy=270.115</code></pre>
+<p>The bar is not exactly half of 539.7, because the discrete conversion adds a constant for the rounding of integer noise, but the rule of thumb holds. <a href="../../book-full/part03-dp-foundations/03-laplace-gaussian.html">The full edition’s chapter on the Laplace mechanism</a> derives both the scale and the tail bound behind the conversion.</p>
+</section>
+<section id="sec-util-gaussian" class="level2" data-number="7.3">
+<h2 data-number="7.3" class="anchored" data-anchor-id="sec-util-gaussian"><span class="header-section-number">7.3</span> Laplace under pure DP, Gaussian under zCDP</h2>
+<p>OpenDP chooses the noise distribution from the kind of budget you give it. If the budget is <code>dp.loss_of(epsilon=...)</code>, the guarantee is pure DP and the context adds Laplace noise. If it is <code>dp.loss_of(rho=...)</code>, the guarantee is zCDP and the context adds Gaussian noise. Nothing else in a query changes, as long as the query does not name a distribution itself. So the two context constructors of the script differ only in the budget line.</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb6" data-excerpt="util-contexts"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> laplace_context(frame: pl.LazyFrame, epsilon: <span class="bu">float</span>) <span class="op">-&gt;</span> dp.Context:</span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a>    <span class="co">"""Pure differential privacy: the context adds Laplace noise."""</span></span>
+<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> dp.Context.compositor(</span>
+<span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a>        data<span class="op">=</span>frame,</span>
+<span id="cb6-5"><a href="#cb6-5" aria-hidden="true" tabindex="-1"></a>        privacy_unit<span class="op">=</span>dp.unit_of(contributions<span class="op">=</span>CONTRIBUTIONS),</span>
+<span id="cb6-6"><a href="#cb6-6" aria-hidden="true" tabindex="-1"></a>        privacy_loss<span class="op">=</span>dp.loss_of(epsilon<span class="op">=</span>epsilon),</span>
+<span id="cb6-7"><a href="#cb6-7" aria-hidden="true" tabindex="-1"></a>        split_evenly_over<span class="op">=</span>QUERIES,</span>
+<span id="cb6-8"><a href="#cb6-8" aria-hidden="true" tabindex="-1"></a>    )</span>
+<span id="cb6-9"><a href="#cb6-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-10"><a href="#cb6-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-11"><a href="#cb6-11" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> gaussian_context(frame: pl.LazyFrame, rho: <span class="bu">float</span>, delta: <span class="bu">float</span> <span class="op">|</span> <span class="va">None</span> <span class="op">=</span> <span class="va">None</span>) <span class="op">-&gt;</span> dp.Context:</span>
+<span id="cb6-12"><a href="#cb6-12" aria-hidden="true" tabindex="-1"></a>    <span class="co">"""Zero-concentrated differential privacy: the context adds Gaussian noise."""</span></span>
+<span id="cb6-13"><a href="#cb6-13" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> dp.Context.compositor(</span>
+<span id="cb6-14"><a href="#cb6-14" aria-hidden="true" tabindex="-1"></a>        data<span class="op">=</span>frame,</span>
+<span id="cb6-15"><a href="#cb6-15" aria-hidden="true" tabindex="-1"></a>        privacy_unit<span class="op">=</span>dp.unit_of(contributions<span class="op">=</span>CONTRIBUTIONS),</span>
+<span id="cb6-16"><a href="#cb6-16" aria-hidden="true" tabindex="-1"></a>        privacy_loss<span class="op">=</span>dp.loss_of(rho<span class="op">=</span>rho, delta<span class="op">=</span>delta),</span>
+<span id="cb6-17"><a href="#cb6-17" aria-hidden="true" tabindex="-1"></a>        split_evenly_over<span class="op">=</span>QUERIES,</span>
+<span id="cb6-18"><a href="#cb6-18" aria-hidden="true" tabindex="-1"></a>    )</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>What does <span class="math inline">\(\rho\)</span> mean? Pure DP bounds the privacy loss, the log of how much more likely an output is with a person in the data than without, by <span class="math inline">\(\varepsilon\)</span> in the worst case. Zero-concentrated DP bounds it on average instead. A mechanism is <span class="math inline">\(\rho\)</span>-zCDP when its privacy loss has mean at most <span class="math inline">\(\rho\)</span> and tails no heavier than those of a normal variable with variance <span class="math inline">\(2\rho\)</span>. The Gaussian mechanism fits this definition exactly, which is why the two go together, and budgets in <span class="math inline">\(\rho\)</span> add up across queries just as budgets in <span class="math inline">\(\varepsilon\)</span> do. <a href="../../book-full/part04-privacy-accounting/03-concentrated-dp.html">The full edition’s chapter on concentrated DP</a> defines it through Rényi divergences and derives all of this. The documentation’s Gaussian page repeats the count under <span class="math inline">\(\rho = 0.1\)</span>, split over the same five queries.</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb7" data-excerpt="util-gaussian"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a>gaussian <span class="op">=</span> gaussian_context(frame, RHO)</span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a>count_gaussian <span class="op">=</span> gaussian.query().select(dp.<span class="bu">len</span>(signed<span class="op">=</span><span class="va">True</span>))</span>
+<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a>gaussian_summary <span class="op">=</span> count_gaussian.summarize(alpha<span class="op">=</span>ALPHA)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<pre class="text"><code>privacy loss: (ZeroConcentratedDivergence, 0.1)
+gaussian count: Integer Gaussian scale=180 95% accuracy=354
+budget per query: rho=0.0200  sqrt(2 rho)=0.2000
+continuous gaussian accuracy at scale 180: 352.7935</code></pre>
+<p>The scale is again 180, and that is no accident. Write <span class="math inline">\(\sigma\)</span> for the standard deviation of the Gaussian noise, which is what OpenDP calls its scale, and <span class="math inline">\(\Delta\)</span> for the sensitivity of the quantity it is added to. Then the mechanism is <span class="math inline">\(\Delta^2 / (2\sigma^2)\)</span>-zCDP, so the context solves for the scale and finds the sensitivity over <span class="math inline">\(\sqrt{2\rho}\)</span>. With a share of <span class="math inline">\(\rho = 0.02\)</span>, that root is 0.2, which is exactly the Laplace share, and the documentation chose <span class="math inline">\(\rho = 0.1\)</span> so that its two pages compare at equal scale. At equal scale the Gaussian bar is narrower, 354 against 540, because Gaussian tails fall faster than Laplace tails. Equal scale is not equal privacy, though. <a href="#sec-util-epsilon" class="quarto-xref"><span>Section 7.5</span></a> converts this share of <span class="math inline">\(\rho\)</span> to an <span class="math inline">\(\varepsilon\)</span> of about 1 at a small <span class="math inline">\(\delta\)</span>. That is five times the Laplace share, so the two pages compare different guarantees.</p>
+<p>The exchange rate also differs. Because the Gaussian scale is the sensitivity over <span class="math inline">\(\sqrt{2\rho}\)</span>, halving the error bar means quadrupling <span class="math inline">\(\rho\)</span>, not doubling it. The script confirms this at <span class="math inline">\(\rho = 0.4\)</span>.</p>
+<pre class="text"><code>gaussian count at rho 0.4: Integer Gaussian scale=90 95% accuracy=177</code></pre>
+<p>So on a single count, Gaussian noise under zCDP is no bargain. Its advantage appears when a query answers many things at once, which is the subject of the next section.</p>
+</section>
+<section id="sec-util-sensitivity" class="level2" data-number="7.4">
+<h2 data-number="7.4" class="anchored" data-anchor-id="sec-util-sensitivity"><span class="header-section-number">7.4</span> One person in many groups: L1 against L2</h2>
+<p>A grouped count returns a vector, one number per group, and the noise is calibrated to how far one person can move the whole vector. Laplace noise measures that distance in the <span class="math inline">\(L_1\)</span> norm, which adds up the changes across groups. Gaussian noise measures it in the <span class="math inline">\(L_2\)</span> norm, which adds up their squares and takes the root. The documentation puts it in one picture. Walking between two corners of a unit square takes 2 along the streets and <span class="math inline">\(\sqrt 2\)</span> as the crow flies. In <span class="math inline">\(d\)</span> dimensions the gap grows to <span class="math inline">\(d\)</span> against <span class="math inline">\(\sqrt d\)</span>.</p>
+<p>The survey shows the gap at its most useful. A person answers at most once per quarter, so their 36 records fall in 36 different year-and-quarter groups, each changed by one. The <span class="math inline">\(L_1\)</span> distance between the two count vectors is 36, but the <span class="math inline">\(L_2\)</span> distance is <span class="math inline">\(\sqrt{36} = 6\)</span>. Without being told that, the library must assume the worst case, in which all 36 records land in one group, and then both distances are 36. <a href="../part02-tabular-data/05-identifier-truncation.html">Identifier truncation and bounds</a> introduced <code>dp.polars.Bound</code> for exactly this statement, and the excerpt uses it.</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb10" data-excerpt="util-bounded-context"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> bounded_context(frame: pl.LazyFrame, privacy_loss: <span class="bu">tuple</span>[Measure, Any]) <span class="op">-&gt;</span> dp.Context:</span>
+<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a>    <span class="co">"""A budget of either kind, with the privacy unit also bounded to one record per year and quarter."""</span></span>
+<span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> dp.Context.compositor(</span>
+<span id="cb10-4"><a href="#cb10-4" aria-hidden="true" tabindex="-1"></a>        data<span class="op">=</span>frame,</span>
+<span id="cb10-5"><a href="#cb10-5" aria-hidden="true" tabindex="-1"></a>        privacy_unit<span class="op">=</span>dp.unit_of(</span>
+<span id="cb10-6"><a href="#cb10-6" aria-hidden="true" tabindex="-1"></a>            contributions<span class="op">=</span>[</span>
+<span id="cb10-7"><a href="#cb10-7" aria-hidden="true" tabindex="-1"></a>                dp.polars.Bound(by<span class="op">=</span>[], per_group<span class="op">=</span>CONTRIBUTIONS),  <span class="co"># at most 36 records overall</span></span>
+<span id="cb10-8"><a href="#cb10-8" aria-hidden="true" tabindex="-1"></a>                dp.polars.Bound(by<span class="op">=</span>[<span class="st">"YEAR"</span>, <span class="st">"QUARTER"</span>], per_group<span class="op">=</span><span class="dv">1</span>),  <span class="co"># and one in each year and quarter</span></span>
+<span id="cb10-9"><a href="#cb10-9" aria-hidden="true" tabindex="-1"></a>            ]</span>
+<span id="cb10-10"><a href="#cb10-10" aria-hidden="true" tabindex="-1"></a>        ),</span>
+<span id="cb10-11"><a href="#cb10-11" aria-hidden="true" tabindex="-1"></a>        privacy_loss<span class="op">=</span>privacy_loss,</span>
+<span id="cb10-12"><a href="#cb10-12" aria-hidden="true" tabindex="-1"></a>        split_evenly_over<span class="op">=</span>QUERIES,</span>
+<span id="cb10-13"><a href="#cb10-13" aria-hidden="true" tabindex="-1"></a>    )</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>The budget now carries a <span class="math inline">\(\delta\)</span>, because the query groups by keys the library has not been given. As <a href="../part02-tabular-data/04-grouping.html">Grouping</a> explained, the context then releases only the groups whose noisy count clears a threshold. The small probability <span class="math inline">\(\delta\)</span> pays for the chance that a group of one person slips through. The script summarizes the quarterly count three ways. The first is under zCDP with the plain bound of 36 contributions, the second adds the per-group bound, and the third uses the per-group bound under pure DP.</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb11" data-excerpt="util-grouped"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a>bounded <span class="op">=</span> bounded_context(frame, dp.loss_of(rho<span class="op">=</span>RHO, delta<span class="op">=</span>DELTA))</span>
+<span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a>count_by_quarter <span class="op">=</span> bounded.query().group_by(<span class="st">"YEAR"</span>, <span class="st">"QUARTER"</span>).agg(dp.<span class="bu">len</span>(signed<span class="op">=</span><span class="va">True</span>))</span>
+<span id="cb11-3"><a href="#cb11-3" aria-hidden="true" tabindex="-1"></a>grouped_summary <span class="op">=</span> count_by_quarter.summarize(alpha<span class="op">=</span>ALPHA)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<pre class="text"><code>privacy loss with a threshold: (Approximate(ZeroConcentratedDivergence), (0.1, 1e-07))
+grouped count, 36 contributions: Integer Gaussian scale=180 95% accuracy=354 threshold=1133
+grouped count, 1 per year and quarter: Integer Gaussian scale=30 95% accuracy=60 threshold=184
+grouped count, 1 per year and quarter, pure DP: Integer Laplace scale=180 95% accuracy=539.731 threshold=3712
+true groups: 36  smallest 82,504  largest 131,656</code></pre>
+<p>The per-group bound cuts the Gaussian scale from 180 to 30, the factor of six that the arithmetic predicted. The threshold falls with it, from 1,133 to 184. Under pure DP the same bound changes nothing, because the <span class="math inline">\(L_1\)</span> distance is 36 either way, and the Laplace scale stays at 180. The thresholds are far below the smallest quarterly count of 82,504, so every group is released and the error bar of 60 is what the table buys. <a href="../../book-full/part03-dp-foundations/03-laplace-gaussian.html">The full edition’s chapter on the two mechanisms</a> proves why Gaussian noise scales with the <span class="math inline">\(L_2\)</span> sensitivity and compares the two in many dimensions.</p>
+<p>The lesson generalizes beyond this survey. Whenever a person’s records are spread thinly over many groups, say one purchase per day, the <span class="math inline">\(L_2\)</span> sensitivity is far below the <span class="math inline">\(L_1\)</span> one. Then Gaussian noise under zCDP is the right tool. The gain depends on telling the library about the spread with a bound per group. A bound you cannot justify from public knowledge must be enforced by truncation first, as the identifier truncation chapter showed.</p>
+</section>
+<section id="sec-util-epsilon" class="level2" data-number="7.5">
+<h2 data-number="7.5" class="anchored" data-anchor-id="sec-util-epsilon"><span class="header-section-number">7.5</span> Stating the guarantee in epsilon</h2>
+<p>A budget in <span class="math inline">\(\rho\)</span> is convenient for accounting but unfamiliar to most readers of a release. OpenDP converts it to the usual pair <span class="math inline">\((\varepsilon, \delta)\)</span> with two combinators, which <a href="../part03-framework/11-combinators.html">Combinators</a> covers in general. The first, <code>make_zCDP_to_approxDP</code>, turns a measurement’s zCDP guarantee into a curve of <span class="math inline">\(\varepsilon\)</span> against <span class="math inline">\(\delta\)</span>. The second, <code>make_fix_delta</code>, picks a <span class="math inline">\(\delta\)</span> on that curve. The script applies them to a Gaussian measurement built by hand, whose scale is set so that a sensitivity of 1 costs exactly <span class="math inline">\(\rho\)</span>.</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb13" data-excerpt="util-epsilon"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> epsilon_of_rho(rho: <span class="bu">float</span>, delta: <span class="bu">float</span>) <span class="op">-&gt;</span> <span class="bu">float</span>:</span>
+<span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a>    <span class="co">"""The epsilon that OpenDP's conversion gives for rho-zCDP at delta, read off a Gaussian measurement."""</span></span>
+<span id="cb13-3"><a href="#cb13-3" aria-hidden="true" tabindex="-1"></a>    space <span class="op">=</span> dp.atom_domain(T<span class="op">=</span><span class="bu">float</span>, nan<span class="op">=</span><span class="va">False</span>), dp.absolute_distance(T<span class="op">=</span><span class="bu">float</span>)</span>
+<span id="cb13-4"><a href="#cb13-4" aria-hidden="true" tabindex="-1"></a>    gaussian <span class="op">=</span> dp.m.make_gaussian(<span class="op">*</span>space, scale<span class="op">=</span><span class="dv">1</span> <span class="op">/</span> math.sqrt(<span class="dv">2</span> <span class="op">*</span> rho))  <span class="co"># sensitivity 1 at this scale is rho-zCDP</span></span>
+<span id="cb13-5"><a href="#cb13-5" aria-hidden="true" tabindex="-1"></a>    approx <span class="op">=</span> dp.c.make_fix_delta(dp.c.make_zCDP_to_approxDP(gaussian), delta)</span>
+<span id="cb13-6"><a href="#cb13-6" aria-hidden="true" tabindex="-1"></a>    epsilon, _ <span class="op">=</span> approx.<span class="bu">map</span>(<span class="fl">1.0</span>)</span>
+<span id="cb13-7"><a href="#cb13-7" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> <span class="bu">float</span>(epsilon)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<pre class="text"><code>rho=0.1 at delta=1e-07: epsilon=2.3484
+closed form rho + 2 sqrt(rho ln(1/delta)): 2.6391
+rho=0.02 (one query) at delta=1e-07: epsilon=0.9951
+the whole context converted: epsilon=2.3484 delta=1e-07</code></pre>
+<p>Take <span class="math inline">\(\delta = 10^{-7}\)</span>. The whole budget of <span class="math inline">\(\rho = 0.1\)</span> is then worth <span class="math inline">\(\varepsilon = 2.35\)</span>. One query’s share of <span class="math inline">\(\rho = 0.02\)</span> is worth about <span class="math inline">\(\varepsilon = 1\)</span> at the same <span class="math inline">\(\delta\)</span>. The textbook conversion is <span id="eq-auto-07utilityandnoise-1"><span class="math display">\[\varepsilon = \rho + 2\sqrt{\rho \ln(1/\delta)}, \tag{7.1}\]</span></span> which gives 2.64 here, and OpenDP’s smaller number is not a mistake. The library uses a tighter conversion that optimizes over the orders of the Rényi divergence, which <a href="../../book-full/part04-privacy-accounting/02-rdp-conversions.html">the full edition’s chapter on conversions</a> derives. You can also convert a whole context rather than one measurement. Its <code>accountant</code> attribute is the measurement that composes every query. The same two combinators applied to it give the same 2.35, which is the number to write in the release’s statement.</p>
+<p>The <span class="math inline">\(\delta\)</span> here is your choice. It should be far below one over the number of people, because a <span class="math inline">\(\delta\)</span> of that size would allow a mechanism that publishes one person’s record outright. With 1.7 million people, <span class="math inline">\(10^{-7}\)</span> is a defensible value. This <span class="math inline">\(\delta\)</span> is a conversion cost, separate from the <span class="math inline">\(\delta\)</span> that paid for the threshold in the grouped query. A release that needs both should budget them both.</p>
+<p>A last detail is which accuracy the zCDP context reports. The Gaussian count’s summary said 354, and the continuous conversion at the same scale says 352.79. The context adds a discrete Gaussian to an integer count, so it reports the discrete accuracy, which <a href="../part03-framework/10-measurements.html">Measurements</a> explains when it builds the integer mechanisms. The difference is a rounding. But if you recompute an accuracy by hand from a scale, use the discrete function for counts to match what <code>summarize</code> prints.</p>
+</section>
+<section id="sec-util-signed" class="level2" data-number="7.6">
+<h2 data-number="7.6" class="anchored" data-anchor-id="sec-util-signed"><span class="header-section-number">7.6</span> Signed and unsigned counts</h2>
+<p>Every count on this page passed <code>signed=True</code>, and the reason is bias. A noisy count can come out negative when the true count is small, and OpenDP’s older behaviour was to raise such a value to zero. Version 0.16.0 adds the <code>signed</code> argument. Pass <code>signed=True</code>, and the count is cast to a signed integer before the noise, so a negative result is kept. Pass <code>signed=False</code>, and the result is clamped at zero. Leaving the argument out still clamps and prints a warning, because the default is about to change.</p>
+<p>Clamping looks harmless for one count, and for a single small cell it even reduces the error. The trouble starts when counts are added. A clamped count can be too high but never too low, so each small cell is biased upward, and a total over hundreds of cells piles those biases up. The OpenDP cookbook demonstrates this on a table of 400 cells, most of them nearly empty. There the clamped total overshoots on every repetition, while the signed total is right on average.</p>
+<p>A signed release can be clamped afterwards for display, because clamping a released value is post-processing and costs nothing. The rule is to release signed counts whenever anyone might sum, average or model them, and to tidy up the presentation last. The script makes the point in miniature. It counts an empty frame a thousand times at a fixed Gaussian scale of 30 through the framework API, which bypasses a context and so suits toy data only.</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb15" data-excerpt="util-clamping"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> mean_noisy_count_of_nobody(signed: <span class="bu">bool</span>, scale: <span class="bu">float</span>, repeats: <span class="bu">int</span>) <span class="op">-&gt;</span> <span class="bu">float</span>:</span>
+<span id="cb15-2"><a href="#cb15-2" aria-hidden="true" tabindex="-1"></a>    <span class="co">"""The mean of `repeats` noisy counts of an empty frame, at a fixed Gaussian scale, signed or clamped at zero."""</span></span>
+<span id="cb15-3"><a href="#cb15-3" aria-hidden="true" tabindex="-1"></a>    empty <span class="op">=</span> pl.LazyFrame(schema<span class="op">=</span>{<span class="st">"A"</span>: pl.Int32})</span>
+<span id="cb15-4"><a href="#cb15-4" aria-hidden="true" tabindex="-1"></a>    domain <span class="op">=</span> dp.with_margin(</span>
+<span id="cb15-5"><a href="#cb15-5" aria-hidden="true" tabindex="-1"></a>        dp.lazyframe_domain([dp.series_domain(<span class="st">"A"</span>, dp.atom_domain(T<span class="op">=</span><span class="st">"i32"</span>))]),</span>
+<span id="cb15-6"><a href="#cb15-6" aria-hidden="true" tabindex="-1"></a>        dp.polars.Margin(by<span class="op">=</span>[], max_length<span class="op">=</span><span class="dv">1000</span>),</span>
+<span id="cb15-7"><a href="#cb15-7" aria-hidden="true" tabindex="-1"></a>    )</span>
+<span id="cb15-8"><a href="#cb15-8" aria-hidden="true" tabindex="-1"></a>    count <span class="op">=</span> dp.m.make_private_lazyframe(</span>
+<span id="cb15-9"><a href="#cb15-9" aria-hidden="true" tabindex="-1"></a>        domain, dp.symmetric_distance(), dp.zero_concentrated_divergence(), empty.select(dp.<span class="bu">len</span>(signed<span class="op">=</span>signed)), scale</span>
+<span id="cb15-10"><a href="#cb15-10" aria-hidden="true" tabindex="-1"></a>    )</span>
+<span id="cb15-11"><a href="#cb15-11" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> <span class="bu">sum</span>(<span class="bu">int</span>(count(empty).collect().item()) <span class="cf">for</span> _ <span class="kw">in</span> <span class="bu">range</span>(repeats)) <span class="op">/</span> repeats</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<pre class="text"><code>dp.len() without signed: warns=True clamped=True
+expected clamped mean at scale 30: scale/sqrt(2 pi)=11.9683
+standard error of the signed mean: scale/sqrt(1000)=0.9487
+clamping experiment (one run): 1000 noisy counts of nobody at gaussian scale 30
+  unsigned mean 11.48  signed mean 1.02  (true count 0)</code></pre>
+<p>The true count is zero. The signed mean sits near zero, within the standard error of 0.95 that a thousand draws at scale 30 leave. The unsigned mean sits near 12, which is the mean of the positive half of a Gaussian of scale 30, and no number of repetitions brings it down. A table of empty and near-empty cells released unsigned carries that 12 in every cell.</p>
+</section>
+<section id="sec-util-choose" class="level2" data-number="7.7">
+<h2 data-number="7.7" class="anchored" data-anchor-id="sec-util-choose"><span class="header-section-number">7.7</span> Which noise to choose</h2>
+<p>The choice comes down to what you release and to whom you must explain it. <a href="#tbl-util-choice" class="quarto-xref">Table&nbsp;<span>7.1</span></a> gathers the cases of this chapter.</p>
+<div id="tbl-util-choice" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-tbl figure">
+<figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl" id="tbl-util-choice-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Table&nbsp;7.1: Which noise to choose, by what is released.
+</figcaption>
+<div aria-describedby="tbl-util-choice-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<table class="caption-top table">
+<colgroup>
+<col style="width: 33%">
+<col style="width: 33%">
+<col style="width: 33%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>Situation</th>
+<th>Noise and budget</th>
+<th>Why</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>One count, sum or mean, and a guarantee in pure <span class="math inline">\(\varepsilon\)</span></td>
+<td>Laplace under <code>dp.loss_of(epsilon=...)</code></td>
+<td>The guarantee has no <span class="math inline">\(\delta\)</span> and is the easiest to state</td>
+</tr>
+<tr class="even">
+<td>A grouped table where a person touches many groups</td>
+<td>Gaussian under <code>dp.loss_of(rho=..., delta=...)</code> with a <code>Bound</code> per group</td>
+<td>The <span class="math inline">\(L_2\)</span> sensitivity grows with the root of the number of groups</td>
+</tr>
+<tr class="odd">
+<td>Many queries composed into one release</td>
+<td>Gaussian under zCDP</td>
+<td>Budgets in <span class="math inline">\(\rho\)</span> add up tightly and convert once at the end</td>
+</tr>
+<tr class="even">
+<td>A release that others will analyse assuming normal errors</td>
+<td>Gaussian</td>
+<td>The noise is normal, so standard intervals apply</td>
+</tr>
+<tr class="odd">
+<td>A guarantee that must be reported as <span class="math inline">\((\varepsilon, \delta)\)</span></td>
+<td>Either; convert <span class="math inline">\(\rho\)</span> with <code>make_zCDP_to_approxDP</code> and <code>make_fix_delta</code></td>
+<td>OpenDP’s conversion is tighter than the closed form</td>
+</tr>
+<tr class="even">
+<td>Counts that anyone might add up</td>
+<td>Either, with <code>signed=True</code></td>
+<td>Clamping at zero biases totals upward</td>
+</tr>
+</tbody>
+</table>
+</div>
+</figure>
+</div>
+<p>Two cautions go with the table. Gaussian noise cannot satisfy pure DP, so a policy that demands <span class="math inline">\(\delta = 0\)</span> rules it out whatever the sensitivity. And the gain from the <span class="math inline">\(L_2\)</span> sensitivity exists only when the library knows how a person’s records spread across groups. So the per-group bound is part of the choice, not an optional extra.</p>
+</section>
+<section id="sec-util-run" class="level2" data-number="7.8">
+<h2 data-number="7.8" class="anchored" data-anchor-id="sec-util-run"><span class="header-section-number">7.8</span> The releases of one run</h2>
+<p>The script ends by releasing the count under both budgets and the quarterly table under the bounded zCDP context, and reads each against its error bar.</p>
+<pre class="text"><code>released (one run):
+  laplace count 3,811,867  (true 3,811,932, within 539.7 with probability 0.95)
+  gaussian count 3,811,994  (true 3,811,932, within 354.0 with probability 0.95)
+  2005 Q1 count 87,442  (true 87,372, within 60)
+  2005 Q2 count 86,457  (true 86,469, within 60)
+  2005 Q3 count 83,536  (true 83,518, within 60)
+  2005 Q4 count 84,746  (true 84,739, within 60)
+  groups released 36 of 36; within 60 of the truth: 32</code></pre>
+<p>Both counts landed well inside their bars, as they should about nineteen times in twenty. Of the 36 quarterly counts, 32 landed within their bar. The first quarter of 2005 is one of the misses. That is what an error bar at <span class="math inline">\(\alpha = 0.05\)</span> means across a table: about one cell in twenty falls outside it, and you cannot tell which. Comparing with the truth is possible here only because the survey is public. On your own data you make these choices on the scales and accuracies, which cost nothing to read, and release once.</p>
+</section>
+<section id="summary" class="level2" data-number="7.9">
+<h2 data-number="7.9" class="anchored" data-anchor-id="summary"><span class="header-section-number">7.9</span> Summary</h2>
+<div id="tbl-util-summary" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-tbl figure">
+<figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl" id="tbl-util-summary-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Table&nbsp;7.2: The calls and concepts of this chapter, what each does, and the rule of thumb that goes with it.
+</figcaption>
+<div aria-describedby="tbl-util-summary-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<table class="caption-top table">
+<colgroup>
+<col style="width: 33%">
+<col style="width: 33%">
+<col style="width: 33%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>Call or concept</th>
+<th>What it does</th>
+<th>Rule of thumb</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><code>summarize(alpha=0.05)</code></td>
+<td>The scale and the 95% accuracy of each statistic, before release</td>
+<td>Read it before <code>release()</code>; it costs nothing</td>
+</tr>
+<tr class="even">
+<td><code>laplacian_scale_to_accuracy</code>, <code>gaussian_scale_to_accuracy</code></td>
+<td>A continuous scale to a 95% error bar</td>
+<td>For sums and means of floats</td>
+</tr>
+<tr class="odd">
+<td><code>discrete_laplacian_scale_to_accuracy</code>, <code>discrete_gaussian_scale_to_accuracy</code></td>
+<td>The same for integer noise</td>
+<td>For counts, to match <code>summarize</code></td>
+</tr>
+<tr class="even">
+<td><code>accuracy_to_laplacian_scale</code> and the three others</td>
+<td>A target error bar to the scale it needs</td>
+<td>Divide the sensitivity by the scale to see the <span class="math inline">\(\varepsilon\)</span> it costs</td>
+</tr>
+<tr class="odd">
+<td>The error bar</td>
+<td>Covers the noise only</td>
+<td>Clipping, imputation, truncation and resizing bias the input, and the bar does not see it</td>
+</tr>
+<tr class="even">
+<td><code>dp.loss_of(epsilon=...)</code></td>
+<td>Pure DP; the context adds Laplace noise</td>
+<td>Halving the bar doubles <span class="math inline">\(\varepsilon\)</span></td>
+</tr>
+<tr class="odd">
+<td><code>dp.loss_of(rho=...)</code></td>
+<td>zCDP; the context adds Gaussian noise</td>
+<td>Halving the bar quadruples <span class="math inline">\(\rho\)</span></td>
+</tr>
+<tr class="even">
+<td><code>dp.polars.Bound(by=[...], per_group=1)</code></td>
+<td>One record per person per group</td>
+<td>Cuts the <span class="math inline">\(L_2\)</span> sensitivity to the root of the number of groups; does nothing for Laplace</td>
+</tr>
+<tr class="odd">
+<td><code>make_zCDP_to_approxDP</code> then <code>make_fix_delta</code></td>
+<td><span class="math inline">\(\rho\)</span> to <span class="math inline">\((\varepsilon, \delta)\)</span>, tighter than the closed form</td>
+<td>Apply to <code>context.accountant</code> for the whole release</td>
+</tr>
+<tr class="even">
+<td><code>signed=True</code></td>
+<td>Keeps negative noisy counts</td>
+<td>Always, if the counts may be summed; clamp for display afterwards</td>
+</tr>
+</tbody>
+</table>
+</div>
+</figure>
+</div>
+</section>
+<section id="references" class="level2" data-number="7.10">
+<h2 data-number="7.10" class="anchored" data-anchor-id="references"><span class="header-section-number">7.10</span> References</h2>
+<ul>
+<li>OpenDP documentation: “Assessing Utility” in Getting Started, “Gaussian Noise” in the Polars user guide, and “Aggregation” in the Polars expressions guide for <code>signed</code>. The OpenDP Cookbook’s “Signed Counts: Why Clipping at Zero Biases Totals” is the experiment the signed-counts section summarizes.</li>
+<li>Bun and Steinke, “Concentrated Differential Privacy: Simplifications, Extensions, and Lower Bounds” (2016): zCDP, the Gaussian mechanism under it, and the conversion to <span class="math inline">\((\varepsilon, \delta)\)</span>.</li>
+<li>Canonne, Kamath and Steinke, “The Discrete Gaussian for Differential Privacy” (2020): the integer Gaussian that the context adds to counts and its tail bounds.</li>
+<li>Kamath, Mouzakis, Regehr, Singhal and Steinke, “A Bias-Variance-Privacy Trilemma for Statistical Estimation” (2023): why the bias of clipping cannot be removed in general, cited by the documentation’s note on accuracy.</li>
+<li>The full edition’s chapters on <a href="../../book-full/part03-dp-foundations/03-laplace-gaussian.html">the Laplace and Gaussian mechanisms</a>, <a href="../../book-full/part04-privacy-accounting/03-concentrated-dp.html">concentrated DP</a> and <a href="../../book-full/part04-privacy-accounting/02-rdp-conversions.html">conversions to (ε, δ)</a> derive the results this chapter states.</li>
+</ul>
+
+
+</section>
+
+</main> <!-- /main -->
+<script id="quarto-html-after-body" type="application/javascript">
+  window.document.addEventListener("DOMContentLoaded", function (event) {
+    const icon = "";
+    const anchorJS = new window.AnchorJS();
+    anchorJS.options = {
+      placement: 'right',
+      icon: icon
+    };
+    anchorJS.add('.anchored');
+    const isCodeAnnotation = (el) => {
+      for (const clz of el.classList) {
+        if (clz.startsWith('code-annotation-')) {                     
+          return true;
+        }
+      }
+      return false;
+    }
+    const onCopySuccess = function(e) {
+      // button target
+      const button = e.trigger;
+      // don't keep focus
+      button.blur();
+      // flash "checked"
+      button.classList.add('code-copy-button-checked');
+      var currentTitle = button.getAttribute("title");
+      button.setAttribute("title", "Copied!");
+      let tooltip;
+      if (window.bootstrap) {
+        button.setAttribute("data-bs-toggle", "tooltip");
+        button.setAttribute("data-bs-placement", "left");
+        button.setAttribute("data-bs-title", "Copied!");
+        tooltip = new bootstrap.Tooltip(button, 
+          { trigger: "manual", 
+            customClass: "code-copy-button-tooltip",
+            offset: [0, -8]});
+        tooltip.show();    
+      }
+      setTimeout(function() {
+        if (tooltip) {
+          tooltip.hide();
+          button.removeAttribute("data-bs-title");
+          button.removeAttribute("data-bs-toggle");
+          button.removeAttribute("data-bs-placement");
+        }
+        button.setAttribute("title", currentTitle);
+        button.classList.remove('code-copy-button-checked');
+      }, 1000);
+      // clear code selection
+      e.clearSelection();
+    }
+    const getTextToCopy = function(trigger) {
+      const outerScaffold = trigger.parentElement.cloneNode(true);
+      const codeEl = outerScaffold.querySelector('code');
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
+        }
+      }
+      return codeEl.innerText;
+    }
+    const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
+      text: getTextToCopy
+    });
+    clipboard.on('success', onCopySuccess);
+    if (window.document.getElementById('quarto-embedded-source-code-modal')) {
+      const clipboardModal = new window.ClipboardJS('.code-copy-button[data-in-quarto-modal]', {
+        text: getTextToCopy,
+        container: window.document.getElementById('quarto-embedded-source-code-modal')
+      });
+      clipboardModal.on('success', onCopySuccess);
+    }
+      var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+      var mailtoRegex = new RegExp(/^mailto:/);
+        var filterRegex = new RegExp('/' + window.location.host + '/');
+      var isInternal = (href) => {
+          return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+      }
+      // Inspect non-navigation links and adorn them if external
+     var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool):not(.about-link)');
+      for (var i=0; i<links.length; i++) {
+        const link = links[i];
+        if (!isInternal(link.href)) {
+          // undo the damage that might have been done by quarto-nav.js in the case of
+          // links that we want to consider external
+          if (link.dataset.originalHref !== undefined) {
+            link.href = link.dataset.originalHref;
+          }
+        }
+      }
+    function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+      const config = {
+        allowHTML: true,
+        maxWidth: 500,
+        delay: 100,
+        arrow: false,
+        appendTo: function(el) {
+            return el.parentElement;
+        },
+        interactive: true,
+        interactiveBorder: 10,
+        theme: 'quarto',
+        placement: 'bottom-start',
+      };
+      if (contentFn) {
+        config.content = contentFn;
+      }
+      if (onTriggerFn) {
+        config.onTrigger = onTriggerFn;
+      }
+      if (onUntriggerFn) {
+        config.onUntrigger = onUntriggerFn;
+      }
+      window.tippy(el, config); 
+    }
+    const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+    for (var i=0; i<noterefs.length; i++) {
+      const ref = noterefs[i];
+      tippyHover(ref, function() {
+        // use id or data attribute instead here
+        let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+        try { href = new URL(href).hash; } catch {}
+        const id = href.replace(/^#\/?/, "");
+        const note = window.document.getElementById(id);
+        if (note) {
+          return note.innerHTML;
+        } else {
+          return "";
+        }
+      });
+    }
+    const xrefs = window.document.querySelectorAll('a.quarto-xref');
+    const processXRef = (id, note) => {
+      // Strip column container classes
+      const stripColumnClz = (el) => {
+        el.classList.remove("page-full", "page-columns");
+        if (el.children) {
+          for (const child of el.children) {
+            stripColumnClz(child);
+          }
+        }
+      }
+      stripColumnClz(note)
+      if (id === null || id.startsWith('sec-')) {
+        // Special case sections, only their first couple elements
+        const container = document.createElement("div");
+        if (note.children && note.children.length > 2) {
+          container.appendChild(note.children[0].cloneNode(true));
+          for (let i = 1; i < note.children.length; i++) {
+            const child = note.children[i];
+            if (child.tagName === "P" && child.innerText === "") {
+              continue;
+            } else {
+              container.appendChild(child.cloneNode(true));
+              break;
+            }
+          }
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(container);
+          }
+          return container.innerHTML
+        } else {
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(note);
+          }
+          return note.innerHTML;
+        }
+      } else {
+        // Remove any anchor links if they are present
+        const anchorLink = note.querySelector('a.anchorjs-link');
+        if (anchorLink) {
+          anchorLink.remove();
+        }
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(note);
+        }
+        if (note.classList.contains("callout")) {
+          return note.outerHTML;
+        } else {
+          return note.innerHTML;
+        }
+      }
+    }
+    for (var i=0; i<xrefs.length; i++) {
+      const xref = xrefs[i];
+      tippyHover(xref, undefined, function(instance) {
+        instance.disable();
+        let url = xref.getAttribute('href');
+        let hash = undefined; 
+        if (url.startsWith('#')) {
+          hash = url;
+        } else {
+          try { hash = new URL(url).hash; } catch {}
+        }
+        if (hash) {
+          const id = hash.replace(/^#\/?/, "");
+          const note = window.document.getElementById(id);
+          if (note !== null) {
+            try {
+              const html = processXRef(id, note.cloneNode(true));
+              instance.setContent(html);
+            } finally {
+              instance.enable();
+              instance.show();
+            }
+          } else {
+            // See if we can fetch this
+            fetch(url.split('#')[0])
+            .then(res => res.text())
+            .then(html => {
+              const parser = new DOMParser();
+              const htmlDoc = parser.parseFromString(html, "text/html");
+              const note = htmlDoc.getElementById(id);
+              if (note !== null) {
+                const html = processXRef(id, note);
+                instance.setContent(html);
+              } 
+            }).finally(() => {
+              instance.enable();
+              instance.show();
+            });
+          }
+        } else {
+          // See if we can fetch a full url (with no hash to target)
+          // This is a special case and we should probably do some content thinning / targeting
+          fetch(url)
+          .then(res => res.text())
+          .then(html => {
+            const parser = new DOMParser();
+            const htmlDoc = parser.parseFromString(html, "text/html");
+            const note = htmlDoc.querySelector('main.content');
+            if (note !== null) {
+              // This should only happen for chapter cross references
+              // (since there is no id in the URL)
+              // remove the first header
+              if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
+                note.children[0].remove();
+              }
+              const html = processXRef(null, note);
+              instance.setContent(html);
+            } 
+          }).finally(() => {
+            instance.enable();
+            instance.show();
+          });
+        }
+      }, function(instance) {
+      });
+    }
+        let selectedAnnoteEl;
+        const selectorForAnnotation = ( cell, annotation) => {
+          let cellAttr = 'data-code-cell="' + cell + '"';
+          let lineAttr = 'data-code-annotation="' +  annotation + '"';
+          const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+          return selector;
+        }
+        const selectCodeLines = (annoteEl) => {
+          const doc = window.document;
+          const targetCell = annoteEl.getAttribute("data-target-cell");
+          const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+          const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+          const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+          const lineIds = lines.map((line) => {
+            return targetCell + "-" + line;
+          })
+          let top = null;
+          let height = null;
+          let parent = null;
+          if (lineIds.length > 0) {
+              //compute the position of the single el (top and bottom and make a div)
+              const el = window.document.getElementById(lineIds[0]);
+              top = el.offsetTop;
+              height = el.offsetHeight;
+              parent = el.parentElement.parentElement;
+            if (lineIds.length > 1) {
+              const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+              const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+              height = bottom - top;
+            }
+            if (top !== null && height !== null && parent !== null) {
+              // cook up a div (if necessary) and position it 
+              let div = window.document.getElementById("code-annotation-line-highlight");
+              if (div === null) {
+                div = window.document.createElement("div");
+                div.setAttribute("id", "code-annotation-line-highlight");
+                div.style.position = 'absolute';
+                parent.appendChild(div);
+              }
+              div.style.top = top - 2 + "px";
+              div.style.height = height + 4 + "px";
+              div.style.left = 0;
+              let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+              if (gutterDiv === null) {
+                gutterDiv = window.document.createElement("div");
+                gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+                gutterDiv.style.position = 'absolute';
+                const codeCell = window.document.getElementById(targetCell);
+                const gutter = codeCell.querySelector('.code-annotation-gutter');
+                gutter.appendChild(gutterDiv);
+              }
+              gutterDiv.style.top = top - 2 + "px";
+              gutterDiv.style.height = height + 4 + "px";
+            }
+            selectedAnnoteEl = annoteEl;
+          }
+        };
+        const unselectCodeLines = () => {
+          const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+          elementsIds.forEach((elId) => {
+            const div = window.document.getElementById(elId);
+            if (div) {
+              div.remove();
+            }
+          });
+          selectedAnnoteEl = undefined;
+        };
+          // Handle positioning of the toggle
+      window.addEventListener(
+        "resize",
+        throttle(() => {
+          elRect = undefined;
+          if (selectedAnnoteEl) {
+            selectCodeLines(selectedAnnoteEl);
+          }
+        }, 10)
+      );
+      function throttle(fn, ms) {
+      let throttle = false;
+      let timer;
+        return (...args) => {
+          if(!throttle) { // first call gets through
+              fn.apply(this, args);
+              throttle = true;
+          } else { // all the others get throttled
+              if(timer) clearTimeout(timer); // cancel #2
+              timer = setTimeout(() => {
+                fn.apply(this, args);
+                timer = throttle = false;
+              }, ms);
+          }
+        };
+      }
+        // Attach click handler to the DT
+        const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+        for (const annoteDlNode of annoteDls) {
+          annoteDlNode.addEventListener('click', (event) => {
+            const clickedEl = event.target;
+            if (clickedEl !== selectedAnnoteEl) {
+              unselectCodeLines();
+              const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+              if (activeEl) {
+                activeEl.classList.remove('code-annotation-active');
+              }
+              selectCodeLines(clickedEl);
+              clickedEl.classList.add('code-annotation-active');
+            } else {
+              // Unselect the line
+              unselectCodeLines();
+              clickedEl.classList.remove('code-annotation-active');
+            }
+          });
+        }
+    const findCites = (el) => {
+      const parentEl = el.parentElement;
+      if (parentEl) {
+        const cites = parentEl.dataset.cites;
+        if (cites) {
+          return {
+            el,
+            cites: cites.split(' ')
+          };
+        } else {
+          return findCites(el.parentElement)
+        }
+      } else {
+        return undefined;
+      }
+    };
+    var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+    for (var i=0; i<bibliorefs.length; i++) {
+      const ref = bibliorefs[i];
+      const citeInfo = findCites(ref);
+      if (citeInfo) {
+        tippyHover(citeInfo.el, function() {
+          var popup = window.document.createElement('div');
+          citeInfo.cites.forEach(function(cite) {
+            var citeDiv = window.document.createElement('div');
+            citeDiv.classList.add('hanging-indent');
+            citeDiv.classList.add('csl-entry');
+            var biblioDiv = window.document.getElementById('ref-' + cite);
+            if (biblioDiv) {
+              citeDiv.innerHTML = biblioDiv.innerHTML;
+            }
+            popup.appendChild(citeDiv);
+          });
+          return popup.innerHTML;
+        });
+      }
+    }
+  });
+  </script>
+<nav class="page-navigation">
+  <div class="nav-page nav-page-previous">
+      <a href="../part02-tabular-data/06-preparing-microdata.html" class="pagination-link" aria-label="Preparing microdata">
+        <i class="bi bi-arrow-left-short"></i> <span class="nav-page-text"><span class="chapter-number">6</span>&nbsp; <span class="chapter-title">Preparing microdata</span></span>
+      </a>          
+  </div>
+  <div class="nav-page nav-page-next">
+      <a href="../part03-framework/00-introduction.html" class="pagination-link" aria-label="The framework">
+        <span class="nav-page-text">The framework</span> <i class="bi bi-arrow-right-short"></i>
+      </a>
+  </div>
+</nav>
+</div> <!-- /content -->
+
+
+
+
+</body></html>

@@ -1,0 +1,1131 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.10.19">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+
+<title>5&nbsp; Identifier truncation and bounds – Differential Privacy with OpenDP</title>
+<style>
+/* Default styles provided by pandoc.
+** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
+*/
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: 1.5em;}
+div.column{flex: auto;}
+@media screen {
+div.columns{gap: min(4vw, 1.5em);}
+div.column{overflow-x: auto;}
+}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+/* CSS for syntax highlighting */
+html { -webkit-text-size-adjust: 100%; }
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+</style>
+
+
+<script src="../site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="../site_libs/quarto-nav/headroom.min.js"></script>
+<script src="../site_libs/clipboard/clipboard.min.js"></script>
+<script src="../site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="../site_libs/quarto-search/fuse.min.js"></script>
+<script src="../site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="../">
+<link href="../part02-tabular-data/06-preparing-microdata.html" rel="next">
+<link href="../part02-tabular-data/04-grouping.html" rel="prev">
+<script src="../site_libs/quarto-html/quarto.js" type="module"></script>
+<script src="../site_libs/quarto-html/tabsets/tabsets.js" type="module"></script>
+<script src="../site_libs/quarto-html/popper.min.js"></script>
+<script src="../site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="../site_libs/quarto-html/anchor.min.js"></script>
+<link href="../site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="../site_libs/quarto-html/quarto-syntax-highlighting-bf27225e3a48a9273f3daa8f8e829971.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="../site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="../site_libs/bootstrap/bootstrap-78f503ea39f784e8964cd205807fbe37.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
+<script id="quarto-search-options" type="application/json">{
+  "location": "sidebar",
+  "copy-button": false,
+  "collapse-after": 3,
+  "panel-placement": "start",
+  "type": "textbox",
+  "limit": 50,
+  "keyboard-shortcut": [
+    "f",
+    "/",
+    "s"
+  ],
+  "show-item-context": false,
+  "language": {
+    "search-no-results-text": "No results",
+    "search-matching-documents-text": "matching documents",
+    "search-copy-link-title": "Copy link to search",
+    "search-hide-matches-text": "Hide additional matches",
+    "search-more-match-text": "more match in this document",
+    "search-more-matches-text": "more matches in this document",
+    "search-clear-button-title": "Clear",
+    "search-text-placeholder": "",
+    "search-detached-cancel-button-title": "Cancel",
+    "search-submit-button-title": "Submit",
+    "search-label": "Search"
+  }
+}</script>
+
+  <script src="https://cdnjs.cloudflare.com/polyfill/v3/polyfill.min.js?features=es6"></script>
+  <script defer="" src="https://cdn.jsdelivr.net/npm/mathjax@4/tex-chtml.js" type="text/javascript"></script>
+
+<script type="text/javascript">
+const typesetMath = (el) => {
+  if (window.MathJax) {
+    // MathJax Typeset
+    window.MathJax.typeset([el]);
+  } else if (window.katex) {
+    // KaTeX Render
+    var mathElements = el.getElementsByClassName("math");
+    var macros = [];
+    for (var i = 0; i < mathElements.length; i++) {
+      var texText = mathElements[i].firstChild;
+      if (mathElements[i].tagName == "SPAN" && texText && texText.data) {
+        window.katex.render(texText.data, mathElements[i], {
+          displayMode: mathElements[i].classList.contains('display'),
+          throwOnError: false,
+          macros: macros,
+          fleqn: false
+        });
+      }
+    }
+  }
+}
+window.Quarto = {
+  typesetMath
+};
+</script>
+
+</head>
+
+<body class="nav-sidebar floating quarto-light">
+
+<div id="quarto-search-results"></div>
+  <header id="quarto-header" class="headroom fixed-top">
+  <nav class="quarto-secondary-nav">
+    <div class="container-fluid d-flex">
+      <button type="button" class="quarto-btn-toggle btn" data-bs-toggle="collapse" role="button" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+        <i class="bi bi-layout-text-sidebar-reverse"></i>
+      </button>
+        <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../part02-tabular-data/00-introduction.html">Tabular data</a></li><li class="breadcrumb-item"><a href="../part02-tabular-data/05-identifier-truncation.html"><span class="chapter-number">5</span>&nbsp; <span class="chapter-title">Identifier truncation and bounds</span></a></li></ol></nav>
+        <a class="flex-grow-1" role="navigation" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">      
+        </a>
+      <button type="button" class="btn quarto-search-button" aria-label="Search" onclick="window.quartoOpenSearch();">
+        <i class="bi bi-search"></i>
+      </button>
+    </div>
+  </nav>
+</header>
+<!-- content -->
+<div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article">
+<!-- sidebar -->
+  <nav id="quarto-sidebar" class="sidebar collapse collapse-horizontal quarto-sidebar-collapse-item sidebar-navigation floating overflow-auto">
+    <div class="pt-lg-2 mt-2 text-left sidebar-header">
+    <div class="sidebar-title mb-0 py-0">
+      <a href="../">Differential Privacy with OpenDP</a> 
+    </div>
+      </div>
+        <div class="mt-2 flex-shrink-0 align-items-center">
+        <div class="sidebar-search">
+        <div id="quarto-search" class="" title="Search"></div>
+        </div>
+        </div>
+    <div class="sidebar-menu-container"> 
+    <ul class="list-unstyled mt-1">
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../index.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Preface</span></a>
+  </div>
+</li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a href="../part01-getting-started/00-introduction.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Getting started</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-1" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-1" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part01-getting-started/01-first-release.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">1</span>&nbsp; <span class="chapter-title">A first release</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part01-getting-started/02-the-data-and-the-context.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">2</span>&nbsp; <span class="chapter-title">The data and the context</span></span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a href="../part02-tabular-data/00-introduction.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Tabular data</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-2" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-2" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part02-tabular-data/03-essential-statistics.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">3</span>&nbsp; <span class="chapter-title">Essential statistics</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part02-tabular-data/04-grouping.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">4</span>&nbsp; <span class="chapter-title">Grouping</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part02-tabular-data/05-identifier-truncation.html" class="sidebar-item-text sidebar-link active">
+ <span class="menu-text"><span class="chapter-number">5</span>&nbsp; <span class="chapter-title">Identifier truncation and bounds</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part02-tabular-data/06-preparing-microdata.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">6</span>&nbsp; <span class="chapter-title">Preparing microdata</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part02-tabular-data/07-utility-and-noise.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">7</span>&nbsp; <span class="chapter-title">Assessing utility and choosing the noise</span></span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a href="../part03-framework/00-introduction.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">The framework</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-3" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-3" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part03-framework/08-a-framework-for-privacy.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">8</span>&nbsp; <span class="chapter-title">A framework to understand differential privacy</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part03-framework/09-transformations.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">9</span>&nbsp; <span class="chapter-title">Transformations</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part03-framework/10-measurements.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">10</span>&nbsp; <span class="chapter-title">Measurements</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part03-framework/11-combinators.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">11</span>&nbsp; <span class="chapter-title">Combinators</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part03-framework/12-utilities-and-the-context-api.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">12</span>&nbsp; <span class="chapter-title">Utilities and the Context API inside</span></span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a href="../part04-extending/00-introduction.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Extending the library</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-4" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-4" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part04-extending/13-plugins.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">13</span>&nbsp; <span class="chapter-title">Plugins</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part04-extending/14-statistical-modelling.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">14</span>&nbsp; <span class="chapter-title">Statistical modelling</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part04-extending/15-limitations-and-troubleshooting.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">15</span>&nbsp; <span class="chapter-title">Limitations and troubleshooting</span></span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a href="../part05-synthetic-data/00-introduction.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Synthetic data</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-5" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-5" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part05-synthetic-data/16-contingency-tables.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">16</span>&nbsp; <span class="chapter-title">Contingency tables</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part05-synthetic-data/17-aim-and-mst.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">17</span>&nbsp; <span class="chapter-title">Synthetic data with AIM and MST</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part05-synthetic-data/18-evaluating-synthetic-data.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">18</span>&nbsp; <span class="chapter-title">Evaluating and tuning synthetic data</span></span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-6" role="navigation" aria-expanded="true">
+ <span class="menu-text">Appendices</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-6" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-6" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../glossary.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">A</span>&nbsp; <span class="chapter-title">Glossary</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../term-index.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">B</span>&nbsp; <span class="chapter-title">Index</span></span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+    </ul>
+    </div>
+</nav>
+<div id="quarto-sidebar-glass" class="quarto-sidebar-collapse-item" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item"></div>
+<!-- margin-sidebar -->
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+        <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">Table of contents</h2>
+   
+  <ul>
+  <li><a href="#sec-trunc-unit" id="toc-sec-trunc-unit" class="nav-link active" data-scroll-target="#sec-trunc-unit"><span class="header-section-number">5.1</span> A privacy unit with an identifier</a></li>
+  <li><a href="#sec-trunc-rows" id="toc-sec-trunc-rows" class="nav-link" data-scroll-target="#sec-trunc-rows"><span class="header-section-number">5.2</span> Truncating each person’s rows</a></li>
+  <li><a href="#sec-trunc-groups" id="toc-sec-trunc-groups" class="nav-link" data-scroll-target="#sec-trunc-groups"><span class="header-section-number">5.3</span> Truncating the groups a person touches</a></li>
+  <li><a href="#sec-trunc-person" id="toc-sec-trunc-person" class="nav-link" data-scroll-target="#sec-trunc-person"><span class="header-section-number">5.4</span> One row per person</a></li>
+  <li><a href="#sec-trunc-bounds" id="toc-sec-trunc-bounds" class="nav-link" data-scroll-target="#sec-trunc-bounds"><span class="header-section-number">5.5</span> Bounds in the privacy unit</a></li>
+  <li><a href="#sec-trunc-check" id="toc-sec-trunc-check" class="nav-link" data-scroll-target="#sec-trunc-check"><span class="header-section-number">5.6</span> The check against the truth</a></li>
+  <li><a href="#summary" id="toc-summary" class="nav-link" data-scroll-target="#summary"><span class="header-section-number">5.7</span> Summary</a></li>
+  <li><a href="#references" id="toc-references" class="nav-link" data-scroll-target="#references"><span class="header-section-number">5.8</span> References</a></li>
+  </ul>
+</nav>
+    </div>
+<!-- main -->
+<main class="content" id="quarto-document-content">
+
+<header id="title-block-header" class="quarto-title-block default"><nav class="quarto-page-breadcrumbs quarto-title-breadcrumbs d-none d-lg-block" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../part02-tabular-data/00-introduction.html">Tabular data</a></li><li class="breadcrumb-item"><a href="../part02-tabular-data/05-identifier-truncation.html"><span class="chapter-number">5</span>&nbsp; <span class="chapter-title">Identifier truncation and bounds</span></a></li></ol></nav>
+<div class="quarto-title">
+<h1 class="title"><span class="chapter-number">5</span>&nbsp; <span class="chapter-title">Identifier truncation and bounds</span></h1>
+</div>
+
+
+
+<div class="quarto-title-meta">
+
+    
+  
+    
+  </div>
+  
+
+
+</header>
+
+
+<p>A person in the survey answers in several quarters, so one person owns several rows. <a href="../part02-tabular-data/04-grouping.html">Grouping</a> handled that with a privacy unit of 36 contributions, the most quarters anyone could appear in over nine years, and every noise scale grew 36-fold with it. Hardly anyone appears that often. This chapter replaces the fixed number with the column that says which rows belong together, <code>PIDENT</code>, and lets each query decide how many of a person’s rows it keeps. The guarantee then protects a person’s whole record, and the noise is calibrated to what the query actually lets one person contribute.</p>
+<p>The chapter follows the documentation’s page on identifier truncation and its user guide on truncation and bounds. You will declare a privacy unit with an identifier, then truncate rows per person and groups per person inside a query. You will then aggregate to one row per person before a statistic, and declare finer bounds in the unit when you must. By the end you will know which of these the library enforces and which it takes on trust, because each call is run in version 0.16.0 end to end.</p>
+<p>The script <a href="https://github.com/manuelvloureiro/privacy-preserving-machine-learning-book/blob/main/code/part02-tabular-data/opendp_identifier_truncation.py">opendp_identifier_truncation.py</a> runs every query on the Labour Force Survey (LFS) sample with OpenDP 0.16.0. The scales, error bars, thresholds, error messages and facts about the data that it prints are the same on every run. The released values are not, because OpenDP’s noise cannot be seeded, so the page shows them in one block marked as one run.</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb1"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="ex">uv</span> run python code/part02-tabular-data/opendp_identifier_truncation.py</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<section id="sec-trunc-unit" class="level2" data-number="5.1">
+<h2 data-number="5.1" class="anchored" data-anchor-id="sec-trunc-unit"><span class="header-section-number">5.1</span> A privacy unit with an identifier</h2>
+<p>The privacy unit says what the guarantee protects. In the chapters before this one it was a number of rows, and two datasets were neighbours when one was the other with that many rows added or removed. With an identifier, the unit is a value of a column instead. Two datasets are neighbours, written <span class="math inline">\(D \sim D'\)</span>, when one is the other with every row of one <code>PIDENT</code> value added or removed. That is <strong>user-level privacy</strong>, the guarantee that hides a person’s whole record rather than one row of it, which <a href="../../book-full/part05-dp-ml/07-user-level.html">the full edition’s chapter on user-level privacy</a> defines and analyses. OpenDP writes the unit as a metric on identifiers and a distance of one.</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb2"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> opendp.prelude <span class="im">as</span> dp</span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>dp.enable_features(<span class="st">"contrib"</span>)</span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(dp.unit_of(contributions<span class="op">=</span><span class="dv">1</span>, identifier<span class="op">=</span><span class="st">"PIDENT"</span>))  <span class="co"># (SymmetricIdDistance { identifier: col("PIDENT") }, 1)</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>The argument <code>contributions=1</code> now counts identifiers, not rows. It says that a person appears under at most one value of <code>PIDENT</code>, which is a fact about how the survey assigns its identifiers, so it is public. The identifier may also be a Polars expression, as long as it is computed row by row. Nothing in the unit says how many rows a person owns, and that is the point. The old number 36 was a bound that had to hold for the whole dataset before any query ran. Under the new unit, each query states its own bound as a truncation that the library applies to the data, so the bound holds because the query made it hold.</p>
+<p>The script first looks at what an identifier owns in this file. The data are public, so the look is harmless here. On real data these are exactly the facts you must not read off the data, because a bound read off the data leaks it. There you reason from the survey’s design instead.</p>
+<pre class="text"><code>identifiers: 1,682,306  rows: 3,811,932
+rows per identifier: p50=2 p90=4 p99=7 max=15
+identifiers with more than 10 rows: 195
+quarters per identifier: max 4  rows per identifier and quarter: max 8</code></pre>
+<p>Half of the identifiers own two rows or fewer, and none owns more than 15. An identifier spans at most four quarters, and within one quarter it can own several rows, up to eight. So the documentation’s worst case of 36 rows is far from this file. Even the truncation at ten rows that the next section applies touches only 195 identifiers.</p>
+<p>The context is the one the documentation builds, with the public bound on the number of rows from <a href="../part02-tabular-data/03-essential-statistics.html">Essential statistics</a>. It takes a privacy budget <span class="math inline">\(\varepsilon\)</span> of 1 and a slack <span class="math inline">\(\delta\)</span> of <span class="math inline">\(10^{-8}\)</span>, split evenly over four queries. The slack is the small probability with which the guarantee may fail. The table per quarter later in the chapter needs it, because the library decides from the data which quarters to publish.</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb4" data-excerpt="trunc-context"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> make_context(frame: pl.LazyFrame, privacy_unit: <span class="bu">tuple</span>[dp.Metric, Any]) <span class="op">-&gt;</span> dp.Context:</span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>    <span class="co">"""The documentation's context: approximate differential privacy, split evenly over four queries."""</span></span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> dp.Context.compositor(</span>
+<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a>        data<span class="op">=</span>frame,</span>
+<span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a>        privacy_unit<span class="op">=</span>privacy_unit,  <span class="co"># dp.unit_of(contributions=1, identifier="PIDENT") below</span></span>
+<span id="cb4-6"><a href="#cb4-6" aria-hidden="true" tabindex="-1"></a>        privacy_loss<span class="op">=</span>dp.loss_of(epsilon<span class="op">=</span>EPSILON, delta<span class="op">=</span>DELTA),</span>
+<span id="cb4-7"><a href="#cb4-7" aria-hidden="true" tabindex="-1"></a>        split_evenly_over<span class="op">=</span>QUERIES,</span>
+<span id="cb4-8"><a href="#cb4-8" aria-hidden="true" tabindex="-1"></a>        margins<span class="op">=</span>[dp.polars.Margin(max_length<span class="op">=</span>MAX_LENGTH)],</span>
+<span id="cb4-9"><a href="#cb4-9" aria-hidden="true" tabindex="-1"></a>    )</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<pre class="text"><code>budget per query: epsilon=0.25 delta=2.5e-09</code></pre>
+<p>A query on this context that does not truncate is refused. The library cannot bound how far one identifier’s rows move a statistic, so it cannot calibrate the noise. The error it raises in version 0.16.0 is not the one you would hope for.</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb6" data-excerpt="trunc-untruncated"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="cf">try</span>:</span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a>    context.query().<span class="bu">filter</span>(pl.col(<span class="st">"HWUSUAL"</span>) <span class="op">!=</span> <span class="dv">99</span>).select(hours().dp.mean(HOURS)).summarize()</span>
+<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a>    untruncated <span class="op">=</span> <span class="st">"accepted"</span></span>
+<span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a><span class="cf">except</span> dp.OpenDPException <span class="im">as</span> err:</span>
+<span id="cb6-5"><a href="#cb6-5" aria-hidden="true" tabindex="-1"></a>    untruncated <span class="op">=</span> reason(err)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<pre class="text"><code>mean without truncation: A step in your query is not recognized at this time: "DF ["PIDENT", "YEAR", "QUARTER", "SEX", ...]; PROJECT */8 COLUMNS". ""If you would like to see this supported, please file an issue.</code></pre>
+<p>The message blames the scan of the data rather than the missing truncation. When you see it on a context with an identifier, the first thing to check is whether every statistic sits behind a truncation.</p>
+</section>
+<section id="sec-trunc-rows" class="level2" data-number="5.2">
+<h2 data-number="5.2" class="anchored" data-anchor-id="sec-trunc-rows"><span class="header-section-number">5.2</span> Truncating each person’s rows</h2>
+<p>The documentation’s first query is the mean of hours usually worked, <code>HWUSUAL</code>, over the rows where the value is not 99, which is the survey’s code for “not applicable”. The mean needs public bounds on the hours, 0 to 80, and a bound on the rows per person, which <code>truncate_per_group(10)</code> supplies. It keeps at most ten rows per identifier, chosen at random, and drops the rest before the aggregation sees them.</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb8" data-excerpt="trunc-per-group"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a>mean_query <span class="op">=</span> (</span>
+<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a>    context.query()</span>
+<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a>    .<span class="bu">filter</span>(pl.col(<span class="st">"HWUSUAL"</span>) <span class="op">!=</span> <span class="dv">99</span>)  <span class="co"># 99 means "not applicable"</span></span>
+<span id="cb8-4"><a href="#cb8-4" aria-hidden="true" tabindex="-1"></a>    .truncate_per_group(ROWS_PER_IDENTIFIER)  <span class="co"># at most 10 rows per identifier, chosen at random</span></span>
+<span id="cb8-5"><a href="#cb8-5" aria-hidden="true" tabindex="-1"></a>    .select(hours().dp.mean(HOURS))</span>
+<span id="cb8-6"><a href="#cb8-6" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb8-7"><a href="#cb8-7" aria-hidden="true" tabindex="-1"></a>mean_summary <span class="op">=</span> mean_query.summarize(alpha<span class="op">=</span><span class="fl">0.05</span>)</span>
+<span id="cb8-8"><a href="#cb8-8" aria-hidden="true" tabindex="-1"></a>dp_mean <span class="op">=</span> mean_query.release().collect().item()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<pre class="text"><code>mean, 10 rows per identifier: HWUSUAL Sum, Integer Laplace, scale=6,400.0 95% accuracy=19,173.2
+mean, 10 rows per identifier: HWUSUAL Length, Integer Laplace, scale=80.0 95% accuracy=240.2</code></pre>
+<p>A mean is released as a sum and a count, as <a href="../part02-tabular-data/03-essential-statistics.html">Essential statistics</a> showed, and the query’s share of the budget is split between the two, so each gets <span class="math inline">\(\varepsilon/8\)</span>. One person now moves the count by at most ten rows, so the count’s sensitivity is 10. Its Laplace scale is that sensitivity over <span class="math inline">\(\varepsilon/8\)</span>, which is 80. Each row adds at most 80 hours to the sum, so the sum’s sensitivity is ten times that. Its scale is 6,400. The sensitivity is the most one privacy unit can change a statistic, and truncation and clipping are the two ways of forcing it to be finite. <a href="../../book-full/part03-dp-foundations/07-sensitivity.html">The full edition’s chapter on sensitivity</a> derives what each of them does to the answer.</p>
+<p>Compare the unit of 36 contributions, which the script also builds. Under it the same mean gets scales of 23,040 and 288. That is the 36-fold increase the opening mentioned, and the truncation replaces it with a tenfold one. The price is bias, because the rows beyond the tenth are dropped and the mean is computed on what remains. On this file the price is nothing. Only 18 identifiers have more than ten rows left after the filter. The truncation drops 20 of their rows, out of about 1.5 million.</p>
+<pre class="text"><code>rows with HWUSUAL not 99: 1,496,192 by 809,710 identifiers
+identifiers with more than 10 such rows: 18  rows dropped: 20
+unit of 36 contributions, no identifier: scales 23,040.0, 288.0</code></pre>
+<p>The <code>keep</code> argument says which rows survive. The default, <code>"sample"</code>, keeps a random ten, and the plan the library builds shows how. It numbers each identifier’s rows in a shuffled order and keeps the numbers below ten. The documentation notes that <code>truncate_per_group(10)</code> is the same as writing that filter yourself. With <code>"first"</code> or <code>"last"</code> the numbering follows the file’s order, which is cheaper but biased whenever that order means something, such as early or late quarters. A <code>SortBy</code> keeps the rows that sort first by an expression of your choice. The documentation sorts by <code>ILOSTAT</code>, the employment status, to prefer the rows where the person worked for pay. None of the choices changes the scales, because the bound of ten rows holds whichever rows are kept.</p>
+<pre class="text"><code>truncate_per_group(10) plan: FILTER [(0.int_range([len().cast(Int64)]).shuffle().over([col("PIDENT")])) &lt; (10)]
+keep=first: scales 6,400.0, 80.0
+keep=last: scales 6,400.0, 80.0
+keep=SortBy(ILOSTAT): scales 6,400.0, 80.0
+ILOSTAT values among them: [1]</code></pre>
+<p>The last line is a small lesson about this dataset. After the filter on <code>HWUSUAL</code>, every remaining row has <code>ILOSTAT</code> equal to 1, so the sort by employment status changes nothing here. It would matter on a query that keeps the other statuses.</p>
+</section>
+<section id="sec-trunc-groups" class="level2" data-number="5.3">
+<h2 data-number="5.3" class="anchored" data-anchor-id="sec-trunc-groups"><span class="header-section-number">5.3</span> Truncating the groups a person touches</h2>
+<p>The second query is a table with one row per quarter, grouped by <code>QUARTER</code> and <code>YEAR</code>, with the number of responses and the sum of their hours. A person’s rows now spread over groups, and the noise on a grouped table depends on two bounds. One is how many rows a person contributes to any one group, and the other is how many groups a person touches. The vector of counts can change by at most the first bound in each of at most the second number of groups. So its total sensitivity is the product of the two. The full edition’s chapter on user-level privacy derives this in <a href="../../book-full/part05-dp-ml/07-user-level.html#sec-ulvl-bounding">its section on contribution bounding</a>.</p>
+<p>So the query truncates twice. <code>truncate_per_group(1, by=quarterly)</code> keeps one row per identifier and quarter, and <code>truncate_num_groups(10, by=quarterly)</code> keeps at most ten quarters per identifier. Without the second truncation the query is refused, and this time the message says what is missing. It goes on to suggest the call that supplies it, <code>truncate_num_groups</code> with the grouping columns. The script leaves that part out of the printed line, because the order of the columns in the suggestion changes from run to run.</p>
+<pre class="text"><code>per quarter without truncate_num_groups: num_groups (None), total contributions (None), and per_group (Some(1)) are not sufficiently well-defined. This is likely due to a missing truncation earlier in the data pipeline.</code></pre>
+<p>The query below is the documentation’s, with one change. It passes <code>keep="first"</code> to the group truncation, for a reason the rest of this section explains.</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb13" data-excerpt="trunc-num-groups"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a>quarter_query <span class="op">=</span> (</span>
+<span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a>    context.query()</span>
+<span id="cb13-3"><a href="#cb13-3" aria-hidden="true" tabindex="-1"></a>    .<span class="bu">filter</span>(pl.col(<span class="st">"HWUSUAL"</span>) <span class="op">!=</span> <span class="dv">99</span>)</span>
+<span id="cb13-4"><a href="#cb13-4" aria-hidden="true" tabindex="-1"></a>    .truncate_per_group(<span class="dv">1</span>, by<span class="op">=</span>QUARTERLY)  <span class="co"># one row per identifier and quarter</span></span>
+<span id="cb13-5"><a href="#cb13-5" aria-hidden="true" tabindex="-1"></a>    .truncate_num_groups(GROUPS_PER_IDENTIFIER, by<span class="op">=</span>QUARTERLY, keep<span class="op">=</span><span class="st">"first"</span>)  <span class="co"># at most 10 quarters each</span></span>
+<span id="cb13-6"><a href="#cb13-6" aria-hidden="true" tabindex="-1"></a>    .group_by(QUARTERLY)</span>
+<span id="cb13-7"><a href="#cb13-7" aria-hidden="true" tabindex="-1"></a>    .agg(dp.<span class="bu">len</span>(signed<span class="op">=</span><span class="va">True</span>), hours().dp.<span class="bu">sum</span>(HOURS))</span>
+<span id="cb13-8"><a href="#cb13-8" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb13-9"><a href="#cb13-9" aria-hidden="true" tabindex="-1"></a>quarter_summary <span class="op">=</span> quarter_query.summarize(alpha<span class="op">=</span><span class="fl">0.05</span>)</span>
+<span id="cb13-10"><a href="#cb13-10" aria-hidden="true" tabindex="-1"></a>quarters_hat <span class="op">=</span> quarter_query.release().collect()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<pre class="text"><code>per quarter, 10 quarters per identifier: len Frame Length, Integer Laplace, scale=80.0 95% accuracy=240.2 threshold=1,714
+per quarter, 10 quarters per identifier: HWUSUAL Sum, Integer Laplace, scale=6,400.0 95% accuracy=19,173.2</code></pre>
+<p>The scales are the ones of the mean, because one row in each of ten quarters is again ten rows per person. The table also has a threshold. The list of quarters is not given as public keys, so the library releases a quarter only if its noisy count exceeds 1,714. That is the private selection of keys that <a href="../part02-tabular-data/04-grouping.html">Grouping</a> explained. Every quarter here has at least 27,228 responses, so all 36 appear.</p>
+<p>Now the two things to know about <code>truncate_num_groups</code> in version 0.16.0. The first concerns the default, <code>keep="sample"</code>. The query passes <code>summarize</code>, and <code>release</code> spends the query’s share of the budget, but <code>collect</code> fails inside Polars.</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb15" data-excerpt="trunc-sample"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a>sample_query <span class="op">=</span> grouped_query(context, keep<span class="op">=</span><span class="st">"sample"</span>)  <span class="co"># the same table, with the default keep</span></span>
+<span id="cb15-2"><a href="#cb15-2" aria-hidden="true" tabindex="-1"></a>sample_summary <span class="op">=</span> sample_query.summarize(alpha<span class="op">=</span><span class="fl">0.05</span>)</span>
+<span id="cb15-3"><a href="#cb15-3" aria-hidden="true" tabindex="-1"></a>released <span class="op">=</span> sample_query.release()  <span class="co"># spends the query's share of the budget</span></span>
+<span id="cb15-4"><a href="#cb15-4" aria-hidden="true" tabindex="-1"></a><span class="cf">try</span>:</span>
+<span id="cb15-5"><a href="#cb15-5" aria-hidden="true" tabindex="-1"></a>    released.collect()</span>
+<span id="cb15-6"><a href="#cb15-6" aria-hidden="true" tabindex="-1"></a>    sample_outcome <span class="op">=</span> <span class="st">"collected"</span></span>
+<span id="cb15-7"><a href="#cb15-7" aria-hidden="true" tabindex="-1"></a><span class="cf">except</span> dp.OpenDPException <span class="im">as</span> err:</span>
+<span id="cb15-8"><a href="#cb15-8" aria-hidden="true" tabindex="-1"></a>    sample_outcome <span class="op">=</span> reason(err)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<pre class="text"><code>keep=sample: summarize scales 80.0, 6,400.0; collect: multiple fields with name 'QUARTER' found
+shares spent after the failed collect: 4 of 4</code></pre>
+<p>The share is gone, because the budget is spent when the measurement is built, not when its output is read. You can catch the failure before spending anything, because the fault is in the Polars plan, and Polars checks a plan without touching data. Call <code>explain()</code> on the query, as the snippet below does on a toy frame with one identifier and three quarters, and the same error appears at no cost.</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb17"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> opendp.prelude <span class="im">as</span> dp</span>
+<span id="cb17-2"><a href="#cb17-2" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> polars <span class="im">as</span> pl</span>
+<span id="cb17-3"><a href="#cb17-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb17-4"><a href="#cb17-4" aria-hidden="true" tabindex="-1"></a>dp.enable_features(<span class="st">"contrib"</span>)</span>
+<span id="cb17-5"><a href="#cb17-5" aria-hidden="true" tabindex="-1"></a>toy <span class="op">=</span> pl.LazyFrame({<span class="st">"PIDENT"</span>: [<span class="dv">7</span>, <span class="dv">7</span>, <span class="dv">7</span>], <span class="st">"YEAR"</span>: [<span class="dv">2005</span>] <span class="op">*</span> <span class="dv">3</span>, <span class="st">"QUARTER"</span>: [<span class="dv">1</span>, <span class="dv">2</span>, <span class="dv">3</span>], <span class="st">"HWUSUAL"</span>: [<span class="fl">35.0</span>, <span class="fl">36.0</span>, <span class="fl">37.0</span>]})</span>
+<span id="cb17-6"><a href="#cb17-6" aria-hidden="true" tabindex="-1"></a>context <span class="op">=</span> dp.Context.compositor(</span>
+<span id="cb17-7"><a href="#cb17-7" aria-hidden="true" tabindex="-1"></a>    data<span class="op">=</span>toy,</span>
+<span id="cb17-8"><a href="#cb17-8" aria-hidden="true" tabindex="-1"></a>    privacy_unit<span class="op">=</span>dp.unit_of(contributions<span class="op">=</span><span class="dv">1</span>, identifier<span class="op">=</span><span class="st">"PIDENT"</span>),</span>
+<span id="cb17-9"><a href="#cb17-9" aria-hidden="true" tabindex="-1"></a>    privacy_loss<span class="op">=</span>dp.loss_of(epsilon<span class="op">=</span><span class="fl">1.0</span>, delta<span class="op">=</span><span class="fl">1e-8</span>),</span>
+<span id="cb17-10"><a href="#cb17-10" aria-hidden="true" tabindex="-1"></a>    split_evenly_over<span class="op">=</span><span class="dv">1</span>,</span>
+<span id="cb17-11"><a href="#cb17-11" aria-hidden="true" tabindex="-1"></a>    margins<span class="op">=</span>[dp.polars.Margin(max_length<span class="op">=</span><span class="dv">100</span>)],</span>
+<span id="cb17-12"><a href="#cb17-12" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb17-13"><a href="#cb17-13" aria-hidden="true" tabindex="-1"></a>quarterly <span class="op">=</span> [pl.col(<span class="st">"QUARTER"</span>), pl.col(<span class="st">"YEAR"</span>)]</span>
+<span id="cb17-14"><a href="#cb17-14" aria-hidden="true" tabindex="-1"></a>query <span class="op">=</span> context.query().truncate_per_group(<span class="dv">1</span>, by<span class="op">=</span>quarterly).truncate_num_groups(<span class="dv">10</span>, by<span class="op">=</span>quarterly)</span>
+<span id="cb17-15"><a href="#cb17-15" aria-hidden="true" tabindex="-1"></a>query <span class="op">=</span> query.group_by(quarterly).agg(dp.<span class="bu">len</span>(signed<span class="op">=</span><span class="va">True</span>))</span>
+<span id="cb17-16"><a href="#cb17-16" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"</span><span class="sc">{</span>query<span class="sc">.</span>summarize()[<span class="st">'scale'</span>]<span class="sc">.</span>item()<span class="sc">:.1f}</span><span class="ss">"</span>)  <span class="co"># 10.0</span></span>
+<span id="cb17-17"><a href="#cb17-17" aria-hidden="true" tabindex="-1"></a><span class="cf">try</span>:</span>
+<span id="cb17-18"><a href="#cb17-18" aria-hidden="true" tabindex="-1"></a>    query.explain()</span>
+<span id="cb17-19"><a href="#cb17-19" aria-hidden="true" tabindex="-1"></a><span class="cf">except</span> pl.exceptions.DuplicateError <span class="im">as</span> err:</span>
+<span id="cb17-20"><a href="#cb17-20" aria-hidden="true" tabindex="-1"></a>    <span class="bu">print</span>(<span class="bu">str</span>(err).splitlines()[<span class="dv">0</span>])  <span class="co"># multiple fields with name 'QUARTER' found</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>The second thing concerns <code>keep="first"</code> and <code>keep="last"</code>, which do run. The plan they build ranks each identifier’s quarters and keeps the ranks below the number you asked for. Polars counts ranks from one, so nine ranks survive a request for ten, and the truncation keeps one group fewer than asked. The snippet shows the two numberings side by side on one identifier with three quarters.</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb18"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> polars <span class="im">as</span> pl</span>
+<span id="cb18-2"><a href="#cb18-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb18-3"><a href="#cb18-3" aria-hidden="true" tabindex="-1"></a>toy <span class="op">=</span> pl.DataFrame({<span class="st">"PIDENT"</span>: [<span class="dv">7</span>, <span class="dv">7</span>, <span class="dv">7</span>], <span class="st">"YEAR"</span>: [<span class="dv">2005</span>] <span class="op">*</span> <span class="dv">3</span>, <span class="st">"QUARTER"</span>: [<span class="dv">1</span>, <span class="dv">2</span>, <span class="dv">3</span>]})</span>
+<span id="cb18-4"><a href="#cb18-4" aria-hidden="true" tabindex="-1"></a>quarterly <span class="op">=</span> [pl.col(<span class="st">"QUARTER"</span>), pl.col(<span class="st">"YEAR"</span>)]</span>
+<span id="cb18-5"><a href="#cb18-5" aria-hidden="true" tabindex="-1"></a>numbered <span class="op">=</span> toy.with_columns(</span>
+<span id="cb18-6"><a href="#cb18-6" aria-hidden="true" tabindex="-1"></a>    index<span class="op">=</span>pl.int_range(pl.<span class="bu">len</span>()).over(<span class="st">"PIDENT"</span>),  <span class="co"># what truncate_per_group compares with k</span></span>
+<span id="cb18-7"><a href="#cb18-7" aria-hidden="true" tabindex="-1"></a>    rank<span class="op">=</span>pl.struct(quarterly).rank(<span class="st">"dense"</span>).over(<span class="st">"PIDENT"</span>),  <span class="co"># what truncate_num_groups compares with k</span></span>
+<span id="cb18-8"><a href="#cb18-8" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb18-9"><a href="#cb18-9" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(numbered[<span class="st">"index"</span>].to_list(), numbered[<span class="st">"rank"</span>].to_list())  <span class="co"># [0, 1, 2] [1, 2, 3]</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>On this file the request for ten quarters drops nothing, because no identifier spans more than four. The script therefore measures the effect at a smaller <code>k</code>, using the filter that the documentation gives as the equivalent of the call. A request for four keeps at most three quarters, and the 13,948 identifiers that have four lose one. A request for five keeps all four, at the scale and threshold of five.</p>
+<pre class="text"><code>truncate_num_groups(10, keep=first) plan: FILTER [(col("QUARTER").as_struct([col("YEAR")]).rank().over([col("PIDENT")])) &lt; (10)]
+identifier-quarters after the filter: 1,241,896  identifiers with 4 quarters: 13,948
+truncate_num_groups(4, keep=first): keeps at most 3 quarters, 1,227,948 identifier-quarters; scale 32.0 threshold 657
+truncate_num_groups(5, keep=first): keeps at most 4 quarters, 1,241,896 identifier-quarters; scale 40.0 threshold 830</code></pre>
+<p>So in version 0.16.0 you ask for one group more than you mean to keep, and you pay the noise of that larger number. The guarantee is not at risk either way, since the library calibrates to the number you asked for and keeps fewer. What is at risk is the estimate, because the dropped group is always the last in sort order, which here is the latest quarter of each person’s year. <a href="../../book-practitioner/part03-dp-foundations/12-release-statistics.html">The practitioner edition’s release workflow</a>, which bounds a customer’s invoice lines, met both problems and avoided the call altogether.</p>
+<p>One more rule about truncations comes from the library itself. The truncations of a query must sit next to each other, and the group truncation must come last before the aggregation. The script moves the filter on <code>HWUSUAL</code> between the two truncations, and the query is refused with a message that names the truncation’s own expression as unrecognized.</p>
+<pre class="text"><code>a filter between the two truncations: Expr is not recognized at this time: dyn int: 0.int_range([len()]).shuffle().over([col("PIDENT"), col("QUARTER"), col("YEAR")]). If you would like to see this supported, please file an issue.</code></pre>
+</section>
+<section id="sec-trunc-person" class="level2" data-number="5.4">
+<h2 data-number="5.4" class="anchored" data-anchor-id="sec-trunc-person"><span class="header-section-number">5.4</span> One row per person</h2>
+<p>For a mean there is a better move than keeping ten rows per person. Group by the identifier first, aggregate each person’s rows to one row with any Polars expression, and take the private mean of those rows. The documentation calls the group-by the point where truncation begins, because after it no identifier owns more than one row.</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb21" data-excerpt="trunc-per-person"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb21-1"><a href="#cb21-1" aria-hidden="true" tabindex="-1"></a>person_query <span class="op">=</span> (</span>
+<span id="cb21-2"><a href="#cb21-2" aria-hidden="true" tabindex="-1"></a>    context.query()</span>
+<span id="cb21-3"><a href="#cb21-3" aria-hidden="true" tabindex="-1"></a>    .<span class="bu">filter</span>(pl.col(<span class="st">"HWUSUAL"</span>) <span class="op">!=</span> <span class="dv">99</span>)</span>
+<span id="cb21-4"><a href="#cb21-4" aria-hidden="true" tabindex="-1"></a>    .group_by(<span class="st">"PIDENT"</span>)  <span class="co"># one row per identifier: the truncation</span></span>
+<span id="cb21-5"><a href="#cb21-5" aria-hidden="true" tabindex="-1"></a>    .agg(pl.col(<span class="st">"HWUSUAL"</span>).mean())  <span class="co"># any expression may summarize the person's rows</span></span>
+<span id="cb21-6"><a href="#cb21-6" aria-hidden="true" tabindex="-1"></a>    .select(hours().dp.mean(HOURS))</span>
+<span id="cb21-7"><a href="#cb21-7" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb21-8"><a href="#cb21-8" aria-hidden="true" tabindex="-1"></a>person_summary <span class="op">=</span> person_query.summarize(alpha<span class="op">=</span><span class="fl">0.05</span>)</span>
+<span id="cb21-9"><a href="#cb21-9" aria-hidden="true" tabindex="-1"></a>dp_person_mean <span class="op">=</span> person_query.release().collect().item()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<pre class="text"><code>mean of one row per identifier: HWUSUAL Sum, Integer Laplace, scale=640.0 95% accuracy=1,917.8
+mean of one row per identifier: HWUSUAL Length, Integer Laplace, scale=8.0 95% accuracy=24.5</code></pre>
+<p>The count’s sensitivity is now 1 and the sum’s is 80, so both scales are a tenth of what the truncation at ten gave. No row of anyone’s is dropped. They are the scales a dataset with one row per person would get, however many rows a person really owns.</p>
+<p>What changes is the question the statistic answers. The first query averaged over responses, so a person with four responses counted four times. This one averages each person’s own average, so every person counts once. On this file the two differ, with 37.64 hours over responses against 37.24 over people. The cast to an integer in the documentation’s query changes it a third time. It truncates each person’s mean towards zero before the private mean sees it, which lowers the true value to 37.10. Noise is not the issue in any of these, since the error bar of the last query is about 0.0035 hours. The choice of what to average is.</p>
+<pre class="text"><code>true mean of one row per identifier: 37.0970  (before the cast to int: 37.2359; all rows: 37.6393)
+per-identifier mean error bar at the true size: 0.0035</code></pre>
+</section>
+<section id="sec-trunc-bounds" class="level2" data-number="5.5">
+<h2 data-number="5.5" class="anchored" data-anchor-id="sec-trunc-bounds"><span class="header-section-number">5.5</span> Bounds in the privacy unit</h2>
+<p>So far the unit held one number, and the query held every bound. The unit can hold finer knowledge, as a list of <code>dp.polars.Bound</code> objects. Each names the grouping it applies to, a bound on identifiers per group and a bound on the groups one person touches. The documentation’s example imagines data merged from two sources that assigned identifiers separately. A person may then appear under two identifiers, which would double the noise, but never under two in the same quarter.</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb24" data-excerpt="trunc-bounds"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb24-1"><a href="#cb24-1" aria-hidden="true" tabindex="-1"></a>two_sources <span class="op">=</span> dp.unit_of(</span>
+<span id="cb24-2"><a href="#cb24-2" aria-hidden="true" tabindex="-1"></a>    contributions<span class="op">=</span>[</span>
+<span id="cb24-3"><a href="#cb24-3" aria-hidden="true" tabindex="-1"></a>        dp.polars.Bound(per_group<span class="op">=</span><span class="dv">2</span>),  <span class="co"># a person may appear under two identifiers</span></span>
+<span id="cb24-4"><a href="#cb24-4" aria-hidden="true" tabindex="-1"></a>        dp.polars.Bound(by<span class="op">=</span>QUARTERLY, per_group<span class="op">=</span><span class="dv">1</span>),  <span class="co"># but under one identifier in any quarter</span></span>
+<span id="cb24-5"><a href="#cb24-5" aria-hidden="true" tabindex="-1"></a>    ],</span>
+<span id="cb24-6"><a href="#cb24-6" aria-hidden="true" tabindex="-1"></a>    identifier<span class="op">=</span><span class="st">"PIDENT"</span>,</span>
+<span id="cb24-7"><a href="#cb24-7" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb24-8"><a href="#cb24-8" aria-hidden="true" tabindex="-1"></a>bounded <span class="op">=</span> make_context(frame, two_sources)</span>
+<span id="cb24-9"><a href="#cb24-9" aria-hidden="true" tabindex="-1"></a>bounded_query <span class="op">=</span> grouped_query(bounded, keep<span class="op">=</span><span class="st">"first"</span>, k<span class="op">=</span><span class="dv">5</span>)  <span class="co"># each identifier may affect up to 5 quarters</span></span>
+<span id="cb24-10"><a href="#cb24-10" aria-hidden="true" tabindex="-1"></a>bounded_summary <span class="op">=</span> bounded_query.summarize(alpha<span class="op">=</span><span class="fl">0.05</span>)</span>
+<span id="cb24-11"><a href="#cb24-11" aria-hidden="true" tabindex="-1"></a>bounded_hat <span class="op">=</span> bounded_query.release().collect()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<pre class="text"><code>two identifiers, one per quarter, 5 quarters: len Frame Length, Integer Laplace, scale=80.0 95% accuracy=240.2 threshold=1,714
+two identifiers, one per quarter, 5 quarters: HWUSUAL Sum, Integer Laplace, scale=6,400.0 95% accuracy=19,173.2
+one identifier as a bound, 5 quarters: scales 40.0, 3,200.0</code></pre>
+<p>The query keeps one row per identifier and quarter and five quarters per identifier. Two identifiers times five quarters is ten rows per person, so the scale is 80 again. The second bound tells the library that the two identifiers never meet in one quarter, which caps what one person adds to any single quarter at one row. It does not lower the count’s scale, because the ten rows can still fall in ten different quarters. With a single identifier declared as a bound, the same query gets half the scale.</p>
+<p>A bound in the unit can also carry <code>num_groups</code>, the number of groups a person touches. Then the query needs no <code>truncate_num_groups</code>, and the script shows that a promise of ten quarters gives the same scale and threshold as the truncation at ten did. But the two are not the same kind of thing. The truncation is enforced, since the library drops the rows that would break it. The bound is a promise about the data that the library takes on trust. The script makes a promise that this file breaks, that no identifier spans more than three quarters, and the release goes through without a complaint.</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb26" data-excerpt="trunc-promise"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb26-1"><a href="#cb26-1" aria-hidden="true" tabindex="-1"></a>promised <span class="op">=</span> dp.unit_of(</span>
+<span id="cb26-2"><a href="#cb26-2" aria-hidden="true" tabindex="-1"></a>    contributions<span class="op">=</span>[</span>
+<span id="cb26-3"><a href="#cb26-3" aria-hidden="true" tabindex="-1"></a>        dp.polars.Bound(per_group<span class="op">=</span><span class="dv">1</span>),</span>
+<span id="cb26-4"><a href="#cb26-4" aria-hidden="true" tabindex="-1"></a>        dp.polars.Bound(by<span class="op">=</span>QUARTERLY, per_group<span class="op">=</span><span class="dv">1</span>, num_groups<span class="op">=</span><span class="dv">3</span>),  <span class="co"># a promise: at most 3 quarters each</span></span>
+<span id="cb26-5"><a href="#cb26-5" aria-hidden="true" tabindex="-1"></a>    ],</span>
+<span id="cb26-6"><a href="#cb26-6" aria-hidden="true" tabindex="-1"></a>    identifier<span class="op">=</span><span class="st">"PIDENT"</span>,</span>
+<span id="cb26-7"><a href="#cb26-7" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb26-8"><a href="#cb26-8" aria-hidden="true" tabindex="-1"></a>promise_query <span class="op">=</span> (</span>
+<span id="cb26-9"><a href="#cb26-9" aria-hidden="true" tabindex="-1"></a>    make_context(frame, promised)</span>
+<span id="cb26-10"><a href="#cb26-10" aria-hidden="true" tabindex="-1"></a>    .query()</span>
+<span id="cb26-11"><a href="#cb26-11" aria-hidden="true" tabindex="-1"></a>    .<span class="bu">filter</span>(pl.col(<span class="st">"HWUSUAL"</span>) <span class="op">!=</span> <span class="dv">99</span>)</span>
+<span id="cb26-12"><a href="#cb26-12" aria-hidden="true" tabindex="-1"></a>    .truncate_per_group(<span class="dv">1</span>, by<span class="op">=</span>QUARTERLY)  <span class="co"># no truncate_num_groups: the unit already bounds the quarters</span></span>
+<span id="cb26-13"><a href="#cb26-13" aria-hidden="true" tabindex="-1"></a>    .group_by(QUARTERLY)</span>
+<span id="cb26-14"><a href="#cb26-14" aria-hidden="true" tabindex="-1"></a>    .agg(dp.<span class="bu">len</span>(signed<span class="op">=</span><span class="va">True</span>), hours().dp.<span class="bu">sum</span>(HOURS))</span>
+<span id="cb26-15"><a href="#cb26-15" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb26-16"><a href="#cb26-16" aria-hidden="true" tabindex="-1"></a>promise_summary <span class="op">=</span> promise_query.summarize(alpha<span class="op">=</span><span class="fl">0.05</span>)</span>
+<span id="cb26-17"><a href="#cb26-17" aria-hidden="true" tabindex="-1"></a>promise_hat <span class="op">=</span> promise_query.release().collect()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<pre class="text"><code>num_groups=10 promised in the unit: len Frame Length, Integer Laplace, scale=80.0 95% accuracy=240.2 threshold=1,714
+num_groups=3 promised in the unit: len Frame Length, Integer Laplace, scale=24.0 95% accuracy=72.4 threshold=486
+num_groups=3 promised in the unit: HWUSUAL Sum, Integer Laplace, scale=1,920.0 95% accuracy=5,752.3
+identifiers that break the promise of 3 quarters: 13,948</code></pre>
+<p>The noise was calibrated for three quarters, and 13,948 identifiers have four. For those people the release can move further than the noise was built to hide. Their privacy loss then exceeds the <span class="math inline">\(\varepsilon\)</span> the context declared, and nothing in the output says so. This is the documentation’s closing advice, and the chapter’s. Truncate in the query, where the library enforces the bound. Declare a bound in the unit only when no truncation can express it, as with the two identifiers above, which no filter can recognize as one person. The same advice applies to clipping: clip the values in the query rather than declaring their range in the input domain. <a href="../part02-tabular-data/07-utility-and-noise.html">Assessing utility and choosing the noise</a> returns to bounds per group when it switches to Gaussian noise, whose scale depends on them differently.</p>
+</section>
+<section id="sec-trunc-check" class="level2" data-number="5.6">
+<h2 data-number="5.6" class="anchored" data-anchor-id="sec-trunc-check"><span class="header-section-number">5.6</span> The check against the truth</h2>
+<p>The data are public, so the script computes what each query would return without noise and compares. For the mean over ten rows per identifier, the script draws its own random ten with a seed. The truncated mean comes out at 37.6393 hours, and the truncation of 20 rows leaves it unchanged to four decimals. The quarters’ true values use the first row of each identifier in each quarter. The released sums keep a random row instead, so for the hours the check is approximate, while for the counts it is exact.</p>
+<pre class="text"><code>true mean, 10 rows per identifier: 37.6393  (1,496,172 rows)
+true per quarter (first row per identifier and quarter): 36 quarters, rows from 27,228 to 41,868
+true 2005Q1: rows 29,561  hours 1,110,610
+true 2005Q2: rows 29,406  hours 1,106,170
+true 2005Q3: rows 28,364  hours 1,070,826
+true 2005Q4: rows 28,681  hours 1,080,009</code></pre>
+<p>The releases of one run follow, read against their error bars. The script derives an error bar for each mean from the bars of its sum and its count, since the mean is one divided by the other, and that bar holds whenever both of them hold.</p>
+<pre class="text"><code>released (one run):
+  mean, 10 rows per identifier: 37.6366  (true 37.6393, within 0.0189 with probability at least 0.9)
+  per quarter: 36 quarters released; rows within their 95% accuracy: 36 of 36; hours: 35 of 36
+  2005Q1: rows 29,644  hours 1,105,518
+  2005Q2: rows 29,460  hours 1,098,965
+  2005Q3: rows 28,244  hours 1,063,846
+  2005Q4: rows 28,645  hours 1,087,028
+  mean of one row per identifier: 37.0970  (true 37.0970, within 0.0035 with probability at least 0.9)
+  two bounds, 5 quarters: 36 quarters released; rows within four times their 95% accuracy: 36 of 36
+  num_groups=3 promised: 36 quarters released; rows within four times their 95% accuracy: 36 of 36</code></pre>
+<p>Every release landed within its bar, which on a run like this is what you should expect about 19 times in 20 for each value. The test behind the page checks the two means within three times their bars and the 36 quarters within four times theirs, so that a correct run almost never fails it. On real data you cannot run this comparison, so you run it on public or historical data while you develop, as here, and release the real data once.</p>
+</section>
+<section id="summary" class="level2" data-number="5.7">
+<h2 data-number="5.7" class="anchored" data-anchor-id="summary"><span class="header-section-number">5.7</span> Summary</h2>
+<div id="tbl-trunc-summary" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-tbl figure">
+<figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl" id="tbl-trunc-summary-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Table&nbsp;5.1: The calls of identifier truncation and bounds, what each does, and the rule of thumb that goes with it.
+</figcaption>
+<div aria-describedby="tbl-trunc-summary-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<table class="caption-top table">
+<colgroup>
+<col style="width: 33%">
+<col style="width: 33%">
+<col style="width: 33%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>Call or concept</th>
+<th>What it does</th>
+<th>Rule of thumb</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><code>dp.unit_of(contributions=1, identifier="PIDENT")</code></td>
+<td>The privacy unit is every row of one identifier</td>
+<td><code>contributions</code> now counts identifiers; the rows per person are bounded by the query</td>
+</tr>
+<tr class="even">
+<td>A query with no truncation</td>
+<td>Refused, with a message that blames the data scan</td>
+<td>On a context with an identifier, every statistic sits behind a truncation</td>
+</tr>
+<tr class="odd">
+<td><code>truncate_per_group(k, keep=...)</code></td>
+<td>Keeps at most <code>k</code> rows per identifier, and per group with <code>by</code></td>
+<td><code>"sample"</code> is unbiased; <code>"first"</code>, <code>"last"</code> and <code>SortBy</code> are cheaper or deliberate, and biased when order matters</td>
+</tr>
+<tr class="even">
+<td><code>truncate_num_groups(k, by=...)</code></td>
+<td>Keeps at most <code>k</code> groups per identifier</td>
+<td>In 0.16.0, <code>"sample"</code> fails at <code>collect</code> after the budget is spent, and <code>"first"</code> keeps <code>k - 1</code> groups; call <code>explain()</code> before <code>release()</code></td>
+</tr>
+<tr class="odd">
+<td>Truncations in a query</td>
+<td>Must sit next to each other, the group truncation last</td>
+<td>A filter between them makes the query unrecognized</td>
+</tr>
+<tr class="even">
+<td><code>group_by("PIDENT").agg(...)</code> before a statistic</td>
+<td>One row per person, so the sensitivity is that of one row</td>
+<td>The best choice for a mean, if the mean over people is the one you want</td>
+</tr>
+<tr class="odd">
+<td><code>dp.polars.Bound(by, per_group, num_groups)</code> in <code>unit_of</code></td>
+<td>Finer bounds on identifiers per group and groups per person</td>
+<td>A promise the library trusts; a person who breaks it loses more than <span class="math inline">\(\varepsilon\)</span></td>
+</tr>
+<tr class="even">
+<td>Truncate or declare</td>
+<td>The query enforces a truncation; the unit declares a bound</td>
+<td>Truncate, and declare only what no truncation can express</td>
+</tr>
+</tbody>
+</table>
+</div>
+</figure>
+</div>
+</section>
+<section id="references" class="level2" data-number="5.8">
+<h2 data-number="5.8" class="anchored" data-anchor-id="references"><span class="header-section-number">5.8</span> References</h2>
+<ul>
+<li>OpenDP documentation: “Identifier Truncation” in the tabular-data tutorial, and “Identifier Truncation and Bounds” in the Polars user guide.</li>
+<li>Dwork, McSherry, Nissim and Smith, “Calibrating Noise to Sensitivity in Private Data Analysis” (2006): sensitivity and the Laplace mechanism.</li>
+<li>Amin, Kulesza, Muñoz Medina and Vassilvitskii, “Bounding User Contributions: A Bias-Variance Trade-off in Differential Privacy” (2019): why truncating a person’s rows trades bias for variance.</li>
+<li>Wilson, Zhang, Lam, Desfontaines, Simmons-Marengo and Gipson, “Differentially Private SQL with Bounded User Contribution” (2020): bounding rows per group and groups per user in grouped queries.</li>
+<li>The full edition’s chapters on <a href="../../book-full/part03-dp-foundations/07-sensitivity.html">sensitivity</a> and <a href="../../book-full/part05-dp-ml/07-user-level.html">user-level privacy</a> derive the results this chapter states.</li>
+</ul>
+
+
+</section>
+
+</main> <!-- /main -->
+<script id="quarto-html-after-body" type="application/javascript">
+  window.document.addEventListener("DOMContentLoaded", function (event) {
+    const icon = "";
+    const anchorJS = new window.AnchorJS();
+    anchorJS.options = {
+      placement: 'right',
+      icon: icon
+    };
+    anchorJS.add('.anchored');
+    const isCodeAnnotation = (el) => {
+      for (const clz of el.classList) {
+        if (clz.startsWith('code-annotation-')) {                     
+          return true;
+        }
+      }
+      return false;
+    }
+    const onCopySuccess = function(e) {
+      // button target
+      const button = e.trigger;
+      // don't keep focus
+      button.blur();
+      // flash "checked"
+      button.classList.add('code-copy-button-checked');
+      var currentTitle = button.getAttribute("title");
+      button.setAttribute("title", "Copied!");
+      let tooltip;
+      if (window.bootstrap) {
+        button.setAttribute("data-bs-toggle", "tooltip");
+        button.setAttribute("data-bs-placement", "left");
+        button.setAttribute("data-bs-title", "Copied!");
+        tooltip = new bootstrap.Tooltip(button, 
+          { trigger: "manual", 
+            customClass: "code-copy-button-tooltip",
+            offset: [0, -8]});
+        tooltip.show();    
+      }
+      setTimeout(function() {
+        if (tooltip) {
+          tooltip.hide();
+          button.removeAttribute("data-bs-title");
+          button.removeAttribute("data-bs-toggle");
+          button.removeAttribute("data-bs-placement");
+        }
+        button.setAttribute("title", currentTitle);
+        button.classList.remove('code-copy-button-checked');
+      }, 1000);
+      // clear code selection
+      e.clearSelection();
+    }
+    const getTextToCopy = function(trigger) {
+      const outerScaffold = trigger.parentElement.cloneNode(true);
+      const codeEl = outerScaffold.querySelector('code');
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
+        }
+      }
+      return codeEl.innerText;
+    }
+    const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
+      text: getTextToCopy
+    });
+    clipboard.on('success', onCopySuccess);
+    if (window.document.getElementById('quarto-embedded-source-code-modal')) {
+      const clipboardModal = new window.ClipboardJS('.code-copy-button[data-in-quarto-modal]', {
+        text: getTextToCopy,
+        container: window.document.getElementById('quarto-embedded-source-code-modal')
+      });
+      clipboardModal.on('success', onCopySuccess);
+    }
+      var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+      var mailtoRegex = new RegExp(/^mailto:/);
+        var filterRegex = new RegExp('/' + window.location.host + '/');
+      var isInternal = (href) => {
+          return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+      }
+      // Inspect non-navigation links and adorn them if external
+     var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool):not(.about-link)');
+      for (var i=0; i<links.length; i++) {
+        const link = links[i];
+        if (!isInternal(link.href)) {
+          // undo the damage that might have been done by quarto-nav.js in the case of
+          // links that we want to consider external
+          if (link.dataset.originalHref !== undefined) {
+            link.href = link.dataset.originalHref;
+          }
+        }
+      }
+    function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+      const config = {
+        allowHTML: true,
+        maxWidth: 500,
+        delay: 100,
+        arrow: false,
+        appendTo: function(el) {
+            return el.parentElement;
+        },
+        interactive: true,
+        interactiveBorder: 10,
+        theme: 'quarto',
+        placement: 'bottom-start',
+      };
+      if (contentFn) {
+        config.content = contentFn;
+      }
+      if (onTriggerFn) {
+        config.onTrigger = onTriggerFn;
+      }
+      if (onUntriggerFn) {
+        config.onUntrigger = onUntriggerFn;
+      }
+      window.tippy(el, config); 
+    }
+    const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+    for (var i=0; i<noterefs.length; i++) {
+      const ref = noterefs[i];
+      tippyHover(ref, function() {
+        // use id or data attribute instead here
+        let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+        try { href = new URL(href).hash; } catch {}
+        const id = href.replace(/^#\/?/, "");
+        const note = window.document.getElementById(id);
+        if (note) {
+          return note.innerHTML;
+        } else {
+          return "";
+        }
+      });
+    }
+    const xrefs = window.document.querySelectorAll('a.quarto-xref');
+    const processXRef = (id, note) => {
+      // Strip column container classes
+      const stripColumnClz = (el) => {
+        el.classList.remove("page-full", "page-columns");
+        if (el.children) {
+          for (const child of el.children) {
+            stripColumnClz(child);
+          }
+        }
+      }
+      stripColumnClz(note)
+      if (id === null || id.startsWith('sec-')) {
+        // Special case sections, only their first couple elements
+        const container = document.createElement("div");
+        if (note.children && note.children.length > 2) {
+          container.appendChild(note.children[0].cloneNode(true));
+          for (let i = 1; i < note.children.length; i++) {
+            const child = note.children[i];
+            if (child.tagName === "P" && child.innerText === "") {
+              continue;
+            } else {
+              container.appendChild(child.cloneNode(true));
+              break;
+            }
+          }
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(container);
+          }
+          return container.innerHTML
+        } else {
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(note);
+          }
+          return note.innerHTML;
+        }
+      } else {
+        // Remove any anchor links if they are present
+        const anchorLink = note.querySelector('a.anchorjs-link');
+        if (anchorLink) {
+          anchorLink.remove();
+        }
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(note);
+        }
+        if (note.classList.contains("callout")) {
+          return note.outerHTML;
+        } else {
+          return note.innerHTML;
+        }
+      }
+    }
+    for (var i=0; i<xrefs.length; i++) {
+      const xref = xrefs[i];
+      tippyHover(xref, undefined, function(instance) {
+        instance.disable();
+        let url = xref.getAttribute('href');
+        let hash = undefined; 
+        if (url.startsWith('#')) {
+          hash = url;
+        } else {
+          try { hash = new URL(url).hash; } catch {}
+        }
+        if (hash) {
+          const id = hash.replace(/^#\/?/, "");
+          const note = window.document.getElementById(id);
+          if (note !== null) {
+            try {
+              const html = processXRef(id, note.cloneNode(true));
+              instance.setContent(html);
+            } finally {
+              instance.enable();
+              instance.show();
+            }
+          } else {
+            // See if we can fetch this
+            fetch(url.split('#')[0])
+            .then(res => res.text())
+            .then(html => {
+              const parser = new DOMParser();
+              const htmlDoc = parser.parseFromString(html, "text/html");
+              const note = htmlDoc.getElementById(id);
+              if (note !== null) {
+                const html = processXRef(id, note);
+                instance.setContent(html);
+              } 
+            }).finally(() => {
+              instance.enable();
+              instance.show();
+            });
+          }
+        } else {
+          // See if we can fetch a full url (with no hash to target)
+          // This is a special case and we should probably do some content thinning / targeting
+          fetch(url)
+          .then(res => res.text())
+          .then(html => {
+            const parser = new DOMParser();
+            const htmlDoc = parser.parseFromString(html, "text/html");
+            const note = htmlDoc.querySelector('main.content');
+            if (note !== null) {
+              // This should only happen for chapter cross references
+              // (since there is no id in the URL)
+              // remove the first header
+              if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
+                note.children[0].remove();
+              }
+              const html = processXRef(null, note);
+              instance.setContent(html);
+            } 
+          }).finally(() => {
+            instance.enable();
+            instance.show();
+          });
+        }
+      }, function(instance) {
+      });
+    }
+        let selectedAnnoteEl;
+        const selectorForAnnotation = ( cell, annotation) => {
+          let cellAttr = 'data-code-cell="' + cell + '"';
+          let lineAttr = 'data-code-annotation="' +  annotation + '"';
+          const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+          return selector;
+        }
+        const selectCodeLines = (annoteEl) => {
+          const doc = window.document;
+          const targetCell = annoteEl.getAttribute("data-target-cell");
+          const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+          const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+          const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+          const lineIds = lines.map((line) => {
+            return targetCell + "-" + line;
+          })
+          let top = null;
+          let height = null;
+          let parent = null;
+          if (lineIds.length > 0) {
+              //compute the position of the single el (top and bottom and make a div)
+              const el = window.document.getElementById(lineIds[0]);
+              top = el.offsetTop;
+              height = el.offsetHeight;
+              parent = el.parentElement.parentElement;
+            if (lineIds.length > 1) {
+              const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+              const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+              height = bottom - top;
+            }
+            if (top !== null && height !== null && parent !== null) {
+              // cook up a div (if necessary) and position it 
+              let div = window.document.getElementById("code-annotation-line-highlight");
+              if (div === null) {
+                div = window.document.createElement("div");
+                div.setAttribute("id", "code-annotation-line-highlight");
+                div.style.position = 'absolute';
+                parent.appendChild(div);
+              }
+              div.style.top = top - 2 + "px";
+              div.style.height = height + 4 + "px";
+              div.style.left = 0;
+              let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+              if (gutterDiv === null) {
+                gutterDiv = window.document.createElement("div");
+                gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+                gutterDiv.style.position = 'absolute';
+                const codeCell = window.document.getElementById(targetCell);
+                const gutter = codeCell.querySelector('.code-annotation-gutter');
+                gutter.appendChild(gutterDiv);
+              }
+              gutterDiv.style.top = top - 2 + "px";
+              gutterDiv.style.height = height + 4 + "px";
+            }
+            selectedAnnoteEl = annoteEl;
+          }
+        };
+        const unselectCodeLines = () => {
+          const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+          elementsIds.forEach((elId) => {
+            const div = window.document.getElementById(elId);
+            if (div) {
+              div.remove();
+            }
+          });
+          selectedAnnoteEl = undefined;
+        };
+          // Handle positioning of the toggle
+      window.addEventListener(
+        "resize",
+        throttle(() => {
+          elRect = undefined;
+          if (selectedAnnoteEl) {
+            selectCodeLines(selectedAnnoteEl);
+          }
+        }, 10)
+      );
+      function throttle(fn, ms) {
+      let throttle = false;
+      let timer;
+        return (...args) => {
+          if(!throttle) { // first call gets through
+              fn.apply(this, args);
+              throttle = true;
+          } else { // all the others get throttled
+              if(timer) clearTimeout(timer); // cancel #2
+              timer = setTimeout(() => {
+                fn.apply(this, args);
+                timer = throttle = false;
+              }, ms);
+          }
+        };
+      }
+        // Attach click handler to the DT
+        const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+        for (const annoteDlNode of annoteDls) {
+          annoteDlNode.addEventListener('click', (event) => {
+            const clickedEl = event.target;
+            if (clickedEl !== selectedAnnoteEl) {
+              unselectCodeLines();
+              const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+              if (activeEl) {
+                activeEl.classList.remove('code-annotation-active');
+              }
+              selectCodeLines(clickedEl);
+              clickedEl.classList.add('code-annotation-active');
+            } else {
+              // Unselect the line
+              unselectCodeLines();
+              clickedEl.classList.remove('code-annotation-active');
+            }
+          });
+        }
+    const findCites = (el) => {
+      const parentEl = el.parentElement;
+      if (parentEl) {
+        const cites = parentEl.dataset.cites;
+        if (cites) {
+          return {
+            el,
+            cites: cites.split(' ')
+          };
+        } else {
+          return findCites(el.parentElement)
+        }
+      } else {
+        return undefined;
+      }
+    };
+    var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+    for (var i=0; i<bibliorefs.length; i++) {
+      const ref = bibliorefs[i];
+      const citeInfo = findCites(ref);
+      if (citeInfo) {
+        tippyHover(citeInfo.el, function() {
+          var popup = window.document.createElement('div');
+          citeInfo.cites.forEach(function(cite) {
+            var citeDiv = window.document.createElement('div');
+            citeDiv.classList.add('hanging-indent');
+            citeDiv.classList.add('csl-entry');
+            var biblioDiv = window.document.getElementById('ref-' + cite);
+            if (biblioDiv) {
+              citeDiv.innerHTML = biblioDiv.innerHTML;
+            }
+            popup.appendChild(citeDiv);
+          });
+          return popup.innerHTML;
+        });
+      }
+    }
+  });
+  </script>
+<nav class="page-navigation">
+  <div class="nav-page nav-page-previous">
+      <a href="../part02-tabular-data/04-grouping.html" class="pagination-link" aria-label="Grouping">
+        <i class="bi bi-arrow-left-short"></i> <span class="nav-page-text"><span class="chapter-number">4</span>&nbsp; <span class="chapter-title">Grouping</span></span>
+      </a>          
+  </div>
+  <div class="nav-page nav-page-next">
+      <a href="../part02-tabular-data/06-preparing-microdata.html" class="pagination-link" aria-label="Preparing microdata">
+        <span class="nav-page-text"><span class="chapter-number">6</span>&nbsp; <span class="chapter-title">Preparing microdata</span></span> <i class="bi bi-arrow-right-short"></i>
+      </a>
+  </div>
+</nav>
+</div> <!-- /content -->
+
+
+
+
+</body></html>

@@ -76,6 +76,35 @@ ul.task-list li input[type="checkbox"] {
   }
 }</script>
 
+  <script src="https://cdnjs.cloudflare.com/polyfill/v3/polyfill.min.js?features=es6"></script>
+  <script defer="" src="https://cdn.jsdelivr.net/npm/mathjax@4/tex-chtml.js" type="text/javascript"></script>
+
+<script type="text/javascript">
+const typesetMath = (el) => {
+  if (window.MathJax) {
+    // MathJax Typeset
+    window.MathJax.typeset([el]);
+  } else if (window.katex) {
+    // KaTeX Render
+    var mathElements = el.getElementsByClassName("math");
+    var macros = [];
+    for (var i = 0; i < mathElements.length; i++) {
+      var texText = mathElements[i].firstChild;
+      if (mathElements[i].tagName == "SPAN" && texText && texText.data) {
+        window.katex.render(texText.data, mathElements[i], {
+          displayMode: mathElements[i].classList.contains('display'),
+          throwOnError: false,
+          macros: macros,
+          fleqn: false
+        });
+      }
+    }
+  }
+}
+window.Quarto = {
+  typesetMath
+};
+</script>
 
 </head>
 
@@ -608,7 +637,7 @@ ul.task-list li input[type="checkbox"] {
     <div>
     <div class="quarto-title-meta-heading">Published</div>
     <div class="quarto-title-meta-contents">
-      <p class="date">Version 2026-10-23</p>
+      <p class="date">Version 2026-10-26</p>
     </div>
   </div>
   
@@ -622,7 +651,7 @@ ul.task-list li input[type="checkbox"] {
 
 <section id="preface" class="level1 unnumbered">
 <h1 class="unnumbered">Preface</h1>
-<p>Notes and code for a book on privacy-preserving machine learning.</p>
+<p>This is the full edition of <em>Privacy-Preserving Machine Learning</em>: every result is derived step by step. Two companions share its parts and chapter files: the <a href="../book-exercises/index.html">exercise book</a>, with a worked solution for every exercise, and the <a href="../book-practitioner/index.html">practitioner edition</a>, which states the same results without proofs and shows how to use them with real libraries. A separate <a href="../book-course/index.html">course in differential privacy</a> teaches the subject one topic per chapter, with complete proofs and little else.</p>
 <p>The figures and the numbers quoted in the text are produced by each chapter’s script, in the repository’s <code>code/</code> directory, one folder per part.</p>
 <section id="how-this-book-is-organized" class="level2 unnumbered">
 <h2 class="unnumbered anchored" data-anchor-id="how-this-book-is-organized">How this book is organized</h2>
@@ -632,7 +661,7 @@ ul.task-list li input[type="checkbox"] {
 <li><strong>Threat models and attacks</strong> shows how models and data leak before any defence is introduced. It first attacks trained models, from one bit of membership up to whole training inputs, then attacks released data, from records with names removed to records hidden in crowds to aggregate statistics alone.</li>
 <li><strong>Differential privacy foundations</strong> defines the guarantee those attacks call for, builds its mechanisms, composes them, and ends with what privacy costs.</li>
 <li><strong>Privacy accounting</strong> tracks the guarantee through many steps of training, as accurately as possible.</li>
-<li><strong>Differential privacy in machine learning</strong> trains models with the guarantee: where the noise goes, how the knobs of noisy, clipped gradient descent trade privacy for accuracy, what else spends the budget, who pays for the noise, which ε to choose, and how to audit the result.</li>
+<li><strong>Differential privacy in machine learning</strong> trains models with the guarantee: where the noise goes, how the knobs of noisy, clipped gradient descent trade privacy for accuracy, what else spends the budget, who pays for the noise, which <span class="math inline">\(\varepsilon\)</span> to choose, and how to audit the result.</li>
 </ol>
 <p>The appendices hold a glossary of acronyms and an index. The exercises, with a worked solution for each, are in the exercise book, a companion website, and each chapter ends with a link to its page there.</p>
 

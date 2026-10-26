@@ -408,7 +408,7 @@ window.Quarto = {
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../part04-privacy-accounting/09-choosing-an-accountant.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">31</span>&nbsp; <span class="chapter-title">Report and review an ε claim</span></span></a>
+ <span class="menu-text"><span class="chapter-number">31</span>&nbsp; <span class="chapter-title">Choosing an accountant</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
@@ -604,7 +604,7 @@ window.Quarto = {
   <li><a href="#sec-calib-train" id="toc-sec-calib-train" class="nav-link" data-scroll-target="#sec-calib-train"><span class="header-section-number">32.7</span> Train, stop early and resume</a></li>
   <li><a href="#sec-calib-statement" id="toc-sec-calib-statement" class="nav-link" data-scroll-target="#sec-calib-statement"><span class="header-section-number">32.8</span> Write the statement</a></li>
   <li><a href="#checklist" id="toc-checklist" class="nav-link" data-scroll-target="#checklist"><span class="header-section-number">32.9</span> Checklist</a></li>
-  <li><a href="#further-reading" id="toc-further-reading" class="nav-link" data-scroll-target="#further-reading"><span class="header-section-number">32.10</span> Further reading</a></li>
+  <li><a href="#references" id="toc-references" class="nav-link" data-scroll-target="#references"><span class="header-section-number">32.10</span> References</a></li>
   </ul>
 </nav>
     </div>
@@ -641,7 +641,7 @@ window.Quarto = {
 <section id="sec-calib-unit" class="level2" data-number="32.2">
 <h2 data-number="32.2" class="anchored" data-anchor-id="sec-calib-unit"><span class="header-section-number">32.2</span> Fix the privacy unit, n and δ</h2>
 <p>The first decision is what one record is, because the guarantee protects exactly that. In Adult each row is one person, so protecting a row protects a person. If one person could own many rows, the number of records <span class="math inline">\(n\)</span> would have to count people, not rows, and training would need the user-level methods of <a href="../part05-dp-ml/07-user-level.html">User-level differential privacy</a>.</p>
-<p>The failure probability <span class="math inline">\(\delta\)</span> is roughly the small chance that the guarantee does not hold. The book’s rule sets it from <span class="math inline">\(n\)</span> as <span class="math inline">\(\delta \le 1/n^{1.1}\)</span>, rounded down to a power of ten, which keeps it well below <span class="math inline">\(1/n\)</span> (<a href="../part04-privacy-accounting/09-choosing-an-accountant.html#sec-choose-delta">Choosing δ</a>).</p>
+<p>The slack <span class="math inline">\(\delta\)</span> is roughly the small chance that the guarantee does not hold. The book’s rule sets it from <span class="math inline">\(n\)</span> as <span class="math inline">\(\delta \le 1/n^{1.1}\)</span>, rounded down to a power of ten, which keeps it well below <span class="math inline">\(1/n\)</span> (<a href="../part04-privacy-accounting/09-choosing-an-accountant.html#sec-choose-delta">Choosing δ</a>).</p>
 <div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb2" data-excerpt="calibrate-delta"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> delta_for(n: <span class="bu">int</span>) <span class="op">-&gt;</span> <span class="bu">float</span>:</span>
 <span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>    <span class="co">"""The book's default delta: at most 1/n^1.1, rounded down to a power of ten."""</span></span>
 <span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> <span class="fl">10.0</span> <span class="op">**</span> math.floor(math.log10(n<span class="op">**-</span><span class="fl">1.1</span>))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
@@ -661,7 +661,7 @@ chosen run uses the loader's q and steps; get_noise_multiplier at that q counts 
 </section>
 <section id="sec-calib-plan" class="level2" data-number="32.4">
 <h2 data-number="32.4" class="anchored" data-anchor-id="sec-calib-plan"><span class="header-section-number">32.4</span> Plan the noise</h2>
-<p>Next come the batch size, the epochs and the noise multiplier <span class="math inline">\(\sigma\)</span>. Training clips each example’s gradient to a length of at most <span class="math inline">\(C\)</span>, the clipping norm, and <span class="math inline">\(\sigma\)</span> is the noise’s standard deviation as a multiple of <span class="math inline">\(C\)</span>. With the target and the sampler fixed, an accountant finds the smallest <span class="math inline">\(\sigma\)</span> that meets them, so calibrate with the accountant you will report (<a href="../part04-privacy-accounting/09-choosing-an-accountant.html#sec-choose-inverse">The inverse problem</a>). The script uses two libraries that check each other, both with tight accountants (<a href="../part04-privacy-accounting/06-numerical-accounting.html">Numerical accounting</a>). Opacus’s <code>get_noise_multiplier</code>, from <code>opacus.accountants.utils</code>, searches with its privacy loss random variable (PRV) accountant and stops within 0.01 of the target <span class="math inline">\(\varepsilon\)</span>. Google’s <code>dp_accounting</code> searches with its privacy loss distribution (PLD) accountant and stops within 0.01 in <span class="math inline">\(\sigma\)</span>.</p>
+<p>Next come the batch size, the epochs and the noise multiplier <span class="math inline">\(\sigma\)</span>. Training clips each record’s gradient to a length of at most <span class="math inline">\(C\)</span>, the clipping norm, and <span class="math inline">\(\sigma\)</span> is the noise’s standard deviation as a multiple of <span class="math inline">\(C\)</span>. With the target and the sampler fixed, an accountant finds the smallest <span class="math inline">\(\sigma\)</span> that meets them, so calibrate with the accountant you will report (<a href="../part04-privacy-accounting/09-choosing-an-accountant.html#sec-choose-inverse">The inverse problem</a>). The script uses two libraries that check each other, both with tight accountants (<a href="../part04-privacy-accounting/06-numerical-accounting.html">Numerical accounting</a>). Opacus’s <code>get_noise_multiplier</code>, from <code>opacus.accountants.utils</code>, searches with its privacy loss random variable (PRV) accountant and stops within 0.01 of the target <span class="math inline">\(\varepsilon\)</span>. Google’s <code>dp_accounting</code> searches with its privacy loss distribution (PLD) accountant and stops within 0.01 in <span class="math inline">\(\sigma\)</span>.</p>
 <div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb5" data-excerpt="calibrate-sigma"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> sigma_opacus(epsilon: <span class="bu">float</span>, delta: <span class="bu">float</span>, q: <span class="bu">float</span>, epochs: <span class="bu">int</span>) <span class="op">-&gt;</span> <span class="bu">float</span>:</span>
 <span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a>    <span class="co">"""Opacus: the sigma whose PRV epsilon after `epochs` is at most the target (to 0.01 in epsilon)."""</span></span>
 <span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> get_noise_multiplier(</span>
@@ -687,7 +687,7 @@ Adult           30000  1e-05   300  10    4   1000       0.74       0.74        
 Adult           30000  1e-05  1000  10    4    300       0.97       0.98           0.97
 Adult           30000  1e-05  1000  10    8    300       0.72       0.73           0.72
 Adult           30000  1e-05  1000  20    4    600       1.16       1.16           1.16</code></pre>
-<p>The block shows 5 of the script’s 18 Adult cells. Read it along the batch size first. At <span class="math inline">\(\varepsilon = 4\)</span> and ten epochs, <span class="math inline">\(\sigma\)</span> grows from 0.62 at a batch of 100 to 0.97 at 1,000. Yet the noise on the averaged gradient falls from 6.16 to 0.97, because a larger batch divides the noise among more examples. At that batch, twenty epochs raise <span class="math inline">\(\sigma\)</span> from 0.97 to 1.16.</p>
+<p>The block shows 5 of the script’s 18 Adult cells. Read it along the batch size first. At <span class="math inline">\(\varepsilon = 4\)</span> and ten epochs, <span class="math inline">\(\sigma\)</span> grows from 0.62 at a batch of 100 to 0.97 at 1,000. Yet the noise on the averaged gradient falls from 6.16 to 0.97, because a larger batch divides the noise among more records. At that batch, twenty epochs raise <span class="math inline">\(\sigma\)</span> from 0.97 to 1.16.</p>
 <p>The table cannot choose the batch, because the noise on the average keeps falling as the batch grows, and so does the number of steps. So learn the epochs and steps your model needs from a non-private run or public data. Then take the largest batch that leaves those steps and fits in memory (<a href="../part05-dp-ml/02-dp-sgd.html#sec-dpsgd-batch">Batch size at a fixed budget</a>). Compare cells by <span class="math inline">\(\sigma/B\)</span>, never by <span class="math inline">\(\sigma\)</span> alone, since a smaller batch has the smaller <span class="math inline">\(\sigma\)</span> but the noisier average. The run takes the largest batch with ten epochs at <span class="math inline">\(\varepsilon = 4\)</span>, which is the cell Part 5 trains.</p>
 <p>The size of the data changes the picture, as a row from the end of the table shows.</p>
 <pre class="text"><code>breast cancer     569  1e-04    64  20    1    177       4.96       4.91          77.51
@@ -858,8 +858,8 @@ Table&nbsp;32.1: The steps of calibrating and accounting a DP-SGD run.
 </figure>
 </div>
 </section>
-<section id="further-reading" class="level2" data-number="32.10">
-<h2 data-number="32.10" class="anchored" data-anchor-id="further-reading"><span class="header-section-number">32.10</span> Further reading</h2>
+<section id="references" class="level2" data-number="32.10">
+<h2 data-number="32.10" class="anchored" data-anchor-id="references"><span class="header-section-number">32.10</span> References</h2>
 <ul>
 <li>Ponomareva et al., “How to DP-fy ML: A Practical Guide to Machine Learning with Differential Privacy” (JAIR 2023): planning a run’s privacy budget, and what to report.</li>
 <li>Lebeda, Regehr, Kamath &amp; Steinke, “Avoiding Pitfalls for Privacy Accounting of Subsampled Mechanisms under Composition” (IEEE SaTML 2025): why fixed-size and shuffled batches need their own accounting.</li>
@@ -1272,8 +1272,8 @@ Table&nbsp;32.1: The steps of calibrating and accounting a DP-SGD run.
   </script>
 <nav class="page-navigation">
   <div class="nav-page nav-page-previous">
-      <a href="../part04-privacy-accounting/09-choosing-an-accountant.html" class="pagination-link" aria-label="Report and review an ε claim">
-        <i class="bi bi-arrow-left-short"></i> <span class="nav-page-text"><span class="chapter-number">31</span>&nbsp; <span class="chapter-title">Report and review an ε claim</span></span>
+      <a href="../part04-privacy-accounting/09-choosing-an-accountant.html" class="pagination-link" aria-label="Choosing an accountant">
+        <i class="bi bi-arrow-left-short"></i> <span class="nav-page-text"><span class="chapter-number">31</span>&nbsp; <span class="chapter-title">Choosing an accountant</span></span>
       </a>          
   </div>
   <div class="nav-page nav-page-next">

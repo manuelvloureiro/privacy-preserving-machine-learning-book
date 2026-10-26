@@ -408,7 +408,7 @@ window.Quarto = {
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../part04-privacy-accounting/09-choosing-an-accountant.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">31</span>&nbsp; <span class="chapter-title">Report and review an ε claim</span></span></a>
+ <span class="menu-text"><span class="chapter-number">31</span>&nbsp; <span class="chapter-title">Choosing an accountant</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
@@ -607,7 +607,7 @@ window.Quarto = {
   <li><a href="#sec-ht-estimation" id="toc-sec-ht-estimation" class="nav-link" data-scroll-target="#sec-ht-estimation"><span class="header-section-number">4.10</span> Measuring rates from finite trials</a></li>
   <li><a href="#sec-ht-recipe" id="toc-sec-ht-recipe" class="nav-link" data-scroll-target="#sec-ht-recipe"><span class="header-section-number">4.11</span> Evaluating a detector at a low false positive rate</a></li>
   <li><a href="#cheat-sheet" id="toc-cheat-sheet" class="nav-link" data-scroll-target="#cheat-sheet"><span class="header-section-number">4.12</span> Cheat sheet</a></li>
-  <li><a href="#further-reading" id="toc-further-reading" class="nav-link" data-scroll-target="#further-reading"><span class="header-section-number">4.13</span> Further reading</a></li>
+  <li><a href="#references" id="toc-references" class="nav-link" data-scroll-target="#references"><span class="header-section-number">4.13</span> References</a></li>
   </ul>
 </nav>
     </div>
@@ -646,16 +646,16 @@ window.Quarto = {
 </section>
 <section id="sec-ht-np" class="level2" data-number="4.3">
 <h2 data-number="4.3" class="anchored" data-anchor-id="sec-ht-np"><span class="header-section-number">4.3</span> The Neyman–Pearson lemma</h2>
-<p>Write <span class="math inline">\(p(x)\)</span> and <span class="math inline">\(q(x)\)</span> for the probabilities, or densities, of an observation <span class="math inline">\(x\)</span> under the two hypotheses. Their quotient is the <strong>likelihood ratio</strong> <span id="eq-auto-04hypothesistesting-1"><span class="math display">\[\Lambda(x) = \frac{q(x)}{p(x)}, \tag{4.1}\]</span></span> and a <strong>likelihood ratio (LR) test</strong> rejects wherever it exceeds a threshold <span class="math inline">\(\eta\)</span>, set so that the test’s FPR equals the budget. The <strong>Neyman–Pearson lemma</strong> says that no other test at that level catches more real cases.</p>
+<p>Write <span class="math inline">\(p(x)\)</span> and <span class="math inline">\(q(x)\)</span> for the probabilities, or densities, of an observation <span class="math inline">\(x\)</span> under the two hypotheses. Their quotient is the <strong>likelihood ratio</strong> <span id="eq-auto-04hypothesistesting-1"><span class="math display">\[\Lambda(x) = \frac{q(x)}{p(x)}, \tag{4.1}\]</span></span> and a <strong>likelihood ratio (LR) test</strong> rejects wherever it exceeds a threshold <span class="math inline">\(\tau\)</span>, set so that the test’s FPR equals the budget. The <strong>Neyman–Pearson lemma</strong> says that no other test at that level catches more real cases.</p>
 <p>So the best test looks at an observation only through its likelihood ratio. A threshold on a raw score is that test only when a higher score always means a higher ratio. To estimate the ratio from labelled scores, fit a logistic regression of the label on the score; its log-odds, less the log prior odds, estimate <span class="math inline">\(\ln\Lambda\)</span>. If a known group shifts the scores, the ratio depends on the group, so the best test thresholds within each group. Independent observations of one case combine by adding their log ratios, and at a fixed FPR the FNR then falls exponentially with their number.</p>
 </section>
 <section id="sec-ht-tradeoff" class="level2" data-number="4.4">
 <h2 data-number="4.4" class="anchored" data-anchor-id="sec-ht-tradeoff"><span class="header-section-number">4.4</span> Trade-off curves</h2>
-<p>To say how hard it is to tell <span class="math inline">\(P\)</span> from <span class="math inline">\(Q\)</span>, record the best FNR at every level. As a function of the budget, this is the <strong>trade-off function</strong> <span class="math inline">\(T(\alpha)\)</span>, and you compute it by sweeping the LR threshold. The <strong>receiver operating characteristic (ROC)</strong> curve holds the same information upside down, as TPR against FPR. Any particular detector traces its own ROC curve, which lies on or below the best one.</p>
+<p>To say how hard it is to tell <span class="math inline">\(P\)</span> from <span class="math inline">\(Q\)</span>, record the best FNR at every level. As a function of the budget, this is the <strong>trade-off function</strong> <span class="math inline">\(T(P, Q)\)</span>, and you compute it by sweeping the LR threshold. The <strong>receiver operating characteristic (ROC)</strong> curve holds the same information upside down, as TPR against FPR. Any particular detector traces its own ROC curve, which lies on or below the best one.</p>
 </section>
 <section id="sec-ht-gaussian" class="level2" data-number="4.5">
 <h2 data-number="4.5" class="anchored" data-anchor-id="sec-ht-gaussian"><span class="header-section-number">4.5</span> The Gaussian trade-off curve</h2>
-<p>A common pair is a score that is normal under both hypotheses, with the same spread, scaled so that normal cases have mean 0 and standard deviation 1. Write <span class="math inline">\(\mu\)</span> for the distance between the two centres in standard deviations, and <span class="math inline">\(\Phi\)</span> for the standard normal cumulative distribution function. The best test thresholds at <span class="math inline">\(\Phi^{-1}(1 - \alpha)\)</span>, and its FNR is <span id="eq-ht-gaussian-tradeoff"><span class="math display">\[T(\alpha) = \Phi\big(\Phi^{-1}(1 - \alpha) - \mu\big). \tag{4.2}\]</span></span> In SciPy this is <code>norm.cdf(norm.isf(alpha) - mu)</code>, with <code>isf</code> because <code>norm.ppf(1 - alpha)</code> loses the digits that matter at a tiny <span class="math inline">\(\alpha\)</span>. So a single number <span class="math inline">\(\mu\)</span> fixes the best TPR at every FPR. Turned around, a measured pair gives <span class="math inline">\(\mu = \Phi^{-1}(1 - \alpha) + \Phi^{-1}(\mathrm{TPR})\)</span>, <code>norm.isf(alpha) + norm.ppf(tpr)</code>. If that estimate changes with <span class="math inline">\(\alpha\)</span>, the scores are not of this shape.</p>
+<p>A common pair is a score that is normal under both hypotheses, with the same spread, scaled so that normal cases have mean 0 and standard deviation 1. Write <span class="math inline">\(\mu\)</span> for the distance between the two centres in standard deviations, and <span class="math inline">\(\Phi\)</span> for the standard normal cumulative distribution function. The best test thresholds at <span class="math inline">\(\Phi^{-1}(1 - \alpha)\)</span>, and its FNR at level <span class="math inline">\(\alpha\)</span> is the Gaussian trade-off function <span id="eq-ht-gaussian-tradeoff"><span class="math display">\[G_\mu(\alpha) = \Phi\big(\Phi^{-1}(1 - \alpha) - \mu\big). \tag{4.2}\]</span></span> In SciPy this is <code>norm.cdf(norm.isf(alpha) - mu)</code>, with <code>isf</code> because <code>norm.ppf(1 - alpha)</code> loses the digits that matter at a tiny <span class="math inline">\(\alpha\)</span>. So a single number <span class="math inline">\(\mu\)</span> fixes the best TPR at every FPR. Turned around, a measured pair gives <span class="math inline">\(\mu = \Phi^{-1}(1 - \alpha) + \Phi^{-1}(\mathrm{TPR})\)</span>, <code>norm.isf(alpha) + norm.ppf(tpr)</code>. If that estimate changes with <span class="math inline">\(\alpha\)</span>, the scores are not of this shape.</p>
 <p>For example, take <span class="math inline">\(\mu = 2\)</span>. At an FPR of 5%, the best test has a TPR of 0.6388. At an FPR of <span class="math inline">\(10^{-3}\)</span>, it drops to 0.1378.</p>
 </section>
 <section id="sec-ht-laplace" class="level2" data-number="4.6">
@@ -691,18 +691,18 @@ Figure&nbsp;4.1: Two detectors with the same AUC of 0.760, on linear axes (left)
 <section id="sec-ht-estimation" class="level2" data-number="4.10">
 <h2 data-number="4.10" class="anchored" data-anchor-id="sec-ht-estimation"><span class="header-section-number">4.10</span> Measuring rates from finite trials</h2>
 <p>You measure a detector’s FPR by counting false positives among <span class="math inline">\(n\)</span> test negatives. If each negative is flagged independently with the same small probability, the count <span class="math inline">\(k\)</span> is binomial and fluctuates by about <span class="math inline">\(\sqrt k\)</span>.</p>
-<p>The <strong>Clopper–Pearson interval</strong> gives the range of true rates that make the observed count unsurprising. Write <span class="math inline">\(1 - a\)</span> for the confidence level (<span class="math inline">\(a\)</span>, since <span class="math inline">\(\alpha\)</span> is the FPR). Its lower end <span class="math inline">\(l\)</span> and upper end <span class="math inline">\(u\)</span> solve <span id="eq-auto-04hypothesistesting-4"><span class="math display">\[\Pr[\mathrm{Bin}(n, l) \ge k] = \frac a2, \qquad \Pr[\mathrm{Bin}(n, u) \le k] = \frac a2. \tag{4.6}\]</span></span> It is exact, because it uses the binomial itself, and conservative, because it covers the true rate at least <span class="math inline">\(1 - a\)</span> of the time. In SciPy, <code>binomtest(k, n).proportion_ci(method="exact")</code> computes it.</p>
+<p>The <strong>Clopper–Pearson interval</strong> gives the range of true rates that make the observed count unsurprising. Write <span class="math inline">\(1 - \alpha\)</span> for the confidence level, so that <span class="math inline">\(\alpha\)</span> is the probability that the interval misses the true rate. Its lower end <span class="math inline">\(l\)</span> and upper end <span class="math inline">\(u\)</span> solve <span id="eq-auto-04hypothesistesting-4"><span class="math display">\[\Pr[\mathrm{Bin}(n, l) \ge k] = \frac\alpha2, \qquad \Pr[\mathrm{Bin}(n, u) \le k] = \frac\alpha2. \tag{4.6}\]</span></span> It is exact, because it uses the binomial itself, and conservative, because it covers the true rate at least <span class="math inline">\(1 - \alpha\)</span> of the time. In SciPy, <code>binomtest(k, n).proportion_ci(method="exact")</code> computes it.</p>
 <p>To claim that an FPR is below a target, you need only the upper end, and passing <code>alternative="less"</code> to <code>binomtest</code> gives that one-sided bound. With no events at all, the one-sided 95% bound is about <span class="math inline">\(3/n\)</span>, the <strong>rule of three</strong>. Computed exactly, certifying an FPR below <span class="math inline">\(10^{-3}\)</span> takes 2,995 negatives with no false positive.</p>
-<p>These intervals are wide. Even 10 false positives in 10,000 negatives give the interval <span class="math inline">\([0.00048, 0.00184]\)</span>, from about half to almost twice the observed rate. About 100 events pin a rate to within about 20%. So measuring an FPR of <span class="math inline">\(\alpha\)</span> takes on the order of <span class="math inline">\(100/\alpha\)</span> negatives. The <strong>Wald interval</strong>, which treats the count as normal, fails here: it is too narrow and collapses to <span class="math inline">\([0, 0]\)</span> with no events.</p>
+<p>These intervals are wide. Even 10 false positives in 10,000 negatives give the interval <span class="math inline">\([0.00048, 0.00184]\)</span>, from about half to almost twice the observed rate. About 100 events pin a rate to within about 20%. So measuring an FPR of <span class="math inline">\(p\)</span> takes on the order of <span class="math inline">\(100/p\)</span> negatives. The <strong>Wald interval</strong>, which treats the count as normal, fails here: it is too narrow and collapses to <span class="math inline">\([0, 0]\)</span> with no events.</p>
 </section>
 <section id="sec-ht-recipe" class="level2" data-number="4.11">
 <h2 data-number="4.11" class="anchored" data-anchor-id="sec-ht-recipe"><span class="header-section-number">4.11</span> Evaluating a detector at a low false positive rate</h2>
 <ol type="1">
 <li>Fix the target FPRs, such as <span class="math inline">\(10^{-2}\)</span> and <span class="math inline">\(10^{-3}\)</span>.</li>
-<li>Plan the trials with about <span class="math inline">\(100/\alpha\)</span> negatives for a target FPR <span class="math inline">\(\alpha\)</span>.</li>
+<li>Plan the trials with about <span class="math inline">\(100/p\)</span> negatives for a target FPR <span class="math inline">\(p\)</span>.</li>
 <li>Choose the threshold on the negatives of one split and measure the rates on another, because a threshold tuned on the evaluation set looks better there than it is. The calibration split needs as many negatives, since below one over their number <code>np.quantile</code> only interpolates between the top scores.</li>
 <li>Report the TPR and FPR measured at that threshold, with Clopper–Pearson intervals on both, and the full ROC curve on log–log axes. A TPR read off the test split’s ROC curve is optimistic, because it picks its threshold on the test data.</li>
-<li>Compare two detectors at the same FPR, never by AUC or accuracy alone, and on a shared evaluation set check the gap with McNemar’s test, <code>binomtest(b, b + c, 0.5)</code>, where <span class="math inline">\(b\)</span> and <span class="math inline">\(c\)</span> count the positives that only one of them catches.</li>
+<li>Compare two detectors at the same FPR, never by AUC or accuracy alone, and on a shared evaluation set check the gap with McNemar’s test, <code>binomtest(m1, m1 + m2, 0.5)</code>, where <span class="math inline">\(m_1\)</span> and <span class="math inline">\(m_2\)</span> count the positives that only one of them catches.</li>
 </ol>
 <p>The snippet below runs steps 3 and 4 on the breast cancer dataset bundled with scikit-learn, with a logistic regression as the detector and malignant tumours as positives. It holds out 30% of the data for calibration and 30% for testing. The threshold is the 99th percentile of the calibration split’s benign scores (<code>decision_function</code>, the model’s log-odds), for a target FPR of 1%.</p>
 <div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb1"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> numpy <span class="im">as</span> np</span>
@@ -753,7 +753,7 @@ Table&nbsp;4.1: The questions of this chapter and their answers.
 </tr>
 <tr class="even">
 <td>How good can any test be?</td>
-<td>The trade-off curve; normal pair <span class="math inline">\(\Phi(\Phi^{-1}(1 - \alpha) - \mu)\)</span></td>
+<td>The trade-off curve; normal pair <span class="math inline">\(G_\mu(\alpha) = \Phi(\Phi^{-1}(1 - \alpha) - \mu)\)</span></td>
 </tr>
 <tr class="odd">
 <td>What does a capped ratio allow?</td>
@@ -782,12 +782,12 @@ Table&nbsp;4.1: The questions of this chapter and their answers.
 </div>
 <p><strong>Rules of thumb</strong></p>
 <ul>
-<li>Plan for <span class="math inline">\(100/\alpha\)</span> negatives, and use Clopper–Pearson, never Wald.</li>
+<li>Plan for <span class="math inline">\(100/p\)</span> negatives, and use Clopper–Pearson, never Wald.</li>
 <li>Report TPR at fixed low FPRs on log–log axes, never AUC alone.</li>
 </ul>
 </section>
-<section id="further-reading" class="level2" data-number="4.13">
-<h2 data-number="4.13" class="anchored" data-anchor-id="further-reading"><span class="header-section-number">4.13</span> Further reading</h2>
+<section id="references" class="level2" data-number="4.13">
+<h2 data-number="4.13" class="anchored" data-anchor-id="references"><span class="header-section-number">4.13</span> References</h2>
 <ul>
 <li>Fawcett, “An introduction to ROC analysis” (Pattern Recognition Letters, 2006): ROC curves and their pitfalls.</li>
 <li>Brown, Cai &amp; DasGupta, “Interval Estimation for a Binomial Proportion” (Statistical Science, 2001): why Wald fails and what to use.</li>

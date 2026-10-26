@@ -408,7 +408,7 @@ window.Quarto = {
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../part04-privacy-accounting/09-choosing-an-accountant.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">31</span>&nbsp; <span class="chapter-title">Report and review an ε claim</span></span></a>
+ <span class="menu-text"><span class="chapter-number">31</span>&nbsp; <span class="chapter-title">Choosing an accountant</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
@@ -599,7 +599,7 @@ window.Quarto = {
   <li><a href="#sec-pate-when" id="toc-sec-pate-when" class="nav-link" data-scroll-target="#sec-pate-when"><span class="header-section-number">49.2</span> When you meet it</a></li>
   <li><a href="#sec-pate-use" id="toc-sec-pate-use" class="nav-link" data-scroll-target="#sec-pate-use"><span class="header-section-number">49.3</span> How to use it</a></li>
   <li><a href="#sec-pate-wrong" id="toc-sec-pate-wrong" class="nav-link" data-scroll-target="#sec-pate-wrong"><span class="header-section-number">49.4</span> What goes wrong</a></li>
-  <li><a href="#further-reading" id="toc-further-reading" class="nav-link" data-scroll-target="#further-reading"><span class="header-section-number">49.5</span> Further reading</a></li>
+  <li><a href="#references" id="toc-references" class="nav-link" data-scroll-target="#references"><span class="header-section-number">49.5</span> References</a></li>
   </ul>
 </nav>
     </div>
@@ -632,7 +632,7 @@ window.Quarto = {
 </section>
 <section id="sec-pate-when" class="level2" data-number="49.2">
 <h2 data-number="49.2" class="anchored" data-anchor-id="sec-pate-when"><span class="header-section-number">49.2</span> When you meet it</h2>
-<p>You meet private prediction when you cannot train a private model. The common case is a large language model (LLM) behind an interface, whose prompt holds private examples and whose answers leak them. The fix splits the examples into disjoint groups, prompts the model once per group, and releases the GNMax label of the answers (Duan et al.&nbsp;2023). Wu et al.&nbsp;(2024) answered 10,000 sentiment queries this way. At <span class="math inline">\(\varepsilon = 1\)</span> they report 91.97% accuracy, as good as one non-private prompt.</p>
+<p>You meet private prediction when you cannot train a private model. The common case is a large language model (LLM) behind an interface, whose prompt holds private records and whose answers leak them. The fix splits the records into disjoint groups, prompts the model once per group, and releases the GNMax label of the answers (Duan et al.&nbsp;2023). Wu et al.&nbsp;(2024) answered 10,000 sentiment queries this way. At <span class="math inline">\(\varepsilon = 1\)</span> they report 91.97% accuracy, as good as one non-private prompt.</p>
 <p>The decision is between private answers and a private model, whose accuracy is fixed. The vote’s accuracy falls as its noise grows with <span class="math inline">\(\sqrt Q\)</span>, so answers win up to a <strong>break-even</strong> number of queries, and the model wins beyond it. On the full edition’s 10,000-record synthetic task, the vote beats noisy stochastic gradient descent (SGD), <a href="../part05-dp-ml/02-dp-sgd.html">DP-SGD</a>, only on the first 18 queries at <span class="math inline">\(\varepsilon = 1\)</span>. From <span class="math inline">\(\varepsilon = 2\)</span> on, DP-SGD beats even a noiseless vote of teachers trained on small shards. So compare the two at your budget and expected number of queries, with the DP-SGD baseline of <a href="../part05-dp-ml/13-train-dp-sgd.html">Train a model with DP-SGD</a>.</p>
 <p><strong>PATE</strong> (private aggregation of teacher ensembles) spends the budget once. It labels public, unlabelled inputs by GNMax and trains a new model, the <strong>student</strong>, on them, and only the student is released, at exactly the cost of its labels. So PATE needs public inputs from the private data’s distribution. Papernot et al.’s MNIST student comes within a percentage point of non-private accuracy, but at a data-dependent <span class="math inline">\(\varepsilon\)</span> (<a href="#sec-pate-wrong" class="quarto-xref"><span>Section 49.4</span></a>). On the synthetic task, though, DP-SGD beats the best student at every budget.</p>
 </section>
@@ -649,7 +649,7 @@ window.Quarto = {
 <span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a>rdp <span class="op">=</span> RdpAccountant().compose(event).get_epsilon(<span class="fl">1e-5</span>)</span>
 <span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a>pld <span class="op">=</span> PLDAccountant().compose(event).get_epsilon(<span class="fl">1e-5</span>)</span>
 <span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"</span><span class="sc">{</span>rdp<span class="sc">:.3f}</span><span class="ss"> </span><span class="sc">{</span>pld<span class="sc">:.3f}</span><span class="ss">"</span>)  <span class="co"># 0.999 0.914</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-<p>The RDP accountant confirms <span class="math inline">\(\varepsilon = 0.999\)</span>. The privacy loss distribution (PLD) accountant, exact for Gaussian noise, gives 0.914, so solving for <span class="math inline">\(\sigma\)</span> with it gives less noise. To solve, pass a function from <span class="math inline">\(\sigma\)</span> to this event to <code>dp_accounting.calibrate_dp_mechanism</code>. For many answers the PLD is much slower than RDP, which is the fallback when it takes too long. When each query draws a fresh Poisson sample of examples, as in Wu et al., wrap each event in a <code>PoissonSampledDpEvent</code>.</p>
+<p>The RDP accountant confirms <span class="math inline">\(\varepsilon = 0.999\)</span>. The privacy loss distribution (PLD) accountant, exact for Gaussian noise, gives 0.914, so solving for <span class="math inline">\(\sigma\)</span> with it gives less noise. To solve, pass a function from <span class="math inline">\(\sigma\)</span> to this event to <code>dp_accounting.calibrate_dp_mechanism</code>. For many answers the PLD is much slower than RDP, which is the fallback when it takes too long. When each query draws a fresh Poisson sample of records, as in Wu et al., wrap each event in a <code>PoissonSampledDpEvent</code>.</p>
 </section>
 <section id="sec-pate-wrong" class="level2" data-number="49.4">
 <h2 data-number="49.4" class="anchored" data-anchor-id="sec-pate-wrong"><span class="header-section-number">49.4</span> What goes wrong</h2>
@@ -657,8 +657,8 @@ window.Quarto = {
 <p>Noise this large wipes out close votes. With two labels, write <span class="math inline">\(g\)</span> for the gap between the two counts. The vote returns the plurality with probability <span class="math inline">\(\Phi(g/(\sqrt2\sigma))\)</span>, where <span class="math inline">\(\Phi\)</span> is the standard normal distribution function. For example, the noise for 1,000 answers at <span class="math inline">\(\varepsilon = 4\)</span> is <span class="math inline">\(\sigma = 51.8\)</span>, and a lopsided vote of 98 to 2 is then right with probability 0.9051. A close vote of 52 to 48, though, comes out right only with probability 0.5218. So measure the noiseless vote first, since no budget beats it. Adding teachers widens the gaps, since <span class="math inline">\(\sigma\)</span> does not depend on their number, until the shards get too small to train on.</p>
 <p>Finally, beware of a data-dependent <span class="math inline">\(\varepsilon\)</span>. When teachers agree, a sharper analysis charges less, but that smaller <span class="math inline">\(\varepsilon\)</span> is computed from the votes and leaks them. Until it is released with noise, it is a measurement, not a guarantee. <strong>Confident-GNMax</strong> answers only queries on which a noisy check finds agreement, the cheap and accurate ones.</p>
 </section>
-<section id="further-reading" class="level2" data-number="49.5">
-<h2 data-number="49.5" class="anchored" data-anchor-id="further-reading"><span class="header-section-number">49.5</span> Further reading</h2>
+<section id="references" class="level2" data-number="49.5">
+<h2 data-number="49.5" class="anchored" data-anchor-id="references"><span class="header-section-number">49.5</span> References</h2>
 <ul>
 <li>Papernot et al., “Scalable Private Learning with PATE” (ICLR 2018): GNMax, its data-dependent analysis and Confident-GNMax.</li>
 <li>Wu et al., “Privacy-Preserving In-Context Learning for Large Language Models” (ICLR 2024): subsampled voting over prompts.</li>

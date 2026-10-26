@@ -408,7 +408,7 @@ window.Quarto = {
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../part04-privacy-accounting/09-choosing-an-accountant.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">31</span>&nbsp; <span class="chapter-title">Report and review an ε claim</span></span></a>
+ <span class="menu-text"><span class="chapter-number">31</span>&nbsp; <span class="chapter-title">Choosing an accountant</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
@@ -601,7 +601,7 @@ window.Quarto = {
   <li><a href="#sec-fair-clipping" id="toc-sec-fair-clipping" class="nav-link" data-scroll-target="#sec-fair-clipping"><span class="header-section-number">51.4</span> Why small groups pay: clipping and noise</a></li>
   <li><a href="#sec-fair-mitigation" id="toc-sec-fair-mitigation" class="nav-link" data-scroll-target="#sec-fair-mitigation"><span class="header-section-number">51.5</span> Mitigations and what they cost</a></li>
   <li><a href="#cheat-sheet" id="toc-cheat-sheet" class="nav-link" data-scroll-target="#cheat-sheet"><span class="header-section-number">51.6</span> Cheat sheet</a></li>
-  <li><a href="#further-reading" id="toc-further-reading" class="nav-link" data-scroll-target="#further-reading"><span class="header-section-number">51.7</span> Further reading</a></li>
+  <li><a href="#references" id="toc-references" class="nav-link" data-scroll-target="#references"><span class="header-section-number">51.7</span> References</a></li>
   </ul>
 </nav>
     </div>
@@ -648,7 +648,7 @@ window.Quarto = {
 <span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a>gap, se <span class="op">=</span> <span class="fl">0.954</span> <span class="op">-</span> <span class="fl">0.880</span>, sqrt(<span class="fl">0.954</span> <span class="op">*</span> <span class="fl">0.046</span> <span class="op">/</span> <span class="dv">1_900</span> <span class="op">+</span> <span class="fl">0.880</span> <span class="op">*</span> <span class="fl">0.120</span> <span class="op">/</span> <span class="dv">100</span>)</span>
 <span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"</span><span class="sc">{</span>gap <span class="op">-</span> <span class="fl">1.96</span> <span class="op">*</span> se<span class="sc">:.3f}</span><span class="ss"> </span><span class="sc">{</span>gap <span class="op">+</span> <span class="fl">1.96</span> <span class="op">*</span> se<span class="sc">:.3f}</span><span class="ss">"</span>)  <span class="co"># 0.010 0.138</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <p>So the gap is real, since its interval excludes zero, but it could be anywhere from one point to fourteen. An interval separates a 5-point gap from zero only with a few hundred test records from the group, and a 1-point gap only with thousands.</p>
-<p>The privacy cost needs a different interval, because both models are scored on the same test records, so their accuracies are not independent and <a href="#eq-fair-gap" class="quarto-xref">Equation&nbsp;<span>51.2</span></a> does not apply. Pair them instead. Among group <span class="math inline">\(g\)</span>’s <span class="math inline">\(m_g\)</span> test records, write <span class="math inline">\(b\)</span> for the number that only the non-private model gets right, and <span class="math inline">\(c\)</span> for the number that only the private one gets right. One run’s cost is then <span class="math inline">\((b - c)/m_g\)</span>, and for large counts an approximate 95% interval is <span id="eq-fair-paired"><span class="math display">\[\frac{b - c}{m_g} \pm \frac{1.96}{m_g}\sqrt{b + c - \frac{(b - c)^2}{m_g}}. \tag{51.3}\]</span></span></p>
+<p>The privacy cost needs a different interval, because both models are scored on the same test records, so their accuracies are not independent and <a href="#eq-fair-gap" class="quarto-xref">Equation&nbsp;<span>51.2</span></a> does not apply. Pair them instead. Among group <span class="math inline">\(g\)</span>’s <span class="math inline">\(m_g\)</span> test records, write <span class="math inline">\(u\)</span> for the number that only the non-private model gets right, and <span class="math inline">\(v\)</span> for the number that only the private one gets right. One run’s cost is then <span class="math inline">\((u - v)/m_g\)</span>, and for large counts an approximate 95% interval is <span id="eq-fair-paired"><span class="math display">\[\frac{u - v}{m_g} \pm \frac{1.96}{m_g}\sqrt{u + v - \frac{(u - v)^2}{m_g}}. \tag{51.3}\]</span></span></p>
 <p>The test records are one source of variation. Training is a second source, and a larger test set does nothing about it. A small group’s accuracy varies far more from one training run to the next than a large group’s. So a comparison of two recipes on one run each can easily reverse for it. Train each recipe several times with different seeds, average the per-run costs and report their spread. <code>fairlearn.metrics.MetricFrame</code> computes any metric per group, but without intervals.</p>
 <p>The evaluation itself can also leak. Per-group accuracies on private test data are statistics of that data. To publish them, add noise to each group’s count of correct predictions and count it in a budget of its own (<a href="../part03-dp-foundations/12-release-statistics.html">Release statistics with a library</a>). Otherwise keep them in the internal assessment.</p>
 </section>
@@ -793,7 +793,7 @@ Table&nbsp;51.3: Mitigations for disparate impact, and when to use them.
 <td>No</td>
 </tr>
 <tr class="even">
-<td>Larger clipping norm, with step size times <span class="math inline">\(C\)</span> held fixed</td>
+<td>Larger clipping norm, with learning rate times <span class="math inline">\(C\)</span> held fixed</td>
 <td>Less clipping, but more noise relative to short gradients</td>
 <td>Rarely, since it did not help the running example</td>
 </tr>
@@ -868,8 +868,8 @@ Table&nbsp;51.4: The decisions of this chapter.
 <li>Never report the gap alone, because levelling down closes it too.</li>
 </ul>
 </section>
-<section id="further-reading" class="level2" data-number="51.7">
-<h2 data-number="51.7" class="anchored" data-anchor-id="further-reading"><span class="header-section-number">51.7</span> Further reading</h2>
+<section id="references" class="level2" data-number="51.7">
+<h2 data-number="51.7" class="anchored" data-anchor-id="references"><span class="header-section-number">51.7</span> References</h2>
 <ul>
 <li>Bagdasaryan, Poursaeed &amp; Shmatikov, “Differential Privacy Has Disparate Impact on Model Accuracy” (NeurIPS 2019): the observation.</li>
 <li>Esipova, Ghomi, Luo &amp; Cresswell, “Disparate Impact in Differential Privacy from Gradient Misalignment” (ICLR 2023): global scaling.</li>

@@ -1,0 +1,1138 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.10.19">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+
+<title>17&nbsp; Synthetic data with AIM and MST – Differential Privacy with OpenDP</title>
+<style>
+/* Default styles provided by pandoc.
+** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
+*/
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: 1.5em;}
+div.column{flex: auto;}
+@media screen {
+div.columns{gap: min(4vw, 1.5em);}
+div.column{overflow-x: auto;}
+}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+/* CSS for syntax highlighting */
+html { -webkit-text-size-adjust: 100%; }
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+</style>
+
+
+<script src="../site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="../site_libs/quarto-nav/headroom.min.js"></script>
+<script src="../site_libs/clipboard/clipboard.min.js"></script>
+<script src="../site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="../site_libs/quarto-search/fuse.min.js"></script>
+<script src="../site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="../">
+<link href="../part05-synthetic-data/18-evaluating-synthetic-data.html" rel="next">
+<link href="../part05-synthetic-data/16-contingency-tables.html" rel="prev">
+<script src="../site_libs/quarto-html/quarto.js" type="module"></script>
+<script src="../site_libs/quarto-html/tabsets/tabsets.js" type="module"></script>
+<script src="../site_libs/quarto-html/popper.min.js"></script>
+<script src="../site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="../site_libs/quarto-html/anchor.min.js"></script>
+<link href="../site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="../site_libs/quarto-html/quarto-syntax-highlighting-bf27225e3a48a9273f3daa8f8e829971.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="../site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="../site_libs/bootstrap/bootstrap-78f503ea39f784e8964cd205807fbe37.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
+<script id="quarto-search-options" type="application/json">{
+  "location": "sidebar",
+  "copy-button": false,
+  "collapse-after": 3,
+  "panel-placement": "start",
+  "type": "textbox",
+  "limit": 50,
+  "keyboard-shortcut": [
+    "f",
+    "/",
+    "s"
+  ],
+  "show-item-context": false,
+  "language": {
+    "search-no-results-text": "No results",
+    "search-matching-documents-text": "matching documents",
+    "search-copy-link-title": "Copy link to search",
+    "search-hide-matches-text": "Hide additional matches",
+    "search-more-match-text": "more match in this document",
+    "search-more-matches-text": "more matches in this document",
+    "search-clear-button-title": "Clear",
+    "search-text-placeholder": "",
+    "search-detached-cancel-button-title": "Cancel",
+    "search-submit-button-title": "Submit",
+    "search-label": "Search"
+  }
+}</script>
+
+  <script src="https://cdnjs.cloudflare.com/polyfill/v3/polyfill.min.js?features=es6"></script>
+  <script defer="" src="https://cdn.jsdelivr.net/npm/mathjax@4/tex-chtml.js" type="text/javascript"></script>
+
+<script type="text/javascript">
+const typesetMath = (el) => {
+  if (window.MathJax) {
+    // MathJax Typeset
+    window.MathJax.typeset([el]);
+  } else if (window.katex) {
+    // KaTeX Render
+    var mathElements = el.getElementsByClassName("math");
+    var macros = [];
+    for (var i = 0; i < mathElements.length; i++) {
+      var texText = mathElements[i].firstChild;
+      if (mathElements[i].tagName == "SPAN" && texText && texText.data) {
+        window.katex.render(texText.data, mathElements[i], {
+          displayMode: mathElements[i].classList.contains('display'),
+          throwOnError: false,
+          macros: macros,
+          fleqn: false
+        });
+      }
+    }
+  }
+}
+window.Quarto = {
+  typesetMath
+};
+</script>
+
+</head>
+
+<body class="nav-sidebar floating quarto-light">
+
+<div id="quarto-search-results"></div>
+  <header id="quarto-header" class="headroom fixed-top">
+  <nav class="quarto-secondary-nav">
+    <div class="container-fluid d-flex">
+      <button type="button" class="quarto-btn-toggle btn" data-bs-toggle="collapse" role="button" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+        <i class="bi bi-layout-text-sidebar-reverse"></i>
+      </button>
+        <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../part05-synthetic-data/00-introduction.html">Synthetic data</a></li><li class="breadcrumb-item"><a href="../part05-synthetic-data/17-aim-and-mst.html"><span class="chapter-number">17</span>&nbsp; <span class="chapter-title">Synthetic data with AIM and MST</span></a></li></ol></nav>
+        <a class="flex-grow-1" role="navigation" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">      
+        </a>
+      <button type="button" class="btn quarto-search-button" aria-label="Search" onclick="window.quartoOpenSearch();">
+        <i class="bi bi-search"></i>
+      </button>
+    </div>
+  </nav>
+</header>
+<!-- content -->
+<div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article">
+<!-- sidebar -->
+  <nav id="quarto-sidebar" class="sidebar collapse collapse-horizontal quarto-sidebar-collapse-item sidebar-navigation floating overflow-auto">
+    <div class="pt-lg-2 mt-2 text-left sidebar-header">
+    <div class="sidebar-title mb-0 py-0">
+      <a href="../">Differential Privacy with OpenDP</a> 
+    </div>
+      </div>
+        <div class="mt-2 flex-shrink-0 align-items-center">
+        <div class="sidebar-search">
+        <div id="quarto-search" class="" title="Search"></div>
+        </div>
+        </div>
+    <div class="sidebar-menu-container"> 
+    <ul class="list-unstyled mt-1">
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../index.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Preface</span></a>
+  </div>
+</li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a href="../part01-getting-started/00-introduction.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Getting started</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-1" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-1" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part01-getting-started/01-first-release.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">1</span>&nbsp; <span class="chapter-title">A first release</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part01-getting-started/02-the-data-and-the-context.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">2</span>&nbsp; <span class="chapter-title">The data and the context</span></span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a href="../part02-tabular-data/00-introduction.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Tabular data</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-2" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-2" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part02-tabular-data/03-essential-statistics.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">3</span>&nbsp; <span class="chapter-title">Essential statistics</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part02-tabular-data/04-grouping.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">4</span>&nbsp; <span class="chapter-title">Grouping</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part02-tabular-data/05-identifier-truncation.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">5</span>&nbsp; <span class="chapter-title">Identifier truncation and bounds</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part02-tabular-data/06-preparing-microdata.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">6</span>&nbsp; <span class="chapter-title">Preparing microdata</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part02-tabular-data/07-utility-and-noise.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">7</span>&nbsp; <span class="chapter-title">Assessing utility and choosing the noise</span></span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a href="../part03-framework/00-introduction.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">The framework</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-3" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-3" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part03-framework/08-a-framework-for-privacy.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">8</span>&nbsp; <span class="chapter-title">A framework to understand differential privacy</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part03-framework/09-transformations.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">9</span>&nbsp; <span class="chapter-title">Transformations</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part03-framework/10-measurements.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">10</span>&nbsp; <span class="chapter-title">Measurements</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part03-framework/11-combinators.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">11</span>&nbsp; <span class="chapter-title">Combinators</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part03-framework/12-utilities-and-the-context-api.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">12</span>&nbsp; <span class="chapter-title">Utilities and the Context API inside</span></span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a href="../part04-extending/00-introduction.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Extending the library</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-4" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-4" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part04-extending/13-plugins.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">13</span>&nbsp; <span class="chapter-title">Plugins</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part04-extending/14-statistical-modelling.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">14</span>&nbsp; <span class="chapter-title">Statistical modelling</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part04-extending/15-limitations-and-troubleshooting.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">15</span>&nbsp; <span class="chapter-title">Limitations and troubleshooting</span></span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a href="../part05-synthetic-data/00-introduction.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Synthetic data</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-5" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-5" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part05-synthetic-data/16-contingency-tables.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">16</span>&nbsp; <span class="chapter-title">Contingency tables</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part05-synthetic-data/17-aim-and-mst.html" class="sidebar-item-text sidebar-link active">
+ <span class="menu-text"><span class="chapter-number">17</span>&nbsp; <span class="chapter-title">Synthetic data with AIM and MST</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part05-synthetic-data/18-evaluating-synthetic-data.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">18</span>&nbsp; <span class="chapter-title">Evaluating and tuning synthetic data</span></span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-6" role="navigation" aria-expanded="true">
+ <span class="menu-text">Appendices</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-6" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-6" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../glossary.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">A</span>&nbsp; <span class="chapter-title">Glossary</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../term-index.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">B</span>&nbsp; <span class="chapter-title">Index</span></span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+    </ul>
+    </div>
+</nav>
+<div id="quarto-sidebar-glass" class="quarto-sidebar-collapse-item" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item"></div>
+<!-- margin-sidebar -->
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+        <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">Table of contents</h2>
+   
+  <ul>
+  <li><a href="#sec-synth-adaptive" id="toc-sec-synth-adaptive" class="nav-link active" data-scroll-target="#sec-synth-adaptive"><span class="header-section-number">17.1</span> When you do not know the questions</a></li>
+  <li><a href="#sec-synth-aim" id="toc-sec-synth-aim" class="nav-link" data-scroll-target="#sec-synth-aim"><span class="header-section-number">17.2</span> The AIM release</a></li>
+  <li><a href="#sec-synth-mst" id="toc-sec-synth-mst" class="nav-link" data-scroll-target="#sec-synth-mst"><span class="header-section-number">17.3</span> A spanning tree of pairs with MST</a></li>
+  <li><a href="#sec-synth-oneway" id="toc-sec-synth-oneway" class="nav-link" data-scroll-target="#sec-synth-oneway"><span class="header-section-number">17.4</span> A first look at the one-way marginals</a></li>
+  <li><a href="#sec-synth-nulls" id="toc-sec-synth-nulls" class="nav-link" data-scroll-target="#sec-synth-nulls"><span class="header-section-number">17.5</span> Nulls and the key set</a></li>
+  <li><a href="#sec-synth-sequential" id="toc-sec-synth-sequential" class="nav-link" data-scroll-target="#sec-synth-sequential"><span class="header-section-number">17.6</span> Guaranteeing marginals with Sequential</a></li>
+  <li><a href="#sec-synth-rows" id="toc-sec-synth-rows" class="nav-link" data-scroll-target="#sec-synth-rows"><span class="header-section-number">17.7</span> Generating the rows</a></li>
+  <li><a href="#sec-synth-statement" id="toc-sec-synth-statement" class="nav-link" data-scroll-target="#sec-synth-statement"><span class="header-section-number">17.8</span> The privacy statement</a></li>
+  <li><a href="#sec-synth-check" id="toc-sec-synth-check" class="nav-link" data-scroll-target="#sec-synth-check"><span class="header-section-number">17.9</span> The measured marginals against the real ones</a></li>
+  <li><a href="#summary" id="toc-summary" class="nav-link" data-scroll-target="#summary"><span class="header-section-number">17.10</span> Summary</a></li>
+  <li><a href="#references" id="toc-references" class="nav-link" data-scroll-target="#references"><span class="header-section-number">17.11</span> References</a></li>
+  </ul>
+</nav>
+    </div>
+<!-- main -->
+<main class="content" id="quarto-document-content">
+
+<header id="title-block-header" class="quarto-title-block default"><nav class="quarto-page-breadcrumbs quarto-title-breadcrumbs d-none d-lg-block" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../part05-synthetic-data/00-introduction.html">Synthetic data</a></li><li class="breadcrumb-item"><a href="../part05-synthetic-data/17-aim-and-mst.html"><span class="chapter-number">17</span>&nbsp; <span class="chapter-title">Synthetic data with AIM and MST</span></a></li></ol></nav>
+<div class="quarto-title">
+<h1 class="title"><span class="chapter-number">17</span>&nbsp; <span class="chapter-title">Synthetic data with AIM and MST</span></h1>
+</div>
+
+
+
+<div class="quarto-title-meta">
+
+    
+  
+    
+  </div>
+  
+
+
+</header>
+
+
+<p><a href="../part05-synthetic-data/16-contingency-tables.html">Contingency tables</a> released the marginals you asked for, which works when you know the questions in advance. The analyst who will use a synthetic dataset usually does not, and a workload that guesses wrong leaves the relationships they care about to chance. This chapter hands the choice to the library. The <strong>AIM</strong> algorithm picks the marginals it measures one round at a time, going each time for the one its current model gets most wrong. The <strong>MST</strong> algorithm picks a spanning tree of column pairs in one go. Both fit a model to the noisy marginals, and <code>synthesize()</code> turns the model into rows. Only the measurements and the choices touch the data. Fitting the model and drawing rows post-process released values, so they cost nothing.</p>
+<p>The chapter follows the documentation’s synthetic-data page and the docstrings of <code>dp.mbi.AIM</code>, <code>dp.mbi.MST</code>, <code>dp.mbi.Sequential</code> and <code>ContingencyTable.synthesize</code>. You will release three tables over the same four survey columns and read which marginals each algorithm chose, at what noise scale. You will generate a synthetic frame of 3.8 million rows, state the guarantee of the whole release, and compare the synthetic marginals with the real ones. That comparison turns up a problem with nulls that the documentation warns about, and you will fix it. Keys, cuts, <code>Fixed</code> and the <code>ContingencyTable</code> object are the previous chapter’s, used here without re-teaching them.</p>
+<p>The script <a href="https://github.com/manuelvloureiro/privacy-preserving-machine-learning-book/blob/main/code/part05-synthetic-data/opendp_aim_and_mst.py">opendp_aim_and_mst.py</a> runs everything on the Labour Force Survey (LFS) sample with OpenDP 0.16.0 and <code>mbi</code> 1.1.0, the Private-PGM version OpenDP pins. It runs JAX, which <code>mbi</code> uses to fit the models, on the CPU, and filters the warnings <code>mbi</code> may print when it imports JAX. The noise scales, the threshold, the budget arithmetic, the conversion to <span class="math inline">\(\varepsilon\)</span> and the facts about the data are the same on every run. The marginals the algorithms choose, the noisy counts, the synthetic rows, the run times and the distances to the real data are not, because OpenDP’s noise cannot be seeded. The page shows them in blocks marked as one run. The whole script takes about 75 seconds on this machine.</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb1"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="ex">uv</span> run python code/part05-synthetic-data/opendp_aim_and_mst.py</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<section id="sec-synth-adaptive" class="level2" data-number="17.1">
+<h2 data-number="17.1" class="anchored" data-anchor-id="sec-synth-adaptive"><span class="header-section-number">17.1</span> When you do not know the questions</h2>
+<p>A fixed workload spends the budget on the marginals you name and on nothing else. If the analyst later asks about a pair of columns you did not name, the model answers from the one-way marginals alone, as if the two columns were independent. The documentation’s contingency-table page shows this on <code>SEX</code>, which comes out uniform over its keys because no measured marginal contains it. With four columns you could name every pair and every triple. But the budget would then be spread over ten marginals, most of which the model would have fitted well anyway. The question is how to spend it where the model is wrong.</p>
+<p>AIM answers it adaptively. It first measures the one-way marginal of every column with half the budget, which also releases the keys of a column that has none, as the previous chapter explained. Then it fits a model to those marginals and runs rounds. In each round it scores every candidate marginal, by default every marginal of up to three columns. The score is the distance between the model’s version of the marginal and the true one, as a sum of absolute cell differences, minus what measuring it would cost in noise. Candidates are weighted by how much they overlap the workload, so the three-way marginals, which are the workload itself, weigh most.</p>
+<p>A noisy selection then picks one candidate with a tenth of the round’s budget. The pick is differentially private because Gaussian noise is added to the scores, the report-noisy-max form of the exponential mechanism that <a href="../../book-full/part03-dp-foundations/05-selection.html">the full edition’s chapter on selection</a> derives. The chosen marginal is measured with Gaussian noise with the other nine tenths, and the model is refitted.</p>
+<p>The adaptive part is in the budget per round. AIM starts with a small share per round, the budget divided by the number of rounds. A measurement may change the model’s version of that marginal by less than the noise it carried. Then the round taught little, and the next round gets four times the share. The rounds stop when the budget is spent, which a privacy filter enforces. The <code>rounds</code> argument sets the number of planned rounds and so the starting share. Its default is sixteen per column, which is 64 here, and the script uses 10 so that a release takes seconds. The <code>max_size</code> argument caps the memory of the model in megabytes, and a candidate that would push the model past the cap is skipped. With four small columns the cap never binds.</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb2"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> opendp.prelude <span class="im">as</span> dp</span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>dp.enable_features(<span class="st">"contrib"</span>)</span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a>aim <span class="op">=</span> dp.mbi.AIM()</span>
+<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(aim.queries, aim.measure_split, aim.max_size, aim.rounds)  <span class="co"># 3 0.9 80.0 None</span></span>
+<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(dp.mbi.MST().num_selections, dp.mbi.MST().measure_split)  <span class="co"># None 0.9</span></span>
+<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(dp.mbi.Count((<span class="st">"SEX"</span>, <span class="st">"ILOSTAT"</span>)))  <span class="co"># Count(by=('SEX', 'ILOSTAT'), weight=1.0)</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>The <code>queries</code> argument is either the largest number of columns a candidate may have, 3 by default, or an explicit workload. A workload is a list of <code>dp.mbi.Count</code> objects, each a set of columns with a weight, and AIM then favours the candidates that overlap the heavy ones. The <code>measure_split</code> of 0.9 is the share of each round that goes to measuring rather than selecting. MST has the same split and one argument of its own, <code>num_selections</code>, which <a href="#sec-synth-mst" class="quarto-xref"><span>Section 17.3</span></a> explains.</p>
+</section>
+<section id="sec-synth-aim" class="level2" data-number="17.2">
+<h2 data-number="17.2" class="anchored" data-anchor-id="sec-synth-aim"><span class="header-section-number">17.2</span> The AIM release</h2>
+<p>The context is the documentation’s, with three times the budget because this chapter releases three tables. The privacy unit is 36 contributions, the most quarters one person can answer over nine years, as <a href="../part01-getting-started/02-the-data-and-the-context.html">the data and the context</a> explained. The budget is <span class="math inline">\(\rho = 0.3\)</span> under zero-concentrated differential privacy (zCDP), where <span class="math inline">\(\rho\)</span> bounds the privacy loss on average rather than in the worst case and the noise is Gaussian. <a href="../part02-tabular-data/07-utility-and-noise.html">Assessing utility and choosing the noise</a> introduced it, and <a href="../../book-full/part04-privacy-accounting/03-concentrated-dp.html">the full edition’s chapter on concentrated differential privacy (DP)</a> derives its composition and conversion rules. The slack <span class="math inline">\(\delta\)</span> of <span class="math inline">\(3 \times 10^{-7}\)</span> is the small failure probability that pays for releasing the keys of <code>ILOSTAT</code>, which the query does not name.</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb3" data-excerpt="synth-context"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> make_context(frame: pl.LazyFrame) <span class="op">-&gt;</span> dp.Context:</span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>    <span class="co">"""The context: a privacy unit of 36 rows, a budget of rho = 0.3 with delta = 3e-7, one share per release."""</span></span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> dp.Context.compositor(</span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a>        data<span class="op">=</span>frame,</span>
+<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a>        privacy_unit<span class="op">=</span>dp.unit_of(contributions<span class="op">=</span>CONTRIBUTIONS),  <span class="co"># neighbours add or remove one person's 36 rows</span></span>
+<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a>        privacy_loss<span class="op">=</span>dp.loss_of(rho<span class="op">=</span>RHO, delta<span class="op">=</span>DELTA),  <span class="co"># zCDP with Gaussian noise; delta pays for ILOSTAT's keys</span></span>
+<span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a>    )</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>Every release goes through one function, because the three queries differ only in the algorithm plugged in. The query takes a third of the budget, <span class="math inline">\(\rho = 0.1\)</span> with <span class="math inline">\(\delta = 10^{-7}\)</span>. It selects the documentation’s four columns, gives the keys of <code>SEX</code> and the cuts of <code>AGE</code> and <code>HWUSUAL</code>, and leaves <code>ILOSTAT</code> to the threshold. The <code>fill</code> argument is for later.</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb4" data-excerpt="synth-query"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> table_query(context: dp.Context, algorithm: Algorithm, fill: <span class="bu">bool</span> <span class="op">=</span> <span class="va">False</span>) <span class="op">-&gt;</span> ContingencyTableQuery:</span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>    <span class="co">"""The documentation's contingency-table query at rho = 0.1 and delta = 1e-7, with the algorithm plugged in."""</span></span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a>    query <span class="op">=</span> context.query(rho<span class="op">=</span>RHO_QUERY, delta<span class="op">=</span>DELTA_QUERY)</span>
+<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> fill:</span>
+<span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a>        query <span class="op">=</span> query.with_columns(fill_nulls())  <span class="co"># a row-by-row transformation before the table</span></span>
+<span id="cb4-6"><a href="#cb4-6" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> query.select(<span class="op">*</span>COLUMNS).contingency_table(</span>
+<span id="cb4-7"><a href="#cb4-7" aria-hidden="true" tabindex="-1"></a>        keys<span class="op">=</span>KEYS,  <span class="co"># public categories of SEX; ILOSTAT's are released with the threshold</span></span>
+<span id="cb4-8"><a href="#cb4-8" aria-hidden="true" tabindex="-1"></a>        cuts<span class="op">=</span>CUTS,  <span class="co"># bins for the two numeric columns</span></span>
+<span id="cb4-9"><a href="#cb4-9" aria-hidden="true" tabindex="-1"></a>        algorithm<span class="op">=</span>algorithm,</span>
+<span id="cb4-10"><a href="#cb4-10" aria-hidden="true" tabindex="-1"></a>    )</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>The first release plugs in AIM with ten rounds. Before releasing, the query reports the scale and the threshold of its one-way step, which cost nothing to read.</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb5" data-excerpt="synth-aim"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a>aim_query <span class="op">=</span> table_query(context, dp.mbi.AIM(rounds<span class="op">=</span>ROUNDS))</span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a>oneway_scale, oneway_threshold <span class="op">=</span> aim_query.oneway_scale, aim_query.oneway_threshold</span>
+<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a>table_aim, seconds_aim <span class="op">=</span> timed_release(aim_query)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<pre class="text"><code>privacy unit: (SymmetricDistance(), 36)
+privacy loss: (Approximate(ZeroConcentratedDivergence), (0.3, 3e-07))
+query budget: rho=0.1 delta=1e-07
+aim: oneway scale=227.6840 threshold=1364
+aim: rho per one-way marginal=0.0125  scale 36/sqrt(2 rho)=227.6840
+aim: rounds=10  rho per round=0.0050  measure=0.0045  select=0.0005  scale of a round's marginal=379.4733
+aim keys ILOSTAT: [1, 2, 3, 9, None]  thresholds: {'ILOSTAT': 1364}</code></pre>
+<p>The scales follow from the budget split. Half of the query’s <span class="math inline">\(\rho\)</span> goes to the one-way step, and AIM measures all four one-way marginals there, so each gets 0.0125. Adding or removing one person changes the cells of a marginal by at most 36 rows in all, and in the worst case all in one cell, so the sensitivity in the Euclidean norm is 36. Write <span class="math inline">\(\Delta_2\)</span> for that sensitivity and <span class="math inline">\(\sigma\)</span> for the standard deviation of the Gaussian noise. The mechanism is <span class="math inline">\(\rho\)</span>-zCDP when <span id="eq-auto-17aimandmst-1"><span class="math display">\[\sigma = \frac{\Delta_2}{\sqrt{2\rho}}, \tag{17.1}\]</span></span> and that formula gives the 227.68 the query reports.</p>
+<p>The other half of the share is divided over the ten rounds. Nine tenths of a round’s 0.005 goes to measuring, and the formula gives 379.47 for a round’s marginal. The threshold of 1364 is the noisy count a category of <code>ILOSTAT</code> must clear to be released. The keys came out as the four codes in the data plus the null that stands for anything else.</p>
+<pre class="text"><code>aim release (one run): 13.4 s
+aim measured: ('AGE', 'HWUSUAL', 'ILOSTAT') std=379.47
+aim measured: ('SEX', 'HWUSUAL', 'ILOSTAT') std=379.47
+aim measured: ('SEX', 'AGE', 'HWUSUAL') std=379.47
+aim measured: ('SEX', 'AGE', 'HWUSUAL') std=189.74
+aim measured: ('SEX', 'AGE', 'ILOSTAT') std=379.47
+aim measured: ('SEX', 'HWUSUAL') std=379.47
+aim measured: ('AGE', 'HWUSUAL') std=379.47</code></pre>
+<p>The release took 13 seconds in this run. The table’s <code>marginals</code> attribute holds every measurement with its clique, the columns it spans, and its noise. The script lists them grouped by clique, in the order the cliques were first measured. In this run AIM measured all four three-way marginals before any pair, as the weights predict. One of them appears twice, the second time at half the scale, which is the adaptive rule at work. A round had moved the model by less than its noise, so the next round took four times the share, which was all that was left, and measured that marginal again. So there were seven measurements rather than ten. Another run chooses differently, which is why you read this list after every release.</p>
+</section>
+<section id="sec-synth-mst" class="level2" data-number="17.3">
+<h2 data-number="17.3" class="anchored" data-anchor-id="sec-synth-mst"><span class="header-section-number">17.3</span> A spanning tree of pairs with MST</h2>
+<p>MST is the mechanism that won the 2018 NIST synthetic-data contest, and it is simpler than AIM. After the same one-way step it considers only pairs of columns. Each pair is scored by how far the model’s version is from the true one, again as a sum of absolute cell differences. MST then selects pairs one at a time with a noisy maximum, each time among the pairs that join two columns not yet connected by an earlier pick. With four columns that gives three pairs, and they form a tree that spans every column, which is where the name comes from. The <code>num_selections</code> argument sets how many pairs to pick and defaults to one fewer than the number of columns. Then all selected pairs are measured at once with nine tenths of the remaining budget, and the model is fitted.</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb8" data-excerpt="synth-mst"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a>mst_query <span class="op">=</span> table_query(context, dp.mbi.MST())</span>
+<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a>table_mst, seconds_mst <span class="op">=</span> timed_release(mst_query)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<pre class="text"><code>mst: oneway scale=227.6840 threshold=1364
+mst: pairs=3  rho per pair=0.0150  scale of a pair=207.8461
+mst release (one run): 3.3 s
+mst measured: ('HWUSUAL', 'ILOSTAT') std=207.85
+mst measured: ('AGE', 'ILOSTAT') std=207.85
+mst measured: ('SEX', 'ILOSTAT') std=207.85
+mst pairs form a spanning tree: True</code></pre>
+<p>The one-way step is identical, so its scale and threshold are the same. The three pairs share nine tenths of the remaining budget, 0.015 each, and the formula gives 207.85. Each pair is therefore measured more precisely than one of AIM’s rounds, because MST commits to three measurements where AIM keeps budget back for rounds it may need. In this run the tree is a star on <code>ILOSTAT</code>, the column most related to the other three. The script checks that the pairs connect all four columns without a cycle, which the selection guarantees. The release took three seconds.</p>
+</section>
+<section id="sec-synth-oneway" class="level2" data-number="17.4">
+<h2 data-number="17.4" class="anchored" data-anchor-id="sec-synth-oneway"><span class="header-section-number">17.4</span> A first look at the one-way marginals</h2>
+<p>The data are public, so the releases can be compared with the truth, which no real release allows. The script draws the synthetic rows of each table, puts their numeric columns back into their bins, and compares each one-way marginal with the real one. The distance it reports is the total variation distance between the two marginals read as distributions, which is half the sum of the absolute differences of their shares. It also reports the largest error of any cell in rows, and the table’s own standard deviation for that marginal from <code>std</code>.</p>
+<p>The last column is a bound. Write <span class="math inline">\(k\)</span> for the number of cells of the marginal and <span class="math inline">\(n\)</span> for the number of rows. If every cell were off by three standard deviations at once, the distance would be <span id="eq-auto-17aimandmst-2"><span class="math display">\[\frac{3 k \sigma}{2 n}. \tag{17.2}\]</span></span> A well-fitted marginal stays far under that, because the cell errors have different signs and few reach three standard deviations.</p>
+<pre class="text"><code>one-way SEX (aim): tv=0.00007 largest cell error=2,813 rows  std=204.6 bound=0.00024
+one-way AGE (aim): tv=0.00015 largest cell error=1,547 rows  std=201.1 bound=0.00032
+one-way HWUSUAL (aim): tv=0.00200 largest cell error=11,310 rows  std=192.3 bound=0.00030
+one-way ILOSTAT (aim): tv=0.00039 largest cell error=1,670 rows  std=792.7 bound=0.00156
+one-way SEX (mst): tv=0.00004 largest cell error=2,779 rows  std=204.5 bound=0.00024
+one-way AGE (mst): tv=0.00017 largest cell error=1,981 rows  std=204.5 bound=0.00032
+one-way HWUSUAL (mst): tv=0.00257 largest cell error=13,620 rows  std=204.5 bound=0.00032
+one-way ILOSTAT (mst): tv=0.00040 largest cell error=1,963 rows  std=227.7 bound=0.00045</code></pre>
+<p><code>SEX</code> and <code>AGE</code> are right as shares, with distances below their bounds. Their largest cell errors of two or three thousand rows are more than the noise explains, and the next section traces them to the model’s total. <code>HWUSUAL</code> is wrong even as shares. Its distance is many times its bound in both releases, and one cell is off by more than eleven thousand rows, over fifty standard deviations. Both algorithms measured that marginal at the same scale as the others, so noise cannot explain it. Something systematic is wrong with the column.</p>
+</section>
+<section id="sec-synth-nulls" class="level2" data-number="17.5">
+<h2 data-number="17.5" class="anchored" data-anchor-id="sec-synth-nulls"><span class="header-section-number">17.5</span> Nulls and the key set</h2>
+<p>The model behind every table needs a fixed set of keys for every column, which the documentation’s section on nulls explains. The keys come from you, through <code>keys</code> and <code>cuts</code>, or from the stable-key release with the threshold. Either way the set need not cover the data, and every value outside it is replaced by null before counting. For a cut column there is no null key. The four bins of <code>HWUSUAL</code> are its whole key set, and the column has 20,819 real nulls, hours that were not recorded.</p>
+<pre class="text"><code>rows: 3,811,932  AGE nulls: 255  HWUSUAL nulls: 20,819
+HWUSUAL = 99 (not applicable): 2,294,921</code></pre>
+<p>In version 0.16.0 those nulls take two different paths. The one-way step counts a cut column by joining its counts onto the bin labels, so a null row is not counted at all. The multi-way step indexes every row into a bin before it counts, and a row whose bin is null gets the last index, so the same row is counted in the bin above 40 hours. The model is then fitted to measurements that disagree about how many rows there are, and it compromises. The script shows the compromise on the fitted one-way marginal of <code>HWUSUAL</code>, against the real counts with the nulls in the last bin.</p>
+<pre class="text"><code>aim model total (one run): 3,806,638.8  real rows 3,811,932
+HWUSUAL bins (aim, one run): fitted count against the real count with nulls in the last bin
+  (-inf, 1.0]: fitted 8,953  real 6,961  difference +1,992
+  (1.0, 20.0]: fitted 121,660  real 119,893  difference +1,767
+  (20.0, 40.0]: fitted 1,028,785  real 1,026,527  difference +2,258
+  (40.0, inf]: fitted 2,647,240  real 2,658,551  difference -11,311</code></pre>
+<p>The last bin is eleven thousand rows short and every other bin is two thousand rows over. The model’s total, which it estimates from the one-way marginals, is five thousand rows below the real count. Those are the missing nulls, spread by the fit. The smallest bin suffers most in relative terms, since two thousand extra rows on seven thousand is more than a quarter.</p>
+<p>The documentation’s remedy is to turn true nulls into a key before the table, with <code>select</code> or <code>with_columns</code>, and that is what the <code>fill</code> argument of the query does. It is a row-by-row transformation inside the query, so it changes nothing about the privacy unit. The script sends the nulls of <code>HWUSUAL</code> to 99, the survey’s own code for not applicable, which already accounts for most of the last bin. It sends the 255 nulls of <code>AGE</code> to zero, the youngest bin. Which code a null gets is a modelling decision. What matters for the fit is that every row lands in a key, the same way in both steps.</p>
+</section>
+<section id="sec-synth-sequential" class="level2" data-number="17.6">
+<h2 data-number="17.6" class="anchored" data-anchor-id="sec-synth-sequential"><span class="header-section-number">17.6</span> Guaranteeing marginals with Sequential</h2>
+<p>Adaptive selection has a cost. If a particular marginal must be in the release, AIM may or may not measure it. <code>Sequential</code> runs a list of algorithms one after another on the same table, each starting from the model the previous one left, and splits the budget evenly between them unless <code>weights</code> says otherwise. A <code>Fixed</code> workload first and AIM second gives you both. The named marginals are measured whatever happens, and AIM spends the rest where the model is still wrong. The third release does this with the pairs of <code>ILOSTAT</code> with <code>SEX</code> and with <code>AGE</code>, and it fills the nulls.</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb13" data-excerpt="synth-sequential"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a>sequential <span class="op">=</span> dp.mbi.Sequential(</span>
+<span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a>    algorithms<span class="op">=</span>[</span>
+<span id="cb13-3"><a href="#cb13-3" aria-hidden="true" tabindex="-1"></a>        dp.mbi.Fixed(queries<span class="op">=</span>[dp.mbi.Count(by) <span class="cf">for</span> by <span class="kw">in</span> GUARANTEED]),  <span class="co"># these two marginals, whatever happens</span></span>
+<span id="cb13-4"><a href="#cb13-4" aria-hidden="true" tabindex="-1"></a>        dp.mbi.AIM(rounds<span class="op">=</span>ROUNDS),  <span class="co"># then AIM chooses the rest</span></span>
+<span id="cb13-5"><a href="#cb13-5" aria-hidden="true" tabindex="-1"></a>    ],</span>
+<span id="cb13-6"><a href="#cb13-6" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb13-7"><a href="#cb13-7" aria-hidden="true" tabindex="-1"></a>sequential_query <span class="op">=</span> table_query(context, sequential, fill<span class="op">=</span><span class="va">True</span>)</span>
+<span id="cb13-8"><a href="#cb13-8" aria-hidden="true" tabindex="-1"></a>table_seq, seconds_seq <span class="op">=</span> timed_release(sequential_query)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<pre class="text"><code>sequential: rho per guaranteed marginal=0.0125  scale=227.6840
+sequential: rho per AIM round=0.0025  scale of a round's marginal=536.6563
+sequential release (one run): 12.1 s
+sequential model total (one run): 3,811,712.7  real rows 3,811,932
+sequential measured: ('SEX', 'ILOSTAT') std=227.68
+sequential measured: ('AGE', 'ILOSTAT') std=227.68
+sequential measured: ('SEX', 'HWUSUAL', 'ILOSTAT') std=536.66
+sequential measured: ('SEX', 'AGE', 'HWUSUAL') std=536.66
+sequential measured: ('SEX', 'AGE', 'HWUSUAL') std=268.33
+sequential measured: ('SEX', 'AGE', 'ILOSTAT') std=536.66
+sequential measured: ('HWUSUAL', 'ILOSTAT') std=536.66
+sequential measured: ('HWUSUAL', 'ILOSTAT') std=536.66
+sequential measured: ('SEX', 'HWUSUAL') std=536.66
+sequential guaranteed marginals present: True</code></pre>
+<p>The one-way step again takes half, and the rest is split evenly between the two algorithms. <code>Fixed</code> divides its quarter between its two marginals, which come out at the familiar 227.68. AIM runs its ten rounds on the other quarter, so each round’s marginal is noisier than in the first release, 536.66 against 379.47. That is the price of the guarantee, and <code>weights</code> can shift it either way. The <code>oneway</code> and <code>oneway_split</code> arguments belong to the outer algorithm here, <code>Sequential</code>, which measures all four one-way marginals as AIM does. The model’s total is now 219 rows from the truth, within one standard deviation of a one-way measurement. The nulls were the problem, and the one-way marginals confirm it.</p>
+<pre class="text"><code>one-way SEX (sequential): tv=0.00004 largest cell error=240 rows  std=198.2 bound=0.00023
+one-way AGE (sequential): tv=0.00006 largest cell error=233 rows  std=200.7 bound=0.00032
+one-way HWUSUAL (sequential): tv=0.00009 largest cell error=273 rows  std=206.2 bound=0.00032
+one-way ILOSTAT (sequential): tv=0.00008 largest cell error=360 rows  std=271.5 bound=0.00053</code></pre>
+<p>Every distance is under its bound by a factor of three or more, and no cell is more than 360 rows off, which is under two standard deviations. <code>HWUSUAL</code> went from eleven thousand rows of error to 273.</p>
+</section>
+<section id="sec-synth-rows" class="level2" data-number="17.7">
+<h2 data-number="17.7" class="anchored" data-anchor-id="sec-synth-rows"><span class="header-section-number">17.7</span> Generating the rows</h2>
+<p>A <code>ContingencyTable</code> is a model, and <code>synthesize()</code> turns it into a frame. The model is a graphical model over the four columns whose marginals match the noisy measurements as closely as they can be matched at once, fitted by Private-PGM with mirror descent. <a href="../../book-full/part03-dp-foundations/06-query-release.html">The full edition’s chapter on query release</a> explains why answering many queries through one consistent model beats answering them separately. Drawing rows from the model looks only at released values, so it is post-processing and spends nothing, however often you call it.</p>
+<pre class="text"><code>synthesize (aim, one run): shape (3806638, 4)  model total 3,806,638.8  11.9 s
+┌─────┬───────────┬──────────┬─────────┐
+│ SEX ┆ AGE       ┆ HWUSUAL  ┆ ILOSTAT │
+│ --- ┆ ---       ┆ ---      ┆ ---     │
+│ i64 ┆ f64       ┆ f64      ┆ i64     │
+╞═════╪═══════════╪══════════╪═════════╡
+│ 1   ┆ 19.813324 ┆ 0.482324 ┆ 1       │
+│ 1   ┆ 19.500078 ┆ 0.94265  ┆ 1       │
+│ 1   ┆ 19.338927 ┆ 0.741979 ┆ 9       │
+│ 1   ┆ 19.031755 ┆ 0.118982 ┆ 9       │
+│ 1   ┆ 19.232563 ┆ 0.676039 ┆ 1       │
+└─────┴───────────┴──────────┴─────────┘
+synthetic AGE from 19.00 to 61.00  HWUSUAL from 0.00 to 41.00
+synthetic dtypes: {'SEX': Int64, 'AGE': Float64, 'HWUSUAL': Float64, 'ILOSTAT': Int64}
+synthetic SEX values: [1, 2]  ILOSTAT values: [1, 2, 3, 9]</code></pre>
+<p>Without a <code>rows</code> argument the frame has as many rows as the model’s total, which is the noisy estimate of the row count and not the true one. The frame has the four columns with their original types, and <code>SEX</code> and <code>ILOSTAT</code> take values from their keys, the null key included. The default <code>method="round"</code> scales the model’s expected counts to the number of rows and rounds them at random, so the synthetic marginals match the model’s to within a row per cell. The alternative, <code>method="sample"</code>, draws each row independently from the model. That adds sampling noise of the order of the square root of each count, and it is the right choice when the rows should behave like a sample.</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb17" data-excerpt="synth-sample"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a>sample <span class="op">=</span> table_aim.synthesize(rows<span class="op">=</span>SAMPLE_ROWS, method<span class="op">=</span><span class="st">"sample"</span>)  <span class="co"># draws rows independently from the model</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<pre class="text"><code>synthesize rows=100,000 method=sample: shape (100000, 4)</code></pre>
+<p>The numeric columns deserve a second look, because the first rows all show an <code>AGE</code> just under 20. The model knows only which bin a row is in. For a cut column, <code>synthesize()</code> draws a value uniformly inside the bin, and for the two open-ended bins it draws within one unit of the edge. So every synthetic age lies between 19 and 61, whatever the real range was, and the rows coded 99 in the real data all become hours just above 40. An analyst who computes a mean age from this frame gets a number that reflects the bins and the sampling rule, not the data. The ages are right as bins and wrong as numbers. If the numbers matter, give finer cuts, at the cost of more cells per marginal and more noise per cell, which <a href="../part05-synthetic-data/18-evaluating-synthetic-data.html">Evaluating and tuning synthetic data</a> weighs.</p>
+<p>The script seeds NumPy’s global generator, which the rounding and the within-bin draws use, so the frame is a function of the released table.</p>
+</section>
+<section id="sec-synth-statement" class="level2" data-number="17.8">
+<h2 data-number="17.8" class="anchored" data-anchor-id="sec-synth-statement"><span class="header-section-number">17.8</span> The privacy statement</h2>
+<p>The context has spent its three shares, and the statement of the whole release is written from the variables of the script, not typed in.</p>
+<pre class="text"><code>budget spent: (0.3, 3e-07)
+rho=0.3 at delta=1e-07: epsilon=4.2709
+whole context converted: epsilon=4.2709 delta=4e-07</code></pre>
+<p>A budget in <span class="math inline">\(\rho\)</span> is stated to readers in <span class="math inline">\(\varepsilon\)</span>, and the conversion is the one <a href="../part02-tabular-data/07-utility-and-noise.html">Assessing utility and choosing the noise</a> used. A Gaussian measurement whose scale makes a sensitivity of 1 cost exactly <span class="math inline">\(\rho = 0.3\)</span> is converted with <code>make_zCDP_to_approxDP</code> and <code>make_fix_delta</code> at a further <span class="math inline">\(\delta\)</span> of <span class="math inline">\(10^{-7}\)</span>. That gives <span class="math inline">\(\varepsilon = 4.27\)</span>. The same two combinators applied to the context’s <code>accountant</code> give the same <span class="math inline">\(\varepsilon\)</span> with the total <span class="math inline">\(\delta\)</span>, three parts for the keys and one for the conversion. So three adaptive releases cost <span class="math inline">\(\varepsilon = 4.27\)</span>, which is a loose guarantee.</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb20" data-excerpt="synth-statement"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb20-1"><a href="#cb20-1" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(</span>
+<span id="cb20-2"><a href="#cb20-2" aria-hidden="true" tabindex="-1"></a>    <span class="ss">f"This release of three contingency tables and the synthetic rows drawn from them satisfies "</span></span>
+<span id="cb20-3"><a href="#cb20-3" aria-hidden="true" tabindex="-1"></a>    <span class="ss">f"(rho = </span><span class="sc">{</span>RHO<span class="sc">:g}</span><span class="ss">, delta = </span><span class="sc">{</span>DELTA<span class="sc">:g}</span><span class="ss">)-zero-concentrated differential privacy, which is "</span></span>
+<span id="cb20-4"><a href="#cb20-4" aria-hidden="true" tabindex="-1"></a>    <span class="ss">f"(epsilon = </span><span class="sc">{</span>epsilon<span class="sc">:.2f}</span><span class="ss">, delta = </span><span class="sc">{</span>total_delta<span class="sc">:g}</span><span class="ss">)-differential privacy, "</span></span>
+<span id="cb20-5"><a href="#cb20-5" aria-hidden="true" tabindex="-1"></a>    <span class="ss">f"for adding or removing all of one person's survey responses, at most </span><span class="sc">{</span>CONTRIBUTIONS<span class="sc">}</span><span class="ss"> of them, "</span></span>
+<span id="cb20-6"><a href="#cb20-6" aria-hidden="true" tabindex="-1"></a>    <span class="ss">f"under the central model, using OpenDP </span><span class="sc">{</span>dp<span class="sc">.</span>__version__<span class="sc">}</span><span class="ss"> with Gaussian noise. "</span></span>
+<span id="cb20-7"><a href="#cb20-7" aria-hidden="true" tabindex="-1"></a>    <span class="ss">f"The keys of SEX and the cuts of AGE and HWUSUAL were fixed in advance; the keys of ILOSTAT were released "</span></span>
+<span id="cb20-8"><a href="#cb20-8" aria-hidden="true" tabindex="-1"></a>    <span class="ss">f"with a threshold of </span><span class="sc">{</span>oneway_threshold<span class="sc">}</span><span class="ss">. Generating the rows is post-processing and spent nothing."</span></span>
+<span id="cb20-9"><a href="#cb20-9" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>The statement covers the synthetic rows without a separate term, because post-processing adds nothing to the loss. It names what was public, since a cut chosen by looking at the data would leak it. The unit of 36 contributions is the expensive part of this guarantee. Every scale above carries the factor 36, and <a href="../part02-tabular-data/05-identifier-truncation.html">Identifier truncation and bounds</a> showed that hardly anyone in the file answers more than a few times. The same query runs under the identifier unit with a truncation to four rows per person. The script builds it to read the scale and does not release it.</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb21" data-excerpt="synth-identifier"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb21-1"><a href="#cb21-1" aria-hidden="true" tabindex="-1"></a>context_id <span class="op">=</span> dp.Context.compositor(</span>
+<span id="cb21-2"><a href="#cb21-2" aria-hidden="true" tabindex="-1"></a>    data<span class="op">=</span>frame,</span>
+<span id="cb21-3"><a href="#cb21-3" aria-hidden="true" tabindex="-1"></a>    privacy_unit<span class="op">=</span>dp.unit_of(contributions<span class="op">=</span><span class="dv">1</span>, identifier<span class="op">=</span><span class="st">"PIDENT"</span>),  <span class="co"># neighbours add or remove one person</span></span>
+<span id="cb21-4"><a href="#cb21-4" aria-hidden="true" tabindex="-1"></a>    privacy_loss<span class="op">=</span>dp.loss_of(rho<span class="op">=</span>RHO_QUERY, delta<span class="op">=</span>DELTA_QUERY),</span>
+<span id="cb21-5"><a href="#cb21-5" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb21-6"><a href="#cb21-6" aria-hidden="true" tabindex="-1"></a>query_id <span class="op">=</span> (</span>
+<span id="cb21-7"><a href="#cb21-7" aria-hidden="true" tabindex="-1"></a>    context_id.query(rho<span class="op">=</span>RHO_QUERY, delta<span class="op">=</span>DELTA_QUERY)</span>
+<span id="cb21-8"><a href="#cb21-8" aria-hidden="true" tabindex="-1"></a>    .truncate_per_group(TRUNCATE)  <span class="co"># at most 4 rows per person, so a person moves a count by at most 4</span></span>
+<span id="cb21-9"><a href="#cb21-9" aria-hidden="true" tabindex="-1"></a>    .select(<span class="op">*</span>COLUMNS)</span>
+<span id="cb21-10"><a href="#cb21-10" aria-hidden="true" tabindex="-1"></a>    .contingency_table(keys<span class="op">=</span>KEYS, cuts<span class="op">=</span>CUTS, algorithm<span class="op">=</span>dp.mbi.AIM(rounds<span class="op">=</span>ROUNDS))</span>
+<span id="cb21-11"><a href="#cb21-11" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<pre class="text"><code>identifier unit, 4 rows per person: oneway scale=25.2982 threshold=142
+identifier unit: scale ratio 9.00 = 36/4</code></pre>
+<p>The one-way scale falls nine-fold, to 25.30, because a person now moves a count by at most 4 rows rather than 36. The threshold falls from 1364 to 142, and every other scale of the release carries the same factor. The cost is the truncation, which drops every row beyond the fourth of anyone who answered more often, before anything is counted.</p>
+</section>
+<section id="sec-synth-check" class="level2" data-number="17.9">
+<h2 data-number="17.9" class="anchored" data-anchor-id="sec-synth-check"><span class="header-section-number">17.9</span> The measured marginals against the real ones</h2>
+<p>The last check compares every measured multi-way marginal of the three releases with the real one, in the same way as the one-way marginals. A measured marginal is what each release spent its budget on, so it is where the synthetic data should be closest to the truth. The lines are from the same run as the lists above.</p>
+<pre class="text"><code>measured (AGE, HWUSUAL) (aim): tv=0.00200 largest cell error=2,992 rows  std=224.1 bound=0.00141
+measured (SEX, HWUSUAL) (aim): tv=0.00200 largest cell error=5,730 rows  std=242.4 bound=0.00114
+measured (AGE, HWUSUAL, ILOSTAT) (aim): tv=0.00219 largest cell error=1,382 rows  std=379.5 bound=0.01195
+measured (SEX, AGE, HWUSUAL) (aim): tv=0.00200 largest cell error=1,556 rows  std=169.7 bound=0.00321
+measured (SEX, AGE, ILOSTAT) (aim): tv=0.00093 largest cell error=699 rows  std=379.5 bound=0.00896
+measured (SEX, HWUSUAL, ILOSTAT) (aim): tv=0.00200 largest cell error=1,940 rows  std=379.5 bound=0.00896
+measured (AGE, ILOSTAT) (mst): tv=0.00116 largest cell error=2,366 rows  std=207.8 bound=0.00164
+measured (HWUSUAL, ILOSTAT) (mst): tv=0.00258 largest cell error=3,700 rows  std=207.8 bound=0.00164
+measured (SEX, ILOSTAT) (mst): tv=0.00041 largest cell error=1,085 rows  std=207.8 bound=0.00123
+measured (AGE, ILOSTAT) (sequential): tv=0.00027 largest cell error=387 rows  std=221.1 bound=0.00174
+measured (HWUSUAL, ILOSTAT) (sequential): tv=0.00068 largest cell error=1,035 rows  std=351.3 bound=0.00276
+measured (SEX, HWUSUAL) (sequential): tv=0.00017 largest cell error=338 rows  std=342.9 bound=0.00162
+measured (SEX, ILOSTAT) (sequential): tv=0.00019 largest cell error=335 rows  std=218.1 bound=0.00129
+measured (SEX, AGE, HWUSUAL) (sequential): tv=0.00094 largest cell error=712 rows  std=240.0 bound=0.00453
+measured (SEX, AGE, ILOSTAT) (sequential): tv=0.00099 largest cell error=751 rows  std=536.7 bound=0.01267
+measured (SEX, HWUSUAL, ILOSTAT) (sequential): tv=0.00073 largest cell error=567 rows  std=536.7 bound=0.01267</code></pre>
+<p>Two things stand out. First, in the two releases that left the nulls alone, every marginal containing <code>HWUSUAL</code> breaks its bound, and the pairs without it are further from the truth than in the third release, because the wrong total leaks into every marginal. Second, in the release that filled the nulls, every measured marginal is under its bound by a factor of four or more. The bound counts three standard deviations in every cell at once, which never happens, so a three-way marginal with a distance of one thousandth is a good fit.</p>
+<p>What this check does not say is how the synthetic data answers a question nobody measured, or how a model trained on it compares with one trained on the real rows. Those are the questions of <a href="../part05-synthetic-data/18-evaluating-synthetic-data.html">Evaluating and tuning synthetic data</a>, which also shows what changes when the budget, the cuts or the number of rounds change.</p>
+</section>
+<section id="summary" class="level2" data-number="17.10">
+<h2 data-number="17.10" class="anchored" data-anchor-id="summary"><span class="header-section-number">17.10</span> Summary</h2>
+<div id="tbl-synth-summary" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-tbl figure">
+<figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl" id="tbl-synth-summary-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Table&nbsp;17.1: The calls and concepts of synthetic data with AIM and MST, what each does, and the rule of thumb that goes with it.
+</figcaption>
+<div aria-describedby="tbl-synth-summary-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<table class="caption-top table">
+<colgroup>
+<col style="width: 33%">
+<col style="width: 33%">
+<col style="width: 33%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>Call or concept</th>
+<th>What it does</th>
+<th>Rule of thumb</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><code>dp.mbi.AIM(rounds=10)</code></td>
+<td>One-way marginals, then rounds that measure the marginal the model fits worst</td>
+<td>Fewer rounds for a quick release; read <code>table.marginals</code> to see what it chose</td>
+</tr>
+<tr class="even">
+<td><code>queries</code>, <code>measure_split</code>, <code>max_size</code></td>
+<td>The candidates or a weighted workload; the share of a round spent measuring; the memory cap</td>
+<td>The defaults serve a handful of columns</td>
+</tr>
+<tr class="odd">
+<td><code>dp.mbi.MST()</code></td>
+<td>One-way marginals, then pairs that form a spanning tree, measured at once</td>
+<td>Faster than AIM when pairs are what matter; it never measures a triple</td>
+</tr>
+<tr class="even">
+<td><code>dp.mbi.Sequential(algorithms=[Fixed, AIM])</code></td>
+<td>Runs the algorithms in turn on one table, splitting the budget evenly or by <code>weights</code></td>
+<td>Put the marginals you must have in <code>Fixed</code>; AIM spends the rest</td>
+</tr>
+<tr class="odd">
+<td><code>query.oneway_scale</code>, <code>query.oneway_threshold</code></td>
+<td>The one-way step’s noise scale and key threshold, before anything is spent</td>
+<td>Under the identifier unit, 4 rows per person cost a ninth of 36</td>
+</tr>
+<tr class="even">
+<td><code>table.synthesize(rows, method)</code></td>
+<td>Rows drawn from the fitted model; <code>round</code> matches its marginals, <code>sample</code> draws independently</td>
+<td>Post-processing, so free; the row count defaults to the model’s noisy total</td>
+</tr>
+<tr class="odd">
+<td>Cut columns in the synthetic frame</td>
+<td>Values drawn uniformly inside the bin, within one unit of the edge for the open bins</td>
+<td>Right as bins, wrong as numbers; give finer cuts if the numbers matter</td>
+</tr>
+<tr class="even">
+<td>Nulls in a cut column</td>
+<td>Dropped by the one-way step and counted in the last bin by the multi-way step in 0.16.0</td>
+<td>Fill them with a public code in <code>with_columns</code> before the table</td>
+</tr>
+<tr class="odd">
+<td>Total variation distance against <code>std</code></td>
+<td>How far a synthetic marginal is from the real one, against three standard deviations per cell</td>
+<td>A measured marginal over the bound points to the data, not the noise</td>
+</tr>
+</tbody>
+</table>
+</div>
+</figure>
+</div>
+</section>
+<section id="references" class="level2" data-number="17.11">
+<h2 data-number="17.11" class="anchored" data-anchor-id="references"><span class="header-section-number">17.11</span> References</h2>
+<ul>
+<li>OpenDP documentation: “Synthetic Data” in the statistical modelling guide, “Contingency Tables” in the tabular data guide, and the API reference for <code>opendp.extras.mbi</code> (<code>AIM</code>, <code>MST</code>, <code>Sequential</code>, <code>Fixed</code>, <code>ContingencyTable</code>).</li>
+<li>McKenna, Mullins, Sheldon and Miklau, “AIM: An Adaptive and Iterative Mechanism for Differentially Private Synthetic Data” (2022): the selection score, the budget schedule and the experiments behind the defaults.</li>
+<li>McKenna, Miklau and Sheldon, “Winning the NIST Contest: A scalable and general approach to differentially private synthetic data” (2021): the MST mechanism and the Private-PGM engine that fits the model.</li>
+<li>McKenna, Sheldon and Miklau, “Graphical-model based estimation and inference for differential privacy” (2019): Private-PGM itself, the inference step that both algorithms share.</li>
+<li>The full edition’s chapters on <a href="../../book-full/part03-dp-foundations/05-selection.html">selection</a>, <a href="../../book-full/part03-dp-foundations/06-query-release.html">query release</a> and <a href="../../book-full/part04-privacy-accounting/03-concentrated-dp.html">concentrated DP</a> derive the results this chapter states.</li>
+</ul>
+
+
+</section>
+
+</main> <!-- /main -->
+<script id="quarto-html-after-body" type="application/javascript">
+  window.document.addEventListener("DOMContentLoaded", function (event) {
+    const icon = "";
+    const anchorJS = new window.AnchorJS();
+    anchorJS.options = {
+      placement: 'right',
+      icon: icon
+    };
+    anchorJS.add('.anchored');
+    const isCodeAnnotation = (el) => {
+      for (const clz of el.classList) {
+        if (clz.startsWith('code-annotation-')) {                     
+          return true;
+        }
+      }
+      return false;
+    }
+    const onCopySuccess = function(e) {
+      // button target
+      const button = e.trigger;
+      // don't keep focus
+      button.blur();
+      // flash "checked"
+      button.classList.add('code-copy-button-checked');
+      var currentTitle = button.getAttribute("title");
+      button.setAttribute("title", "Copied!");
+      let tooltip;
+      if (window.bootstrap) {
+        button.setAttribute("data-bs-toggle", "tooltip");
+        button.setAttribute("data-bs-placement", "left");
+        button.setAttribute("data-bs-title", "Copied!");
+        tooltip = new bootstrap.Tooltip(button, 
+          { trigger: "manual", 
+            customClass: "code-copy-button-tooltip",
+            offset: [0, -8]});
+        tooltip.show();    
+      }
+      setTimeout(function() {
+        if (tooltip) {
+          tooltip.hide();
+          button.removeAttribute("data-bs-title");
+          button.removeAttribute("data-bs-toggle");
+          button.removeAttribute("data-bs-placement");
+        }
+        button.setAttribute("title", currentTitle);
+        button.classList.remove('code-copy-button-checked');
+      }, 1000);
+      // clear code selection
+      e.clearSelection();
+    }
+    const getTextToCopy = function(trigger) {
+      const outerScaffold = trigger.parentElement.cloneNode(true);
+      const codeEl = outerScaffold.querySelector('code');
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
+        }
+      }
+      return codeEl.innerText;
+    }
+    const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
+      text: getTextToCopy
+    });
+    clipboard.on('success', onCopySuccess);
+    if (window.document.getElementById('quarto-embedded-source-code-modal')) {
+      const clipboardModal = new window.ClipboardJS('.code-copy-button[data-in-quarto-modal]', {
+        text: getTextToCopy,
+        container: window.document.getElementById('quarto-embedded-source-code-modal')
+      });
+      clipboardModal.on('success', onCopySuccess);
+    }
+      var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+      var mailtoRegex = new RegExp(/^mailto:/);
+        var filterRegex = new RegExp('/' + window.location.host + '/');
+      var isInternal = (href) => {
+          return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+      }
+      // Inspect non-navigation links and adorn them if external
+     var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool):not(.about-link)');
+      for (var i=0; i<links.length; i++) {
+        const link = links[i];
+        if (!isInternal(link.href)) {
+          // undo the damage that might have been done by quarto-nav.js in the case of
+          // links that we want to consider external
+          if (link.dataset.originalHref !== undefined) {
+            link.href = link.dataset.originalHref;
+          }
+        }
+      }
+    function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+      const config = {
+        allowHTML: true,
+        maxWidth: 500,
+        delay: 100,
+        arrow: false,
+        appendTo: function(el) {
+            return el.parentElement;
+        },
+        interactive: true,
+        interactiveBorder: 10,
+        theme: 'quarto',
+        placement: 'bottom-start',
+      };
+      if (contentFn) {
+        config.content = contentFn;
+      }
+      if (onTriggerFn) {
+        config.onTrigger = onTriggerFn;
+      }
+      if (onUntriggerFn) {
+        config.onUntrigger = onUntriggerFn;
+      }
+      window.tippy(el, config); 
+    }
+    const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+    for (var i=0; i<noterefs.length; i++) {
+      const ref = noterefs[i];
+      tippyHover(ref, function() {
+        // use id or data attribute instead here
+        let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+        try { href = new URL(href).hash; } catch {}
+        const id = href.replace(/^#\/?/, "");
+        const note = window.document.getElementById(id);
+        if (note) {
+          return note.innerHTML;
+        } else {
+          return "";
+        }
+      });
+    }
+    const xrefs = window.document.querySelectorAll('a.quarto-xref');
+    const processXRef = (id, note) => {
+      // Strip column container classes
+      const stripColumnClz = (el) => {
+        el.classList.remove("page-full", "page-columns");
+        if (el.children) {
+          for (const child of el.children) {
+            stripColumnClz(child);
+          }
+        }
+      }
+      stripColumnClz(note)
+      if (id === null || id.startsWith('sec-')) {
+        // Special case sections, only their first couple elements
+        const container = document.createElement("div");
+        if (note.children && note.children.length > 2) {
+          container.appendChild(note.children[0].cloneNode(true));
+          for (let i = 1; i < note.children.length; i++) {
+            const child = note.children[i];
+            if (child.tagName === "P" && child.innerText === "") {
+              continue;
+            } else {
+              container.appendChild(child.cloneNode(true));
+              break;
+            }
+          }
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(container);
+          }
+          return container.innerHTML
+        } else {
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(note);
+          }
+          return note.innerHTML;
+        }
+      } else {
+        // Remove any anchor links if they are present
+        const anchorLink = note.querySelector('a.anchorjs-link');
+        if (anchorLink) {
+          anchorLink.remove();
+        }
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(note);
+        }
+        if (note.classList.contains("callout")) {
+          return note.outerHTML;
+        } else {
+          return note.innerHTML;
+        }
+      }
+    }
+    for (var i=0; i<xrefs.length; i++) {
+      const xref = xrefs[i];
+      tippyHover(xref, undefined, function(instance) {
+        instance.disable();
+        let url = xref.getAttribute('href');
+        let hash = undefined; 
+        if (url.startsWith('#')) {
+          hash = url;
+        } else {
+          try { hash = new URL(url).hash; } catch {}
+        }
+        if (hash) {
+          const id = hash.replace(/^#\/?/, "");
+          const note = window.document.getElementById(id);
+          if (note !== null) {
+            try {
+              const html = processXRef(id, note.cloneNode(true));
+              instance.setContent(html);
+            } finally {
+              instance.enable();
+              instance.show();
+            }
+          } else {
+            // See if we can fetch this
+            fetch(url.split('#')[0])
+            .then(res => res.text())
+            .then(html => {
+              const parser = new DOMParser();
+              const htmlDoc = parser.parseFromString(html, "text/html");
+              const note = htmlDoc.getElementById(id);
+              if (note !== null) {
+                const html = processXRef(id, note);
+                instance.setContent(html);
+              } 
+            }).finally(() => {
+              instance.enable();
+              instance.show();
+            });
+          }
+        } else {
+          // See if we can fetch a full url (with no hash to target)
+          // This is a special case and we should probably do some content thinning / targeting
+          fetch(url)
+          .then(res => res.text())
+          .then(html => {
+            const parser = new DOMParser();
+            const htmlDoc = parser.parseFromString(html, "text/html");
+            const note = htmlDoc.querySelector('main.content');
+            if (note !== null) {
+              // This should only happen for chapter cross references
+              // (since there is no id in the URL)
+              // remove the first header
+              if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
+                note.children[0].remove();
+              }
+              const html = processXRef(null, note);
+              instance.setContent(html);
+            } 
+          }).finally(() => {
+            instance.enable();
+            instance.show();
+          });
+        }
+      }, function(instance) {
+      });
+    }
+        let selectedAnnoteEl;
+        const selectorForAnnotation = ( cell, annotation) => {
+          let cellAttr = 'data-code-cell="' + cell + '"';
+          let lineAttr = 'data-code-annotation="' +  annotation + '"';
+          const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+          return selector;
+        }
+        const selectCodeLines = (annoteEl) => {
+          const doc = window.document;
+          const targetCell = annoteEl.getAttribute("data-target-cell");
+          const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+          const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+          const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+          const lineIds = lines.map((line) => {
+            return targetCell + "-" + line;
+          })
+          let top = null;
+          let height = null;
+          let parent = null;
+          if (lineIds.length > 0) {
+              //compute the position of the single el (top and bottom and make a div)
+              const el = window.document.getElementById(lineIds[0]);
+              top = el.offsetTop;
+              height = el.offsetHeight;
+              parent = el.parentElement.parentElement;
+            if (lineIds.length > 1) {
+              const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+              const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+              height = bottom - top;
+            }
+            if (top !== null && height !== null && parent !== null) {
+              // cook up a div (if necessary) and position it 
+              let div = window.document.getElementById("code-annotation-line-highlight");
+              if (div === null) {
+                div = window.document.createElement("div");
+                div.setAttribute("id", "code-annotation-line-highlight");
+                div.style.position = 'absolute';
+                parent.appendChild(div);
+              }
+              div.style.top = top - 2 + "px";
+              div.style.height = height + 4 + "px";
+              div.style.left = 0;
+              let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+              if (gutterDiv === null) {
+                gutterDiv = window.document.createElement("div");
+                gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+                gutterDiv.style.position = 'absolute';
+                const codeCell = window.document.getElementById(targetCell);
+                const gutter = codeCell.querySelector('.code-annotation-gutter');
+                gutter.appendChild(gutterDiv);
+              }
+              gutterDiv.style.top = top - 2 + "px";
+              gutterDiv.style.height = height + 4 + "px";
+            }
+            selectedAnnoteEl = annoteEl;
+          }
+        };
+        const unselectCodeLines = () => {
+          const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+          elementsIds.forEach((elId) => {
+            const div = window.document.getElementById(elId);
+            if (div) {
+              div.remove();
+            }
+          });
+          selectedAnnoteEl = undefined;
+        };
+          // Handle positioning of the toggle
+      window.addEventListener(
+        "resize",
+        throttle(() => {
+          elRect = undefined;
+          if (selectedAnnoteEl) {
+            selectCodeLines(selectedAnnoteEl);
+          }
+        }, 10)
+      );
+      function throttle(fn, ms) {
+      let throttle = false;
+      let timer;
+        return (...args) => {
+          if(!throttle) { // first call gets through
+              fn.apply(this, args);
+              throttle = true;
+          } else { // all the others get throttled
+              if(timer) clearTimeout(timer); // cancel #2
+              timer = setTimeout(() => {
+                fn.apply(this, args);
+                timer = throttle = false;
+              }, ms);
+          }
+        };
+      }
+        // Attach click handler to the DT
+        const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+        for (const annoteDlNode of annoteDls) {
+          annoteDlNode.addEventListener('click', (event) => {
+            const clickedEl = event.target;
+            if (clickedEl !== selectedAnnoteEl) {
+              unselectCodeLines();
+              const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+              if (activeEl) {
+                activeEl.classList.remove('code-annotation-active');
+              }
+              selectCodeLines(clickedEl);
+              clickedEl.classList.add('code-annotation-active');
+            } else {
+              // Unselect the line
+              unselectCodeLines();
+              clickedEl.classList.remove('code-annotation-active');
+            }
+          });
+        }
+    const findCites = (el) => {
+      const parentEl = el.parentElement;
+      if (parentEl) {
+        const cites = parentEl.dataset.cites;
+        if (cites) {
+          return {
+            el,
+            cites: cites.split(' ')
+          };
+        } else {
+          return findCites(el.parentElement)
+        }
+      } else {
+        return undefined;
+      }
+    };
+    var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+    for (var i=0; i<bibliorefs.length; i++) {
+      const ref = bibliorefs[i];
+      const citeInfo = findCites(ref);
+      if (citeInfo) {
+        tippyHover(citeInfo.el, function() {
+          var popup = window.document.createElement('div');
+          citeInfo.cites.forEach(function(cite) {
+            var citeDiv = window.document.createElement('div');
+            citeDiv.classList.add('hanging-indent');
+            citeDiv.classList.add('csl-entry');
+            var biblioDiv = window.document.getElementById('ref-' + cite);
+            if (biblioDiv) {
+              citeDiv.innerHTML = biblioDiv.innerHTML;
+            }
+            popup.appendChild(citeDiv);
+          });
+          return popup.innerHTML;
+        });
+      }
+    }
+  });
+  </script>
+<nav class="page-navigation">
+  <div class="nav-page nav-page-previous">
+      <a href="../part05-synthetic-data/16-contingency-tables.html" class="pagination-link" aria-label="Contingency tables">
+        <i class="bi bi-arrow-left-short"></i> <span class="nav-page-text"><span class="chapter-number">16</span>&nbsp; <span class="chapter-title">Contingency tables</span></span>
+      </a>          
+  </div>
+  <div class="nav-page nav-page-next">
+      <a href="../part05-synthetic-data/18-evaluating-synthetic-data.html" class="pagination-link" aria-label="Evaluating and tuning synthetic data">
+        <span class="nav-page-text"><span class="chapter-number">18</span>&nbsp; <span class="chapter-title">Evaluating and tuning synthetic data</span></span> <i class="bi bi-arrow-right-short"></i>
+      </a>
+  </div>
+</nav>
+</div> <!-- /content -->
+
+
+
+
+</body></html>
