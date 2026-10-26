@@ -676,7 +676,7 @@ window.Quarto = {
 <p>The previous part showed that models and statistics leak: membership, attributes, training text, whole datasets. This part introduces the defence that the rest of the book is built on, <strong>differential privacy (DP)</strong>, and develops it far enough that you can prove a new mechanism private, calibrate its noise, compose it with others, and say what any such mechanism must cost. The finer tools for tracking privacy over many steps (Rényi DP, numerical accountants, amplification by subsampling) come in the <a href="../part04-privacy-accounting/00-introduction.html">next part</a>, which builds directly on this one.</p>
 <section id="who-this-part-is-for" class="level2">
 <h2 class="anchored" data-anchor-id="who-this-part-is-for">Who this part is for</h2>
-<p>You are expected to have read the <a href="../part01-prerequisites/00-introduction.html">Prerequisites</a> and <a href="../part02-attacks/00-introduction.html">Threat models and attacks</a>. This part uses the max-divergence and the hockey-stick divergence, the data processing inequality, the trade-off function of a hypothesis test, and tail bounds for the Laplace and normal distributions, all derived in the prerequisites. It uses the games and the advantage of the attacks part, since the definition of DP is a bound on exactly those games.</p>
+<p>You are expected to have read the <a href="../part01-prerequisites/00-introduction.html">Prerequisites</a> and <a href="../part02-attacks/00-introduction.html">Threat models and attacks</a>. This part uses the max-divergence, the hockey-stick divergence and the data processing inequality of <a href="../part01-prerequisites/03-divergences.html">Divergences</a>, the trade-off function of <a href="../part01-prerequisites/04-hypothesis-testing.html">Hypothesis testing</a>, and the tail bounds for the Laplace and normal distributions of <a href="../part01-prerequisites/02-concentration.html">Concentration inequalities</a>. It uses the games and the advantage of <a href="../part02-attacks/01-threat-models.html">Threat models and privacy games</a>, since the definition of DP is a bound on exactly those games. Each chapter restates in one sentence every fact it takes from an earlier page, and links to the page that proves it.</p>
 </section>
 <section id="the-common-thread" class="level2">
 <h2 class="anchored" data-anchor-id="the-common-thread">The common thread</h2>
@@ -705,32 +705,32 @@ Table&nbsp;1: The chapters of this part, the question each one answers, and the 
 <tr class="odd">
 <td><a href="../part03-dp-foundations/01-definition.html">The definition of differential privacy</a></td>
 <td>What exactly does DP promise, to whom, and what does it not protect? How do you tell a privacy violation from learning about the population?</td>
-<td>3, 4, 9, 10</td>
+<td>3, 4, 9–11, 13</td>
 </tr>
 <tr class="even">
 <td><a href="../part03-dp-foundations/02-properties.html">Post-processing, group privacy and composition</a></td>
 <td>Which operations keep a guarantee, and how do guarantees add up?</td>
-<td>3, 18</td>
+<td>2, 3, 9, 10, 18</td>
 </tr>
 <tr class="odd">
 <td><a href="../part03-dp-foundations/03-laplace-gaussian.html">The Laplace and Gaussian mechanisms</a></td>
 <td>How much noise does a numerical query need, and what is the exact privacy of Gaussian noise?</td>
-<td>1, 2, 3, 18, 19</td>
+<td>1–4, 18, 19</td>
 </tr>
 <tr class="even">
 <td><a href="../part03-dp-foundations/04-composition.html">Advanced and optimal composition</a></td>
 <td>How does privacy degrade over many releases, exactly?</td>
-<td>2, 3, 4, 18, 19</td>
+<td>2–4, 18–20</td>
 </tr>
 <tr class="odd">
 <td><a href="../part03-dp-foundations/05-selection.html">Selection: exponential mechanism, report-noisy-max, sparse vector</a></td>
 <td>How do you privately choose the best of many options, or find the few queries above a threshold?</td>
-<td>1, 2, 18–20</td>
+<td>1, 2, 18–21</td>
 </tr>
 <tr class="even">
 <td><a href="../part03-dp-foundations/06-query-release.html">Query release and private multiplicative weights</a></td>
 <td>How do you answer millions of linear queries, or publish a synthetic dataset, when noise on every answer would drown them?</td>
-<td>2, 18, 20–22</td>
+<td>2, 17, 18, 20–22</td>
 </tr>
 <tr class="odd">
 <td><a href="../part03-dp-foundations/07-sensitivity.html">Beyond global sensitivity</a></td>
@@ -740,22 +740,22 @@ Table&nbsp;1: The chapters of this part, the question each one answers, and the 
 <tr class="even">
 <td><a href="../part03-dp-foundations/08-discrete-mechanisms.html">Discrete and floating-point-safe mechanisms</a></td>
 <td>Why do textbook mechanisms break on real computers, and how is that fixed?</td>
-<td>1, 3, 18, 20</td>
+<td>1, 3, 18–20</td>
 </tr>
 <tr class="odd">
 <td><a href="../part03-dp-foundations/09-trust-models.html">Local, shuffle and distributed trust models</a></td>
 <td>What changes when no one is trusted with the raw data?</td>
-<td>2, 8, 9, 18, 20</td>
+<td>1–4, 8, 9, 18–20</td>
 </tr>
 <tr class="even">
 <td><a href="../part03-dp-foundations/10-lower-bounds.html">Lower bounds: what privacy costs</a></td>
 <td>How much accuracy must every private mechanism give up?</td>
-<td>2, 4, 5, 10, 17, 18–20</td>
+<td>2, 4, 5, 10, 17–20, 22–24</td>
 </tr>
 <tr class="odd">
 <td><a href="../part03-dp-foundations/11-mean-estimation.html">Private mean estimation</a></td>
 <td>How many records does a private estimate of a population mean need, and what does not knowing the range, the dimension or the tails cost?</td>
-<td>1, 2, 20–22, 24, 27</td>
+<td>1, 2, 18–22, 24, 27</td>
 </tr>
 </tbody>
 </table>
@@ -766,7 +766,7 @@ Table&nbsp;1: The chapters of this part, the question each one answers, and the 
 <section id="how-to-read-this-part" class="level2">
 <h2 class="anchored" data-anchor-id="how-to-read-this-part">How to read this part</h2>
 <p><strong>Order.</strong> Chapters 18 to 21 are the core and should be read in order: the definition, the properties that make it usable, the two mechanisms everything else is built from, and advanced and optimal composition, which finishes the story of composition that chapter 19 starts and introduces the privacy loss random variable that the next part uses throughout. Chapter 22 adds mechanisms for selection, and chapter 23 builds on them to answer many queries at once, by releasing synthetic data with private multiplicative weights. Chapter 24 handles data whose worst case is far from typical. Chapter 25 is short and practical: read it before you implement any mechanism yourself. Chapter 26 changes who is trusted with the raw data. Chapter 27 is the most theoretical; it ties back to reconstruction and membership attacks and says what privacy must cost. Chapter 28 closes the part by putting these tools together on the most common statistical task, estimating a mean, and matches each of its error rates with a lower bound from chapter 27.</p>
-<p><strong>Structure of a chapter.</strong> Every chapter has the same shape as in the earlier parts: why it matters, a toolkit, one section per result with a statement, derivation, interpretation, worked example and two <em>check yourself</em> questions, then code, references and a cheat sheet. Exercises with worked solutions are collected in the exercise book, a companion website, with a link at the end of each chapter.</p>
+<p><strong>Structure of a chapter.</strong> Every chapter opens with the question it answers and a running example with its numbers, such as the counting query of <a href="../part03-dp-foundations/03-laplace-gaussian.html">the Laplace and Gaussian mechanisms</a> or the dashboard of a hundred counts in <a href="../part03-dp-foundations/04-composition.html">Advanced and optimal composition</a>. Then comes one section per topic. Its definitions, theorems, lemmas and worked examples are numbered environments, so that later chapters can cite them by number, and every theorem is followed at once by its proof in numbered steps. A Code section runs the script that checks every quoted number. A Summary table then lists each result of the chapter, its statement in a line and where it is used, and References close the chapter. The exercises, each with a worked solution, are in the exercise book, a companion website, and the last line of each chapter links to them.</p>
 <p><strong>Proofs you can check by computer.</strong> Most privacy claims in this part are checked numerically as well as proved: the exact privacy profile of a mechanism is computed and compared with its bound, a composition formula is compared with brute-force enumeration, and a buggy mechanism is shown to leak by computing its privacy loss. Running the scripts is the fastest way to see how loose each bound is. From the repository root, for example,</p>
 <div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb1"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="ex">uv</span> run python code/part03-dp-foundations/laplace_gaussian.py</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </section>
@@ -845,7 +845,7 @@ Table&nbsp;2: Notation shared by the chapters of this part and the next.
 </tr>
 <tr class="even">
 <td><span class="math inline">\(\mathrm{FPR}\)</span>, <span class="math inline">\(\mathrm{FNR}\)</span></td>
-<td>A test’s false positive and false negative rates, its type I and type II errors, written <span class="math inline">\(\alpha\)</span> and <span class="math inline">\(\beta\)</span> on a page without an accuracy guarantee</td>
+<td>A test’s false positive and false negative rates, its type I and type II errors, written <span class="math inline">\(\alpha\)</span> and <span class="math inline">\(\beta\)</span> only on a page where neither letter has another meaning</td>
 </tr>
 <tr class="odd">
 <td><span class="math inline">\(R\colon \mathcal X \to \mathcal Y\)</span>, <span class="math inline">\(\varepsilon_0\)</span></td>
@@ -861,15 +861,17 @@ Table&nbsp;2: Notation shared by the chapters of this part and the next.
 <h2 class="anchored" data-anchor-id="what-you-will-be-able-to-do">What you will be able to do</h2>
 <p>By the end of this part you should be able to:</p>
 <ul>
-<li>state pure and approximate DP for a stated neighbouring relation and unit of privacy, and translate a guarantee into a bound on membership advantage and on posterior odds;</li>
+<li>state pure and approximate DP for a stated neighbouring relation and unit of privacy, translate a guarantee into a bound on membership advantage and on posterior odds, and say why <span class="math inline">\(\delta\)</span> must be much smaller than <span class="math inline">\(1/n\)</span>;</li>
 <li>prove post-processing, group privacy and basic composition, and say what does not compose;</li>
 <li>calibrate the Laplace and Gaussian mechanisms, including the exact (analytic) Gaussian calibration;</li>
 <li>derive advanced composition and compute optimal composition exactly;</li>
 <li>prove the exponential mechanism, report-noisy-max and the sparse vector technique private, and recognize the common broken variants of the last;</li>
-<li>handle data-dependent sensitivity with smooth sensitivity, propose-test-release, subsample-and-aggregate and clipping;</li>
+<li>answer a large workload of linear queries with private multiplicative weights, and bound its error through the regret of multiplicative weights;</li>
+<li>handle data-dependent sensitivity with smooth sensitivity, propose-test-release, inverse sensitivity, subsample-and-aggregate and clipping;</li>
 <li>implement discrete Laplace and discrete Gaussian samplers exactly, and explain why naive floating-point noise is not private;</li>
 <li>design frequency estimation in the local model and explain what shuffling and secure aggregation buy;</li>
-<li>prove packing and fingerprinting lower bounds, and run the tracing attack they come from.</li>
+<li>prove packing and fingerprinting lower bounds, and run the tracing attack they come from;</li>
+<li>estimate a mean privately when its range, its dimension or its tails are unknown, and match each error rate with a lower bound.</li>
 </ul>
 <p>Each of these is a result derived in one of the chapters that follow.</p>
 

@@ -554,12 +554,12 @@ window.Quarto = {
 <ol type="1">
 <li><strong>The joint table.</strong> Multiply <span class="math inline">\(\Pr[s] = 0.5\)</span> by <span class="math inline">\(\Pr[x \mid s]\)</span> and <span class="math inline">\(\Pr[y \mid x, s]\)</span>. For example, <span class="math inline">\(p(\text{smoker}, \text{old}, \text{disease}) = 0.5 \times 0.6 \times 0.7 = 0.21\)</span>.</li>
 </ol>
-<div id="tbl-sol-attribute-inference-balanced" class="quarto-float quarto-figure quarto-figure-center anchored">
+<div id="tbl-sol-attr-balanced" class="quarto-float quarto-figure quarto-figure-center anchored">
 <figure class="quarto-float quarto-float-tbl figure">
-<figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl" id="tbl-sol-attribute-inference-balanced-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl" id="tbl-sol-attr-balanced-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
 Table&nbsp;11.1: The smoking table with a balanced prior, column maxima in bold.
 </figcaption>
-<div aria-describedby="tbl-sol-attribute-inference-balanced-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<div aria-describedby="tbl-sol-attr-balanced-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
 <table class="caption-top table">
 <colgroup>
 <col style="width: 20%">
@@ -619,7 +619,7 @@ Table&nbsp;11.1: The smoking table with a balanced prior, column maxima in bold.
 <section id="sec-sol-attr-2" class="level2" data-number="11.2">
 <h2 data-number="11.2" class="anchored" data-anchor-id="sec-sol-attr-2"><span class="header-section-number">11.2</span> The marginal prior</h2>
 <blockquote class="blockquote">
-<p><strong>Exercise 2.</strong> <strong>The marginal prior.</strong> Fredrikson et al.’s attack uses <span class="math inline">\(p(s)\)</span> in place of <span class="math inline">\(p(s \mid x)\)</span>. On the smoking table, with a calibrated model, compute the success of <span class="math inline">\(\arg\max_s p(s)\,f_y(x, s)\)</span>, breaking ties towards “non-smoker”. <em>Check: 0.706, against 0.748 for imputation.</em> Which cell causes the loss? <em>(Bayes’ rule, Fact 1)</em></p>
+<p><strong>Exercise 2.</strong> <strong>The marginal prior.</strong> Fredrikson et al.’s attack uses <span class="math inline">\(p(s)\)</span> in place of <span class="math inline">\(p(s \mid x)\)</span>. On the smoking table, with a calibrated model, compute the success of <span class="math inline">\(\arg\max_s p(s)\,f_y(x, s)\)</span>, breaking ties towards “non-smoker”. <em>Check: 0.706, against 0.748 for imputation.</em> Which cell causes the loss? <em>(Bayes’ rule, <a href="../../book-full/part02-attacks/03-attribute-inference.html#def-attr-vulnerability">Definition&nbsp;11.2</a>)</em></p>
 </blockquote>
 <div class="callout callout-style-default callout-tip callout-titled" title="Solution">
 <div class="callout-header d-flex align-content-center collapsed" data-bs-toggle="collapse" data-bs-target=".callout-2-contents" aria-controls="callout-2" aria-expanded="false" aria-label="Toggle callout">
@@ -643,7 +643,7 @@ Table&nbsp;11.1: The smoking table with a balanced prior, column maxima in bold.
 </ul></li>
 <li><strong>Success.</strong> Add the mass of the guessed value in each cell of the smoking table: <span class="math inline">\(0.378 + 0.048 + 0.196 + 0.084 = 0.706\)</span>. The check value is right.</li>
 <li><strong>Where the loss is.</strong> Only the last cell differs from imputation, which guesses “smoker” there and gets <span class="math inline">\(0.126\)</span> instead of <span class="math inline">\(0.084\)</span>. The loss is <span class="math inline">\(0.748 - 0.706 = 0.042\)</span>.</li>
-<li><strong>Why.</strong> Bayes’ rule needs <span class="math inline">\(p(s \mid x)\)</span>: an old person is a smoker with probability <span class="math inline">\(0.3913\)</span>, not <span class="math inline">\(0.3\)</span>. With it the scores are <span class="math inline">\(0.3913 \times 0.7 = 0.2739\)</span> against <span class="math inline">\(0.6087 \times 0.3 = 0.1826\)</span>, and the tie is broken the right way. Dropping the dependence of <span class="math inline">\(s\)</span> on <span class="math inline">\(x\)</span> throws that evidence away. By Fact 1, any rule other than the MAP guess can only do worse.</li>
+<li><strong>Why.</strong> Bayes’ rule needs <span class="math inline">\(p(s \mid x)\)</span>, and an old person is a smoker with probability <span class="math inline">\(0.3913\)</span>, not <span class="math inline">\(0.3\)</span>. With it, the scores of <a href="../../book-full/part02-attacks/03-attribute-inference.html#exm-attr-inversion">Example&nbsp;11.3</a> are 0.2739 against 0.1826, and the tie is broken the right way. Dropping the dependence of <span class="math inline">\(s\)</span> on <span class="math inline">\(x\)</span> throws that evidence away. The MAP guess of <a href="../../book-full/part02-attacks/03-attribute-inference.html#def-attr-vulnerability">Definition&nbsp;11.2</a> is the best rule, so any rule that differs from it can only do worse.</li>
 </ol>
 <p><em>An inversion attack is only as good as the adversary’s model of how the sensitive attribute relates to what it already knows.</em></p>
 </div>
@@ -653,7 +653,7 @@ Table&nbsp;11.1: The smoking table with a balanced prior, column maxima in bold.
 <section id="sec-sol-attr-3" class="level2" data-number="11.3">
 <h2 data-number="11.3" class="anchored" data-anchor-id="sec-sol-attr-3"><span class="header-section-number">11.3</span> The reduction at low false positive rate</h2>
 <blockquote class="blockquote">
-<p><strong>Exercise 3.</strong> <strong>The reduction at low false positive rate.</strong> The membership test <span class="math inline">\(\mathcal B\)</span> built from the toy attack has TPR 0.7832 at FPR 0.7262. Using the mixing of tests in <a href="../../book-full/part01-prerequisites/04-hypothesis-testing.html">Hypothesis testing</a>, find the best TPR it can reach at FPR <span class="math inline">\(10^{-3}\)</span>. <em>Check: <span class="math inline">\(0.00108\)</span>.</em> Why can it not do better? <em>Hint: its only output is one bit.</em> <em>(Neyman–Pearson, mixing tests)</em></p>
+<p><strong>Exercise 3.</strong> <strong>The reduction at low false positive rate.</strong> The membership test <span class="math inline">\(\mathcal B\)</span> of <a href="../../book-full/part02-attacks/03-attribute-inference.html#prp-attr-reduction">Proposition&nbsp;11.1</a>, built from the toy attack, has TPR 0.7832 at FPR 0.7262. Using the mixing of tests in <a href="../../book-full/part01-prerequisites/04-hypothesis-testing.html">Hypothesis testing</a>, find the best TPR it can reach at FPR <span class="math inline">\(10^{-3}\)</span>. <em>Check: <span class="math inline">\(0.00108\)</span>.</em> Why can it not do better? <em>Hint: its only output is one bit.</em> <em>(Neyman–Pearson, mixing tests)</em></p>
 </blockquote>
 <div class="callout callout-style-default callout-tip callout-titled" title="Solution">
 <div class="callout-header d-flex align-content-center collapsed" data-bs-toggle="collapse" data-bs-target=".callout-3-contents" aria-controls="callout-3" aria-expanded="false" aria-label="Toggle callout">
@@ -682,7 +682,7 @@ Table&nbsp;11.1: The smoking table with a balanced prior, column maxima in bold.
 <section id="sec-sol-attr-4" class="level2" data-number="11.4">
 <h2 data-number="11.4" class="anchored" data-anchor-id="sec-sol-attr-4"><span class="header-section-number">11.4</span> Label-only inversion</h2>
 <blockquote class="blockquote">
-<p><strong>Exercise 4.</strong> <strong>Label-only inversion.</strong> The hospital releases only a label: “disease” when <span class="math inline">\(\Pr[y = 1 \mid x, s] &gt; \frac12\)</span>. On the smoking table, the adversary queries the label at both values of <span class="math inline">\(s\)</span>, scores <span class="math inline">\(p(s \mid x)\,\mathbf 1[\mathrm{label}(x, s) = y]\)</span>, and breaks ties with <span class="math inline">\(p(s \mid x)\)</span>. Compute its success. <em>Check: 0.742, a loss of 0.006 against imputation.</em> <em>(Fact 3, MAP guess)</em></p>
+<p><strong>Exercise 4.</strong> <strong>Label-only inversion.</strong> The hospital releases only a label: “disease” when <span class="math inline">\(\Pr[y = 1 \mid x, s] &gt; \frac12\)</span>. On the smoking table, the adversary queries the label at both values of <span class="math inline">\(s\)</span>, scores <span class="math inline">\(p(s \mid x)\,\mathbf 1[\mathrm{label}(x, s) = y]\)</span>, and breaks ties with <span class="math inline">\(p(s \mid x)\)</span>. Compute its success. <em>Check: 0.742, a loss of 0.006 against imputation.</em> <em>(<a href="../../book-full/part02-attacks/03-attribute-inference.html#lem-attr-processing">Lemma&nbsp;11.2</a>, MAP guess)</em></p>
 </blockquote>
 <div class="callout callout-style-default callout-tip callout-titled" title="Solution">
 <div class="callout-header d-flex align-content-center collapsed" data-bs-toggle="collapse" data-bs-target=".callout-4-contents" aria-controls="callout-4" aria-expanded="false" aria-label="Toggle callout">
@@ -706,7 +706,7 @@ Table&nbsp;11.1: The smoking table with a balanced prior, column maxima in bold.
 <li>old, disease: only the smoker label matches, guess smoker, right on <span class="math inline">\(0.126\)</span>.</li>
 </ul></li>
 <li><strong>Success.</strong> <span class="math inline">\(0.378 + 0.042 + 0.196 + 0.126 = 0.742\)</span>. The check value is right.</li>
-<li><strong>The loss.</strong> Imputation guesses “smoker” for young people with the disease and gets <span class="math inline">\(0.048\)</span> there instead of <span class="math inline">\(0.042\)</span>: a loss of <span class="math inline">\(0.006\)</span>. The label is a function of the confidences, so by Fact 3 a loss, not a gain, was the only possibility.</li>
+<li><strong>The loss.</strong> Imputation guesses “smoker” for young people with the disease and gets <span class="math inline">\(0.048\)</span> there instead of <span class="math inline">\(0.042\)</span>: a loss of <span class="math inline">\(0.006\)</span>. The label is a function of the confidences, so by <a href="../../book-full/part02-attacks/03-attribute-inference.html#lem-attr-processing">Lemma&nbsp;11.2</a> a loss, not a gain, was the only possibility.</li>
 </ol>
 <p><em>A coarse output costs the attacker only in the cells where the coarse answer cannot tell the candidates apart; everywhere else it is as good as the full confidence.</em></p>
 </div>
@@ -746,7 +746,7 @@ Table&nbsp;11.1: The smoking table with a balanced prior, column maxima in bold.
 <section id="sec-sol-attr-6" class="level2" data-number="11.6">
 <h2 data-number="11.6" class="anchored" data-anchor-id="sec-sol-attr-6"><span class="header-section-number">11.6</span> A model that memorizes</h2>
 <blockquote class="blockquote">
-<p><strong>Exercise 6.</strong> <strong>A model that memorizes.</strong> A lookup model stores each training record under a unique record identifier, such as a patient number. Queried with a person’s identifier and a candidate <span class="math inline">\((x, s, y)\)</span>, it returns <span class="math inline">\(f_y(x, s) = 1\)</span> when that person is a training member and the candidate is their stored record, and the population’s <span class="math inline">\(p(y \mid x, s)\)</span> for every other query. The lookup is keyed on the identifier, not on the values, because the smoking table has only eight kinds of record and many people share each one. So a non-member’s query never hits a stored record, and a member’s query hits only at the member’s own true values. On the smoking table, compute the success of MAP inversion on members and on non-members. <em>Check: 0.874 on members, 0.748 on non-members, an advantage of 0.126.</em> Which members does the attack still get wrong? <em>(The game, the non-member ceiling)</em></p>
+<p><strong>Exercise 6.</strong> <strong>A model that memorizes.</strong> A lookup model stores each training record under a unique record identifier, such as a patient number. Queried with a person’s identifier and a candidate <span class="math inline">\((x, s, y)\)</span>, it returns <span class="math inline">\(f_y(x, s) = 1\)</span> when that person is a training member and the candidate is their stored record, and the population’s <span class="math inline">\(p(y \mid x, s)\)</span> for every other query. The lookup is keyed on the identifier, not on the values, because the smoking table has only eight kinds of record and many people share each one. So a non-member’s query never hits a stored record, and a member’s query hits only at the member’s own true values. On the smoking table, compute the success of MAP inversion on members and on non-members. <em>Check: 0.874 on members, 0.748 on non-members, an advantage of 0.126.</em> Which members does the attack still get wrong? <em>(<a href="../../book-full/part02-attacks/03-attribute-inference.html#def-attr-game">Definition&nbsp;11.1</a>, <a href="../../book-full/part02-attacks/03-attribute-inference.html#thm-attr-ceiling">Theorem&nbsp;11.1</a>)</em></p>
 </blockquote>
 <div class="callout callout-style-default callout-tip callout-titled" title="Solution">
 <div class="callout-header d-flex align-content-center collapsed" data-bs-toggle="collapse" data-bs-target=".callout-6-contents" aria-controls="callout-6" aria-expanded="false" aria-label="Toggle callout">
@@ -761,16 +761,16 @@ Table&nbsp;11.1: The smoking table with a balanced prior, column maxima in bold.
 <div id="callout-6" class="callout-6-contents callout-collapse collapse">
 <div class="callout-body-container callout-body">
 <ol type="1">
-<li><strong>Non-members.</strong> None of their queries is stored, so the model answers with <span class="math inline">\(p(y \mid x, s)\)</span> at both candidates. It is calibrated, so MAP inversion is imputation and succeeds with <span class="math inline">\(V(S \mid X, Y) = 0.748\)</span>.</li>
+<li><strong>Non-members.</strong> None of their queries is stored, so the model answers with <span class="math inline">\(p(y \mid x, s)\)</span> at both candidates. It is calibrated, so by <a href="../../book-full/part02-attacks/03-attribute-inference.html#prp-attr-calibrated">Proposition&nbsp;11.3</a> MAP inversion is imputation and succeeds with <span class="math inline">\(V(S \mid X, Y) = 0.748\)</span>.</li>
 <li><strong>Members.</strong> At the true value <span class="math inline">\(s\)</span> the model returns 1. At the other value <span class="math inline">\(s'\)</span> it returns the population’s <span class="math inline">\(p(y \mid x, s')\)</span>. The attack is right exactly when <span class="math inline">\(p(s \mid x) \times 1 &gt; p(s' \mid x)\,p(y \mid x, s')\)</span>.</li>
 <li><strong>Check each of the eight records.</strong> With <span class="math inline">\(p(\text{smoker} \mid \text{young}) = 0.2222\)</span> and <span class="math inline">\(p(\text{smoker} \mid \text{old}) = 0.3913\)</span>:</li>
 </ol>
-<div id="tbl-sol-attribute-inference-lookup" class="quarto-float quarto-figure quarto-figure-center anchored">
+<div id="tbl-sol-attr-lookup" class="quarto-float quarto-figure quarto-figure-center anchored">
 <figure class="quarto-float quarto-float-tbl figure">
-<figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl" id="tbl-sol-attribute-inference-lookup-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl" id="tbl-sol-attr-lookup-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
 Table&nbsp;11.2: MAP inversion against a model that memorizes its training records, for a member of each kind.
 </figcaption>
-<div aria-describedby="tbl-sol-attribute-inference-lookup-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<div aria-describedby="tbl-sol-attr-lookup-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
 <table class="caption-top table">
 <colgroup>
 <col style="width: 16%">

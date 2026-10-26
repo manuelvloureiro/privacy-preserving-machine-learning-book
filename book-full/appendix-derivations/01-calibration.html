@@ -803,7 +803,7 @@ Table&nbsp;A.1: The calibration formulas derived in this appendix and the chapte
 <tr class="even">
 <td><a href="#sec-apx-cal-tradeoffs" class="quarto-xref"><span>Section A.8</span></a></td>
 <td>Computing <span class="math inline">\(\delta\)</span> in code, and how <span class="math inline">\(\varepsilon\)</span>, <span class="math inline">\(\delta\)</span>, <span class="math inline">\(\sigma\)</span> and <span class="math inline">\(\Delta_2\)</span> trade off</td>
-<td><a href="../part03-dp-foundations/03-laplace-gaussian.html#sec-lg-analytic" class="quarto-xref"><span>Section 20.4</span></a>, <a href="../part05-dp-ml/09-choosing-epsilon.html#sec-epsc-delta" class="quarto-xref"><span>Section 46.7</span></a></td>
+<td><a href="../part03-dp-foundations/03-laplace-gaussian.html#sec-lg-analytic" class="quarto-xref"><span>Section 20.4</span></a>, <a href="../part05-dp-ml/09-choosing-epsilon.html#sec-epsc-delta" class="quarto-xref"><span>Section 46.5</span></a></td>
 </tr>
 </tbody>
 </table>
@@ -2011,7 +2011,7 @@ Table&nbsp;A.14: The exact <span class="math inline">\(\sigma/\Delta_2\)</span> 
 <p>Decide the quantities in this order, because the later steps use the earlier choices.</p>
 <ol type="1">
 <li><strong>Fix the neighbouring relation and compute <span class="math inline">\(\Delta_2\)</span></strong>, as in <a href="#sec-apx-cal-sensitivity" class="quarto-xref"><span>Section A.2</span></a>. Clip first if the data are unbounded.</li>
-<li><strong>Pick <span class="math inline">\(\delta\)</span> from the number of people <span class="math inline">\(n\)</span></strong>, well below <span class="math inline">\(1/n\)</span>. The choice <span class="math inline">\(\delta = 1/n^2\)</span> is cheap, as <a href="#tbl-apx-cal-delta-n" class="quarto-xref">Table&nbsp;<span>A.14</span></a> shows, and <a href="../part05-dp-ml/09-choosing-epsilon.html#sec-epsc-delta" class="quarto-xref"><span>Section 46.7</span></a> discusses other rules.</li>
+<li><strong>Pick <span class="math inline">\(\delta\)</span> from the number of people <span class="math inline">\(n\)</span></strong>, well below <span class="math inline">\(1/n\)</span>. The choice <span class="math inline">\(\delta = 1/n^2\)</span> is cheap, as <a href="#tbl-apx-cal-delta-n" class="quarto-xref">Table&nbsp;<span>A.14</span></a> shows, and <a href="../part05-dp-ml/09-choosing-epsilon.html#sec-epsc-delta" class="quarto-xref"><span>Section 46.5</span></a> discusses other rules.</li>
 <li><strong>Pick <span class="math inline">\(\varepsilon\)</span>.</strong> It decides the noise far more than <span class="math inline">\(\delta\)</span> does, so spend your judgement here.</li>
 <li><strong>Count the releases <span class="math inline">\(k\)</span></strong> that must share the budget. If they are Gaussian releases of the same sensitivity, solve for one and multiply <span class="math inline">\(\sigma\)</span> by <span class="math inline">\(\sqrt k\)</span>.</li>
 <li><strong>Solve for <span class="math inline">\(\sigma\)</span> by bisection</strong> on the exact formula with <span class="math inline">\(\Delta_2 = 1\)</span>, computing <span class="math inline">\(\Phi\)</span> with <span class="math inline">\(\operatorname{erfc}\)</span>, and multiply by <span class="math inline">\(\Delta_2\)</span>. <a href="#tbl-apx-cal-grid" class="quarto-xref">Table&nbsp;<span>A.11</span></a> gives a first estimate, and <a href="#eq-apx-cal-tail-rule" class="quarto-xref">Equation&nbsp;<span>A.22</span></a> gives a safe closed form if you cannot run bisection.</li>

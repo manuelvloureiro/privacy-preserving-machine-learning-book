@@ -643,56 +643,16 @@ window.Quarto = {
     <h2 id="toc-title">Table of contents</h2>
    
   <ul>
-  <li><a href="#why-this-matters" id="toc-why-this-matters" class="nav-link active" data-scroll-target="#why-this-matters"><span class="header-section-number">14.1</span> Why this matters</a>
-  <ul class="collapse">
-  <li><a href="#the-one-idea-a-gradient-is-a-sum-of-outer-products" id="toc-the-one-idea-a-gradient-is-a-sum-of-outer-products" class="nav-link" data-scroll-target="#the-one-idea-a-gradient-is-a-sum-of-outer-products"><span class="header-section-number">14.1.1</span> The one idea: a gradient is a sum of outer products</a></li>
-  <li><a href="#the-setting-and-the-game" id="toc-the-setting-and-the-game" class="nav-link" data-scroll-target="#the-setting-and-the-game"><span class="header-section-number">14.1.2</span> The setting and the game</a></li>
-  </ul></li>
-  <li><a href="#toolkit-three-facts-every-derivation-uses" id="toc-toolkit-three-facts-every-derivation-uses" class="nav-link" data-scroll-target="#toolkit-three-facts-every-derivation-uses"><span class="header-section-number">14.2</span> Toolkit: three facts every derivation uses</a>
-  <ul class="collapse">
-  <li><a href="#fact-1-the-gradient-of-a-fully-connected-layer-is-an-outer-product" id="toc-fact-1-the-gradient-of-a-fully-connected-layer-is-an-outer-product" class="nav-link" data-scroll-target="#fact-1-the-gradient-of-a-fully-connected-layer-is-an-outer-product"><span class="header-section-number">14.2.1</span> Fact 1 — The gradient of a fully connected layer is an outer product</a></li>
-  <li><a href="#fact-2-softmax-with-cross-entropy-has-gradient-p---e_y" id="toc-fact-2-softmax-with-cross-entropy-has-gradient-p---e_y" class="nav-link" data-scroll-target="#fact-2-softmax-with-cross-entropy-has-gradient-p---e_y"><span class="header-section-number">14.2.2</span> Fact 2 — Softmax with cross-entropy has gradient <span class="math inline">\(p - e_y\)</span></a></li>
-  <li><a href="#fact-3-backpropagation-and-averaging" id="toc-fact-3-backpropagation-and-averaging" class="nav-link" data-scroll-target="#fact-3-backpropagation-and-averaging"><span class="header-section-number">14.2.3</span> Fact 3 — Backpropagation and averaging</a></li>
-  </ul></li>
-  <li><a href="#sec-gradinv-exact" id="toc-sec-gradinv-exact" class="nav-link" data-scroll-target="#sec-gradinv-exact"><span class="header-section-number">14.3</span> Exact recovery from a fully connected layer</a>
-  <ul class="collapse">
-  <li><a href="#context" id="toc-context" class="nav-link" data-scroll-target="#context"><span class="header-section-number">14.3.1</span> Context</a></li>
-  <li><a href="#statement" id="toc-statement" class="nav-link" data-scroll-target="#statement"><span class="header-section-number">14.3.2</span> Statement</a></li>
-  <li><a href="#derivation" id="toc-derivation" class="nav-link" data-scroll-target="#derivation"><span class="header-section-number">14.3.3</span> Derivation</a></li>
-  <li><a href="#interpretation" id="toc-interpretation" class="nav-link" data-scroll-target="#interpretation"><span class="header-section-number">14.3.4</span> Interpretation</a></li>
-  <li><a href="#example-a-network-you-can-compute-by-hand" id="toc-example-a-network-you-can-compute-by-hand" class="nav-link" data-scroll-target="#example-a-network-you-can-compute-by-hand"><span class="header-section-number">14.3.5</span> Example: a network you can compute by hand</a></li>
-  <li><a href="#check-yourself" id="toc-check-yourself" class="nav-link" data-scroll-target="#check-yourself"><span class="header-section-number">14.3.6</span> Check yourself</a></li>
-  </ul></li>
-  <li><a href="#sec-gradinv-labels" id="toc-sec-gradinv-labels" class="nav-link" data-scroll-target="#sec-gradinv-labels"><span class="header-section-number">14.4</span> Label recovery from the last layer</a>
-  <ul class="collapse">
-  <li><a href="#context-1" id="toc-context-1" class="nav-link" data-scroll-target="#context-1"><span class="header-section-number">14.4.1</span> Context</a></li>
-  <li><a href="#statement-1" id="toc-statement-1" class="nav-link" data-scroll-target="#statement-1"><span class="header-section-number">14.4.2</span> Statement</a></li>
-  <li><a href="#derivation-1" id="toc-derivation-1" class="nav-link" data-scroll-target="#derivation-1"><span class="header-section-number">14.4.3</span> Derivation</a></li>
-  <li><a href="#interpretation-1" id="toc-interpretation-1" class="nav-link" data-scroll-target="#interpretation-1"><span class="header-section-number">14.4.4</span> Interpretation</a></li>
-  <li><a href="#example-a-batch-of-16" id="toc-example-a-batch-of-16" class="nav-link" data-scroll-target="#example-a-batch-of-16"><span class="header-section-number">14.4.5</span> Example: a batch of 16</a></li>
-  <li><a href="#check-yourself-1" id="toc-check-yourself-1" class="nav-link" data-scroll-target="#check-yourself-1"><span class="header-section-number">14.4.6</span> Check yourself</a></li>
-  </ul></li>
-  <li><a href="#sec-gradinv-dlg" id="toc-sec-gradinv-dlg" class="nav-link" data-scroll-target="#sec-gradinv-dlg"><span class="header-section-number">14.5</span> Deep Leakage from Gradients</a>
-  <ul class="collapse">
-  <li><a href="#context-2" id="toc-context-2" class="nav-link" data-scroll-target="#context-2"><span class="header-section-number">14.5.1</span> Context</a></li>
-  <li><a href="#statement-2" id="toc-statement-2" class="nav-link" data-scroll-target="#statement-2"><span class="header-section-number">14.5.2</span> Statement</a></li>
-  <li><a href="#derivation-2" id="toc-derivation-2" class="nav-link" data-scroll-target="#derivation-2"><span class="header-section-number">14.5.3</span> Derivation</a></li>
-  <li><a href="#interpretation-2" id="toc-interpretation-2" class="nav-link" data-scroll-target="#interpretation-2"><span class="header-section-number">14.5.4</span> Interpretation</a></li>
-  <li><a href="#example-one-image" id="toc-example-one-image" class="nav-link" data-scroll-target="#example-one-image"><span class="header-section-number">14.5.5</span> Example: one image</a></li>
-  <li><a href="#check-yourself-2" id="toc-check-yourself-2" class="nav-link" data-scroll-target="#check-yourself-2"><span class="header-section-number">14.5.6</span> Check yourself</a></li>
-  </ul></li>
-  <li><a href="#sec-gradinv-batch" id="toc-sec-gradinv-batch" class="nav-link" data-scroll-target="#sec-gradinv-batch"><span class="header-section-number">14.6</span> Batches and averaging</a>
-  <ul class="collapse">
-  <li><a href="#context-3" id="toc-context-3" class="nav-link" data-scroll-target="#context-3"><span class="header-section-number">14.6.1</span> Context</a></li>
-  <li><a href="#statement-3" id="toc-statement-3" class="nav-link" data-scroll-target="#statement-3"><span class="header-section-number">14.6.2</span> Statement</a></li>
-  <li><a href="#derivation-3" id="toc-derivation-3" class="nav-link" data-scroll-target="#derivation-3"><span class="header-section-number">14.6.3</span> Derivation</a></li>
-  <li><a href="#interpretation-3" id="toc-interpretation-3" class="nav-link" data-scroll-target="#interpretation-3"><span class="header-section-number">14.6.4</span> Interpretation</a></li>
-  <li><a href="#example-what-a-batch-hides" id="toc-example-what-a-batch-hides" class="nav-link" data-scroll-target="#example-what-a-batch-hides"><span class="header-section-number">14.6.5</span> Example: what a batch hides</a></li>
-  <li><a href="#check-yourself-3" id="toc-check-yourself-3" class="nav-link" data-scroll-target="#check-yourself-3"><span class="header-section-number">14.6.6</span> Check yourself</a></li>
-  </ul></li>
-  <li><a href="#code-check-every-attack-by-computation" id="toc-code-check-every-attack-by-computation" class="nav-link" data-scroll-target="#code-check-every-attack-by-computation"><span class="header-section-number">14.7</span> Code: check every attack by computation</a></li>
-  <li><a href="#references" id="toc-references" class="nav-link" data-scroll-target="#references"><span class="header-section-number">14.8</span> References</a></li>
-  <li><a href="#cheat-sheet" id="toc-cheat-sheet" class="nav-link" data-scroll-target="#cheat-sheet"><span class="header-section-number">14.9</span> Cheat sheet</a></li>
+  <li><a href="#sec-gradinv-game" id="toc-sec-gradinv-game" class="nav-link active" data-scroll-target="#sec-gradinv-game"><span class="header-section-number">14.1</span> The reconstruction game</a></li>
+  <li><a href="#sec-gradinv-gradient" id="toc-sec-gradinv-gradient" class="nav-link" data-scroll-target="#sec-gradinv-gradient"><span class="header-section-number">14.2</span> What a gradient is made of</a></li>
+  <li><a href="#sec-gradinv-exact" id="toc-sec-gradinv-exact" class="nav-link" data-scroll-target="#sec-gradinv-exact"><span class="header-section-number">14.3</span> Exact recovery from a fully connected layer</a></li>
+  <li><a href="#sec-gradinv-labels" id="toc-sec-gradinv-labels" class="nav-link" data-scroll-target="#sec-gradinv-labels"><span class="header-section-number">14.4</span> Label recovery from the last layer</a></li>
+  <li><a href="#sec-gradinv-dlg" id="toc-sec-gradinv-dlg" class="nav-link" data-scroll-target="#sec-gradinv-dlg"><span class="header-section-number">14.5</span> Deep Leakage from Gradients</a></li>
+  <li><a href="#sec-gradinv-batch" id="toc-sec-gradinv-batch" class="nav-link" data-scroll-target="#sec-gradinv-batch"><span class="header-section-number">14.6</span> Batches and averaging</a></li>
+  <li><a href="#sec-gradinv-isolation" id="toc-sec-gradinv-isolation" class="nav-link" data-scroll-target="#sec-gradinv-isolation"><span class="header-section-number">14.7</span> How often a unit isolates an example</a></li>
+  <li><a href="#sec-gradinv-code" id="toc-sec-gradinv-code" class="nav-link" data-scroll-target="#sec-gradinv-code"><span class="header-section-number">14.8</span> Code</a></li>
+  <li><a href="#sec-gradinv-summary" id="toc-sec-gradinv-summary" class="nav-link" data-scroll-target="#sec-gradinv-summary"><span class="header-section-number">14.9</span> Summary</a></li>
+  <li><a href="#sec-gradinv-references" id="toc-sec-gradinv-references" class="nav-link" data-scroll-target="#sec-gradinv-references"><span class="header-section-number">14.10</span> References</a></li>
   </ul>
 </nav>
     </div>
@@ -718,20 +678,15 @@ window.Quarto = {
 </header>
 
 
-<section id="why-this-matters" class="level2" data-number="14.1">
-<h2 data-number="14.1" class="anchored" data-anchor-id="why-this-matters"><span class="header-section-number">14.1</span> Why this matters</h2>
-<p>A phone keyboard learns from what its users type. The raw text never leaves the phones. Instead, a server sends the current model <span class="math inline">\(\theta\)</span> to each phone, the phone computes the gradient of the loss on its own few examples, and only that gradient goes back. The server averages the gradients of many phones and takes a step. This is the setting of <strong>federated learning (FL)</strong>, and it is often described as private because “the data stay on the device”. Later parts study FL itself. This chapter asks one question about it: <strong>what does a single client’s gradient reveal about the client’s data?</strong></p>
-<p>The answer is: often, everything. A gradient is not a summary statistic chosen to hide the data. It is the derivative of a loss with respect to millions of parameters, and many of those derivatives are simple functions of the input. This chapter shows four ways to read the data back out of the gradient, going from the exact to the approximate. The first is <strong>exact recovery</strong>: for a fully connected layer with a bias, dividing one row of the weight gradient by one entry of the bias gradient gives back the layer’s input, with no search at all. The second is <strong>label recovery</strong>: the signs of the last layer’s gradient name the label, so the label can be taken off the list of unknowns. The third handles layers where no such closed form exists. You guess an input, compute the gradient it would produce, and move the guess until that gradient matches the one you saw. This is <strong>Deep Leakage from Gradients (DLG)</strong>. The fourth asks what happens when the client sends the average gradient of a whole batch of examples. Averaging mixes the examples together, but much less than you might hope.</p>
-<section id="the-one-idea-a-gradient-is-a-sum-of-outer-products" class="level3" data-number="14.1.1">
-<h3 data-number="14.1.1" class="anchored" data-anchor-id="the-one-idea-a-gradient-is-a-sum-of-outer-products"><span class="header-section-number">14.1.1</span> The one idea: a gradient is a sum of outer products</h3>
-<p>Why should a gradient contain the input at all? Take a fully connected layer, which computes <span class="math inline">\(a = Wx + b\)</span>: each output <span class="math inline">\(a_j\)</span> is a weighted sum of the inputs <span class="math inline">\(x_k\)</span>, with weights <span class="math inline">\(W_{jk}\)</span>, plus a bias <span class="math inline">\(b_j\)</span>. The weight <span class="math inline">\(W_{jk}\)</span> multiplies the input <span class="math inline">\(x_k\)</span>, so a small change in <span class="math inline">\(W_{jk}\)</span> changes <span class="math inline">\(a_j\)</span> by <span class="math inline">\(x_k\)</span> times that change. The loss <span class="math inline">\(\ell\)</span> in turn responds to a change in <span class="math inline">\(a_j\)</span> at some rate, <span class="math inline">\(\gamma_j = \partial\ell/\partial a_j\)</span>, which depends on everything that happens after this layer. The chain rule multiplies the two rates: the loss changes with <span class="math inline">\(W_{jk}\)</span> at the rate <span class="math inline">\(\gamma_jx_k\)</span>. Collecting these numbers into a matrix with the shape of <span class="math inline">\(W\)</span>, the gradient of the loss with respect to <span class="math inline">\(W\)</span> is <span id="eq-auto-06gradientinversion-1"><span class="math display">\[\nabla_W\ell = \gamma\,x^\top, \qquad \gamma = \frac{\partial\ell}{\partial a}. \tag{14.1}\]</span></span> A matrix whose <span class="math inline">\((j, k)\)</span> entry is <span class="math inline">\(\gamma_jx_k\)</span> is called the <strong>outer product</strong> of <span class="math inline">\(\gamma\)</span> and <span class="math inline">\(x\)</span>. Here it is the outer product of what flows backward (<span class="math inline">\(\gamma\)</span>) with what flowed forward (<span class="math inline">\(x\)</span>). Row <span class="math inline">\(j\)</span> is the input <span class="math inline">\(x\)</span> multiplied by the single number <span class="math inline">\(\gamma_j\)</span>, so the layer’s input sits, unchanged up to a scale, in every row of the gradient. Every attack in this chapter exploits that. With one example the scale can be divided out. With a batch of <span class="math inline">\(B\)</span> examples the gradient is a sum of <span class="math inline">\(B\)</span> such outer products, and the attacker’s job is to pull the sum apart.</p>
-<p><a href="#tbl-gradinv-overview" class="quarto-xref">Table&nbsp;<span>14.1</span></a> lists the results and where each is used.</p>
-<div id="tbl-gradinv-overview" class="quarto-float quarto-figure quarto-figure-center anchored">
+<p>A phone keyboard learns from what its users type, but the raw text never leaves the phones. A server sends the current model <span class="math inline">\(\theta\)</span> to each phone, the phone computes the gradient of the loss on its own few examples, and only that gradient goes back. The server averages the gradients of many phones and takes a step. This is the setting of <strong>federated learning (FL)</strong>, and it is often described as private because “the data stay on the device”. This chapter asks one question about it: <strong>what does a single client’s gradient reveal about the client’s data?</strong></p>
+<p>The answer is often everything, and one idea explains why. A gradient is not a summary chosen to hide the data. In a fully connected layer, each row of the weight gradient is the layer’s input multiplied by a single number, the rate at which the loss changes with that row’s output. The bias gradient holds the same numbers on their own. So with one example, dividing a row of the weight gradient by the matching entry of the bias gradient gives back the input exactly. With a batch, the gradient is a sum of such rows, one per example, and the attacker’s work is to pull the sum apart. The chapter builds its attacks in four steps. One division recovers the input of one example, and the signs of the last layer’s gradient give its label. When no division applies, <strong>Deep Leakage from Gradients (DLG)</strong> searches for an input whose gradient matches the one observed. Last, the chapter asks which of these attacks survive when the client averages over a batch.</p>
+<p>The running example comes in two sizes. A network with three inputs and two hidden units is small enough to compute by hand, and the division gives back its input <span class="math inline">\((0.5, 1, 0.2)\)</span> exactly, once for each hidden unit. The experiments then use synthetic <span class="math inline">\(8\times8\)</span> images and a network with 32 hidden units, whose gradient has 2,212 entries against 64 unknown pixels. There the division recovers an image to rounding error, DLG recovers one to about 13 digits after 600 steps, and the same division, applied unit by unit, still recovers all four images of a batch of 4.</p>
+<div id="tbl-gradinv-symbols" class="quarto-float quarto-figure quarto-figure-center anchored">
 <figure class="quarto-float quarto-float-tbl figure">
-<figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl" id="tbl-gradinv-overview-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-Table&nbsp;14.1: The results of this chapter and where each is used.
+<figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl" id="tbl-gradinv-symbols-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Table&nbsp;14.1: The symbols of this chapter.
 </figcaption>
-<div aria-describedby="tbl-gradinv-overview-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<div aria-describedby="tbl-gradinv-symbols-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
 <table class="caption-top table">
 <colgroup>
 <col style="width: 50%">
@@ -739,113 +694,112 @@ Table&nbsp;14.1: The results of this chapter and where each is used.
 </colgroup>
 <thead>
 <tr class="header">
-<th>Result</th>
-<th>Where it is used</th>
+<th>Symbol</th>
+<th>Meaning</th>
 </tr>
 </thead>
 <tbody>
 <tr class="odd">
-<td><span class="math inline">\(\nabla_W\ell = \gamma x^\top\)</span>, <span class="math inline">\(\nabla_b\ell = \gamma\)</span> (Toolkit)</td>
-<td>Every attack below; per-example gradients in later parts</td>
+<td><span class="math inline">\(x \in \mathbb R^d\)</span>; <span class="math inline">\(y\)</span></td>
+<td>an input with <span class="math inline">\(d\)</span> pixels; its label, one of <span class="math inline">\(K\)</span> classes</td>
 </tr>
 <tr class="even">
-<td>Exact recovery <span class="math inline">\(x = (\nabla_W\ell)_{j,:}/(\nabla_b\ell)_j\)</span></td>
-<td>Inverting any model whose first layer is fully connected with a bias</td>
+<td><span class="math inline">\(W_1, b_1\)</span>; <span class="math inline">\(W_2, b_2\)</span></td>
+<td>the weights and biases of the first and the second layer</td>
 </tr>
 <tr class="odd">
-<td>Labels from the sign of <span class="math inline">\(\nabla_{b_2}\ell = p - e_y\)</span>; counts from its size</td>
-<td>Removing the label from the unknowns; label leakage in batches</td>
+<td><span class="math inline">\(a\)</span>, <span class="math inline">\(h\)</span>, <span class="math inline">\(z\)</span>, <span class="math inline">\(p\)</span></td>
+<td>pre-activations, hidden activations, logits and predicted probabilities</td>
 </tr>
 <tr class="even">
-<td>Deep Leakage from Gradients: <span class="math inline">\(\min_{\hat x}\|\nabla_\theta\ell(\hat x) - g\|^2\)</span></td>
-<td>Inverting layers with no closed form, such as convolutions</td>
+<td><span class="math inline">\(\sigma\)</span>; <span class="math inline">\(m\)</span></td>
+<td>the activation function; the number of hidden units</td>
 </tr>
 <tr class="odd">
-<td>Rank and isolation in a batch: <span class="math inline">\(1 - (1 - 2^{-B})^m\)</span></td>
-<td>How much batching protects, and why it is not a defence</td>
+<td><span class="math inline">\(\ell\)</span></td>
+<td>the cross-entropy loss of one example</td>
+</tr>
+<tr class="even">
+<td><span class="math inline">\(\gamma_1\)</span>, <span class="math inline">\(\gamma_2\)</span></td>
+<td>the backward signals <span class="math inline">\(\partial\ell/\partial a\)</span> and <span class="math inline">\(\partial\ell/\partial z\)</span></td>
+</tr>
+<tr class="odd">
+<td><span class="math inline">\(e_y\)</span>; <span class="math inline">\(\odot\)</span>; <span class="math inline">\(A_{j,:}\)</span></td>
+<td>the one-hot vector of the label; the entrywise product; row <span class="math inline">\(j\)</span> of a matrix <span class="math inline">\(A\)</span></td>
+</tr>
+<tr class="even">
+<td><span class="math inline">\(B\)</span>; <span class="math inline">\(g\)</span></td>
+<td>the batch size; the gradient the client sends</td>
+</tr>
+<tr class="odd">
+<td><span class="math inline">\(R\)</span></td>
+<td>the matching loss of Deep Leakage from Gradients</td>
 </tr>
 </tbody>
 </table>
 </div>
 </figure>
 </div>
-</section>
-<section id="the-setting-and-the-game" class="level3" data-number="14.1.2">
-<h3 data-number="14.1.2" class="anchored" data-anchor-id="the-setting-and-the-game"><span class="header-section-number">14.1.2</span> The setting and the game</h3>
-<p>The server is <strong>honest-but-curious</strong> in the sense of <a href="../part02-attacks/01-threat-models.html">Threat models and privacy games</a>: it runs the training protocol as specified, sends the real model and does not tamper with anything, and only analyses what it receives. Its access is the <strong>transcript</strong>, the strongest level of that chapter: it sees each client’s own update, which is more than the final model, and it knows the architecture and every parameter of <span class="math inline">\(\theta\)</span> because it chose them. A client holds a batch of <span class="math inline">\(B\)</span> labelled examples <span class="math inline">\((x_1, y_1), \dots, (x_B, y_B)\)</span>. Its training loss is the average of the <span class="math inline">\(B\)</span> per-example losses, and what it sends is the gradient of that average with respect to all the parameters <span class="math inline">\(\theta\)</span>. Since the derivative of an average is the average of the derivatives, this is the average of the per-example gradients: <span id="eq-auto-06gradientinversion-2"><span class="math display">\[g = \frac1B\sum_{i=1}^B\nabla_\theta\ell(\theta; x_i, y_i). \tag{14.2}\]</span></span></p>
-<p>This is the <strong>reconstruction game</strong> of that chapter, played on one client. A game there has three parts: a challenger who draws a hidden secret, an adversary who sees only what the threat model allows, and a score for the adversary’s guess. Here the challenger draws the batch from the population and the secret is the inputs. The adversary sees <span class="math inline">\((\theta, g)\)</span> and outputs reconstructions <span class="math inline">\(\hat x_1, \dots, \hat x_B\)</span>, and its gain is how close they come to the true inputs. We measure closeness by the <strong>relative error</strong> <span class="math inline">\(\|\hat x - x\|/\| x\|\)</span>: the length of the mistake as a fraction of the length of the input, so that 0 is a perfect reconstruction and 1 is a mistake as large as the image itself. Each true example is matched to its closest reconstruction, because an average does not change when you reorder the examples, so the gradient carries no record of which example came first.</p>
-<p>The baseline is a guess from the population alone, such as the average image of a shape, which knows nothing of the client’s own position, noise or pixels. The attacks below either recover the client’s exact pixels or, for large enough batches, produce blends; there is little in between.</p>
-<p><strong>The model.</strong> All experiments use a network with one hidden layer, written in NumPy. An input <span class="math inline">\(x \in \mathbb R^d\)</span> first goes through a fully connected layer (<span class="math inline">\(W_1\)</span>, <span class="math inline">\(b_1\)</span>) that gives one number <span class="math inline">\(a_j\)</span> per hidden unit. An activation <span class="math inline">\(\sigma\)</span> is applied to each unit, giving <span class="math inline">\(h\)</span>. A second fully connected layer (<span class="math inline">\(W_2\)</span>, <span class="math inline">\(b_2\)</span>) turns <span class="math inline">\(h\)</span> into one score <span class="math inline">\(z_k\)</span> per class, called a <strong>logit</strong>. The <strong>softmax</strong> turns the logits into probabilities by exponentiating and normalizing, <span class="math inline">\(p_k = e^{z_k}/\sum_{k'}e^{z_{k'}}\)</span>, so that every <span class="math inline">\(p_k\)</span> is positive and they sum to 1. The loss is the <strong>cross-entropy</strong>, minus the log of the probability the model gives to the true label <span class="math inline">\(y\)</span>, which is small when the model is confidently right. In one line: <span id="eq-auto-06gradientinversion-3"><span class="math display">\[a = W_1x + b_1, \quad h = \sigma(a), \quad z = W_2h + b_2, \quad p = \mathrm{softmax}(z), \quad \ell = -\ln p_y, \tag{14.3}\]</span></span> with <span class="math inline">\(m\)</span> hidden units, <span class="math inline">\(K\)</span> classes, <span class="math inline">\(W_1 \in \mathbb R^{m\times d}\)</span> and <span class="math inline">\(W_2 \in \mathbb R^{K\times m}\)</span>. The activation <span class="math inline">\(\sigma\)</span> is either the ReLU <span class="math inline">\(\max(a, 0)\)</span>, which passes positive values and replaces negative ones by 0, or the sigmoid <span class="math inline">\(1/(1 + e^{-a})\)</span>, which squashes every value smoothly into <span class="math inline">\((0, 1)\)</span>. The inputs are synthetic <span class="math inline">\(8\times8\)</span> grey-scale images (<span class="math inline">\(d = 64\)</span>) of <span class="math inline">\(K = 4\)</span> shapes (a horizontal bar, a vertical bar, a diagonal and a square outline), shifted at random and with pixel noise. The network has <span class="math inline">\(m = 32\)</span> hidden units and is at its random initialization, as in the first round of training. Counting the <span class="math inline">\(64\cdot32\)</span> weights and 32 biases of the first layer and the <span class="math inline">\(32\cdot4\)</span> weights and 4 biases of the second, it has <span class="math inline">\(64\cdot32 + 32 + 32\cdot4 + 4 = 2{,}212\)</span> parameters, so the gradient has 2,212 entries, against 64 unknown pixels per example.</p>
-<p><strong>What this chapter assumes.</strong> Gradients, stochastic gradient descent (SGD), minibatches and the limits of non-convex optimization are in <a href="../part01-prerequisites/06-optimization.html">Optimization</a>. The threat-model vocabulary and the games are in <a href="../part02-attacks/01-threat-models.html">Threat models and privacy games</a>. The facts this chapter needs from both are restated where they are used. For a different route to reconstruction, from noisy answers to many queries rather than from one gradient, see <a href="../part02-attacks/09-reconstruction.html">Reconstruction attacks</a>.</p>
-<p><strong>Conventions.</strong> <span class="math inline">\(e_y\)</span> is the <span class="math inline">\(y\)</span>-th standard basis vector: 1 in position <span class="math inline">\(y\)</span> and 0 elsewhere, the “one-hot” encoding of the label. <span class="math inline">\(\odot\)</span> is the elementwise product, which multiplies two vectors entry by entry. For a matrix <span class="math inline">\(A\)</span>, <span class="math inline">\(A_{j,:}\)</span> is its <span class="math inline">\(j\)</span>-th row. Gradients are column vectors and <span class="math inline">\(\nabla_W\ell\)</span> has the shape of <span class="math inline">\(W\)</span>. We write <span class="math inline">\(\gamma_1 = \partial\ell/\partial a \in \mathbb R^m\)</span> and <span class="math inline">\(\gamma_2 = \partial\ell/\partial z \in \mathbb R^K\)</span> for the backward signals at the two layers: how fast the loss changes with each hidden unit’s pre-activation and with each logit. Texts on backpropagation usually write these signals as <span class="math inline">\(\delta\)</span>; this book keeps <span class="math inline">\(\delta\)</span> for the privacy parameter of the later parts.</p>
-</section>
-</section>
-<section id="toolkit-three-facts-every-derivation-uses" class="level2" data-number="14.2">
-<h2 data-number="14.2" class="anchored" data-anchor-id="toolkit-three-facts-every-derivation-uses"><span class="header-section-number">14.2</span> Toolkit: three facts every derivation uses</h2>
-<section id="fact-1-the-gradient-of-a-fully-connected-layer-is-an-outer-product" class="level3" data-number="14.2.1">
-<h3 data-number="14.2.1" class="anchored" data-anchor-id="fact-1-the-gradient-of-a-fully-connected-layer-is-an-outer-product"><span class="header-section-number">14.2.1</span> Fact 1 — The gradient of a fully connected layer is an outer product</h3>
-<p>This is the fact behind the whole chapter: in a fully connected layer, the gradient of each weight is the backward signal of its output times the input it multiplies. Let <span class="math inline">\(a = Wx + b\)</span> with <span class="math inline">\(W \in \mathbb R^{m\times d}\)</span>, and let <span class="math inline">\(\gamma = \partial\ell/\partial a\)</span> be the backward signal. Then <span id="eq-gradinv-outer"><span class="math display">\[\nabla_W\ell = \gamma\,x^\top, \qquad \nabla_b\ell = \gamma. \tag{14.4}\]</span></span></p>
-<p><em>Why.</em> Write out one output: <span class="math inline">\(a_j = \sum_kW_{jk}x_k + b_j\)</span>. The weight <span class="math inline">\(W_{jk}\)</span> appears in <span class="math inline">\(a_j\)</span> only, with coefficient <span class="math inline">\(x_k\)</span>, so <span class="math inline">\(\partial a_j/\partial W_{jk} = x_k\)</span>. The loss depends on <span class="math inline">\(W_{jk}\)</span> only through <span class="math inline">\(a_j\)</span>, so the chain rule gives <span class="math inline">\(\frac{\partial\ell}{\partial W_{jk}} = \frac{\partial\ell}{\partial a_j}\frac{\partial a_j}{\partial W_{jk}} = \gamma_jx_k\)</span>, which is the <span class="math inline">\((j, k)\)</span> entry of <span class="math inline">\(\gamma x^\top\)</span>. The bias <span class="math inline">\(b_j\)</span> enters <span class="math inline">\(a_j\)</span> with coefficient 1, so <span class="math inline">\(\frac{\partial\ell}{\partial b_j} = \gamma_j\cdot1\)</span>.</p>
-<p><em>A concrete case.</em> With <span class="math inline">\(m = 2\)</span>, <span class="math inline">\(d = 3\)</span>, <span class="math inline">\(\gamma = (-0.3279, 0.9838)\)</span> and <span class="math inline">\(x = (0.5, 1, 0.2)\)</span>, the two rows of <span class="math inline">\(\nabla_W\ell\)</span> are <span class="math inline">\(-0.3279\,x = (-0.1640, -0.3279, -0.0656)\)</span> and <span class="math inline">\(0.9838\,x = (0.4919, 0.9838, 0.1968)\)</span>. Both are multiples of <span class="math inline">\(x\)</span>. This is the worked example of <a href="#tbl-gradinv-tiny" class="quarto-xref">Table&nbsp;<span>14.2</span></a>.</p>
-<p>Every attack in this chapter uses this fact. The point to keep is the split between the two factors: <span class="math inline">\(\gamma\)</span> depends on everything above the layer (the rest of the network, the loss, the label), but the factor <span class="math inline">\(x^\top\)</span> does not. Whatever the rest of the network does, it can only rescale the rows, never change their direction.</p>
-</section>
-<section id="fact-2-softmax-with-cross-entropy-has-gradient-p---e_y" class="level3" data-number="14.2.2">
-<h3 data-number="14.2.2" class="anchored" data-anchor-id="fact-2-softmax-with-cross-entropy-has-gradient-p---e_y"><span class="header-section-number">14.2.2</span> Fact 2 — Softmax with cross-entropy has gradient <span class="math inline">\(p - e_y\)</span></h3>
-<p>At the last layer the backward signal has a very simple form: the predicted probabilities minus the one-hot label. In words, raising the logit of a wrong class <span class="math inline">\(k\)</span> raises the loss at the rate <span class="math inline">\(p_k\)</span>, the probability the model already gives that class, and raising the logit of the true class lowers the loss at the rate <span class="math inline">\(1 - p_y\)</span>. With <span class="math inline">\(p = \mathrm{softmax}(z)\)</span> and <span class="math inline">\(\ell = -\ln p_y\)</span>, <span id="eq-gradinv-softmax"><span class="math display">\[\gamma_2 = \frac{\partial\ell}{\partial z} = p - e_y. \tag{14.5}\]</span></span></p>
-<p><em>Why.</em> Write the loss without the fraction. Since <span class="math inline">\(p_y = e^{z_y}/\sum_ke^{z_k}\)</span>, its log is <span class="math inline">\(z_y - \ln\sum_ke^{z_k}\)</span>, so <span class="math inline">\(\ell = -z_y + \ln\sum_ke^{z_k}\)</span>. Now differentiate in one logit <span class="math inline">\(z_k\)</span>. The first term depends only on <span class="math inline">\(z_y\)</span>, so it contributes <span class="math inline">\(-1\)</span> when <span class="math inline">\(k = y\)</span> and 0 otherwise, which is <span class="math inline">\(-\mathbf 1[k = y]\)</span>. The second term is the log of a sum, and the derivative of <span class="math inline">\(\ln u\)</span> is <span class="math inline">\(u'/u\)</span>: here <span class="math inline">\(u' = e^{z_k}\)</span>, so the term contributes <span class="math inline">\(e^{z_k}/\sum_{k'}e^{z_{k'}} = p_k\)</span>. Together, <span class="math inline">\(\partial\ell/\partial z_k = p_k - \mathbf 1[k = y]\)</span>, which is entry <span class="math inline">\(k\)</span> of <span class="math inline">\(p - e_y\)</span>.</p>
-<p><em>A concrete case.</em> With logits <span class="math inline">\(z = (-0.35, 0.295)\)</span> and <span class="math inline">\(y = 1\)</span> (the first class), the first probability is <span class="math inline">\(p_1 = e^{-0.35}/(e^{-0.35} + e^{0.295}) = 1/(1 + e^{0.645}) = 1/(1 + 1.906) = 0.3441\)</span>, so <span class="math inline">\(p = (0.3441, 0.6559)\)</span> and <span class="math inline">\(\gamma_2 = (0.3441 - 1, 0.6559) = (-0.6559, 0.6559)\)</span>. The entries sum to 0, and only the true class is negative.</p>
-<p>This sign pattern is what label recovery uses. The softmax never gives a probability of exactly 0 or 1, since every <span class="math inline">\(e^{z_k}\)</span> is positive, so <span class="math inline">\(0 &lt; p_y &lt; 1\)</span>. The entry at the true label is therefore <span class="math inline">\(p_y - 1 &lt; 0\)</span>, and every other entry is <span class="math inline">\(p_k &gt; 0\)</span>.</p>
-</section>
-<section id="fact-3-backpropagation-and-averaging" class="level3" data-number="14.2.3">
-<h3 data-number="14.2.3" class="anchored" data-anchor-id="fact-3-backpropagation-and-averaging"><span class="header-section-number">14.2.3</span> Fact 3 — Backpropagation and averaging</h3>
-<p>To use Fact 1 at the first layer you need its backward signal <span class="math inline">\(\gamma_1\)</span>, and that is obtained by sending <span class="math inline">\(\gamma_2\)</span> back through the network, which is what <strong>backpropagation</strong> does. Each hidden unit <span class="math inline">\(j\)</span> feeds every logit <span class="math inline">\(z_k\)</span> through the weight <span class="math inline">\(W_{2,kj}\)</span>, so it collects the logits’ signals weighted by those connections, <span class="math inline">\(\sum_k\gamma_{2,k}W_{2,kj}\)</span>. That sum is how fast the loss changes with the unit’s output <span class="math inline">\(h_j\)</span>. The unit’s output is <span class="math inline">\(h_j = \sigma(a_j)\)</span>, so to get the rate with respect to <span class="math inline">\(a_j\)</span> you multiply by the activation’s slope <span class="math inline">\(\sigma'(a_j)\)</span>. In vector form: <span id="eq-gradinv-backprop"><span class="math display">\[\gamma_1 = (W_2^\top\gamma_2)\odot\sigma'(a). \tag{14.6}\]</span></span> The second half of the fact concerns batches: the gradient of an average loss over a batch is the average of the per-example gradients.</p>
-<p><em>Why.</em> <span class="math inline">\(z_k = \sum_jW_{2,kj}h_j + b_{2,k}\)</span>, so <span class="math inline">\(h_j\)</span> enters each <span class="math inline">\(z_k\)</span> with coefficient <span class="math inline">\(W_{2,kj}\)</span>, and the chain rule sums over the logits: <span class="math inline">\(\frac{\partial\ell}{\partial h_j} = \sum_k\gamma_{2,k}W_{2,kj} = (W_2^\top\gamma_2)_j\)</span>. Then <span class="math inline">\(h_j = \sigma(a_j)\)</span> multiplies this by <span class="math inline">\(\sigma'(a_j)\)</span>. The claim about batches holds because differentiation is linear: the derivative of a sum is the sum of the derivatives, and a constant factor <span class="math inline">\(\frac1B\)</span> comes out unchanged.</p>
-<p><em>A concrete case.</em> For ReLU the slope is <span class="math inline">\(\sigma'(a_j) = \mathbf 1[a_j &gt; 0]\)</span>: 1 if the unit is switched on, 0 if it is switched off. So a unit that is switched off on an input has <span class="math inline">\(\gamma_{1,j} = 0\)</span> and, by Fact 1, a zero row in <span class="math inline">\(\nabla_{W_1}\ell\)</span>. For a batch, Fact 1 applied to each example and then averaged gives the first-layer gradient <span class="math inline">\(\frac1B\sum_i\gamma_{1,i}x_i^\top\)</span>: a sum of <span class="math inline">\(B\)</span> outer products, one per example.</p>
-<p>Label recovery uses this fact to know which rows of the weight gradient can be negative, and every batch result below uses the averaging.</p>
-</section>
-</section>
-<section id="sec-gradinv-exact" class="level2" data-number="14.3">
-<h2 data-number="14.3" class="anchored" data-anchor-id="sec-gradinv-exact"><span class="header-section-number">14.3</span> Exact recovery from a fully connected layer</h2>
-<section id="context" class="level3" data-number="14.3.1">
-<h3 data-number="14.3.1" class="anchored" data-anchor-id="context"><span class="header-section-number">14.3.1</span> Context</h3>
-<p>The server sees <span class="math inline">\(g\)</span>. Is there any computation, short of a search, that gives back the client’s input? For the most common first layer of all, a fully connected layer with a bias, there is: one division. The observation goes back at least to Phong et al.&nbsp;(2018), who pointed it out for exactly this federated setting.</p>
-</section>
-<section id="statement" class="level3" data-number="14.3.2">
-<h3 data-number="14.3.2" class="anchored" data-anchor-id="statement"><span class="header-section-number">14.3.2</span> Statement</h3>
-<p>Suppose the client sends the gradient of a single example, and the first layer is fully connected, <span class="math inline">\(a = W_1x + b_1\)</span>. By Fact 1, row <span class="math inline">\(j\)</span> of the weight gradient is the input <span class="math inline">\(x\)</span> scaled by the number <span class="math inline">\(\gamma_{1,j}\)</span>, and entry <span class="math inline">\(j\)</span> of the bias gradient is that same number <span class="math inline">\(\gamma_{1,j}\)</span>. Dividing the first by the second removes the scale. So for every unit <span class="math inline">\(j\)</span> with <span class="math inline">\((\nabla_{b_1}\ell)_j \ne 0\)</span>, <span id="eq-gradinv-ratio"><span class="math display">\[x = \frac{(\nabla_{W_1}\ell)_{j,:}}{(\nabla_{b_1}\ell)_j}. \tag{14.7}\]</span></span> Moreover, since every row is a multiple of the same vector, <span class="math inline">\(\nabla_{W_1}\ell\)</span> has <strong>rank one</strong> (all its rows lie on a single line), and that line, its row space, is the line through <span class="math inline">\(x\)</span>.</p>
-</section>
-<section id="derivation" class="level3" data-number="14.3.3">
-<h3 data-number="14.3.3" class="anchored" data-anchor-id="derivation"><span class="header-section-number">14.3.3</span> Derivation</h3>
+<section id="sec-gradinv-game" class="level2" data-number="14.1">
+<h2 data-number="14.1" class="anchored" data-anchor-id="sec-gradinv-game"><span class="header-section-number">14.1</span> The reconstruction game</h2>
+<p>Before any attack can be judged, you need to know who sees what and what counts as success. This section fixes both for one round of federated training, in the vocabulary of <a href="../part02-attacks/01-threat-models.html">Threat models and privacy games</a>, and then fixes the network that every experiment uses.</p>
+<p>The server is <strong>honest-but-curious</strong> in the sense of that chapter: it runs the protocol as specified and only analyses what it receives. Its access is the <strong>transcript</strong>: it sees each client’s own update, and it knows the architecture and every parameter of <span class="math inline">\(\theta\)</span> because it chose them. The derivative of an average is the average of the derivatives, so the client’s gradient is the average of its per-example gradients.</p>
+<div id="def-gradinv-game" class="theorem definition">
+<p><span class="theorem-title"><strong>Definition 14.1 (The gradient reconstruction game)</strong></span> Fix a model <span class="math inline">\(\theta\)</span>, known to the server, and a population of labelled examples. The challenger plays the client, and the adversary is the server. The game has three steps.</p>
 <ol type="1">
-<li><strong>Apply Fact 1 (<a href="#eq-gradinv-outer" class="quarto-xref">Equation&nbsp;<span>14.4</span></a>) to the first layer.</strong> It gives the two pieces the server sees: <span class="math inline">\((\nabla_{W_1}\ell)_{j,:} = \gamma_{1,j}\,x^\top\)</span> and <span class="math inline">\((\nabla_{b_1}\ell)_j = \gamma_{1,j}\)</span>.</li>
-<li><strong>Divide one by the other.</strong> When <span class="math inline">\(\gamma_{1,j} \ne 0\)</span>, the ratio is <span class="math inline">\(\gamma_{1,j}x^\top/\gamma_{1,j} = x^\top\)</span>. Nothing about the rest of the network enters: the depth, the activations above, the loss and the label all sit inside the number <span class="math inline">\(\gamma_{1,j}\)</span>, and that number cancels.</li>
-<li><strong>Read off the rank.</strong> All rows of <span class="math inline">\(\nabla_{W_1}\ell = \gamma_1x^\top\)</span> are multiples of the same vector <span class="math inline">\(x^\top\)</span>. A matrix whose rows are all multiples of one nonzero vector has rank one, so (as long as <span class="math inline">\(\gamma_1 \ne 0\)</span>) the rank is one and the row space is spanned by <span class="math inline">\(x\)</span>.</li>
+<li>The challenger draws a batch of <span class="math inline">\(B\)</span> labelled examples <span class="math inline">\((x_1, y_1), \dots, (x_B, y_B)\)</span> from the population. The inputs are the secret.</li>
+<li>The client sends the gradient of its average loss with respect to all the parameters, <span id="eq-auto-06gradientinversion-1"><span class="math display">\[g = \frac1B\sum_{i=1}^B\nabla_\theta\ell(\theta; x_i, y_i). \tag{14.1}\]</span></span></li>
+<li>The adversary sees <span class="math inline">\((\theta, g)\)</span> and outputs reconstructions <span class="math inline">\(\hat x_1, \dots, \hat x_B\)</span>.</li>
 </ol>
-</section>
-<section id="interpretation" class="level3" data-number="14.3.4">
-<h3 data-number="14.3.4" class="anchored" data-anchor-id="interpretation"><span class="header-section-number">14.3.4</span> Interpretation</h3>
-<p>The attack is exact and costs nothing. It needs no optimization, no prior knowledge of what the data look like, and no knowledge of the label. It also checks itself: every unit with a nonzero bias gradient gives the same answer, so if all the usable ratios agree, the attacker knows it has the input.</p>
-<p>The same division works at any fully connected layer whose input you want. Applied deeper in the network, it gives that layer’s input, an intermediate feature vector. Applied at the first layer, the input is the data itself.</p>
-<p>Three things can stop it, and only one of them stops it fully. With ReLU, units that are switched off on <span class="math inline">\(x\)</span> have <span class="math inline">\(\gamma_{1,j} = 0\)</span> and give nothing, but a single active unit is enough. Without a bias there is no denominator, but the rank-one structure still gives the direction of <span class="math inline">\(x\)</span>, so <span class="math inline">\(x\)</span> is known up to one scalar, and a one-dimensional search finds that scalar (<a href="../../book-exercises/part02-attacks/06-gradient-inversion.html#sec-sol-gradinv-2">Exercise 2</a>). A convolutional first layer is what really breaks the outer-product form. A convolution applies the same small filter at every position of the image, so its gradient is a sum of outer products over all the image patches rather than a single one, and no division separates them. That is why images fed to convolutional networks need the search of <a href="#sec-gradinv-dlg" class="quarto-xref"><span>Section 14.5</span></a>. A batch of more than one example also breaks the formula, as <a href="#sec-gradinv-batch" class="quarto-xref"><span>Section 14.6</span></a> shows, but only partly.</p>
-<p><a href="#fig-gradinv-rank-one" class="quarto-xref">Figure&nbsp;<span>14.1</span></a> shows the attack on one image.</p>
-<div id="fig-gradinv-rank-one" class="quarto-float quarto-figure quarto-figure-center anchored">
-<figure class="quarto-float quarto-float-fig figure">
-<div aria-describedby="fig-gradinv-rank-one-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-<img src="figures/gradinv_rank_one.svg" class="img-fluid figure-img">
+<p>Each true input <span class="math inline">\(x\)</span> is matched to its closest reconstruction <span class="math inline">\(\hat x\)</span> (two inputs may share one), and the pair is scored by its <strong>relative error</strong> <span class="math inline">\(\|\hat x - x\|/\|x\|\)</span>.</p>
 </div>
-<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-gradinv-rank-one-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-Figure&nbsp;14.1: Exact recovery from the first-layer gradient of a ReLU network with 32 hidden units. Left: the client’s <span class="math inline">\(8\times8\)</span> input. Middle: <span class="math inline">\(\nabla_{W_1}\ell\)</span>, one row per hidden unit and one column per pixel (blue positive, red negative), next to <span class="math inline">\(\nabla_{b_1}\ell\)</span>. Every nonzero row is the image times the matching bias entry; switched-off units give zero rows. Right: one row divided by its bias entry, which is the input exactly.
-</figcaption>
-</figure>
+<p>The relative error is 0 for a perfect reconstruction and 1 for a mistake as large as the input itself. The matching is needed because an average does not change when you reorder the examples, so the gradient carries no record of which example came first. The baseline is a guess from the population alone, such as the average input of the population. The attacks below either recover the client’s exact pixels or, for large batches, produce blends of them.</p>
+<p>All experiments use one small network, written in NumPy. An input first goes through a fully connected layer that gives one number per hidden unit. An activation is applied to each unit, and a second fully connected layer turns the result into one score per class, called a <strong>logit</strong>. The <strong>softmax</strong> turns the logits into probabilities by exponentiating and normalizing, so that every probability is positive and they sum to 1. The loss is the <strong>cross-entropy</strong>, minus the log of the probability the model gives to the true label, which is small when the model is confidently right.</p>
+<div id="def-gradinv-network" class="theorem definition">
+<p><span class="theorem-title"><strong>Definition 14.2 (The network)</strong></span> An input <span class="math inline">\(x \in \mathbb R^d\)</span> has a label <span class="math inline">\(y\)</span>, one of <span class="math inline">\(K\)</span> classes. It passes through a first layer with weights <span class="math inline">\(W_1 \in \mathbb R^{m\times d}\)</span> and biases <span class="math inline">\(b_1\)</span>, one per hidden unit. An activation <span class="math inline">\(\sigma\)</span> is applied to each of the <span class="math inline">\(m\)</span> hidden units. A second layer with weights <span class="math inline">\(W_2 \in \mathbb R^{K\times m}\)</span> and biases <span class="math inline">\(b_2\)</span> gives one logit per class, and then <span id="eq-auto-06gradientinversion-2"><span class="math display">\[a = W_1x + b_1, \quad h = \sigma(a), \quad z = W_2h + b_2, \quad p = \mathrm{softmax}(z), \quad \ell = -\ln p_y, \tag{14.2}\]</span></span> where the softmax has entries <span id="eq-auto-06gradientinversion-3"><span class="math display">\[p_k = \frac{e^{z_k}}{\sum_{k'}e^{z_{k'}}}. \tag{14.3}\]</span></span> The <strong>backward signals</strong> are the rates at which the loss changes with each hidden unit’s pre-activation and with each logit, <span class="math inline">\(\gamma_1 = \partial\ell/\partial a\)</span> and <span class="math inline">\(\gamma_2 = \partial\ell/\partial z\)</span>.</p>
+</div>
+<p>The activation <span class="math inline">\(\sigma\)</span> is either the ReLU <span class="math inline">\(\max(a, 0)\)</span>, which passes positive values and replaces negative ones by 0, or the sigmoid <span class="math inline">\(1/(1 + e^{-a})\)</span>, which squashes every value smoothly into <span class="math inline">\((0, 1)\)</span>. Texts on backpropagation usually write the backward signals as <span class="math inline">\(\delta\)</span>, but this book keeps <span class="math inline">\(\delta\)</span> for the privacy parameter of the later parts.</p>
+<div id="exm-gradinv-images" class="theorem example">
+<p><span class="theorem-title"><strong>Example 14.1</strong></span> The client’s inputs are synthetic <span class="math inline">\(8\times8\)</span> grey-scale images, so <span class="math inline">\(d = 64\)</span>. Each shows one of <span class="math inline">\(K = 4\)</span> shapes (a horizontal bar, a vertical bar, a diagonal and a square outline), shifted at random and with pixel noise. The network has <span class="math inline">\(m = 32\)</span> hidden units and is at its random initialization, as in the first round of training. The first layer has <span class="math inline">\(64\cdot32\)</span> weights and 32 biases, and the second has <span class="math inline">\(32\cdot4\)</span> weights and 4 biases, so the network has <span id="eq-auto-06gradientinversion-4"><span class="math display">\[64\cdot32 + 32 + 32\cdot4 + 4 = 2{,}212 \tag{14.4}\]</span></span> parameters. The server therefore receives 2,212 numbers about an example that has only 64 unknown pixels.</p>
 </div>
 </section>
-<section id="example-a-network-you-can-compute-by-hand" class="level3" data-number="14.3.5">
-<h3 data-number="14.3.5" class="anchored" data-anchor-id="example-a-network-you-can-compute-by-hand"><span class="header-section-number">14.3.5</span> Example: a network you can compute by hand</h3>
-<p>Take <span class="math inline">\(d = 3\)</span> inputs, <span class="math inline">\(m = 2\)</span> ReLU units and <span class="math inline">\(K = 2\)</span> classes, with <span id="eq-auto-06gradientinversion-4"><span class="math display">\[W_1 = \begin{pmatrix}0.4 &amp; -0.2 &amp; 0.1\\ 0.3 &amp; 0.5 &amp; -0.4\end{pmatrix},\quad b_1 = \begin{pmatrix}0.1\\ -0.1\end{pmatrix},\quad W_2 = \begin{pmatrix}1 &amp; -1\\ 0.5 &amp; 0.5\end{pmatrix},\quad b_2 = 0, \tag{14.8}\]</span></span> and the example <span class="math inline">\(x = (0.5, 1, 0.2)\)</span> with label <span class="math inline">\(y = 1\)</span> (the first class). <a href="#tbl-gradinv-tiny" class="quarto-xref">Table&nbsp;<span>14.2</span></a> walks through the forward pass, the backward pass and the attack.</p>
+<section id="sec-gradinv-gradient" class="level2" data-number="14.2">
+<h2 data-number="14.2" class="anchored" data-anchor-id="sec-gradinv-gradient"><span class="header-section-number">14.2</span> What a gradient is made of</h2>
+<p>Every attack in this chapter reads the input out of the gradient, so you first need to know where in the gradient the input sits. This section derives the gradient in two results. The first shows that in a fully connected layer the input appears in every row of the weight gradient. The second gives the backward signals that scale those rows.</p>
+<p>The reason the input appears is the chain rule. The weight <span class="math inline">\(W_{jk}\)</span> multiplies the input <span class="math inline">\(x_k\)</span> and feeds only the output <span class="math inline">\(a_j\)</span>, so the loss changes with it at the rate at which the loss changes with <span class="math inline">\(a_j\)</span>, times <span class="math inline">\(x_k\)</span>. That is what flows backward times what flowed forward.</p>
+<div id="prp-gradinv-outer" class="theorem proposition">
+<p><span class="theorem-title"><strong>Proposition 14.1 (The gradient of a fully connected layer is an outer product)</strong></span> Let a fully connected layer compute <span class="math inline">\(a = Wx + b\)</span> with <span class="math inline">\(W \in \mathbb R^{m\times d}\)</span>, and let the loss <span class="math inline">\(\ell\)</span> depend on <span class="math inline">\(W\)</span> and <span class="math inline">\(b\)</span> only through <span class="math inline">\(a\)</span>, with backward signal <span class="math inline">\(\gamma = \partial\ell/\partial a\)</span>. Then <span id="eq-gradinv-outer"><span class="math display">\[\nabla_W\ell = \gamma\,x^\top, \qquad \nabla_b\ell = \gamma. \tag{14.5}\]</span></span></p>
+</div>
+<div class="proof">
+<p><span class="proof-title"><em>Proof</em>. </span></p>
+<ol type="1">
+<li><em>Each weight feeds one output.</em> Written out, output <span class="math inline">\(j\)</span> is <span class="math inline">\(a_j = \sum_kW_{jk}x_k + b_j\)</span>. The weight <span class="math inline">\(W_{jk}\)</span> appears in <span class="math inline">\(a_j\)</span> only, with coefficient <span class="math inline">\(x_k\)</span>, so <span class="math inline">\(\partial a_j/\partial W_{jk} = x_k\)</span>.</li>
+<li><em>The chain rule multiplies the two rates.</em> The loss depends on <span class="math inline">\(W_{jk}\)</span> only through <span class="math inline">\(a_j\)</span>, so <span id="eq-auto-06gradientinversion-5"><span class="math display">\[\frac{\partial\ell}{\partial W_{jk}} = \frac{\partial\ell}{\partial a_j}\,\frac{\partial a_j}{\partial W_{jk}} = \gamma_jx_k, \tag{14.6}\]</span></span> which is the <span class="math inline">\((j, k)\)</span> entry of <span class="math inline">\(\gamma x^\top\)</span>.</li>
+<li><em>The bias has coefficient 1.</em> The bias <span class="math inline">\(b_j\)</span> enters <span class="math inline">\(a_j\)</span> with coefficient 1, so the same rule gives <span class="math inline">\(\partial\ell/\partial b_j = \gamma_j\)</span>.</li>
+</ol>
+</div>
+<p>A matrix whose <span class="math inline">\((j, k)\)</span> entry is <span class="math inline">\(\gamma_jx_k\)</span> is called the outer product of <span class="math inline">\(\gamma\)</span> and <span class="math inline">\(x\)</span>, and its row <span class="math inline">\(j\)</span> is the input multiplied by the number <span class="math inline">\(\gamma_j\)</span>. The signal <span class="math inline">\(\gamma\)</span> depends on everything above the layer (the rest of the network, the loss, the label), but the factor <span class="math inline">\(x^\top\)</span> does not. So the rest of the network can only rescale the rows, never change their direction.</p>
+<p>To use <a href="#prp-gradinv-outer" class="quarto-xref">Proposition&nbsp;<span>14.1</span></a> at the first layer you need its backward signal <span class="math inline">\(\gamma_1\)</span>, and the chain rule obtains it by sending the last layer’s signal <span class="math inline">\(\gamma_2\)</span> back through the network. At the last layer the signal has a simple form. Raising the logit of a wrong class <span class="math inline">\(k\)</span> raises the loss at the rate <span class="math inline">\(p_k\)</span>, the probability the model already gives that class, and raising the logit of the true class lowers the loss at the rate <span class="math inline">\(1 - p_y\)</span>. Each hidden unit then collects the logits’ signals, weighted by its connections to them, and multiplies by the slope of its activation.</p>
+<div id="prp-gradinv-backward" class="theorem proposition">
+<p><span class="theorem-title"><strong>Proposition 14.2 (The backward signals)</strong></span> For the network of <a href="#def-gradinv-network" class="quarto-xref">Definition&nbsp;<span>14.2</span></a>, write <span class="math inline">\(e_y\)</span> for the one-hot vector of the label, with 1 in position <span class="math inline">\(y\)</span> and 0 elsewhere, and <span class="math inline">\(\odot\)</span> for the entrywise product of two vectors. Then <span id="eq-gradinv-softmax"><span class="math display">\[\gamma_2 = p - e_y, \tag{14.7}\]</span></span> so the entry of <span class="math inline">\(\gamma_2\)</span> at the true label is negative and every other entry is positive, and <span id="eq-gradinv-backprop"><span class="math display">\[\gamma_1 = (W_2^\top\gamma_2)\odot\sigma'(a). \tag{14.8}\]</span></span></p>
+</div>
+<div class="proof">
+<p><span class="proof-title"><em>Proof</em>. </span>The plan is to differentiate the loss in the logits, read off the signs, and then pass the result back through the second layer and the activation.</p>
+<ol type="1">
+<li><em>Remove the fraction.</em> Since <span class="math inline">\(p_y = e^{z_y}/\sum_ke^{z_k}\)</span>, taking minus its log gives <span id="eq-auto-06gradientinversion-6"><span class="math display">\[\ell = -z_y + \ln\sum_ke^{z_k}. \tag{14.9}\]</span></span></li>
+<li><em>Differentiate in one logit.</em> The first term depends only on <span class="math inline">\(z_y\)</span>, so it contributes <span class="math inline">\(-1\)</span> when <span class="math inline">\(k = y\)</span> and 0 otherwise. The second term is the log of a sum, whose derivative is the derivative of the sum, <span class="math inline">\(e^{z_k}\)</span>, divided by the sum itself, which is <span class="math inline">\(p_k\)</span>. Together, <span id="eq-auto-06gradientinversion-7"><span class="math display">\[\frac{\partial\ell}{\partial z_k} = p_k - \mathbf 1[k = y], \tag{14.10}\]</span></span> which is entry <span class="math inline">\(k\)</span> of <span class="math inline">\(p - e_y\)</span>.</li>
+<li><em>Read off the signs.</em> Every <span class="math inline">\(e^{z_k}\)</span> is positive, so every <span class="math inline">\(p_k\)</span> lies strictly between 0 and 1. The entry at the label is <span class="math inline">\(p_y - 1 &lt; 0\)</span>, and every other entry is <span class="math inline">\(p_k &gt; 0\)</span>.</li>
+<li><em>Pass back through the second layer.</em> Logit <span class="math inline">\(k\)</span> is <span class="math inline">\(z_k = \sum_jW_{2,kj}h_j + b_{2,k}\)</span>, so <span class="math inline">\(h_j\)</span> enters each logit with coefficient <span class="math inline">\(W_{2,kj}\)</span>, and the chain rule sums over the logits: <span id="eq-auto-06gradientinversion-8"><span class="math display">\[\frac{\partial\ell}{\partial h_j} = \sum_k\gamma_{2,k}W_{2,kj} = (W_2^\top\gamma_2)_j. \tag{14.11}\]</span></span></li>
+<li><em>Pass through the activation.</em> The output <span class="math inline">\(h_j = \sigma(a_j)\)</span> changes with <span class="math inline">\(a_j\)</span> at the rate <span class="math inline">\(\sigma'(a_j)\)</span>, so multiplying step 4 by it gives entry <span class="math inline">\(j\)</span> of <a href="#eq-gradinv-backprop" class="quarto-xref">Equation&nbsp;<span>14.8</span></a>.</li>
+</ol>
+</div>
+<p>For ReLU the slope is <span class="math inline">\(\sigma'(a_j) = \mathbf 1[a_j &gt; 0]\)</span>, which is 1 if the unit is switched on and 0 if it is switched off. So a unit that is switched off on an input has <span class="math inline">\(\gamma_{1,j} = 0\)</span> and, by <a href="#prp-gradinv-outer" class="quarto-xref">Proposition&nbsp;<span>14.1</span></a>, a zero row in the first-layer weight gradient. The sign pattern of <span class="math inline">\(\gamma_2\)</span> is what label recovery uses in <a href="#sec-gradinv-labels" class="quarto-xref"><span>Section 14.4</span></a>.</p>
+<div id="exm-gradinv-tiny" class="theorem example">
+<p><span class="theorem-title"><strong>Example 14.2</strong></span> Take <span class="math inline">\(d = 3\)</span> inputs, <span class="math inline">\(m = 2\)</span> ReLU units and <span class="math inline">\(K = 2\)</span> classes, with <span id="eq-auto-06gradientinversion-9"><span class="math display">\[W_1 = \begin{pmatrix}0.4 &amp; -0.2 &amp; 0.1\\ 0.3 &amp; 0.5 &amp; -0.4\end{pmatrix},\quad b_1 = \begin{pmatrix}0.1\\ -0.1\end{pmatrix},\quad W_2 = \begin{pmatrix}1 &amp; -1\\ 0.5 &amp; 0.5\end{pmatrix},\quad b_2 = 0, \tag{14.12}\]</span></span> and the example <span class="math inline">\(x = (0.5, 1, 0.2)\)</span> with label <span class="math inline">\(y = 1\)</span>, the first class. <a href="#tbl-gradinv-tiny" class="quarto-xref">Table&nbsp;<span>14.2</span></a> walks through the forward pass, the backward pass and the gradient.</p>
 <div id="tbl-gradinv-tiny" class="quarto-float quarto-figure quarto-figure-center anchored">
 <figure class="quarto-float quarto-float-tbl figure">
 <figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl" id="tbl-gradinv-tiny-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-Table&nbsp;14.2: Forward pass, backward pass and exact recovery for a two-unit ReLU network. The server sees only the “Gradient” rows.
+Table&nbsp;14.2: Forward pass, backward pass and gradient of a two-unit ReLU network, by <a href="#prp-gradinv-backward" class="quarto-xref">Proposition&nbsp;<span>14.2</span></a> and <a href="#prp-gradinv-outer" class="quarto-xref">Proposition&nbsp;<span>14.1</span></a>. The server sees only the “Gradient” rows.
 </figcaption>
 <div aria-describedby="tbl-gradinv-tiny-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
 <table class="caption-top table">
@@ -884,17 +838,17 @@ Table&nbsp;14.2: Forward pass, backward pass and exact recovery for a two-unit R
 </tr>
 <tr class="odd">
 <td>Backward</td>
-<td><span class="math inline">\(\gamma_2 = p - e_y\)</span> (Fact 2)</td>
+<td><span class="math inline">\(\gamma_2 = p - e_y\)</span></td>
 <td><span class="math inline">\((-0.6559, 0.6559)\)</span></td>
 </tr>
 <tr class="even">
 <td></td>
-<td><span class="math inline">\(\gamma_1 = (W_2^\top\gamma_2)\odot\sigma'(a)\)</span> (Fact 3)</td>
-<td><span class="math inline">\((-0.6559 + 0.5\cdot0.6559,\ 0.6559 + 0.5\cdot0.6559) = (-0.3279, 0.9838)\)</span></td>
+<td><span class="math inline">\(\gamma_1 = (W_2^\top\gamma_2)\odot\sigma'(a)\)</span></td>
+<td><span class="math inline">\((1\cdot(-0.6559) + 0.5\cdot0.6559,\ (-1)\cdot(-0.6559) + 0.5\cdot0.6559) = (-0.3279, 0.9838)\)</span></td>
 </tr>
 <tr class="odd">
 <td>Gradient</td>
-<td><span class="math inline">\(\nabla_{W_1}\ell = \gamma_1x^\top\)</span> (Fact 1)</td>
+<td><span class="math inline">\(\nabla_{W_1}\ell = \gamma_1x^\top\)</span></td>
 <td>rows <span class="math inline">\((-0.1640, -0.3279, -0.0656)\)</span> and <span class="math inline">\((0.4919, 0.9838, 0.1968)\)</span></td>
 </tr>
 <tr class="even">
@@ -902,72 +856,81 @@ Table&nbsp;14.2: Forward pass, backward pass and exact recovery for a two-unit R
 <td><span class="math inline">\(\nabla_{b_1}\ell = \gamma_1\)</span></td>
 <td><span class="math inline">\((-0.3279, 0.9838)\)</span></td>
 </tr>
-<tr class="odd">
-<td>Attack</td>
-<td>row 1 / <span class="math inline">\((-0.3279)\)</span>, row 2 / <span class="math inline">\(0.9838\)</span></td>
-<td><span class="math inline">\((0.5, 1, 0.2)\)</span> and <span class="math inline">\((0.5, 1, 0.2)\)</span></td>
-</tr>
 </tbody>
 </table>
 </div>
 </figure>
 </div>
-<p>The server never sees <span class="math inline">\(a\)</span>, <span class="math inline">\(h\)</span>, <span class="math inline">\(z\)</span> or <span class="math inline">\(p\)</span>. From the two gradient rows alone it divides and reads off <span class="math inline">\(x\)</span>, twice. Both units are on here (<span class="math inline">\(a = (0.12, 0.47)\)</span> is positive in both entries), so the ReLU slope is 1 for both and <span class="math inline">\(\gamma_1\)</span> is just <span class="math inline">\(W_2^\top\gamma_2\)</span>.</p>
-<p><strong>On the images.</strong> For one <span class="math inline">\(8\times8\)</span> image and the 32-unit ReLU network, 13 of the 32 units are switched on and have a nonzero bias gradient. Every one of the 13 ratios equals the image to a relative error of at most <span class="math inline">\(6.7\times10^{-17}\)</span>, which is rounding error. To check the rank, look at the <strong>singular values</strong> of <span class="math inline">\(\nabla_{W_1}\ell\)</span>: they measure how much of the matrix lies along each of its independent directions, so a rank-one matrix has exactly one that is not zero. Here they are <span class="math inline">\(1.6155\)</span> and then nothing: the second is <span class="math inline">\(9.5\times10^{-17}\)</span> times the first. The gradient is rank one, as the statement says.</p>
+<p>The first probability is <span class="math inline">\(p_1 = e^{-0.35}/(e^{-0.35} + e^{0.295}) = 1/(1 + e^{0.645}) = 1/(1 + 1.906) = 0.3441\)</span>, so <span class="math inline">\(p = (0.3441, 0.6559)\)</span>. The two entries of <span class="math inline">\(\gamma_2\)</span> sum to 0, and only the one at the true class is negative. Both units are on, since both entries of <span class="math inline">\(a\)</span> are positive, so <span class="math inline">\(\gamma_1\)</span> is just <span class="math inline">\(W_2^\top\gamma_2\)</span>, and the two rows of the weight gradient are <span class="math inline">\(-0.3279\)</span> times <span class="math inline">\(x\)</span> and <span class="math inline">\(0.9838\)</span> times <span class="math inline">\(x\)</span>.</p>
+</div>
 </section>
-<section id="check-yourself" class="level3" data-number="14.3.6">
-<h3 data-number="14.3.6" class="anchored" data-anchor-id="check-yourself"><span class="header-section-number">14.3.6</span> Check yourself</h3>
-<ul>
-<li>The network has 20 layers above the first one and a custom loss. Does <a href="#eq-gradinv-ratio" class="quarto-xref">Equation&nbsp;<span>14.7</span></a> still hold? <em>(Yes. Everything above the first layer only changes <span class="math inline">\(\gamma_1\)</span>, and <span class="math inline">\(\gamma_{1,j}\)</span> cancels in the ratio. All that matters is that the first layer is fully connected with a bias.)</em></li>
-<li>For a ReLU network, which units are useless to the attacker, and could all of them be useless? <em>(Units switched off on <span class="math inline">\(x\)</span> have <span class="math inline">\(\gamma_{1,j} = 0\)</span>. All units are useless only if every unit is off or every active unit has <span class="math inline">\((W_2^\top\gamma_2)_j = 0\)</span>, which for a random network essentially never happens; the image above had 13 usable units out of 32.)</em></li>
-</ul>
-</section>
+<section id="sec-gradinv-exact" class="level2" data-number="14.3">
+<h2 data-number="14.3" class="anchored" data-anchor-id="sec-gradinv-exact"><span class="header-section-number">14.3</span> Exact recovery from a fully connected layer</h2>
+<p>The server sees <span class="math inline">\(g\)</span>. Is there any computation, short of a search, that gives back the client’s input? For the most common first layer of all, a fully connected layer with a bias, there is: one division. The observation goes back at least to Phong et al.&nbsp;(2018), who pointed it out for exactly this federated setting.</p>
+<p>The division works because of <a href="#prp-gradinv-outer" class="quarto-xref">Proposition&nbsp;<span>14.1</span></a>. Row <span class="math inline">\(j\)</span> of the first-layer weight gradient is the input <span class="math inline">\(x\)</span> scaled by the number <span class="math inline">\(\gamma_{1,j}\)</span>, and entry <span class="math inline">\(j\)</span> of the bias gradient is that same number, so dividing the first by the second removes the scale.</p>
+<div id="thm-gradinv-exact" class="theorem">
+<p><span class="theorem-title"><strong>Theorem 14.1 (Exact recovery from one example)</strong></span> Suppose the client sends the gradient of a single example, and the first layer is fully connected with a bias, <span class="math inline">\(a = W_1x + b_1\)</span>, whatever the layers above it and the loss. Then for every unit <span class="math inline">\(j\)</span> with <span class="math inline">\((\nabla_{b_1}\ell)_j \ne 0\)</span>, <span id="eq-gradinv-ratio"><span class="math display">\[x = \frac{(\nabla_{W_1}\ell)_{j,:}}{(\nabla_{b_1}\ell)_j}. \tag{14.13}\]</span></span> Moreover, if <span class="math inline">\(\gamma_1 \ne 0\)</span>, the matrix <span class="math inline">\(\nabla_{W_1}\ell\)</span> has <strong>rank one</strong>, and its row space is the line through <span class="math inline">\(x\)</span>.</p>
+</div>
+<div class="proof">
+<p><span class="proof-title"><em>Proof</em>. </span></p>
+<ol type="1">
+<li><em>Write out what the server sees.</em> <a href="#prp-gradinv-outer" class="quarto-xref">Proposition&nbsp;<span>14.1</span></a> applied to the first layer gives <span class="math inline">\((\nabla_{W_1}\ell)_{j,:} = \gamma_{1,j}\,x^\top\)</span> and <span class="math inline">\((\nabla_{b_1}\ell)_j = \gamma_{1,j}\)</span>.</li>
+<li><em>Divide one by the other.</em> When <span class="math inline">\(\gamma_{1,j} \ne 0\)</span>, the ratio is <span class="math inline">\(\gamma_{1,j}x^\top/\gamma_{1,j} = x^\top\)</span>. Nothing about the rest of the network enters, because the depth, the activations above, the loss and the label all sit inside the number <span class="math inline">\(\gamma_{1,j}\)</span>, and that number cancels.</li>
+<li><em>Read off the rank.</em> All rows of <span class="math inline">\(\nabla_{W_1}\ell = \gamma_1x^\top\)</span> are multiples of the same vector <span class="math inline">\(x^\top\)</span>, and at least one is nonzero when <span class="math inline">\(\gamma_1 \ne 0\)</span>. A matrix whose rows are all multiples of one nonzero vector has rank one, and its row space is spanned by that vector.</li>
+</ol>
+</div>
+<p>The attack is exact and needs no optimization, no prior knowledge of the data and no label. It also checks itself, because every usable unit gives the same answer, so agreement between the ratios tells the attacker it has the input. Deeper in the network, the same division gives an intermediate feature vector.</p>
+<p>Four things get in its way, and only one stops it fully. With ReLU, switched-off units give nothing, but one active unit is enough. Without a bias there is no denominator, but the rank-one structure still gives the direction of <span class="math inline">\(x\)</span>, so a one-dimensional search finds the missing scale (<a href="../../book-exercises/part02-attacks/06-gradient-inversion.html#sec-sol-gradinv-2">Exercise 2</a>). A convolutional first layer really breaks the outer-product form. It applies the same small filter at every position of the image, so its gradient is a sum of outer products over all the image patches, and only the search of <a href="#sec-gradinv-dlg" class="quarto-xref"><span>Section 14.5</span></a> can undo it. A batch of more than one example also breaks the formula, but only partly, as <a href="#sec-gradinv-batch" class="quarto-xref"><span>Section 14.6</span></a> shows.</p>
+<div id="fig-gradinv-rank-one" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-gradinv-rank-one-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="figures/gradinv_rank_one.svg" class="img-fluid figure-img">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-gradinv-rank-one-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;14.1: Exact recovery from the first-layer gradient of a ReLU network with 32 hidden units. Left: the client’s <span class="math inline">\(8\times8\)</span> input. Middle: <span class="math inline">\(\nabla_{W_1}\ell\)</span>, one row per hidden unit and one column per pixel (blue positive, red negative), next to <span class="math inline">\(\nabla_{b_1}\ell\)</span>. Every nonzero row is the image times the matching bias entry; switched-off units give zero rows. Right: one row divided by its bias entry, which is the input exactly.
+</figcaption>
+</figure>
+</div>
+<div id="exm-gradinv-exact" class="theorem example">
+<p><span class="theorem-title"><strong>Example 14.3</strong></span> In the hand network of <a href="#exm-gradinv-tiny" class="quarto-xref">Example&nbsp;<span>14.2</span></a>, the server never sees <span class="math inline">\(a\)</span>, <span class="math inline">\(h\)</span>, <span class="math inline">\(z\)</span> or <span class="math inline">\(p\)</span>. It sees only the gradient rows of <a href="#tbl-gradinv-tiny" class="quarto-xref">Table&nbsp;<span>14.2</span></a>. Dividing the first row by <span class="math inline">\(-0.3279\)</span> and the second by <span class="math inline">\(0.9838\)</span> gives <span class="math inline">\((0.5, 1, 0.2)\)</span> both times, which is the input.</p>
+<p>On the images, <a href="#fig-gradinv-rank-one" class="quarto-xref">Figure&nbsp;<span>14.1</span></a> shows the attack on one input. Of the 32 ReLU units, 13 are switched on and have a nonzero bias gradient. Every one of the 13 ratios equals the image to a relative error of at most <span class="math inline">\(6.7\times10^{-17}\)</span>, which is rounding error. To check the rank, look at the <strong>singular values</strong> of <span class="math inline">\(\nabla_{W_1}\ell\)</span>. They measure how much of the matrix lies along each of its independent directions, so a rank-one matrix has exactly one that is not zero. Here the largest is <span class="math inline">\(1.6155\)</span>, and the second is <span class="math inline">\(9.5\times10^{-17}\)</span> times the first. The gradient is rank one, as <a href="#thm-gradinv-exact" class="quarto-xref">Theorem&nbsp;<span>14.1</span></a> says.</p>
+</div>
 </section>
 <section id="sec-gradinv-labels" class="level2" data-number="14.4">
 <h2 data-number="14.4" class="anchored" data-anchor-id="sec-gradinv-labels"><span class="header-section-number">14.4</span> Label recovery from the last layer</h2>
-<section id="context-1" class="level3" data-number="14.4.1">
-<h3 data-number="14.4.1" class="anchored" data-anchor-id="context-1"><span class="header-section-number">14.4.1</span> Context</h3>
 <p>The gradient depends on the label too, and the label is often the most sensitive part: the diagnosis, the word typed next, the class of a photo. Zhao, Mopuri &amp; Bilen (2020) noticed that the label can be read off the last layer in closed form. Their attack, iDLG (“improved DLG”), then searches only for the input, which makes the search of <a href="#sec-gradinv-dlg" class="quarto-xref"><span>Section 14.5</span></a> easier and more reliable.</p>
-</section>
-<section id="statement-1" class="level3" data-number="14.4.2">
-<h3 data-number="14.4.2" class="anchored" data-anchor-id="statement-1"><span class="header-section-number">14.4.2</span> Statement</h3>
-<p>There are three versions of the rule, depending on what the last layer has and how many examples the gradient covers. All three come from Fact 2: the last layer’s backward signal is <span class="math inline">\(p - e_y\)</span>, a vector of probabilities with 1 subtracted at the true label.</p>
-<p><strong>From the bias, for one example.</strong> By Fact 1 the last layer’s bias gradient equals its backward signal, <span class="math inline">\(\nabla_{b_2}\ell = p - e_y\)</span>. Every entry is a positive probability except the one at the true label, where subtracting 1 makes it negative. So the label is the position of the smallest entry, the only negative one: <span id="eq-gradinv-labels"><span class="math display">\[y = \arg\min_k(\nabla_{b_2}\ell)_k. \tag{14.9}\]</span></span></p>
-<p><strong>From the weights, for one example.</strong> The weight gradient tells the same story. By Fact 1, row <span class="math inline">\(k\)</span> of <span class="math inline">\(\nabla_{W_2}\ell\)</span> is <span class="math inline">\(\gamma_{2,k}\)</span> times the hidden activations <span class="math inline">\(h\)</span>. If those activations are never negative (<span class="math inline">\(h \ge 0\)</span> and <span class="math inline">\(h \ne 0\)</span>, as for ReLU or the sigmoid), multiplying by them keeps the sign of <span class="math inline">\(\gamma_{2,k}\)</span>. So <span class="math inline">\(y\)</span> is the only row of <span class="math inline">\(\nabla_{W_2}\ell\)</span> whose entries are non-positive, and in particular the only row with a negative sum.</p>
-<p><strong>Counts, for a batch.</strong> With <span class="math inline">\(B\)</span> examples the bias gradient is the average of <span class="math inline">\(p_i - e_{y_i}\)</span> over the batch. The <span class="math inline">\(e_{y_i}\)</span> parts add up to the label histogram: their <span class="math inline">\(k\)</span>-th entries sum to <span class="math inline">\(n_k\)</span>, the number of examples of class <span class="math inline">\(k\)</span>. The <span class="math inline">\(p_i\)</span> parts add up to the model’s total predicted probability for class <span class="math inline">\(k\)</span>, <span class="math inline">\(\sum_ip_{ik}\)</span>. So the histogram is that total minus <span class="math inline">\(B\)</span> times the bias gradient: <span id="eq-gradinv-counts"><span class="math display">\[n_k = \sum_{i=1}^Bp_{ik} - B\,(\nabla_{b_2}\ell)_k. \tag{14.10}\]</span></span> An attacker who does not know <span class="math inline">\(\sum_ip_{ik}\)</span> replaces it by <span class="math inline">\(B\bar p_k\)</span>, where <span class="math inline">\(\bar p\)</span> is a guess of the model’s average prediction, and rounds to the nearest integer.</p>
-</section>
-<section id="derivation-1" class="level3" data-number="14.4.3">
-<h3 data-number="14.4.3" class="anchored" data-anchor-id="derivation-1"><span class="header-section-number">14.4.3</span> Derivation</h3>
+<p>All three rules below come from <a href="#prp-gradinv-backward" class="quarto-xref">Proposition&nbsp;<span>14.2</span></a>: the last layer’s backward signal is a vector of probabilities with 1 subtracted at the true label. A batch gradient averages these vectors, so the subtracted 1s add up, before the division by the batch size, to the number of examples of each class.</p>
+<div id="prp-gradinv-labels" class="theorem proposition">
+<p><span class="theorem-title"><strong>Proposition 14.3 (Labels from the last layer)</strong></span> Let the network of <a href="#def-gradinv-network" class="quarto-xref">Definition&nbsp;<span>14.2</span></a> keep its last-layer bias <span class="math inline">\(b_2\)</span>. For a single example, the label is the position of the only negative entry of the last-layer bias gradient, <span id="eq-gradinv-labels"><span class="math display">\[y = \arg\min_k(\nabla_{b_2}\ell)_k. \tag{14.14}\]</span></span> If in addition the hidden activations satisfy <span class="math inline">\(h \ge 0\)</span> and <span class="math inline">\(h \ne 0\)</span>, as for ReLU or the sigmoid, then row <span class="math inline">\(y\)</span> of <span class="math inline">\(\nabla_{W_2}\ell\)</span> is the only row whose entries are all non-positive, and the only row with a negative sum.</p>
+<p>For a batch of <span class="math inline">\(B\)</span> examples, write <span class="math inline">\(n_k\)</span> for the number of examples of class <span class="math inline">\(k\)</span> and <span class="math inline">\(p_{ik}\)</span> for the probability the model gives class <span class="math inline">\(k\)</span> on example <span class="math inline">\(i\)</span>. Then <span id="eq-gradinv-counts"><span class="math display">\[n_k = \sum_{i=1}^Bp_{ik} - B\,(\nabla_{b_2}\ell)_k. \tag{14.15}\]</span></span></p>
+</div>
+<div class="proof">
+<p><span class="proof-title"><em>Proof</em>. </span></p>
 <ol type="1">
-<li><strong>Bias.</strong> Fact 1 at the last layer gives <span class="math inline">\(\nabla_{b_2}\ell = \gamma_2\)</span>, and Fact 2 (<a href="#eq-gradinv-softmax" class="quarto-xref">Equation&nbsp;<span>14.5</span></a>) gives <span class="math inline">\(\gamma_2 = p - e_y\)</span>. Softmax probabilities lie strictly between 0 and 1, so <span class="math inline">\((\nabla_{b_2}\ell)_y = p_y - 1 &lt; 0\)</span> and <span class="math inline">\((\nabla_{b_2}\ell)_k = p_k &gt; 0\)</span> for <span class="math inline">\(k \ne y\)</span>. The smallest entry is therefore at <span class="math inline">\(y\)</span>.</li>
-<li><strong>Weights.</strong> Fact 1 gives <span class="math inline">\((\nabla_{W_2}\ell)_{k,:} = \gamma_{2,k}\,h^\top\)</span>. With <span class="math inline">\(h \ge 0\)</span>, row <span class="math inline">\(y\)</span> is <span class="math inline">\((p_y - 1)h^\top\)</span>, a negative number times non-negative entries, so it is <span class="math inline">\(\le 0\)</span> entrywise. Every other row is <span class="math inline">\(p_kh^\top \ge 0\)</span>. Summing a row multiplies <span class="math inline">\(\gamma_{2,k}\)</span> by <span class="math inline">\(\sum_jh_j\)</span>, which is positive because <span class="math inline">\(h \ge 0\)</span> and <span class="math inline">\(h \ne 0\)</span>, so the sum keeps the sign of <span class="math inline">\(\gamma_{2,k}\)</span>.</li>
-<li><strong>Counts.</strong> By Fact 3 the batch gradient is the average of the per-example ones, so <span class="math inline">\(\nabla_{b_2}\ell = \frac1B\sum_i(p_i - e_{y_i})\)</span>. Its <span class="math inline">\(k\)</span>-th entry is <span class="math inline">\(\frac1B\big(\sum_ip_{ik} - n_k\big)\)</span>, because <span class="math inline">\(e_{y_i}\)</span> has a 1 in position <span class="math inline">\(k\)</span> exactly when example <span class="math inline">\(i\)</span> has class <span class="math inline">\(k\)</span>, so <span class="math inline">\(\sum_ie_{y_i}\)</span> counts the examples of each class. Multiply by <span class="math inline">\(B\)</span> and solve for <span class="math inline">\(n_k\)</span>.</li>
+<li><em>The bias rule.</em> <a href="#prp-gradinv-outer" class="quarto-xref">Proposition&nbsp;<span>14.1</span></a> at the last layer gives <span class="math inline">\(\nabla_{b_2}\ell = \gamma_2\)</span>, and <a href="#prp-gradinv-backward" class="quarto-xref">Proposition&nbsp;<span>14.2</span></a> gives <span class="math inline">\(\gamma_2 = p - e_y\)</span>, with entry <span class="math inline">\(p_y - 1 &lt; 0\)</span> at the label and <span class="math inline">\(p_k &gt; 0\)</span> elsewhere. The smallest entry is therefore at <span class="math inline">\(y\)</span>.</li>
+<li><em>The weight rule.</em> <a href="#prp-gradinv-outer" class="quarto-xref">Proposition&nbsp;<span>14.1</span></a> gives <span class="math inline">\((\nabla_{W_2}\ell)_{k,:} = \gamma_{2,k}\,h^\top\)</span>. With <span class="math inline">\(h \ge 0\)</span>, row <span class="math inline">\(y\)</span> is a negative number times non-negative entries, so it is non-positive entrywise, and every other row is <span class="math inline">\(p_kh^\top \ge 0\)</span>. Summing a row multiplies <span class="math inline">\(\gamma_{2,k}\)</span> by <span class="math inline">\(\sum_jh_j\)</span>, which is positive because <span class="math inline">\(h \ge 0\)</span> and <span class="math inline">\(h \ne 0\)</span>, so the sum keeps the sign of <span class="math inline">\(\gamma_{2,k}\)</span>.</li>
+<li><em>The counts.</em> The batch gradient is the average of the per-example ones, so <span class="math inline">\(\nabla_{b_2}\ell = \frac1B\sum_i(p_i - e_{y_i})\)</span>. The vector <span class="math inline">\(e_{y_i}\)</span> has a 1 in position <span class="math inline">\(k\)</span> exactly when example <span class="math inline">\(i\)</span> has class <span class="math inline">\(k\)</span>, so <span class="math inline">\(\sum_ie_{y_i}\)</span> counts the examples of each class, and entry <span class="math inline">\(k\)</span> is <span id="eq-auto-06gradientinversion-10"><span class="math display">\[(\nabla_{b_2}\ell)_k = \frac1B\Big(\sum_ip_{ik} - n_k\Big). \tag{14.16}\]</span></span> Multiplying by <span class="math inline">\(B\)</span> and solving for <span class="math inline">\(n_k\)</span> gives <a href="#eq-gradinv-counts" class="quarto-xref">Equation&nbsp;<span>14.15</span></a>.</li>
 </ol>
-</section>
-<section id="interpretation-1" class="level3" data-number="14.4.4">
-<h3 data-number="14.4.4" class="anchored" data-anchor-id="interpretation-1"><span class="header-section-number">14.4.4</span> Interpretation</h3>
-<p>For one example the rule makes no errors. It is exact for every network that ends in softmax and cross-entropy with a bias, at any point of training, because the sign argument never depends on how good the model is. On 1,000 random images and random networks, both the bias rule and the weight rule name the label correctly 1.000 of the time.</p>
-<p>For a batch, the gradient leaks the label histogram. <a href="#eq-gradinv-counts" class="quarto-xref">Equation&nbsp;<span>14.10</span></a> is exact, so the only uncertainty is the total prediction <span class="math inline">\(\sum_ip_{ik}\)</span>, and the attacker can estimate it well: it knows the model, so it can run the model on data of its own from the same population and average the predictions. The true counts are integers, and a number within <span class="math inline">\(\frac12\)</span> of an integer rounds to that integer. So rounding gives the exact counts whenever the estimate of <span class="math inline">\(\sum_ip_{ik}\)</span> is off by less than <span class="math inline">\(\frac12\)</span> for every class (<a href="../../book-exercises/part02-attacks/06-gradient-inversion.html#sec-sol-gradinv-4">Exercise 4</a>). The cruder guess <span class="math inline">\(\bar p_k = 1/K\)</span>, which assumes the model spreads its predictions evenly over the classes, does worse, because even an untrained network is not uniform.</p>
-<p>The label matters for inversion as well. Knowing <span class="math inline">\(y\)</span> removes a discrete unknown from the search. Zhu et al.&nbsp;(2019) optimized a soft label (a probability vector standing in for the unknown label) jointly with the input, and that joint search often failed. With the label fixed by <a href="#eq-gradinv-labels" class="quarto-xref">Equation&nbsp;<span>14.9</span></a>, the search is over the input only.</p>
-<p><a href="#fig-gradinv-labels" class="quarto-xref">Figure&nbsp;<span>14.2</span></a> shows both cases.</p>
+</div>
+<p>For one example the rule makes no errors, at any point of training, because the sign argument never depends on how good the model is. A confident model gives a tiny negative entry, and only floating point can hide it, when <span class="math inline">\(p_y\)</span> rounds to 1, which is one reason attacks are run on models early in training. Without a bias and with an activation such as tanh, which can be negative, the label’s row is still the one whose sum has the opposite sign to all the others (<a href="../../book-exercises/part02-attacks/06-gradient-inversion.html#sec-sol-gradinv-3">Exercise 3</a>).</p>
+<p>For a batch, the gradient leaks the label histogram. <a href="#eq-gradinv-counts" class="quarto-xref">Equation&nbsp;<span>14.15</span></a> is exact, so the only unknown is the total prediction <span class="math inline">\(\sum_ip_{ik}\)</span>, and the attacker can estimate it well. It can run the model on data of its own and average the predictions into a guess <span class="math inline">\(\bar p\)</span>, then replace the total by <span class="math inline">\(B\bar p_k\)</span> and round. The true counts are integers, so rounding gives them exactly whenever the estimate of the total is off by less than <span class="math inline">\(\frac12\)</span> for every class (<a href="../../book-exercises/part02-attacks/06-gradient-inversion.html#sec-sol-gradinv-4">Exercise 4</a>). The cruder guess <span class="math inline">\(\bar p_k = 1/K\)</span>, which assumes the model spreads its predictions evenly over the classes, does worse, because even an untrained network is not uniform.</p>
 <div id="fig-gradinv-labels" class="quarto-float quarto-figure quarto-figure-center anchored">
 <figure class="quarto-float quarto-float-fig figure">
 <div aria-describedby="fig-gradinv-labels-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
 <img src="figures/gradinv_labels.svg" class="img-fluid figure-img">
 </div>
 <figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-gradinv-labels-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-Figure&nbsp;14.2: Labels from the last-layer bias gradient. Left: for one example, <span class="math inline">\(\nabla_{b_2}\ell = p - e_y\)</span> has a single negative entry, at the true label (red). Right: for a batch of 16, the counts <span class="math inline">\(B(\bar p - \nabla_{b_2}\ell)\)</span> with <span class="math inline">\(\bar p\)</span> the model’s average prediction on the attacker’s own images (green) are close to the true counts (grey); with <span class="math inline">\(\bar p = 1/K\)</span> (orange) they are off by up to about half an example.
+Figure&nbsp;14.2: Labels from the last-layer bias gradient. Left: for one example, <span class="math inline">\(\nabla_{b_2}\ell = p - e_y\)</span> has a single negative entry, at the true label (red). Right: for a batch of 16, the counts <span class="math inline">\(B(\bar p - \nabla_{b_2}\ell)\)</span> with <span class="math inline">\(\bar p\)</span> the model’s average prediction on the attacker’s own images (green) are close to the true counts (grey); with <span class="math inline">\(\bar p = 1/K\)</span> (orange) they are off by up to about half an example. The batch is a different random draw from the one in <a href="#tbl-gradinv-counts" class="quarto-xref">Table&nbsp;<span>14.3</span></a>.
 </figcaption>
 </figure>
 </div>
-</section>
-<section id="example-a-batch-of-16" class="level3" data-number="14.4.5">
-<h3 data-number="14.4.5" class="anchored" data-anchor-id="example-a-batch-of-16"><span class="header-section-number">14.4.5</span> Example: a batch of 16</h3>
-<p>A batch of 16 images has true counts <span class="math inline">\((4, 2, 4, 6)\)</span> over the four shapes. <a href="#tbl-gradinv-counts" class="quarto-xref">Table&nbsp;<span>14.3</span></a> reads them off the bias gradient of the 32-unit ReLU network, with three different guesses for the total prediction <span class="math inline">\(\sum_ip_{ik}\)</span> in <a href="#eq-gradinv-counts" class="quarto-xref">Equation&nbsp;<span>14.10</span></a>.</p>
+<div id="exm-gradinv-labels" class="theorem example">
+<p><span class="theorem-title"><strong>Example 14.4</strong></span> In the hand network of <a href="#exm-gradinv-tiny" class="quarto-xref">Example&nbsp;<span>14.2</span></a>, the last-layer bias gradient is <span class="math inline">\(\gamma_2 = (-0.6559, 0.6559)\)</span>. Its smallest entry is the first, so the server reads off the label 1. On 1,000 random images and random networks, both the bias rule and the weight rule name the label correctly in a fraction 1.000 of the trials.</p>
+<p>For a batch, take 16 images with true counts <span class="math inline">\((4, 2, 4, 6)\)</span> over the four shapes. <a href="#tbl-gradinv-counts" class="quarto-xref">Table&nbsp;<span>14.3</span></a> reads them off the bias gradient of the 32-unit ReLU network, with three guesses for the total prediction in <a href="#eq-gradinv-counts" class="quarto-xref">Equation&nbsp;<span>14.15</span></a>.</p>
 <div id="tbl-gradinv-counts" class="quarto-float quarto-figure quarto-figure-center anchored">
 <figure class="quarto-float quarto-float-tbl figure">
 <figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl" id="tbl-gradinv-counts-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-Table&nbsp;14.3: Label counts of one batch of 16 recovered from <span class="math inline">\(\nabla_{b_2}\ell\)</span> by <a href="#eq-gradinv-counts" class="quarto-xref">Equation&nbsp;<span>14.10</span></a>, under three guesses of the summed predictions.
+Table&nbsp;14.3: Label counts of one batch of 16 recovered from <span class="math inline">\(\nabla_{b_2}\ell\)</span> by <a href="#eq-gradinv-counts" class="quarto-xref">Equation&nbsp;<span>14.15</span></a>, under three guesses of the summed predictions.
 </figcaption>
 <div aria-describedby="tbl-gradinv-counts-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
 <table class="caption-top table">
@@ -1009,43 +972,33 @@ Table&nbsp;14.3: Label counts of one batch of 16 recovered from <span class="mat
 </div>
 </figure>
 </div>
-<p>With the averaged guess every estimate is within <span class="math inline">\(\frac12\)</span> of the truth (the largest miss is <span class="math inline">\(4.19 - 4 = 0.19\)</span>), so rounding fixes it. With the uniform guess the first class is off by <span class="math inline">\(4 - 2.12 = 1.88\)</span>, and rounding cannot help.</p>
-<p>Over 200 random batches and networks, the rounded counts are all correct in 1.000 of batches of 4, 0.975 of batches of 16 and 0.525 of batches of 64 with the averaged guess. With the uniform guess the rates are 0.925, 0.095 and 0.000. The reason for the decline is that the error of the estimate is a sum of <span class="math inline">\(B\)</span> deviations, one per example, each the gap between that example’s prediction and the guess <span class="math inline">\(\bar p\)</span>. These do not cancel exactly, so the error of their sum grows with <span class="math inline">\(B\)</span>, and so does the chance that some class is off by more than <span class="math inline">\(\frac12\)</span>. Even when the counts are not all exact, they are close: <a href="../../book-exercises/part02-attacks/06-gradient-inversion.html#sec-sol-gradinv-4">Exercise 4</a> finds that at <span class="math inline">\(B = 16\)</span> the largest error over the four classes, before rounding, has median 0.233 with the averaged guess and 1.102 with the uniform one.</p>
-</section>
-<section id="check-yourself-1" class="level3" data-number="14.4.6">
-<h3 data-number="14.4.6" class="anchored" data-anchor-id="check-yourself-1"><span class="header-section-number">14.4.6</span> Check yourself</h3>
-<ul>
-<li>Why must <span class="math inline">\(p_y - 1\)</span> be negative, even for a model that is confidently right? <em>(Softmax never outputs exactly 1, so <span class="math inline">\(p_y &lt; 1\)</span>. A confident model gives a tiny negative entry, but its sign is still the only negative one. In floating point a <span class="math inline">\(p_y\)</span> that rounds to 1 would hide it, which is one reason attacks are run on early-training models.)</em></li>
-<li>The last layer has no bias and the hidden layer uses tanh. Which rule still works? <em>(Neither as stated: there is no bias gradient, and tanh activations can be negative, so row <span class="math inline">\(y\)</span> need not have a negative sum. But row <span class="math inline">\(y\)</span> still has the opposite sign to all other rows, so for <span class="math inline">\(K \ge 3\)</span> the odd one out is the label; see <a href="../../book-exercises/part02-attacks/06-gradient-inversion.html#sec-sol-gradinv-3">Exercise 3</a>.)</em></li>
-</ul>
-</section>
+<p>With the averaged guess every estimate is within <span class="math inline">\(\frac12\)</span> of the truth, the largest miss being <span class="math inline">\(4.19 - 4 = 0.19\)</span>, so rounding fixes it. With the uniform guess the first class is off by <span class="math inline">\(4 - 2.12 = 1.88\)</span>, and rounding cannot help.</p>
+<p>Over 200 random batches and networks, the averaged guess gets all the rounded counts right in 1.000 of batches of 4 and 0.975 of batches of 16. For batches of 64 the rate falls to 0.525. With the uniform guess the three rates are 0.925, 0.095 and 0.000. The rates fall because the error of the estimate is a sum of <span class="math inline">\(B\)</span> deviations, one per example, and that sum grows with <span class="math inline">\(B\)</span>. <a href="../../book-exercises/part02-attacks/06-gradient-inversion.html#sec-sol-gradinv-4">Exercise 4</a> finds that at <span class="math inline">\(B = 16\)</span> the largest error before rounding has median 0.233 with the averaged guess, against 1.102 with the uniform one.</p>
+</div>
 </section>
 <section id="sec-gradinv-dlg" class="level2" data-number="14.5">
 <h2 data-number="14.5" class="anchored" data-anchor-id="sec-gradinv-dlg"><span class="header-section-number">14.5</span> Deep Leakage from Gradients</h2>
-<section id="context-2" class="level3" data-number="14.5.1">
-<h3 data-number="14.5.1" class="anchored" data-anchor-id="context-2"><span class="header-section-number">14.5.1</span> Context</h3>
-<p>The closed forms need a fully connected layer with a bias. Most image models start with convolutions, and many architectures have normalization layers, attention, or no biases at all. Zhu, Liu &amp; Han (2019) gave a generic attack that needs none of these: <strong>guess an input, compute its gradient, and move the guess until the gradients match</strong>. If only the true input produces the observed gradient, a matching guess is the input.</p>
-</section>
-<section id="statement-2" class="level3" data-number="14.5.2">
-<h3 data-number="14.5.2" class="anchored" data-anchor-id="statement-2"><span class="header-section-number">14.5.2</span> Statement</h3>
-<p>To turn “move the guess until the gradients match” into something you can optimize, you need one number that says how badly a guess matches. DLG uses the squared distance between the gradient the guessed batch would produce and the observed gradient <span class="math inline">\(g\)</span>, summed over all the gradient’s entries. Call it the <strong>matching loss</strong> <span class="math inline">\(R\)</span>. It is zero for a perfect match and positive otherwise. Given <span class="math inline">\(\theta\)</span>, the observed gradient <span class="math inline">\(g\)</span> and the labels <span class="math inline">\(y_1, \dots, y_B\)</span> (from <a href="#sec-gradinv-labels" class="quarto-xref"><span>Section 14.4</span></a>), DLG looks for the guesses <span class="math inline">\(x'_1, \dots, x'_B\)</span> that make <span class="math inline">\(R\)</span> smallest: <span id="eq-gradinv-dlg"><span class="math display">\[\hat x_1, \dots, \hat x_B = \arg\min_{x_1', \dots, x_B'}R(x'), \qquad R(x') = \Big\|\frac1B\sum_{i=1}^B\nabla_\theta\ell(\theta; x_i', y_i) - g\Big\|^2, \tag{14.11}\]</span></span> where <span class="math inline">\(\arg\min\)</span> means “the inputs at which the minimum is reached”. It searches by a gradient method: start from random noise and repeatedly move the guess a little downhill on <span class="math inline">\(R\)</span>. The true batch has <span class="math inline">\(R = 0\)</span>, the smallest possible value.</p>
-</section>
-<section id="derivation-2" class="level3" data-number="14.5.3">
-<h3 data-number="14.5.3" class="anchored" data-anchor-id="derivation-2"><span class="header-section-number">14.5.3</span> Derivation</h3>
+<p>The closed forms need a fully connected layer with a bias. Most image models start with convolutions, and many architectures have normalization layers, attention, or no biases at all. Zhu, Liu &amp; Han (2019) gave a generic attack that needs none of these: <strong>guess an input, compute its gradient, and move the guess until the gradients match</strong>. Zhu et al.&nbsp;also searched for a soft label, a probability vector standing in for the unknown label, and that joint search often failed. With the label fixed by <a href="#eq-gradinv-labels" class="quarto-xref">Equation&nbsp;<span>14.14</span></a>, the search is over the input only.</p>
+<p>To turn “move the guess until the gradients match” into something you can optimize, you need one number that says how badly a guess matches. DLG uses the squared distance between the gradient the guessed batch would produce and the observed gradient, summed over all the gradient’s entries. It is zero for a perfect match and positive otherwise.</p>
+<div id="def-gradinv-dlg" class="theorem definition">
+<p><span class="theorem-title"><strong>Definition 14.3 (Deep Leakage from Gradients)</strong></span> Given the model <span class="math inline">\(\theta\)</span>, the observed gradient <span class="math inline">\(g\)</span> and the labels <span class="math inline">\(y_1, \dots, y_B\)</span>, write <span class="math inline">\(G(x') = \frac1B\sum_i\nabla_\theta\ell(\theta; x_i', y_i)\)</span> for the gradient that a guessed batch <span class="math inline">\(x' = (x_1', \dots, x_B')\)</span> would produce. The <strong>matching loss</strong> is <span class="math inline">\(R(x') = \|G(x') - g\|^2\)</span>, and DLG outputs <span id="eq-gradinv-dlg"><span class="math display">\[\hat x_1, \dots, \hat x_B = \arg\min_{x_1', \dots, x_B'}R(x'), \qquad R(x') = \Big\|\frac1B\sum_{i=1}^B\nabla_\theta\ell(\theta; x_i', y_i) - g\Big\|^2, \tag{14.17}\]</span></span> searching by a gradient method that starts from random noise and repeatedly moves the guess a little downhill on <span class="math inline">\(R\)</span>.</p>
+</div>
+<p>For a batch, the label rules of <a href="#prp-gradinv-labels" class="quarto-xref">Proposition&nbsp;<span>14.3</span></a> give only the counts of each class, not which example has which label. That is enough, because the guesses are interchangeable: the attacker hands out the recovered labels to the guesses in any order, and the search fits each guess to its label.</p>
+<p>Two facts make this a sensible search. The true batch scores the best value the matching loss can take, and the slope of the matching loss can be computed, as long as the network can be differentiated twice. The second fact needs the second derivatives because <span class="math inline">\(G\)</span> is itself made of first derivatives of the network.</p>
+<div id="prp-gradinv-dlg" class="theorem proposition">
+<p><span class="theorem-title"><strong>Proposition 14.4 (The true batch is a global minimizer)</strong></span> The true batch <span class="math inline">\((x_1, \dots, x_B)\)</span> has <span class="math inline">\(R = 0\)</span>, the smallest value <span class="math inline">\(R\)</span> takes. If the network is twice differentiable, then <span class="math inline">\(R\)</span> is differentiable in the guess, with <span id="eq-gradinv-dlg-slope"><span class="math display">\[\nabla_{x'}R = 2\,J_G(x')^\top\big(G(x') - g\big), \tag{14.18}\]</span></span> where <span class="math inline">\(J_G\)</span> is the <strong>Jacobian</strong> of <span class="math inline">\(G\)</span>, the matrix of rates at which each gradient entry changes with each input pixel.</p>
+</div>
+<div class="proof">
+<p><span class="proof-title"><em>Proof</em>. </span></p>
 <ol type="1">
-<li><strong>The true batch is a global minimizer of <a href="#eq-gradinv-dlg" class="quarto-xref">Equation&nbsp;<span>14.11</span></a>.</strong> <span class="math inline">\(R\)</span> is a squared length, so <span class="math inline">\(R \ge 0\)</span> always. Plugging in the true <span class="math inline">\(x_i\)</span> reproduces <span class="math inline">\(g\)</span> exactly, so <span class="math inline">\(R = 0\)</span> there, and nothing can do better.</li>
-<li><strong>The objective can be differentiated in <span class="math inline">\(x'\)</span> if the network is twice differentiable.</strong> A gradient method needs the slope of <span class="math inline">\(R\)</span> with respect to the guess. Write <span class="math inline">\(G(x') = \frac1B\sum_i\nabla_\theta\ell(\theta; x_i', y_i)\)</span>, the function that takes a guessed batch to the gradient it would produce. Then <span class="math inline">\(R = \| G(x') - g\|^2\)</span>. The squared length <span class="math inline">\(\| u\|^2\)</span> changes at the rate <span class="math inline">\(2u\)</span>, and the chain rule passes this back to <span class="math inline">\(x'\)</span> through the <strong>Jacobian</strong> <span class="math inline">\(J_G\)</span> of <span class="math inline">\(G\)</span>, the matrix of rates at which each gradient entry changes with each input pixel: <span id="eq-auto-06gradientinversion-5"><span class="math display">\[\nabla_{x'}R = 2\,J_G(x')^\top\big(G(x') - g\big). \tag{14.12}\]</span></span> <span class="math inline">\(G\)</span> is already made of first derivatives of the network, so <span class="math inline">\(J_G\)</span> is made of second derivatives. That is why Zhu et al.&nbsp;replaced ReLU by the sigmoid, and the experiments here do the same. The ReLU’s slope is 0 or 1, constant on each side of zero, so its second derivative is zero almost everywhere: the factor <span class="math inline">\(\sigma'(a)\)</span> in <a href="#eq-gradinv-backprop" class="quarto-xref">Equation&nbsp;<span>14.6</span></a> is piecewise constant in <span class="math inline">\(a\)</span>, and the search gets no signal through it. The sigmoid’s slope varies smoothly, so it does.</li>
-<li><strong>Computing <span class="math inline">\(J_G^\top v\)</span> without forming <span class="math inline">\(J_G\)</span>.</strong> <span class="math inline">\(J_G\)</span> would have one row per parameter and one column per pixel, and no one builds it. Automatic-differentiation libraries instead run backpropagation through the backward pass itself, which is called <strong>double backpropagation</strong>. The script writes it out by hand for the one-hidden-layer network. The forward pass computes <span class="math inline">\(a, h, z, p\)</span>. The backward pass computes <span class="math inline">\(\gamma_2, \gamma_1\)</span> and the four gradient blocks. A second backward pass then sends <span class="math inline">\(2(G - g)\)</span> through every one of those steps back to <span class="math inline">\(x'\)</span>. To check it, the script also estimates the slope by finite differences (nudge one pixel slightly and see how much <span class="math inline">\(R\)</span> changes), and the two agree to within <span class="math inline">\(1.2\times10^{-10}\)</span>.</li>
-<li><strong>Optimization finds a stationary point, not necessarily the minimizer.</strong> <span class="math inline">\(R\)</span> is not convex in <span class="math inline">\(x'\)</span>: its surface can have dips and flat regions other than the true minimum. As the non-convex section of <a href="../part01-prerequisites/06-optimization.html">Optimization</a> shows, for such a function a gradient method with a suitable step only guarantees that the slope <span class="math inline">\(\|\nabla R\|\)</span> goes to zero. That gives a <strong>stationary point</strong>, where the surface is flat, which may or may not be the global minimum. So success is an empirical question. The value of <span class="math inline">\(R\)</span> at the end tells you which case you are in: <span class="math inline">\(R = 0\)</span> (up to rounding) means you found an exact match, while a value stuck well above zero means you got stuck.</li>
-<li><strong>Uniqueness is plausible when equations outnumber unknowns.</strong> Matching <span class="math inline">\(g\)</span> imposes one equation per parameter: 2,212 here, against <span class="math inline">\(64B\)</span> unknown pixels. That is not a proof that the minimizer is unique, but with a single example the closed form of <a href="#sec-gradinv-exact" class="quarto-xref"><span>Section 14.3</span></a> shows that it is: the input is determined by the gradient.</li>
+<li><em>The true batch is a global minimizer.</em> <span class="math inline">\(R\)</span> is a squared length, so <span class="math inline">\(R \ge 0\)</span> for every guess. Plugging in the true inputs reproduces <span class="math inline">\(g\)</span> exactly, so <span class="math inline">\(R = 0\)</span> there, and no guess can do better.</li>
+<li><em>The slope of a squared length.</em> A squared length <span class="math inline">\(\|u\|^2\)</span> changes with <span class="math inline">\(u\)</span> at the rate <span class="math inline">\(2u\)</span>. Here <span class="math inline">\(u = G(x') - g\)</span>, and <span class="math inline">\(g\)</span> does not depend on the guess.</li>
+<li><em>The chain rule passes the slope back to the guess.</em> <span class="math inline">\(u\)</span> changes with <span class="math inline">\(x'\)</span> at the rates collected in <span class="math inline">\(J_G(x')\)</span>, so the chain rule multiplies the transpose of that matrix by <span class="math inline">\(2u\)</span>, which is <a href="#eq-gradinv-dlg-slope" class="quarto-xref">Equation&nbsp;<span>14.18</span></a>. The entries of <span class="math inline">\(J_G\)</span> are derivatives of the gradient, so they are second derivatives of the network, and they exist because the network is twice differentiable.</li>
 </ol>
-</section>
-<section id="interpretation-2" class="level3" data-number="14.5.4">
-<h3 data-number="14.5.4" class="anchored" data-anchor-id="interpretation-2"><span class="header-section-number">14.5.4</span> Interpretation</h3>
-<p>DLG is a general recipe. All it needs is the ability to differentiate the gradient with respect to the input, which any automatic-differentiation library provides. So it works for convolutional networks and on real images, where no closed form exists: Zhu et al.&nbsp;recover CIFAR-100 pictures and text tokens from single-example gradients.</p>
-<p>When it fails, it fails first as an optimization, not for lack of information. If the run ends with <span class="math inline">\(R\)</span> far from zero, the attacker knows it has not found the input, and better optimizers, restarts from new random guesses, and image priors help. Geiping et al.&nbsp;(2020) made two changes. They replaced the squared distance by a cosine distance between gradients, which compares only the directions of the two gradients and ignores their lengths. And they added a total-variation penalty, the sum of differences between neighbouring pixels, which is small for natural images made of smooth regions. (This penalty is a measure of image roughness, not the total variation distance between distributions.) With these they recover recognizable images from trained networks and from batches.</p>
-<p>Note what the attack does not need. The label search is gone, thanks to iDLG. And the server need not be malicious: it only computes on what it legitimately received.</p>
-<p><a href="#fig-gradinv-dlg-progress" class="quarto-xref">Figure&nbsp;<span>14.3</span></a> shows one run.</p>
+</div>
+<p>The need for second derivatives is why Zhu et al.&nbsp;replaced ReLU by the sigmoid, and why the experiments here do the same. The ReLU’s slope is 0 or 1, constant on each side of zero, so its own derivative is zero almost everywhere. The factor <span class="math inline">\(\sigma'(a)\)</span> in <a href="#eq-gradinv-backprop" class="quarto-xref">Equation&nbsp;<span>14.8</span></a> then does not change as the guess moves, and the search gets no signal through it. The sigmoid’s slope varies smoothly, so it does. No one builds <span class="math inline">\(J_G\)</span>, which has one row per parameter and one column per pixel. Automatic-differentiation libraries instead run backpropagation through the backward pass itself, which is called <strong>double backpropagation</strong>. That is all DLG needs, so it works for convolutional networks and on real images: Zhu et al.&nbsp;recover pictures from the CIFAR-100 image dataset and text tokens from single-example gradients.</p>
+<p><a href="#prp-gradinv-dlg" class="quarto-xref">Proposition&nbsp;<span>14.4</span></a> does not say that the search finds the true batch. <span class="math inline">\(R\)</span> is not convex in the guess, and for such a function <a href="../part01-prerequisites/06-optimization.html">Optimization</a> shows that a gradient method with a suitable step only drives the slope to zero. That gives a <strong>stationary point</strong>, where the surface is flat, which may or may not be the global minimum, so success is an empirical question. The final value of <span class="math inline">\(R\)</span> tells you which case you are in: <span class="math inline">\(R = 0\)</span> up to rounding means an exact match, while a value stuck well above zero means the search is stuck, and restarts or image priors may help.</p>
+<p>The minimizer is also plausibly unique, since matching <span class="math inline">\(g\)</span> imposes one equation per parameter, 2,212 here against <span class="math inline">\(64B\)</span> unknown pixels. That count is not a proof. For a single example, though, the sigmoid network still has a fully connected first layer with a bias, so <a href="#thm-gradinv-exact" class="quarto-xref">Theorem&nbsp;<span>14.1</span></a> shows that its gradient determines the input. Geiping et al.&nbsp;(2020) compared gradients by a cosine distance and penalized differences between neighbouring pixels, and so recovered recognizable images from trained networks and from batches.</p>
 <div id="fig-gradinv-dlg-progress" class="quarto-float quarto-figure quarto-figure-center anchored">
 <figure class="quarto-float quarto-float-fig figure">
 <div aria-describedby="fig-gradinv-dlg-progress-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
@@ -1056,10 +1009,8 @@ Figure&nbsp;14.3: Deep Leakage from Gradients on one <span class="math inline">\
 </figcaption>
 </figure>
 </div>
-</section>
-<section id="example-one-image" class="level3" data-number="14.5.5">
-<h3 data-number="14.5.5" class="anchored" data-anchor-id="example-one-image"><span class="header-section-number">14.5.5</span> Example: one image</h3>
-<p>The script starts from uniform noise and runs 600 steps of the Adam optimizer, a variant of gradient descent that scales each pixel’s step by a running estimate of the size of that pixel’s gradient, with learning rate 0.05 decaying linearly to 0. The label comes from <a href="#eq-gradinv-labels" class="quarto-xref">Equation&nbsp;<span>14.9</span></a>.</p>
+<div id="exm-gradinv-dlg" class="theorem example">
+<p><span class="theorem-title"><strong>Example 14.5</strong></span> The chapter’s script (<a href="#sec-gradinv-code" class="quarto-xref"><span>Section 14.8</span></a>) runs DLG on one image with the sigmoid network of 32 hidden units, computing the slope of <a href="#eq-gradinv-dlg-slope" class="quarto-xref">Equation&nbsp;<span>14.18</span></a> by double backpropagation written out by hand. A finite-difference check, which nudges one pixel slightly and sees how much <span class="math inline">\(R\)</span> changes, agrees with it to within <span class="math inline">\(1.2\times10^{-10}\)</span>. The search starts from uniform noise and runs 600 steps of the Adam optimizer, a variant of gradient descent that scales each pixel’s step by a running estimate of the size of that pixel’s gradient, with learning rate 0.05 decaying linearly to 0. The label comes from <a href="#eq-gradinv-labels" class="quarto-xref">Equation&nbsp;<span>14.14</span></a>.</p>
 <div id="tbl-gradinv-dlg" class="quarto-float quarto-figure quarto-figure-center anchored">
 <figure class="quarto-float quarto-float-tbl figure">
 <figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl" id="tbl-gradinv-dlg-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
@@ -1115,77 +1066,125 @@ Table&nbsp;14.4: Deep Leakage from Gradients on one image, sigmoid network with 
 </div>
 </figure>
 </div>
-<p>By iteration 50 the image is visually correct (7.5% error); by iteration 600 it is exact to about 13 digits. The matching loss falls about as the square of the error, and that is what you should expect close to the answer. Near the true input <span class="math inline">\(x\)</span>, the gradient map <span class="math inline">\(G\)</span> is nearly linear, so the mismatch is about the Jacobian times the error, <span class="math inline">\(G(x') - g \approx J_G(x)(x' - x)\)</span>, and its squared length is quadratic in the error: <span class="math inline">\(R \approx \| J_G(x)(x' - x)\|^2\)</span>. In the table, between iterations 50 and 100 the error shrinks by a factor <span class="math inline">\(0.075/0.0057 \approx 13\)</span> and <span class="math inline">\(R\)</span> by <span class="math inline">\(0.0025/0.000013 \approx 190\)</span>, close to <span class="math inline">\(13^2 \approx 170\)</span>.</p>
-</section>
-<section id="check-yourself-2" class="level3" data-number="14.5.6">
-<h3 data-number="14.5.6" class="anchored" data-anchor-id="check-yourself-2"><span class="header-section-number">14.5.6</span> Check yourself</h3>
-<ul>
-<li>The run ends with <span class="math inline">\(R = 10^{-5}\)</span> and a reconstruction that looks like a shape. Has the attack succeeded? <em>(Not certainly. At the true input <span class="math inline">\(R = 0\)</span>, and in <a href="#tbl-gradinv-dlg" class="quarto-xref">Table&nbsp;<span>14.4</span></a> <span class="math inline">\(R = 1.3\times10^{-5}\)</span> goes with an error below 1%, but a different input can also have small <span class="math inline">\(R\)</span>. A loss that has stopped falling well above rounding error signals a stationary point that is not the input; restart from a new random guess.)</em></li>
-<li>Why does the attacker want the label before running DLG? <em>(With the label fixed, <span class="math inline">\(R\)</span> depends on the input only. Searching jointly over a soft label adds a variable that interacts with every gradient entry through <span class="math inline">\(p - e_y\)</span>, and Zhao et al.&nbsp;found that the joint search fails much more often.)</em></li>
-</ul>
-</section>
+<p>By iteration 50 the image is visually correct, with 7.5% error, and by iteration 600 it is exact to about 13 digits (<a href="#fig-gradinv-dlg-progress" class="quarto-xref">Figure&nbsp;<span>14.3</span></a>). The matching loss falls about as the square of the error, which is what you should expect close to the answer. Near the true input <span class="math inline">\(x\)</span> the map <span class="math inline">\(G\)</span> is nearly linear, so the mismatch is about the Jacobian times the error, and its squared length is quadratic in the error: <span id="eq-auto-06gradientinversion-11"><span class="math display">\[R(x') \approx \|J_G(x)(x' - x)\|^2. \tag{14.19}\]</span></span> In the table, between iterations 50 and 100 the error shrinks by a factor <span class="math inline">\(0.075/0.0057 \approx 13\)</span> and <span class="math inline">\(R\)</span> by <span class="math inline">\(0.0025/0.000013 \approx 190\)</span>, close to <span class="math inline">\(13^2 \approx 170\)</span>.</p>
+</div>
 </section>
 <section id="sec-gradinv-batch" class="level2" data-number="14.6">
 <h2 data-number="14.6" class="anchored" data-anchor-id="sec-gradinv-batch"><span class="header-section-number">14.6</span> Batches and averaging</h2>
-<section id="context-3" class="level3" data-number="14.6.1">
-<h3 data-number="14.6.1" class="anchored" data-anchor-id="context-3"><span class="header-section-number">14.6.1</span> Context</h3>
-<p>Clients rarely send the gradient of one example. They send the average over a batch, or the change in parameters after several local steps. Averaging is often said to protect the individual examples: the gradient now describes the batch, not anyone in it. This section measures that claim. Averaging does destroy the one-line formula of <a href="#eq-gradinv-ratio" class="quarto-xref">Equation&nbsp;<span>14.7</span></a>, and it does make DLG harder, but three things survive: the span of the batch, every example that some unit “sees alone”, and a search that still works for small batches.</p>
-</section>
-<section id="statement-3" class="level3" data-number="14.6.2">
-<h3 data-number="14.6.2" class="anchored" data-anchor-id="statement-3"><span class="header-section-number">14.6.2</span> Statement</h3>
-<p>Take a batch of <span class="math inline">\(B\)</span> examples and a fully connected first layer, and write <span class="math inline">\(\gamma_{1,i}\)</span> for the backward signal of example <span class="math inline">\(i\)</span> at that layer. Each claim below follows from the gradient being a sum of one outer product per example.</p>
-<p><strong>The gradient is a sum of <span class="math inline">\(B\)</span> outer products, and its rows lie in the span of the batch.</strong> By Facts 1 and 3, averaging adds up the per-example outer products <span class="math inline">\(\gamma_{1,i}x_i^\top\)</span>. Each of those has rows that are multiples of its own <span class="math inline">\(x_i\)</span>, so every row of the sum is a weighted combination of the <span class="math inline">\(B\)</span> inputs. It lies in their <strong>span</strong>, the set of all such combinations. And adding <span class="math inline">\(B\)</span> rank-one matrices gives rank at most <span class="math inline">\(B\)</span>: <span id="eq-gradinv-batch"><span class="math display">\[\nabla_{W_1}\ell = \frac1B\sum_{i=1}^B\gamma_{1,i}\,x_i^\top, \qquad \operatorname{rank}\nabla_{W_1}\ell \le B, \qquad \text{every row} \in \operatorname{span}\{x_1, \dots, x_B\}. \tag{14.13}\]</span></span></p>
-<p><strong>Unit ratios are weighted averages.</strong> With one example, dividing row <span class="math inline">\(j\)</span> by the bias entry cancelled a single scale. With a batch, row <span class="math inline">\(j\)</span> is a sum of different inputs with different scales <span class="math inline">\(\gamma_{1,ij}\)</span>, and the bias entry is the sum of those scales. The division gives each input a weight equal to its share of the total, so the result is a weighted average of the inputs. For a unit <span class="math inline">\(j\)</span> with <span class="math inline">\((\nabla_{b_1}\ell)_j \ne 0\)</span>, <span id="eq-auto-06gradientinversion-6"><span class="math display">\[\frac{(\nabla_{W_1}\ell)_{j,:}}{(\nabla_{b_1}\ell)_j} = \sum_{i=1}^B\frac{\gamma_{1,ij}}{\sum_{i'}\gamma_{1,i'j}}\,x_i^\top, \tag{14.14}\]</span></span> which equals <span class="math inline">\(x_i\)</span> exactly when only example <span class="math inline">\(i\)</span> contributes, that is when <span class="math inline">\(\gamma_{1,i'j} = 0\)</span> for every <span class="math inline">\(i' \ne i\)</span>. For ReLU this happens when unit <span class="math inline">\(j\)</span> is switched on for example <span class="math inline">\(i\)</span> only: unit <span class="math inline">\(j\)</span> <strong>isolates</strong> example <span class="math inline">\(i\)</span>.</p>
-<p><strong>How often an example is isolated.</strong> A unit isolates example <span class="math inline">\(i\)</span> when it is on for <span class="math inline">\(i\)</span> and off for every other example. Suppose each of the <span class="math inline">\(m\)</span> ReLU units switches on for each example independently with probability <span class="math inline">\(\frac12\)</span>, like a fair coin. Then one unit isolates example <span class="math inline">\(i\)</span> with probability <span class="math inline">\(2^{-B}\)</span>, the chance of one particular pattern of <span class="math inline">\(B\)</span> coin flips. The example is missed only if all <span class="math inline">\(m\)</span> units miss it, which has probability <span class="math inline">\((1 - 2^{-B})^m\)</span>. So each example of the batch is recovered exactly by some unit ratio with probability <span id="eq-gradinv-isolation"><span class="math display">\[P_{\text{iso}}(B, m) = 1 - (1 - 2^{-B})^m. \tag{14.15}\]</span></span></p>
-</section>
-<section id="derivation-3" class="level3" data-number="14.6.3">
-<h3 data-number="14.6.3" class="anchored" data-anchor-id="derivation-3"><span class="header-section-number">14.6.3</span> Derivation</h3>
+<p>Clients rarely send the gradient of one example. They send the average over a batch, or the change in parameters after several local steps. Averaging is often said to protect the individual examples, and this section measures that claim. Averaging does destroy the one-line formula of <a href="#eq-gradinv-ratio" class="quarto-xref">Equation&nbsp;<span>14.13</span></a>, and it does make DLG harder, but the span of the batch survives, and so does every example that some unit “sees alone”.</p>
+<p>The structure of a batch gradient follows from <a href="#prp-gradinv-outer" class="quarto-xref">Proposition&nbsp;<span>14.1</span></a>. Each example contributes one outer product, whose rows are multiples of its own input, so every row of the sum is a weighted combination of the <span class="math inline">\(B\)</span> inputs.</p>
+<div id="prp-gradinv-batch" class="theorem proposition">
+<p><span class="theorem-title"><strong>Proposition 14.5 (The gradient of a batch)</strong></span> Take a batch of <span class="math inline">\(B\)</span> examples and a fully connected first layer, and write <span class="math inline">\(\gamma_{1,i}\)</span> for the backward signal of example <span class="math inline">\(i\)</span> at that layer, with entries <span class="math inline">\(\gamma_{1,ij}\)</span>, one per unit <span class="math inline">\(j\)</span>. Then <span id="eq-gradinv-batch"><span class="math display">\[\nabla_{W_1}\ell = \frac1B\sum_{i=1}^B\gamma_{1,i}\,x_i^\top, \qquad \operatorname{rank}\nabla_{W_1}\ell \le B, \qquad \text{every row} \in \operatorname{span}\{x_1, \dots, x_B\}. \tag{14.20}\]</span></span> For every unit <span class="math inline">\(j\)</span> with <span class="math inline">\((\nabla_{b_1}\ell)_j \ne 0\)</span>, the unit ratio is a weighted combination of the inputs, <span id="eq-gradinv-batch-ratio"><span class="math display">\[\frac{(\nabla_{W_1}\ell)_{j,:}}{(\nabla_{b_1}\ell)_j} = \sum_{i=1}^B\frac{\gamma_{1,ij}}{\sum_{i'}\gamma_{1,i'j}}\,x_i^\top, \tag{14.21}\]</span></span> with weights that sum to 1 (some may be negative). It equals <span class="math inline">\(x_i\)</span> exactly when <span class="math inline">\(\gamma_{1,ij} \ne 0\)</span> and <span class="math inline">\(\gamma_{1,i'j} = 0\)</span> for every <span class="math inline">\(i' \ne i\)</span>.</p>
+</div>
+<div class="proof">
+<p><span class="proof-title"><em>Proof</em>. </span></p>
 <ol type="1">
-<li><strong>Sum of outer products.</strong> By Fact 3 the batch gradient is the average of the per-example gradients, and by Fact 1 each of those is <span class="math inline">\(\gamma_{1,i}x_i^\top\)</span>.</li>
-<li><strong>Rank and span.</strong> Stack the <span class="math inline">\(x_i^\top\)</span> as the rows of a matrix <span class="math inline">\(X \in \mathbb R^{B\times d}\)</span> and the <span class="math inline">\(\gamma_{1,i}^\top\)</span> as the rows of <span class="math inline">\(\Gamma \in \mathbb R^{B\times m}\)</span>. Then the sum of outer products is a matrix product, <span class="math inline">\(\nabla_{W_1}\ell = \frac1B\Gamma^\top X\)</span>. A product has rank at most that of either factor, and <span class="math inline">\(X\)</span> has only <span class="math inline">\(B\)</span> rows, so the rank is at most <span class="math inline">\(B\)</span>. Row <span class="math inline">\(j\)</span> is <span class="math inline">\(\frac1B\sum_i\Gamma_{ij}x_i^\top\)</span>, a combination of the <span class="math inline">\(x_i\)</span>, so it lies in their span.</li>
-<li><strong>Ratios.</strong> By step 1 and Fact 1, the bias gradient is <span class="math inline">\((\nabla_{b_1}\ell)_j = \frac1B\sum_i\gamma_{1,ij}\)</span>. Divide the <span class="math inline">\(j\)</span>-th row by it. The factors <span class="math inline">\(\frac1B\)</span> cancel, and the weights <span class="math inline">\(\gamma_{1,ij}/\sum_{i'}\gamma_{1,i'j}\)</span> sum to 1 because they are each example’s share of the same total. If only <span class="math inline">\(\gamma_{1,ij}\)</span> is nonzero, the weight on <span class="math inline">\(x_i\)</span> is 1 and all the others are 0.</li>
-<li><strong>One unit.</strong> For ReLU, <span class="math inline">\(\gamma_{1,i'j} = 0\)</span> whenever unit <span class="math inline">\(j\)</span> is off on <span class="math inline">\(x_{i'}\)</span>, because the ReLU slope is 0 there (Fact 3). So unit <span class="math inline">\(j\)</span> isolates example <span class="math inline">\(i\)</span> if it is on for <span class="math inline">\(i\)</span> (probability <span class="math inline">\(\frac12\)</span>) and off for each of the other <span class="math inline">\(B - 1\)</span> (probability <span class="math inline">\(\frac12\)</span> each, independently). Multiplying the <span class="math inline">\(B\)</span> independent probabilities gives <span class="math inline">\(2^{-B}\)</span>. (An active unit also needs <span class="math inline">\((W_2^\top\gamma_{2,i})_j \ne 0\)</span>, which holds with probability 1 for random weights.)</li>
-<li><strong>Many units.</strong> The units are independent by assumption, so the probability that none of the <span class="math inline">\(m\)</span> units isolates example <span class="math inline">\(i\)</span> is the product of <span class="math inline">\(m\)</span> factors <span class="math inline">\(1 - 2^{-B}\)</span>, which is <span class="math inline">\((1 - 2^{-B})^m\)</span>. Subtracting from 1 gives <a href="#eq-gradinv-isolation" class="quarto-xref">Equation&nbsp;<span>14.15</span></a>.</li>
-<li><strong>When the independence assumption holds.</strong> Suppose the first-layer bias is zero and the inputs are drawn from a distribution that is symmetric about zero, such as <span class="math inline">\(\mathcal N(0, I)\)</span>. Unit <span class="math inline">\(j\)</span>, whose weights are the row <span class="math inline">\((W_1)_{j,:}\)</span>, is on for <span class="math inline">\(x_i\)</span> when <span class="math inline">\((W_1)_{j,:}\,x_i &gt; 0\)</span>. Symmetry makes <span class="math inline">\((W_1)_{j,:}\,x_i\)</span> equally likely to be positive or negative, and independent inputs make these signs independent across the batch. So each unit’s on/off pattern over the batch is exactly a sequence of fair coin flips, and step 4 is exact. Different units look at the same inputs, though, so their patterns are not fully independent of each other, and step 5 is only approximate. Real data are not symmetric: images of the same kind are positively correlated, and <a href="#tbl-gradinv-isolation" class="quarto-xref">Table&nbsp;<span>14.5</span></a> shows that this changes the answer substantially.</li>
+<li><em>A sum of outer products.</em> The batch gradient is the average of the per-example gradients, and by <a href="#prp-gradinv-outer" class="quarto-xref">Proposition&nbsp;<span>14.1</span></a> each of those is <span class="math inline">\(\gamma_{1,i}x_i^\top\)</span>.</li>
+<li><em>Rank and span.</em> Stack the <span class="math inline">\(x_i^\top\)</span> as the rows of a matrix <span class="math inline">\(X\)</span> with <span class="math inline">\(B\)</span> rows, and the <span class="math inline">\(\gamma_{1,i}^\top\)</span> as the rows of a matrix <span class="math inline">\(\Gamma\)</span>. The sum of outer products is then the product <span class="math inline">\(\frac1B\Gamma^\top X\)</span>. A product has rank at most that of either factor, and <span class="math inline">\(X\)</span> has only <span class="math inline">\(B\)</span> rows, so the rank is at most <span class="math inline">\(B\)</span>. Row <span class="math inline">\(j\)</span> of the product is <span class="math inline">\(\frac1B\sum_i\Gamma_{ij}x_i^\top\)</span>, a combination of the inputs, so it lies in their span.</li>
+<li><em>The ratios.</em> By <a href="#prp-gradinv-outer" class="quarto-xref">Proposition&nbsp;<span>14.1</span></a> again, entry <span class="math inline">\(j\)</span> of the bias gradient is <span class="math inline">\(\frac1B\sum_i\gamma_{1,ij}\)</span>. Dividing row <span class="math inline">\(j\)</span> by it cancels the factors <span class="math inline">\(\frac1B\)</span> and gives <a href="#eq-gradinv-batch-ratio" class="quarto-xref">Equation&nbsp;<span>14.21</span></a>. The weights are each example’s share of the same total, so they sum to 1, and if only <span class="math inline">\(\gamma_{1,ij}\)</span> is nonzero the weight on <span class="math inline">\(x_i\)</span> is 1 and all the others are 0.</li>
 </ol>
-</section>
-<section id="interpretation-3" class="level3" data-number="14.6.4">
-<h3 data-number="14.6.4" class="anchored" data-anchor-id="interpretation-3"><span class="header-section-number">14.6.4</span> Interpretation</h3>
-<p>The formula is exponential in <span class="math inline">\(B\)</span> and linear in <span class="math inline">\(m\)</span>. A unit isolates a given example with probability <span class="math inline">\(2^{-B}\)</span>, so among <span class="math inline">\(m\)</span> units the expected number that isolate it is <span class="math inline">\(m2^{-B}\)</span>. With <span class="math inline">\(m \gg 2^B\)</span> almost every example is isolated; with <span class="math inline">\(m \ll 2^B\)</span> almost none is. To find the width that gives an even chance, set the miss probability <span class="math inline">\((1 - 2^{-B})^m\)</span> to at most <span class="math inline">\(\frac12\)</span> and take logs: <span class="math inline">\(m\ln(1 - 2^{-B}) \le -\ln2\)</span>, so <span class="math inline">\(m \ge \ln2/(-\ln(1 - 2^{-B}))\)</span>. At <span class="math inline">\(B = 10\)</span> this is <span class="math inline">\(\ln2/(-\ln(1 - 2^{-10})) = 0.6931/0.000977 \approx 709.4\)</span>, so you need <span class="math inline">\(m \ge 710\)</span> units. Real first layers have thousands of units, so batches of 10 are not safe from this attack.</p>
-<p>Correlated data are easier for the attacker, not harder. With images, a unit tends to fire on many examples of a batch or on few: the number of examples it fires for is more spread out than the coin-flip model predicts (statisticians call this <strong>overdispersion</strong>), instead of concentrating around <span class="math inline">\(B/2\)</span>. Units that fire on just one example are then much more common at large <span class="math inline">\(B\)</span>, and isolation decays much more slowly than <span class="math inline">\(2^{-B}\)</span>. <a href="../../book-exercises/part02-attacks/06-gradient-inversion.html#sec-sol-gradinv-5">Exercise 5</a> works out one extreme model, in which each unit has its own firing rate <span class="math inline">\(\rho\)</span>, drawn uniformly between 0 and 1, and fires on each example with that probability. Averaging the isolation probability <span class="math inline">\(\rho(1 - \rho)^{B-1}\)</span> over <span class="math inline">\(\rho\)</span> gives <span class="math inline">\(1/(B(B + 1))\)</span> per unit, which shrinks only like <span class="math inline">\(1/B^2\)</span> instead of halving with each extra example.</p>
-<p>The span leaks even when nothing is isolated. By <a href="#eq-gradinv-batch" class="quarto-xref">Equation&nbsp;<span>14.13</span></a>, the server learns the <span class="math inline">\(B\)</span>-dimensional subspace that contains the batch. For <span class="math inline">\(B \ll d\)</span> that already rules out almost every input, since every example must be a combination of <span class="math inline">\(B\)</span> known directions.</p>
-<p>A malicious server does better still. The analysis above assumes random weights, as an honest server would send. A server that chooses <span class="math inline">\(\theta\)</span> can plant first-layer units that fire on rare inputs only (“trap weights”, Boenisch et al.&nbsp;2023), or that sort inputs into bins by a feature such as brightness (Fowl et al.&nbsp;2022), so that most examples of even a large batch are isolated by construction.</p>
-<p>DLG on batches has a harder search to do: it must untangle <span class="math inline">\(B\)</span> inputs from one sum. In the experiments below it always recovers single examples, usually recovers pairs, and mostly fails beyond that, with the matching loss stuck well above zero. That is an optimization failure, not a shortage of information: at <span class="math inline">\(B = 4\)</span> there are <span class="math inline">\(64\cdot4 = 256\)</span> unknown pixels against 2,212 equations.</p>
-<p>Finally, several local steps do not help either. If the client takes several SGD steps on its batch and sends the total change in parameters, every step’s first-layer gradient is made of outer products with the same inputs <span class="math inline">\(x_i\)</span>, and only the backward signals change from step to step. So for one example the change in <span class="math inline">\(W_1\)</span> is still a multiple of <span class="math inline">\(x^\top\)</span> in every row, still rank one, and <a href="#eq-gradinv-ratio" class="quarto-xref">Equation&nbsp;<span>14.7</span></a> still recovers <span class="math inline">\(x\)</span> exactly (<a href="../../book-exercises/part02-attacks/06-gradient-inversion.html#sec-sol-gradinv-6">Exercise 6</a>).</p>
-<div id="fig-gradinv-isolation" class="quarto-float quarto-figure quarto-figure-center anchored">
-<figure class="quarto-float quarto-float-fig figure">
-<div aria-describedby="fig-gradinv-isolation-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-<img src="figures/gradinv_isolation.svg" class="img-fluid figure-img">
 </div>
-<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-gradinv-isolation-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-Figure&nbsp;14.4: Fraction of a batch recovered exactly by first-layer unit ratios, for ReLU networks with <span class="math inline">\(m = 64\)</span>, 256 and 1024 hidden units. Lines: <a href="#eq-gradinv-isolation" class="quarto-xref">Equation&nbsp;<span>14.15</span></a>. Filled circles: Gaussian inputs and zero first-layer bias, where each unit’s on/off pattern is a sequence of fair coin flips. Open squares: the <span class="math inline">\(8\times8\)</span> images, which are correlated, so units fire on many or few of them and isolation decays much more slowly.
-</figcaption>
-</figure>
-</div>
+<p>For ReLU the condition of the last sentence has a simple form. By <a href="#prp-gradinv-backward" class="quarto-xref">Proposition&nbsp;<span>14.2</span></a>, <span class="math inline">\(\gamma_{1,i'j} = 0\)</span> whenever unit <span class="math inline">\(j\)</span> is switched off on <span class="math inline">\(x_{i'}\)</span>, so a unit that is switched on for example <span class="math inline">\(i\)</span> and for no other example gives back <span class="math inline">\(x_i\)</span> exactly. Such a unit <strong>isolates</strong> example <span class="math inline">\(i\)</span>, and <a href="#sec-gradinv-isolation" class="quarto-xref"><span>Section 14.7</span></a> asks how often that happens. The span leaks even when nothing is isolated. When the gradient has rank <span class="math inline">\(B\)</span>, as it does for the batch of 4 below, its rows span exactly the span of the inputs. Every example is then a combination of <span class="math inline">\(B\)</span> known directions, so a further search such as DLG has <span class="math inline">\(B\)</span> unknowns per example instead of <span class="math inline">\(d\)</span>: 4 instead of 64 here, and 4 instead of hundreds of thousands for real images.</p>
+<p>Several local steps do not help either. If the client takes several steps of stochastic gradient descent (SGD) on its batch and sends the total change in parameters, every step’s first-layer gradient is made of outer products with the same inputs, and only the backward signals change from step to step. So for one example the change in <span class="math inline">\(W_1\)</span> is still rank one. The change in <span class="math inline">\(b_1\)</span> sums the same backward signals, so the scale still cancels and <a href="#eq-gradinv-ratio" class="quarto-xref">Equation&nbsp;<span>14.13</span></a> still recovers <span class="math inline">\(x\)</span> exactly (<a href="../../book-exercises/part02-attacks/06-gradient-inversion.html#sec-sol-gradinv-6">Exercise 6</a>).</p>
 <div id="fig-gradinv-dlg-batch" class="quarto-float quarto-figure quarto-figure-center anchored">
 <figure class="quarto-float quarto-float-fig figure">
 <div aria-describedby="fig-gradinv-dlg-batch-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
 <img src="figures/gradinv_dlg_batch.svg" class="img-fluid figure-img">
 </div>
 <figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-gradinv-dlg-batch-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-Figure&nbsp;14.5: Deep Leakage from Gradients against batch size, sigmoid network with 32 hidden units. Left: relative error of the closest reconstruction for every example (dots) and the median (red), on a log scale; the dotted line marks an error of 0.05. Right: a batch of 4, true images (top) and their closest reconstructions (bottom). Some examples are recovered and others are blends.
+Figure&nbsp;14.4: Deep Leakage from Gradients against batch size, sigmoid network with 32 hidden units. Left: relative error of the closest reconstruction for every example (dots) and the median (red), on a log scale; the dotted line marks an error of 0.05. Right: a batch of 4, true images (top) and their closest reconstructions (bottom). Some examples are recovered and others are blends.
 </figcaption>
 </figure>
 </div>
+<div id="exm-gradinv-batch" class="theorem example">
+<p><span class="theorem-title"><strong>Example 14.6</strong></span> A batch of 4 images through the 32-unit ReLU network gives a first-layer gradient whose singular values, relative to the largest, are <span class="math inline">\(1.0\)</span>, <span class="math inline">\(0.84\)</span>, <span class="math inline">\(0.69\)</span>, <span class="math inline">\(0.039\)</span> and then <span class="math inline">\(1.5\times10^{-16}\)</span>. Four directions are nonzero and the rest are rounding error, so the rank is 4, as <a href="#eq-gradinv-batch" class="quarto-xref">Equation&nbsp;<span>14.20</span></a> says. Every row lies in the span of the four images to within <span class="math inline">\(4.6\times10^{-16}\)</span>, and the unit ratios recover all 4 of the 4 images exactly.</p>
+<p>DLG does much worse on the same kind of batch. <a href="#tbl-gradinv-dlg-batch" class="quarto-xref">Table&nbsp;<span>14.5</span></a> runs it on the sigmoid network for 6 random networks and batches of each size.</p>
+<div id="tbl-gradinv-dlg-batch" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-tbl figure">
+<figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl" id="tbl-gradinv-dlg-batch-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Table&nbsp;14.5: Deep Leakage from Gradients on batches, sigmoid network with 32 hidden units, 600 Adam steps, 6 trials per batch size.
+</figcaption>
+<div aria-describedby="tbl-gradinv-dlg-batch-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<table class="caption-top table">
+<colgroup>
+<col style="width: 25%">
+<col style="width: 25%">
+<col style="width: 25%">
+<col style="width: 25%">
+</colgroup>
+<thead>
+<tr class="header">
+<th><span class="math inline">\(B\)</span></th>
+<th>Median relative error</th>
+<th>Examples recovered (error <span class="math inline">\(&lt; 0.05\)</span>)</th>
+<th>Median final matching loss</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>1</td>
+<td>0.000</td>
+<td>1.00</td>
+<td><span class="math inline">\(1.5\times10^{-27}\)</span></td>
+</tr>
+<tr class="even">
+<td>2</td>
+<td>0.000</td>
+<td>0.67</td>
+<td><span class="math inline">\(1.3\times10^{-27}\)</span></td>
+</tr>
+<tr class="odd">
+<td>4</td>
+<td>0.363</td>
+<td>0.29</td>
+<td><span class="math inline">\(3.3\times10^{-5}\)</span></td>
+</tr>
+<tr class="even">
+<td>8</td>
+<td>0.711</td>
+<td>0.00</td>
+<td><span class="math inline">\(7.7\times10^{-5}\)</span></td>
+</tr>
+</tbody>
+</table>
+</div>
+</figure>
+</div>
+<p>Batches of one and two are recovered to rounding error in most runs. From <span class="math inline">\(B = 4\)</span> the median run gets stuck, with the matching loss near <span class="math inline">\(10^{-5}\)</span> instead of <span class="math inline">\(10^{-27}\)</span>, and the reconstructions are blends of the batch (<a href="#fig-gradinv-dlg-batch" class="quarto-xref">Figure&nbsp;<span>14.4</span></a>). The failure lies in the optimization, because the information is there. At <span class="math inline">\(B = 4\)</span> there are <span class="math inline">\(64\cdot4 = 256\)</span> unknown pixels against 2,212 equations. On a ReLU network of the same width, which also averages four examples, the unit ratios recovered all four images, so averaging has made the search harder without hiding the inputs.</p>
+</div>
 </section>
-<section id="example-what-a-batch-hides" class="level3" data-number="14.6.5">
-<h3 data-number="14.6.5" class="anchored" data-anchor-id="example-what-a-batch-hides"><span class="header-section-number">14.6.5</span> Example: what a batch hides</h3>
-<p><strong>Rank and isolation in one batch.</strong> A batch of 4 images through the 32-unit ReLU network gives a first-layer gradient whose singular values (the sizes of the matrix along its independent directions), relative to the largest, are <span class="math inline">\(1.0\)</span>, <span class="math inline">\(0.84\)</span>, <span class="math inline">\(0.69\)</span>, <span class="math inline">\(0.039\)</span> and then <span class="math inline">\(1.5\times10^{-16}\)</span>. Four directions are nonzero and the rest are rounding error: rank 4, as <a href="#eq-gradinv-batch" class="quarto-xref">Equation&nbsp;<span>14.13</span></a> says. Every row lies in the span of the four images to within <span class="math inline">\(4.6\times10^{-16}\)</span>. The unit ratios recover all 4 of the 4 images exactly. For comparison, <a href="#eq-gradinv-isolation" class="quarto-xref">Equation&nbsp;<span>14.15</span></a> with <span class="math inline">\(B = 4\)</span> has <span class="math inline">\(1 - 2^{-4} = 15/16\)</span> and predicts <span class="math inline">\(1 - (15/16)^{32} = 1 - e^{32\ln(15/16)} = 1 - e^{-2.065} = 0.873\)</span> per example under independence.</p>
-<p><strong>Isolation against batch size.</strong> <a href="#tbl-gradinv-isolation" class="quarto-xref">Table&nbsp;<span>14.5</span></a> compares <a href="#eq-gradinv-isolation" class="quarto-xref">Equation&nbsp;<span>14.15</span></a> with simulation, 20 random networks and batches per cell (see <a href="#fig-gradinv-isolation" class="quarto-xref">Figure&nbsp;<span>14.4</span></a> for the full range).</p>
+<section id="sec-gradinv-isolation" class="level2" data-number="14.7">
+<h2 data-number="14.7" class="anchored" data-anchor-id="sec-gradinv-isolation"><span class="header-section-number">14.7</span> How often a unit isolates an example</h2>
+<p>Every isolated example comes out exactly, so the share of a batch that a gradient exposes is the share isolated by at least one unit. How does that share depend on the batch size and on the width of the layer? To answer, you need a model of when units switch on, and the simplest one treats each unit’s response to each example as a fair coin.</p>
+<p>For a single unit, the coin model is exact in one case. Suppose the first-layer bias is zero and the inputs are drawn from a distribution that is symmetric about zero, such as <span class="math inline">\(\mathcal N(0, I)\)</span>. Unit <span class="math inline">\(j\)</span>, with weights <span class="math inline">\((W_1)_{j,:}\)</span>, is on for <span class="math inline">\(x_i\)</span> when <span class="math inline">\((W_1)_{j,:}\,x_i &gt; 0\)</span>. Symmetry makes this product equally likely to be positive or negative, and independent inputs make the signs independent across the batch. So each unit’s on/off pattern over the batch is a sequence of fair coin flips. Different units look at the same inputs, though, so independence between units is only approximate, and real data are not symmetric at all.</p>
+<div id="prp-gradinv-isolation" class="theorem proposition">
+<p><span class="theorem-title"><strong>Proposition 14.6 (Isolation under independent units)</strong></span> Take a ReLU first layer with <span class="math inline">\(m\)</span> units and a batch of <span class="math inline">\(B\)</span> examples. Suppose that each unit is on for each example with probability <span class="math inline">\(\frac12\)</span>, independently across examples and across units, and that every unit <span class="math inline">\(j\)</span> active on an example <span class="math inline">\(i\)</span> has <span class="math inline">\((W_2^\top\gamma_{2,i})_j \ne 0\)</span>, where <span class="math inline">\(\gamma_{2,i}\)</span> is the last-layer signal of example <span class="math inline">\(i\)</span>. Then each example of the batch is recovered exactly by some unit ratio with probability <span id="eq-gradinv-isolation"><span class="math display">\[P_{\text{iso}}(B, m) = 1 - (1 - 2^{-B})^m. \tag{14.22}\]</span></span></p>
+</div>
+<div class="proof">
+<p><span class="proof-title"><em>Proof</em>. </span></p>
+<ol type="1">
+<li><em>One unit.</em> By <a href="#prp-gradinv-batch" class="quarto-xref">Proposition&nbsp;<span>14.5</span></a> and the ReLU slope, unit <span class="math inline">\(j\)</span> gives back <span class="math inline">\(x_i\)</span> exactly when it is on for <span class="math inline">\(x_i\)</span> and off for each of the other <span class="math inline">\(B - 1\)</span> examples, since an active unit has a nonzero signal by hypothesis. Each of these <span class="math inline">\(B\)</span> events has probability <span class="math inline">\(\frac12\)</span>, and they are independent, so their probability together is <span class="math inline">\(2^{-B}\)</span>.</li>
+<li><em>Many units.</em> The example is missed only if all <span class="math inline">\(m\)</span> units miss it. The units are independent by hypothesis, so this has probability <span class="math inline">\((1 - 2^{-B})^m\)</span>, and subtracting from 1 gives <a href="#eq-gradinv-isolation" class="quarto-xref">Equation&nbsp;<span>14.22</span></a>.</li>
+</ol>
+</div>
+<p>The formula pits an exponential in <span class="math inline">\(B\)</span> against a count that grows linearly in <span class="math inline">\(m\)</span>. A unit isolates a given example with probability <span class="math inline">\(2^{-B}\)</span>, so among <span class="math inline">\(m\)</span> units the expected number that isolate it is <span class="math inline">\(m2^{-B}\)</span>, and almost every example is isolated when <span class="math inline">\(m\)</span> is much larger than <span class="math inline">\(2^B\)</span>. To find the width that gives an even chance, require the miss probability <span class="math inline">\((1 - 2^{-B})^m\)</span> to be at most <span class="math inline">\(\frac12\)</span> and take logs. The log of <span class="math inline">\(1 - 2^{-B}\)</span> is negative, so dividing by it flips the inequality and gives <span id="eq-auto-06gradientinversion-12"><span class="math display">\[m \ge \frac{\ln2}{-\ln(1 - 2^{-B})}. \tag{14.23}\]</span></span> At <span class="math inline">\(B = 10\)</span> the denominator is <span class="math inline">\(-\ln(1 - 2^{-10}) = 0.000977\)</span>, close to <span class="math inline">\(2^{-10}\)</span> itself, so the bound is <span class="math inline">\(0.6931/0.000977 \approx 709.4\)</span>, so you need <span class="math inline">\(m \ge 710\)</span> units. Real first layers have thousands of units, so batches of 10 are not safe from this attack.</p>
+<p>Correlated data are easier for the attacker, not harder. With images, a unit tends to fire on many examples of a batch or on few. The number of examples it fires for is more spread out than the coin model predicts, which statisticians call <strong>overdispersion</strong>. In particular some units fire only on rare inputs, and when such a unit fires on a large batch it usually fires on just one example, so isolation is much more common at large <span class="math inline">\(B\)</span>. <a href="../../book-exercises/part02-attacks/06-gradient-inversion.html#sec-sol-gradinv-5">Exercise 5</a> works out one extreme model, in which each unit has its own firing rate, drawn uniformly between 0 and 1. There a unit isolates an example with probability <span class="math inline">\(1/(B(B + 1))\)</span>, which shrinks only like <span class="math inline">\(1/B^2\)</span> instead of halving with each extra example. A malicious server does better still, because it chooses <span class="math inline">\(\theta\)</span> to attack rather than at random. It can plant first-layer units that fire on rare inputs only (“trap weights”, Boenisch et al.&nbsp;2023), or that sort inputs into bins by a feature such as brightness (Fowl et al.&nbsp;2022), so that most examples of even a large batch are isolated by construction.</p>
+<div id="fig-gradinv-isolation" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-gradinv-isolation-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="figures/gradinv_isolation.svg" class="img-fluid figure-img">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-gradinv-isolation-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;14.5: Fraction of a batch recovered exactly by first-layer unit ratios, for ReLU networks with <span class="math inline">\(m = 64\)</span>, 256 and 1024 hidden units. Lines: <a href="#eq-gradinv-isolation" class="quarto-xref">Equation&nbsp;<span>14.22</span></a>. Filled circles: Gaussian inputs and zero first-layer bias, where each unit’s on/off pattern is a sequence of fair coin flips. Open squares: the <span class="math inline">\(8\times8\)</span> images, which are correlated, so units fire on many or few of them and isolation decays much more slowly.
+</figcaption>
+</figure>
+</div>
+<div id="exm-gradinv-isolation" class="theorem example">
+<p><span class="theorem-title"><strong>Example 14.7</strong></span> For the batch of 4 in <a href="#exm-gradinv-batch" class="quarto-xref">Example&nbsp;<span>14.6</span></a>, the network has <span class="math inline">\(m = 32\)</span> units and <span class="math inline">\(1 - 2^{-4} = 15/16\)</span>, so <a href="#eq-gradinv-isolation" class="quarto-xref">Equation&nbsp;<span>14.22</span></a> predicts <span id="eq-auto-06gradientinversion-13"><span class="math display">\[P_{\text{iso}}(4, 32) = 1 - (15/16)^{32} = 1 - e^{32\ln(15/16)} = 1 - e^{-2.065} = 0.873 \tag{14.24}\]</span></span> per example under independence. All 4 of the 4 images were recovered. <a href="#tbl-gradinv-isolation" class="quarto-xref">Table&nbsp;<span>14.6</span></a> compares <a href="#eq-gradinv-isolation" class="quarto-xref">Equation&nbsp;<span>14.22</span></a> with simulation over a range of widths and batch sizes, with 20 random networks and batches per cell (<a href="#fig-gradinv-isolation" class="quarto-xref">Figure&nbsp;<span>14.5</span></a> shows the full range).</p>
 <div id="tbl-gradinv-isolation" class="quarto-float quarto-figure quarto-figure-center anchored">
 <figure class="quarto-float quarto-float-tbl figure">
 <figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl" id="tbl-gradinv-isolation-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-Table&nbsp;14.5: Fraction of batch examples recovered exactly from first-layer unit ratios of a random ReLU network, against <a href="#eq-gradinv-isolation" class="quarto-xref">Equation&nbsp;<span>14.15</span></a>.
+Table&nbsp;14.6: Fraction of batch examples recovered exactly from first-layer unit ratios of a random ReLU network, against <a href="#eq-gradinv-isolation" class="quarto-xref">Equation&nbsp;<span>14.22</span></a>.
 </figcaption>
 <div aria-describedby="tbl-gradinv-isolation-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
 <table class="caption-top table">
@@ -1193,7 +1192,7 @@ Table&nbsp;14.5: Fraction of batch examples recovered exactly from first-layer u
 <tr class="header">
 <th><span class="math inline">\(m\)</span></th>
 <th><span class="math inline">\(B\)</span></th>
-<th><a href="#eq-gradinv-isolation" class="quarto-xref">Equation&nbsp;<span>14.15</span></a></th>
+<th><a href="#eq-gradinv-isolation" class="quarto-xref">Equation&nbsp;<span>14.22</span></a></th>
 <th>Gaussian inputs</th>
 <th>Images</th>
 </tr>
@@ -1260,79 +1259,18 @@ Table&nbsp;14.5: Fraction of batch examples recovered exactly from first-layer u
 </div>
 </figure>
 </div>
-<p>For Gaussian inputs the formula matches to within the simulation noise. It usually overestimates slightly (in seven of the eight rows), because units share inputs and so their on/off patterns are not fully independent (step 6 of the derivation). For images the formula is far too reassuring about privacy. At <span class="math inline">\(B = 16\)</span> it predicts that 1.6% of the batch is exposed in the 1024-unit network; 69.1% is.</p>
-<p>At <span class="math inline">\(B = 4\)</span>, by contrast, the images are recovered less often than the formula predicts (0.838 against 0.984 for <span class="math inline">\(m = 64\)</span>). Overdispersion cuts both ways. The same spread that makes “on for exactly one image” more common at large <span class="math inline">\(B\)</span> also makes “on for all four images” and “on for none” common at small <span class="math inline">\(B\)</span>, and units like that isolate nothing.</p>
-<p><strong>DLG against batch size.</strong> <a href="#tbl-gradinv-dlg-batch" class="quarto-xref">Table&nbsp;<span>14.6</span></a> runs DLG on 6 random networks and batches for each batch size.</p>
-<div id="tbl-gradinv-dlg-batch" class="quarto-float quarto-figure quarto-figure-center anchored">
-<figure class="quarto-float quarto-float-tbl figure">
-<figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl" id="tbl-gradinv-dlg-batch-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-Table&nbsp;14.6: Deep Leakage from Gradients on batches, sigmoid network with 32 hidden units, 600 Adam steps, 6 trials per batch size.
-</figcaption>
-<div aria-describedby="tbl-gradinv-dlg-batch-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-<table class="caption-top table">
-<colgroup>
-<col style="width: 25%">
-<col style="width: 25%">
-<col style="width: 25%">
-<col style="width: 25%">
-</colgroup>
-<thead>
-<tr class="header">
-<th><span class="math inline">\(B\)</span></th>
-<th>Median relative error</th>
-<th>Examples recovered (error <span class="math inline">\(&lt; 0.05\)</span>)</th>
-<th>Median final matching loss</th>
-</tr>
-</thead>
-<tbody>
-<tr class="odd">
-<td>1</td>
-<td>0.000</td>
-<td>1.00</td>
-<td><span class="math inline">\(1.5\times10^{-27}\)</span></td>
-</tr>
-<tr class="even">
-<td>2</td>
-<td>0.000</td>
-<td>0.67</td>
-<td><span class="math inline">\(1.3\times10^{-27}\)</span></td>
-</tr>
-<tr class="odd">
-<td>4</td>
-<td>0.363</td>
-<td>0.29</td>
-<td><span class="math inline">\(3.3\times10^{-5}\)</span></td>
-</tr>
-<tr class="even">
-<td>8</td>
-<td>0.711</td>
-<td>0.00</td>
-<td><span class="math inline">\(7.7\times10^{-5}\)</span></td>
-</tr>
-</tbody>
-</table>
+<p>For Gaussian inputs the formula matches to within the simulation noise, overestimating slightly in seven of the eight rows because units share inputs. For images the formula is far too reassuring about privacy. At <span class="math inline">\(B = 16\)</span> it predicts that 1.6% of the batch is exposed in the 1024-unit network, and 69.1% is.</p>
+<p>At <span class="math inline">\(B = 4\)</span>, by contrast, the images are recovered less often than the formula predicts, 0.838 against 0.984 for <span class="math inline">\(m = 64\)</span>. Overdispersion cuts both ways. The same spread that makes “on for exactly one image” more common at large <span class="math inline">\(B\)</span> also makes “on for all four images” and “on for none” common at small <span class="math inline">\(B\)</span>, and units like that isolate nothing.</p>
 </div>
-</figure>
-</div>
-<p>Batches of one and two are recovered to rounding error in most runs. From <span class="math inline">\(B = 4\)</span> the median run gets stuck: the matching loss stalls near <span class="math inline">\(10^{-5}\)</span>, many orders of magnitude above the <span class="math inline">\(10^{-27}\)</span> of a successful run, and the reconstructions are blends of the batch (<a href="#fig-gradinv-dlg-batch" class="quarto-xref">Figure&nbsp;<span>14.5</span></a>). Averaging has made the search harder, not the information smaller: there are still 2,212 equations, and on a ReLU network of the same width the closed-form isolation attack recovered all four images of a batch of 4 (above).</p>
 </section>
-<section id="check-yourself-3" class="level3" data-number="14.6.6">
-<h3 data-number="14.6.6" class="anchored" data-anchor-id="check-yourself-3"><span class="header-section-number">14.6.6</span> Check yourself</h3>
-<ul>
-<li>A first layer has <span class="math inline">\(m = 4096\)</span> ReLU units and the batch size is 8. Under the independence model, what fraction of the batch is exposed? <em>(A unit isolates a given example with probability <span class="math inline">\(2^{-8} = 1/256\)</span>, so the expected number of isolating units per example is <span class="math inline">\(4096/256 = 16\)</span>, and <span class="math inline">\(P_{\text{iso}} = 1 - (1 - 1/256)^{4096} \approx 1 - e^{-16}\)</span>: essentially the whole batch.)</em></li>
-<li>Why does the span of the batch, revealed by <a href="#eq-gradinv-batch" class="quarto-xref">Equation&nbsp;<span>14.13</span></a>, matter if the attacker cannot tell which direction is which example? <em>(Each example is a combination of <span class="math inline">\(B\)</span> known basis vectors, so any further search, such as DLG, has <span class="math inline">\(B\)</span> unknowns per example instead of <span class="math inline">\(d\)</span>: 4 instead of 64 here, and 4 instead of hundreds of thousands for real images.)</em></li>
-</ul>
-</section>
-</section>
-<section id="code-check-every-attack-by-computation" class="level2" data-number="14.7">
-<h2 data-number="14.7" class="anchored" data-anchor-id="code-check-every-attack-by-computation"><span class="header-section-number">14.7</span> Code: check every attack by computation</h2>
-<p>The script <a href="https://github.com/manuelvloureiro/privacy-preserving-machine-learning-book/blob/main/code/part02-attacks/gradient_inversion.py">code/gradient_inversion.py</a> computes every number in this chapter and draws every figure. The network, its forward and backward passes and the hand-written double backpropagation for DLG are small typed functions; the attacks call them, and the figures loop over them. From the repository root:</p>
+<section id="sec-gradinv-code" class="level2" data-number="14.8">
+<h2 data-number="14.8" class="anchored" data-anchor-id="sec-gradinv-code"><span class="header-section-number">14.8</span> Code</h2>
+<p>The script <a href="https://github.com/manuelvloureiro/privacy-preserving-machine-learning-book/blob/main/code/part02-attacks/gradient_inversion.py">code/part02-attacks/gradient_inversion.py</a> computes every number in this chapter and draws every figure. From the repository root:</p>
 <div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb1"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="ex">uv</span> run python code/part02-attacks/gradient_inversion.py</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-<p>It takes about half a minute. <strong>Output</strong> (seed 0), summarized in <a href="#tbl-gradinv-code" class="quarto-xref">Table&nbsp;<span>14.7</span></a>:</p>
 <div id="tbl-gradinv-code" class="quarto-float quarto-figure quarto-figure-center anchored">
 <figure class="quarto-float quarto-float-tbl figure">
 <figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl" id="tbl-gradinv-code-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-Table&nbsp;14.7: The script’s output with the default seed.
+Table&nbsp;14.7: The script’s output with the default seed. Here <span class="math inline">\(s_1\)</span> and <span class="math inline">\(s_2\)</span> are the two largest singular values of the first-layer gradient.
 </figcaption>
 <div aria-describedby="tbl-gradinv-code-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
 <table class="caption-top table">
@@ -1349,7 +1287,7 @@ Table&nbsp;14.7: The script’s output with the default seed.
 <tbody>
 <tr class="odd">
 <td>Hand example (<a href="#tbl-gradinv-tiny" class="quarto-xref">Table&nbsp;<span>14.2</span></a>)</td>
-<td><span class="math inline">\(p = (0.3441, 0.6559)\)</span>, <span class="math inline">\(\gamma_1 = (-0.3279, 0.9838)\)</span>; both unit ratios give <span class="math inline">\((0.5, 1, 0.2)\)</span>; <span class="math inline">\(\nabla_{b_2}\ell = (-0.6559, 0.6559)\)</span>, label 1 (the first class; index 0 in the script)</td>
+<td><span class="math inline">\(p = (0.3441, 0.6559)\)</span>, <span class="math inline">\(\gamma_1 = (-0.3279, 0.9838)\)</span>; both unit ratios give <span class="math inline">\((0.5, 1, 0.2)\)</span>; label 1 (index 0 in the script)</td>
 </tr>
 <tr class="even">
 <td>Exact recovery, one image, ReLU, <span class="math inline">\(m = 32\)</span></td>
@@ -1372,7 +1310,7 @@ Table&nbsp;14.7: The script’s output with the default seed.
 <td>Largest gap <span class="math inline">\(1.2\times10^{-10}\)</span></td>
 </tr>
 <tr class="odd">
-<td>DLG on batches (<a href="#tbl-gradinv-dlg-batch" class="quarto-xref">Table&nbsp;<span>14.6</span></a>)</td>
+<td>DLG on batches (<a href="#tbl-gradinv-dlg-batch" class="quarto-xref">Table&nbsp;<span>14.5</span></a>)</td>
 <td>Recovered: <span class="math inline">\(B = 1\)</span>: 1.00, <span class="math inline">\(B = 2\)</span>: 0.67, <span class="math inline">\(B = 4\)</span>: 0.29, <span class="math inline">\(B = 8\)</span>: 0.00</td>
 </tr>
 <tr class="even">
@@ -1380,10 +1318,6 @@ Table&nbsp;14.7: The script’s output with the default seed.
 <td>Rank 4; rows in the span to <span class="math inline">\(4.6\times10^{-16}\)</span>; 4 of 4 images isolated</td>
 </tr>
 <tr class="odd">
-<td>Isolation (<a href="#tbl-gradinv-isolation" class="quarto-xref">Table&nbsp;<span>14.5</span></a>)</td>
-<td>Formula matches Gaussian inputs; images exposed far more at large <span class="math inline">\(B\)</span></td>
-</tr>
-<tr class="even">
 <td>Width for isolation probability <span class="math inline">\(\frac12\)</span> at <span class="math inline">\(B = 10\)</span></td>
 <td>710</td>
 </tr>
@@ -1392,102 +1326,88 @@ Table&nbsp;14.7: The script’s output with the default seed.
 </div>
 </figure>
 </div>
-<p>In the table, <span class="math inline">\(s_1\)</span> and <span class="math inline">\(s_2\)</span> are the two largest singular values of the first-layer gradient, so their ratio measures how far the gradient is from rank one. <a href="https://github.com/manuelvloureiro/privacy-preserving-machine-learning-book/blob/main/tests/test_gradient_inversion.py">tests/test_gradient_inversion.py</a> checks that the output still matches.</p>
-<p><strong>What to take from it.</strong> Three things stand out. First, the closed forms are exact: unit ratios and the bias rule for labels are right to rounding error, every time, whatever the network does above the first layer, because everything above only rescales the rows that the division removes. Second, search works when the closed form is missing: DLG recovers single images to about 13 digits, and the final matching loss tells the attacker whether it has succeeded. Third, batching is not a defence. It weakens DLG on this toy, but the label histogram, the span of the batch and every isolated example still come out exactly, and real data are isolated far more often than the independence model predicts.</p>
+<p><a href="https://github.com/manuelvloureiro/privacy-preserving-machine-learning-book/blob/main/tests/test_gradient_inversion.py">tests/test_gradient_inversion.py</a> checks that the output still matches.</p>
 </section>
-<section id="references" class="level2" data-number="14.8">
-<h2 data-number="14.8" class="anchored" data-anchor-id="references"><span class="header-section-number">14.8</span> References</h2>
-<ul>
-<li>Zhu, Liu &amp; Han, “Deep Leakage from Gradients” (NeurIPS 2019). The gradient-matching attack of <a href="#sec-gradinv-dlg" class="quarto-xref"><span>Section 14.5</span></a>, with reconstructions of images and text from single-example and small-batch gradients; replaces ReLU by the sigmoid to keep the objective twice differentiable.</li>
-<li>Zhao, Mopuri &amp; Bilen, “iDLG: Improved Deep Leakage from Gradients” (arXiv 2020). Label recovery from the sign of the last-layer gradient, and DLG with the label fixed.</li>
-<li>Phong, Aono, Hayashi, Wang &amp; Moriai, “Privacy-Preserving Deep Learning via Additively Homomorphic Encryption” (IEEE Transactions on Information Forensics and Security, 2018). Points out that the input of a fully connected layer with a bias can be read off its gradient, <a href="#eq-gradinv-ratio" class="quarto-xref">Equation&nbsp;<span>14.7</span></a>.</li>
-<li>Geiping, Bauermeister, Dröge &amp; Moeller, “Inverting Gradients — How easy is it to break privacy in federated learning?” (NeurIPS 2020). Cosine-similarity matching with a total-variation image prior; reconstructions from trained networks, from several local steps and from batches; the proof that fully connected layers leak their inputs in closed form.</li>
-<li>Fowl, Geiping, Czaja, Goldblum &amp; Goldstein, “Robbing the Fed: Directly Obtaining Private Data in Federated Learning with Modified Models” (ICLR 2022). A malicious server inserts a fully connected block whose units bin inputs by a feature, so that most examples of a large batch are isolated.</li>
-<li>Boenisch, Dziedzic, Schuster, Shamsabadi, Shumailov &amp; Papernot, “When the Curious Abandon Honesty: Federated Learning Is Not Private” (IEEE EuroS&amp;P 2023). Trap weights that make first-layer units fire for single examples; exact recovery from large batches by a malicious server.</li>
-<li>Wainakh et al., “User-Level Label Leakage from Gradients in Federated Learning” (PETS 2022). Label counts from batch gradients, as in <a href="#eq-gradinv-counts" class="quarto-xref">Equation&nbsp;<span>14.10</span></a>.</li>
-<li>Huang, Gupta, Song, Li &amp; Arora, “Evaluating Gradient Inversion Attacks and Defenses in Federated Learning” (NeurIPS 2021). How the strength of these attacks depends on assumptions such as known labels, batch normalization statistics and untrained models.</li>
-<li>McMahan, Moore, Ramage, Hampson &amp; Agüera y Arcas, “Communication-Efficient Learning of Deep Networks from Decentralized Data” (AISTATS 2017). The federated averaging protocol, where clients send updates after several local steps.</li>
-</ul>
-</section>
-<section id="cheat-sheet" class="level2" data-number="14.9">
-<h2 data-number="14.9" class="anchored" data-anchor-id="cheat-sheet"><span class="header-section-number">14.9</span> Cheat sheet</h2>
-<p>Network <span class="math inline">\(a = W_1x + b_1\)</span>, <span class="math inline">\(h = \sigma(a)\)</span>, <span class="math inline">\(z = W_2h + b_2\)</span>, <span class="math inline">\(p = \mathrm{softmax}(z)\)</span>, <span class="math inline">\(\ell = -\ln p_y\)</span>; backward signals <span class="math inline">\(\gamma_2 = p - e_y\)</span> and <span class="math inline">\(\gamma_1 = (W_2^\top\gamma_2)\odot\sigma'(a)\)</span>. The client sends <span class="math inline">\(g\)</span>, the gradient of its average loss over <span class="math inline">\(B\)</span> examples. <a href="#tbl-gradinv-cheat" class="quarto-xref">Table&nbsp;<span>14.8</span></a> collects the results.</p>
-<div id="tbl-gradinv-cheat" class="quarto-float quarto-figure quarto-figure-center anchored">
+<section id="sec-gradinv-summary" class="level2" data-number="14.9">
+<h2 data-number="14.9" class="anchored" data-anchor-id="sec-gradinv-summary"><span class="header-section-number">14.9</span> Summary</h2>
+<div id="tbl-gradinv-summary" class="quarto-float quarto-figure quarto-figure-center anchored">
 <figure class="quarto-float quarto-float-tbl figure">
-<figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl" id="tbl-gradinv-cheat-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-Table&nbsp;14.8: Every result in this chapter.
+<figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl" id="tbl-gradinv-summary-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Table&nbsp;14.8: The results of this chapter, and where each is used.
 </figcaption>
-<div aria-describedby="tbl-gradinv-cheat-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<div aria-describedby="tbl-gradinv-summary-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
 <table class="caption-top table">
 <colgroup>
-<col style="width: 25%">
-<col style="width: 25%">
-<col style="width: 25%">
-<col style="width: 25%">
+<col style="width: 33%">
+<col style="width: 33%">
+<col style="width: 33%">
 </colgroup>
 <thead>
 <tr class="header">
 <th>Result</th>
-<th>Formula</th>
-<th>Needs</th>
-<th>Fails when</th>
+<th>Statement</th>
+<th>Use</th>
 </tr>
 </thead>
 <tbody>
 <tr class="odd">
-<td>Outer product (Fact 1)</td>
-<td><span class="math inline">\(\nabla_W\ell = \gamma x^\top\)</span>, <span class="math inline">\(\nabla_b\ell = \gamma\)</span></td>
-<td>A fully connected layer</td>
-<td>—</td>
+<td><a href="#def-gradinv-game" class="quarto-xref">Definition&nbsp;<span>14.1</span></a></td>
+<td>An honest-but-curious server sees <span class="math inline">\((\theta, g)\)</span> and outputs reconstructions, scored by relative error</td>
+<td>Every attack here needs no malice</td>
 </tr>
 <tr class="even">
-<td>Exact recovery, one example</td>
-<td><span class="math inline">\(x = (\nabla_{W_1}\ell)_{j,:}/(\nabla_{b_1}\ell)_j\)</span></td>
-<td>First layer fully connected with bias</td>
-<td>Convolutional first layer; batches (partly)</td>
+<td><a href="#prp-gradinv-outer" class="quarto-xref">Proposition&nbsp;<span>14.1</span></a></td>
+<td><span class="math inline">\(\nabla_W\ell = \gamma x^\top\)</span> and <span class="math inline">\(\nabla_b\ell = \gamma\)</span> for a fully connected layer</td>
+<td>A fully connected layer’s input sits in its gradient</td>
 </tr>
 <tr class="odd">
-<td>Label, one example</td>
-<td><span class="math inline">\(y = \arg\min_k(\nabla_{b_2}\ell)_k\)</span>; or the non-positive row of <span class="math inline">\(\nabla_{W_2}\ell\)</span> when <span class="math inline">\(h \ge 0\)</span></td>
-<td>Softmax and cross-entropy</td>
-<td><span class="math inline">\(p_y\)</span> rounds to 1</td>
+<td><a href="#prp-gradinv-backward" class="quarto-xref">Proposition&nbsp;<span>14.2</span></a></td>
+<td><span class="math inline">\(\gamma_2 = p - e_y\)</span> and <span class="math inline">\(\gamma_1 = (W_2^\top\gamma_2)\odot\sigma'(a)\)</span></td>
+<td>The sign pattern for labels; a switched-off ReLU unit has a zero row</td>
 </tr>
 <tr class="even">
-<td>Label counts, batch</td>
-<td><span class="math inline">\(n_k = \sum_ip_{ik} - B(\nabla_{b_2}\ell)_k\)</span></td>
-<td>Last-layer bias; a guess of <span class="math inline">\(\sum_ip_{ik}\)</span></td>
-<td>Large <span class="math inline">\(B\)</span> with a poor guess of <span class="math inline">\(\sum_ip_{ik}\)</span></td>
+<td><a href="#thm-gradinv-exact" class="quarto-xref">Theorem&nbsp;<span>14.1</span></a></td>
+<td>One example: <span class="math inline">\(x = (\nabla_{W_1}\ell)_{j,:}/(\nabla_{b_1}\ell)_j\)</span>, and <span class="math inline">\(\nabla_{W_1}\ell\)</span> has rank one</td>
+<td>The input costs one division; fails for a convolutional first layer</td>
 </tr>
 <tr class="odd">
-<td>Deep Leakage from Gradients</td>
-<td><span class="math inline">\(\min_{x'}\| G(x') - g\|^2\)</span> by gradient descent</td>
-<td>Twice-differentiable network; labels</td>
-<td>Optimizer stuck (final <span class="math inline">\(R \gg 0\)</span>), larger batches</td>
+<td><a href="#prp-gradinv-labels" class="quarto-xref">Proposition&nbsp;<span>14.3</span></a></td>
+<td><span class="math inline">\(y = \arg\min_k(\nabla_{b_2}\ell)_k\)</span>; <span class="math inline">\(n_k = \sum_ip_{ik} - B(\nabla_{b_2}\ell)_k\)</span></td>
+<td>The label costs one sign; batch counts are exact for small batches</td>
 </tr>
 <tr class="even">
-<td>Span of a batch</td>
-<td><span class="math inline">\(\operatorname{rank}\nabla_{W_1}\ell \le B\)</span>, rows in <span class="math inline">\(\operatorname{span}\{x_i\}\)</span></td>
-<td>Fully connected first layer</td>
-<td>—</td>
+<td><a href="#def-gradinv-dlg" class="quarto-xref">Definition&nbsp;<span>14.3</span></a>, <a href="#prp-gradinv-dlg" class="quarto-xref">Proposition&nbsp;<span>14.4</span></a></td>
+<td>Minimize <span class="math inline">\(R(x') = \Vert G(x') - g\Vert^2\)</span>; the true batch has <span class="math inline">\(R = 0\)</span></td>
+<td>No closed form needed, only a twice-differentiable network; a final <span class="math inline">\(R\)</span> well above zero means the search is stuck</td>
 </tr>
 <tr class="odd">
-<td>Isolation, batch</td>
-<td><span class="math inline">\(P_{\text{iso}} = 1 - (1 - 2^{-B})^m\)</span> under independence</td>
-<td>ReLU units, random weights</td>
-<td><span class="math inline">\(m \ll 2^B\)</span> for symmetric data; much slower decay for real data</td>
+<td><a href="#prp-gradinv-batch" class="quarto-xref">Proposition&nbsp;<span>14.5</span></a></td>
+<td><span class="math inline">\(\operatorname{rank}\nabla_{W_1}\ell \le B\)</span>, rows in the span of the batch; unit ratios are weighted combinations</td>
+<td>Batching hinders search, not structure: the span and isolated examples leak</td>
+</tr>
+<tr class="even">
+<td><a href="#prp-gradinv-isolation" class="quarto-xref">Proposition&nbsp;<span>14.6</span></a></td>
+<td><span class="math inline">\(P_{\text{iso}} = 1 - (1 - 2^{-B})^m\)</span> for independent units</td>
+<td>Most of a batch is exposed once <span class="math inline">\(m\)</span> is much larger than <span class="math inline">\(2^B\)</span>; real data are isolated far more often</td>
 </tr>
 </tbody>
 </table>
 </div>
 </figure>
 </div>
-<p><strong>Rules of thumb</strong></p>
+</section>
+<section id="sec-gradinv-references" class="level2" data-number="14.10">
+<h2 data-number="14.10" class="anchored" data-anchor-id="sec-gradinv-references"><span class="header-section-number">14.10</span> References</h2>
 <ul>
-<li>A gradient is a sum of outer products of backward signals with forward inputs. Any layer whose input you can isolate, you can read.</li>
-<li>One example, a fully connected layer with a bias: the input costs one division. The label costs one sign.</li>
-<li>When there is no closed form, match gradients. The final matching loss tells you whether it worked.</li>
-<li>Batching helps against search but not against structure. The label histogram and the span of the batch always leak, and examples isolated by a single unit leak exactly; with real data that is most of them for batches of 10 or more on wide layers.</li>
-<li>An honest server can already do all of this. A malicious server that chooses the weights can do it for large batches by design.</li>
+<li>Zhu, Liu &amp; Han, “Deep Leakage from Gradients” (NeurIPS 2019). The gradient-matching attack of <a href="#sec-gradinv-dlg" class="quarto-xref"><span>Section 14.5</span></a>, with reconstructions of images and text from single-example and small-batch gradients; replaces ReLU by the sigmoid to keep the objective twice differentiable.</li>
+<li>Zhao, Mopuri &amp; Bilen, “iDLG: Improved Deep Leakage from Gradients” (arXiv 2020). Label recovery from the sign of the last-layer gradient, and DLG with the label fixed.</li>
+<li>Phong, Aono, Hayashi, Wang &amp; Moriai, “Privacy-Preserving Deep Learning via Additively Homomorphic Encryption” (IEEE Transactions on Information Forensics and Security, 2018). Points out that the input of a fully connected layer with a bias can be read off its gradient, <a href="#eq-gradinv-ratio" class="quarto-xref">Equation&nbsp;<span>14.13</span></a>.</li>
+<li>Geiping, Bauermeister, Dröge &amp; Moeller, “Inverting Gradients — How easy is it to break privacy in federated learning?” (NeurIPS 2020). Cosine-similarity matching with a total-variation image prior; reconstructions from trained networks, from several local steps and from batches; the proof that fully connected layers leak their inputs in closed form.</li>
+<li>Fowl, Geiping, Czaja, Goldblum &amp; Goldstein, “Robbing the Fed: Directly Obtaining Private Data in Federated Learning with Modified Models” (ICLR 2022). A malicious server inserts a fully connected block whose units bin inputs by a feature, so that most examples of a large batch are isolated.</li>
+<li>Boenisch, Dziedzic, Schuster, Shamsabadi, Shumailov &amp; Papernot, “When the Curious Abandon Honesty: Federated Learning Is Not Private” (IEEE EuroS&amp;P 2023). Trap weights that make first-layer units fire for single examples; exact recovery from large batches by a malicious server.</li>
+<li>Wainakh et al., “User-Level Label Leakage from Gradients in Federated Learning” (PETS 2022). Label counts from batch gradients, as in <a href="#eq-gradinv-counts" class="quarto-xref">Equation&nbsp;<span>14.15</span></a>.</li>
+<li>Huang, Gupta, Song, Li &amp; Arora, “Evaluating Gradient Inversion Attacks and Defenses in Federated Learning” (NeurIPS 2021). How the strength of these attacks depends on assumptions such as known labels, batch normalization statistics and untrained models.</li>
+<li>McMahan, Moore, Ramage, Hampson &amp; Agüera y Arcas, “Communication-Efficient Learning of Deep Networks from Decentralized Data” (AISTATS 2017). The federated averaging protocol, where clients send updates after several local steps.</li>
 </ul>
 <p><strong>Practice.</strong> Exercises for this chapter, each with a worked solution, are in <a href="../../book-exercises/part02-attacks/06-gradient-inversion.html">the exercise book</a>.</p>
 

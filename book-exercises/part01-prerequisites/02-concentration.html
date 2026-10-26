@@ -501,14 +501,14 @@ window.Quarto = {
     <h2 id="toc-title">Table of contents</h2>
    
   <ul>
-  <li><a href="#sec-sol-concentration-1" id="toc-sec-sol-concentration-1" class="nav-link active" data-scroll-target="#sec-sol-concentration-1"><span class="header-section-number">2.1</span> Tightness of Markov</a></li>
-  <li><a href="#sec-sol-concentration-2" id="toc-sec-sol-concentration-2" class="nav-link" data-scroll-target="#sec-sol-concentration-2"><span class="header-section-number">2.2</span> Cantelli’s inequality</a></li>
-  <li><a href="#sec-sol-concentration-3" id="toc-sec-sol-concentration-3" class="nav-link" data-scroll-target="#sec-sol-concentration-3"><span class="header-section-number">2.3</span> A direct Hoeffding lemma</a></li>
-  <li><a href="#sec-sol-concentration-4" id="toc-sec-sol-concentration-4" class="nav-link" data-scroll-target="#sec-sol-concentration-4"><span class="header-section-number">2.4</span> Sample size for a mean</a></li>
-  <li><a href="#sec-sol-concentration-5" id="toc-sec-sol-concentration-5" class="nav-link" data-scroll-target="#sec-sol-concentration-5"><span class="header-section-number">2.5</span> Noisy argmax</a></li>
-  <li><a href="#sec-sol-concentration-6" id="toc-sec-sol-concentration-6" class="nav-link" data-scroll-target="#sec-sol-concentration-6"><span class="header-section-number">2.6</span> Chernoff for a Poisson</a></li>
-  <li><a href="#sec-sol-concentration-7" id="toc-sec-sol-concentration-7" class="nav-link" data-scroll-target="#sec-sol-concentration-7"><span class="header-section-number">2.7</span> Azuma for the coin game</a></li>
-  <li><a href="#sec-sol-concentration-8" id="toc-sec-sol-concentration-8" class="nav-link" data-scroll-target="#sec-sol-concentration-8"><span class="header-section-number">2.8</span> Low-rate estimate</a></li>
+  <li><a href="#sec-sol-conc-1" id="toc-sec-sol-conc-1" class="nav-link active" data-scroll-target="#sec-sol-conc-1"><span class="header-section-number">2.1</span> Tightness of Markov</a></li>
+  <li><a href="#sec-sol-conc-2" id="toc-sec-sol-conc-2" class="nav-link" data-scroll-target="#sec-sol-conc-2"><span class="header-section-number">2.2</span> Cantelli’s inequality</a></li>
+  <li><a href="#sec-sol-conc-3" id="toc-sec-sol-conc-3" class="nav-link" data-scroll-target="#sec-sol-conc-3"><span class="header-section-number">2.3</span> A direct Hoeffding lemma</a></li>
+  <li><a href="#sec-sol-conc-4" id="toc-sec-sol-conc-4" class="nav-link" data-scroll-target="#sec-sol-conc-4"><span class="header-section-number">2.4</span> Sample size for a mean</a></li>
+  <li><a href="#sec-sol-conc-5" id="toc-sec-sol-conc-5" class="nav-link" data-scroll-target="#sec-sol-conc-5"><span class="header-section-number">2.5</span> Noisy argmax</a></li>
+  <li><a href="#sec-sol-conc-6" id="toc-sec-sol-conc-6" class="nav-link" data-scroll-target="#sec-sol-conc-6"><span class="header-section-number">2.6</span> Chernoff for a Poisson</a></li>
+  <li><a href="#sec-sol-conc-7" id="toc-sec-sol-conc-7" class="nav-link" data-scroll-target="#sec-sol-conc-7"><span class="header-section-number">2.7</span> Azuma for the coin game</a></li>
+  <li><a href="#sec-sol-conc-8" id="toc-sec-sol-conc-8" class="nav-link" data-scroll-target="#sec-sol-conc-8"><span class="header-section-number">2.8</span> Low-rate estimate</a></li>
   </ul>
 </nav>
     </div>
@@ -535,8 +535,8 @@ window.Quarto = {
 
 
 <p>Exercises for <a href="../../book-full/part01-prerequisites/02-concentration.html">Concentration inequalities</a>, each with a worked solution. Try each exercise before opening its solution. The numbers that are not short hand calculations come from <code>code/part01-prerequisites/solutions_concentration.py</code>, which you can run with <code>uv run python code/part01-prerequisites/solutions_concentration.py</code>.</p>
-<section id="sec-sol-concentration-1" class="level2" data-number="2.1">
-<h2 data-number="2.1" class="anchored" data-anchor-id="sec-sol-concentration-1"><span class="header-section-number">2.1</span> Tightness of Markov</h2>
+<section id="sec-sol-conc-1" class="level2" data-number="2.1">
+<h2 data-number="2.1" class="anchored" data-anchor-id="sec-sol-conc-1"><span class="header-section-number">2.1</span> Tightness of Markov</h2>
 <blockquote class="blockquote">
 <p><strong>Exercise 1.</strong> <strong>Tightness of Markov.</strong> For given <span class="math inline">\(\mu\)</span> and <span class="math inline">\(a\)</span>, construct the distribution attaining <span class="math inline">\(\Pr[X \ge a] = \mu/a\)</span>, and explain why no variable with mean <span class="math inline">\(\mu\)</span> can do worse. <em>(Markov)</em></p>
 </blockquote>
@@ -559,14 +559,14 @@ window.Quarto = {
 <li>Its mean is <span class="math inline">\(a \cdot \mu/a + 0 = \mu\)</span>.</li>
 <li><span class="math inline">\(X \ge a\)</span> happens exactly when <span class="math inline">\(X = a\)</span>, so <span class="math inline">\(\Pr[X \ge a] = \mu/a\)</span>, which is Markov’s bound.</li>
 </ol>
-<p><strong>Why no variable can do worse.</strong> Markov’s derivation used nothing about <span class="math inline">\(X\)</span> except <span class="math inline">\(X \ge 0\)</span> and <span class="math inline">\(\mathbb E[X] = \mu\)</span>. So every non-negative <span class="math inline">\(X\)</span> with mean <span class="math inline">\(\mu\)</span> has <span class="math inline">\(\Pr[X \ge a] \le \mu/a\)</span>, and the two-point variable reaches that ceiling.</p>
-<p><strong>Why this variable, and only this one.</strong> The only inequality in the derivation is step 1, <span class="math inline">\(a\,\mathbf 1[X \ge a] \le X\)</span>. Equality after averaging needs equality on every outcome (up to probability zero), so <span class="math inline">\(X\)</span> must equal <span class="math inline">\(a\)</span> where <span class="math inline">\(X \ge a\)</span> and <span class="math inline">\(0\)</span> where <span class="math inline">\(X &lt; a\)</span>. Take <span class="math inline">\(\mu = 1\)</span> and <span class="math inline">\(a = 4\)</span> and compare the two rows, as in <a href="../../book-full/part01-prerequisites/02-concentration.html#tbl-die-markov">Table&nbsp;2.3</a>:</p>
-<div id="tbl-sol-concentration-markov-tight" class="quarto-float quarto-figure quarto-figure-center anchored">
+<p><strong>Why no variable can do worse.</strong> The proof of <a href="../../book-full/part01-prerequisites/02-concentration.html#thm-conc-markov">Theorem&nbsp;2.1</a> used nothing about <span class="math inline">\(X\)</span> except <span class="math inline">\(X \ge 0\)</span> and <span class="math inline">\(\mathbb E[X] = \mu\)</span>. So every non-negative <span class="math inline">\(X\)</span> with mean <span class="math inline">\(\mu\)</span> has <span class="math inline">\(\Pr[X \ge a] \le \mu/a\)</span>, and the two-point variable reaches that ceiling.</p>
+<p><strong>Why this variable, and only this one.</strong> The only inequality in that proof is step 1, <span class="math inline">\(a\,\mathbf 1[X \ge a] \le X\)</span>. Equality after averaging needs equality on every outcome (up to probability zero), so <span class="math inline">\(X\)</span> must equal <span class="math inline">\(a\)</span> where <span class="math inline">\(X \ge a\)</span> and <span class="math inline">\(0\)</span> where <span class="math inline">\(X &lt; a\)</span>. Take <span class="math inline">\(\mu = 1\)</span> and <span class="math inline">\(a = 4\)</span> and compare the two rows, as in <a href="../../book-full/part01-prerequisites/02-concentration.html#tbl-conc-die-markov">Table&nbsp;2.1</a>:</p>
+<div id="tbl-sol-conc-markov-tight" class="quarto-float quarto-figure quarto-figure-center anchored">
 <figure class="quarto-float quarto-float-tbl figure">
-<figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl" id="tbl-sol-concentration-markov-tight-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl" id="tbl-sol-conc-markov-tight-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
 Table&nbsp;2.1: The scaled indicator and the variable agree on every outcome of the two-point distribution with <span class="math inline">\(\mu = 1\)</span>, <span class="math inline">\(a = 4\)</span>, so Markov loses nothing.
 </figcaption>
-<div aria-describedby="tbl-sol-concentration-markov-tight-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<div aria-describedby="tbl-sol-conc-markov-tight-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
 <table class="caption-top table">
 <thead>
 <tr class="header">
@@ -594,15 +594,15 @@ Table&nbsp;2.1: The scaled indicator and the variable agree on every outcome of 
 </div>
 </figure>
 </div>
-<p>The two rows of <a href="#tbl-sol-concentration-markov-tight" class="quarto-xref">Table&nbsp;<span>2.1</span></a> are identical. On the die, by contrast, every roll except 5 had slack. Any mass strictly between 0 and <span class="math inline">\(a\)</span>, or strictly above <span class="math inline">\(a\)</span>, creates slack, because it adds to the mean without adding to <span class="math inline">\(\Pr[X \ge a]\)</span> at the full rate.</p>
+<p>The two rows of <a href="#tbl-sol-conc-markov-tight" class="quarto-xref">Table&nbsp;<span>2.1</span></a> are identical. On the die, by contrast, every roll except 5 had slack. Any mass strictly between 0 and <span class="math inline">\(a\)</span>, or strictly above <span class="math inline">\(a\)</span>, creates slack, because it adds to the mean without adding to <span class="math inline">\(\Pr[X \ge a]\)</span> at the full rate.</p>
 <p>Non-negativity matters. Without it, <span class="math inline">\(X = a\)</span> with probability <span class="math inline">\(1 - \xi\)</span> and <span class="math inline">\(X = -(a(1-\xi) - \mu)/\xi\)</span> otherwise has mean <span class="math inline">\(\mu\)</span> and <span class="math inline">\(\Pr[X \ge a] = 1 - \xi\)</span>, as close to 1 as you like.</p>
 <p><em>Markov is the best bound that uses only the mean: its worst case puts all the mass at <span class="math inline">\(0\)</span> and <span class="math inline">\(a\)</span>.</em></p>
 </div>
 </div>
 </div>
 </section>
-<section id="sec-sol-concentration-2" class="level2" data-number="2.2">
-<h2 data-number="2.2" class="anchored" data-anchor-id="sec-sol-concentration-2"><span class="header-section-number">2.2</span> Cantelli’s inequality</h2>
+<section id="sec-sol-conc-2" class="level2" data-number="2.2">
+<h2 data-number="2.2" class="anchored" data-anchor-id="sec-sol-conc-2"><span class="header-section-number">2.2</span> Cantelli’s inequality</h2>
 <blockquote class="blockquote">
 <p><strong>Exercise 2.</strong> <strong>Cantelli’s inequality.</strong> Show that <span class="math inline">\(\Pr[X - \mu \ge t] \le \sigma^2/(\sigma^2 + t^2)\)</span>. <em>Hint: apply Markov to <span class="math inline">\((X - \mu + u)^2\)</span> for <span class="math inline">\(u &gt; 0\)</span>, then optimize <span class="math inline">\(u\)</span>.</em> <em>(Generalized Markov)</em></p>
 </blockquote>
@@ -625,15 +625,15 @@ Table&nbsp;2.1: The scaled indicator and the variable agree on every outcome of 
 <li><strong>Optimize <span class="math inline">\(u\)</span>.</strong> The log of the right side is <span class="math inline">\(\ln(\sigma^2 + u^2) - 2\ln(t + u)\)</span>, with derivative <span class="math inline">\(\frac{2u}{\sigma^2 + u^2} - \frac{2}{t + u}\)</span>. It vanishes when <span class="math inline">\(u(t + u) = \sigma^2 + u^2\)</span>, that is, at <span class="math inline">\(u = \sigma^2/t &gt; 0\)</span>. The derivative is negative below this point and positive above it, so it is the minimum.</li>
 <li><strong>Substitute</strong> <span class="math inline">\(u = \sigma^2/t\)</span>. The numerator is <span class="math inline">\(\sigma^2 + \sigma^4/t^2 = \sigma^2(t^2 + \sigma^2)/t^2\)</span>, and the denominator is <span class="math inline">\((t + \sigma^2/t)^2 = (t^2 + \sigma^2)^2/t^2\)</span>. Their ratio is <span id="eq-auto-02concentration-2"><span class="math display">\[\Pr[X - \mu \ge t] \le \frac{\sigma^2}{\sigma^2 + t^2}. \tag{2.2}\]</span></span></li>
 </ol>
-<p><strong>How it compares with Chebyshev.</strong> Setting <span class="math inline">\(u = 0\)</span> in step 2 gives back <span class="math inline">\(\sigma^2/t^2\)</span>. The shift <span class="math inline">\(u\)</span> helps because a one-sided event lets you move the centre of the square towards the side you don’t care about. At <span class="math inline">\(t = \sigma\)</span>, Chebyshev gives 1 and Cantelli gives <span class="math inline">\(1/2\)</span>. For a standard normal at <span class="math inline">\(t = 3\)</span>, Cantelli gives <span class="math inline">\(1/10 = 0.1\)</span> against Chebyshev’s <span class="math inline">\(0.111\)</span> (<a href="../../book-full/part01-prerequisites/02-concentration.html#tbl-concentration-results">Table&nbsp;2.5</a>): the gain fades for large <span class="math inline">\(t\)</span>, where both decay like <span class="math inline">\(\sigma^2/t^2\)</span>.</p>
+<p><strong>How it compares with Chebyshev.</strong> Setting <span class="math inline">\(u = 0\)</span> in step 2 gives back <span class="math inline">\(\sigma^2/t^2\)</span>. The shift <span class="math inline">\(u\)</span> helps because a one-sided event lets you move the centre of the square towards the side you don’t care about. At <span class="math inline">\(t = \sigma\)</span>, Chebyshev gives 1 and Cantelli gives <span class="math inline">\(1/2\)</span>. For a standard normal at <span class="math inline">\(t = 3\)</span>, Cantelli gives <span class="math inline">\(1/10 = 0.1\)</span> against Chebyshev’s <span class="math inline">\(0.111\)</span> (<a href="../../book-full/part01-prerequisites/02-concentration.html#tbl-conc-code">Table&nbsp;2.3</a>): the gain fades for large <span class="math inline">\(t\)</span>, where both decay like <span class="math inline">\(\sigma^2/t^2\)</span>.</p>
 <p><strong>It is tight.</strong> Let <span class="math inline">\(Y = t\)</span> with probability <span class="math inline">\(p = \sigma^2/(\sigma^2 + t^2)\)</span> and <span class="math inline">\(Y = -\sigma^2/t\)</span> otherwise. Its mean is <span class="math inline">\(tp - (\sigma^2/t)(1 - p) = \frac{t\sigma^2 - \sigma^2 t}{\sigma^2 + t^2} = 0\)</span>, its variance is <span class="math inline">\(t^2 p + (\sigma^4/t^2)(1-p) = \frac{t^2\sigma^2 + \sigma^4}{\sigma^2 + t^2} = \sigma^2\)</span>, and <span class="math inline">\(\Pr[Y \ge t] = p\)</span>.</p>
 <p><em>A one-sided question deserves a one-sided bound: shifting before squaring buys up to a factor of 2 over Chebyshev.</em></p>
 </div>
 </div>
 </div>
 </section>
-<section id="sec-sol-concentration-3" class="level2" data-number="2.3">
-<h2 data-number="2.3" class="anchored" data-anchor-id="sec-sol-concentration-3"><span class="header-section-number">2.3</span> A direct Hoeffding lemma</h2>
+<section id="sec-sol-conc-3" class="level2" data-number="2.3">
+<h2 data-number="2.3" class="anchored" data-anchor-id="sec-sol-conc-3"><span class="header-section-number">2.3</span> A direct Hoeffding lemma</h2>
 <blockquote class="blockquote">
 <p><strong>Exercise 3.</strong> <strong>A direct Hoeffding lemma.</strong> For <span class="math inline">\(X = \pm1\)</span> with probability <span class="math inline">\(\frac12\)</span> each, show that <span class="math inline">\(\mathbb E[e^{\lambda X}] = \cosh\lambda \le e^{\lambda^2/2}\)</span>. <em>Hint: compare Taylor series term by term, using <span class="math inline">\((2k)! \ge 2^k k!\)</span>.</em> <em>(Sub-Gaussian)</em></p>
 </blockquote>
@@ -656,13 +656,13 @@ Table&nbsp;2.1: The scaled indicator and the variable agree on every outcome of 
 <li><strong>The factorial inequality.</strong> Group <span class="math inline">\((2k)!\)</span> into <span class="math inline">\(k\)</span> pairs of consecutive factors: <span id="eq-auto-02concentration-3"><span class="math display">\[(2k)! = \prod_{i=1}^{k}(2i - 1)(2i) \ge \prod_{i=1}^{k} 2i = 2^k k!, \tag{2.3}\]</span></span> since each odd factor <span class="math inline">\(2i - 1\)</span> is at least 1.</li>
 <li><strong>Compare term by term.</strong> Both series have the same powers <span class="math inline">\(\lambda^{2k} \ge 0\)</span>. By step 4 each coefficient of <span class="math inline">\(\cosh\lambda\)</span> is at most the matching coefficient of <span class="math inline">\(e^{\lambda^2/2}\)</span>. Summing gives <span class="math inline">\(\cosh\lambda \le e^{\lambda^2/2}\)</span> for every real <span class="math inline">\(\lambda\)</span>.</li>
 </ol>
-<p><a href="#tbl-sol-concentration-cosh" class="quarto-xref">Table&nbsp;<span>2.2</span></a> shows the first four terms.</p>
-<div id="tbl-sol-concentration-cosh" class="quarto-float quarto-figure quarto-figure-center anchored">
+<p><a href="#tbl-sol-conc-cosh" class="quarto-xref">Table&nbsp;<span>2.2</span></a> shows the first four terms.</p>
+<div id="tbl-sol-conc-cosh" class="quarto-float quarto-figure quarto-figure-center anchored">
 <figure class="quarto-float quarto-float-tbl figure">
-<figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl" id="tbl-sol-concentration-cosh-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl" id="tbl-sol-conc-cosh-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
 Table&nbsp;2.2: The first terms of the two series. They agree up to <span class="math inline">\(\lambda^2\)</span>, which is why the variance proxy 1 equals the true variance; afterwards the bound’s coefficients are larger.
 </figcaption>
-<div aria-describedby="tbl-sol-concentration-cosh-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<div aria-describedby="tbl-sol-conc-cosh-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
 <table class="caption-top table">
 <colgroup>
 <col style="width: 25%">
@@ -708,15 +708,15 @@ Table&nbsp;2.2: The first terms of the two series. They agree up to <span class=
 </div>
 </figure>
 </div>
-<p>So <span class="math inline">\(X\)</span> is 1-sub-Gaussian. Hoeffding’s lemma on <span class="math inline">\([l, u] = [-1, 1]\)</span> gives the same constant, <span class="math inline">\((u - l)/2 = 1\)</span>: this fair coin on the endpoints is exactly the lemma’s worst case. The series comparison reaches the same constant without the convexity argument.</p>
+<p>So <span class="math inline">\(X\)</span> is 1-sub-Gaussian. Hoeffding’s lemma (<a href="../../book-full/part01-prerequisites/02-concentration.html#lem-conc-hoeffding">Lemma&nbsp;2.2</a>) on <span class="math inline">\([l, u] = [-1, 1]\)</span> gives the same constant, <span class="math inline">\((u - l)/2 = 1\)</span>: this fair coin on the endpoints is exactly the lemma’s worst case. The series comparison reaches the same constant without the convexity argument.</p>
 </div>
 </div>
 </div>
 </section>
-<section id="sec-sol-concentration-4" class="level2" data-number="2.4">
-<h2 data-number="2.4" class="anchored" data-anchor-id="sec-sol-concentration-4"><span class="header-section-number">2.4</span> Sample size for a mean</h2>
+<section id="sec-sol-conc-4" class="level2" data-number="2.4">
+<h2 data-number="2.4" class="anchored" data-anchor-id="sec-sol-conc-4"><span class="header-section-number">2.4</span> Sample size for a mean</h2>
 <blockquote class="blockquote">
-<p><strong>Exercise 4.</strong> <strong>Sample size for a mean.</strong> How many samples in <span class="math inline">\([0, 1]\)</span> does Hoeffding need to estimate a mean to within <span class="math inline">\(\pm0.01\)</span> with probability 0.99? <em>Check: <span class="math inline">\(n \ge \ln(200)/(2\times10^{-4}) \approx 26{,}500\)</span>.</em> <em>(Hoeffding, Fact 5)</em></p>
+<p><strong>Exercise 4.</strong> <strong>Sample size for a mean.</strong> How many samples in <span class="math inline">\([0, 1]\)</span> does Hoeffding need to estimate a mean to within <span class="math inline">\(\pm0.01\)</span> with probability 0.99? <em>Check: <span class="math inline">\(n \ge \ln(200)/(2\times10^{-4}) \approx 26{,}500\)</span>.</em> <em>(Hoeffding, inverting a tail bound)</em></p>
 </blockquote>
 <div class="callout callout-style-default callout-tip callout-titled" title="Solution">
 <div class="callout-header d-flex align-content-center collapsed" data-bs-toggle="collapse" data-bs-target=".callout-4-contents" aria-controls="callout-4" aria-expanded="false" aria-label="Toggle callout">
@@ -731,9 +731,9 @@ Table&nbsp;2.2: The first terms of the two series. They agree up to <span class=
 <div id="callout-4" class="callout-4-contents callout-collapse collapse">
 <div class="callout-body-container callout-body">
 <ol type="1">
-<li><strong>Two-sided Hoeffding</strong> for the mean of <span class="math inline">\(n\)</span> independent variables in <span class="math inline">\([0, 1]\)</span>, so <span class="math inline">\(u - l = 1\)</span>: <span class="math inline">\(\Pr[|\bar X_n - \mu| \ge t] \le 2e^{-2nt^2}\)</span> (the one-sided bound, doubled for the lower tail).</li>
+<li><strong>Two-sided Hoeffding</strong> (<a href="../../book-full/part01-prerequisites/02-concentration.html#thm-conc-hoeffding">Theorem&nbsp;2.5</a>) for the mean of <span class="math inline">\(n\)</span> independent variables in <span class="math inline">\([0, 1]\)</span>, so <span class="math inline">\(u - l = 1\)</span>: <span class="math inline">\(\Pr[|\bar X_n - \mu| \ge t] \le 2e^{-2nt^2}\)</span> (the one-sided bound, doubled for the lower tail).</li>
 <li><strong>Set the failure probability</strong> to <span class="math inline">\(\beta = 1 - 0.99 = 0.01\)</span> and require <span class="math inline">\(2e^{-2nt^2} \le \beta\)</span>.</li>
-<li><strong>Solve for <span class="math inline">\(n\)</span></strong> (Fact 5): take logs, <span class="math inline">\(-2nt^2 \le \ln(\beta/2)\)</span>, so <span id="eq-auto-02concentration-4"><span class="math display">\[n \ge \frac{\ln(2/\beta)}{2t^2} = \frac{\ln 200}{2 \times 10^{-4}} = 26{,}491.6. \tag{2.4}\]</span></span></li>
+<li><strong>Solve for <span class="math inline">\(n\)</span></strong> (<a href="../../book-full/part01-prerequisites/02-concentration.html#lem-conc-width">Lemma&nbsp;2.1</a>): take logs, <span class="math inline">\(-2nt^2 \le \ln(\beta/2)\)</span>, so <span id="eq-auto-02concentration-4"><span class="math display">\[n \ge \frac{\ln(2/\beta)}{2t^2} = \frac{\ln 200}{2 \times 10^{-4}} = 26{,}491.6. \tag{2.4}\]</span></span></li>
 <li><span class="math inline">\(n\)</span> is an integer, so <strong><span class="math inline">\(n = 26{,}492\)</span></strong> samples suffice. This matches the check value.</li>
 </ol>
 <p>For comparison, Chebyshev with the largest possible variance on <span class="math inline">\([0, 1]\)</span>, <span class="math inline">\(\sigma^2 \le 1/4\)</span>, needs <span class="math inline">\(n \ge \sigma^2/(t^2\beta) = 0.25/(10^{-4} \times 0.01) = 250{,}000\)</span>: almost ten times more. The <span class="math inline">\(\ln(1/\beta)\)</span> in Hoeffding against the <span class="math inline">\(1/\beta\)</span> in Chebyshev is the whole difference.</p>
@@ -742,8 +742,8 @@ Table&nbsp;2.2: The first terms of the two series. They agree up to <span class=
 </div>
 </div>
 </section>
-<section id="sec-sol-concentration-5" class="level2" data-number="2.5">
-<h2 data-number="2.5" class="anchored" data-anchor-id="sec-sol-concentration-5"><span class="header-section-number">2.5</span> Noisy argmax</h2>
+<section id="sec-sol-conc-5" class="level2" data-number="2.5">
+<h2 data-number="2.5" class="anchored" data-anchor-id="sec-sol-conc-5"><span class="header-section-number">2.5</span> Noisy argmax</h2>
 <blockquote class="blockquote">
 <p><strong>Exercise 5.</strong> <strong>Noisy argmax.</strong> You add independent <span class="math inline">\(\mathrm{Lap}(b)\)</span> noise to each of <span class="math inline">\(k\)</span> scores and pick the largest noisy score. Show that with probability at least <span class="math inline">\(1-\beta\)</span>, the true score of the item you pick is within <span class="math inline">\(2b\ln(k/\beta)\)</span> of the true maximum. <em>(Laplace tail + union bound)</em></p>
 </blockquote>
@@ -761,21 +761,21 @@ Table&nbsp;2.2: The first terms of the two series. They agree up to <span class=
 <div class="callout-body-container callout-body">
 <p>Write <span class="math inline">\(u_1, \dots, u_k\)</span> for the true scores, <span class="math inline">\(Z_1, \dots, Z_k\)</span> for the noise, <span class="math inline">\(i^*\)</span> for an item with the largest true score, and <span class="math inline">\(\hat\imath\)</span> for the item with the largest noisy score <span class="math inline">\(u_i + Z_i\)</span>. Let <span class="math inline">\(\tau = b\ln(k/\beta)\)</span>.</p>
 <ol type="1">
-<li><strong>One draw (Laplace tail).</strong> For each <span class="math inline">\(i\)</span>, <span class="math inline">\(\Pr[|Z_i| \ge \tau] = e^{-\tau/b} = \beta/k\)</span>.</li>
-<li><strong>All draws at once (union bound, Fact 2).</strong> <span class="math inline">\(\Pr[\text{some } |Z_i| \ge \tau] \le k \cdot \beta/k = \beta\)</span>. So the event <span class="math inline">\(G\)</span> = “every <span class="math inline">\(|Z_i| &lt; \tau\)</span>” has probability at least <span class="math inline">\(1 - \beta\)</span>.</li>
+<li><strong>One draw (Laplace tail, <a href="../../book-full/part01-prerequisites/02-concentration.html#prp-conc-laplace-tail">Proposition&nbsp;2.3</a>).</strong> For each <span class="math inline">\(i\)</span>, <span class="math inline">\(\Pr[|Z_i| \ge \tau] = e^{-\tau/b} = \beta/k\)</span>.</li>
+<li><strong>All draws at once (union bound, <a href="../../book-full/part01-prerequisites/02-concentration.html#lem-conc-union">Lemma&nbsp;2.3</a>).</strong> <span class="math inline">\(\Pr[\text{some } |Z_i| \ge \tau] \le k \cdot \beta/k = \beta\)</span>. So the event <span class="math inline">\(G\)</span> = “every <span class="math inline">\(|Z_i| &lt; \tau\)</span>” has probability at least <span class="math inline">\(1 - \beta\)</span>.</li>
 <li><strong>The choice.</strong> <span class="math inline">\(\hat\imath\)</span> maximizes the noisy score, so in particular <span class="math inline">\(u_{\hat\imath} + Z_{\hat\imath} \ge u_{i^*} + Z_{i^*}\)</span>.</li>
 <li><strong>Rearrange:</strong> <span class="math inline">\(u_{i^*} - u_{\hat\imath} \le Z_{\hat\imath} - Z_{i^*}\)</span>.</li>
 <li><strong>On <span class="math inline">\(G\)</span></strong>, both noise terms are below <span class="math inline">\(\tau\)</span> in absolute value, so <span class="math inline">\(Z_{\hat\imath} - Z_{i^*} &lt; 2\tau\)</span>. Hence <span class="math inline">\(u_{i^*} - u_{\hat\imath} &lt; 2b\ln(k/\beta)\)</span> with probability at least <span class="math inline">\(1 - \beta\)</span>.</li>
 </ol>
 <p><strong>Why step 2 needs the union bound.</strong> The picked item <span class="math inline">\(\hat\imath\)</span> depends on the noise: it tends to be an item whose noise came out large. So you can’t apply the one-draw bound to <span class="math inline">\(Z_{\hat\imath}\)</span> as if <span class="math inline">\(\hat\imath\)</span> were fixed in advance. Bounding all <span class="math inline">\(k\)</span> noise terms at once covers whichever item gets picked.</p>
-<p><strong>Size.</strong> With <span class="math inline">\(k = 100\)</span>, <span class="math inline">\(b = 1\)</span> and <span class="math inline">\(\beta = 0.05\)</span>, the guarantee is <span class="math inline">\(2\ln 2000 = 15.20\)</span>, twice the maximum-of-Laplace bound 7.60 of <a href="../../book-full/part01-prerequisites/02-concentration.html#tbl-concentration-results">Table&nbsp;2.5</a>. It grows only like <span class="math inline">\(\ln k\)</span>. It is loose, because it charges the worst case on both sides: the picked item’s noise at <span class="math inline">\(+\tau\)</span> and the best item’s at <span class="math inline">\(-\tau\)</span>.</p>
+<p><strong>Size.</strong> With <span class="math inline">\(k = 100\)</span>, <span class="math inline">\(b = 1\)</span> and <span class="math inline">\(\beta = 0.05\)</span>, the guarantee is <span class="math inline">\(2\ln 2000 = 15.20\)</span>, twice the maximum-of-Laplace bound 7.60 of <a href="../../book-full/part01-prerequisites/02-concentration.html#tbl-conc-code">Table&nbsp;2.3</a>. It grows only like <span class="math inline">\(\ln k\)</span>. It is loose, because it charges the worst case on both sides: the picked item’s noise at <span class="math inline">\(+\tau\)</span> and the best item’s at <span class="math inline">\(-\tau\)</span>.</p>
 <p><em>Selecting with noise costs at most twice the largest noise, and the largest of <span class="math inline">\(k\)</span> noises costs only <span class="math inline">\(\ln k\)</span>.</em></p>
 </div>
 </div>
 </div>
 </section>
-<section id="sec-sol-concentration-6" class="level2" data-number="2.6">
-<h2 data-number="2.6" class="anchored" data-anchor-id="sec-sol-concentration-6"><span class="header-section-number">2.6</span> Chernoff for a Poisson</h2>
+<section id="sec-sol-conc-6" class="level2" data-number="2.6">
+<h2 data-number="2.6" class="anchored" data-anchor-id="sec-sol-conc-6"><span class="header-section-number">2.6</span> Chernoff for a Poisson</h2>
 <blockquote class="blockquote">
 <p><strong>Exercise 6.</strong> <strong>Chernoff for a Poisson.</strong> For <span class="math inline">\(N \sim \mathrm{Poisson}(\mu)\)</span>, show that <span class="math inline">\(\Pr[N \ge (1+r)\mu]\)</span> satisfies exactly the same bound as the Bernoulli sum. Why is that no coincidence? <em>(Chernoff)</em></p>
 </blockquote>
@@ -793,17 +793,17 @@ Table&nbsp;2.2: The first terms of the two series. They agree up to <span class=
 <div class="callout-body-container callout-body">
 <ol type="1">
 <li><strong>The MGF.</strong> <span class="math inline">\(\mathbb E[e^{\lambda N}] = \exp(\mu(e^\lambda - 1))\)</span> (<a href="../../book-full/part01-prerequisites/01-distributions.html">Probability distributions</a>).</li>
-<li><strong>Master bound</strong> with <span class="math inline">\(t = (1 + r)\mu\)</span> and <span class="math inline">\(\lambda &gt; 0\)</span>: <span class="math inline">\(\Pr[N \ge (1+r)\mu] \le \exp\big(\mu(e^\lambda - 1) - \lambda(1+r)\mu\big)\)</span>.</li>
-<li><strong>This is the Bernoulli expression.</strong> Step 3 of the Bernoulli-sum derivation reached exactly this exponent. Steps 4 and 5 there worked on that exponent alone, without going back to the Bernoullis. So they apply verbatim: <span class="math inline">\(\lambda = \ln(1 + r)\)</span> gives <span id="eq-auto-02concentration-5"><span class="math display">\[\Pr[N \ge (1+r)\mu] \le \exp\big(-\mu[(1+r)\ln(1+r) - r]\big) \le \exp\left(-\frac{r^2\mu}{2+r}\right). \tag{2.5}\]</span></span> The lower tail works the same way: the Bernoulli lower-tail step 1 also reduced to <span class="math inline">\(\exp(\lambda s + \mu(e^{-\lambda} - 1))\)</span>, which is the Poisson MGF at <span class="math inline">\(-\lambda\)</span>.</li>
+<li><strong>The Chernoff bound</strong> (<a href="../../book-full/part01-prerequisites/02-concentration.html#thm-conc-chernoff">Theorem&nbsp;2.3</a>) with <span class="math inline">\(t = (1 + r)\mu\)</span> and <span class="math inline">\(\lambda &gt; 0\)</span>: <span class="math inline">\(\Pr[N \ge (1+r)\mu] \le \exp\big(\mu(e^\lambda - 1) - \lambda(1+r)\mu\big)\)</span>.</li>
+<li><strong>This is the Bernoulli expression.</strong> Step 3 of the proof of <a href="../../book-full/part01-prerequisites/02-concentration.html#thm-conc-chernoff-bernoulli">Theorem&nbsp;2.4</a> reached exactly this exponent. Steps 4 and 5 there worked on that exponent alone, without going back to the Bernoullis. So they apply verbatim: <span class="math inline">\(\lambda = \ln(1 + r)\)</span> gives <span id="eq-auto-02concentration-5"><span class="math display">\[\Pr[N \ge (1+r)\mu] \le \exp\big(-\mu[(1+r)\ln(1+r) - r]\big) \le \exp\left(-\frac{r^2\mu}{2+r}\right). \tag{2.5}\]</span></span> The lower tail works the same way: step 6 of that proof also reduced to <span class="math inline">\(\exp(\lambda s + \mu(e^{-\lambda} - 1))\)</span>, which is the Poisson MGF at <span class="math inline">\(-\lambda\)</span>.</li>
 </ol>
-<p><strong>Why it is no coincidence.</strong> Step 1 of the Bernoulli derivation replaced each factor <span class="math inline">\(1 + p_i(e^\lambda - 1)\)</span> by <span class="math inline">\(\exp(p_i(e^\lambda - 1))\)</span>, the MGF of a <span class="math inline">\(\mathrm{Poisson}(p_i)\)</span>. The product of those is the MGF of a sum of independent Poissons, which is <span class="math inline">\(\mathrm{Poisson}(\mu)\)</span>. So the Bernoulli-sum bound <em>is</em> the Chernoff bound of <span class="math inline">\(\mathrm{Poisson}(\mu)\)</span>, used as an upper bound on the MGF of the sum. For the Poisson itself, that step is an equality and nothing is lost. The Poisson is the worst case among sums of independent Bernoullis with mean <span class="math inline">\(\mu\)</span>, as far as the MGF can tell. It is also their limit as every <span class="math inline">\(p_i \to 0\)</span>, so a bound that depends only on <span class="math inline">\(\mu\)</span> and holds for all Bernoulli sums has to hold for the Poisson anyway.</p>
+<p><strong>Why it is no coincidence.</strong> Step 1 of the proof of <a href="../../book-full/part01-prerequisites/02-concentration.html#thm-conc-chernoff-bernoulli">Theorem&nbsp;2.4</a> replaced each factor <span class="math inline">\(1 + p_i(e^\lambda - 1)\)</span> by <span class="math inline">\(\exp(p_i(e^\lambda - 1))\)</span>, the MGF of a <span class="math inline">\(\mathrm{Poisson}(p_i)\)</span>. The product of those is the MGF of a sum of independent Poissons, which is <span class="math inline">\(\mathrm{Poisson}(\mu)\)</span>. So the Bernoulli-sum bound <em>is</em> the Chernoff bound of <span class="math inline">\(\mathrm{Poisson}(\mu)\)</span>, used as an upper bound on the MGF of the sum. For the Poisson itself, that step is an equality and nothing is lost. The Poisson is the worst case among sums of independent Bernoullis with mean <span class="math inline">\(\mu\)</span>, as far as the MGF can tell. It is also their limit as every <span class="math inline">\(p_i \to 0\)</span>, so a bound that depends only on <span class="math inline">\(\mu\)</span> and holds for all Bernoulli sums has to hold for the Poisson anyway.</p>
 <p><strong>How tight.</strong> For <span class="math inline">\(\mu = 10\)</span> and <span class="math inline">\(r = 1\)</span>, the exact tail <span class="math inline">\(\Pr[N \ge 20]\)</span> is <span class="math inline">\(3.45\times10^{-3}\)</span>. The optimized bound gives <span class="math inline">\(2.10\times10^{-2}\)</span> and the simplified one <span class="math inline">\(3.57\times10^{-2}\)</span>: about 6 and 10 times too large. The exponent is right (Cramér’s theorem); what the bound misses is a prefactor of order <span class="math inline">\(1/\sqrt\mu\)</span>.</p>
 </div>
 </div>
 </div>
 </section>
-<section id="sec-sol-concentration-7" class="level2" data-number="2.7">
-<h2 data-number="2.7" class="anchored" data-anchor-id="sec-sol-concentration-7"><span class="header-section-number">2.7</span> Azuma for the coin game</h2>
+<section id="sec-sol-conc-7" class="level2" data-number="2.7">
+<h2 data-number="2.7" class="anchored" data-anchor-id="sec-sol-conc-7"><span class="header-section-number">2.7</span> Azuma for the coin game</h2>
 <blockquote class="blockquote">
 <p><strong>Exercise 7.</strong> <strong>Azuma for the coin game.</strong> Modify the script to use a different adaptive rule (for example, pick the 0.7 coin after two heads in a row). Check that the Azuma bound still holds and explain why the rule does not matter. <em>(Azuma)</em></p>
 </blockquote>
@@ -836,12 +836,12 @@ def adaptive_martingale(rng, rule: Rule, n: int, p_low: float, p_high: float, tr
         before, last = last, x
     return m</code></pre>
 <p>The solutions script runs four rules, with <span class="math inline">\(n = 200\)</span> flips, <span class="math inline">\(t = 20\)</span> and <span class="math inline">\(10^6\)</span> games each. “When behind” tries to push the martingale up by using the 0.7 coin whenever <span class="math inline">\(W_{k-1} &lt; 0\)</span>. “Always 0.7” is not adaptive at all, so its heads count is <span class="math inline">\(\mathrm{Bin}(200, 0.7)\)</span> and <span class="math inline">\(\Pr[W_{200} \ge 20] = \Pr[\text{heads} \ge 160]\)</span> can be computed exactly: <span class="math inline">\(9.28\times10^{-4}\)</span>.</p>
-<div id="tbl-sol-concentration-azuma-rules" class="quarto-float quarto-figure quarto-figure-center anchored">
+<div id="tbl-sol-conc-azuma-rules" class="quarto-float quarto-figure quarto-figure-center anchored">
 <figure class="quarto-float quarto-float-tbl figure">
-<figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl" id="tbl-sol-concentration-azuma-rules-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl" id="tbl-sol-conc-azuma-rules-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
 Table&nbsp;2.3: Tail of the coin-game martingale at <span class="math inline">\(t = 20\)</span> after 200 flips, under four adaptive rules, with <span class="math inline">\(10^6\)</span> simulated games per rule and seed 0.
 </figcaption>
-<div aria-describedby="tbl-sol-concentration-azuma-rules-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<div aria-describedby="tbl-sol-conc-azuma-rules-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
 <table class="caption-top table">
 <colgroup>
 <col style="width: 50%">
@@ -883,8 +883,8 @@ Table&nbsp;2.3: Tail of the coin-game martingale at <span class="math inline">\(
 </div>
 </figure>
 </div>
-<p>The Azuma bound holds for every rule in <a href="#tbl-sol-concentration-azuma-rules" class="quarto-xref">Table&nbsp;<span>2.3</span></a>, with a margin of more than 15 times. (The chapter’s <span class="math inline">\(1.12\times10^{-3}\)</span> for the first rule came from <span class="math inline">\(10^5\)</span> games; with about 110 games in the tail, its standard error is about <span class="math inline">\(1.1\times10^{-4}\)</span>, so it is within two standard errors of <span class="math inline">\(9.13\times10^{-4}\)</span>.)</p>
-<p><strong>Why the rule does not matter.</strong> Azuma’s derivation used only one fact about each increment: given the past, <span class="math inline">\(U_k\)</span> has mean zero and lies in an interval of length <span class="math inline">\(d_k\)</span>. Check it for any rule that decides from the past.</p>
+<p>The Azuma bound holds for every rule in <a href="#tbl-sol-conc-azuma-rules" class="quarto-xref">Table&nbsp;<span>2.3</span></a>, with a margin of more than 15 times. (The chapter’s <span class="math inline">\(1.12\times10^{-3}\)</span> for the first rule came from <span class="math inline">\(10^5\)</span> games; with about 110 games in the tail, its standard error is about <span class="math inline">\(1.1\times10^{-4}\)</span>, so it is within two standard errors of <span class="math inline">\(9.13\times10^{-4}\)</span>.)</p>
+<p><strong>Why the rule does not matter.</strong> The proof of <a href="../../book-full/part01-prerequisites/02-concentration.html#thm-conc-azuma">Theorem&nbsp;2.7</a> used only one fact about each increment: given the past, <span class="math inline">\(U_k\)</span> has mean zero and lies in an interval of length <span class="math inline">\(d_k\)</span>. Check it for any rule that decides from the past.</p>
 <ol type="1">
 <li>The rule fixes <span class="math inline">\(p_k\)</span> before flip <span class="math inline">\(k\)</span>, so given the past, <span class="math inline">\(p_k\)</span> is a constant.</li>
 <li>Given the past, <span class="math inline">\(X_k\)</span> is a <span class="math inline">\(\mathrm{Bern}(p_k)\)</span> flip, so <span class="math inline">\(U_k = X_k - p_k\)</span> has conditional mean <span class="math inline">\(p_k - p_k = 0\)</span>.</li>
@@ -897,8 +897,8 @@ Table&nbsp;2.3: Tail of the coin-game martingale at <span class="math inline">\(
 </div>
 </div>
 </section>
-<section id="sec-sol-concentration-8" class="level2" data-number="2.8">
-<h2 data-number="2.8" class="anchored" data-anchor-id="sec-sol-concentration-8"><span class="header-section-number">2.8</span> Low-rate estimate</h2>
+<section id="sec-sol-conc-8" class="level2" data-number="2.8">
+<h2 data-number="2.8" class="anchored" data-anchor-id="sec-sol-conc-8"><span class="header-section-number">2.8</span> Low-rate estimate</h2>
 <blockquote class="blockquote">
 <p><strong>Exercise 8.</strong> <strong>Low-rate estimate.</strong> You observe 3 false positives in 5,000 trials. Give 95% upper bounds on the rate using Hoeffding, Bernstein, the multiplicative Chernoff bound, and the exact Clopper–Pearson interval (<code>scipy.stats.beta.ppf</code>). Explain the ranking. <em>Check: Clopper–Pearson gives <span class="math inline">\(\approx 0.00155\)</span>.</em> <em>(Hoeffding vs variance-aware bounds)</em></p>
 </blockquote>
@@ -914,19 +914,19 @@ Table&nbsp;2.3: Tail of the coin-game martingale at <span class="math inline">\(
 </div>
 <div id="callout-8" class="callout-8-contents callout-collapse collapse">
 <div class="callout-body-container callout-body">
-<p>Let <span class="math inline">\(p\)</span> be the true rate, <span class="math inline">\(n = 5000\)</span>, <span class="math inline">\(s = 3\)</span> the count, <span class="math inline">\(\hat p = s/n = 0.0006\)</span>, and <span class="math inline">\(\beta = 0.05\)</span>, so <span class="math inline">\(\ln(1/\beta) = \ln 20 \approx 3.00\)</span>. An upper bound needs the lower tail: a candidate rate <span class="math inline">\(p\)</span> is ruled out when, were <span class="math inline">\(p\)</span> true, a count as low as 3 would have probability below <span class="math inline">\(\beta\)</span>. The 95% upper bound is the largest <span class="math inline">\(p\)</span> not ruled out. For a bound of the form “<span class="math inline">\(\hat p &lt; p - w\)</span> with probability at most <span class="math inline">\(\beta\)</span>”, that is simply <span class="math inline">\(\hat p + w\)</span> (Fact 5).</p>
+<p>Let <span class="math inline">\(p\)</span> be the true rate, <span class="math inline">\(n = 5000\)</span>, <span class="math inline">\(s = 3\)</span> the count, <span class="math inline">\(\hat p = s/n = 0.0006\)</span>, and <span class="math inline">\(\beta = 0.05\)</span>, so <span class="math inline">\(\ln(1/\beta) = \ln 20 \approx 3.00\)</span>. An upper bound needs the lower tail: a candidate rate <span class="math inline">\(p\)</span> is ruled out when, were <span class="math inline">\(p\)</span> true, a count as low as 3 would have probability below <span class="math inline">\(\beta\)</span>. The 95% upper bound is the largest <span class="math inline">\(p\)</span> not ruled out. For a bound of the form “<span class="math inline">\(\hat p &lt; p - w\)</span> with probability at most <span class="math inline">\(\beta\)</span>”, that is simply <span class="math inline">\(\hat p + w\)</span> (<a href="../../book-full/part01-prerequisites/02-concentration.html#lem-conc-width">Lemma&nbsp;2.1</a>).</p>
 <ol type="1">
 <li><strong>Hoeffding</strong> (one-sided, range <span class="math inline">\([0, 1]\)</span>): <span class="math inline">\(w = \sqrt{\ln 20/(2 \times 5000)}\)</span>, so the upper bound is <span class="math inline">\(0.0179\)</span>.</li>
-<li><strong>Bernstein</strong> with <span class="math inline">\(K = 1\)</span>, applied to the lower tail (to <span class="math inline">\(-X_i\)</span>, which has the same variance and range). The chapter’s plug-in version, with <span class="math inline">\(\sigma^2 \approx \hat p(1 - \hat p)\)</span>, gives <span class="math inline">\(\hat p + \sqrt{2\hat p(1-\hat p)\ln 20/n} + 2\ln 20/(3n) = 0.00185\)</span>. But a candidate <span class="math inline">\(p\)</span> above <span class="math inline">\(\hat p\)</span> has a larger variance <span class="math inline">\(p(1-p)\)</span>, so the plug-in is optimistic. The rigorous version uses each candidate’s own variance: rule out <span class="math inline">\(p\)</span> when <span class="math inline">\(\exp\big(-n(p - \hat p)^2/(2p(1-p) + \frac23(p - \hat p))\big) &lt; \beta\)</span>. The largest <span class="math inline">\(p\)</span> not ruled out, found by bisection, is <span class="math inline">\(0.00256\)</span>.</li>
-<li><strong>Multiplicative Chernoff</strong>, lower tail <span class="math inline">\(\Pr[S \le (1-r)\mu] \le e^{-r^2\mu/2}\)</span> with <span class="math inline">\(\mu = np\)</span>. At <span class="math inline">\(s = (1-r)\mu\)</span> the exponent is <span class="math inline">\(r^2\mu/2 = (\mu - s)^2/(2\mu)\)</span>. Rule out <span class="math inline">\(\mu\)</span> when <span class="math inline">\((\mu - s)^2 &gt; 2\mu\ln 20\)</span>. The boundary is the larger root of <span class="math inline">\(\mu^2 - 2(s + \ln 20)\mu + s^2 = 0\)</span>: <span id="eq-auto-02concentration-6"><span class="math display">\[\mu = s + \ln 20 + \sqrt{(\ln 20)^2 + 2s\ln 20}, \tag{2.6}\]</span></span> which gives the upper bound <span class="math inline">\(\mu/n = 0.00224\)</span>. With the unsimplified exponent <span class="math inline">\(\mu[r + (1-r)\ln(1-r)] = \mu - s + s\ln(s/\mu)\)</span>, it is <span class="math inline">\(0.00189\)</span>.</li>
+<li><strong>Bernstein</strong> (<a href="../../book-full/part01-prerequisites/02-concentration.html#thm-conc-bernstein">Theorem&nbsp;2.6</a>) with <span class="math inline">\(R = 1\)</span>, applied to the lower tail (to <span class="math inline">\(-X_i\)</span>, which has the same variance and range). The plug-in version of <a href="../../book-full/part01-prerequisites/02-concentration.html#exm-conc-small-rate">Example&nbsp;2.4</a>, with <span class="math inline">\(\sigma^2 \approx \hat p(1 - \hat p)\)</span>, gives <span class="math inline">\(\hat p + \sqrt{2\hat p(1-\hat p)\ln 20/n} + 2\ln 20/(3n) = 0.00185\)</span>. But a candidate <span class="math inline">\(p\)</span> above <span class="math inline">\(\hat p\)</span> has a larger variance <span class="math inline">\(p(1-p)\)</span>, so the plug-in is optimistic. The rigorous version uses each candidate’s own variance: rule out <span class="math inline">\(p\)</span> when <span class="math inline">\(\exp\big(-n(p - \hat p)^2/(2p(1-p) + \frac23(p - \hat p))\big) &lt; \beta\)</span>. The largest <span class="math inline">\(p\)</span> not ruled out, found by bisection, is <span class="math inline">\(0.00256\)</span>.</li>
+<li><strong>Multiplicative Chernoff</strong> (<a href="../../book-full/part01-prerequisites/02-concentration.html#thm-conc-chernoff-bernoulli">Theorem&nbsp;2.4</a>), lower tail <span class="math inline">\(\Pr[S \le (1-r)\mu] \le e^{-r^2\mu/2}\)</span> with <span class="math inline">\(\mu = np\)</span>. At <span class="math inline">\(s = (1-r)\mu\)</span> the exponent is <span class="math inline">\(r^2\mu/2 = (\mu - s)^2/(2\mu)\)</span>. Rule out <span class="math inline">\(\mu\)</span> when <span class="math inline">\((\mu - s)^2 &gt; 2\mu\ln 20\)</span>. The boundary is the larger root of <span class="math inline">\(\mu^2 - 2(s + \ln 20)\mu + s^2 = 0\)</span>: <span id="eq-auto-02concentration-6"><span class="math display">\[\mu = s + \ln 20 + \sqrt{(\ln 20)^2 + 2s\ln 20}, \tag{2.6}\]</span></span> which gives the upper bound <span class="math inline">\(\mu/n = 0.00224\)</span>. With the unsimplified exponent <span class="math inline">\(\mu[r + (1-r)\ln(1-r)] = \mu - s + s\ln(s/\mu)\)</span>, it is <span class="math inline">\(0.00189\)</span>.</li>
 <li><strong>Clopper–Pearson.</strong> The largest <span class="math inline">\(p\)</span> with <span class="math inline">\(\Pr[\mathrm{Bin}(5000, p) \le 3] \ge 0.05\)</span>. The script finds it by bisection on the binomial cumulative sum; it equals <code>scipy.stats.beta.ppf(0.95, 4, 4997)</code>. The result is <span class="math inline">\(0.00155\)</span>, matching the check value.</li>
 </ol>
-<div id="tbl-sol-concentration-low-rate" class="quarto-float quarto-figure quarto-figure-center anchored">
+<div id="tbl-sol-conc-low-rate" class="quarto-float quarto-figure quarto-figure-center anchored">
 <figure class="quarto-float quarto-float-tbl figure">
-<figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl" id="tbl-sol-concentration-low-rate-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl" id="tbl-sol-conc-low-rate-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
 Table&nbsp;2.4: One-sided 95% upper bounds on a rate after 3 events in 5,000 trials (observed rate 0.0006).
 </figcaption>
-<div aria-describedby="tbl-sol-concentration-low-rate-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<div aria-describedby="tbl-sol-conc-low-rate-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
 <table class="caption-top table">
 <thead>
 <tr class="header">
@@ -964,10 +964,10 @@ Table&nbsp;2.4: One-sided 95% upper bounds on a rate after 3 events in 5,000 tri
 </div>
 </figure>
 </div>
-<p><strong>The ranking</strong> in <a href="#tbl-sol-concentration-low-rate" class="quarto-xref">Table&nbsp;<span>2.4</span></a> follows how much each method knows about the count.</p>
+<p><strong>The ranking</strong> in <a href="#tbl-sol-conc-low-rate" class="quarto-xref">Table&nbsp;<span>2.4</span></a> follows how much each method knows about the count.</p>
 <ul>
 <li><strong>Hoeffding</strong> knows only the range, so it assumes the variance <span class="math inline">\(1/4\)</span>. The true variance is about <span class="math inline">\(0.0006\)</span>, over 400 times smaller. Its bound is 30 times the observed rate and more than 10 times the exact one.</li>
-<li><strong>Bernstein</strong> knows the variance. That removes most of the gap, but it pays for the range term <span class="math inline">\(\frac23 K(p - \hat p)\)</span> with <span class="math inline">\(K = 1\)</span> and for its constants.</li>
+<li><strong>Bernstein</strong> knows the variance. That removes most of the gap, but it pays for the range term <span class="math inline">\(\frac23 R(p - \hat p)\)</span> with <span class="math inline">\(R = 1\)</span> and for its constants.</li>
 <li><strong>Chernoff</strong> knows the whole MGF of a Bernoulli sum, through its Poisson bound. Simplifying the exponent to <span class="math inline">\(r^2\mu/2\)</span> costs some of that.</li>
 <li><strong>Clopper–Pearson</strong> uses the binomial distribution itself, with no inequality at all. Nothing valid can be smaller.</li>
 </ul>

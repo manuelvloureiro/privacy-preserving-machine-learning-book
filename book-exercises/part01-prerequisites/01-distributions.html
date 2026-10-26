@@ -560,13 +560,13 @@ window.Quarto = {
 <li><p><strong>The remaining sum is a whole PMF.</strong> It is the sum of the <span class="math inline">\(\mathrm{Bin}(n-2, p)\)</span> PMF over all its values, which is 1 (equivalently, <span class="math inline">\((p + q)^{n-2} = 1\)</span> by the binomial theorem). So <span id="eq-auto-01distributions-4"><span class="math display">\[\mathbb E[S(S-1)] = n(n-1)p^2. \tag{1.4}\]</span></span></p></li>
 <li><p><strong>Recover the variance.</strong> <span class="math inline">\(\mathbb E S^2 = \mathbb E[S(S-1)] + \mathbb E S\)</span>, and the same trick with one factor <span class="math inline">\(k\)</span> gives <span class="math inline">\(\mathbb E S = np\)</span>. So <span id="eq-auto-01distributions-5"><span class="math display">\[\operatorname{Var}S = n(n-1)p^2 + np - n^2p^2 = np - np^2 = np(1-p). \tag{1.5}\]</span></span></p></li>
 </ol>
-<p><strong>A small case.</strong> For <span class="math inline">\(n = 3\)</span>, <a href="#tbl-sol-distributions-binomial-n3" class="quarto-xref">Table&nbsp;<span>1.1</span></a> lists every term of the sum in step 1.</p>
-<div id="tbl-sol-distributions-binomial-n3" class="quarto-float quarto-figure quarto-figure-center anchored">
+<p><strong>A small case.</strong> For <span class="math inline">\(n = 3\)</span>, <a href="#tbl-sol-dist-binomial-n3" class="quarto-xref">Table&nbsp;<span>1.1</span></a> lists every term of the sum in step 1.</p>
+<div id="tbl-sol-dist-binomial-n3" class="quarto-float quarto-figure quarto-figure-center anchored">
 <figure class="quarto-float quarto-float-tbl figure">
-<figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl" id="tbl-sol-distributions-binomial-n3-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl" id="tbl-sol-dist-binomial-n3-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
 Table&nbsp;1.1: The terms of <span class="math inline">\(\mathbb E[S(S-1)]\)</span> for <span class="math inline">\(S \sim \mathrm{Bin}(3, p)\)</span>, with <span class="math inline">\(q = 1 - p\)</span>.
 </figcaption>
-<div aria-describedby="tbl-sol-distributions-binomial-n3-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<div aria-describedby="tbl-sol-dist-binomial-n3-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
 <table class="caption-top table">
 <thead>
 <tr class="header">
@@ -607,7 +607,7 @@ Table&nbsp;1.1: The terms of <span class="math inline">\(\mathbb E[S(S-1)]\)</sp
 </figure>
 </div>
 <p>The total is <span class="math inline">\(6p^2q + 6p^3 = 6p^2(q + p) = 6p^2 = n(n-1)p^2\)</span>, as step 4 says. Summed numerically over the PMF, the script gets <span class="math inline">\(\mathbb E[S(S-1)] = 34.2000\)</span> and <span class="math inline">\(\operatorname{Var}S = 4.2000\)</span> for <span class="math inline">\(\mathrm{Bin}(20, 0.3)\)</span>, and <span class="math inline">\(2497.5000\)</span> and <span class="math inline">\(47.5000\)</span> for <span class="math inline">\(\mathrm{Bin}(1000, 0.05)\)</span>, matching <span class="math inline">\(n(n-1)p^2\)</span> and <span class="math inline">\(np(1-p)\)</span>.</p>
-<p><strong>The effort.</strong> The PMF route needs the factorial moment <span class="math inline">\(\mathbb E[S(S-1)]\)</span> (not <span class="math inline">\(\mathbb E S^2\)</span>, which does not telescope), an identity for the coefficient, a re-index, and the fact that a PMF sums to 1. The decomposition <span class="math inline">\(S = X_1 + \dots + X_n\)</span> needs one line: each Bernoulli has variance <span class="math inline">\(p(1-p)\)</span>, and independent variances add.</p>
+<p><strong>The effort.</strong> The PMF route needs the factorial moment <span class="math inline">\(\mathbb E[S(S-1)]\)</span> (not <span class="math inline">\(\mathbb E S^2\)</span>, which does not telescope), an identity for the coefficient, a re-index, and the fact that a PMF sums to 1. The decomposition <span class="math inline">\(S = X_1 + \dots + X_n\)</span> in the proof of <a href="../../book-full/part01-prerequisites/01-distributions.html#prp-dist-binomial">Proposition&nbsp;1.3</a> needs one line: each Bernoulli has variance <span class="math inline">\(p(1-p)\)</span>, and independent variances add by <a href="../../book-full/part01-prerequisites/01-distributions.html#lem-dist-moment-rules">Lemma&nbsp;1.1</a>.</p>
 <p><em>Factorial moments are the moments that a PMF with factorials sums easily, but decomposing into independent pieces is shorter.</em></p>
 </div>
 </div>
@@ -632,18 +632,18 @@ Table&nbsp;1.1: The terms of <span class="math inline">\(\mathbb E[S(S-1)]\)</sp
 <div class="callout-body-container callout-body">
 <p>Let <span class="math inline">\(K\)</span> be the number kept.</p>
 <ol type="1">
-<li><p><strong>Given <span class="math inline">\(N\)</span>, the count kept is binomial.</strong> If <span class="math inline">\(N = n\)</span>, then <span class="math inline">\(K\)</span> counts the successes in <span class="math inline">\(n\)</span> independent <span class="math inline">\(\mathrm{Bern}(q)\)</span> trials, so <span class="math inline">\(K \sim \mathrm{Bin}(n, q)\)</span>. Its MGF is the binomial MGF from the chapter: <span id="eq-auto-01distributions-6"><span class="math display">\[\mathbb E[e^{\lambda K} \mid N = n] = \big(1 + q(e^\lambda - 1)\big)^n. \tag{1.6}\]</span></span></p></li>
+<li><p><strong>Given <span class="math inline">\(N\)</span>, the count kept is binomial.</strong> If <span class="math inline">\(N = n\)</span>, then <span class="math inline">\(K\)</span> counts the successes in <span class="math inline">\(n\)</span> independent <span class="math inline">\(\mathrm{Bern}(q)\)</span> trials, so <span class="math inline">\(K \sim \mathrm{Bin}(n, q)\)</span>. Its MGF is the binomial MGF of <a href="../../book-full/part01-prerequisites/01-distributions.html#prp-dist-binomial">Proposition&nbsp;1.3</a>: <span id="eq-auto-01distributions-6"><span class="math display">\[\mathbb E[e^{\lambda K} \mid N = n] = \big(1 + q(e^\lambda - 1)\big)^n. \tag{1.6}\]</span></span></p></li>
 <li><p><strong>Average over <span class="math inline">\(N\)</span>.</strong> The MGF of <span class="math inline">\(K\)</span> is the average of these conditional MGFs, weighted by <span class="math inline">\(\Pr[N = n]\)</span>: <span id="eq-auto-01distributions-7"><span class="math display">\[M_K(\lambda) = \sum_{n\ge0}\Pr[N = n]\,\big(1 + q(e^\lambda - 1)\big)^n = \mathbb E\big[c^N\big], \qquad c = 1 + q(e^\lambda - 1). \tag{1.7}\]</span></span></p></li>
-<li><p><strong>Recognize the Poisson MGF.</strong> Write <span class="math inline">\(c^N = e^{N\ln c}\)</span>, so <span class="math inline">\(\mathbb E[c^N] = M_N(\ln c) = \exp\big(\mu(e^{\ln c} - 1)\big) = \exp\big(\mu(c - 1)\big)\)</span>. Substituting <span class="math inline">\(c - 1 = q(e^\lambda - 1)\)</span>, <span id="eq-auto-01distributions-8"><span class="math display">\[M_K(\lambda) = \exp\big(q\mu(e^\lambda - 1)\big). \tag{1.8}\]</span></span></p></li>
-<li><p><strong>Identify the distribution.</strong> This is the <span class="math inline">\(\mathrm{Poisson}(q\mu)\)</span> MGF, for every <span class="math inline">\(\lambda\)</span>. Two distributions with the same MGF around 0 are the same (<a href="../../book-full/part01-prerequisites/01-distributions.html#sec-dist-mgf">Section&nbsp;1.2.2</a>), so <span class="math inline">\(K \sim \mathrm{Poisson}(q\mu)\)</span>.</p></li>
+<li><p><strong>Recognize the Poisson MGF.</strong> Write <span class="math inline">\(c^N = e^{N\ln c}\)</span>, so <span class="math inline">\(\mathbb E[c^N] = M_N(\ln c)\)</span>, which by <a href="../../book-full/part01-prerequisites/01-distributions.html#prp-dist-poisson">Proposition&nbsp;1.4</a> is <span class="math inline">\(\exp\big(\mu(e^{\ln c} - 1)\big) = \exp\big(\mu(c - 1)\big)\)</span>. Substituting <span class="math inline">\(c - 1 = q(e^\lambda - 1)\)</span>, <span id="eq-auto-01distributions-8"><span class="math display">\[M_K(\lambda) = \exp\big(q\mu(e^\lambda - 1)\big). \tag{1.8}\]</span></span></p></li>
+<li><p><strong>Identify the distribution.</strong> This is the <span class="math inline">\(\mathrm{Poisson}(q\mu)\)</span> MGF, for every <span class="math inline">\(\lambda\)</span>. Two distributions with the same MGF around 0 are the same (<a href="../../book-full/part01-prerequisites/01-distributions.html#thm-dist-mgf-unique">Theorem&nbsp;1.1</a>), so <span class="math inline">\(K \sim \mathrm{Poisson}(q\mu)\)</span>.</p></li>
 </ol>
-<p><strong>Step 2 on a small case.</strong> Take the outcome <span class="math inline">\(N = 2\)</span>. The two events are kept or dropped independently, so <a href="#tbl-sol-distributions-thinning" class="quarto-xref">Table&nbsp;<span>1.2</span></a> lists the four possibilities.</p>
-<div id="tbl-sol-distributions-thinning" class="quarto-float quarto-figure quarto-figure-center anchored">
+<p><strong>Step 2 on a small case.</strong> Take the outcome <span class="math inline">\(N = 2\)</span>. The two events are kept or dropped independently, so <a href="#tbl-sol-dist-thinning" class="quarto-xref">Table&nbsp;<span>1.2</span></a> lists the four possibilities.</p>
+<div id="tbl-sol-dist-thinning" class="quarto-float quarto-figure quarto-figure-center anchored">
 <figure class="quarto-float quarto-float-tbl figure">
-<figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl" id="tbl-sol-distributions-thinning-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl" id="tbl-sol-dist-thinning-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
 Table&nbsp;1.2: The four outcomes of keeping or dropping two events, each with probability <span class="math inline">\(q\)</span> of being kept.
 </figcaption>
-<div aria-describedby="tbl-sol-distributions-thinning-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<div aria-describedby="tbl-sol-dist-thinning-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
 <table class="caption-top table">
 <thead>
 <tr class="header">
@@ -714,14 +714,14 @@ Table&nbsp;1.2: The four outcomes of keeping or dropping two events, each with p
 <div class="callout-body-container callout-body">
 <ol type="1">
 <li><p><strong>Split the sum at <span class="math inline">\(n\)</span>.</strong> The binomial puts no mass above <span class="math inline">\(n\)</span>, so for <span class="math inline">\(k &gt; n\)</span> each term is <span class="math inline">\(\Pr[N = k]\)</span>, and those terms add up to <span class="math inline">\(\Pr[N &gt; n]\)</span>: <span id="eq-auto-01distributions-9"><span class="math display">\[\frac12\sum_k\big|\Pr[S = k] - \Pr[N = k]\big| = \frac12\left(\sum_{k=0}^n\big|\Pr[S = k] - \Pr[N = k]\big| + 1 - \sum_{k=0}^n\Pr[N = k]\right). \tag{1.9}\]</span></span></p></li>
-<li><p><strong>Evaluate with the chapter’s functions.</strong> <code>binomial_poisson_tv</code> in the solutions script computes this with <code>binomial_pmf</code> and <code>poisson_pmf</code> from <code>distributions.py</code>. <a href="#tbl-sol-distributions-tv" class="quarto-xref">Table&nbsp;<span>1.3</span></a> gives the results.</p></li>
+<li><p><strong>Evaluate with the chapter’s functions.</strong> <code>binomial_poisson_tv</code> in the solutions script computes this with <code>binomial_pmf</code> and <code>poisson_pmf</code> from <code>distributions.py</code>. <a href="#tbl-sol-dist-tv" class="quarto-xref">Table&nbsp;<span>1.3</span></a> gives the results.</p></li>
 </ol>
-<div id="tbl-sol-distributions-tv" class="quarto-float quarto-figure quarto-figure-center anchored">
+<div id="tbl-sol-dist-tv" class="quarto-float quarto-figure quarto-figure-center anchored">
 <figure class="quarto-float quarto-float-tbl figure">
-<figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl" id="tbl-sol-distributions-tv-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl" id="tbl-sol-dist-tv-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
 Table&nbsp;1.3: Total variation distance between <span class="math inline">\(\mathrm{Bin}(n, 5/n)\)</span> and <span class="math inline">\(\mathrm{Poisson}(5)\)</span>.
 </figcaption>
-<div aria-describedby="tbl-sol-distributions-tv-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<div aria-describedby="tbl-sol-dist-tv-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
 <table class="caption-top table">
 <thead>
 <tr class="header">
@@ -754,7 +754,7 @@ Table&nbsp;1.3: Total variation distance between <span class="math inline">\(\ma
 <ol start="3" type="1">
 <li><strong>Read off the rate.</strong> Each tenfold increase in <span class="math inline">\(n\)</span> cuts the distance by about ten, and <span class="math inline">\(n\)</span> times the distance settles near 1.23. So the distance is roughly <span class="math inline">\(1.23/n\)</span>, which confirms the check.</li>
 </ol>
-<p><strong>Why <span class="math inline">\(1/n\)</span>.</strong> The two distributions have the same mean <span class="math inline">\(\mu = 5\)</span>, but the binomial variance is <span class="math inline">\(np(1 - p) = \mu - \mu^2/n\)</span>, smaller than the Poisson’s <span class="math inline">\(\mu\)</span> by <span class="math inline">\(\mu^2/n = 25/n\)</span>. The binomial is narrower by an amount of order <span class="math inline">\(1/n\)</span>, which is the gap <a href="../../book-full/part01-prerequisites/01-distributions.html#fig-poisson-limit">Figure&nbsp;1.1</a> shows at <span class="math inline">\(n = 10\)</span>.</p>
+<p><strong>Why <span class="math inline">\(1/n\)</span>.</strong> The two distributions have the same mean <span class="math inline">\(\mu = 5\)</span>, but the binomial variance is <span class="math inline">\(np(1 - p) = \mu - \mu^2/n\)</span>, smaller than the Poisson’s <span class="math inline">\(\mu\)</span> by <span class="math inline">\(\mu^2/n = 25/n\)</span>. The binomial is narrower by an amount of order <span class="math inline">\(1/n\)</span>, which is the gap <a href="../../book-full/part01-prerequisites/01-distributions.html#fig-dist-poisson-limit">Figure&nbsp;1.1</a> shows at <span class="math inline">\(n = 10\)</span>.</p>
 <p>(The chapter’s <code>binomial_pmf</code> evaluates <span class="math inline">\(\binom nk\)</span> as an exact integer and then converts it to a float. That conversion overflows once <span class="math inline">\(n\)</span> is a little above 1,000, so going further, to <span class="math inline">\(n = 10{,}000\)</span>, would need the PMF in log space, as <code>poisson_pmf</code> already does.)</p>
 <p><em>The Poisson approximation to <span class="math inline">\(\mathrm{Bin}(n, \mu/n)\)</span> is off by an amount of order <span class="math inline">\(1/n\)</span>, because the two variances differ by <span class="math inline">\(\mu^2/n\)</span>.</em></p>
 </div>
@@ -786,13 +786,13 @@ Table&nbsp;1.3: Total variation distance between <span class="math inline">\(\ma
 <li><p><strong>Where the minimum is.</strong> A convex piecewise-linear function is minimal exactly at the points where the slope just to the left is <span class="math inline">\(\le 0\)</span> and the slope just to the right is <span class="math inline">\(\ge 0\)</span>. At <span class="math inline">\(m\)</span>, those one-sided slopes are <span id="eq-auto-01distributions-11"><span class="math display">\[f'(m^-) = \#\{y_i &lt; m\} - \#\{y_i \ge m\}, \qquad f'(m^+) = \#\{y_i \le m\} - \#\{y_i &gt; m\}. \tag{1.11}\]</span></span></p></li>
 <li><p><strong>Translate the two conditions.</strong> Since <span class="math inline">\(\#\{y_i \ge m\} = n - \#\{y_i &lt; m\}\)</span>, the condition <span class="math inline">\(f'(m^-) \le 0\)</span> says <span class="math inline">\(\#\{y_i &lt; m\} \le n/2\)</span>. Since <span class="math inline">\(\#\{y_i \le m\} = n - \#\{y_i &gt; m\}\)</span>, the condition <span class="math inline">\(f'(m^+) \ge 0\)</span> says <span class="math inline">\(\#\{y_i &gt; m\} \le n/2\)</span>. Together they are the definition of a median. So <span class="math inline">\(f\)</span> is minimized exactly at the medians.</p></li>
 </ol>
-<p><strong>A small case.</strong> Take the data <span class="math inline">\(1, 2, 7\)</span>, and then add a fourth point, 10. <a href="#tbl-sol-distributions-median-slopes" class="quarto-xref">Table&nbsp;<span>1.4</span></a> gives the slope of <span class="math inline">\(f\)</span> on each interval.</p>
-<div id="tbl-sol-distributions-median-slopes" class="quarto-float quarto-figure quarto-figure-center anchored">
+<p><strong>A small case.</strong> Take the data <span class="math inline">\(1, 2, 7\)</span>, and then add a fourth point, 10. <a href="#tbl-sol-dist-median-slopes" class="quarto-xref">Table&nbsp;<span>1.4</span></a> gives the slope of <span class="math inline">\(f\)</span> on each interval.</p>
+<div id="tbl-sol-dist-median-slopes" class="quarto-float quarto-figure quarto-figure-center anchored">
 <figure class="quarto-float quarto-float-tbl figure">
-<figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl" id="tbl-sol-distributions-median-slopes-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl" id="tbl-sol-dist-median-slopes-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
 Table&nbsp;1.4: Slope of <span class="math inline">\(f(m) = \sum_i|y_i - m|\)</span> between the data points, for three and for four data points.
 </figcaption>
-<div aria-describedby="tbl-sol-distributions-median-slopes-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<div aria-describedby="tbl-sol-dist-median-slopes-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
 <table class="caption-top table">
 <thead>
 <tr class="header">
@@ -832,7 +832,7 @@ Table&nbsp;1.4: Slope of <span class="math inline">\(f(m) = \sum_i|y_i - m|\)</s
 </div>
 </figure>
 </div>
-<p>With three points the slope changes sign at <span class="math inline">\(m = 2\)</span>, the middle value, where <span class="math inline">\(f(2) = 1 + 0 + 5 = 6\)</span>. With four points the slope is 0 on <span class="math inline">\([2, 7]\)</span>, so every <span class="math inline">\(m\)</span> there is a minimizer with <span class="math inline">\(f(m) = (m - 1) + (m - 2) + (7 - m) + (10 - m) = 14\)</span>, and every such <span class="math inline">\(m\)</span> is a median. Now replace 10 by 1,000. No slope in the first three rows changes sign, so the minimizers are still <span class="math inline">\([2, 7]\)</span>, while the mean jumps from 5 to 252.5. This is the robustness the chapter’s absolute-error regression example describes.</p>
+<p>With three points the slope changes sign at <span class="math inline">\(m = 2\)</span>, the middle value, where <span class="math inline">\(f(2) = 1 + 0 + 5 = 6\)</span>. With four points the slope is 0 on <span class="math inline">\([2, 7]\)</span>, so every <span class="math inline">\(m\)</span> there is a minimizer with <span class="math inline">\(f(m) = (m - 1) + (m - 2) + (7 - m) + (10 - m) = 14\)</span>, and every such <span class="math inline">\(m\)</span> is a median. Now replace 10 by 1,000. No slope in the first three rows changes sign, so the minimizers are still <span class="math inline">\([2, 7]\)</span>, while the mean jumps from 5 to 252.5. This is the robustness that <a href="../../book-full/part01-prerequisites/01-distributions.html#exm-dist-absolute-error">Example&nbsp;1.6</a> describes.</p>
 <p><em>Minimizing absolute error balances the count of points on each side, not their distances, so a median is the minimizer.</em></p>
 </div>
 </div>
@@ -858,17 +858,16 @@ Table&nbsp;1.4: Slope of <span class="math inline">\(f(m) = \sum_i|y_i - m|\)</s
 <p>The ratio is the same for every location-0 member of each family, since scaling <span class="math inline">\(X\)</span> by <span class="math inline">\(c\)</span> multiplies both numerator and denominator by <span class="math inline">\(c^4\)</span>. Take location 0.</p>
 <p><strong>Laplace.</strong> Let <span class="math inline">\(X \sim \mathrm{Lap}(b)\)</span>.</p>
 <ol type="1">
-<li><p><strong>Use <span class="math inline">\(|X| \sim \mathrm{Exp}(b)\)</span>.</strong> Even powers do not see the sign, so <span class="math inline">\(\mathbb E X^4 = \mathbb E|X|^4\)</span> and <span class="math inline">\(\mathbb E X^2 = \mathbb E|X|^2\)</span>.</p></li>
-<li><p><strong>Exponential moments.</strong> The chapter’s Gamma integral (or its check-yourself question) gives <span class="math inline">\(\mathbb E Y^k = k!\,b^k\)</span> for <span class="math inline">\(Y \sim \mathrm{Exp}(b)\)</span>. So <span class="math inline">\(\mathbb E X^4 = 4!\,b^4 = 24b^4\)</span> and <span class="math inline">\(\mathbb E X^2 = 2b^2\)</span>.</p></li>
+<li><p><strong>Use <span class="math inline">\(|X| \sim \mathrm{Exp}(b)\)</span>.</strong> By <a href="../../book-full/part01-prerequisites/01-distributions.html#prp-dist-laplace">Proposition&nbsp;1.8</a> the size <span class="math inline">\(|X|\)</span> is <span class="math inline">\(\mathrm{Exp}(b)\)</span>. Even powers do not see the sign, so <span class="math inline">\(\mathbb E X^4 = \mathbb E|X|^4\)</span> and <span class="math inline">\(\mathbb E X^2 = \mathbb E|X|^2\)</span>.</p></li>
+<li><p><strong>Exponential moments.</strong> By <a href="../../book-full/part01-prerequisites/01-distributions.html#prp-dist-exponential">Proposition&nbsp;1.6</a>, <span class="math inline">\(\mathbb E Y^k = k!\,b^k\)</span> for <span class="math inline">\(Y \sim \mathrm{Exp}(b)\)</span>. So <span class="math inline">\(\mathbb E X^4 = 4!\,b^4 = 24b^4\)</span> and <span class="math inline">\(\mathbb E X^2 = 2b^2\)</span>.</p></li>
 <li><p><strong>Divide.</strong> <span class="math inline">\(\mathbb E X^4/(\mathbb E X^2)^2 = 24b^4/(4b^4) = 6\)</span>.</p></li>
 </ol>
-<p><strong>Normal.</strong> Let <span class="math inline">\(X \sim \mathcal N(0, \sigma^2)\)</span>.</p>
+<p><strong>Normal.</strong> Let <span class="math inline">\(X \sim \mathcal N(0, \sigma^2)\)</span> and write <span class="math inline">\(X = \sigma Z\)</span> with <span class="math inline">\(Z\)</span> standard normal.</p>
 <ol type="1">
-<li><p><strong>Expand the MGF.</strong> With <span class="math inline">\(\mu = 0\)</span>, <span class="math inline">\(M_X(\lambda) = e^{\sigma^2\lambda^2/2} = 1 + \frac{\sigma^2\lambda^2}{2} + \frac{\sigma^4\lambda^4}{8} + \dots\)</span>, from <span class="math inline">\(e^u = 1 + u + u^2/2 + \dots\)</span> with <span class="math inline">\(u = \sigma^2\lambda^2/2\)</span>.</p></li>
-<li><p><strong>Read off the moments.</strong> The coefficient of <span class="math inline">\(\lambda^k\)</span> in <span class="math inline">\(M_X\)</span> is <span class="math inline">\(\mathbb E X^k/k!\)</span>, because <span class="math inline">\(M_X^{(k)}(0) = \mathbb E X^k\)</span>. So <span class="math inline">\(\mathbb E X^2 = 2!\cdot\frac{\sigma^2}{2} = \sigma^2\)</span> and <span class="math inline">\(\mathbb E X^4 = 4!\cdot\frac{\sigma^4}{8} = 3\sigma^4\)</span>.</p></li>
-<li><p><strong>Divide.</strong> <span class="math inline">\(\mathbb E X^4/(\mathbb E X^2)^2 = 3\sigma^4/\sigma^4 = 3\)</span>.</p></li>
+<li><p><strong>The moments of <span class="math inline">\(Z\)</span>.</strong> Step 2 of the proof of <a href="../../book-full/part01-prerequisites/01-distributions.html#prp-dist-norm">Proposition&nbsp;1.13</a> reads <span class="math inline">\(\mathbb E Z^4 = 3\)</span> off the MGF <span class="math inline">\(e^{\lambda^2/2}\)</span>, and <span class="math inline">\(\mathbb E Z^2 = 1\)</span>.</p></li>
+<li><p><strong>Scale.</strong> So <span class="math inline">\(\mathbb E X^4 = 3\sigma^4\)</span> and <span class="math inline">\(\mathbb E X^2 = \sigma^2\)</span>, and <span class="math inline">\(\mathbb E X^4/(\mathbb E X^2)^2 = 3\sigma^4/\sigma^4 = 3\)</span>.</p></li>
 </ol>
-<p><strong>What the larger value says.</strong> The fourth power weighs values far from 0 much more heavily than the square does. At equal variance, a ratio of 6 against 3 means the Laplace puts more of its mass far out. To keep the same variance it must then also put more mass near 0, and less in the shoulders in between. That is the sharp peak and fat tails of <a href="../../book-full/part01-prerequisites/01-distributions.html#fig-laplace-vs-normal">Figure&nbsp;1.4</a>. The chapter’s check-yourself numbers show the tail side: <span class="math inline">\(\Pr[|X| \ge 3b] = e^{-3} \approx 0.050\)</span> for the Laplace against about 0.034 for the normal with the same variance.</p>
+<p><strong>What the larger value says.</strong> The fourth power weighs values far from 0 much more heavily than the square does. At equal variance, a ratio of 6 against 3 means the Laplace puts more of its mass far out. To keep the same variance it must then also put more mass near 0, and less in the shoulders in between. That is the sharp peak and fat tails of <a href="../../book-full/part01-prerequisites/01-distributions.html#fig-dist-laplace-vs-normal">Figure&nbsp;1.4</a>. The chapter’s comparison in <a href="../../book-full/part01-prerequisites/01-distributions.html#sec-dist-laplace">Section&nbsp;1.6</a> shows the tail side: <span class="math inline">\(\Pr[|X| \ge 3b] = e^{-3} \approx 0.050\)</span> for the Laplace against about 0.034 for the normal with the same variance.</p>
 <p><em>A larger fourth-moment ratio at the same variance means heavier tails and a sharper peak.</em></p>
 </div>
 </div>
@@ -895,18 +894,18 @@ Table&nbsp;1.4: Slope of <span class="math inline">\(f(m) = \sum_i|y_i - m|\)</s
 <ol type="1">
 <li><p><strong>Jensen.</strong> <span class="math inline">\(u \mapsto e^{\lambda u}\)</span> is convex, so <span class="math inline">\(e^{\lambda\mathbb E M} \le \mathbb E e^{\lambda M}\)</span>. (This is the same inequality the chapter uses for the norm, with a convex function instead of a concave one.)</p></li>
 <li><p><strong>Replace the max by a sum.</strong> Since <span class="math inline">\(\lambda &gt; 0\)</span>, <span class="math inline">\(e^{\lambda M} = \max_i e^{\lambda Z_i}\)</span>. Every term is positive, so the maximum is at most the sum: <span class="math inline">\(e^{\lambda M} \le \sum_i e^{\lambda Z_i}\)</span>.</p></li>
-<li><p><strong>Take expectations.</strong> Linearity, which needs no independence, gives <span class="math inline">\(\mathbb E e^{\lambda M} \le \sum_i\mathbb E e^{\lambda Z_i}\)</span>. Each <span class="math inline">\(Z_i\)</span> is <span class="math inline">\(\mathcal N(0, 1)\)</span>, with MGF <span class="math inline">\(e^{\lambda^2/2}\)</span>, so the sum is <span class="math inline">\(ke^{\lambda^2/2}\)</span>.</p></li>
+<li><p><strong>Take expectations.</strong> Linearity, which needs no independence, gives <span class="math inline">\(\mathbb E e^{\lambda M} \le \sum_i\mathbb E e^{\lambda Z_i}\)</span>. Each <span class="math inline">\(Z_i\)</span> is <span class="math inline">\(\mathcal N(0, 1)\)</span>, with MGF <span class="math inline">\(e^{\lambda^2/2}\)</span> by <a href="../../book-full/part01-prerequisites/01-distributions.html#prp-dist-normal-mgf">Proposition&nbsp;1.10</a>, so the sum is <span class="math inline">\(ke^{\lambda^2/2}\)</span>.</p></li>
 <li><p><strong>Take logs and divide by <span class="math inline">\(\lambda\)</span>.</strong> From steps 1 to 3, <span class="math inline">\(\lambda\mathbb E M \le \ln k + \lambda^2/2\)</span>, so <span id="eq-auto-01distributions-12"><span class="math display">\[\mathbb E M \le \frac{\ln k}{\lambda} + \frac\lambda2 \qquad\text{for every } \lambda &gt; 0. \tag{1.12}\]</span></span></p></li>
 <li><p><strong>Optimize <span class="math inline">\(\lambda\)</span>.</strong> The derivative of the right side is <span class="math inline">\(-\ln k/\lambda^2 + 1/2\)</span>, which is zero at <span class="math inline">\(\lambda = \sqrt{2\ln k}\)</span> (positive because <span class="math inline">\(k \ge 2\)</span>). There the two terms are equal, each <span class="math inline">\(\sqrt{2\ln k}/2\)</span>, so <span id="eq-auto-01distributions-13"><span class="math display">\[\mathbb E\max_i Z_i \le \sqrt{2\ln k}. \tag{1.13}\]</span></span></p></li>
 </ol>
 <p>For <span class="math inline">\(k = 1\)</span> the claim reads <span class="math inline">\(\mathbb E Z_1 \le 0\)</span>, which holds with equality.</p>
-<p><strong>How good is it?</strong> Only step 3 used the distribution, and only one <span class="math inline">\(Z_i\)</span> at a time, so the bound holds whatever the dependence. When the <span class="math inline">\(Z_i\)</span> are all the same variable, <span class="math inline">\(\mathbb E M = \mathbb E Z_1 = 0\)</span>, and the bound is far off. When they are independent, <a href="#tbl-sol-distributions-max-normals" class="quarto-xref">Table&nbsp;<span>1.5</span></a> compares it with simulation.</p>
-<div id="tbl-sol-distributions-max-normals" class="quarto-float quarto-figure quarto-figure-center anchored">
+<p><strong>How good is it?</strong> Only step 3 used the distribution, and only one <span class="math inline">\(Z_i\)</span> at a time, so the bound holds whatever the dependence. When the <span class="math inline">\(Z_i\)</span> are all the same variable, <span class="math inline">\(\mathbb E M = \mathbb E Z_1 = 0\)</span>, and the bound is far off. When they are independent, <a href="#tbl-sol-dist-max-normals" class="quarto-xref">Table&nbsp;<span>1.5</span></a> compares it with simulation.</p>
+<div id="tbl-sol-dist-max-normals" class="quarto-float quarto-figure quarto-figure-center anchored">
 <figure class="quarto-float quarto-float-tbl figure">
-<figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl" id="tbl-sol-distributions-max-normals-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl" id="tbl-sol-dist-max-normals-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
 Table&nbsp;1.5: Mean of the maximum of <span class="math inline">\(k\)</span> independent <span class="math inline">\(\mathcal N(0, 1)\)</span> variables over 10,000 draws (seed 0), against the bound.
 </figcaption>
-<div aria-describedby="tbl-sol-distributions-max-normals-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<div aria-describedby="tbl-sol-dist-max-normals-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
 <table class="caption-top table">
 <colgroup>
 <col style="width: 25%">
@@ -978,8 +977,8 @@ Table&nbsp;1.5: Mean of the maximum of <span class="math inline">\(k\)</span> in
 <p>Let <span class="math inline">\(\rho = \langle X, Y\rangle/(\|X\|\|Y\|)\)</span>, the cosine of the angle between <span class="math inline">\(X\)</span> and <span class="math inline">\(Y\)</span>.</p>
 <ol type="1">
 <li><p><strong>Fix <span class="math inline">\(Y\)</span>.</strong> Condition on <span class="math inline">\(Y\)</span> and let <span class="math inline">\(u = Y/\|Y\|\)</span>, a fixed unit vector. Since <span class="math inline">\(X\)</span> is independent of <span class="math inline">\(Y\)</span>, <span class="math inline">\(X\)</span> is still <span class="math inline">\(\mathcal N(0, I_d)\)</span>, and <span id="eq-auto-01distributions-14"><span class="math display">\[\rho = \frac{\langle u, X\rangle}{\|X\|}. \tag{1.14}\]</span></span></p></li>
-<li><p><strong>Numerator: rotation invariance.</strong> <span class="math inline">\(\langle u, X\rangle \sim \mathcal N(0, 1)\)</span> for any unit <span class="math inline">\(u\)</span>. Its distribution does not depend on <span class="math inline">\(u\)</span>, so it does not depend on <span class="math inline">\(Y\)</span> either.</p></li>
-<li><p><strong>Denominator: norm concentration.</strong> <span class="math inline">\(\|X\| = \sqrt d\,\big(1 \pm O(1/\sqrt d)\big)\)</span>, by the chapter’s norm result.</p></li>
+<li><p><strong>Numerator: rotation invariance.</strong> By <a href="../../book-full/part01-prerequisites/01-distributions.html#prp-dist-rotation">Proposition&nbsp;1.12</a>, <span class="math inline">\(\langle u, X\rangle \sim \mathcal N(0, 1)\)</span> for any unit <span class="math inline">\(u\)</span>. Its distribution does not depend on <span class="math inline">\(u\)</span>, so it does not depend on <span class="math inline">\(Y\)</span> either.</p></li>
+<li><p><strong>Denominator: norm concentration.</strong> By <a href="../../book-full/part01-prerequisites/01-distributions.html#prp-dist-norm">Proposition&nbsp;1.13</a>, <span class="math inline">\(\|X\|^2/d\)</span> has mean 1 and standard deviation <span class="math inline">\(\sqrt{2/d}\)</span>, so <span class="math inline">\(\|X\| = \sqrt d\,\big(1 \pm O(1/\sqrt d)\big)\)</span>.</p></li>
 <li><p><strong>Combine.</strong> <span class="math inline">\(\rho \approx \langle u, X\rangle/\sqrt d\)</span>: a standard normal divided by <span class="math inline">\(\sqrt d\)</span>. So <span class="math inline">\(\rho\)</span> is typically of size <span class="math inline">\(1/\sqrt d\)</span>.</p></li>
 </ol>
 <p><strong>The exact standard deviation.</strong> Steps 3 and 4 are approximate, but the second moment is exact.</p>
@@ -988,13 +987,13 @@ Table&nbsp;1.5: Mean of the maximum of <span class="math inline">\(k\)</span> in
 <li><p><strong>Symmetry among coordinates.</strong> The coordinates of <span class="math inline">\(X\)</span> are independent and identically distributed, so <span class="math inline">\(\mathbb E[X_i^2/\|X\|^2]\)</span> is the same for every <span class="math inline">\(i\)</span>. These <span class="math inline">\(d\)</span> numbers add up to <span class="math inline">\(\mathbb E[\sum_iX_i^2/\|X\|^2] = 1\)</span>, so each is <span class="math inline">\(1/d\)</span>.</p></li>
 <li><p><strong>Mean and standard deviation.</strong> <span class="math inline">\(X\)</span> and <span class="math inline">\(-X\)</span> have the same distribution, so <span class="math inline">\(\mathbb E \rho = 0\)</span>, and <span class="math inline">\(\operatorname{Var}(\rho) = \mathbb E \rho^2 = 1/d\)</span>. The standard deviation of <span class="math inline">\(\rho\)</span> is exactly <span class="math inline">\(1/\sqrt d\)</span>.</p></li>
 </ol>
-<p><strong>Simulation.</strong> <a href="#tbl-sol-distributions-cosines" class="quarto-xref">Table&nbsp;<span>1.6</span></a> reports 10,000 pairs for each <span class="math inline">\(d\)</span>.</p>
-<div id="tbl-sol-distributions-cosines" class="quarto-float quarto-figure quarto-figure-center anchored">
+<p><strong>Simulation.</strong> <a href="#tbl-sol-dist-cosines" class="quarto-xref">Table&nbsp;<span>1.6</span></a> reports 10,000 pairs for each <span class="math inline">\(d\)</span>.</p>
+<div id="tbl-sol-dist-cosines" class="quarto-float quarto-figure quarto-figure-center anchored">
 <figure class="quarto-float quarto-float-tbl figure">
-<figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl" id="tbl-sol-distributions-cosines-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl" id="tbl-sol-dist-cosines-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
 Table&nbsp;1.6: Cosine <span class="math inline">\(\rho\)</span> between independent <span class="math inline">\(X, Y \sim \mathcal N(0, I_d)\)</span>, over 10,000 pairs (seed 0).
 </figcaption>
-<div aria-describedby="tbl-sol-distributions-cosines-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<div aria-describedby="tbl-sol-dist-cosines-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
 <table class="caption-top table">
 <colgroup>
 <col style="width: 16%">
