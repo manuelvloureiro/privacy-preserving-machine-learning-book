@@ -70,7 +70,7 @@ def canary_exposure(
     return exposure(score, candidate_scores), extrapolated_exposure(score, candidate_scores, SECRET_SPACE)
 ```
 
-The model comes from `transformers` and its adapters from `peft`, but no maintained library computes exposure. So `exposure` and `extrapolated_exposure` come from the book's helper module [practitioner_privacy_tests.py](../../code/practitioner_privacy_tests.py), which follows the reference code in TensorFlow Privacy.
+The model comes from `transformers` and its adapters from `peft`, but no library installed with this book computes exposure. So `exposure` and `extrapolated_exposure` come from the book's helper module [practitioner_privacy_tests.py](../../code/practitioner_privacy_tests.py), which follows TensorFlow Privacy's `compute_exposure_interpolation` and `compute_exposure_extrapolation`.
 
 The model trains on 1,024 sequences of Tiny Shakespeare, a public extract of Shakespeare's plays. The script inserts three canaries at each copy count from 1 to 64, keeps three as controls, and ranks each value among 2,000 random candidates. The command `uv run python code/part05-dp-ml/practitioner_lora.py` runs it in about two and a half minutes on an idle CPU, and several times longer on a busy one. Each line gives a group's mean exposure, then that exposure extrapolated past the cap the candidates set (explained below), and how many of its secrets greedy decoding wrote out.
 

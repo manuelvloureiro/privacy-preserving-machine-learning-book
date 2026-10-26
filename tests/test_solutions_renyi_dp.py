@@ -31,8 +31,10 @@ def test_solutions_renyi_dp_matches_page(tmp_path: Path) -> None:
         # Exercise 5
         "alpha* exceeds 512 once sigma > 106.5",
         "sigma=100: grid eps=0.04813 at alpha=512  continuous eps=0.04804 at alpha*=480.9  grid/continuous=1.002",
-        "sigma=200: grid eps=0.02893 at alpha=512  continuous eps=0.02401 at alpha*=960.7  grid/continuous=1.205  "
-        "exact=0.01251",
+        (
+            "sigma=200: grid eps=0.02893 at alpha=512  continuous eps=0.02401 at alpha*=960.7  grid/continuous=1.205  "
+            "exact=0.01251"
+        ),
     ):
         assert expected in out, expected
     assert list(tmp_path.iterdir()) == []

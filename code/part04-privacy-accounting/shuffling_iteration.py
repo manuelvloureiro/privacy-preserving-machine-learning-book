@@ -550,7 +550,7 @@ def print_table(rng: np.random.Generator) -> None:
                 )
             )
 
-    figure_ns = [int(round(10 ** (k / 4))) for k in range(10, 21)]
+    figure_ns = [round(10 ** (k / 4)) for k in range(10, 21)]
     print(
         f"  Erlingsson at eps0=4, smallest over the figure's n={figure_ns[0]}..{figure_ns[-1]}: "
         f"{min(erlingsson_epsilon(4.0, m, SHUFFLE_DELTA) for m in figure_ns):.3g}"
@@ -676,7 +676,7 @@ def plot_shuffled_counts(eps0: float = 2.0) -> Figure:
 
 def plot_shuffle_bounds(delta: float = SHUFFLE_DELTA) -> Figure:
     fig, axes = plt.subplots(1, 3, figsize=(13, 4), sharey=True)
-    ns = [int(round(10 ** (k / 4))) for k in range(10, 21)]  # the same grid as print_table's Erlingsson line
+    ns = [round(10 ** (k / 4)) for k in range(10, 21)]  # the same grid as print_table's Erlingsson line
     for ax, eps0 in zip(axes, SHUFFLE_EPS0):
         closed = [clones_epsilon(eps0, n, delta) for n in ns]
         ax.loglog(
@@ -771,7 +771,7 @@ def plot_shift_schedule(shift: float = 1.0, steps: int = 4) -> Figure:
 
 def plot_hidden_state() -> Figure:
     fig, (left, right) = plt.subplots(1, 2, figsize=(12, 4.2))
-    ks = sorted({int(round(10 ** (j / 10))) for j in range(41)})
+    ks = sorted({round(10 ** (j / 10)) for j in range(41)})
     left.loglog(
         ks, [composed_mu(k, 1.0, 1.0) for k in ks], "k", linewidth=2, label="all iterates released (composition)"
     )
@@ -790,7 +790,7 @@ def plot_hidden_state() -> Figure:
         title=r"$\theta \leftarrow c\,\theta + b + \mathcal{N}(0, \sigma^2)$, full batch, s/σ = 1: exact μ",
     )
     left.legend(fontsize=9)
-    steps = sorted({int(round(10 ** (j / 8))) for j in range(27)})
+    steps = sorted({round(10 ** (j / 8)) for j in range(27)})
     walk = projected_walk_renyi(2.0, steps, 0.01, 0.1, 1.0, cells=1000)
     right.loglog(steps, [gaussian_rdp(2.0, 0.01, 0.1) * k for k in steps], "k", linewidth=2, label="composition")
     right.loglog(steps, [plateau_rdp_bound(2.0, k, 0.01, 0.1, 1.0) for k in steps], "C3", label="bounded-domain bound")

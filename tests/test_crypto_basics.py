@@ -10,8 +10,10 @@ CODE = Path(__file__).resolve().parent.parent / "code" / "part01-prerequisites"
 def test_crypto_basics_matches_section(tmp_path: Path) -> None:
     out = run(CODE / "crypto_basics.py", tmp_path)
     for expected in (
-        "2^-lam=2^-128.00 (2.9e-39)  lam^-log lam=2^-49.00 (1.8e-15)  "
-        "2^-sqrt lam=2^-11.31 (3.9e-04)  lam^-10=2^-70.00 (8.5e-22)",
+        (
+            "2^-lam=2^-128.00 (2.9e-39)  lam^-log lam=2^-49.00 (1.8e-15)  "
+            "2^-sqrt lam=2^-11.31 (3.9e-04)  lam^-10=2^-70.00 (8.5e-22)"
+        ),
         "first below lam^-10 at lambda=20520",
         "= 2^84.7 keys, success=9.3e-14; exhausting 2^128 takes 1.08e+13 years",
         "[Birthday q=23 N=365] exact=0.507  union=0.693  1-exp=0.500",

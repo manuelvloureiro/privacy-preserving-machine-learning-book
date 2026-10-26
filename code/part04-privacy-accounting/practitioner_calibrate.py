@@ -409,7 +409,12 @@ def main() -> None:
     parser.add_argument("--dataset", default="Adult", help="dataset name, for the printed lines")
     parser.add_argument("--unit", default="person", help="what one row protects, for the statement")
     parser.add_argument("--clip", type=float, default=1.0, help="clipping norm C, for the statement only")
-    parser.add_argument("--workers", type=int, default=min(12, os.cpu_count() or 1), help="processes for the table")
+    parser.add_argument(
+        "--workers",
+        type=int,
+        default=int(os.environ.get("PRIVACY_WORKERS") or min(12, os.cpu_count() or 1)),
+        help="processes for the table",
+    )
     args = parser.parse_args()
     n: int = args.n
     batch: int = args.batch

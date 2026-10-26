@@ -405,11 +405,13 @@ def plot_game() -> Figure:
             3.6,
             3.3,
             "Challenger",
-            "1. draw a dataset $D$ from the population\n"
-            "2. train a model $\\theta$ on $D$\n"
-            "3. flip a fair bit $b$\n"
-            "     $b = 1$: target $z$ drawn from $D$\n"
-            "     $b = 0$: fresh $z$ from the population",
+            (
+                "1. draw a dataset $D$ from the population\n"
+                "2. train a model $\\theta$ on $D$\n"
+                "3. flip a fair bit $b$\n"
+                "     $b = 1$: target $z$ drawn from $D$\n"
+                "     $b = 0$: fresh $z$ from the population"
+            ),
             "C0",
         ),
         (

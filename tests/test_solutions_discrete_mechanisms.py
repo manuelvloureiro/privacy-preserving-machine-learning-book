@@ -33,10 +33,14 @@ def test_solutions_discrete_mechanisms_matches_page(tmp_path: Path) -> None:
         "sigma^2=10000: closed form=0.7601  by summation=0.7601",
         "limit sqrt(pi/2) e^-1/2=0.7602",
         # Exercise 6
-        "sigma^2=0.25 each: Pr[sum=0]=0.6414  N_Z(0,0.5) at 0=0.5641  var of sum=0.4300  "
-        "var of N_Z(0,0.5)=0.4990  TV=8.01e-02",
-        "sigma^2=1 each: Pr[sum=0]=0.2821  N_Z(0,2) at 0=0.2821  var of sum=2.0000  var of N_Z(0,2)=2.0000  "
-        "TV=5.17e-05",
+        (
+            "sigma^2=0.25 each: Pr[sum=0]=0.6414  N_Z(0,0.5) at 0=0.5641  var of sum=0.4300  "
+            "var of N_Z(0,0.5)=0.4990  TV=8.01e-02"
+        ),
+        (
+            "sigma^2=1 each: Pr[sum=0]=0.2821  N_Z(0,2) at 0=0.2821  var of sum=2.0000  var of N_Z(0,2)=2.0000  "
+            "TV=5.17e-05"
+        ),
         "sigma^2=4 each: Pr[sum=0]=0.1410",
         # Exercise 7
         "p=12: P(S)=0.4791  reverse=0.2033",

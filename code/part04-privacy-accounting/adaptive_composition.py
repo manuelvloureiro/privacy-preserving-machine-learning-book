@@ -717,7 +717,7 @@ def plot_plugin_failure(rng: np.random.Generator, eps: float = 0.1, delta: float
         title=f"Stop when ahead: frozen (red) paths crossed, ε={eps:g}, δ={delta:g}",
     )
     ax1.legend(loc="lower left", fontsize=9)
-    horizons = [int(round(10 ** (i / 4))) for i in range(4, 17)]
+    horizons = [round(10 ** (i / 4)) for i in range(4, 17)]
     for d, color in ((0.05, "C0"), (0.01, "C1")):
         cross = plugin_crossing_probability(eps, d, horizons)
         ax2.plot(horizons, [cross[h] for h in horizons], "o-", color=color, label=f"P(cross by n), δ={d:g}")
@@ -729,7 +729,7 @@ def plot_plugin_failure(rng: np.random.Generator, eps: float = 0.1, delta: float
 
 
 def plot_filter_budgets(eps0: float = 0.01, delta: float = 1e-6) -> Figure:
-    ks = [int(round(10 ** (i / 8))) for i in range(8, 41)]
+    ks = [round(10 ** (i / 8)) for i in range(8, 41)]
     fig, ax = plt.subplots(figsize=(7.5, 4.5))
     ax.plot(ks, [k * eps0 for k in ks], "k:", label="basic composition (also a filter)")
     ax.plot(
@@ -822,7 +822,7 @@ def plot_individual_hist(rng: np.random.Generator) -> Figure:
         math.log(1 / DELTA) / (alpha_star - 1), color="0.5", linestyle=":", label=r"floor $\ln(1/\delta)/(\alpha^*-1)$"
     )
     ax.set(
-        xlabel=r"individual $\varepsilon$ at $\delta = 10^{-5}$, order $\alpha^* = %g$" % alpha_star,
+        xlabel=rf"individual $\varepsilon$ at $\delta = 10^{{-5}}$, order $\alpha^* = {alpha_star:g}$",
         ylabel="records",
         title=f"Individual ε after {K0} full-batch steps, σ={SIGMA:g}",
     )

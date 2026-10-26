@@ -55,8 +55,10 @@ def test_reconstruction_matches_section(tmp_path: Path) -> None:
         "white: count=3  median=33  mean=31.67",
         "married: count=4  median=43.5  mean=47.75",
         "female age tuples=435  male age tuples=34  age vectors=14790  age vectors with the total median=12906",
-        "age vectors with a valid black split=387  age vectors with a valid married split=33  "
-        "age vectors with valid splits for all three=1",
+        (
+            "age vectors with a valid black split=387  age vectors with a valid married split=33  "
+            "age vectors with valid splits for all three=1"
+        ),
         "consistent blocks with the full table: 1  equal to the true block: True",
         "withhold female median: 7 consistent blocks, 6 attribute patterns, true pattern in 0.14 of them",
         "withhold black median: 36 consistent blocks, 3 attribute patterns, true pattern in 0.64 of them",

@@ -601,7 +601,7 @@ def plot_loss_distribution(eps: float = 0.1, k: int = 100, delta_prime: float = 
 
 
 def plot_epsilon_vs_k(delta_prime: float = 1e-5) -> Figure:
-    ks = sorted({int(round(10 ** (x / 10))) for x in range(41)})
+    ks = sorted({round(10 ** (x / 10)) for x in range(41)})
     fig, axes = plt.subplots(1, 2, figsize=(11, 4.4))
     for ax, eps in zip(axes, (0.1, 0.5)):
         ax.plot(ks, [basic_epsilon(eps, k) for k in ks], "k-.", label=r"basic $k\varepsilon$")
@@ -672,7 +672,7 @@ def plot_delta_curves(rng: np.random.Generator, eps: float = 0.1, k: int = 100) 
 
 
 def plot_gaussian(sigma: float = 20.0, delta: float = 1e-5) -> Figure:
-    ks = sorted({int(round(10 ** (x / 6))) for x in range(19)})
+    ks = sorted({round(10 ** (x / 6)) for x in range(19)})
     rows = [gaussian_composed(sigma, k, delta) for k in ks]
     fig, ax = plt.subplots(figsize=(8, 4.4))
     for key, style, label in (

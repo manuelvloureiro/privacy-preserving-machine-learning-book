@@ -22,8 +22,10 @@ def test_solutions_distributions_matches_page(tmp_path: Path) -> None:
         "k=1000  simulated 3.242   bound 3.717   ratio 0.87",
         "k=2 exact 1/√π = 0.564",
         "d=10    mean 0.0021   std 0.3178   1/√d 0.3162   √d * std 1.005   max |cos| 0.908",
-        "d=1000  mean -0.0003   std 0.0315   1/√d 0.0316   √d * std 0.997   max |cos| 0.121 "
-        "(within 7.0° of a right angle)",
+        (
+            "d=1000  mean -0.0003   std 0.0315   1/√d 0.0316   √d * std 0.997   max |cos| 0.121 "
+            "(within 7.0° of a right angle)"
+        ),
     ):
         assert expected in out
     assert list(tmp_path.iterdir()) == []

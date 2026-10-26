@@ -60,14 +60,22 @@ def test_renyi_dp_matches_section(tmp_path: Path) -> None:
         "alpha=5.8: eps(alpha)=2.9000 + ln(1/delta)/(alpha-1)=2.3985 = 5.2985",
         "alpha=20: eps(alpha)=10.0000 + ln(1/delta)/(alpha-1)=0.6059 = 10.6059",
         "exact delta at the RDP eps: 1.300e-07",
-        "k=1: basic=0.160  advanced=0.847 (split s=0.56)  RDP=0.251 (alpha=128; closed form 0.241 at 97.0)  "
-        "exact=0.160  RDP/exact=1.566  advanced/exact=5.29",
-        "k=10: basic=1.892  advanced=3.270 (split s=0.56)  RDP=0.771 (alpha=31; closed form 0.771 at 31.3)  "
-        "exact=0.561  RDP/exact=1.374  advanced/exact=5.83",
-        "k=100: basic=21.510  advanced=13.423 (split s=0.56)  RDP=2.524 (alpha=10.6; closed form 2.524 at 10.6)  "
-        "exact=1.993  RDP/exact=1.267  advanced/exact=6.73",
-        "k=1000: basic=238.578  advanced=68.008 (split s=0.56)  RDP=8.838 (alpha=4; closed form 8.837 at 4.0)  "
-        "exact=7.511  RDP/exact=1.177  advanced/exact=9.05",
+        (
+            "k=1: basic=0.160  advanced=0.847 (split s=0.56)  RDP=0.251 (alpha=128; closed form 0.241 at 97.0)  "
+            "exact=0.160  RDP/exact=1.566  advanced/exact=5.29"
+        ),
+        (
+            "k=10: basic=1.892  advanced=3.270 (split s=0.56)  RDP=0.771 (alpha=31; closed form 0.771 at 31.3)  "
+            "exact=0.561  RDP/exact=1.374  advanced/exact=5.83"
+        ),
+        (
+            "k=100: basic=21.510  advanced=13.423 (split s=0.56)  RDP=2.524 (alpha=10.6; closed form 2.524 at 10.6)  "
+            "exact=1.993  RDP/exact=1.267  advanced/exact=6.73"
+        ),
+        (
+            "k=1000: basic=238.578  advanced=68.008 (split s=0.56)  RDP=8.838 (alpha=4; closed form 8.837 at 4.0)  "
+            "exact=7.511  RDP/exact=1.177  advanced/exact=9.05"
+        ),
         # Check yourself
         "sigma=sqrt(0.8)=0.8944  adaptive gap=0.0180  (10, 0.5)-RDP at delta=1e-5: eps=1.7792",
         "delta promised / exact delta at the RDP eps (sigma=1): 76.9",

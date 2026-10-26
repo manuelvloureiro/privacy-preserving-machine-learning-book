@@ -110,7 +110,7 @@ def sample_population(
     """
     x = rng.standard_normal((n, d)) / math.sqrt(d)
     outlier = np.zeros(n, dtype=np.bool_)
-    outlier[: int(round(frac * n))] = True
+    outlier[: round(frac * n)] = True
     x[outlier] *= scale
     p = 0.5 * (1 + np.tanh(0.5 * signal * math.sqrt(d) * x[:, 0]))
     y = np.where(rng.random(n) < p, 1.0, -1.0)
@@ -233,7 +233,7 @@ def rates_at_threshold(scores: Array, labels: Mask, t: float) -> tuple[float, fl
 def threshold_for_fpr(scores: Array, labels: Mask, alpha: float) -> float:
     """The smallest threshold whose FPR on these (scores, labels) is at most alpha."""
     neg = np.sort(scores[~labels])[::-1]
-    k = int(math.floor(alpha * len(neg)))  # at most k negatives may reach the threshold
+    k = math.floor(alpha * len(neg))  # at most k negatives may reach the threshold
     return float(np.nextafter(neg[k], np.inf))
 
 
@@ -586,9 +586,9 @@ def print_table(rng: np.random.Generator) -> None:
         )
     r = rocs["online"]
     tpr = tpr_at_fpr(r, ALPHA)
-    k_tp = int(round(tpr * r.n_pos))
+    k_tp = round(tpr * r.n_pos)
     lo, hi = clopper_pearson(k_tp, r.n_pos)
-    k_fp = int(math.floor(ALPHA * r.n_neg))
+    k_fp = math.floor(ALPHA * r.n_neg)
     lo_f, hi_f = clopper_pearson(k_fp, r.n_neg)
     print(
         f"  LiRA online at FPR {ALPHA:g}: {k_tp} true positives of {r.n_pos}, 95% CI [{lo:.4f}, {hi:.4f}]; "

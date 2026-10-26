@@ -25,6 +25,8 @@ from shared.stats import normal_cdf
 
 configure("gaussian_dp")
 
+import itertools
+
 import matplotlib.pyplot as plt
 import numpy as np
 from matplotlib.figure import Figure
@@ -114,7 +116,7 @@ def tradeoff_breakpoints(p: Sequence[float], q: Sequence[float]) -> list[tuple[f
 
 def piecewise_linear(points: Sequence[tuple[float, float]], a: float) -> float:
     """Evaluate the polygon through the corners (sorted by first coordinate) at a."""
-    for (a0, b0), (a1, b1) in zip(points, points[1:], strict=False):
+    for (a0, b0), (a1, b1) in itertools.pairwise(points):
         if a0 <= a <= a1:
             return b0 if a1 == a0 else b0 + (b1 - b0) * (a - a0) / (a1 - a0)
     return points[-1][1]
@@ -639,7 +641,7 @@ def print_table(rng: np.random.Generator) -> None:
         )
     for k in (10, 100, 1000):
         eps0 = 1 / math.sqrt(k)
-        rr_e = eps_from_profile(lambda e: rr_composed_delta(eps0, k, e), SGD_DELTA)
+        rr_e = eps_from_profile(lambda e, eps0=eps0, k=k: rr_composed_delta(eps0, k, e), SGD_DELTA)
         mu_rr, _ = clt_mu_homogeneous(rr_functionals(eps0), k)
         print(
             f"[k={k} eps at delta=1e-5] RR exact={rr_e:.4f}  GDP(Thm3.4 mu)={gdp_eps(mu_rr, SGD_DELTA):.4f}  "
@@ -840,7 +842,7 @@ def plot_clt() -> Figure:
 
 def plot_subsampled() -> Figure:
     fig, (left, right) = plt.subplots(1, 2, figsize=(11, 4.5))
-    ks = [int(round(10 ** (1 + 3 * i / 150))) for i in range(151)]
+    ks = [round(10 ** (1 + 3 * i / 150)) for i in range(151)]
     for sigma in (0.8, 1.0, 1.5):
         mus = [clt_mu_subsampled_gaussian(SGD_Q, sigma, k) for k in ks]
         left.plot(ks, mus, label=rf"$\sigma$ = {sigma:g}")

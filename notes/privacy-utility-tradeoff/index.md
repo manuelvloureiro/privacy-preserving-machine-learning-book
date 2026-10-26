@@ -155,7 +155,7 @@ for technique in COLOURS:
     jobs += [(technique, eps, TRAIN_ROWS, seed) for eps in [None, *EPSILONS] for seed in range(seeds)]
 for n in SIZES[:-1]:
     jobs += [("DP-SGD", eps, n, seed) for eps in [None, *EPSILONS] for seed in range(size_seeds)]
-with ProcessPoolExecutor(max_workers=os.cpu_count(), initializer=_init, initargs=(data,)) as pool:
+with ProcessPoolExecutor(max_workers=WORKERS, initializer=_init, initargs=(data,)) as pool:
     runs = list(pool.map(evaluate, jobs, chunksize=4))
 ```
 

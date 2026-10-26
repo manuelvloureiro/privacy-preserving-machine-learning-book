@@ -140,7 +140,7 @@ def print_table(rng: np.random.Generator) -> None:
     for c in (2.0, 5.0):
         print(f"  sigma={c:g} sqrt(n): m/n={queries_for_recovery(0.9, c):.1f}")
     n = 100
-    m = int(round(queries_for_recovery(0.9, 2.0) * n))
+    m = round(queries_for_recovery(0.9, 2.0) * n)
     sim = ls_recovery(rng, n, [m], [2.0 * math.sqrt(n)], reps=4)[0][0]
     print(f"  n={n}, m={m}, sigma=2 sqrt(n): simulated={sim:.4f}  predicted={ls_predicted_fraction(n, m, 20.0):.4f}")
 

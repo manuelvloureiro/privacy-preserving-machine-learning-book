@@ -169,7 +169,7 @@ def bad_difference(n: int, beta: float, balanced: bool) -> FloatArray:
     balanced=True gives half of them +1/3 and half −1/3 (so E⟨q, z⟩ = 0, the hard case);
     balanced=False makes them all +1/3.
     """
-    k = int(round(beta * n))
+    k = round(beta * n)
     z = np.zeros(n)
     z[:k] = 1 / 3
     if balanced:

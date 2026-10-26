@@ -188,7 +188,7 @@ def canary_exposure(
     return exposure(score, candidate_scores), extrapolated_exposure(score, candidate_scores, SECRET_SPACE)
 ```
 
-No maintained library computes exposure, so `exposure` and `extrapolated_exposure` come from the book's helper module [practitioner_privacy_tests.py](../../code/practitioner_privacy_tests.py), after TensorFlow Privacy's reference code. The script ranks each secret among 2,000 random candidates, so a canary that beats them all reaches a cap of 10.97 bits. A secret the model has never seen averages about 1.44 bits ($\log_2 e$), because its rank among the candidates is then random. Each line below gives a group's mean exposure, the same past the cap (explained below), and how many of its three secrets greedy decoding wrote out.
+No library installed with this book computes exposure, so `exposure` and `extrapolated_exposure` come from the book's helper module [practitioner_privacy_tests.py](../../code/practitioner_privacy_tests.py), after TensorFlow Privacy's `compute_exposure_interpolation` and `compute_exposure_extrapolation`. The script ranks each secret among 2,000 random candidates, so a canary that beats them all reaches a cap of 10.97 bits. A secret the model has never seen averages about 1.44 bits ($\log_2 e$), because its rank among the candidates is then random. Each line below gives a group's mean exposure, the same past the cap (explained below), and how many of its three secrets greedy decoding wrote out.
 
 ```text
 non-private 1 copies: mean exposure 2.0 bits  extrapolated 2.0  extracted 0/3

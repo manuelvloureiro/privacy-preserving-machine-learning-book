@@ -62,6 +62,8 @@ from shared.figures import configure
 
 configure("choosing_an_accountant")
 
+import itertools
+
 import matplotlib.pyplot as plt
 from matplotlib.figure import Figure
 
@@ -469,7 +471,7 @@ def print_table(rng: np.random.Generator) -> None:
         f"  delta of the composed pessimistic PLD at its own eps: {max(pld_delta(p, pld_eps(plds, delta)) for p in plds):.3e}"
     )
     eps_k = [rows[k].pld_upper for k in sorted(rows)]
-    print(f"  PLD upper increasing in k: {all(a < b for a, b in zip(eps_k, eps_k[1:]))}")
+    print(f"  PLD upper increasing in k: {all(a < b for a, b in itertools.pairwise(eps_k))}")
 
 
 # --- Figures -----------------------------------------------------------------------------------

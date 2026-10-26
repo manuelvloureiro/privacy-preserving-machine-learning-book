@@ -566,9 +566,7 @@ def print_table(rng: np.random.Generator) -> None:
     for n in ORDERS:
         cells = "  ".join(f"k={d.copies}: {d.exact:.2f}/{d.approximate:.2f}/{d.predicted:.2f}" for d in rates[n])
         print(f"  n={n}: {cells}")
-    agree = sum(
-        int(round(d.exact * PER_GROUP)) == int(round(d.predicted * PER_GROUP)) for n in ORDERS for d in rates[n]
-    )
+    agree = sum(round(d.exact * PER_GROUP) == round(d.predicted * PER_GROUP) for n in ORDERS for d in rates[n])
     print(f"  groups where the k* prediction matches greedy exactly: {agree} of {len(ORDERS) * len(COPIES)}")
 
     n_sample = 5

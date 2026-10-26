@@ -22,14 +22,18 @@ def test_practitioner_release_adult_run() -> None:
         "record: built-in copy of the Adult run (practitioner_dp_sgd.py, seed 0)",
         "record problems: 0",
         "record limitations: 1",
-        "  - secure_mode=False: Opacus drew the noise from a seeded, non-cryptographic generator so the numbers "
-        "reproduce; floating-point attacks on the noise are not excluded. Retrain with secure_mode=True to ship",
+        (
+            "  - secure_mode=False: Opacus drew the noise from a seeded, non-cryptographic generator so the numbers "
+            "reproduce; floating-point attacks on the noise are not excluded. Retrain with secure_mode=True to ship"
+        ),
         "secure_mode: False",
         "seed: 0",
         "Noise generator: Opacus secure_mode=False, seed 0.",
-        "Tuning: learning rate 2 = 10x the non-private 0.2, the best of 6 non-private runs trained and scored only "
-        "on the 2,000 public stand-in rows; batch 1,000, 10 epochs, momentum 0.9, C=1 fixed in advance; every use "
-        "of private rows is in epsilon.",
+        (
+            "Tuning: learning rate 2 = 10x the non-private 0.2, the best of 6 non-private runs trained and scored only "
+            "on the 2,000 public stand-in rows; batch 1,000, 10 epochs, momentum 0.9, C=1 fixed in advance; every use "
+            "of private rows is in epsilon."
+        ),
         # Recomputed guarantee
         "eps PLD at delta=1e-05: 3.981",
         "eps RDP at delta=1e-05: 4.503",
@@ -53,8 +57,10 @@ def test_practitioner_release_adult_run() -> None:
         "  - missing field: neighbours",
         "  - missing field: max_grad_norm",
         "  - missing field: secure_mode",
-        "  - sampler 'shuffled fixed-size batches' is not Poisson subsampling: Poisson-subsampled accounting does not "
-        "apply",
+        (
+            "  - sampler 'shuffled fixed-size batches' is not Poisson subsampling: Poisson-subsampled accounting does not "
+            "apply"
+        ),
         "  - delta=1e-03 is above 1/n^1.1 (use 1e-06)",
         "  - tuning not reported: the cost of choosing hyperparameters is unknown",
         "  - eps=1.0 does not follow: PLD gives 2.17 at its delta",
@@ -117,7 +123,9 @@ def test_review_flags_a_hidden_sampler_and_the_named_accountant() -> None:
 @pytest.mark.libs
 def test_practitioner_release_rejects_a_missing_record(tmp_path: Path) -> None:
     missing = tmp_path / "no_such_run.json"
-    result = subprocess.run([sys.executable, str(SCRIPT), "--record", str(missing)], capture_output=True, text=True)
+    result = subprocess.run(
+        [sys.executable, str(SCRIPT), "--record", str(missing)], capture_output=True, text=True, check=False
+    )
     assert result.returncode != 0
     assert "cannot read the run record" in result.stderr
     assert "Guarantee:" not in result.stdout  # no statement from the built-in record

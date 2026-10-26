@@ -41,7 +41,7 @@ training rows, 2,000 public stand-in validation rows, and 16,842 test rows, of w
    with and 1,000 without a canary.
 
 What is a library and what is not. Opacus is under test; SciPy's `binomtest(...).proportion_ci(method="exact")`
-gives the Clopper–Pearson bounds. The μ and ε lower bounds and the one-run audit, which no maintained package
+gives the Clopper–Pearson bounds. The μ and ε lower bounds and the one-run audit, which no package installable here
 provides, come from code/practitioner_privacy_tests.py.
 
 Prints, with seed 0, every number the pages quote: the CI test's μ_lo and verdict for each implementation, the

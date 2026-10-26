@@ -662,7 +662,7 @@ def plot_rdp_curve(q: float = Q_RUN, sigma: float = SIGMA_RUN) -> Figure:
 
 
 def plot_dpsgd(q: float = Q_RUN, sigma: float = SIGMA_RUN, delta: float = DELTA_RUN) -> Figure:
-    ks = sorted({int(round(k)) for k in np.logspace(0, 4, 25)})
+    ks = sorted({round(k) for k in np.logspace(0, 4, 25)})
     fig, ax = plt.subplots(figsize=(7.5, 4.5))
     ax.plot(
         ks, [dpsgd_eps_basic(q, sigma, k, delta) for k in ks], marker=".", label="per step (ε, δ), basic composition"

@@ -363,7 +363,7 @@ def holdout_reuse(
         for mech in mechanisms:
             tho = Thresholdout(rng, 4 / math.sqrt(n), 1 / math.sqrt(n))
 
-            def ask(train_value: float, hold_value: float) -> float:
+            def ask(train_value: float, hold_value: float, mech: str = mech, tho: Thresholdout = tho) -> float:
                 if mech == "reuse":
                     return hold_value
                 if mech == "gaussian":
@@ -512,7 +512,7 @@ def plot_boosting(rng: np.random.Generator) -> Figure:
 def plot_rates() -> Figure:
     """Sample size needed for expected error 0.05 against the number of queries, for the three methods."""
     fig, ax = plt.subplots(figsize=(6.4, 4.0))
-    ks = [int(round(10 ** (e / 4))) for e in range(25)]
+    ks = [round(10 ** (e / 4)) for e in range(25)]
     ax.plot(ks, [required_n(nonadaptive_error, k, 0.05) for k in ks], label="fixed queries (not adaptive)")
     ax.plot(ks, [required_n(splitting_error, k, 0.05) for k in ks], label=r"sample splitting, $\propto k$")
     ax.plot(ks, [required_n(gaussian_error_value, k, 0.05) for k in ks], label=r"Gaussian noise, $\propto\sqrt{k}$")

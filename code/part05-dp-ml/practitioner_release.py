@@ -270,12 +270,16 @@ def format_statement(rec: RunRecord, check: Recomputed) -> str:
         [
             f"Guarantee: ({check.eps_pld:.2f}, {rec.delta:.0e})-DP per {rec.unit}, {rec.neighbours} neighbours,",
             f"  for the whole training run on {rec.dataset} (n = {rec.n:,}).",
-            f"  Also ({check.eps_pld_small_delta:.2f}, {rec.delta / 100:.0e})-DP. Any membership test has TPR at most "
-            f"{check.tpr_bounds[1e-3]:.4f} at FPR 1e-3.",
+            (
+                f"  Also ({check.eps_pld_small_delta:.2f}, {rec.delta / 100:.0e})-DP. Any membership test has TPR at most "
+                f"{check.tpr_bounds[1e-3]:.4f} at FPR 1e-3."
+            ),
             f"Mechanism: DP-SGD, {rec.sampler} sampling q = {rec.sample_rate:.4f}, noise multiplier {rec.sigma:.4f},",
             f"  clipping norm {rec.max_grad_norm:g}, {rec.steps} steps ({rec.epochs} epochs).",
-            f"Accounting: {rec.accountant}, Opacus {rec.library_versions.get('opacus', '?')}; "
-            f"recomputed with dp_accounting PLD (RDP gives {check.eps_rdp:.2f}).",
+            (
+                f"Accounting: {rec.accountant}, Opacus {rec.library_versions.get('opacus', '?')}; "
+                f"recomputed with dp_accounting PLD (RDP gives {check.eps_rdp:.2f})."
+            ),
             f"Tuning: {describe_tuning(rec.tuning)}.",
             f"Preprocessing on private data: {rec.preprocessing}. Public data: {rec.public_data}.",
             f"Noise generator: Opacus secure_mode={rec.secure_mode}, seed {rec.seed}.",

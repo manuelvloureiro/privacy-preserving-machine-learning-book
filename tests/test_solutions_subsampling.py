@@ -18,12 +18,18 @@ def test_solutions_subsampling_matches_page(tmp_path: Path) -> None:
         "privacy cost of j=2: 0.00051033  of j=3: 0.00001909  share of j=2: 0.96",
         "without the e-factors the terms sum to 1.00000000",
         # Exercise 3
-        "eps=0.1: add/remove=0.00105  exact replace-one=0.00200  group bound=0.00221  exact/add-remove=1.91  "
-        "group/add-remove=2.10  Laplace event ln-ratio=0.00200",
-        "eps=1: add/remove=0.01704  exact replace-one=0.02338  group bound=0.06193  exact/add-remove=1.37  "
-        "group/add-remove=3.64  Laplace event ln-ratio=0.02338",
-        "eps=5: add/remove=0.90589  exact replace-one=0.91587  group bound=5.39931  exact/add-remove=1.01  "
-        "group/add-remove=5.96  Laplace event ln-ratio=0.91587",
+        (
+            "eps=0.1: add/remove=0.00105  exact replace-one=0.00200  group bound=0.00221  exact/add-remove=1.91  "
+            "group/add-remove=2.10  Laplace event ln-ratio=0.00200"
+        ),
+        (
+            "eps=1: add/remove=0.01704  exact replace-one=0.02338  group bound=0.06193  exact/add-remove=1.37  "
+            "group/add-remove=3.64  Laplace event ln-ratio=0.02338"
+        ),
+        (
+            "eps=5: add/remove=0.90589  exact replace-one=0.91587  group bound=5.39931  exact/add-remove=1.01  "
+            "group/add-remove=5.96  Laplace event ln-ratio=0.91587"
+        ),
         # Exercise 4
         "bracket: eps at sigma=0.5 is 47.42, at sigma=10 is 0.377",
         "target eps=1: sigma=4.126  (check: eps=1.000 at alpha=18)",

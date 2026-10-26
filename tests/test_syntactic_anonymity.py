@@ -33,27 +33,43 @@ def test_syntactic_anonymity_matches_section(tmp_path: Path) -> None:
         # Hospital table
         "HIV=0.010",
         "n=10000  exact quasi-identifiers: linkage=0.933",
-        "baseline: guess the most common diagnosis=0.185  imputation from exact age=0.536  "
-        "largest population posterior=0.705",
+        (
+            "baseline: guess the most common diagnosis=0.185  imputation from exact age=0.536  "
+            "largest population posterior=0.705"
+        ),
         "k=2: classes=4091  sizes 2..5  mean size=2.6  width=0.005  linkage=0.4091  certain=0.2797  guess=0.675",
-        "k=5: classes=1542  sizes 5..11  mean size=6.8  width=0.016  linkage=0.1542  certain=0.0232  guess=0.593  "
-        "max TV=0.937",
+        (
+            "k=5: classes=1542  sizes 5..11  mean size=6.8  width=0.016  linkage=0.1542  certain=0.0232  guess=0.593  "
+            "max TV=0.937"
+        ),
         "k=10: classes=748  sizes 10..20  mean size=14.1  width=0.028  linkage=0.0748  certain=0.0000  guess=0.562",
         "k=20: classes=366  sizes 20..41  mean size=29.2  width=0.043  linkage=0.0366  certain=0.0000  guess=0.540",
         "k=50: classes=129  sizes 50..99  mean size=78.4  width=0.075  linkage=0.0129  certain=0.0000  guess=0.506",
-        "k=5, distinct l=3: classes=1132  sizes 5..33  mean size=10.4  width=0.022  linkage=0.1132  certain=0.0000  "
-        "guess=0.574",
-        "k=5, recursive (c=2, l=3): classes=389  sizes 5..641  mean size=114.9  width=0.113  linkage=0.0389  "
-        "certain=0.0000  guess=0.417",
-        "k=5, t=0.3: classes=495  sizes 6..60  mean size=24.9  width=0.291  linkage=0.0495  certain=0.0000  "
-        "guess=0.275  max TV=0.300",
-        "k=5, t=0.15: classes=136  sizes 14..304  mean size=96.6  width=0.324  linkage=0.0136  certain=0.0000  "
-        "guess=0.222  max TV=0.149",
+        (
+            "k=5, distinct l=3: classes=1132  sizes 5..33  mean size=10.4  width=0.022  linkage=0.1132  certain=0.0000  "
+            "guess=0.574"
+        ),
+        (
+            "k=5, recursive (c=2, l=3): classes=389  sizes 5..641  mean size=114.9  width=0.113  linkage=0.0389  "
+            "certain=0.0000  guess=0.417"
+        ),
+        (
+            "k=5, t=0.3: classes=495  sizes 6..60  mean size=24.9  width=0.291  linkage=0.0495  certain=0.0000  "
+            "guess=0.275  max TV=0.300"
+        ),
+        (
+            "k=5, t=0.15: classes=136  sizes 14..304  mean size=96.6  width=0.324  linkage=0.0136  certain=0.0000  "
+            "guess=0.222  max TV=0.149"
+        ),
         # Composition
-        "k=5: people in both=6649  pinned by A=0.0289  by B=0.0262  by A and B=0.0985 (655 people)  "
-        "mean candidates A=2.79  A and B=2.38",
-        "k=5, distinct l=3: people in both=6649  pinned by A=0.0000  by B=0.0000  by A and B=0.0027 (18 people)  "
-        "mean candidates A=3.22  A and B=2.92",
+        (
+            "k=5: people in both=6649  pinned by A=0.0289  by B=0.0262  by A and B=0.0985 (655 people)  "
+            "mean candidates A=2.79  A and B=2.38"
+        ),
+        (
+            "k=5, distinct l=3: people in both=6649  pinned by A=0.0000  by B=0.0000  by A and B=0.0027 (18 people)  "
+            "mean candidates A=3.22  A and B=2.92"
+        ),
         "k=2: pinned exact=0.8734",
         "union bound=0.8734",
         "k=5: pinned exact=0.1615",

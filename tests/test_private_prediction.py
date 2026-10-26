@@ -102,8 +102,10 @@ def test_private_prediction_matches_chapter(tmp_path: Path) -> None:
         "student prompt with 256 public exemplars, eps=1: sigma=91.5  label acc 0.8086  accuracy 0.7954",
         # Stable aggregation
         "eps0=1: Pr[nu - rho > 8] formula=0.0872  simulated=0.0866",
-        "eps0=1: pool=1000: t=74.8  pool=10000: t=84.0  eps for c unstable answers: c=1: 1.00  c=5: 5.00  "
-        "c=20: 20.00  c=100: 83.45",
+        (
+            "eps0=1: pool=1000: t=74.8  pool=10000: t=84.0  eps for c unstable answers: c=1: 1.00  c=5: 5.00  "
+            "c=20: 20.00  c=100: 83.45"
+        ),
         "k=250: largest distance 124  fraction of pool with distance >= t: t=84.0: 0.1996",
         "k=500: largest distance 240  fraction of pool with distance >= t: t=84.0: 0.3923",
         "k=250, eps0=1, c=20: processed 23  labelled 3  label acc 1.0000  eps=20.00",

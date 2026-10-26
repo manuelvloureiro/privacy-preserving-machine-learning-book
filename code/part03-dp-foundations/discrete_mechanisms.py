@@ -415,7 +415,7 @@ def print_table(rng: np.random.Generator) -> None:
         zs = [discrete_laplace(s, t, src) for _ in range(n)]
         mean, var = mean_var(zs)
         support = range(-60 * t, 60 * t + 1)
-        exact_l: Callable[[int], float] = lambda z: discrete_laplace_pmf(z, scale)
+        exact_l: Callable[[int], float] = lambda z, scale=scale: discrete_laplace_pmf(z, scale)
         tv = tv_to(empirical_pmf(zs), exact_l, support)
         floor = reference_tv(rng, exact_l, support, n)
         print(
@@ -462,7 +462,7 @@ def print_table(rng: np.random.Generator) -> None:
         xs = [discrete_gaussian(sigma2, src) for _ in range(n)]
         mean, var = mean_var(xs)
         pmf = discrete_gaussian_pmf(sigma)
-        exact_g: Callable[[int], float] = lambda x: pmf.get(x, 0.0)
+        exact_g: Callable[[int], float] = lambda x, pmf=pmf: pmf.get(x, 0.0)
         tv = tv_to(empirical_pmf(xs), exact_g, discrete_gaussian_support(sigma))
         floor = reference_tv(rng, exact_g, discrete_gaussian_support(sigma), n)
         print(

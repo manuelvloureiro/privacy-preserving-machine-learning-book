@@ -25,8 +25,10 @@ def test_solutions_trust_models_matches_page(tmp_path: Path) -> None:
         "local=920674  central=1415  factor e/(e−1)^2=0.9207",
         # Exercise 4
         "largest eps0=5.809  closed form there=0.5000  condition allows eps0 <= 8.093",
-        "e^eps0=333.3  tanh=0.9940  ln(4/δ)=19.81  sqrt term=0.6500  1/n term=0.0027  u=0.6487  "
-        "ln(1+u)=0.5000  u/ln(1+u)=1.30",
+        (
+            "e^eps0=333.3  tanh=0.9940  ln(4/δ)=19.81  sqrt term=0.6500  1/n term=0.0027  u=0.6487  "
+            "ln(1+u)=0.5000  u/ln(1+u)=1.30"
+        ),
         # Exercise 5
         "m=0: honest=10000  eps=0.5009  condition allows eps0 <= 3.763",
         "m=5000: honest=5000  eps=0.6535  condition allows eps0 <= 3.070",

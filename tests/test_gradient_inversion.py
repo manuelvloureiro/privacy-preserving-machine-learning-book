@@ -23,8 +23,10 @@ def test_gradient_inversion_matches_section(tmp_path: Path) -> None:
         "gradient entries: 2212  input pixels: 64",
         # Section 14.4
         "single example, 1000 trials: bias rule 1.000  weight rule 1.000",
-        "batch of 16: true counts [4, 2, 4, 6]  uniform guess (2.12, 3.01, 4.27, 6.60)  "
-        "auxiliary guess (3.88, 2.00, 4.19, 5.92)  true p (4.00, 2.00, 4.00, 6.00)",
+        (
+            "batch of 16: true counts [4, 2, 4, 6]  uniform guess (2.12, 3.01, 4.27, 6.60)  "
+            "auxiliary guess (3.88, 2.00, 4.19, 5.92)  true p (4.00, 2.00, 4.00, 6.00)"
+        ),
         "batch 4: all counts exact, uniform guess 0.925  auxiliary guess 1.000",
         "batch 16: all counts exact, uniform guess 0.095  auxiliary guess 0.975",
         "batch 64: all counts exact, uniform guess 0.000  auxiliary guess 0.525",

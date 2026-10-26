@@ -23,8 +23,10 @@ def test_dp_erm_matches_chapter(tmp_path: Path) -> None:
         # Objective perturbation
         "n=100: eps'=0.5537  extra lambda=0",
         "n=10000: eps'=0.9950  extra lambda=0",
-        "1-D check, n=5, lambda=0.1, 500 datasets: largest |ln p/p'|=0.3779 (eps=1)  noise part 0.0992 "
-        "(budget eps'=0.1891)  Jacobian part 0.3395 (budget 0.8109)",
+        (
+            "1-D check, n=5, lambda=0.1, 500 datasets: largest |ln p/p'|=0.3779 (eps=1)  noise part 0.0992 "
+            "(budget eps'=0.1891)  Jacobian part 0.3395 (budget 0.8109)"
+        ),
         # Noisy gradient descent
         "n=1000: steps T=100  per-step sigma on the mean gradient=0.07461  estimate=6.725e-02",
         "n=3000: steps T=156  per-step sigma on the mean gradient=0.03106  estimate=1.080e-02",
@@ -38,10 +40,14 @@ def test_dp_erm_matches_chapter(tmp_path: Path) -> None:
         "n=10000: output-Gauss=9.274e-04  output-pure=8.321e-04  objective=8.156e-05  noisy-GD=1.384e-03",
         "n=30000: output-Gauss=9.973e-05  output-pure=8.943e-05  objective=7.135e-06  noisy-GD=1.538e-04",
         "n=100000: output-Gauss=8.543e-06  output-pure=6.379e-06  objective=8.798e-07  noisy-GD=1.621e-05",
-        "n=1000: test accuracy nonprivate=0.747  output-Gauss=0.681  output-pure=0.686  objective=0.736  "
-        "noisy-GD=0.695",
-        "n=10000: test accuracy nonprivate=0.753  output-Gauss=0.751  output-pure=0.752  objective=0.753  "
-        "noisy-GD=0.751",
+        (
+            "n=1000: test accuracy nonprivate=0.747  output-Gauss=0.681  output-pure=0.686  objective=0.736  "
+            "noisy-GD=0.695"
+        ),
+        (
+            "n=10000: test accuracy nonprivate=0.753  output-Gauss=0.751  output-pure=0.752  objective=0.753  "
+            "noisy-GD=0.751"
+        ),
         "log-log slope of excess risk against n, output-Gauss: -2.01",
         "log-log slope of excess risk against n, output-pure: -2.00",
         "log-log slope of excess risk against n, objective: -2.01",
@@ -52,8 +58,10 @@ def test_dp_erm_matches_chapter(tmp_path: Path) -> None:
         "T=20: 1.027e-03  T=50: 2.875e-04  T=100: 7.137e-04  T=200: 1.076e-03  T=500: 2.939e-03  T=1000: 6.018e-03",
         # Noisy projected gradient descent without a ridge
         "classic ratio eps/sqrt(2 ln(1.25/delta))=0.2064  exact mu=0.2681",
-        "n=1000: T=1797  sigma=0.3163  G^2=1+d sigma^2=2.0004  step=0.0834  bound=0.1668  "
-        "limit 2RL sqrt(d)/(n mu)=0.1180",
+        (
+            "n=1000: T=1797  sigma=0.3163  G^2=1+d sigma^2=2.0004  step=0.0834  bound=0.1668  "
+            "limit 2RL sqrt(d)/(n mu)=0.1180"
+        ),
         "n=1000, T=100: bound=0.5137",
         "n=1000, T=1000: bound=0.1973",
         "n=1000, T=10000: bound=0.1281",

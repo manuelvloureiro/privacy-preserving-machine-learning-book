@@ -185,11 +185,10 @@ def parse(path: Path) -> Page:
             in_table = False
             if (m := CAPTION.match(line)) and tables:
                 tables[-1].caption_id = m.group(1)
-        elif in_table and not line.strip():
-            # a blank line may separate the table from its caption; look one line ahead
-            if n < len(lines) and (m := CAPTION.match(lines[n])) and tables:
-                tables[-1].caption_id = m.group(1)
-                in_table = False
+        # a blank line may separate the table from its caption; look one line ahead
+        elif in_table and not line.strip() and n < len(lines) and (m := CAPTION.match(lines[n])) and tables:
+            tables[-1].caption_id = m.group(1)
+            in_table = False
         for m in LABEL.finditer(line):
             labels.append((m.group(1), n))
         if BOLD_RESULT.match(line.strip()):
@@ -416,9 +415,7 @@ def check_exercises(page: Page, skel: Skeleton, prefix: str | None) -> list[Find
     out: list[Finding] = []
     if not skel.exercise_sections or not prefix:
         return out
-    n = 0
-    for h, start, end in page.sections():
-        n += 1
+    for n, (h, start, end) in enumerate(page.sections(), 1):
         want = skel.exercise_sections.format(prefix=prefix, n=n)
         if h.id != want:
             out.append(Finding(page.path, h.line, f"exercise {n} has id {h.id}, not {want}"))

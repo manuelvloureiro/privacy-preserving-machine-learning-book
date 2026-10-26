@@ -535,7 +535,7 @@ def plot_calibration() -> Figure:
 
 def plot_high_dim(rng: np.random.Generator, eps: float = 1.0) -> Figure:
     """Per-coordinate error of Laplace and Gaussian mechanisms as the number of released counts grows."""
-    ds = [int(round(10 ** (i / 10))) for i in range(31)]
+    ds = [round(10 ** (i / 10)) for i in range(31)]
     ds = sorted(set(ds))
     sim_ds = [1, 10, 100, 1000]
     fig, (left, right) = plt.subplots(1, 2, figsize=(12, 4.4), sharey=True)

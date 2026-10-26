@@ -19,8 +19,10 @@ def test_subsampling_matches_section(tmp_path: Path) -> None:
         "exact subsampled eps=0.1586  formula=0.1586  q*eps=0.1000",
         "largest E/(gamma*delta) = 1.0000",
         # Section 31.4
-        "Poisson add/remove 0.01704  fixed-size replace-one 0.01704  Poisson replace-one (group privacy) 0.06193  "
-        "ratio 3.64  e^eps+1=3.72",
+        (
+            "Poisson add/remove 0.01704  fixed-size replace-one 0.01704  Poisson replace-one (group privacy) 0.06193  "
+            "ratio 3.64  e^eps+1=3.72"
+        ),
         "Poisson replace-one, exact for pure DP: 0.02338  ratio to add/remove 1.37",
         "Poisson RDP upper eps=1.21  shuffled lower eps=4.06  deterministic batches eps=4.38",
         "sigma=0.5: deterministic=10.00  shuffled lower=10.00  Poisson upper=8.03",
@@ -46,10 +48,14 @@ def test_subsampling_matches_section(tmp_path: Path) -> None:
         "sigma=0.5: largest D(mu0||mixture) - D(mixture||mu0) over ORDERS = -5.09e-04",
         "sigma=2: largest D(mu0||mixture) - D(mixture||mu0) over ORDERS = -5.67e-08",
         # Section 31.6
-        "sigma=1: Abadi order limit alpha <= 5.6  first order where exact > 2x leading: 8.9  (fine: 8.9)  "
-        "2 sigma^2 ln(1/q) = 9.2  sigma^2 ln(1/q) = 4.6",
-        "sigma=4: Abadi order limit alpha <= 52.5  first order where exact > 2x leading: 256  (fine: 147.4)  "
-        "2 sigma^2 ln(1/q) = 147.4  sigma^2 ln(1/q) = 73.7",
+        (
+            "sigma=1: Abadi order limit alpha <= 5.6  first order where exact > 2x leading: 8.9  (fine: 8.9)  "
+            "2 sigma^2 ln(1/q) = 9.2  sigma^2 ln(1/q) = 4.6"
+        ),
+        (
+            "sigma=4: Abadi order limit alpha <= 52.5  first order where exact > 2x leading: 256  (fine: 147.4)  "
+            "2 sigma^2 ln(1/q) = 147.4  sigma^2 ln(1/q) = 73.7"
+        ),
         "at alpha = sigma^2 ln(1/q): exact/leading = 1.08",
         "at alpha = sigma^2 ln(1/q): exact/leading = 1.05",
         "alpha=16: exact=3.0879e+00  leading=1.3746e-03  Abadi=1.6162e-03  exact/leading=2246.32",

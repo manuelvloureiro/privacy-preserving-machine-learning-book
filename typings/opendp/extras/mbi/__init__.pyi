@@ -31,6 +31,7 @@ class Algorithm:
     estimator: Callable[..., Any] = ...
     oneway: Literal["all", "unkeyed"] = "all"
     oneway_split: float | None = None
+    @property
     def needs_model(self) -> bool: ...
     def make_marginals(
         self,

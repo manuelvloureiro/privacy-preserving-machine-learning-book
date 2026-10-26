@@ -16,12 +16,16 @@ def test_solutions_property_inference_matches_page(tmp_path: Path) -> None:
         "Bin(99, 1/2): TV(X, X+1)=0.0796  max pmf=0.0796  half of it=0.0398  membership game=0.0398",
         "X uniform on {0, 2}: TV(X, X+1)=1.0000  max pmf=0.5000",
         # Exercise 2
-        "Phi^-1(0.95)=1.6449  normal approximation n=270.6  exact smallest n=269  exact accuracy there=0.9501  "
-        "at n=268: 0.9495",
+        (
+            "Phi^-1(0.95)=1.6449  normal approximation n=270.6  exact smallest n=269  exact accuracy there=0.9501  "
+            "at n=268: 0.9495"
+        ),
         # Exercise 3
         "n=200, |t1 - t0|=0.1: model accuracy (Gaussian prediction)=0.6763  records matching it=21  n (kappa/2)^2=20.9",
-        "n=1000, |t1 - t0|=0.1: model accuracy (Gaussian prediction)=0.8467  records matching it=105  "
-        "n (kappa/2)^2=104.6",
+        (
+            "n=1000, |t1 - t0|=0.1: model accuracy (Gaussian prediction)=0.8467  records matching it=105  "
+            "n (kappa/2)^2=104.6"
+        ),
         # Exercise 4
         "h=4: h! 2^h = 384",
         "h=8: h! 2^h = 10321920",

@@ -28,8 +28,10 @@ def test_laplace_gaussian_matches_section(tmp_path: Path) -> None:
         "proof needs t >= 0.5262, which holds for every eps <= 1 when delta <= 0.7448",
         # Exact curve
         "24 of 30 (eps, mu) pairs with delta > 1e-12: max relative error 3.1e-06",
-        "mu=1: delta(0)=0.3829 (TV)  delta(1)=0.1269 (integrated 0.1269, Monte Carlo 0.1270)  P[L>1]=0.3085  "
-        "e Q[L>1]=0.1816  delta(2)=0.0209  delta(4)=4.71e-05",
+        (
+            "mu=1: delta(0)=0.3829 (TV)  delta(1)=0.1269 (integrated 0.1269, Monte Carlo 0.1270)  P[L>1]=0.3085  "
+            "e Q[L>1]=0.1816  delta(2)=0.0209  delta(4)=4.71e-05"
+        ),
         "sigma=2 (mu=0.5): P[L>1]=0.0401  delta(1)=0.0068",
         "mu=1: eps at delta=1e-5 is 4.3772",
         "eps=0.05: classic=96.8961  analytic=57.7707  ratio=1.677  true delta at classic=1.29e-09",
@@ -51,8 +53,10 @@ def test_laplace_gaussian_matches_section(tmp_path: Path) -> None:
         "d=100: Laplace rms=141.42 (simulated 141.07)  Gaussian rms=37.31 (simulated 37.28)  ratio=3.79",
         "d=1000: Laplace rms=1414.21 (simulated 1412.90)  Gaussian rms=117.97 (simulated 118.11)  ratio=11.99",
         # Privacy loss distribution of the Laplace mechanism
-        "eps=1: atom at +eps=0.5000 (simulated 0.5007)  atom at -eps=0.1839 (simulated 0.1841)  continuous part=0.3161  "
-        "mean loss=0.3679 (simulated 0.3682)",
+        (
+            "eps=1: atom at +eps=0.5000 (simulated 0.5007)  atom at -eps=0.1839 (simulated 0.1841)  continuous part=0.3161  "
+            "mean loss=0.3679 (simulated 0.3682)"
+        ),
     ):
         assert expected in out
     assert {f.name for f in tmp_path.iterdir()} == {

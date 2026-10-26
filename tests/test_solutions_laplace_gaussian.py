@@ -19,12 +19,16 @@ def test_solutions_laplace_gaussian_matches_page(tmp_path: Path) -> None:
         "density identity gap=0.0e+00  slope formula=-0.1816  finite difference=-0.1816",
         "mu=1: delta(0)=0.3829 = 2 Phi(1/2) - 1 = 0.3829",
         # Exercise 4
-        "step 1: mu in [0.001000, 0.316228]  step 2: mu in [0.017783, 0.316228]  step 3: mu in [0.074989, 0.316228]  "
-        "step 10: mu in [0.122983, 0.124373]  step 20: mu in [0.124106, 0.124107]  step 60: mu in [0.124106, 0.124106]",
+        (
+            "step 1: mu in [0.001000, 0.316228]  step 2: mu in [0.017783, 0.316228]  step 3: mu in [0.074989, 0.316228]  "
+            "step 10: mu in [0.122983, 0.124373]  step 20: mu in [0.124106, 0.124107]  step 60: mu in [0.124106, 0.124106]"
+        ),
         "eps=0.5 delta=1e-6: analytic sigma=8.0576  classic sigma=10.5976  ratio=1.315",
         # Exercise 5
-        "k=16 sigma=4: mu=1.0000  exact eps at delta=1e-5: 4.3772  each alone: eps=1.0864 at delta/k  "
-        "basic composition: eps=17.3818",
+        (
+            "k=16 sigma=4: mu=1.0000  exact eps at delta=1e-5: 4.3772  each alone: eps=1.0864 at delta/k  "
+            "basic composition: eps=17.3818"
+        ),
         # Exercise 6
         "Laplace l2 rms=0.02828  Gaussian l2 rms=0.00746  ratio=3.79",
         # Exercise 7

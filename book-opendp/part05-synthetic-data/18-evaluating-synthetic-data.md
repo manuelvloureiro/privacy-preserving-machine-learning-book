@@ -253,6 +253,8 @@ The statement covers the rows without a further term, because drawing rows from 
 
 The last row is the one most often done wrong. A distance computed on the private data depends on that data, so publishing it is a new release that the statement does not cover. [Limitations and troubleshooting](../part04-extending/15-limitations-and-troubleshooting.md) put it as a rule: the guarantee covers what passes through a measurement and nothing computed beside it. The error bars from `std` are safe to publish. The distances in this chapter's tables were safe only because the data are public.
 
+This is the last chapter of the book. You can now state a privacy unit and a budget, release statistics, tables and models through a context, and read every scale and threshold before spending anything. You can build the framework's pieces by hand when the context is not enough, and turn a contingency table into synthetic rows. You can also measure how good those rows are, on data you are allowed to look at, and publish them with a guarantee that says exactly what it covers.
+
 ## Summary
 
 | Call or concept | What it does | Rule of thumb |
@@ -278,5 +280,3 @@ The last row is the one most often done wrong. A distance computed on the privat
 - Tao, McKenna, Hay, Machanavajjhala and Miklau, "Benchmarking Differentially Private Synthetic Data Generation Algorithms" (2021): marginal errors and downstream tasks as the measures of quality.
 - The practitioner edition's chapter on [release and governance](../../book-practitioner/part05-dp-ml/12-release-governance.md): the statement of a guarantee and the evidence that goes with it.
 - The full edition's chapters on [post-processing and composition](../../book-full/part03-dp-foundations/02-properties.md), [query release](../../book-full/part03-dp-foundations/06-query-release.md), [public data](../../book-full/part05-dp-ml/06-public-data.md) and [choosing epsilon](../../book-full/part05-dp-ml/09-choosing-epsilon.md) derive the results this chapter states.
-
-This is the last chapter of the book. You can now state a privacy unit and a budget, release statistics, tables and models through a context, and read every scale and threshold before spending anything. You can build the framework's pieces by hand when the context is not enough, and turn a contingency table into synthetic rows. You can also measure how good those rows are, on data you are allowed to look at, and publish them with a guarantee that says exactly what it covers.

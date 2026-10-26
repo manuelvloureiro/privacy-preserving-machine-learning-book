@@ -67,7 +67,7 @@ Solving these two inequalities for $\varepsilon$ turns measured rates into a low
 $$\varepsilon_{\mathrm{lo}} = \max\Big\{\ln\frac{\underline{\mathrm{TPR}} - \delta}{\overline{\mathrm{FPR}}},\ \ln\frac{1 - \overline{\mathrm{FPR}} - \delta}{1 - \underline{\mathrm{TPR}}}\Big\}.$$ {#eq-audit-eps-lo}
 The bound needs independent trials, and a threshold chosen on other trials than those it counts, since one tuned on the counted trials would inflate the bound.
 
-SciPy's `binomtest(k, n).proportion_ci(method="exact")` gives the Clopper–Pearson intervals. No maintained package computes the bound itself, so the script imports `eps_lower_bound` from the book's helper module, [practitioner_privacy_tests.py](../../code/practitioner_privacy_tests.py). The same module holds the bound on $\mu$ above and the one-run audit below. Suppose an attack catches the canary in 500 of 1,000 runs that include it, and raises one false alarm in 1,000 runs without it.
+SciPy's `binomtest(k, n).proportion_ci(method="exact")` gives the Clopper–Pearson intervals. No library installed with this book computes the bound itself, so the script imports `eps_lower_bound` from the book's helper module, [practitioner_privacy_tests.py](../../code/practitioner_privacy_tests.py). The same module holds the bound on $\mu$ above and the one-run audit below. Suppose an attack catches the canary in 500 of 1,000 runs that include it, and raises one false alarm in 1,000 runs without it.
 
 ```{.python excerpt="audit-eps-bound"}
 for false_pos, true_pos in ((1, 500), (0, 1_000)):  # out of 1,000 runs without and with the canary

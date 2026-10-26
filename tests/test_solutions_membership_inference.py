@@ -18,8 +18,10 @@ def test_solutions_membership_inference_matches_page(tmp_path: Path) -> None:
         "z=3.0902 s=0.5: s*z - s^2/2=1.4201  from densities=1.4201",
         "z=3.0902 s=4: s*z - s^2/2=4.3608  from densities=4.3608",
         "z=1 s=4: s*z - s^2/2=-4.0000  from densities=-4.0000",
-        "log-threshold c=1.497  z-cut typical=3.244  z-cut atypical=2.374  FPR typical=5.90e-04  "
-        "FPR atypical=0.0088  pooled FPR=0.0010  TPR=0.0503",
+        (
+            "log-threshold c=1.497  z-cut typical=3.244  z-cut atypical=2.374  FPR typical=5.90e-04  "
+            "FPR atypical=0.0088  pooled FPR=0.0010  TPR=0.0503"
+        ),
         # Exercise 3
         "q=0.05: AUC=0.5250  A: advantage=0.0500 TPR=0.05095  B: mu=0.0887 AUC check=0.5250 advantage=0.0354 TPR=0.00134",
         "q=0.01: AUC=0.5050  A: advantage=0.0100 TPR=0.01099  B: mu=0.0177 AUC check=0.5050 advantage=0.0071 TPR=0.00106",

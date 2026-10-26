@@ -285,6 +285,11 @@ Data = tuple[Array, npt.NDArray[np.int64], Array, npt.NDArray[np.int64]]
 _data: Data | None = None  # set once in each worker process
 
 
+WORKERS = int(
+    os.environ.get("PRIVACY_WORKERS") or os.cpu_count() or 1
+)  # processes for the sweep; lower it when memory is short
+
+
 def _init(data: Data) -> None:
     global _data
     _data = data
@@ -551,7 +556,7 @@ def main() -> None:
         jobs += [(technique, eps, TRAIN_ROWS, seed) for eps in [None, *EPSILONS] for seed in range(seeds)]
     for n in SIZES[:-1]:
         jobs += [("DP-SGD", eps, n, seed) for eps in [None, *EPSILONS] for seed in range(size_seeds)]
-    with ProcessPoolExecutor(max_workers=os.cpu_count(), initializer=_init, initargs=(data,)) as pool:
+    with ProcessPoolExecutor(max_workers=WORKERS, initializer=_init, initargs=(data,)) as pool:
         runs = list(pool.map(evaluate, jobs, chunksize=4))
     # end excerpt
     groups: dict[tuple[str, float | None, int], list[Run]] = {}

@@ -37,11 +37,15 @@ def test_solutions_dp_erm_matches_page(tmp_path: Path) -> None:
         # Exercise 7
         "n=10000, L=1, 10% slack: g=1e-05",
         # Exercise 8
-        "n=1000, d=10, R=5: T=1797  sigma=0.3163  d sigma^2=1.0004  private bound=0.1668  "
-        "noiseless bound=0.1179  ratio=1.4144",
+        (
+            "n=1000, d=10, R=5: T=1797  sigma=0.3163  d sigma^2=1.0004  private bound=0.1668  "
+            "noiseless bound=0.1179  ratio=1.4144"
+        ),
         # Exercise 9
         "n=1000, d=10: T within 10% of the limit=8554  bound=0.1298  limit=0.1180  gradient evaluations n*T=8.55e+06",
-        "n=10000, d=10: T within 10% of the limit=855374  bound=0.0130  limit=0.0118  "
-        "gradient evaluations n*T=8.55e+09",
+        (
+            "n=10000, d=10: T within 10% of the limit=855374  bound=0.0130  limit=0.0118  "
+            "gradient evaluations n*T=8.55e+09"
+        ),
     ):
         assert expected in out, expected

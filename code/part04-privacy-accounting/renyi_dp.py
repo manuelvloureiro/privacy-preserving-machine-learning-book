@@ -25,6 +25,8 @@ from shared.stats import bisect, logsumexp, normal_cdf
 
 configure("renyi_dp")
 
+import itertools
+
 import matplotlib.pyplot as plt
 import numpy as np
 from matplotlib.figure import Figure
@@ -129,7 +131,7 @@ def renyi_numeric(
 def laplace_rdp_numeric(alpha: float, b: float) -> float:
     """D_α(Lap(0, b)‖Lap(1, b)) by numerical integration; the grid has nodes at both kinks, 0 and 1."""
     half = 60 * b + 1
-    n = int(round(2 * half * 10_000))  # step 1e-4, so 0 and 1 are grid points
+    n = round(2 * half * 10_000)  # step 1e-4, so 0 and 1 are grid points
 
     def log_p(x: NDArray[np.float64]) -> NDArray[np.float64]:
         return -np.abs(x) / b - math.log(2 * b)
@@ -362,7 +364,7 @@ def print_table(rng: np.random.Generator) -> None:
     grows = all(
         laplace_rdp_shift(a, 1.0, s1) < laplace_rdp_shift(a, 1.0, s2)
         for a in (1.5, 2.0, 10.0, 64.0)
-        for s1, s2 in zip(shifts, shifts[1:])
+        for s1, s2 in itertools.pairwise(shifts)
     )
     print(f"  Laplace b=1: D_alpha grows with the shift on (0, 1] at orders 1.5, 2, 10, 64: {grows}")
     print("  RR " + fmt_curve(lambda a: randomized_response_rdp(a, 0.75), ks))
@@ -531,7 +533,7 @@ def plot_rr_curve(p: float = 0.75) -> Figure:
         ylabel=r"$\varepsilon(\alpha)$ (nats)",
         ylim=(0, 1.25),
         xlim=(1, 101),
-        title=f"RDP curve of randomized response, p = {p:g}",
+        title=f"RDP curve of randomized response, t = {p:g}",
     )
     ax.legend(loc="lower right", fontsize=9)
     return fig
@@ -549,7 +551,7 @@ def plot_curves() -> Figure:
         [randomized_response_rdp(a, 0.75) for a in alphas],
         "C2",
         linewidth=2,
-        label=r"randomized response, $p = 0.75$",
+        label=r"randomized response, $t = 0.75$",
     )
     ax.axhline(1.0, color="C1", linestyle=":", linewidth=1)
     ax.axhline(math.log(3), color="C2", linestyle=":", linewidth=1)
@@ -635,7 +637,7 @@ def plot_conversion(sigma: float = 20.0, k_max: int = 1000, delta: float = DELTA
     )
     ax1.legend(fontsize=8, loc="center right")
 
-    ks = sorted({int(round(10 ** (x / 8))) for x in range(25)})
+    ks = sorted({round(10 ** (x / 8)) for x in range(25)})
     ax2.plot(ks, [gaussian_advanced(sigma, k, delta)[0] for k in ks], "C3-.", label="advanced composition, best split")
     ax2.plot(
         ks,

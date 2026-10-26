@@ -64,7 +64,7 @@ for k in range(n_models):
     confidence[k] = p
 ```
 
-So ART trains the models, while the LiRA scores come from a helper, because no library installed with this book computes them. The helper's `lira_scores`, in [practitioner_privacy_tests.py](../../code/practitioner_privacy_tests.py), fits the two normals per image and returns @eq-mia-lira-online and @eq-mia-lira-offline. It follows the reference code in TensorFlow Privacy, which needs TensorFlow.
+So ART trains the models, while the LiRA scores come from a helper, because no library installed with this book computes them. The helper's `lira_scores`, in [practitioner_privacy_tests.py](../../code/practitioner_privacy_tests.py), fits the two normals per image and returns @eq-mia-lira-online and @eq-mia-lira-offline. It follows TensorFlow Privacy's `compute_score_lira`, which the `tensorflow-privacy` package does not ship.
 
 The command `uv run python code/part02-attacks/practitioner_lira.py` runs it in seconds. It compares the attacks by their TPR at two low FPRs and by their area under the curve (AUC) of the TPR against the FPR.
 

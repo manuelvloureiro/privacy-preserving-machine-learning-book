@@ -18,8 +18,10 @@ def test_solutions_concentration_matches_page(tmp_path: Path) -> None:
         "rule=after two heads: empirical=1.10e-03",
         "rule=when behind: empirical=1.18e-03",
         "rule=always 0.7: empirical=9.37e-04",
-        "p_hat=0.0006  Hoeffding=0.0179  Bernstein plug-in=0.00185  Bernstein=0.00256  "
-        "Chernoff=0.00224  Chernoff exact exponent=0.00189  Clopper-Pearson=0.00155",
+        (
+            "p_hat=0.0006  Hoeffding=0.0179  Bernstein plug-in=0.00185  Bernstein=0.00256  "
+            "Chernoff=0.00224  Chernoff exact exponent=0.00189  Clopper-Pearson=0.00155"
+        ),
     ):
         assert expected in out
     assert not any(tmp_path.iterdir())  # the solutions draw no figures

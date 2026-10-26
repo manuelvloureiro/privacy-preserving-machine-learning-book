@@ -140,7 +140,7 @@ def ggm_all_inputs(key: bytes, n: int) -> tuple[int, int, float]:
     """Evaluate F_k on all 2^n inputs: (calls per evaluation, distinct outputs, fraction of 1 bits)."""
     gen = CountingGenerator()
     outputs = [ggm_eval(gen, key, int_to_bits(x, n)) for x in range(2**n)]
-    ones = sum(bin(byte).count("1") for out in outputs for byte in out)
+    ones = sum(byte.bit_count() for out in outputs for byte in out)
     return gen.calls // 2**n, len(set(outputs)), ones / (len(outputs) * 256)
 
 

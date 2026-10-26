@@ -53,10 +53,14 @@ def test_stability_matches_section(tmp_path: Path) -> None:
         "[0-1 error n=1000] 1-NN train=0.000 test=0.367  logistic train=0.244 test=0.266",
         "[0-1 error n=4000] 1-NN train=0.000 test=0.352  logistic train=0.249 test=0.259",
         # choosing what to measure after looking
-        "[Holdout reuse n=1000 d=100] kept=33.3  largest feature error=0.0436  fixed-query bound=0.0515  "
-        "reused=0.6080  split=0.5032  true=0.5",
-        "[Holdout reuse n=1000 d=1000] kept=325.9  largest feature error=0.0538  fixed-query bound=0.0616  "
-        "reused=0.8053  split=0.5018  true=0.5",
+        (
+            "[Holdout reuse n=1000 d=100] kept=33.3  largest feature error=0.0436  fixed-query bound=0.0515  "
+            "reused=0.6080  split=0.5032  true=0.5"
+        ),
+        (
+            "[Holdout reuse n=1000 d=1000] kept=325.9  largest feature error=0.0538  fixed-query bound=0.0616  "
+            "reused=0.8053  split=0.5018  true=0.5"
+        ),
     ):
         assert expected in out
     assert {f.name for f in tmp_path.iterdir()} == {

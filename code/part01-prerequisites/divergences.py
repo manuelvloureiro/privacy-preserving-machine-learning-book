@@ -25,6 +25,8 @@ from shared.stats import laplace_pdf, normal_cdf, normal_pdf
 
 configure("divergences")
 
+import itertools
+
 import matplotlib.pyplot as plt
 import numpy as np
 from matplotlib.figure import Figure
@@ -283,8 +285,8 @@ def binned_gaussian(mu: float, width: float) -> tuple[list[float], list[float], 
     else:
         k = math.ceil(12 / width)
         edges = [-math.inf] + [mu / 2 + j * width for j in range(-k, k + 1)] + [math.inf]
-    p = [normal_cdf(hi) - normal_cdf(lo) for lo, hi in zip(edges, edges[1:])]
-    q = [normal_cdf(hi - mu) - normal_cdf(lo - mu) for lo, hi in zip(edges, edges[1:])]
+    p = [normal_cdf(hi) - normal_cdf(lo) for lo, hi in itertools.pairwise(edges)]
+    q = [normal_cdf(hi - mu) - normal_cdf(lo - mu) for lo, hi in itertools.pairwise(edges)]
     return edges, p, q
 
 
@@ -571,7 +573,7 @@ def plot_renyi_chords() -> Figure:
     lams = [-1 + i / 100 for i in range(401)]
     psi = [log_ratio_log_mgf(LOADED, FAIR, lam) for lam in lams]
     fig, (left, right) = plt.subplots(1, 2, figsize=(11, 4.2))
-    left.plot(lams, psi, "k", linewidth=2, label=r"$\psi(\lambda) = \ln \mathbb{E}_P[e^{\lambda L}]$")
+    left.plot(lams, psi, "k", linewidth=2, label=r"$K_L(\lambda) = \ln \mathbb{E}_P[e^{\lambda L}]$")
     kl_value = kl(LOADED, FAIR)
     left.plot([-1, 3], [-kl_value, 3 * kl_value], ":", color="gray", label=f"tangent at 0, slope KL = {kl_value:.3f}")
     for lam in (-0.5, 1.0, 2.5):
@@ -585,7 +587,7 @@ def plot_renyi_chords() -> Figure:
     left.axhline(0, color="0.8", linewidth=0.8)
     left.axvline(0, color="0.8", linewidth=0.8)
     left.set(
-        xlabel=r"$\lambda = \alpha - 1$", ylabel=r"$\psi(\lambda)$", title="Rényi divergence = slope of a chord of ψ"
+        xlabel=r"$\lambda = \alpha - 1$", ylabel=r"$K_L(\lambda)$", title="Rényi divergence = slope of a chord of ψ"
     )
     left.legend(fontsize=8, loc="upper left")
 
@@ -656,7 +658,7 @@ def plot_tv_gaussians(rng: np.random.Generator, mu: float = 1.0, per_sample: flo
     left.set(xlabel="x", ylabel="density", ylim=(0, 0.55), title="TV is the area where p exceeds q")
     left.legend(fontsize=8, loc="upper left")
 
-    ns = [int(round(10 ** (k / 20))) for k in range(81)]
+    ns = [round(10 ** (k / 20)) for k in range(81)]
     exact = [0.5 + 0.5 * gaussian_tv(per_sample * math.sqrt(n)) for n in ns]
     pinsker = [0.5 + 0.5 * min(1.0, pinsker_bound(n * gaussian_kl(per_sample))) for n in ns]
     sim_ns = [10, 100, 1000, 10000]

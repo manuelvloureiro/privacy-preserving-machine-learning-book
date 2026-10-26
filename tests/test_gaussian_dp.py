@@ -64,8 +64,10 @@ def test_gaussian_dp_matches_section(tmp_path: Path) -> None:
         "[numerical accountant k=100] eps(1e-5) in [0.7175, 0.7185]  CLT eps=0.4575  CLT below the lower value: True",
         "[numerical accountant k=1000] eps(1e-5) in [1.8232, 1.8332]  CLT eps=1.6177  CLT below the lower value: True",
         "[numerical accountant k=10000] eps(1e-5) in [6.1377, 6.2377]  CLT eps=6.0071  CLT below the lower value: True",
-        "[one step, P=mixture] mean=8.3812e-05  var=1.7163e-04  heuristic q^2(e-1)/2=8.5914e-05, q^2(e-1)=1.7183e-04  "
-        "Thm3.4 mu at k=10000=1.2795 -> eps(1e-5)=5.8379",
+        (
+            "[one step, P=mixture] mean=8.3812e-05  var=1.7163e-04  heuristic q^2(e-1)/2=8.5914e-05, q^2(e-1)=1.7183e-04  "
+            "Thm3.4 mu at k=10000=1.2795 -> eps(1e-5)=5.8379"
+        ),
         "[one step, P=N(0,1)] mean=8.1890e-05  var=1.6009e-04",
         "Thm3.4 mu at k=10000=1.2944 -> eps(1e-5)=5.9184",
         "CLT/lower=0.638  width=0.0010 = k h=0.0010",
@@ -75,8 +77,10 @@ def test_gaussian_dp_matches_section(tmp_path: Path) -> None:
         "CLT/lower=0.887",
         "CLT/lower=0.979",
         # Section 30.9
-        "[mu=1 a=Phi(-1/2)=0.3085] G_1=0.3085  f_RDP on the grid of orders=0.2201  "
-        "f_RDP with 5010 orders in [1.01, 3000]=0.2219",
+        (
+            "[mu=1 a=Phi(-1/2)=0.3085] G_1=0.3085  f_RDP on the grid of orders=0.2201  "
+            "f_RDP with 5010 orders in [1.01, 3000]=0.2219"
+        ),
         "[mu=1 diagonal point] G_1: a=0.3085 advantage=0.3829  f_RDP: a=0.2585 advantage=0.4830  delta_RDP(0)=0.4830",
         "[mu=1 eps=1] GDP delta=0.1269  delta certified by the RDP curve=0.2149 at a=0.0838  ratio=1.69",
     ):

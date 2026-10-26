@@ -24,6 +24,8 @@ from shared.figures import configure
 
 configure("linkage")
 
+import itertools
+
 import matplotlib.pyplot as plt
 import numpy as np
 from matplotlib.figure import Figure
@@ -417,7 +419,7 @@ def estimated_correctness(
 def calibration(predicted: FloatArray, actual: FloatArray, edges: Sequence[float]) -> list[tuple[float, float, int]]:
     """(mean predicted, observed rate, count) for each bin of predicted correctness."""
     rows: list[tuple[float, float, int]] = []
-    for lo, hi in zip(edges[:-1], edges[1:], strict=True):
+    for lo, hi in itertools.pairwise(edges):
         inside = (predicted >= lo) & (predicted < hi) if hi < 1 else (predicted >= lo)
         if np.any(inside):
             rows.append((float(np.mean(predicted[inside])), float(np.mean(actual[inside])), int(np.sum(inside))))

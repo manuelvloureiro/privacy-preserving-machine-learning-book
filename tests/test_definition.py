@@ -18,8 +18,10 @@ def test_definition_matches_section(tmp_path: Path) -> None:
         "max_S P(S) - 2Q(S): brute force=0.2500  hockey-stick=0.2500",
         # Why a ratio
         "additive-only definition, n=1000, delta=0.0001: TV between any two datasets <= 0.1000  best accuracy <= 0.5500",
-        "additive-only definition, n=1000, delta=0.001: TV between any two datasets <= 1.0000  best accuracy <= 1.0000  "
-        "release-each-record exposure=0.6323",
+        (
+            "additive-only definition, n=1000, delta=0.001: TV between any two datasets <= 1.0000  best accuracy <= 1.0000  "
+            "release-each-record exposure=0.6323"
+        ),
         # Randomized response
         "two coins: Pr(yes | yes)=0.7500  Pr(yes | no)=0.2500  eps=ln 3=1.0986",
         "eps=0.1000: truth prob=0.5250",

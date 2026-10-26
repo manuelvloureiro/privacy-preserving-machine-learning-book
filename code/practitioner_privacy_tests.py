@@ -1,4 +1,4 @@
-"""What no maintained library provides: the LiRA score, the audit lower bounds and canary exposure.
+"""What no library installable in this project provides: the LiRA score, the audit lower bounds and canary exposure.
 
 The practitioner edition runs its attacks on maintained libraries where they exist: the Adversarial Robustness
 Toolbox (ART) trains shadow models and runs the black-box membership and attribute inference attacks, scikit-learn
@@ -6,15 +6,20 @@ reads the ROC curve, and SciPy's `binomtest(...).proportion_ci(method="exact")` 
 The functions here are the rest: published formulas that no maintained library installable in this project
 provides. Each docstring names the paper and the reference implementation it follows, so a reader can check it.
 
-- `lira_scores`: online and offline LiRA (Carlini et al. 2022), as in TensorFlow Privacy's `privacy_tests`
-  (`membership_inference_attack/advanced_mia.py`, `compute_score_lira`), which needs TensorFlow, a framework this
-  project does not install.
-- `exposure` and `extrapolated_exposure`: canary exposure (Carlini et al. 2019), as in TensorFlow Privacy's
-  `privacy_tests/secret_sharer/exposures.py`.
+The reference implementations are in TensorFlow Privacy (https://github.com/tensorflow/privacy), under
+`tensorflow_privacy/privacy/privacy_tests/`. Its `setup.py` leaves that package out of the `tensorflow-privacy`
+wheel, which also needs TensorFlow 2.15 or older and Python older than 3.12, while this project runs Python 3.12.
+
+- `lira_scores`: online and offline LiRA (Carlini et al. 2022), after `compute_score_lira` in TensorFlow Privacy's
+  `privacy_tests/membership_inference_attack/advanced_mia.py`.
+- `exposure` and `extrapolated_exposure`: canary exposure (Carlini et al. 2019), after `compute_exposure_interpolation`
+  and `compute_exposure_extrapolation` in TensorFlow Privacy's `privacy_tests/secret_sharer/exposures.py`.
 - `clopper_pearson_bounds`, `mu_lower_bound`, `eps_lower_bound`: the lower bounds of a privacy audit from measured
-  rates (Nasr et al. 2023; Jagielski, Ullman & Oprea 2020), on top of SciPy's exact binomial interval.
+  rates (Nasr et al. 2023; Jagielski, Ullman & Oprea 2020), on top of SciPy's exact binomial interval. TensorFlow
+  Privacy's `privacy_tests/epsilon_lower_bound.py` (`EpsilonLowerBound` with `BoundMethod.CLOPPER_PEARSON`) computes
+  the ε bound with δ = 0; it has nothing for the Gaussian-DP μ.
 - `correct_guesses`, `one_run_pvalue`, `one_run_eps`: the one-run audit (Steinke, Nasr & Jagielski 2023,
-  Corollary 5.4), which has no reference package.
+  Corollary 5.4), which has no reference package; TensorFlow Privacy has none.
 
 Used by code/part02-attacks/practitioner_lira.py, code/part05-dp-ml/practitioner_audit.py and
 code/part05-dp-ml/practitioner_lora.py.
@@ -43,7 +48,10 @@ def lira_scores(
     ratio of φ under a normal fitted to the record's IN shadows against one fitted to its OUT shadows; offline LiRA
     is how many OUT standard deviations φ lies above the OUT mean. With `global_variance`, one spread is shared by
     all records, which is steadier with few shadows. Reference implementation: TensorFlow Privacy,
-    `privacy_tests/membership_inference_attack/advanced_mia.py`, `compute_score_lira`.
+    `privacy_tests/membership_inference_attack/advanced_mia.py`, `compute_score_lira`, whose `option="both"` is online
+    LiRA and `fix_variance=True` the shared spread. It averages the shadows with the median unless
+    `median_or_mean="mean"`, and its sign is reversed: members score low. Its `option="out"` returns the log-density
+    of φ under the OUT normal, not the one-sided distance offline LiRA uses here.
     """
     phi_in = np.where(shadow_member, shadow_phi, np.nan)  # NaN where the shadow did not train on the record
     phi_out = np.where(~shadow_member, shadow_phi, np.nan)
@@ -64,7 +72,8 @@ def exposure(canary_score: float, candidate_scores: Array) -> float:
     """Exposure in bits: log2 of 1 / (the share of candidates scored at least as high), the canary included.
 
     Carlini et al. (2019), estimated by ranking the canary among random candidates of the same format. Reference
-    implementation: TensorFlow Privacy, `privacy_tests/secret_sharer/exposures.py`, `compute_exposure_interpolation`.
+    implementation: TensorFlow Privacy, `privacy_tests/secret_sharer/exposures.py`, `compute_exposure_interpolation`,
+    which ranks by perplexity (lower is more exposed) and divides by the number of candidates alone.
     """
     at_least = 1 + np.sum(candidate_scores >= canary_score)
     return math.log2((len(candidate_scores) + 1) / at_least)
@@ -74,7 +83,8 @@ def extrapolated_exposure(canary_score: float, candidate_scores: Array, secret_s
     """Exposure from a skew-normal fitted to the candidates' scores, capped at log2 of the number of secrets.
 
     Carlini et al. (2019), Section 4.3, for canaries that beat every candidate. Reference implementation:
-    TensorFlow Privacy, `privacy_tests/secret_sharer/exposures.py`, `compute_exposure_extrapolation`.
+    TensorFlow Privacy, `privacy_tests/secret_sharer/exposures.py`, `compute_exposure_extrapolation`, which fits the
+    skew-normal to perplexities, takes its lower tail and sets no cap.
     """
     shape, loc, scale = stats.skewnorm.fit(candidate_scores)
     tail = stats.skewnorm.sf(canary_score, shape, loc=loc, scale=scale)
@@ -106,7 +116,9 @@ def eps_lower_bound(false_pos: int, true_pos: int, n: int, delta: float, beta: f
     """Certified ε lower bound from n independent trials per hypothesis, with probability at least 1 - β.
 
     Solves TPR ≤ e^ε FPR + δ and 1 − FPR ≤ e^ε (1 − TPR) + δ at the Clopper-Pearson ends, each at β/2
-    (Jagielski, Ullman & Oprea 2020; Nasr et al. 2023).
+    (Jagielski, Ullman & Oprea 2020; Nasr et al. 2023). TensorFlow Privacy's counterpart,
+    `privacy_tests/epsilon_lower_bound.py`, `EpsilonLowerBound` with `BoundMethod.CLOPPER_PEARSON`, takes δ = 0 and
+    searches every threshold of a score.
     """
     fpr_hi = clopper_pearson_bounds(false_pos, n, beta / 2)[1]
     tpr_lo = clopper_pearson_bounds(true_pos, n, beta / 2)[0]

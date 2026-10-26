@@ -30,8 +30,10 @@ def test_solutions_private_prediction_matches_page(tmp_path: Path) -> None:
         "no subsampling, eps=1, Q=1000: sigma=180.9",
         "expected number of queries that use one record: 40",
         # Exercise 8
-        "votes 0-0: gap 0 dist 0  votes 5-4: gap 1 dist 0  votes 6-4: gap 2 dist 0  votes 7-4: gap 3 dist 1  "
-        "votes 55-45: gap 10 dist 4  votes 135-115: gap 20 dist 9",
+        (
+            "votes 0-0: gap 0 dist 0  votes 5-4: gap 1 dist 0  votes 6-4: gap 2 dist 0  votes 7-4: gap 3 dist 1  "
+            "votes 55-45: gap 10 dist 4  votes 135-115: gap 20 dist 9"
+        ),
         "eps0=1, pool=1000: t=74.8  smallest gap that reaches it: 151",
         "eps0=1, pool=10000: t=84.0  smallest gap that reaches it: 171",
         "4 ln(10)=9.2",

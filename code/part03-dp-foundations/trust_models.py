@@ -547,7 +547,7 @@ def clone_split(
 
 
 def _window(center: float, half: float, lo: int, hi: int) -> tuple[int, int]:
-    return max(lo, int(math.floor(center - half))), min(hi, int(math.ceil(center + half)))
+    return max(lo, math.floor(center - half)), min(hi, math.ceil(center + half))
 
 
 @cache
@@ -567,17 +567,17 @@ def fmt_clone_pair(eps0: float, n: int) -> tuple[FloatArray, FloatArray, FloatAr
     p_rows: list[FloatArray] = []
     q_rows: list[FloatArray] = []
     dropped = float(c_pmf[:c_lo].sum() + c_pmf[c_hi + 1 :].sum())
+
+    # b(j, c) = Pr[Bin(c, 1/2) = j], zero outside 0..c
+    def b(j: IntArray, c: int) -> FloatArray:
+        inside = (j >= 0) & (j <= c)
+        jj = np.clip(j, 0, c)
+        return np.where(inside, np.exp(lf[c] - lf[jj] - lf[c - jj] - c * math.log(2)), 0.0)
+
     for c in range(c_lo, c_hi + 1):
         k_lo, k_hi = _window(c / 2, 7 * math.sqrt(c) + 5, 0, c + 1)
         k = np.arange(k_lo, k_hi + 1)
-
-        # b(j) = Pr[Bin(c, 1/2) = j], zero outside 0..c
-        def b(j: IntArray) -> FloatArray:
-            inside = (j >= 0) & (j <= c)
-            jj = np.clip(j, 0, c)
-            return np.where(inside, np.exp(lf[c] - lf[jj] - lf[c - jj] - c * math.log(2)), 0.0)
-
-        b_k, b_km1 = b(k), b(k - 1)
+        b_k, b_km1 = b(k, c), b(k - 1, c)
         weights.append(np.full(len(k), c_pmf[c]))
         p_rows.append(pd * b_km1 + (1 - pd) * b_k)
         q_rows.append((1 - pd) * b_km1 + pd * b_k)
@@ -945,7 +945,7 @@ def plot_models() -> Figure:
 
 
 def plot_rr_gap(rng: np.random.Generator, eps: float = 1.0) -> Figure:
-    ns = [int(round(10 ** (e / 4))) for e in range(8, 29)]
+    ns = [round(10 ** (e / 4)) for e in range(8, 29)]
     fig, ax = plt.subplots(figsize=(7, 4.5))
     ax.loglog(ns, [math.sqrt(rr_variance(m, eps)) for m in ns], label="local: randomized response")
     ax.loglog(
@@ -1017,7 +1017,7 @@ def plot_shuffle_bound(delta: float = 1e-6) -> Figure:
     fig, ax = plt.subplots(figsize=(7.5, 4.8))
     for i, eps0 in enumerate((1.0, 3.0)):
         n_min = math.ceil(16 * math.log(2 / delta) * math.exp(eps0))
-        ns = sorted({int(round(10 ** (e / 8))) for e in range(24, 49)} | {n_min})
+        ns = sorted({round(10 ** (e / 8)) for e in range(24, 49)} | {n_min})
         ns = [m for m in ns if m >= n_min]
         ax.loglog(
             ns,
@@ -1046,7 +1046,7 @@ def plot_shuffle_bound(delta: float = 1e-6) -> Figure:
 
 
 def plot_matched_error(rng: np.random.Generator, eps: float = 1.0, delta: float = 1e-6, k: int = 8) -> Figure:
-    ns = [int(round(10 ** (e / 4))) for e in range(12, 25)]
+    ns = [round(10 ** (e / 4)) for e in range(12, 25)]
     sim_ns = [1_000, 10_000, 100_000]
     labels = {
         "central": "central (Laplace)",

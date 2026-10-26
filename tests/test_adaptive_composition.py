@@ -12,22 +12,34 @@ def test_adaptive_composition_matches_section(tmp_path: Path) -> None:
     for expected in (
         # Section 34.3: the plug-in odometer fails under stop-when-ahead
         "per-step mean loss eps*tanh(eps/2)=0.004996",
-        "delta=0.05: P(cross by n): n=10: 0.0110  n=100: 0.0575  n=1000: 0.1004  n=10000: 0.1424  "
-        "| max fixed-t P over t<=1000: 0.0110 at t=17  | cross by 10^4 / delta=2.85",
-        "delta=0.01: P(cross by n): n=10: 0.0000  n=100: 0.0090  n=1000: 0.0202  n=10000: 0.0318  "
-        "| max fixed-t P over t<=1000: 0.0016 at t=21  | cross by 10^4 / delta=3.18",
-        "delta=1e-05: P(cross by n): n=10: 0.00e+00  n=100: 3.12e-06  n=1000: 1.80e-05  n=10000: 3.69e-05  "
-        "| max fixed-t P over t<=1000: 8.18e-07 at t=758  | cross by 10^4 / delta=3.69",
+        (
+            "delta=0.05: P(cross by n): n=10: 0.0110  n=100: 0.0575  n=1000: 0.1004  n=10000: 0.1424  "
+            "| max fixed-t P over t<=1000: 0.0110 at t=17  | cross by 10^4 / delta=2.85"
+        ),
+        (
+            "delta=0.01: P(cross by n): n=10: 0.0000  n=100: 0.0090  n=1000: 0.0202  n=10000: 0.0318  "
+            "| max fixed-t P over t<=1000: 0.0016 at t=21  | cross by 10^4 / delta=3.18"
+        ),
+        (
+            "delta=1e-05: P(cross by n): n=10: 0.00e+00  n=100: 3.12e-06  n=1000: 1.80e-05  n=10000: 3.69e-05  "
+            "| max fixed-t P over t<=1000: 8.18e-07 at t=758  | cross by 10^4 / delta=3.69"
+        ),
         "bound at t=100, delta=0.01: 3.534",
         # Section 34.4: filters for pure DP
         "eps0=0.01 k=100: basic=1.000  advanced=0.536  Rogers filter=0.803  Whitehouse filter=0.531  Rogers/Whitehouse=1.51",
-        "eps0=0.01 k=1000: basic=10.000  advanced=1.763  Rogers filter=2.570  Whitehouse filter=1.712  "
-        "Rogers/Whitehouse=1.50",
-        "eps0=0.01 k=10000: basic=100.000  advanced=6.262  Rogers filter=8.450  Whitehouse filter=5.757  "
-        "Rogers/Whitehouse=1.47",
+        (
+            "eps0=0.01 k=1000: basic=10.000  advanced=1.763  Rogers filter=2.570  Whitehouse filter=1.712  "
+            "Rogers/Whitehouse=1.50"
+        ),
+        (
+            "eps0=0.01 k=10000: basic=100.000  advanced=6.262  Rogers filter=8.450  Whitehouse filter=5.757  "
+            "Rogers/Whitehouse=1.47"
+        ),
         "eps0=0.1 k=100: basic=10.000  advanced=6.308  Rogers filter=8.472  Whitehouse filter=5.757  Rogers/Whitehouse=1.47",
-        "eps0=0.1 k=1000: basic=100.000  advanced=27.140  Rogers filter=30.244  Whitehouse filter=21.623  "
-        "Rogers/Whitehouse=1.40",
+        (
+            "eps0=0.1 k=1000: basic=100.000  advanced=27.140  Rogers filter=30.244  Whitehouse filter=21.623  "
+            "Rogers/Whitehouse=1.40"
+        ),
         "rho*=0.017469  zcdp_to_dp(rho*)=1.0000  Whitehouse at sum eps^2 = 2 rho*: 1.0000",
         "steps allowed at eps_g=1, eps0=0.01: basic=100  advanced (fixed k)=337  Rogers=154  Whitehouse=349",
         "steps allowed at eps_g=1, eps0=0.001: basic=1000  advanced (fixed k)=33785  Rogers=15481  Whitehouse=34937",
@@ -52,24 +64,36 @@ def test_adaptive_composition_matches_section(tmp_path: Path) -> None:
         "y1=0: L1=-1.0986  N1=0.1429  E_P[N3 | y1]=0.1429",
         "top_up=True: MC D_2=1.0004  max spend=1.0000  mean spend=1.0000  steps min=3 max=9",
         "top_up=False: MC D_2=0.9305  max spend=0.9900  mean spend=0.8998  steps min=2 max=8",
-        "per step sigma=10 0.0290, sigma=5 0.1160; sigma=10 throughout: 100 steps; after 60 steps left 1.160, "
-        "then 10 steps at sigma=5",
+        (
+            "per step sigma=10 0.0290, sigma=5 0.1160; sigma=10 throughout: 100 steps; after 60 steps left 1.160, "
+            "then 10 steps at sigma=5"
+        ),
         # Section 34.6: odometers
         "|orders|=154  ln(1/delta)=11.513  ln(|orders|/delta)=16.550",
-        "t=10: rho=0.050  fixed-time=1.568  Ville over orders=1.869  Lecuyer=1.916  Ville at alpha=5.8 only=2.689  "
-        "Ville/fixed=1.19",
-        "t=100: rho=0.500  fixed-time=5.299  Ville over orders=6.253  Lecuyer=6.507  Ville at alpha=5.8 only=5.299  "
-        "Ville/fixed=1.18",
-        "t=300: rho=1.500  fixed-time=9.812  Ville over orders=11.465  Lecuyer=11.892  Ville at alpha=5.8 only=11.099  "
-        "Ville/fixed=1.17",
-        "t=1000: rho=5.000  fixed-time=20.175  Ville over orders=23.194  Lecuyer=24.633  Ville at alpha=5.8 only=31.399  "
-        "Ville/fixed=1.15",
+        (
+            "t=10: rho=0.050  fixed-time=1.568  Ville over orders=1.869  Lecuyer=1.916  Ville at alpha=5.8 only=2.689  "
+            "Ville/fixed=1.19"
+        ),
+        (
+            "t=100: rho=0.500  fixed-time=5.299  Ville over orders=6.253  Lecuyer=6.507  Ville at alpha=5.8 only=5.299  "
+            "Ville/fixed=1.18"
+        ),
+        (
+            "t=300: rho=1.500  fixed-time=9.812  Ville over orders=11.465  Lecuyer=11.892  Ville at alpha=5.8 only=11.099  "
+            "Ville/fixed=1.17"
+        ),
+        (
+            "t=1000: rho=5.000  fixed-time=20.175  Ville over orders=23.194  Lecuyer=24.633  Ville at alpha=5.8 only=31.399  "
+            "Ville/fixed=1.15"
+        ),
         "running example q=0.01 sigma=1 k=10000: fixed-time=7.43  Ville over orders=8.82  Lecuyer=9.08",
         "MC P(cross)=0.0461  Brownian limit=0.0500",
         "crossed with probability 0.0072",
         # Section 34.7: individual accounting
-        "worst case: rho=0.500  eps=5.299 at alpha*=5.8  budget B=eps(alpha*)=2.900  "
-        "floor ln(1/delta)/(alpha*-1)=2.399",
+        (
+            "worst case: rho=0.500  eps=5.299 at alpha*=5.8  budget B=eps(alpha*)=2.900  "
+            "floor ln(1/delta)/(alpha*-1)=2.399"
+        ),
         "hard records: 962 (9.6%)",
         "all: eps at alpha*: p10=2.56 median=3.25 p90=3.81  median optimized over orders=2.75",
         "typical: eps at alpha*: p10=2.55 median=3.17 p90=3.67  median optimized over orders=2.61",

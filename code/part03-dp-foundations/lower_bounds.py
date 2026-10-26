@@ -524,7 +524,7 @@ def plot_packing_budget(eps: float = EPS, beta: float = BETA) -> Figure:
 
 def plot_histogram(rng: np.random.Generator, eps: float = EPS, beta: float = BETA) -> Figure:
     exps = np.linspace(1, 12, 111)
-    sizes = [int(round(10**e)) for e in exps]
+    sizes = [round(10**e) for e in exps]
     fig, ax = plt.subplots(figsize=(7, 4.2))
     ax.plot(
         sizes,
@@ -590,7 +590,7 @@ def plot_fingerprinting(n: int = 5) -> Figure:
 
 
 def plot_sample_complexity(eps: float = EPS, delta: float = DELTA, alpha: float = ALPHA, beta: float = BETA) -> Figure:
-    ds = [int(round(10 ** (e / 10))) for e in range(10, 61)]
+    ds = [round(10 ** (e / 10)) for e in range(10, 61)]
     fig, ax = plt.subplots(figsize=(7, 4.5))
     ax.plot(ds, [marginals_laplace_upper(d, eps, alpha, beta) for d in ds], "C1", label="pure DP, Laplace (upper)")
     ax.plot(ds, [marginals_pure_lower(d, eps, alpha, beta) for d in ds], "C1--", label="pure DP, packing (lower)")

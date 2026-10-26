@@ -52,8 +52,9 @@ What it does:
    a measurable exposure at log2(2,001) = 10.97 bits (the full space would allow log2(10^5) = 16.61); an exposure
    extrapolated from a skew-normal fit to the candidates' scores (capped at 16.61); and whether greedy decoding
    from the prefix writes the secret. Uninserted controls should average 1/ln 2 = 1.44 bits. The two exposures,
-   which no maintained library computes, come from code/practitioner_privacy_tests.py (after TensorFlow Privacy's
-   `privacy_tests/secret_sharer`).
+   which no library installable here computes, come from code/practitioner_privacy_tests.py (after
+   `compute_exposure_interpolation` and `compute_exposure_extrapolation` in TensorFlow Privacy's
+   `privacy_tests/secret_sharer/exposures.py`).
 
 Prints every quoted number on a labelled line. Determinism: torch runs on 4 threads with seed 0; held-out losses
 are printed to 3 decimals and exposures to 1 decimal, which reruns reproduce.

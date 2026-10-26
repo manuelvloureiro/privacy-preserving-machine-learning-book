@@ -68,8 +68,10 @@ def test_shuffling_iteration_matches_section(tmp_path: Path) -> None:
         "sqrt(n)*exact=8.702",
         "n=10000 eps0=4: exact RR=0.3146  CLT approx=0.2816  clones numeric=0.6009  clones closed form=n/a",
         "sqrt(n)*exact=31.464",
-        "n=100000 eps0=1: exact RR=0.0101  CLT approx=0.0101  clones numeric=0.0153  clones closed form=0.0726  "
-        "Erlingsson=0.4285",
+        (
+            "n=100000 eps0=1: exact RR=0.0101  CLT approx=0.0101  clones numeric=0.0153  clones closed form=0.0726  "
+            "Erlingsson=0.4285"
+        ),
         "closed/exact=7.15  closed/numeric=4.75",
         "n=100000 eps0=2: exact RR=0.0247  CLT approx=0.0244  clones numeric=0.0450  clones closed form=0.1862",
         "closed/exact=7.55  closed/numeric=4.13",

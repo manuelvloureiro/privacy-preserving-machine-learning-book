@@ -32,8 +32,10 @@ def test_solutions_composition_matches_page(tmp_path: Path) -> None:
         "at eps=0.8: K(.|0)=[0.7448, 0.3, -0.0448]",
         # Exercise 6
         "mu_k=sqrt(k)/sigma=1.5811  exact eps=7.511",
-        "true mean loss k/(2 sigma^2)=1.25  per-step eps0 at delta0=5e-09: 0.2453  k*eps0*tanh(eps0/2)=29.93  "
-        "eps0*sqrt(2k ln(1/delta'))=38.32",
+        (
+            "true mean loss k/(2 sigma^2)=1.25  per-step eps0 at delta0=5e-09: 0.2453  k*eps0*tanh(eps0/2)=29.93  "
+            "eps0*sqrt(2k ln(1/delta'))=38.32"
+        ),
         # Exercise 7
         "(true, true): P=1/2  Q=1/12  e^L=6",
         "(true, flipped): P=1/4  Q=1/6  e^L=3/2",

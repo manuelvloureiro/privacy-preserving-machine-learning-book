@@ -27,18 +27,30 @@ def test_linkage_matches_section(tmp_path: Path) -> None:
         "ten-digit phone numbers: 33.2 bits",
         "one trip: pickup minute=525600 (19.0 bits)  pickup square=78000 (16.3 bits)  total=35.3 bits",
         # Synthetic census
-        "cum bits=9.31 cells=1280  exact=0.0158  simulated=0.0160 (sd 0.0011)  collision bound=0.0000  "
-        "entropy rule=0.0000  uniform cells=0.0004",
-        "cum bits=12.90 cells=15360  exact=0.3328  simulated=0.3332 (sd 0.0049)  collision bound=0.0834  "
-        "entropy rule=0.2692  uniform cells=0.5215",
-        "cum bits=14.60 cells=61440  exact=0.5789  simulated=0.5797 (sd 0.0053)  collision bound=0.4237  "
-        "entropy rule=0.6690  uniform cells=0.8498",
-        "cum bits=16.48 cells=368640  exact=0.7939  simulated=0.7918 (sd 0.0048)  collision bound=0.7443  "
-        "entropy rule=0.8967  uniform cells=0.9732",
-        "cum bits=20.39 cells=7372800  exact=0.9747  simulated=0.9737 (sd 0.0027)  collision bound=0.9736  "
-        "entropy rule=0.9928  uniform cells=0.9986",
-        "cum bits=22.57 cells=58982400  exact=0.9925  simulated=0.9926 (sd 0.0012)  collision bound=0.9924  "
-        "entropy rule=0.9984  uniform cells=0.9998",
+        (
+            "cum bits=9.31 cells=1280  exact=0.0158  simulated=0.0160 (sd 0.0011)  collision bound=0.0000  "
+            "entropy rule=0.0000  uniform cells=0.0004"
+        ),
+        (
+            "cum bits=12.90 cells=15360  exact=0.3328  simulated=0.3332 (sd 0.0049)  collision bound=0.0834  "
+            "entropy rule=0.2692  uniform cells=0.5215"
+        ),
+        (
+            "cum bits=14.60 cells=61440  exact=0.5789  simulated=0.5797 (sd 0.0053)  collision bound=0.4237  "
+            "entropy rule=0.6690  uniform cells=0.8498"
+        ),
+        (
+            "cum bits=16.48 cells=368640  exact=0.7939  simulated=0.7918 (sd 0.0048)  collision bound=0.7443  "
+            "entropy rule=0.8967  uniform cells=0.9732"
+        ),
+        (
+            "cum bits=20.39 cells=7372800  exact=0.9747  simulated=0.9737 (sd 0.0027)  collision bound=0.9736  "
+            "entropy rule=0.9928  uniform cells=0.9986"
+        ),
+        (
+            "cum bits=22.57 cells=58982400  exact=0.9925  simulated=0.9926 (sd 0.0012)  collision bound=0.9924  "
+            "entropy rule=0.9984  uniform cells=0.9998"
+        ),
         "log2 n = 13.29",
         "McDiarmid 95% half-width for the fraction unique: 0.0272",
         # Sparse ratings

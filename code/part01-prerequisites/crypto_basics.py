@@ -170,7 +170,7 @@ def cpa_game_deterministic(rng: np.random.Generator, b: int) -> int:
 def cpa_game_randomized(rng: np.random.Generator, b: int, queries: int, nonce_bits: int) -> int:
     """The adversary asks for `queries` encryptions of m0 and wins outright if a nonce repeats."""
     key = rng.bytes(16)
-    pads = dict((r, xor(c, M0)) for r, c in (enc_randomized(rng, key, M0, nonce_bits) for _ in range(queries)))
+    pads = {r: xor(c, M0) for r, c in (enc_randomized(rng, key, M0, nonce_bits) for _ in range(queries))}
     r_star, c_star = enc_randomized(rng, key, M1 if b else M0, nonce_bits)
     if r_star in pads:
         return 0 if xor(c_star, pads[r_star]) == M0 else 1

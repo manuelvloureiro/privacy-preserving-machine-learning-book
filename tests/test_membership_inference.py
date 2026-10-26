@@ -11,8 +11,10 @@ def test_membership_inference_matches_section(tmp_path: Path) -> None:
     out = run(CODE / "membership_inference.py", tmp_path)
     for expected in (
         # Setup
-        "pool=1000  d=100  outliers=50  lambda=0.001  target models=128  shadow models=64  "
-        "member pairs=64000  non-member pairs=64000",
+        (
+            "pool=1000  d=100  outliers=50  lambda=0.001  target models=128  shadow models=64  "
+            "member pairs=64000  non-member pairs=64000"
+        ),
         # Loss attack and the gap
         "train error=0.1495  test error=0.2663  gap=0.1168",
         "'correct means member': TPR=0.8505  FPR=0.7337  advantage=0.1168",

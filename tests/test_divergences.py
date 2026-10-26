@@ -26,8 +26,10 @@ def test_divergences_matches_section(tmp_path: Path) -> None:
         "exact=0.0062  Markov e^-c=0.1353  Renyi-Chernoff=0.0439 at alpha=2.5",
         "width 0.5=0.4898  width 1=0.4618  width 2=0.3781  one bit=0.3090",
         # The Laplace pair against a Gaussian pair with the same variance
-        "KL=0.3679 (Monte Carlo 0.3684)  D_0.5=0.1891  D_2=0.6191  D_10=0.9287  D_inf=1.0000  TV=0.3935  "
-        "E_2=0.1422  Pinsker=0.4289",
+        (
+            "KL=0.3679 (Monte Carlo 0.3684)  D_0.5=0.1891  D_2=0.6191  D_10=0.9287  D_inf=1.0000  TV=0.3935  "
+            "E_2=0.1422  Pinsker=0.4289"
+        ),
         "KL=0.2500  D_0.5=0.1250  D_2=0.5000  D_10=2.5000  D_inf=inf",
         "overtakes Laplace D_alpha at alpha=2.98",
         # n samples

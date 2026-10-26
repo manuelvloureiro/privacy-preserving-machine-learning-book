@@ -443,6 +443,11 @@ def diffprivlib_logistic_regression() -> str:
 _data: Data | None = None
 
 
+WORKERS = int(
+    os.environ.get("PRIVACY_WORKERS") or os.cpu_count() or 1
+)  # processes for the sweep; lower it when memory is short
+
+
 def _init(data: Data) -> None:
     global _data
     _data = data
@@ -685,7 +690,7 @@ def main() -> None:
     jobs: list[tuple[str, float | None, int, float]] = [
         (technique, eps, seed, delta) for technique in COLOURS for eps in [None, *EPSILONS] for seed in range(seeds)
     ]
-    with ProcessPoolExecutor(max_workers=os.cpu_count(), initializer=_init, initargs=(data,)) as pool:
+    with ProcessPoolExecutor(max_workers=WORKERS, initializer=_init, initargs=(data,)) as pool:
         runs = list(pool.map(evaluate, jobs, chunksize=4))
     summaries = summarize(runs)
     for s in summaries:

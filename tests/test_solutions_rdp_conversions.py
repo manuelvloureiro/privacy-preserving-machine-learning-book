@@ -34,8 +34,10 @@ def test_solutions_rdp_conversions_matches_page(tmp_path: Path) -> None:
         # Exercise 4
         "alpha=2: Laplace RDP formula=0.009644  numeric=0.009644  Gaussian-like alpha eps0^2/2=0.010000",
         "alpha=20: Laplace RDP formula=0.065854  numeric=0.065854  Gaussian-like alpha eps0^2/2=0.100000",
-        "basic=10.000  advanced=5.850  RDP improved=4.533 (alpha 5.8)  RDP Mironov=5.071 (alpha 6.3)  "
-        "via min(eps0, alpha eps0^2/2)=4.729  gain of the exact curve=0.196",
+        (
+            "basic=10.000  advanced=5.850  RDP improved=4.533 (alpha 5.8)  RDP Mironov=5.071 (alpha 6.3)  "
+            "via min(eps0, alpha eps0^2/2)=4.729  gain of the exact curve=0.196"
+        ),
         # Exercise 5
         "sigma=1 k=10000: rho=5000  continuous alpha*=1.048 eps=5475.7911  grid alpha=1.1 eps=5611.7783  excess=2.48%",
         "sigma=10 k=1: rho=0.005  continuous alpha*=40.525 eps=0.3753  grid alpha=41 eps=0.3753  excess=0.01%",

@@ -18,8 +18,10 @@ def test_rdp_conversions_matches_section(tmp_path: Path) -> None:
         "loss from dropping (1-e^(eps-L)): 0.388   loss from Markov: 0.534  total excess: 0.921",
         "mu=10: eps exact=91.817  tail step=92.649  Mironov=98.026 at alpha=1.5  (continuous: 97.985 at alpha=1.480)",
         "loss from dropping (1-e^(eps-L)): 0.832   loss from Markov: 5.377  total excess: 6.209",
-        "mu=1 at eps=5.299: delta exact=1.300e-07  tail=7.992e-07  Mironov bound=1.000e-05  "
-        "factors tail/exact=6.1  bound/tail=12.5",
+        (
+            "mu=1 at eps=5.299: delta exact=1.300e-07  tail=7.992e-07  Mironov bound=1.000e-05  "
+            "factors tail/exact=6.1  bound/tail=12.5"
+        ),
         # Section 28.4
         "alpha=2: delta ratio improved/Mironov=0.2500  1/(e alpha)=0.1839  eps saving=1.3863",
         "alpha=10: delta ratio improved/Mironov=0.0387  1/(e alpha)=0.0368  eps saving=0.3612",
@@ -47,10 +49,14 @@ def test_rdp_conversions_matches_section(tmp_path: Path) -> None:
         "binding single order at a=1e-3: 3.7, alone allows 2.4910e-02",
         # Section 28.6
         "sigma=1 k=1: rho=0.5  improved alpha*=5.432 (grid 5.4)  eps continuous=4.728  grid=4.729  Mironov alpha*=5.799",
-        "sigma=1 k=100: rho=50  improved alpha*=1.472 (grid 1.5)  eps continuous=96.035  grid=96.116  Mironov alpha*=1.480  "
-        "grid cost=0.081",
-        "sigma=1 k=10000: rho=5000  improved alpha*=1.048 (grid 1.1)  eps continuous=5475.791  grid=5611.778  "
-        "Mironov alpha*=1.048  grid cost=135.987",
+        (
+            "sigma=1 k=100: rho=50  improved alpha*=1.472 (grid 1.5)  eps continuous=96.035  grid=96.116  Mironov alpha*=1.480  "
+            "grid cost=0.081"
+        ),
+        (
+            "sigma=1 k=10000: rho=5000  improved alpha*=1.048 (grid 1.1)  eps continuous=5475.791  grid=5611.778  "
+            "Mironov alpha*=1.048  grid cost=135.987"
+        ),
         "sigma=10 k=1: rho=0.005  improved alpha*=40.525 (grid 41)  eps continuous=0.375  grid=0.375  Mironov alpha*=48.985",
         "mu=1 delta=1e-10: improved alpha*=7.483",
         # Section 28.7
@@ -61,8 +67,10 @@ def test_rdp_conversions_matches_section(tmp_path: Path) -> None:
         "k=10000: mu=10.000  exact=91.817  optimal=96.116  improved=96.116  Mironov=98.026  ratios 1.05 1.05 1.07",
         "privacy loss: accept L=4.5954  reject L=-2.257e-04  u - e^eps b=4.4700e-05",
         "max over orders of D_alpha - eps(alpha): forward=2.4e-13  reverse=-5.5e-01",
-        "worst two-outcome pair at eps=4.377: P(accept)=2.2797e-04  Q(accept)=2.3020e-06  delta=4.4700e-05 "
-        "vs Gaussian 1.0000e-05",
+        (
+            "worst two-outcome pair at eps=4.377: P(accept)=2.2797e-04  Q(accept)=2.3020e-06  delta=4.4700e-05 "
+            "vs Gaussian 1.0000e-05"
+        ),
         "binding order=5.1  next smallest slack=0.0011 at order 5",
         "improved conversion's delta at that eps=4.4701e-05",
         "mu=1 to six decimals: optimal from the curve=4.728505  improved=4.728507",

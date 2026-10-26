@@ -40,8 +40,10 @@ def test_solutions_definition_matches_page(tmp_path: Path) -> None:
         "n=1000 delta=0.0001: TV bound=0.1000  best accuracy=0.5500  release-each-record exposure=0.0952",
         "n=1000 delta=0.001: TV bound=1.0000  best accuracy=1.0000  release-each-record exposure=0.6323",
         # Exercise 9
-        "eps=1 delta=0.01: smallest delta at eps=1=0.0100  at eps=0.5=0.2948  Pr[L = inf]=0.0100  "
-        "Pr[L > 3]=0.0100  bound=0.0116",
+        (
+            "eps=1 delta=0.01: smallest delta at eps=1=0.0100  at eps=0.5=0.2948  Pr[L = inf]=0.0100  "
+            "Pr[L > 3]=0.0100  bound=0.0116"
+        ),
     ):
         assert expected in out, expected
     assert list(tmp_path.iterdir()) == []

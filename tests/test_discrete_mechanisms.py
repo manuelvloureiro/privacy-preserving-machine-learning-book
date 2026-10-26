@@ -26,11 +26,15 @@ def test_discrete_mechanisms_matches_section(tmp_path: Path) -> None:
         "k=1: 0.2987/0.3000  k=2: 0.4618/0.4550  k=3: 0.1824/0.1878  k=4: 0.0473/0.0472  k=5: 0.0083/0.0086",
         "e^-0.7=0.4966",
         # Algorithm 2
-        "var=1.8305 (exact 1.8413, continuous 2.0000)  TV to exact=0.0114 (noise floor 0.0074)  "
-        "draws per sample=11.49  loop passes=1.462",
+        (
+            "var=1.8305 (exact 1.8413, continuous 2.0000)  TV to exact=0.0114 (noise floor 0.0074)  "
+            "draws per sample=11.49  loop passes=1.462"
+        ),
         "var=4.3834 (exact 4.3370, continuous 4.5000)  TV to exact=0.0119 (noise floor 0.0243)  draws per sample=12.08",
-        "var=195.2985 (exact 199.8334, continuous 200.0000)  TV to exact=0.0339 (noise floor 0.0331)  "
-        "draws per sample=10.25",
+        (
+            "var=195.2985 (exact 199.8334, continuous 200.0000)  TV to exact=0.0339 (noise floor 0.0331)  "
+            "draws per sample=10.25"
+        ),
         "Pr[Z=0] at scale 1: 0.4621",
         # Discrete Gaussian: privacy
         "sigma=0.5, shift 1: D_2=4.0000/4.0000  D_2.5=4.9808/5.0000  D_5=10.0000/10.0000",
@@ -46,14 +50,22 @@ def test_discrete_mechanisms_matches_section(tmp_path: Path) -> None:
         "sigma=0.5: Var/sigma^2 summation=0.860051  Poisson=0.860051",
         "sigma=1: Var/sigma^2 summation=1.000000  Poisson=1.000000  1 - Var/sigma^2=2.11e-07",
         # Algorithm 3
-        "sigma^2=1/4: t=1  mean=0.0019  var=0.2189 (exact 0.2150)  TV to exact=0.0028 (noise floor 0.0045)  "
-        "acceptance=0.5185  draws per sample=26.6",
-        "sigma^2=1: t=2  mean=-0.0001  var=0.9977 (exact 1.0000)  TV to exact=0.0076 (noise floor 0.0042)  "
-        "acceptance=0.5418  draws per sample=24.8",
-        "sigma^2=4: t=3  mean=0.0018  var=4.0826 (exact 4.0000)  TV to exact=0.0154 (noise floor 0.0142)  "
-        "acceptance=0.6629  draws per sample=18.9",
-        "sigma^2=100: t=11  mean=-0.0711  var=99.4386 (exact 100.0000)  TV to exact=0.0243 (noise floor 0.0325)  "
-        "acceptance=0.7532  draws per sample=15.6",
+        (
+            "sigma^2=1/4: t=1  mean=0.0019  var=0.2189 (exact 0.2150)  TV to exact=0.0028 (noise floor 0.0045)  "
+            "acceptance=0.5185  draws per sample=26.6"
+        ),
+        (
+            "sigma^2=1: t=2  mean=-0.0001  var=0.9977 (exact 1.0000)  TV to exact=0.0076 (noise floor 0.0042)  "
+            "acceptance=0.5418  draws per sample=24.8"
+        ),
+        (
+            "sigma^2=4: t=3  mean=0.0018  var=4.0826 (exact 4.0000)  TV to exact=0.0154 (noise floor 0.0142)  "
+            "acceptance=0.6629  draws per sample=18.9"
+        ),
+        (
+            "sigma^2=100: t=11  mean=-0.0711  var=99.4386 (exact 100.0000)  TV to exact=0.0243 (noise floor 0.0325)  "
+            "acceptance=0.7532  draws per sample=15.6"
+        ),
     ):
         assert expected in out
     assert {f.name for f in tmp_path.iterdir()} == {

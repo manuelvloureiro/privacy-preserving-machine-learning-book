@@ -21,9 +21,10 @@ What is a library and what is not. ART 1.20.1 runs the two attacks it implements
 ("member if correctly classified") on the first target, and the shadow-model attack of Shokri et al. (2017), whose
 four shadow models ART's `ShadowModels` trains on random halves of the images and whose attack model (ART's default
 random forest, seeded through NumPy's global generator) `MembershipInferenceBlackBox` fits on their outputs; that
-one attack model then scores every target. The LiRA score, which no maintained library provides, comes from
-code/practitioner_privacy_tests.py (`lira_scores`, after TensorFlow Privacy's `privacy_tests`). scikit-learn reads
-the ROC curve and SciPy's `binomtest` gives the exact intervals.
+one attack model then scores every target. The LiRA score, which no library installable here provides, comes from
+code/practitioner_privacy_tests.py (`lira_scores`, after `compute_score_lira` in TensorFlow Privacy's
+`privacy_tests/membership_inference_attack/advanced_mia.py`). scikit-learn reads the ROC curve and SciPy's
+`binomtest` gives the exact intervals.
 
 It prints, with seed 0, every number the chapter quotes:
 - the free check: train and test accuracy of the first target and the average gap over all K targets, ART's
