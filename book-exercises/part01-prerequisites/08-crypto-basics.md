@@ -41,8 +41,8 @@ It is negligible only barely. Against $\lambda^{-10}$ it needs $\lambda > 2^{102
 2. **Fix a distinguisher.** Let $\mathcal A$ be any distinguisher on $m$-tuples, randomized or not, with no limit on its running time.
 3. **One step changes one entry.** $H_{i-1}$ and $H_i$ differ only in entry $i$: $P_0$ in $H_{i-1}$, $P_1$ in $H_i$. The other $m - 1$ entries have the same distribution in both, and are independent of entry $i$. Condition on their values $w$. Then $\mathcal A(\dots)$ becomes a distinguisher $\mathcal \mathcal A_w$ that sees only entry $i$, so by Fact 2
 $$\big|\Pr[\mathcal A(H_{i-1}) = 1 \mid w] - \Pr[\mathcal A(H_i) = 1 \mid w]\big| = \mathrm{Adv}_{\mathcal \mathcal A_w}(P_0, P_1) \le \mathrm{TV}(P_0, P_1).$$
-4. **Average over $w$.** The two conditional probabilities are averaged with the same weights in both hybrids, so the triangle inequality gives $\mathrm{Adv}_\mathcal A(H_{i-1}, H_i) \le \mathrm{TV}(P_0, P_1)$.
-5. **Chain.** By Fact 3, $\mathrm{Adv}_\mathcal A(H_0, H_m) \le \sum_{i=1}^m\mathrm{Adv}_\mathcal A(H_{i-1}, H_i) \le m\,\mathrm{TV}(P_0, P_1)$.
+4. **Average over $w$.** The two conditional probabilities are averaged with the same weights in both hybrids, so the triangle inequality gives $\mathrm{Adv}_{\mathcal A}(H_{i-1}, H_i) \le \mathrm{TV}(P_0, P_1)$.
+5. **Chain.** By Fact 3, $\mathrm{Adv}_{\mathcal A}(H_0, H_m) \le \sum_{i=1}^m\mathrm{Adv}_{\mathcal A}(H_{i-1}, H_i) \le m\,\mathrm{TV}(P_0, P_1)$.
 6. **Take the best $\mathcal A$.** By Fact 2 the best unbounded distinguisher attains $\mathrm{TV}(H_0, H_m)$. Step 5 holds for it too, so $\mathrm{TV}(P_0^{\otimes m}, P_1^{\otimes m}) \le m\,\mathrm{TV}(P_0, P_1)$.
 
 **The true growth for two coins.** Let $P_0$ be a coin with heads probability $\frac12 + \xi$ and $P_1$ a fair coin, so $\mathrm{TV}(P_0, P_1) = \xi$.

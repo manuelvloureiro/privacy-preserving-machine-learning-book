@@ -31,7 +31,7 @@ Later parts build protocols from these primitives. The probability tools used he
 ### Fact 1 — Advantage and guessing probability are the same thing
 
 A **distinguisher** $\mathcal A$ is any procedure that receives one sample and outputs a bit, 0 or 1. Think of output 1 as "I think this sample came from $Y$". If $\mathcal A$ is any good at telling distribution $X$ from distribution $Y$, it says 1 more often on samples from $Y$ than on samples from $X$, so the natural measure of its skill is the gap between those two frequencies. That gap is its **advantage**:
-$$\mathrm{Adv}_\mathcal A(X, Y) = \big|\Pr[\mathcal A(X) = 1] - \Pr[\mathcal A(Y) = 1]\big|.$$
+$$\mathrm{Adv}_{\mathcal A}(X, Y) = \big|\Pr[\mathcal A(X) = 1] - \Pr[\mathcal A(Y) = 1]\big|.$$
 Here $\Pr[\mathcal A(X) = 1]$ is the probability that $\mathcal A$ outputs 1 when its input is drawn from $X$. A distinguisher that ignores its input says 1 equally often on both and has advantage 0; one that is always right has advantage 1.
 
 Games are often phrased differently, as a guessing contest. The challenger flips a fair bit $b$: if $b = 1$ it gives $\mathcal A$ a sample from $Y$, and if $b = 0$ a sample from $X$. $\mathcal A$ outputs a guess, and it **wins** if its guess equals $b$. So $\Pr[\mathcal A \text{ wins}]$, also written $\Pr[b' = b]$ with $b'$ the guess, is the probability that the guess is correct; it is not the probability that $b$ is 1, which is $\frac12$ by construction. The coin is fair on purpose. With a fair coin, an adversary who learns nothing from its sample, and so has nothing to go on, wins exactly half the time, whether it guesses at random or always says 1. Any win rate above $\frac12$ must therefore come from information in the sample.
@@ -68,7 +68,7 @@ So the best unbounded distinguisher attains the TV distance, and this splits sec
 ### Fact 3 — Advantages add along a chain
 
 If you walk from distribution $H_0$ to distribution $H_m$ through intermediate distributions $H_1, \dots, H_{m-1}$, a distinguisher cannot tell the two ends apart better than the sum of how well it tells each consecutive pair apart. In symbols, for any distinguisher $\mathcal A$,
-$$\mathrm{Adv}_\mathcal A(H_0, H_m) \le \sum_{i=1}^m \mathrm{Adv}_\mathcal A(H_{i-1}, H_i).$$
+$$\mathrm{Adv}_{\mathcal A}(H_0, H_m) \le \sum_{i=1}^m \mathrm{Adv}_{\mathcal A}(H_{i-1}, H_i).$$
 The reason is a telescoping sum: in $\sum_{i=1}^m\big(\Pr[\mathcal A(H_{i-1}) = 1] - \Pr[\mathcal A(H_i) = 1]\big)$, each intermediate term appears once with a plus sign and once with a minus sign and cancels, leaving $\Pr[\mathcal A(H_0) = 1] - \Pr[\mathcal A(H_m) = 1]$. Taking absolute values, the triangle inequality ($|a_1 + \dots + a_m| \le |a_1| + \dots + |a_m|$) gives the bound. This is the arithmetic behind every hybrid proof.
 
 ### Fact 4 — A bijection maps uniform to uniform
@@ -156,7 +156,7 @@ You already know distinguishers from machine learning. A classifier trained to t
 ### Definition
 
 Because security is about how things behave as $\lambda$ grows, the objects compared are not single distributions but families, one distribution for each value of $\lambda$. Two families $X = \{X_\lambda\}$ and $Y = \{Y_\lambda\}$ are **computationally indistinguishable**, written $X \approx_c Y$, if no efficient distinguisher has more than a negligible advantage: for every PPT distinguisher $\mathcal A$
-$$\mathrm{Adv}_\mathcal A(X_\lambda, Y_\lambda) = \big|\Pr[\mathcal A(1^\lambda, X_\lambda) = 1] - \Pr[\mathcal A(1^\lambda, Y_\lambda) = 1]\big| \text{ is negligible in } \lambda.$$
+$$\mathrm{Adv}_{\mathcal A}(X_\lambda, Y_\lambda) = \big|\Pr[\mathcal A(1^\lambda, X_\lambda) = 1] - \Pr[\mathcal A(1^\lambda, Y_\lambda) = 1]\big| \text{ is negligible in } \lambda.$$
 If the TV distance itself is negligible, so that even unbounded distinguishers gain almost nothing, they are **statistically indistinguishable** ($\approx_s$), and if they are equal, **perfectly indistinguishable** ($\equiv$). By Fact 2, every distinguisher's advantage is at most the TV distance, so $\equiv$ implies $\approx_s$, which implies $\approx_c$.
 
 ### The hybrid lemma for many samples
