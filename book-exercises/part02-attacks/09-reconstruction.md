@@ -9,7 +9,7 @@ The solutions use the chapter's notation: $d \in \{0, 1\}^n$ is the secret datab
 > **Exercise 1.** **A rounding curator.** A curator answers all $2^n$ subset sums rounded to the nearest multiple of $w$, so its error is at most $w/2$. Explain why the worst-case analysis allows $4E = 2w$ wrong bits while, on the database of @tbl-recon-exp with $w = 4$, only $d$ itself is consistent. *Hint: flipping bit $i$ changes the sum of every subset containing $i$ by 1, and rounding to multiples of 4 separates $s$ from $s + 1$ when $s \equiv 1 \pmod 4$. Check: at least 128 of the 1024 subsets separate $d$ from every one-bit change of it.* *(Exponential attack)*
 
 ::: {.callout-tip collapse="true" title="Solution"}
-1. **What the worst case assumes.** The bound $4E$ holds for every curator whose error is at most $E$, including one that chooses its errors knowing both $d$ and a decoy $c$. The tightness argument used exactly such a curator: it answered the midpoint of $\sum_Sc_i$ and $\sum_Sd_i$, which depends on $c$.
+1. **What the worst case assumes.** The bound $4E$ of @thm-recon-exponential holds for every curator whose error is at most $E$, including one that chooses its errors knowing both $d$ and a decoy $c$. The proof of @prp-recon-exp-tight used exactly such a curator: it answered the midpoint of $\sum_Sc_i$ and $\sum_Sd_i$, which depends on $c$.
 2. **What a rounding curator does instead.** Its answer is $R(\sum_Sd_i)$ with the fixed function $R(s) = w\lfloor s/w + \frac12\rfloor$. The attacker knows $R$, so it can demand more than "within $w/2$": a candidate $c$ survives only if $R(\sum_Sc_i) = R(\sum_Sd_i)$ for every $S$. The error is no longer chosen against the attacker; it is a known function of the truth.
 3. **When rounding separates $s$ from $s + 1$.** With $w = 4$, $R(s) = 4\lfloor s/4 + \frac12\rfloor$ jumps from $4k$ to $4k + 4$ between $s = 4k + 1$ and $s = 4k + 2$. So $R(s) \ne R(s + 1)$ exactly when $s \equiv 1 \pmod 4$.
 4. **Count the separating subsets for a one-bit flip.** The database $d = (1, 1, 1, 0, 0, 0, 0, 0, 0, 1)$ has four ones. Only subsets containing the flipped bit $i$ change, and there are $2^9 = 512$ of them.
@@ -23,13 +23,13 @@ The solutions use the chapter's notation: $d \in \{0, 1\}^n$ is the secret datab
 
 ## Another Paley–Zygmund threshold {#sec-sol-recon-2}
 
-> **Exercise 2.** **Another Paley–Zygmund threshold.** Redo the lemma with $\lambda = \frac19$. Show that the escape probability becomes $(8/9)^2/3 = 64/243$ at threshold $\sqrt{\gamma n}/18$, and compute the error tolerance and the number of queries the theorem then needs at $n = 1000$, $\gamma = 0.1$, $\beta = 0.01$. *Check: escape 0.2634, $E \le 0.0278$, $m \ge 22\,617$.* Which choice is better? *(Paley–Zygmund, union bound)*
+> **Exercise 2.** **Another Paley–Zygmund threshold.** Redo @lem-recon-anti with $\lambda = \frac19$. Show that the escape probability becomes $(8/9)^2/3 = 64/243$ at threshold $\sqrt{\gamma n}/18$, and compute the error tolerance and the number of queries @thm-recon-lp then needs at $n = 1000$, $\gamma = 0.1$, $\beta = 0.01$. *Check: escape 0.2634, $E \le 0.0278$, $m \ge 22\,617$.* Which choice is better? *(Paley–Zygmund, union bound)*
 
 ::: {.callout-tip collapse="true" title="Solution"}
-1. **Steps 1–6 of the lemma do not involve $\lambda$.** They give $\Pr[|Y| > \sqrt\lambda\,\tau] \ge (1 - \lambda)^2/3$ with $\tau \ge \sqrt{\gamma n}/6$, where $\tau$ is the standard deviation of the random-sign part of the subset sum.
+1. **Steps 1–6 of the proof of @lem-recon-anti do not involve $\lambda$.** They give $\Pr[|Y| > \sqrt\lambda\,\tau] \ge (1 - \lambda)^2/3$ with $\tau \ge \sqrt{\gamma n}/6$, where $\tau$ is the standard deviation of the random-sign part of the subset sum.
 2. **Set $\lambda = \frac19$.** Then $\sqrt\lambda = \frac13$, so the threshold is $\frac13\cdot\frac{\sqrt{\gamma n}}6 = \frac{\sqrt{\gamma n}}{18}$, and the probability is $(8/9)^2/3 = \frac{64}{81 \cdot 3} = \frac{64}{243} = 0.2634$.
 3. **Error tolerance.** The theorem needs $2E + \frac12 \le \sqrt{\gamma n}/18 = 10/18 = 0.5556$, so $E \le (0.5556 - 0.5)/2 = 0.0278$.
-4. **Queries.** Step 4 of the theorem now uses survival probability $1 - \frac{64}{243} = \frac{179}{243}$ per query, so
+4. **Queries.** Step 4 of the proof of @thm-recon-lp now uses survival probability $1 - \frac{64}{243} = \frac{179}{243}$ per query, so
 $$m \ge \frac{1000\ln1001 + \ln100}{\ln(243/179)} = \frac{6913.4}{0.3057} = 22\,616.7,$$
 so at least 22 617 queries.
 5. **Compare with $\lambda = \frac14$:** escape 0.1875, $E \le 0.1667$, $m \ge 33\,296$.
@@ -39,14 +39,14 @@ so at least 22 617 queries.
 | $\frac14$ | 0.1875 | 0.8333 | 0.1667 | 33 296 |
 | $\frac19$ | 0.2634 | 0.5556 | 0.0278 | 22 617 |
 
-: The lemma's threshold trades the error the theorem tolerates against the number of queries it needs. {#tbl-sol-reconstruction-theta}
+: The lemma's threshold trades the error the theorem tolerates against the number of queries it needs. {#tbl-sol-recon-theta}
 
 *A smaller $\lambda$ makes each query a likelier catch, so fewer queries are needed, but only for a much smaller error. Since the point of the theorem is the error scale, the larger $\lambda = \frac14$ is the better choice; neither changes the $\sqrt{\gamma n}$ scaling.*
 :::
 
 ## The fourth moment {#sec-sol-recon-3}
 
-> **Exercise 3.** **The fourth moment.** Prove $\mathbb E\big(\sum_is_ia_i\big)^4 = 3(\sum_ia_i^2)^2 - 2\sum_ia_i^4$ by counting index patterns, and check it by enumeration for $a = (1, 2)$ and $a = (\frac12, \frac12, \frac12, \frac12)$. *Check: 41 and 2.5.* *(Fact 2)*
+> **Exercise 3.** **The fourth moment.** Prove $\mathbb E\big(\sum_is_ia_i\big)^4 = 3(\sum_ia_i^2)^2 - 2\sum_ia_i^4$ by counting index patterns, and check it by enumeration for $a = (1, 2)$ and $a = (\frac12, \frac12, \frac12, \frac12)$. This is the identity @eq-recon-fourth that the proof of @lem-recon-anti uses. *Check: 41 and 2.5.* *(Moments of a random-sign sum)*
 
 ::: {.callout-tip collapse="true" title="Solution"}
 1. **Expand.** $\big(\sum_is_ia_i\big)^4 = \sum_{i, j, k, l}s_is_js_ks_l\,a_ia_ja_ka_l$, a sum over all ordered quadruples of indices.
@@ -97,8 +97,8 @@ so at least 22 617 queries.
 
 ::: {.callout-tip collapse="true" title="Solution"}
 1. **Values per answer.** A count is in $\{0, \dots, 1000\}$, and rounding to the nearest multiple of 10 gives one of $0, 10, \dots, 1000$: 101 values. The chapter's bound uses the safe count $\lfloor n/w\rfloor + 2 = 102$, so $\log_2V = \log_2102 = 6.6724$ bits.
-2. **Bits needed.** $h(0.01) = -0.01\log_20.01 - 0.99\log_20.99 = 0.0664 + 0.0144 = 0.0808$, so recovering all but 1% of the bits needs $I(d; \text{answers}) \ge n(1 - h(0.01)) = 919.2$ bits.
-3. **Divide.** $m \ge 919.2/6.6724 = 137.8$, so at least 138 queries.
+2. **Bits needed.** $h(0.01) = -0.01\log_20.01 - 0.99\log_20.99 = 0.0664 + 0.0144 = 0.0808$, so recovering all but 1% of the bits needs $n(1 - h(0.01)) = 919.2$ bits.
+3. **Divide.** By @thm-recon-info, $m \ge 919.2/6.6724 = 137.8$, so at least 138 queries.
 4. **Compare.** With exact answers ($V = 1001$, $\log_2V = 9.97$), the bound is 92.2. Rounding to 10 makes each answer carry fewer bits, so more queries are needed; it does not stop the attack.
 
 *Coarsening the answers raises the number of queries any attack needs, but only by the factor $\log_2(n + 1)/\log_2(n/w + 2)$; it does not change its order.*
@@ -109,10 +109,10 @@ so at least 22 617 queries.
 > **Exercise 7.** **A sampling curator that keeps more.** Repeat the sampling-curator analysis with the sampling rate $q$ raised to 0.9. Find the Hoeffding error bound at $n = 500$, $m = 2000$, failure probability $\beta = 0.05$, and the ceiling on the fraction any attacker recovers. *Check: 59.03 and 0.95; in simulation the largest error is 12.00 and least squares recovers 0.9420.* *(Hoeffding, union bound)*
 
 ::: {.callout-tip collapse="true" title="Solution"}
-1. **The error terms.** Each term $d_i(t_i/q - 1)$ is 0 when $d_i = 0$, and otherwise $\frac1{0.9} - 1 = 0.111$ with probability 0.9 or $-1$ with probability 0.1. The mean is $0.9 \times 0.111 - 0.1 = 0$ and the range is $\frac1q = 1.111$.
-2. **Hoeffding and the union bound,** exactly as in the chapter: $\Pr[\text{some error} \ge u] \le 2m\exp(-2q^2u^2/n)$. Setting it to $\beta = 0.05$:
-$$u = \sqrt{\frac{n\ln(2m/\beta)}{2q^2}} = \sqrt{\frac{500\ln80\,000}{2 \times 0.81}} = \sqrt{\frac{500 \times 11.290}{1.62}} = 59.03.$$
-3. **The ceiling.** The people outside the sample $T$ are hidden, so the attacker is right on at most all of the sampled people (fraction 0.9) and half of the others: $0.9 + 0.1/2 = 0.95$.
+1. **The error terms.** Each term $d_i(t_i/q - 1)$ is 0 when $d_i = 0$, and otherwise $\frac1{0.9} - 1 = 0.111$ with probability 0.9 or $-1$ with probability 0.1. The mean is $0.9 \times 0.111 - 0.1 = 0$ and the range is $\frac1q = 1.111$, as the proof of @prp-recon-sampling assumes.
+2. **The error bound.** @eq-recon-hoeffding with $q = 0.9$ and $\beta = 0.05$ gives
+$$u = \sqrt{\frac{500\ln80\,000}{2 \times 0.81}} = \sqrt{\frac{500 \times 11.290}{1.62}} = 59.03.$$
+3. **The ceiling.** By @prp-recon-sampling it is $q + \frac{1 - q}{2} = 0.9 + 0.1/2 = 0.95$: at best all of the sampled people and half of the others.
 4. **Simulation.** The script keeps 445 of the 500 people. The largest error over 2000 queries is 12.00, well below the bound, and least squares recovers 0.9420: it gets the 445 sampled people right and, among the 55 others, exactly those whose bit is 0 (it estimates their bit as 0).
 
 *Keeping more people lowers the error and exposes more of them. The curator's hiding power is exactly the fraction it leaves out, and it buys that by making each answer less accurate.*

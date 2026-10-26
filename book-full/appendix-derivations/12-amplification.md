@@ -120,7 +120,7 @@ The gradients may depend on earlier steps, but they are fixed when the step runs
 The **hockey-stick divergence** at level $\gamma$ is the largest amount by which $P$ exceeds $\gamma$ times $Q$ on any event, $E_\gamma(P\|Q) = \max_A\big[P(A) - \gamma Q(A)\big]$. At $\gamma = e^\varepsilon$ it is the $\delta(\varepsilon)$ of the pair. The definition makes sense for every real $\gamma$, and for $\gamma \le 0$ the best event is the whole space, so $E_\gamma = 1 - \gamma$. A pair **dominates** one direction if its $E_\gamma$ is at least the mechanism's $E_\gamma$ in that direction, for every $\gamma \ge 0$ and all datasets. With $P_0 = \mathcal N(0, \sigma^2)$, $P_1 = \mathcal N(1, \sigma^2)$ and $P_q = (1 - q)P_0 + qP_1$ as in @sec-apx-amp-direction, the claim is that, for every $\gamma \ge 0$,
 $$E_\gamma\big(M(D')\,\|\,M(D)\big) \le E_\gamma(P_q\|P_0), \qquad E_\gamma\big(M(D)\,\|\,M(D')\big) \le E_\gamma(P_0\|P_q).$$ {#eq-apx-amp-dominate}
 
-[Numerical accounting](../part04-privacy-accounting/06-numerical-accounting.md) states the two pairs in @sec-num-subsampled. It cites Zhu, Dong & Wang (2022, Theorem 11), and its step 7 says that they "prove each pair dominates its case". [Choosing an accountant](../part04-privacy-accounting/09-choosing-an-accountant.md) relies on both pairs in @sec-choose-compare.
+[Numerical accounting](../part04-privacy-accounting/06-numerical-accounting.md) states the two pairs in @sec-num-subsampled. It cites Zhu, Dong & Wang (2022, Theorem 11), and the sentence after its @thm-num-subsampled-pairs says that they "prove each pair dominates its case". [Choosing an accountant](../part04-privacy-accounting/09-choosing-an-accountant.md) relies on both pairs in @sec-choose-compare.
 
 ### The idea
 
@@ -134,7 +134,7 @@ For a feel of the stretch, take $q = 0.01$ and $\gamma = 1.5$. The remove identi
 
 1. **Fix the other records' coins.** Let $K$ be the Poisson sample of $D$. Your record has its own coin, independent of $K$, so the sample of $D'$ is $K$ with probability $1 - q$ and $K \cup \{x\}$ otherwise. Given $K$, $M(D)$ is $Q_K = \mathcal N(f_K, \sigma^2I)$, with $f_K$ the sum of the gradients in $K$. And $M(D')$ is $(1 - q)Q_K + qP_K$, with $P_K = \mathcal N(f_K + v, \sigma^2I)$ and $v = g(x)$, so $\|v\| \le 1$.
 
-2. **Averaging over $K$ cannot raise $E_\gamma$.** Both runs are averages over $K$ with the same weights $w_K$. Write $U_K$ and $V_K$ for the two conditional outputs given $K$, in either order. For every event, $\sum_K w_KU_K(A) - \gamma\sum_Kw_KV_K(A)$ is the weighted average of the excesses $U_K(A) - \gamma V_K(A)$, and an average is at most the largest term. So $E_\gamma(\sum_Kw_KU_K\|\sum_Kw_KV_K) \le \max_KE_\gamma(U_K\|V_K)$, for every real $\gamma$. This is Fact 1 of [Amplification by subsampling](../part04-privacy-accounting/05-subsampling.md). It reduces both claims to one fixed $K$.
+2. **Averaging over $K$ cannot raise $E_\gamma$.** Both runs are averages over $K$ with the same weights $w_K$. Write $U_K$ and $V_K$ for the two conditional outputs given $K$, in either order. For every event, $\sum_K w_KU_K(A) - \gamma\sum_Kw_KV_K(A)$ is the weighted average of the excesses $U_K(A) - \gamma V_K(A)$, and an average is at most the largest term. So $E_\gamma(\sum_Kw_KU_K\|\sum_Kw_KV_K) \le \max_KE_\gamma(U_K\|V_K)$, for every real $\gamma$. This is @lem-sub-averaging of [Amplification by subsampling](../part04-privacy-accounting/05-subsampling.md). It reduces both claims to one fixed $K$.
 
 3. **The remove identity.** For any event $A$, collect the terms in $Q(A)$: $(1 - q)Q(A) + qP(A) - \gamma Q(A) = q\big[P(A) - \gamma' Q(A)\big]$, where $q\gamma' = \gamma - 1 + q$. Taking the maximum over $A$ on both sides gives
 $$E_\gamma\big((1 - q)Q + qP\,\big\|\,Q\big) = q\,E_{\gamma'}(P\|Q), \qquad \gamma' = 1 + \frac{\gamma - 1}{q}.$$ {#eq-apx-amp-remove-identity}
@@ -173,11 +173,11 @@ The pairs dominate one step, for add/remove neighbours. Composing them over many
 
 In the shuffle model, $n$ users each send one report through a shuffler, which hides the order. The neighbouring relation is replace-one: you hold $x^0$ in $D$ and $x^1$ in $D'$, and everyone else holds the same value in both. Every user applies the same local randomizer $R$, a randomized map from a value to a report, and $R(x)$ is the distribution of the report of a user who holds $x$. It is **$\varepsilon_0$-DP**: no report is more than $e^{\varepsilon_0}$ times likelier under one input than under another.
 
-The chapter's Theorem 3.2 (Feldman, McMillan & Talwar 2021) says that the shuffled output on $D$ and on $D'$ is the same post-processing of the two random pairs of counts of @eq-shuf-clone-pair,
+@thm-shuf-clone-reduction (Theorem 3.2 of Feldman, McMillan & Talwar 2021) says that the shuffled output on $D$ and on $D'$ is the same post-processing of the two random pairs of counts of @eq-shuf-clone-pair,
 $$\tilde P = (A + \Delta,\ C - A + 1 - \Delta), \qquad \tilde Q = (A + 1 - \Delta,\ C - A + \Delta).$$
 The number of clones $C$ is binomial, $\mathrm{Bin}(n - 1, e^{-\varepsilon_0})$. A clone is another user's report that is distributed like one of your two possible reports, and the idea below makes this precise. Given $C$, the number $A$ of clones of the first kind is $\mathrm{Bin}(C, \frac12)$. The bit $\Delta$, independent of both, says whether your own report favours your true value, and it is 1 with probability
 $$p = \frac{e^{\varepsilon_0}}{e^{\varepsilon_0} + 1}.$$
-@sec-shuf-clones proves a weaker reduction, in which your own report counts fully on one side, with counts $(A + 1, C - A)$ against $(A, C - A + 1)$. That pair ignores the noise in your own report. The chapter then replaces your exact contribution by the noisy bit $\Delta$, citing Lemma 3.4 of the paper, but it does not show that the other users' clones can be rewritten in the same terms. It also cites, without the calculation, the Chernoff bounds that give the closed form @eq-shuf-clone-bound. This section proves the full reduction for one fixed randomizer and derives a closed-form bound with explicit constants.
+@sec-shuf-clones proves a weaker reduction, in which your own report counts fully on one side, with counts $(A + 1, C - A)$ against $(A, C - A + 1)$. That pair ignores the noise in your own report. Steps 4 and 5 of @thm-shuf-clone-reduction's proof then replace your exact contribution by the noisy bit $\Delta$ and redraw the other users' clones, resting on Lemma 3.4 of the paper. It also cites, without the calculation, the Chernoff bounds that give the closed form @eq-shuf-clone-bound. This section proves the full reduction for one fixed randomizer and derives a closed-form bound with explicit constants.
 
 ### The idea
 
@@ -275,7 +275,7 @@ The script checks steps 1 to 4 on 2,000 random randomizers that are 2-DP, each w
 
 ### What it does not cover
 
-The proof fixes one randomizer $R$ that every user applies. Theorem 3.1 of the paper, as the chapter states it, also allows each randomizer to be chosen adaptively from the earlier outputs. Then step 4 has to compare a user's randomizer with yours, and the paper needs a more careful argument, which stays cited. The numeric clone bound is exact for the pair, not for the mechanism. For binary randomized response the exact shuffled $\varepsilon$ of @sec-shuf-rr is smaller still.
+The proof fixes one randomizer $R$ that every user applies. Theorem 3.1 of the paper, as @thm-trust-fmt states it, also allows each randomizer to be chosen adaptively from the earlier outputs. Then step 4 has to compare a user's randomizer with yours, and the paper needs a more careful argument, which stays cited. The numeric clone bound is exact for the pair, not for the mechanism. For binary randomized response the exact shuffled $\varepsilon$ of @sec-shuf-rr is smaller still.
 
 ## Shift reduction and contraction {#sec-apx-amp-shift}
 
@@ -290,7 +290,7 @@ $$R_\alpha(a) = \sup_{\|w\| \le a}D_\alpha(Z + w\,\|\,Z) = \frac{\alpha a^2}{2\s
 the Gaussian cost @eq-shuf-gauss-cost, which is the same in both orders. The two lemmas are Lemmas 20 and 21 of Feldman, Mironov, Talwar & Thakurta (2018). The first lets the noise pay off a shift $a \ge 0$. The second handles the gradient steps, which differ between the runs because they use different records. It lets two maps $\psi$ and $\psi'$ act on the runs, where $\psi'$ is a **contraction**, $\|\psi'(u) - \psi'(v)\| \le \|u - v\|$, and the two maps differ by at most $s$ at every point. In symbols,
 $$D_\alpha^{(z)}(X + Z\,\|\,X' + Z) \le D_\alpha^{(z + a)}(X\|X') + R_\alpha(a), \qquad D_\alpha^{(z + s)}\big(\psi(X)\,\|\,\psi'(X')\big) \le D_\alpha^{(z)}(X\|X').$$
 
-These are @eq-shuf-shift-reduction and @eq-shuf-contraction in @sec-shuf-iteration. The chapter shows the first only for point masses, and says that the general proof uses a coupling and bounds a joint pair. It states the second without proof. Theorems 22 and 23, and the plateau bound @eq-shuf-plateau of @sec-shuf-hidden, rest on both.
+These are @eq-shuf-shift-reduction and @eq-shuf-contraction in @sec-shuf-iteration. The chapter shows the first only for point masses, and says that the general proof uses a coupling and bounds a joint pair. It proves the second, @lem-shuf-contraction, by the triangle inequality and the data-processing inequality. @thm-shuf-chain and @thm-shuf-sgd, and the plateau bound @eq-shuf-plateau of @sec-shuf-hidden, rest on both.
 
 ### The idea
 

@@ -19,13 +19,13 @@ The solutions use the chapter's notation. Empirical risk minimization (ERM) pick
 
 ## Ridge regression on a ball {#sec-sol-dperm-2}
 
-> **Exercise 2.** **Ridge regression on a ball.** The squared loss $\ell(\theta; (x, y)) = \frac12(\langle \theta, x\rangle - y)^2$ has no global gradient bound. Suppose $\|x\| \le 1$, $|y| \le 1$, and the minimizer is computed over the ball $\|\theta\| \le R$. Find a Lipschitz constant $L$ on the ball and the output-perturbation noise for $R = 2$, $\lambda = 0.1$, $n = 1{,}000$, $\varepsilon = 1$, $\delta = 10^{-5}$. Why does restricting to the ball not break Fact 2? *Check: $L = 3$, sensitivity 0.06, $\sigma = 0.2238$.* *(Lipschitz constants on a bounded domain)*
+> **Exercise 2.** **Ridge regression on a ball.** The squared loss $\ell(\theta; (x, y)) = \frac12(\langle \theta, x\rangle - y)^2$ has no global gradient bound. Suppose $\|x\| \le 1$, $|y| \le 1$, and the minimizer is computed over the ball $\|\theta\| \le R$. Find a Lipschitz constant $L$ on the ball and the output-perturbation noise for $R = 2$, $\lambda = 0.1$, $n = 1{,}000$, $\varepsilon = 1$, $\delta = 10^{-5}$. Why does restricting to the ball not break @thm-opt-erm-sensitivity? *Check: $L = 3$, sensitivity 0.06, $\sigma = 0.2238$.* *(Lipschitz constants on a bounded domain)*
 
 ::: {.callout-tip collapse="true" title="Solution"}
 1. **The gradient.** $\nabla_\theta\ell = (\langle \theta, x\rangle - y)x$. Its length is $|\langle \theta, x\rangle - y|\,\|x\|$.
 2. **Bound it on the ball.** By Cauchy–Schwarz $|\langle \theta, x\rangle| \le \|\theta\|\|x\| \le R$, so $|\langle \theta, x\rangle - y| \le R + 1$, and the length is at most $(R + 1) \cdot 1 = 3$ for $R = 2$.
-3. **Sensitivity.** Fact 2 gives $2L/(\lambda n) = 6/100 = 0.06$, and the exact calibration gives $\sigma = 3.7306 \times 0.06 = 0.2238$.
-4. **Why the ball is fine.** Fact 2's argument works for the minimizer over any convex set: strong convexity still converts a bound on the gradient difference into a bound on the distance between the constrained minimizers, using the first-order optimality condition $\langle\nabla \mathcal L(\theta^*), v - \theta^*\rangle \ge 0$ for all $v$ in the set in place of $\nabla \mathcal L(\theta^*) = 0$. The set must be fixed in advance, not chosen from the data.
+3. **Sensitivity.** @thm-opt-erm-sensitivity gives $2L/(\lambda n) = 6/100 = 0.06$, and the exact calibration gives $\sigma = 3.7306 \times 0.06 = 0.2238$.
+4. **Why the ball is fine.** The argument of @thm-opt-erm-sensitivity works for the minimizer over any convex set: strong convexity still converts a bound on the gradient difference into a bound on the distance between the constrained minimizers, using the first-order optimality condition $\langle\nabla \mathcal L(\theta^*), v - \theta^*\rangle \ge 0$ for all $v$ in the set in place of $\nabla \mathcal L(\theta^*) = 0$. The set must be fixed in advance, not chosen from the data.
 
 *Losses without a global gradient bound become Lipschitz on a bounded domain, and the domain's radius enters the noise. Choosing $R$ too large costs noise, too small biases the solution: the same trade-off as clipping.*
 :::
@@ -46,10 +46,10 @@ The solutions use the chapter's notation. Empirical risk minimization (ERM) pick
 
 ## Pure against Gaussian noise in $d$ dimensions {#sec-sol-dperm-4}
 
-> **Exercise 4.** **Pure against Gaussian noise in $d$ dimensions.** Output perturbation can use Gaussian noise for $(\varepsilon, \delta)$-DP or noise with density $\propto e^{-\|b\|\varepsilon/\Delta_2 f}$ for $\varepsilon$-DP. Using Fact 3, find the dimension $d$ above which the Gaussian has smaller mean squared length, at $\varepsilon = 1$, $\delta = 10^{-5}$. Repeat at $\varepsilon = 0.1$. *Check: $d = 13$ at $\varepsilon = 1$; $d = 9$ at $\varepsilon = 0.1$.* *(Moments of the gamma distribution)*
+> **Exercise 4.** **Pure against Gaussian noise in $d$ dimensions.** Output perturbation can use Gaussian noise for $(\varepsilon, \delta)$-DP or noise with density $\propto e^{-\|b\|\varepsilon/\Delta_2 f}$ for $\varepsilon$-DP. Using @lem-dperm-norm-noise, find the dimension $d$ above which the Gaussian has smaller mean squared length, at $\varepsilon = 1$, $\delta = 10^{-5}$. Repeat at $\varepsilon = 0.1$. *Check: $d = 13$ at $\varepsilon = 1$; $d = 9$ at $\varepsilon = 0.1$.* *(Moments of the gamma distribution)*
 
 ::: {.callout-tip collapse="true" title="Solution"}
-1. **The two second moments.** With $s = \Delta_2 f/\varepsilon$, Fact 3 gives $\mathbb E\|b\|^2 = d(d+1)(\Delta_2 f)^2/\varepsilon^2$. The Gaussian gives $d\sigma^2$, with $\sigma = \Delta_2 f/\mu(\varepsilon, \delta)$.
+1. **The two second moments.** With $s = \Delta_2 f/\varepsilon$, @lem-dperm-norm-noise gives $\mathbb E\|b\|^2 = d(d+1)(\Delta_2 f)^2/\varepsilon^2$. The Gaussian gives $d\sigma^2$, with $\sigma = \Delta_2 f/\mu(\varepsilon, \delta)$.
 2. **Compare.** The Gaussian is smaller when $d\sigma^2 < d(d + 1)(\Delta_2 f)^2/\varepsilon^2$, that is $d + 1 > \varepsilon^2\sigma^2/(\Delta_2 f)^2$.
 3. **At $\varepsilon = 1$.** $\sigma^2/(\Delta_2 f)^2 = 3.7306^2 = 13.918$, so $d + 1 > 13.918$, $d \ge 13$. At $d = 12$ the pure noise has 156 against 167.0; at $d = 13$, 182 against 180.9. At $d = 100$ it is 10,100 against 1,391.8.
 4. **At $\varepsilon = 0.1$.** $\varepsilon^2\sigma^2/(\Delta_2 f)^2 = 9.455$, so $d \ge 9$.
@@ -59,7 +59,7 @@ The solutions use the chapter's notation. Empirical risk minimization (ERM) pick
 
 ## Noisy gradient descent with weaker composition {#sec-sol-dperm-5}
 
-> **Exercise 5.** **Noisy gradient descent with weaker composition.** For noisy gradient descent at $n = 10{,}000$ with $(\varepsilon, \delta) = (1, 10^{-5})$, compute the per-step noise on the mean gradient for $T = 10$, 100 and 1,000 steps under three accountings: exact composition of Gaussians (Fact 5); basic composition, giving each step $(\varepsilon/T, \delta/T)$; and advanced composition, $\varepsilon = \varepsilon_0\sqrt{2T\ln(1/\delta')} + T\varepsilon_0(e^{\varepsilon_0} - 1)$ with $\delta' = \delta/2$ and each step $\delta/(2T)$. *Check: at $T = 100$, exact 0.00746, basic 0.07240, advanced 0.04032.* *(Composition theorems)*
+> **Exercise 5.** **Noisy gradient descent with weaker composition.** For noisy gradient descent at $n = 10{,}000$ with $(\varepsilon, \delta) = (1, 10^{-5})$, compute the per-step noise on the mean gradient for $T = 10$, 100 and 1,000 steps under three accountings: exact composition of Gaussians, as in @thm-dperm-noisy-gd; basic composition, giving each step $(\varepsilon/T, \delta/T)$; and advanced composition, $\varepsilon = \varepsilon_0\sqrt{2T\ln(1/\delta')} + T\varepsilon_0(e^{\varepsilon_0} - 1)$ with $\delta' = \delta/2$ and each step $\delta/(2T)$. *Check: at $T = 100$, exact 0.00746, basic 0.07240, advanced 0.04032.* *(Composition theorems)*
 
 ::: {.callout-tip collapse="true" title="Solution"}
 1. **Exact.** Each step has sensitivity $2/n = 2 \times 10^{-4}$, and @eq-dperm-noisy-gd gives $\sigma = 2 \times 10^{-4}\sqrt T/0.2681$: 0.00236, 0.00746 and 0.02359.
@@ -72,7 +72,7 @@ The solutions use the chapter's notation. Empirical risk minimization (ERM) pick
 
 ## A sharper Jacobian bound {#sec-sol-dperm-6}
 
-> **Exercise 6.** **A sharper Jacobian bound.** In step 5 of the objective-perturbation derivation, $K = \alpha\tilde x'\tilde x'^\top - \beta\tilde x\tilde x^\top$ with $\alpha, \beta \in [0, c]$. Show that $K$ has at most one positive and at most one negative eigenvalue, and conclude that $\det(I + K)$ lies in $[1/(1 + a), 1 + a]$ with $a = c/(n\lambda)$ once both directions are considered. So the Jacobian costs only $\ln(1 + a)$, half of what @eq-dperm-eps-prime charges. Check the bound on random instances. *Check: over 2,000 random instances ($d = 5$, $n = 20$, $\lambda = 0.05$) the largest $|\ln\det|$ is 0.9759 times $\ln(1 + a)$; an extreme instance attains 1.0000.* *(Eigenvalue interlacing)*
+> **Exercise 6.** **A sharper Jacobian bound.** In step 5 of the proof of @thm-dperm-objective, $K = \alpha\tilde x'\tilde x'^\top - \beta\tilde x\tilde x^\top$, where the curvatures $\alpha = \psi''(m')$ and $\beta = \psi''(m)$ of the arriving and leaving records lie in $[0, c]$. Show that $K$ has at most one positive and at most one negative eigenvalue, and conclude that $\det(I + K)$ lies in $[1/(1 + a), 1 + a]$ with $a = c/(n\lambda)$ once both directions are considered. So the Jacobian costs only $\ln(1 + a)$, half of what @eq-dperm-eps-prime charges. Check the bound on random instances. *Check: over 2,000 random instances ($d = 5$, $n = 20$, $\lambda = 0.05$) the largest $|\ln\det|$ is 0.9759 times $\ln(1 + a)$; an extreme instance attains 1.0000.* *(Eigenvalue interlacing)*
 
 ::: {.callout-tip collapse="true" title="Solution"}
 1. **At most one positive eigenvalue.** $K \preceq \alpha\tilde x'\tilde x'^\top$, because the difference $\beta\tilde x\tilde x^\top$ is positive semi-definite. By the Courant–Fischer characterization, the second-largest eigenvalue of $K$ is at most that of $\alpha\tilde x'\tilde x'^\top$, which is 0. So only the largest eigenvalue $\kappa_1$ can be positive, and it is at most $\alpha\|\tilde x'\|^2 \le c/(n\lambda) = a$.
@@ -86,12 +86,12 @@ The solutions use the chapter's notation. Empirical risk minimization (ERM) pick
 
 ## How tight must an approximate minimizer be? {#sec-sol-dperm-7}
 
-> **Exercise 7.** **How tight must an approximate minimizer be?** Using @eq-dperm-approx, find the largest gradient tolerance $g$ for which an approximate minimizer's sensitivity is within 10% of the exact $2L/(\lambda n)$. Evaluate it for $n = 10{,}000$, $L = 1$. Does it depend on $\lambda$? *Check: $g = 10^{-5}$.* *(Strong convexity: small gradient, close to the minimizer)*
+> **Exercise 7.** **How tight must an approximate minimizer be?** Using @eq-dperm-approx, find the largest gradient tolerance $\tau$ for which an approximate minimizer's sensitivity is within 10% of the exact $2L/(\lambda n)$. Evaluate it for $n = 10{,}000$, $L = 1$. Does it depend on $\lambda$? *Check: $\tau = 10^{-5}$.* *(Strong convexity: small gradient, close to the minimizer)*
 
 ::: {.callout-tip collapse="true" title="Solution"}
-1. **The condition.** The extra term $2g/\lambda$ must be at most $0.1 \times 2L/(\lambda n)$.
-2. **Solve.** Multiply both sides by $\lambda/2$: $g \le 0.1L/n$. The $\lambda$ cancels.
-3. **Numbers.** $g = 0.1/10{,}000 = 10^{-5}$.
+1. **The condition.** The extra term $2\tau/\lambda$ must be at most $0.1 \times 2L/(\lambda n)$.
+2. **Solve.** Multiply both sides by $\lambda/2$: $\tau \le 0.1L/n$. The $\lambda$ cancels.
+3. **Numbers.** $\tau = 0.1/10{,}000 = 10^{-5}$.
 4. **Interpretation.** The tolerance shrinks like $1/n$: the more data, the more precisely you must solve. For Newton's method this is cheap, a few extra steps; for stochastic gradient descent (SGD) it can be the dominant cost.
 
 *An approximate solver changes the sensitivity, not just the accuracy. Stop on a gradient check at a tolerance tied to $L/n$, and the privacy proof survives.*
@@ -103,8 +103,8 @@ The solutions use the chapter's notation. Empirical risk minimization (ERM) pick
 
 ::: {.callout-tip collapse="true" title="Solution"}
 1. **The noise.** With $\mu = 0.2681$, the rule gives $T = \lceil 1{,}000^2 \times 0.2681^2/40\rceil = 1{,}797$, and @eq-dperm-projected-gd gives $\sigma = (2/1{,}000)\sqrt{1{,}797}/0.2681 = 0.3163$.
-2. **The extra second moment.** Each coordinate of the noise has variance $\sigma^2$, so the noise adds $d\sigma^2 = 10 \times 0.3163^2 = 1.0004$ to $\mathbb E\|g_t\|^2$. The noiseless gradient contributes at most $L^2 = 1$, so $G^2 = 2.0004$.
-3. **The two bounds.** Fact 6 gives $RG/\sqrt T = 5\sqrt{2.0004/1{,}797} = 0.1668$. Without noise, $G = L$ and the bound is $5/\sqrt{1{,}797} = 0.1179$.
+2. **The extra second moment.** By step 3 of the proof of @thm-dperm-convex, the noise adds $d\sigma^2 = 10 \times 0.3163^2 = 1.0004$ to the noiseless $L^2 = 1$, so $G^2 = 2.0004$.
+3. **The two bounds.** @thm-opt-sgd-convex gives $RG/\sqrt T = 5\sqrt{2.0004/1{,}797} = 0.1668$. Without noise, $G = L$ and the bound is $5/\sqrt{1{,}797} = 0.1179$.
 4. **The ratio.** It is $\sqrt{G^2/L^2} = \sqrt{2.0004} = 1.4144$. The rule chooses $T$ so that the noise term $4d/(n^2\mu^2)$ equals $1/T$, which is the same as saying that $d\sigma^2 = L^2$. So the noise doubles the second moment, and the bound grows by $\sqrt2$, at every $n$. The rounding up of $T$ is why the ratio is 1.4144 rather than exactly $\sqrt2$.
 
 *The optimizer cannot tell privacy noise from sampling noise: both only raise the second moment of its gradients. The step rule spends exactly as much second moment on privacy as the gradient itself has.*

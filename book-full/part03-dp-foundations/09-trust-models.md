@@ -350,7 +350,7 @@ $$\varepsilon \le \ln\left(1 + \frac{e^{\varepsilon_0} - 1}{e^{\varepsilon_0} + 
 :::
 <!-- proof: cited -->
 
-The proof is in [Amplification by shuffling and by iteration](../part04-privacy-accounting/07-shuffling-iteration.md), which bounds the hockey-stick divergence of two binomial counts. Its first step, the lemma below, carries the intuition that other people's reports can look exactly like the target's.
+The proof is in [Amplification by shuffling and by iteration](../part04-privacy-accounting/07-shuffling-iteration.md#sec-shuf-clones), which reduces the shuffled output to two binomial counts, and @sec-apx-amp-clones bounds their hockey-stick divergence. Its first step, the lemma below, carries the intuition that other people's reports can look exactly like the target's.
 
 ::: {#lem-trust-clones name="Clones"}
 Let $R$ be an $\varepsilon_0$-DP local randomizer and $x^0, x^1$ the two values the target might hold. Then for every other value $x$ there is a distribution $\mathrm{LO}(x)$, the leftover, with

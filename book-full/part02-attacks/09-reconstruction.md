@@ -1,106 +1,56 @@
 # Reconstruction attacks
 
-## Why this matters
+A hospital keeps one sensitive bit per patient, whether they tested positive, and never releases the bits. It only answers counting questions, such as "how many of patients 3, 17 and 42 tested positive?", and it adds a little noise to every answer. Is that enough? This is the **reconstruction game** of [Threat models and privacy games](01-threat-models.md), where the adversary is scored by the fraction of the secret bits it recovers. One exact count of all $n$ bits lifts that score only from $\frac12$ to about $\frac12 + 1/\sqrt{2\pi n}$, and this chapter asks what many counts do.
 
-A hospital keeps one sensitive bit per patient: whether they tested positive. It never releases the bits. It only answers counting questions: "how many of patients 3, 17, 42, … tested positive?" To be safe, it adds a little noise to every answer. Is that enough? The answer, due to Dinur and Nissim (2003), is a hard no unless the noise is large. If every answer is within $o(\sqrt n)$ of the truth, where $n$ is the number of patients, an attacker who asks a number of random questions only slightly larger than $n$ can recover almost every bit by solving a linear program. If the attacker may ask all $2^n$ questions, an error of $o(n)$ is already too small. (Here $o(\sqrt n)$ means an amount that grows more slowly than $\sqrt n$, so that its ratio to $\sqrt n$ goes to 0 as $n$ grows; $O(\cdot)$, used below, means "at most a constant times".) A table of aggregates is a system of equations whose unknowns are the people in it, and enough equations determine the unknowns.
+The one idea is that every answer is a linear equation in the secret bits, so the error of the answers is the only thing standing between the attacker and the solution. To hide a wrong guess, the error must be as large as the amount by which that guess changes the answers. That amount is about $\sqrt n$ for a random question and about $n$ for the question aimed at exactly the wrong bits. Errors well below these scales reveal the bits (Dinur and Nissim 2003), and errors that are independent from answer to answer are averaged away by asking more questions. Dwork and Roth call this the **Fundamental Law of Information Recovery**: overly accurate answers to too many questions destroy privacy.
 
-This is the **reconstruction game** of [Threat models and privacy games](01-threat-models.md). In that game the secret is the whole dataset (or one column of it), and the adversary is scored by the fraction of entries it recovers, compared with the baseline of guessing from the population, which for fair bits is $\frac12$. That chapter showed that one exact count of $n$ fair bits lets the adversary recover only about $\frac12 + 1/\sqrt{2\pi n}$ of them: knowing the total tells you which value is the majority, and nothing about who holds it. This chapter shows what happens with many counts.
+The running example is the hospital with $n = 500$ patients and an attacker who asks $m = 2000$ random counting questions. With independent normal noise of standard deviation $0.25\sqrt n = 5.59$ on each answer, a least-squares fit recovers 0.9655 of the bits. [Part 3](../part03-dp-foundations/01-definition.md) introduces the definition that defends against these attacks.
 
-The one idea that organizes the chapter is this. **Every answer is a linear equation in the secret bits, and the error of the answers is the only thing standing between the attacker and the solution.** To hide a wrong guess, the curator's error has to be as large as the amount by which that guess changes the answers. For a random query that amount is about $\sqrt n$ when the guess is wrong on a constant fraction of the bits, and for the query aimed at exactly the wrong bits it is about $n$; errors well below those scales cannot hide the solution. Errors that are independent from answer to answer, and do not grow with the number of queries, are averaged away by asking more. Dwork and Roth call this the **Fundamental Law of Information Recovery**: overly accurate answers to too many questions destroy privacy.
+## Subset sums and the exponential attack {#sec-recon-exponential}
 
-@tbl-recon-uses lists the results and where they are used.
+Before asking how few questions suffice, consider the strongest attacker, who may ask every possible counting question. How large must the error be before even this attacker cannot pin the bits down? This section also sets up the model that every later section shares, in which a list of counting questions is a system of linear equations in the bits.
 
-| Result | Where it is used |
-| --- | --- |
-| Exponential attack: error $E$ on all $2^n$ subset sums leaves at most $4E$ wrong bits | Why per-answer error must be of order $n$ when queries are unlimited |
-| Anti-concentration of a random subset sum (Paley–Zygmund) | The step that makes a random query informative about every bad candidate |
-| Linear-programming decoder: error $o(\sqrt n)$ on $O(n\log n)$ random queries leaves $o(n)$ wrong bits | The Dinur–Nissim attack; the $\sqrt n$ threshold |
-| Least squares under worst-case and random error | The attack you would actually run; how noise and the number of queries trade off |
-| Sampling curator, via Hoeffding and the union bound | Error of order $\sqrt{n\ln m}$ can stop reconstruction, yet still be far from private |
-| Information bound, via Fano | No attack can succeed with much fewer than $n/\ln n$ queries |
-| Least squares against a deployed query system | Why noise that does not grow with the number of queries fails, whatever the query language allows |
-| Census block reconstruction by constraint search | Why publishing many overlapping tables reveals the microdata |
+::: {#def-recon-subset-sum name="Subset-sum queries and the curator"}
+The secret database is a bit vector $d = (d_1, \dots, d_n) \in \{0, 1\}^n$, one bit per person. A **subset-sum query** is a set $S \subseteq \{1, \dots, n\}$ of people, written as its indicator vector $f$, with $f_i = 1$ when person $i$ is in $S$. Its true answer is
+$$\sum_{i \in S}d_i = \langle f, d\rangle.$$
+The attacker asks $m$ queries $f_1, \dots, f_m$, the rows of an $m \times n$ matrix $A$. The **curator**, the party that holds $d$, returns $a = Ad + e$, where the error vector $e$ has one entry per query. The error is at most $E$ when $|e_j| \le E$ for every query $j$.
+:::
 
-: The results of this chapter and where each is used. {#tbl-recon-uses}
+A wrong guess $c$ gives answers that differ from the true ones by $\langle f, c - d\rangle$. Both databases must be within the error of the same answer, so if that difference exceeds twice the error, $c$ is ruled out.
 
-**How to read this chapter.** Read the toolkit, then the exponential attack, which is short and exact. The linear-programming section is the heart of the chapter; on a first pass read its statement, the lemma and the figure, and come back for the union-bound steps. The least-squares section is what the script runs. The Fundamental Law section puts the results together with two converses. The last two sections leave the theory: one replays a published attack on a commercial query system, and the other shows the same idea on real-looking census tables.
+::: {#def-recon-consistent name="Consistent candidates and blatant non-privacy"}
+A candidate $c \in \{0, 1\}^n$ is **consistent** with the answers if $|a_j - \langle f_j, c\rangle| \le E$ for every query $j$. Its number of wrong bits is the **Hamming distance** $\mathrm{dist}(c, d)$, the number of people with $c_i \ne d_i$. A curator is **blatantly non-private** if some attacker recovers all but $o(n)$ of the bits, an amount whose ratio to $n$ goes to 0 as $n$ grows.
+:::
 
-The concentration tools (Hoeffding's inequality, the union bound) are in [Concentration inequalities](../part01-prerequisites/02-concentration.md). Entropy, mutual information, the data processing inequality (DPI) and Fano's inequality are in [Information theory](../part01-prerequisites/05-information-theory.md). Each is restated below where it is used. No privacy definition is used: [Part 3](../part03-dp-foundations/01-definition.md) introduces the one that defends against these attacks, and [Lower bounds](../part03-dp-foundations/10-lower-bounds.md) reads this chapter's results as lower bounds on the error any defence must add.
+The true $d$ is always consistent, so an attacker who asks all $2^n$ queries can output any consistent candidate. The candidate's wrong bits form two subsets, the ones it missed and the ones it invented, and each subset is itself a query the attacker has asked.
 
-**Conventions.** The secret database is a bit vector $d = (d_1, \dots, d_n) \in \{0, 1\}^n$, one bit per person. A **subset-sum query** is a set $S \subseteq [n] = \{1, \dots, n\}$ of people, and it asks how many of them have bit 1. It is written as its 0/1 indicator vector $f$, with $f_i = 1$ when person $i$ is in $S$; its true answer is $\sum_{i \in S}d_i = \langle f, d\rangle$. The attacker asks $m$ queries, the rows of an $m \times n$ matrix $A$. The **curator** (the party holding $d$) returns $a = Ad + e$, where $e$ is its error, one entry per query. "Error at most $E$" means $|e_j| \le E$ for every query $j$. $\gamma$ is a fraction of wrong bits, $\beta$ a failure probability and $\sigma$ the standard deviation of random noise. We write $\ln$ for the natural logarithm and $\log_2$ for the logarithm in base 2. [Threat models and privacy games](01-threat-models.md) wrote $m$ for the number of bits; here $n$ is the number of bits and $m$ the number of queries.
+::: {#thm-recon-exponential name="The exponential attack"}
+Suppose the curator answers all $2^n$ subset-sum queries with error at most $E$. Then every consistent candidate $c$ satisfies
+$$\mathrm{dist}(c, d) \le 4E.$$ {#eq-recon-exp}
+:::
 
-## Toolkit: three facts every derivation uses
+::: {.proof}
+1. *Count the ones that the candidate missed.* Let $S_0$ be the set of people with $d_i = 1$ and $c_i = 0$. On $S_0$, $d$ sums to $|S_0|$ and $c$ sums to 0. Both sums are within $E$ of the one answer to $S_0$, so by the triangle inequality they are within $2E$ of each other, and $|S_0| \le 2E$.
+2. *Count the ones that the candidate invented.* On the set $S_1$ of people with $d_i = 0$ and $c_i = 1$, the candidate sums to $|S_1|$ and $d$ sums to 0, and the same argument gives $|S_1| \le 2E$.
+3. *Add.* Every disagreement lies in $S_0$ or in $S_1$, so $\mathrm{dist}(c, d) = |S_0| + |S_1| \le 4E$.
+:::
 
-### Fact 1 — Subset sums are inner products
+The proof never uses that the errors are random, so it holds even against a curator that picks its errors after seeing the attacker's candidate. Such a curator can attain the bound.
 
-A subset sum adds up the bits of the people in the subset, so it is the inner product of the subset's indicator vector with the database: $\langle f, d\rangle = \sum_i f_id_i$, which is linear in $d$. Stacking $m$ queries as the rows of $A$ gives $a = Ad + e$: a linear system with $n$ unknowns (the bits) and $m$ equations, each off by its error. @tbl-recon-subsets shows a few of the $2^4 = 16$ subset sums of the database $d = (1, 0, 1, 1)$.
+::: {#prp-recon-exp-tight name="The bound is attained"}
+Let $k = \lfloor 2E\rfloor$, and suppose $d$ has at least $k$ ones and at least $k$ zeros. Then some curator with error at most $E$ on all $2^n$ queries makes a candidate at distance $2k$ from $d$ consistent.
+:::
 
-| Subset $S$ | $\{1\}$ | $\{2\}$ | $\{1, 2\}$ | $\{3, 4\}$ | $\{2, 3, 4\}$ | $\{1, 2, 3, 4\}$ |
-| --- | --- | --- | --- | --- | --- | --- |
-| Indicator $f$ | 1000 | 0100 | 1100 | 0011 | 0111 | 1111 |
-| $\langle f, d\rangle$ | 1 | 0 | 1 | 2 | 2 | 3 |
+::: {.proof}
+1. *Build the decoy.* Let $c$ flip $k$ of the ones of $d$ to 0 and $k$ of the zeros to 1.
+2. *Its sums stay close to the true ones.* For any $S$, the sum of $c_i - d_i$ over $S$ is the number of flipped zeros in $S$ minus the number of flipped ones in $S$, so it lies between $-k$ and $k$.
+3. *Answer the midpoint.* A curator that answers each query with the midpoint of the two databases' sums is within $k/2 \le E$ of both, so $c$ is consistent.
+:::
 
-: Six subset sums of $d = (1, 0, 1, 1)$. Each is a linear equation in the four secret bits. {#tbl-recon-subsets}
+So a curator whose error is $o(n)$ is blatantly non-private. The attack checks $2^n$ candidates against $2^n$ answers, and the next section makes it efficient. A particular curator can also be weaker than the bound suggests: one that rounds every answer to a multiple of 4 has error at most 2, yet simulating the rounding recovers $d$ exactly ([Exercise 1](../../book-exercises/part02-attacks/09-reconstruction.md#sec-sol-recon-1)).
 
-With exact answers there is nothing to attack. The singletons $\{1\}, \dots, \{4\}$ alone reveal $d$ exactly, one bit per answer, and any $n$ queries whose indicator vectors are linearly independent do the same, because Gaussian elimination solves the system. Everything interesting in this chapter is about answers with error.
-
-Linearity also tells you how an attacker rules out a wrong guess. If the attacker considers a candidate database $c$, the answers $c$ would produce differ from the true ones by $\langle f, c\rangle - \langle f, d\rangle = \langle f, c - d\rangle$, the subset sum of the difference vector $c - d$. If, for some query, that difference is larger than the curator's error could explain, the candidate is ruled out. Every attack below is a way of finding such a query for every bad candidate.
-
-### Fact 2 — Moments of a random-sign sum
-
-A random query includes each person with probability $\frac12$, so its answer behaves like a sum of terms that are switched on or off by fair coins. The cleanest form of such a sum uses signs instead of on/off switches. Let $s_1, \dots, s_n$ be independent fair signs ($+1$ or $-1$ with probability $\frac12$ each) and $X = \sum_is_ia_i$ for fixed numbers $a_i$. The sum is centred at 0, and its spread is set by $\sum_ia_i^2$, because the variances of independent terms add. What the later proofs need is that $X$ has no heavy tails: its fourth moment is at most 3 times the square of its second moment, the same ratio as for a normal variable. In symbols,
-$$\mathbb E X = 0, \qquad \mathbb E X^2 = \sum_ia_i^2, \qquad \mathbb E X^4 = 3\Big(\sum_ia_i^2\Big)^2 - 2\sum_ia_i^4 \le 3\Big(\sum_ia_i^2\Big)^2.$$
-
-The proof is a count of which terms survive when you take expectations. Expand $X^4 = \sum_{i,j,k,l}s_is_js_ks_la_ia_ja_ka_l$. A term in which some index appears an odd number of times (once or three times) contains a factor $\mathbb E s_i = 0$ or $\mathbb E s_i^3 = 0$, and vanishes, because the signs are independent and $s_i^3 = s_i$ has mean 0. Two kinds of terms survive. If all four indices are equal, $s_i^4 = 1$, and these terms add up to $\sum_ia_i^4$. If the indices form two distinct pairs, each $s_i^2 = 1$; the pairs can be matched as $i = j \ne k = l$ or in two other ways, so these terms add up to $3\sum_{i \ne k}a_i^2a_k^2 = 3\big((\sum_ia_i^2)^2 - \sum_ia_i^4\big)$. Adding the two kinds gives the formula, and dropping the negative term $-2\sum_ia_i^4$ gives the bound. The second moment is the same computation with two indices: only the terms with $i = j$ survive. The mean is 0, and every odd moment is 0, because flipping all the signs turns $X$ into $-X$ without changing its distribution.
-
-*A concrete case.* Take $a = (1, 1, 1)$. Of the eight sign patterns, two give $X = \pm3$ (all signs equal) and six give $X = \pm1$, so $\mathbb E X^4 = (2 \cdot 81 + 6 \cdot 1)/8 = 21$. The formula gives $3 \cdot 9 - 2 \cdot 3 = 21$, and the bound $3 \cdot 9 = 27$.
-
-This is how the fact is used. A random subset has $f_i = (1 + s_i)/2$: the person is in when the sign is $+1$ and out when it is $-1$. So a random subset sum $\sum_iq_iz_i$ is the constant $\frac12\sum_iz_i$ plus half a random-sign sum, and its fourth moment is at most 3 times its squared second moment. That ratio is what Fact 3 needs.
-
-### Fact 3 — Paley–Zygmund: a variable with a light fourth moment is not concentrated near 0
-
-Markov's inequality ([Concentration inequalities](../part01-prerequisites/02-concentration.md)) says that a non-negative variable is rarely *far above* its mean. The attacks need the opposite: that a variable is not too often *far below* its mean, so that a random query does not usually give a tiny answer. That cannot hold for every variable. A variable that is 0 most of the time and huge once in a while has a large mean and is still usually 0. What rules this out is a second moment that is not much larger than the squared mean, since a rare huge value makes $\mathbb E[W^2]$ enormous. The **Paley–Zygmund inequality** makes this precise. For a random variable $W \ge 0$ with finite second moment and $0 \le \lambda < 1$,
-$$\Pr\big[W > \lambda\,\mathbb E W\big] \ge (1 - \lambda)^2\frac{(\mathbb E W)^2}{\mathbb E[W^2]}.$$ {#eq-recon-pz}
-A lower bound on how often a variable is not close to zero is called **anti-concentration**.
-
-The proof splits the mean $\mathbb E W$ into the part that comes from the event $B = \{W > \lambda\,\mathbb E W\}$ and the part that comes from its complement: $\mathbb E W = \mathbb E[W\mathbf 1[B^c]] + \mathbb E[W\mathbf 1[B]]$. On the complement $W \le \lambda\,\mathbb E W$, so the first part is at most $\lambda\,\mathbb E W$. For the second part, use the Cauchy–Schwarz inequality $\mathbb E[UV] \le \sqrt{\mathbb E[U^2]\,\mathbb E[V^2]}$ with $U = W$ and $V = \mathbf 1[B]$; since $\mathbf 1[B]^2 = \mathbf 1[B]$ has mean $\Pr[B]$, this gives $\mathbb E[W\mathbf 1[B]] \le \sqrt{\mathbb E[W^2]\Pr[B]}$. Together, $\mathbb E W \le \lambda\,\mathbb E W + \sqrt{\mathbb E[W^2]\Pr[B]}$, that is, $(1 - \lambda)\mathbb E W \le \sqrt{\mathbb E[W^2]\Pr[B]}$. Squaring both sides and dividing by $\mathbb E[W^2]$ gives @eq-recon-pz.
-
-The linear-programming decoder uses this with $W$ the square of a random subset sum: it needs a random query to move a bad candidate's answer by a lot with constant probability, and Fact 2 supplies the light fourth moment.
-
-## The exponential attack {#sec-recon-exponential}
-
-### Context
-
-Start with the strongest attacker: it may ask every one of the $2^n$ subset sums. How large must the curator's error be before the attacker cannot pin $d$ down? The answer is linear in $n$, and the proof is three lines.
-
-### Statement
-
-The attacker cannot know $d$, but it can throw away every candidate that contradicts an answer. Call a candidate $c \in \{0, 1\}^n$ **consistent** if each of its subset sums is within $E$ of the published answer, $\big|a_S - \sum_{i \in S}c_i\big| \le E$ for every $S$; the true $d$ is always consistent. The attacker outputs any consistent candidate. The reason it cannot be far from $d$ is that the bits where $c$ is wrong form two subsets, the ones it missed and the ones it invented, and the attacker has asked about both. On each of them $c$ and $d$ disagree by the size of the subset, while both have to be within $E$ of the same answer, so each subset has at most $2E$ people. The number of wrong bits, the **Hamming distance** between $c$ and $d$, therefore satisfies
-$$\mathrm{dist}(c, d) = \#\{i : c_i \ne d_i\} \le 4E.$$ {#eq-recon-exp}
-The bound is tight: if $d$ has at least $\lfloor 2E\rfloor$ ones and $\lfloor 2E\rfloor$ zeros, some curator with error at most $E$ makes a candidate at distance $2\lfloor 2E\rfloor$ consistent.
-
-So a curator with error $E = o(n)$ is **blatantly non-private** in the sense of Dinur and Nissim: the attacker recovers all but $o(n)$ of the bits.
-
-### Derivation
-
-1. **A consistent candidate exists**, because $d$ itself is one: the true answers are within $E$ of $d$'s sums by assumption.
-2. **Count the ones that the candidate missed.** Let $S_0 = \{i : d_i = 1, c_i = 0\}$. On $S_0$, $d$ sums to $|S_0|$ and $c$ sums to 0. Both sums are within $E$ of the one answer $a_{S_0}$, so by the triangle inequality they are within $2E$ of each other: $|S_0| = |S_0| - 0 \le 2E$.
-3. **Count the zeros that the candidate invented.** Let $S_1 = \{i : d_i = 0, c_i = 1\}$. Now $c$ sums to $|S_1|$ and $d$ to 0 on $S_1$, and the same argument gives $|S_1| \le 2E$.
-4. **Add.** Every disagreement is in $S_0$ or in $S_1$, so $\mathrm{dist}(c, d) = |S_0| + |S_1| \le 4E$.
-
-**Tightness.** To show a curator can really be this misleading, build a bad candidate and a curator that covers for it. Let $k = \lfloor 2E\rfloor$ and let $c$ flip $k$ of the ones of $d$ to 0 and $k$ of the zeros to 1, so $c$ is at distance $2k$. For any $S$, $\sum_S(c_i - d_i)$ is the number of flipped zeros in $S$ minus the number of flipped ones in $S$, so it lies in $[-k, k]$: the two databases' sums are never more than $k$ apart. A curator that answers the midpoint $a_S = \frac12\big(\sum_Sc_i + \sum_Sd_i\big)$ is then within $k/2 \le E$ of both, so its error is at most $E$ and $c$ is consistent.
-
-### Interpretation
-
-The proof uses only two queries, $S_0$ and $S_1$: the people the candidate got wrong in each direction. Small, well-aimed subsets do all the work. But the attacker does not know which people it got wrong, so it does not know these two subsets in advance, and that is why it needs all $2^n$ answers.
-
-This is not an efficient attack. The attacker checks $2^n$ candidates against $2^n$ answers. The next section replaces "all subsets" by a few times $n$ random ones and "check every candidate" by a linear program. The price is that a random subset cannot aim at the wrong bits the way $S_0$ and $S_1$ do, so the error must be $o(\sqrt n)$ instead of $o(n)$.
-
-The bound is a worst case over curators. It holds for every curator, including one that picks its errors to fool this attacker. A specific curator can be much weaker than the bound suggests. One that rounds every answer to a multiple of 4 has error at most 2, but its rounding is a known function of the true sum, and an attacker who simulates the rounding on each candidate recovers $d$ exactly ([Exercise 1](../../book-exercises/part02-attacks/09-reconstruction.md#sec-sol-recon-1)).
-
-### Example: ten people, all 1024 subsets
-
-The script draws $d = (1, 1, 1, 0, 0, 0, 0, 0, 0, 1)$, with four ones, and checks all $2^{10}$ candidates against all $2^{10}$ subsets. It needs a test for whether a candidate $c$ can be made consistent by *some* curator with error at most $E$. The tightness argument gives it: if every subset sum of $c - d$ is at most $2E$ in absolute value, the midpoint curator has error at most $E$ and keeps $c$; if some subset sum of $c - d$ exceeds $2E$, no single answer can be within $E$ of both $c$'s sum and $d$'s, so no curator keeps $c$. The script counts the candidates that pass the test (@tbl-recon-exp).
+::: {#exm-recon-exponential}
+For a hospital of ten patients, $d = (1, 1, 1, 0, 0, 0, 0, 0, 0, 1)$, the script checks all 1024 candidates against all 1024 subsets. By the midpoint construction, some curator with error at most $E$ makes $c$ consistent exactly when every subset sum of $c - d$ is at most $2E$ in absolute value (@tbl-recon-exp).
 
 | Error $E$ | 0 | 0.5 | 1 | 1.5 | 2 |
 | --- | --- | --- | --- | --- | --- |
@@ -110,143 +60,158 @@ The script draws $d = (1, 1, 1, 0, 0, 0, 0, 0, 0, 1)$, with four ones, and check
 
 : The exponential attack on $n = 10$ bits. Every surviving candidate is within $4E$ of $d$, and the bound is attained. {#tbl-recon-exp}
 
-The bound is attained at every $E$, as the tightness argument predicts: that argument needs $\lfloor 2E\rfloor$ ones and $\lfloor 2E\rfloor$ zeros to flip, at most 4 of each here, and $d$ has four ones and six zeros. At $E = 2$, 912 of the 1024 candidates survive, so the attacker learns little: the bound $4E = 8$ is close to $n = 10$, and a guarantee of at most 8 wrong bits out of 10 says almost nothing. @fig-recon-exponential draws both rows over a finer grid of $E$, for another random database of ten bits, so its counts can differ from those of @tbl-recon-exp.
+The bound is attained at every $E$, as @prp-recon-exp-tight predicts. At $E = 2$, 912 candidates survive, and at most 8 wrong bits out of 10 says almost nothing. @fig-recon-exponential draws both rows over a finer grid of $E$, for another random database.
+:::
 
-![The exponential attack on ten bits. Left: the largest Hamming distance between the true database and a candidate that some curator with error $E$ can make consistent with all 1024 subset sums, against the bound $4E$. Right: the number of surviving candidates (log scale); at $E = 0$ only $d$ survives.](figures/recon_exponential.svg){#fig-recon-exponential}
-
-### Check yourself
-
-- Why does the derivation not need the curator's errors to be random? *(It only uses $|e_S| \le E$ for the two subsets $S_0$ and $S_1$. The errors can be chosen by an adversarial curator, even after seeing the attacker's candidate.)*
-- With $n = 10^6$ people and every subset sum answered with error at most 1000, how many bits can the attacker get wrong? *(At most $4E = 4000$, or 0.4% of the bits, although each answer has error up to 1000.)*
+![The exponential attack on ten bits. Left: the largest distance from $d$ of a candidate that some curator with error $E$ makes consistent, against $4E$. Right: the number of surviving candidates (log scale).](figures/recon_exponential.svg){#fig-recon-exponential}
 
 ## The linear-programming decoder {#sec-recon-lp}
 
-### Context
+Asking $2^n$ questions is not realistic. Dinur and Nissim showed that about $n\ln n$ random subsets suffice, with an efficient decoder. How large may the error then be? The answer is $o(\sqrt n)$ instead of $o(n)$, because a random subset cannot aim at the wrong bits. If a candidate differs from $d$ in $k$ places, a random subset picks up each with probability $\frac12$, so the change in its answer is a sum of about $k$ random terms, which fluctuates by about $\sqrt k$, not $k$.
 
-Asking $2^n$ questions is not realistic. Dinur and Nissim showed that a number of *random* subsets only a polylogarithmic factor above $n$ suffices, with an efficient decoder: their proof asks $n(\ln n)^2$ of them, and the version proved below needs $O(n\log n)$. Instead of checking every bit vector, the decoder lets each unknown be any number between 0 and 1, finds a fractional vector consistent with the answers by linear programming (LP), and rounds it. A linear program finds a point that satisfies a list of linear inequalities, and it can be solved in time polynomial in the number of unknowns and inequalities.
+The decoder relaxes each bit to the interval $[0, 1]$. That turns the search for a consistent candidate into a **linear program**, a search for a point that satisfies a list of linear inequalities, which linear programming (LP) solves in polynomial time.
 
-The price is that the error must now be $o(\sqrt n)$ instead of $o(n)$, and the reason is that a random query cannot aim at the wrong coordinates. Suppose a candidate differs from $d$ by a vector with $k$ entries of constant size. A random subset picks up each of those entries with probability $\frac12$, so its sum of the difference behaves like a sum of $k$ coin-flip terms, which fluctuates by about $\sqrt k$, not $k$. An error below $\sqrt k$ cannot hide that fluctuation. The key step is to show that the sum does fluctuate this much with constant probability, whatever the signs of the entries, and that is where the anti-concentration of Fact 3 comes in.
+::: {#def-recon-lp name="Linear-programming decoder"}
+Given the answers $a$ to $m$ queries $f_1, \dots, f_m$ and the error bound $E$, the **linear-programming decoder** finds some $c$ with
+$$c \in [0, 1]^n \quad\text{and}\quad \big|\langle f_j, c\rangle - a_j\big| \le E \text{ for } j = 1, \dots, m,$$
+and rounds each $c_i$ to the nearest bit.
+:::
 
-### Statement
+The true $d$ is a solution, and the theorem below shows that no solution has many wrong bits. Its key step needs one random query to catch any difference vector with many large coordinates, by moving its answer far from 0 with constant probability. That is an **anti-concentration** statement, a lower bound on how often a variable is not close to zero. The proof applies an inequality about the squared answer, which needs the squared answer's second moment, the answer's fourth moment, to be small.
 
-Let the $m$ queries be independent uniformly random subsets (each person included with probability $\frac12$). The true $d$ satisfies every answer to within $E$, so the set of vectors that do so is not empty. The **linear-programming decoder** searches that set, after relaxing each bit to the interval $[0, 1]$ so that the search becomes a linear program. It solves the feasibility problem
-$$\text{find } c \in [0, 1]^n \text{ with } \big|\langle f_j, c\rangle - a_j\big| \le E \text{ for } j = 1, \dots, m,$$
-which is a linear program: each absolute value is two linear inequalities, which makes $2m$ of them, and each $0 \le c_i \le 1$ is a box constraint, one per person. The decoder then rounds each $c_i$ to the nearest bit.
+So it needs one fact about sums of random signs. Take independent fair signs $s_i$, each $+1$ or $-1$ with probability $\frac12$, and fixed weights $w_i$. The sum $X = \sum_is_iw_i$ has odd moments 0, because flipping every sign leaves its distribution unchanged. Its fourth moment is at most 3 times its squared second moment, as for a normal variable:
+$$\mathbb E[X^2] = \sum_iw_i^2, \qquad \mathbb E[X^4] \le 3\,\mathbb E[X^2]^2.$$ {#eq-recon-fourth}
+[Exercise 3](../../book-exercises/part02-attacks/09-reconstruction.md#sec-sol-recon-3) proves the exact value $3(\sum_iw_i^2)^2 - 2\sum_iw_i^4$ by counting which products of signs survive the expectation.
 
-The analysis rests on one lemma about a single random query. Think of $z$ as the difference between a bad candidate and $d$. If $z$ has many coordinates of at least a constant size (here $\frac13$, the size left after a rounding step in the proof), then a random subset sum of $z$ lands far from 0 with probability at least a constant, whatever the signs of the coordinates. "Far" means on the scale $\sqrt{\gamma n}$, the square root of the number of large coordinates, as the coin-flip picture above predicts.
+Markov's inequality (@thm-conc-markov) says that a variable that cannot be negative is rarely far *above* its mean, and the attack needs the opposite. A variable that is 0 most of the time and huge once in a while is often far below its mean. But its second moment is then enormous next to its squared mean, and the next lemma shows that a small ratio of the two is all that can go wrong.
 
-**Lemma (one random query catches a bad difference).** Let $z \in \mathbb R^n$ have at least $\gamma n$ coordinates with $|z_i| \ge \frac13$, and let $f$ be a uniformly random subset. Then
+::: {#lem-recon-pz name="Paley–Zygmund inequality"}
+Let $W \ge 0$ be a random variable with finite second moment, and let $0 \le \lambda < 1$. Then
+$$\Pr\big[W > \lambda\,\mathbb E[W]\big] \ge (1 - \lambda)^2\frac{\mathbb E[W]^2}{\mathbb E[W^2]}.$$ {#eq-recon-pz}
+:::
+
+::: {.proof}
+The plan is to split the mean of $W$ between the event and its complement, and to bound the part on the event with Cauchy–Schwarz.
+
+1. *Split the mean.* Write $B$ for the event $W > \lambda\,\mathbb E[W]$. Then $\mathbb E[W]$ is the sum of $\mathbb E\big[W\mathbf 1[B^c]\big]$ and $\mathbb E\big[W\mathbf 1[B]\big]$.
+2. *Bound the complement.* On the complement $W \le \lambda\,\mathbb E[W]$, so the first part is at most $\lambda\,\mathbb E[W]$.
+3. *Bound the event.* The Cauchy–Schwarz inequality $\mathbb E[UV] \le \sqrt{\mathbb E[U^2]\,\mathbb E[V^2]}$, with $U = W$ and $V = \mathbf 1[B]$, whose square has mean $\Pr[B]$, gives
+$$\mathbb E\big[W\mathbf 1[B]\big] \le \sqrt{\mathbb E[W^2]\Pr[B]}.$$
+4. *Solve for the probability.* Steps 1 to 3 give $(1 - \lambda)\mathbb E[W] \le \sqrt{\mathbb E[W^2]\Pr[B]}$. Squaring and dividing by $\mathbb E[W^2]$ gives @eq-recon-pz.
+:::
+
+Now comes the lemma the theorem uses. Think of $z$ as the difference between a bad candidate and $d$, with large coordinates of size at least $\frac13$, the size left after a rounding step in the theorem's proof.
+
+::: {#lem-recon-anti name="One random query catches a bad difference"}
+Let $z \in \mathbb R^n$ have at least $\gamma n$ coordinates with $|z_i| \ge \frac13$, for a fraction $\gamma$, and let $f$ be a uniformly random subset, which includes each person independently with probability $\frac12$. Then
 $$\Pr\left[|\langle f, z\rangle| > \frac{\sqrt{\gamma n}}{12}\right] \ge \frac{3}{16}.$$ {#eq-recon-anti}
+:::
 
-The theorem turns this into a guarantee for the decoder. A bad candidate survives the linear program only if every one of the $m$ queries fails to catch it. Each query catches it with probability at least $\frac3{16}$, so it survives all $m$ independent queries with probability at most $(13/16)^m$, which shrinks exponentially in $m$. There are many bad candidates, but after rounding them to a grid there are only finitely many, about $(n + 1)^n$. Taking $m$ large enough that $(n + 1)^n(13/16)^m$ falls below a chosen failure probability $\beta$ makes every bad candidate fail at once.
+::: {.proof}
+The plan is to apply @lem-recon-pz to the squared answer, with @eq-recon-fourth supplying its moments, and then to let the large coordinates set the scale. Write $Y = \langle f, z\rangle$ for the answer, and write the random subset as $f_i = (1 + s_i)/2$ with independent fair signs $s_i$.
 
-**Theorem (Dinur–Nissim, in the form proved here).** Fix $d$, $\gamma$ and a failure probability $\beta$. If the curator's error is at most $E$ with $2E + \frac12 \le \sqrt{\gamma n}/12$, and
-$$m \ge \frac{n\ln(n + 1) + \ln(1/\beta)}{\ln(16/13)},$$ {#eq-recon-lp}
-then with probability at least $1 - \beta$ over the queries, every solution of the linear program rounds to a vector with at most $\gamma n$ wrong bits, whatever errors the curator chose.
+1. *Split the sum into a constant and a random-sign part.* $Y = \mu + X$, with the constant $\mu = \frac12\sum_iz_i$ and the random-sign sum $X = \sum_is_iz_i/2$, whose weights are $w_i = z_i/2$.
+2. *Compute the second moment.* $X$ has mean 0, and by @eq-recon-fourth its variance, written $\tau^2$, is $\frac14\sum_iz_i^2$. The cross term $2\mu X$ has mean 0, so $\mathbb E[Y^2] = \mu^2 + \tau^2$.
+3. *Bound the fourth moment.* In the expansion of $(\mu + X)^4$ the terms with $\mathbb E[X]$ and $\mathbb E[X^3]$ vanish, and @eq-recon-fourth gives $\mathbb E[X^4] \le 3\tau^4$, which leaves $\mu^4 + 6\mu^2\tau^2 + 3\tau^4$. Adding $2\mu^4$ completes the square, so
+$$\mathbb E[Y^4] \le 3(\mu^2 + \tau^2)^2.$$
+4. *Apply Paley–Zygmund.* Step 3 makes the ratio $\mathbb E[Y^2]^2/\mathbb E[Y^4]$ at least $\frac13$, so @eq-recon-pz with $W = Y^2$ gives
+$$\Pr\big[Y^2 > \lambda(\mu^2 + \tau^2)\big] \ge \frac{(1 - \lambda)^2}{3}.$$
+5. *Drop the mean.* Since $\mu^2 + \tau^2 \ge \tau^2$, the event of step 4 implies $|Y| > \sqrt\lambda\,\tau$, which therefore has the same lower bound. A non-zero mean only helps, because it pushes $Y$ away from 0.
+6. *Use the large coordinates.* At least $\gamma n$ coordinates have $z_i^2 \ge \frac19$, so $\tau^2 \ge \gamma n/36$ and $\tau \ge \sqrt{\gamma n}/6$.
+7. *Choose $\lambda = \frac14$.* Then $\sqrt\lambda\,\tau \ge \sqrt{\gamma n}/12$, and the probability is at least $(3/4)^2/3 = 3/16$, which is @eq-recon-anti.
+:::
 
-In words: error $o(\sqrt n)$ on $O(n\log n)$ random subset sums lets the attacker recover all but $o(n)$ bits in polynomial time.
+A candidate with more than $\gamma n$ wrong bits survives the decoder only if all $m$ independent queries fail to catch it, which has probability at most $(13/16)^m$. Rounding the fractional candidates to a grid leaves finitely many, and the union bound handles them all at once.
 
-### Derivation
+::: {#thm-recon-lp name="Dinur–Nissim, in the form proved here"}
+Fix $d$, a fraction $\gamma$ and a failure probability $\beta$, let $n \ge 3$, and let the $m$ queries be independent uniformly random subsets. Suppose the curator's error is at most $E$, with $2E + \frac12 \le \sqrt{\gamma n}/12$, and
+$$m \ge \frac{n\ln(n + 1) + \ln(1/\beta)}{\ln(16/13)}.$$ {#eq-recon-lp}
+Then with probability at least $1 - \beta$ over the queries, every solution of the linear program rounds to a vector with at most $\gamma n$ wrong bits, whatever errors the curator chose.
+:::
 
-**The lemma.** The plan is to apply Paley–Zygmund (@eq-recon-pz) to $W = Y^2$, where $Y = \langle f, z\rangle$ is the random subset sum. That needs the second and fourth moments of $Y$, and Fact 2 provides them once $Y$ is written as a constant plus a random-sign sum. So write the random subset as $f_i = (1 + s_i)/2$ with independent fair signs $s_i$.
+::: {.proof}
+The plan is to show that a solution with many wrong bits gives a difference vector that every query fails to catch, and that with enough queries no such vector exists.
 
-1. **Split the sum into a constant and a random-sign part.** $Y = \langle f, z\rangle = \mu + X$, with the constant $\mu = \frac12\sum_iz_i$ and $X = \frac12\sum_is_iz_i$, a random-sign sum with coefficients $a_i = z_i/2$.
-2. **Compute the second moment.** By Fact 2, $\mathbb E X = 0$, and the variance of the random-sign part, written $\tau^2$ so that $\tau$ is its standard deviation, is $\tau^2 := \mathbb E X^2 = \sum_ia_i^2 = \frac14\sum_iz_i^2$. Expanding $(\mu + X)^2$, the cross term $2\mu\,\mathbb E X$ vanishes, so $\mathbb E Y^2 = \mu^2 + \tau^2$.
-3. **Bound the fourth moment by 3 times the squared second moment.** Expand $(\mu + X)^4 = \mu^4 + 4\mu^3X + 6\mu^2X^2 + 4\mu X^3 + X^4$. The terms with $\mathbb E X$ and $\mathbb E X^3$ vanish, since odd moments of a random-sign sum are 0. Fact 2 gives $\mathbb E X^4 \le 3(\sum_ia_i^2)^2 = \frac{3}{16}(\sum_iz_i^2)^2 = 3\tau^4$. So
-$$\mathbb E Y^4 = \mu^4 + 6\mu^2\tau^2 + \mathbb E X^4 \le \mu^4 + 6\mu^2\tau^2 + 3\tau^4 \le 3(\mu^2 + \tau^2)^2,$$
-where the last step holds because $3(\mu^2 + \tau^2)^2 = 3\mu^4 + 6\mu^2\tau^2 + 3\tau^4$ is larger by $2\mu^4 \ge 0$.
-4. **Apply Paley–Zygmund** (@eq-recon-pz) with $W = Y^2$, whose mean is $\mu^2 + \tau^2$. Step 3 says $(\mathbb E Y^2)^2/\mathbb E Y^4 \ge \frac13$, so $\Pr[Y^2 > \lambda(\mu^2 + \tau^2)] \ge (1 - \lambda)^2(\mathbb E Y^2)^2/\mathbb E Y^4 \ge (1 - \lambda)^2/3$.
-5. **Drop the mean.** Since $\mu^2 + \tau^2 \ge \tau^2$, the event $Y^2 > \lambda(\mu^2 + \tau^2)$ implies $Y^2 > \lambda\tau^2$, that is $|Y| > \sqrt\lambda\,\tau$. So $\Pr[|Y| > \sqrt\lambda\,\tau] \ge (1 - \lambda)^2/3$. A non-zero mean only helps: it pushes $Y$ away from 0.
-6. **Use the large coordinates to bound $\tau$ from below.** At least $\gamma n$ coordinates have $z_i^2 \ge \frac19$, and the others contribute $z_i^2 \ge 0$, so $\tau^2 = \frac14\sum_iz_i^2 \ge \frac14\cdot\frac{\gamma n}{9}$ and $\tau \ge \sqrt{\gamma n}/6$.
-7. **Choose $\lambda = \frac14$.** Then $\sqrt\lambda\,\tau \ge \frac12\cdot\sqrt{\gamma n}/6 = \sqrt{\gamma n}/12$, and the probability is at least $(3/4)^2/3 = (9/16)/3 = 3/16$. This gives @eq-recon-anti.
+1. *Consistent candidates differ from $d$ by little on every query.* Both $c$ and $d$ are within $E$ of every answer, so by the triangle inequality $|\langle f_j, c - d\rangle| \le 2E$ for every query $j$.
+2. *A wrong bit is a large coordinate.* Rounding $c_i$ gives the wrong bit only if $|c_i - d_i| \ge \frac12$. So more than $\gamma n$ wrong bits means more than $\gamma n$ coordinates of $c - d$ of size at least $\frac12$.
+3. *Move to a finite set.* Round each $c_i$ to the nearest multiple of $1/n$, giving a grid point $c'$. A subset sum adds at most $n$ coordinates, each moved by at most $\frac1{2n}$, so it moves by at most $\frac12$, and $z' = c' - d$ has $|\langle f_j, z'\rangle| \le 2E + \frac12$ for every $j$. It still has more than $\gamma n$ coordinates of size at least $\frac12 - \frac1{2n}$, which is at least $\frac13$ because $n \ge 3$.
+4. *One grid point passes all queries only with small probability.* Fix a grid point whose $z'$ has more than $\gamma n$ large coordinates. By @lem-recon-anti, each query has $|\langle f_j, z'\rangle| > \sqrt{\gamma n}/12$ with probability at least $\frac3{16}$, and by the assumption on $E$ such a query violates step 3. The queries are independent, so $z'$ passes all $m$ of them with probability at most $(13/16)^m$.
+5. *Union bound over the grid.* There are at most $(n + 1)^n$ grid points, since each coordinate takes one of $n + 1$ values. The union bound (@lem-conc-union) says that the probability that one of several events happens is at most the sum of their probabilities. So some bad grid point passes every query with probability at most $(n + 1)^n(13/16)^m$, which is at most $\beta$ exactly when @eq-recon-lp holds.
+6. *Conclude.* Outside that event no bad grid point passes, so by step 3 no solution with more than $\gamma n$ wrong bits exists. The event depends only on the queries, so the guarantee holds for every curator at once.
+:::
 
-**The theorem.** The idea is to show that a solution with many wrong bits would give a difference vector that no random query catches, and that, with enough queries, no such vector exists.
+So error $o(\sqrt n)$ on $O(n\log n)$ random subset sums, at most a constant times $n\ln n$, lets the attacker recover all but $o(n)$ bits in polynomial time. The threshold is $\sqrt n$ because a random query fluctuates on the scale of step 6 of @lem-recon-anti. Step 5 of the lemma relies on the fluctuation alone, so it also covers the hard case of a balanced difference, whose positive and negative entries cancel in the mean (@fig-recon-anticoncentration).
 
-1. **Consistent candidates differ from $d$ by little on every query.** Both $c$ and $d$ are within $E$ of every answer, so by the triangle inequality $|\langle f_j, c - d\rangle| \le 2E$ for all $j$, as in the exponential attack.
-2. **A wrong bit is a large coordinate.** Rounding $c_i$ gives the wrong bit only if $c_i$ is on the far side of $\frac12$ from $d_i$, that is, if $|c_i - d_i| \ge \frac12$. So if the rounding has more than $\gamma n$ wrong bits, $z = c - d$ has more than $\gamma n$ coordinates of size at least $\frac12$.
-3. **Move to a finite set.** The linear program can return any point of the cube, and the union bound below needs a finite list of candidates. Round each $c_i$ to the nearest multiple of $1/n$, giving $c'$. Each coordinate moves by at most $\frac1{2n}$, and a subset sum adds at most $n$ coordinates, so $|\langle f, c - c'\rangle| \le n \cdot \frac{1}{2n} = \frac12$ for every subset $f$. Hence $z' = c' - d$ satisfies $|\langle f_j, z'\rangle| \le 2E + \frac12$ for all $j$, and still has more than $\gamma n$ coordinates of size at least $\frac12 - \frac1{2n} \ge \frac13$ (for $n \ge 3$, since $\frac12 - \frac16 = \frac13$).
-4. **One grid point survives all queries only with small probability.** Fix one grid point $c'$ whose $z'$ has more than $\gamma n$ large coordinates. By the lemma (@eq-recon-anti), each random query has $|\langle f_j, z'\rangle| > \sqrt{\gamma n}/12$ with probability at least $\frac3{16}$, and by the assumption $2E + \frac12 \le \sqrt{\gamma n}/12$ such a query violates the bound of step 3. So each query lets $z'$ pass with probability at most $1 - \frac3{16} = \frac{13}{16}$. The queries are independent, so $z'$ passes all $m$ of them with probability at most $(13/16)^m$.
-5. **Union bound over the grid.** The union bound ([Concentration inequalities](../part01-prerequisites/02-concentration.md), Fact 2) says that the probability that at least one of several events happens is at most the sum of their probabilities. Each coordinate of a grid point takes one of the $n + 1$ values $0, \frac1n, \dots, 1$, so there are at most $(n + 1)^n$ grid points, and the probability that *some* bad grid point passes every query is at most $(n + 1)^n(13/16)^m$. Taking logarithms, this is at most $\beta$ exactly when $n\ln(n + 1) - m\ln(16/13) \le \ln\beta$, that is, when $m\ln(16/13) \ge n\ln(n + 1) + \ln(1/\beta)$, which is @eq-recon-lp.
-6. **Conclude.** Outside that event, no bad grid point passes, so by step 3 no linear-program solution with more than $\gamma n$ wrong bits exists. The event depends only on the queries, not on the curator's errors, so the guarantee holds for every curator at once.
+The constants are poor, but the scaling is right, and sharper analyses need only $O(n)$ queries. A variant that minimizes the total absolute error $\|Ac - a\|_1$ tolerates a constant fraction of arbitrarily wrong answers (Dwork, McSherry and Talwar 2007).
 
-### Interpretation
+![A random subset sum of a difference vector with 100 entries of size $\frac13$ ($n = 1000$), over 20 000 random subsets, against the lemma's band $\pm0.83$ (red). Left: half the entries positive and half negative. Right: all entries positive.](figures/recon_anticoncentration.svg){#fig-recon-anticoncentration}
 
-The threshold is $\sqrt n$ because a random query cannot aim at the wrong coordinates. Its inner product with a difference vector that has $k$ coordinates of constant size fluctuates on the scale $\sqrt k$, as step 2 of the lemma computes. An error below that scale cannot hide $k = \gamma n$ wrong bits. An error of order $\sqrt n$ can, and @sec-recon-law constructs a curator that does.
+::: {#exm-recon-lp}
+Take a hospital of $n = 1000$ patients and target $\gamma = 0.1$, at most 100 wrong bits. The lemma's threshold is $\sqrt{100}/12 = 0.8333$. Over 100 000 random subsets, the answer leaves that band with probability 0.6161 for the balanced vector and 1.0000 for the aligned one, against the guaranteed 0.1875.
 
-Among difference vectors, the balanced ones are the hard case. If the wrong coordinates of $z$ all have the same sign, $\langle f, z\rangle$ has a large mean and escapes any small band almost surely. If they cancel, the mean is near 0 and only the fluctuation helps. Step 5 of the lemma covers both cases, because it drops the mean and relies on the fluctuation alone. @fig-recon-anticoncentration shows the two cases.
-
-The constants are poor, but the scaling is right. The theorem asks for $E$ below about $\sqrt{\gamma n}/24$, which is what $2E + \frac12 \le \sqrt{\gamma n}/12$ gives after dividing by 2, and for $m \approx 33n$ at $n = 1000$ (the example below). The union bound over $(n + 1)^n$ grid points costs the $\ln(n + 1)$ factor. Sharper analyses need only $m = O(n)$ queries. Dwork, McSherry and Talwar (2007) go further with a variant of the decoder: instead of requiring every answer to be within $E$, which a single wildly wrong answer makes impossible, it minimizes the total absolute error $\| Ac - a\|_1$, and it tolerates a constant fraction of answers with arbitrarily large error. In practice, the least-squares decoder of the next section with $m = 4n$ already works at errors of about $0.2\sqrt n$.
-
-Random queries are not essential either. Dinur and Nissim's queries were random to make the proof work, and real attacks use whatever queries the system answers. Cohen and Nissim (2020) ran a linear-programming reconstruction against Diffix, a commercial query system built to resist exactly this attack, and recovered every secret bit they targeted. @sec-recon-diffix replays their attack.
-
-![A random subset sum of a difference vector $z$ with $\gamma n = 100$ entries of size $\frac13$ ($n = 1000$), over 20 000 random subsets, against the band $|\langle f, z\rangle| \le \sqrt{\gamma n}/12 = 0.83$ (red). Left: half the entries $+\frac13$ and half $-\frac13$, so the sum is centred at 0, yet it still leaves the band most of the time. Right: all entries $+\frac13$, so the sum is centred far from the band. The lemma guarantees at least $\frac3{16} = 0.1875$ in both cases.](figures/recon_anticoncentration.svg){#fig-recon-anticoncentration}
-
-### Example: what the theorem promises at $n = 1000$
-
-Take $n = 1000$ people and target $\gamma = 0.1$, so at most $0.1 \times 1000 = 100$ wrong bits. The lemma's threshold is $\sqrt{\gamma n}/12 = \sqrt{100}/12 = 0.8333$. The script estimates the escape probability, the chance that a random subset sum lands outside the band $\pm0.8333$, over 100 000 random subsets for the two difference vectors of @fig-recon-anticoncentration: 0.6161 for the balanced one and 1.0000 for the aligned one, against the guaranteed 0.1875. The lemma is far from tight for both.
-
-The theorem's condition $2E + \frac12 \le \sqrt{\gamma n}/12$ then allows an error of $E \le \sqrt{\gamma n}/24 - \frac14 = 0.4167 - 0.25 = 0.1667$. With failure probability $\beta = 0.01$, so that $\ln(1/\beta) = \ln 100$, @eq-recon-lp asks for
+The theorem's condition allows $E \le \sqrt{\gamma n}/24 - \frac14 = 0.1667$. With $\beta = 0.01$, @eq-recon-lp asks for
 $$m \ge \frac{1000\ln1001 + \ln100}{\ln(16/13)} = 33\,295.04,$$
-so at least 33 296 queries, about $33n$. Both constants are far from what the attack needs in practice, but they come with a complete proof.
-
-### Check yourself
-
-- Why does the derivation round the linear program's solution to a grid before using the union bound? *(The solution can be any point in the cube, an infinite set. The union bound needs a finite list of candidates; the grid of step $1/n$ has $(n + 1)^n$ points and moves every answer by at most $\frac12$.)*
-- If the curator could see the queries before choosing $d$, would the theorem still hold? *(The proof fixes $d$ before the queries. With $d$ chosen after the queries, add a union bound over the $2^n$ databases: the count of bad grid points grows to at most $2^n(n + 1)^n$, which only adds $n\ln2$ to the numerator of @eq-recon-lp.)*
+so at least 33 296 queries, about $33n$, while the least-squares decoder of the next section works with $4n$.
+:::
 
 ## Least squares under worst-case and random error {#sec-recon-ls}
 
-### Context
+The linear program needs a solver and a value of $E$. This section analyses least squares, which needs neither, on the running example. Its estimate is linear in the answers, so its error is linear in the curator's, and you can analyse it exactly against adversarial errors and against random noise.
 
-The linear program needs a solver and a value of $E$. A simpler decoder needs neither. **Least squares** picks the vector whose answers come closest to the published ones, measured by the sum of squared differences, $\hat x = \arg\min_x\|Ax - a\|^2$. Setting the gradient $2A^\top(Ax - a)$ to zero gives the closed form $\hat x = (A^\top A)^{-1}A^\top a$. The decoder clips each coordinate to $[0, 1]$ and rounds it. Because $\hat x$ is a linear function of the answers, its error is a linear function of the curator's error, so you can analyse it exactly in two cases: errors chosen by an adversary, and independent random noise.
+::: {#def-recon-ls name="Least-squares decoder"}
+Let $m \ge n$ and let $A$ have full column rank. The **least-squares decoder** picks the vector whose answers come closest to the published ones in squared distance,
+$$\hat x = \arg\min_x\|Ax - a\|^2 = (A^\top A)^{-1}A^\top a,$$
+then clips each coordinate to $[0, 1]$ and rounds it to the nearest bit.
+:::
 
-### Statement
+How much the decoder amplifies the curator's error depends on how much $A$ can shrink a vector. The **smallest singular value** $s_{\min}(A)$ is the smallest length $\|Ax\|$ over unit vectors $x$. Undoing $A$ stretches a vector by at most $1/s_{\min}(A)$, and each wrong bit uses up at least $\frac14$ of the squared length of the decoder's error.
 
-How much least squares amplifies the curator's error depends on how much $A$ can shrink a vector. The **smallest singular value** $s_{\min}(A)$ is the smallest length $\|Ax\|$ over unit vectors $x$: the factor by which $A$ shrinks the direction it shrinks most. Assume $m \ge n$ and that $A$ has full column rank, so that $s_{\min}(A) > 0$.
-
-**Worst-case error.** The decoder's error vector has length at most $\|e\|/s_{\min}(A)$, because undoing $A$ can stretch a vector by at most $1/s_{\min}$. Each wrong bit is off by at least $\frac12$, so it uses up at least $\frac14$ of the squared length. If $|e_j| \le E$ for every $j$, so that $\|e\|^2 \le mE^2$, the least-squares decoder therefore gets at most
+::: {#prp-recon-ls-worst name="Least squares under worst-case error"}
+If the curator's error is at most $E$ on each of the $m$ queries, the least-squares decoder gets at most
 $$\frac{4\|e\|^2}{s_{\min}(A)^2} \le \frac{4mE^2}{s_{\min}(A)^2}$$ {#eq-recon-ls-worst}
-bits wrong. For random subsets, $s_{\min}(A) \approx \frac12(\sqrt m - \sqrt n)$, so $s_{\min}^2 \approx \frac m4(1 - \sqrt{n/m})^2$ and the bound becomes $16E^2/(1 - \sqrt{n/m})^2$; at $m = 4n$, $1 - \sqrt{1/4} = \frac12$ and it is $64E^2$. So, if the cited asymptotics already hold at this size (the script checks them), error $E = o(\sqrt n)$ gives $o(n)$ wrong bits with only $m = 4n$ queries. @sec-apx-mat-smin in the appendices proves a version with worse constants: $s_{\min}(A) \ge \sqrt m/14$ once $m$ is of order $n\ln n$, so at most $784E^2$ bits are wrong with $m = O(n\log n)$ queries.
+bits wrong.
+:::
 
-**Random error.** Now let the curator's errors be independent $\mathcal N(0, \sigma^2)$, normal with mean 0 and standard deviation $\sigma$. Each coordinate of the decoder's error is then also normal, and, as the derivation shows, its variance is about $\frac{4\sigma^2}{m - n}$: the noise $\sigma^2$ divided by roughly the number of equations beyond the $n$ needed to determine $d$, times 4 because a random query includes each person only half the time. A bit is recovered when its error does not push it across $\frac12$. Write $\Phi$ for the standard normal cumulative distribution function, so $\Phi(t)$ is the probability that a standard normal variable is below $t$. Each coordinate of $\hat x - d$ is approximately $\mathcal N\big(0, \frac{4\sigma^2}{m - n}\big)$, and the expected fraction of bits recovered is approximately
+::: {.proof}
+The plan is to bound the length of the decoder's error, then count how many coordinates it can push past $\frac12$.
+
+1. *The decoder's error is linear in the curator's.* Substituting $a = Ad + e$ gives $\hat x = d + A^+e$, with the pseudo-inverse $A^+ = (A^\top A)^{-1}A^\top$.
+2. *Bound its size.* In the singular value decomposition $A = U\,\mathrm{diag}(s_1, \dots, s_n)\,V^\top$, with orthonormal columns in $U$ and $V$, the pseudo-inverse is $V\,\mathrm{diag}(1/s_1, \dots, 1/s_n)\,U^\top$. Its largest singular value is $1/s_{\min}(A)$, so $\|\hat x - d\| \le \|e\|/s_{\min}(A)$.
+3. *Clipping only helps.* Each $d_i$ lies in $[0, 1]$, so moving $\hat x_i$ to the nearest point of $[0, 1]$ cannot move it away from $d_i$.
+4. *Count the wrong bits.* A wrong bit has $|\hat x_i - d_i| \ge \frac12$, so it contributes at least $\frac14$ to $\|\hat x - d\|^2$. There are therefore at most $4\|e\|^2/s_{\min}(A)^2$ of them, and $\|e\|^2 \le mE^2$.
+:::
+
+The bound is useful only if $s_{\min}(A)$ is of order $\sqrt m$, so that $m$ cancels. For random rows, $s_{\min}$ concentrates near $\sqrt m - \sqrt n$ times the scale of the rows (Vershynin 2018, ch. 4), which suggests $s_{\min}(A) \approx \frac12(\sqrt m - \sqrt n)$ for random subsets, and the example checks it. Appendix @sec-apx-mat-smin proves $s_{\min}(A) \ge \sqrt m/14$ once $m$ is of order $n\ln n$, which gives at most $784E^2$ wrong bits, so error $o(\sqrt n)$ leaves $o(n)$ wrong bits.
+
+Now let the errors be independent $\mathcal N(0, \sigma^2)$ instead, normal with standard deviation $\sigma$. The decoder's error is then normal, with variance per coordinate about $\sigma^2$ divided by the number $m - n$ of equations beyond the $n$ needed, times 4 because one person's membership in a random query has variance only $\frac14$. The exact constant needs the average inverse of $A^\top A$. For $m$ independent normal rows with covariance $\Sigma$, the sum $A^\top A$ is a **Wishart matrix**, and its inverse has mean $\Sigma^{-1}/(m - n - 1)$ (Muirhead 1982, ch. 3). Appendix @sec-apx-mat-wishart derives this and finds 0/1 rows within about 3% of it, so the next result assumes it.
+
+::: {#prp-recon-ls-random name="Least squares under random noise"}
+Let the $m$ queries be uniformly random subsets and the errors independent $\mathcal N(0, \sigma^2)$. Suppose that $(A^\top A)^{-1}$ has the mean it would have for normal rows with the same second moments. Then each coordinate of $\hat x - d$ is approximately $\mathcal N\big(0, \frac{4\sigma^2}{m - n}\big)$, and with $\Phi$ the standard normal cumulative distribution function, the expected fraction of bits recovered is approximately
 $$\Phi\left(\frac{\sqrt{m - n}}{4\sigma}\right).$$ {#eq-recon-ls-random}
-The argument of $\Phi$ is the distance $\frac12$ to the wrong side, measured in standard deviations $2\sigma/\sqrt{m - n}$.
+:::
 
-### Derivation
+::: {.proof}
+The plan is to find the variance of each coordinate of $\hat x - d$, then to ask how often that normal error crosses $\frac12$.
 
-**Worst case.**
+1. *The error is normal.* Given $A$, the error $A^+e$ is a linear map of a normal vector, so it is normal. A linear map $G$ turns covariance $\sigma^2I$ into $\sigma^2GG^\top$, so the covariance is $\sigma^2A^+(A^+)^\top = \sigma^2(A^\top A)^{-1}$.
+2. *Compute the average Gram matrix.* $A^\top A$ is the sum of $f_jf_j^\top$ over the queries. For a random subset, $f_i^2 = f_i$ has mean $\frac12$, and two different memberships are independent, so $\mathbb E[f_if_k] = \frac14$ for $i \ne k$. Hence
+$$\mathbb E[A^\top A] = \frac m4(I + \mathbf 1\mathbf 1^\top).$$
+3. *Invert it.* Multiplying out shows that $(I + \mathbf 1\mathbf 1^\top)^{-1} = I - \frac{1}{n + 1}\mathbf 1\mathbf 1^\top$ ([Exercise 4](../../book-exercises/part02-attacks/09-reconstruction.md#sec-sol-recon-4)). Its diagonal is $\frac{n}{n + 1} \approx 1$, so the mean of $A^\top A$ alone would give a variance of about $4\sigma^2/m$.
+4. *Correct for finite $m$.* The inverse of a fluctuating matrix is on average larger than the inverse of its mean, as $\mathbb E[1/Z] \ge 1/\mathbb E[Z]$ for a positive number $Z$. The hypothesis, with $\Sigma = \mathbb E[ff^\top]$, replaces $m$ by $m - n - 1$, so the variance is
+$$4\sigma^2\cdot\frac{n}{n + 1}\cdot\frac{1}{m - n - 1} \approx \frac{4\sigma^2}{m - n}.$$
+5. *Find when a bit goes wrong.* A 0 rounds to 1 when its error exceeds $\frac12$, and a 1 rounds to 0 when its error is below $-\frac12$, so only one tail counts. The error has standard deviation $2\sigma/\sqrt{m - n}$, so a bit goes wrong with probability $\Phi\big(-\sqrt{m - n}/(4\sigma)\big)$. The symmetry $1 - \Phi(-t) = \Phi(t)$ gives @eq-recon-ls-random.
+:::
 
-1. **The decoder's error is linear in the curator's.** Substituting $a = Ad + e$, $\hat x = (A^\top A)^{-1}A^\top(Ad + e) = d + A^+e$, with $A^+ = (A^\top A)^{-1}A^\top$ the pseudo-inverse. The $d$ comes back exactly, because $(A^\top A)^{-1}A^\top A = I$.
-2. **Bound its size.** Write $A$ in its singular value decomposition, $A = U\,\mathrm{diag}(s_1, \dots, s_n)\,V^\top$ with $U$ and $V$ having orthonormal columns. Then $A^+ = V\,\mathrm{diag}(1/s_1, \dots, 1/s_n)\,U^\top$, whose largest singular value is $1/s_{\min}(A)$. So $\|\hat x - d\| = \|A^+e\| \le \|e\|/s_{\min}(A)$.
-3. **Clipping only helps.** Each $d_i$ is in $[0, 1]$, and moving $\hat x_i$ to the nearest point of $[0, 1]$ cannot move it away from $d_i$.
-4. **Count the wrong bits.** A wrong bit has $|\hat x_i - d_i| \ge \frac12$, so it contributes at least $\frac14$ to $\|\hat x - d\|^2$. Hence the number of wrong bits is at most $4\|\hat x - d\|^2 \le 4\|e\|^2/s_{\min}^2$, and $\|e\|^2 \le mE^2$ because each of the $m$ errors is at most $E$ in size. This is @eq-recon-ls-worst.
-5. **Estimate the singular value.** For a random matrix with $m$ independent rows, $s_{\min}$ concentrates near $\sqrt m - \sqrt n$ times the scale of the rows (Vershynin, *High-Dimensional Probability*, ch. 4, for the general statement). @sec-apx-mat-smin in the appendices proves a constant-factor version for random subsets. Here the rows are $\frac12(\mathbf 1 + s)$ with a random-sign vector $s$. The all-ones part sends every vector orthogonal to $\mathbf 1$ to 0, so on those directions $A$ acts as $\frac12$ times a random-sign matrix, which gives the approximation $\frac12(\sqrt m - \sqrt n)$. The script checks it: at $n = 500$, $m = 2000$, $s_{\min} = 11.43$ against $\frac12(\sqrt{2000} - \sqrt{500}) = \frac12(44.72 - 22.36) = 11.18$. Substituting gives $4mE^2/\big(\frac14(\sqrt m - \sqrt n)^2\big) = 16E^2/(1 - \sqrt{n/m})^2$.
+With $m$ a fixed multiple of $n$, the prediction depends only on $\sigma/\sqrt n$ (@fig-recon-ls-noise). Noise of order $\sqrt n$ is not automatically safe, since at $\sigma = 0.25\sqrt n$ and $m = 4n$ least squares recovers about 96% of the bits. At a fixed $\sigma$, more queries average the noise away, so to hold the attack at a fixed accuracy the noise must grow like $\sqrt m$ (@fig-recon-ls-queries).
 
-**Random noise.** The plan is to find the variance of each coordinate of $\hat x - d$, then ask how often that normal error crosses $\frac12$.
+Worst-case errors hurt more than random ones of the same size, because a curator can push every answer along the direction that least squares amplifies most. The bound @eq-recon-ls-worst is loose by more than a factor of 10 in @exm-recon-ls, but it is the only statement that holds for every curator.
 
-1. **The error is Gaussian.** $\hat x - d = A^+e$ is a linear map of a Gaussian vector, so given $A$ it is Gaussian. A linear map $G$ turns covariance $\sigma^2I$ into $\sigma^2GG^\top$, so its covariance is $\sigma^2A^+(A^+)^\top = \sigma^2(A^\top A)^{-1}A^\top A(A^\top A)^{-1} = \sigma^2(A^\top A)^{-1}$.
-2. **Compute the average Gram matrix.** $A^\top A = \sum_jq_jq_j^\top$ is a sum over the $m$ queries. For a random subset $f$, $f_i^2 = f_i$ because $f_i$ is 0 or 1, so $\mathbb E f_i^2 = \frac12$; and for $i \ne k$ the two memberships are independent, so $\mathbb E f_iq_k = \frac14$. Hence $\mathbb E[qq^\top] = \frac14(I + \mathbf 1\mathbf 1^\top)$ and $\mathbb E[A^\top A] = \frac m4(I + \mathbf 1\mathbf 1^\top)$.
-3. **Invert it.** $(I + \mathbf 1\mathbf 1^\top)^{-1} = I - \frac{1}{n + 1}\mathbf 1\mathbf 1^\top$. To check, multiply out and use $\mathbf 1^\top\mathbf 1 = n$: the product is $I + \mathbf 1\mathbf 1^\top - \frac{1}{n + 1}\mathbf 1\mathbf 1^\top - \frac{n}{n + 1}\mathbf 1\mathbf 1^\top = I$ ([Exercise 4](../../book-exercises/part02-attacks/09-reconstruction.md#sec-sol-recon-4)). Its diagonal is $1 - \frac1{n + 1} = \frac{n}{n + 1} \approx 1$, so replacing $A^\top A$ by its mean gives a per-coordinate variance of about $\sigma^2 \cdot \frac4m = 4\sigma^2/m$.
-4. **Correct for finite $m$.** $A^\top A$ fluctuates around its mean, and the inverse of a fluctuating matrix is on average larger than the inverse of its mean, just as $\mathbb E[1/Z] \ge 1/\mathbb E Z$ for a positive number $Z$. For Gaussian rows the exact mean is known. A sum of outer products of $m$ independent Gaussian rows with covariance $\Sigma$ is called a Wishart matrix, and if $A^\top A$ is Wishart with $m$ rows and scale $\Sigma$, then $\mathbb E[(A^\top A)^{-1}] = \Sigma^{-1}/(m - n - 1)$ (the inverse-Wishart mean; Muirhead 1982, ch. 3; @sec-apx-mat-wishart in the appendices derives it step by step and checks that 0/1 rows come within about 3% of it). Using it with $\Sigma = \mathbb E[qq^\top]$ replaces $m$ by $m - n - 1$: the variance is $4\sigma^2\frac{n}{n + 1}\cdot\frac{1}{m - n - 1} \approx \frac{4\sigma^2}{m - n}$. The rows here are 0/1, not Gaussian, so this is an approximation; the simulations below check it.
-5. **Find when a bit goes wrong.** A 0 rounds to 1 when its error exceeds $+\frac12$; a 1 rounds to 0 when its error is below $-\frac12$. Either way only one tail counts. The error has standard deviation $\frac{2\sigma}{\sqrt{m - n}}$, so the probability is $\Phi\big(-\frac12\big/\frac{2\sigma}{\sqrt{m - n}}\big) = \Phi\big(-\frac{\sqrt{m - n}}{4\sigma}\big)$. The fraction recovered is one minus that, which by the symmetry $1 - \Phi(-t) = \Phi(t)$ of the normal curve is @eq-recon-ls-random.
+![Fraction of bits recovered by least squares from $m = 4n$ noisy random subset sums, against the noise in units of $\sqrt n$, for three database sizes. The black curve is @eq-recon-ls-random, and the curves coincide.](figures/recon_ls_noise.svg){#fig-recon-ls-noise}
 
-### Interpretation
+![Fraction of bits recovered by least squares at $n = 200$ as the number of queries grows, for three noise levels. Lines are @eq-recon-ls-random; dots are simulations.](figures/recon_ls_queries.svg){#fig-recon-ls-queries}
 
-At a fixed ratio of queries to people, only $\sigma/\sqrt n$ matters. With $m = \kappa n$, $\sqrt{m - n} = \sqrt{\kappa - 1}\sqrt n$, so @eq-recon-ls-random is $\Phi\big(\sqrt{\kappa - 1}/(4\sigma/\sqrt n)\big)$. Plotted against $\sigma/\sqrt n$, the curves for $n = 100$, 300 and 900 fall on top of each other (@fig-recon-ls-noise). The scale of the threat is $\sqrt n$, as in the theorem.
-
-Noise of order $\sqrt n$ is not automatically safe. At $\sigma = 0.25\sqrt n$ and $m = 4n$, the argument of $\Phi$ is $\sqrt 3/(4 \times 0.25) = \sqrt3 \approx 1.73$, and least squares recovers about 96% of the bits. Recovery degrades smoothly as $\sigma/\sqrt n$ grows; it does not switch off at a threshold.
-
-More queries average independent noise away. At a fixed $\sigma$, @eq-recon-ls-random tends to 1 as $m$ grows, because $m - n$ independent noisy equations average to an error of order $\sigma/\sqrt{m - n}$ per coordinate. To keep the attack at a fixed accuracy, the argument $\sqrt{m - n}/(4\sigma)$ must stay fixed, so the noise must grow like $\sqrt m$ (@fig-recon-ls-queries). This is the second half of the Fundamental Law: a bound on the error of *each* answer is not enough when the number of answers is not bounded.
-
-Worst-case errors hurt more than random ones of the same size. A curator that chooses its errors along the decoder's weakest direction, the right singular vector of $s_{\min}$, which least squares amplifies the most, does much more damage than Gaussian noise with the same scale, whose errors point in all directions equally. The bound @eq-recon-ls-worst is loose by more than a factor of 10 in the example below, but it is the only statement that holds for every curator.
-
-![Fraction of bits recovered by least squares from $m = 4n$ noisy random subset sums, against the noise scale in units of $\sqrt n$, for three database sizes. The black curve is @eq-recon-ls-random. The curves for different $n$ coincide: the attack's success depends on $\sigma/\sqrt n$ only.](figures/recon_ls_noise.svg){#fig-recon-ls-noise}
-
-![Fraction of bits recovered by least squares at $n = 200$ as the number of queries grows, for three noise levels. Lines are @eq-recon-ls-random; dots are simulations. Near $m = n$ the system is barely determined and the noise is amplified; beyond that, more queries average the noise away, and even at $\sigma = 2\sqrt n$ the attack recovers most bits with $64n = 12\,800$ queries.](figures/recon_ls_queries.svg){#fig-recon-ls-queries}
-
-### Example: $n = 500$ people, $m = 2000$ queries
-
-The script averages over four random databases and query matrices (@tbl-recon-ls). Here $\sqrt n = \sqrt{500} = 22.36$, which gives the second row.
+::: {#exm-recon-ls}
+In the running example, $n = 500$ and $m = 2000$, so $\sqrt n = 22.36$, and the script averages over four random databases and query matrices (@tbl-recon-ls).
 
 | $\sigma/\sqrt n$ | 0.1 | 0.25 | 0.5 | 1 | 2 |
 | --- | --- | --- | --- | --- | --- |
@@ -256,153 +221,107 @@ The script averages over four random databases and query matrices (@tbl-recon-ls
 
 : Least-squares reconstruction of $n = 500$ bits from $m = 2000$ random subset sums with Gaussian noise. {#tbl-recon-ls}
 
-The prediction is within 0.013 of every simulated value. By hand at $\sigma = 0.5\sqrt n$: $\sqrt{m - n}/(4\sigma) = \sqrt{1500}/44.72 = 0.866$, and $\Phi(0.866) = 0.807$.
-
-For worst-case errors, the script measures $s_{\min}(A) = 11.43$ and runs a curator that adds $E\cdot\mathrm{sign}(Av)$, with $v$ the weakest right singular vector. That curator pushes every answer by the full $E$ in the direction that least squares turns into the largest error along $v$. At $E = 1$, the bound @eq-recon-ls-worst allows $4 \times 2000 \times 1/11.43^2 = 61.2$ wrong bits, and this curator causes 0. At $E = 2$, the bound is four times larger, 245.0, and this curator causes 20. At $E = 0.25\sqrt n = 5.59$, the bound (1914.0) exceeds $n$ and says nothing, while this curator causes 143 wrong bits, against about 17 for Gaussian noise with $\sigma = 5.59$ (1 − 0.9655 of 500).
-
-### Check yourself
-
-- At $m = n$ with exact answers, least squares recovers $d$ exactly. Why does the prediction @eq-recon-ls-random fail there with noise? *(At $m = n$ the system is square and $s_{\min}$ is close to 0, so tiny errors are amplified enormously. The factor $1/(m - n - 1)$ in the variance blows up; @fig-recon-ls-queries shows recovery near $\frac12$ there.)*
-- A curator adds independent noise with $\sigma = 2\sqrt n$ to every answer and lets anyone ask as many questions as they want. How many queries per person does least squares need to recover 90% of the bits? *(Solve $\Phi(\sqrt{m - n}/(4\sigma)) = 0.9$. The standard normal is below 1.2816 with probability 0.9, so $\sqrt{m - n}/(4\sigma) = 1.2816$; dividing through by $\sqrt n$ gives $\sqrt{m/n - 1} = 4 \times 2 \times 1.2816$, so $m/n = 106.1$.)*
+The prediction is within 0.013 of every simulated value. For worst-case errors, the script measures $s_{\min}(A) = 11.43$, against the approximation $\frac12(44.72 - 22.36) = 11.18$. Its curator adds $E$ times the sign of $Av$ to the answers, where $v$ is the direction that $A$ shrinks most. At $E = 1$, 2 and 5.59 the bound @eq-recon-ls-worst allows 61.2, 245.0 and 1914.0 wrong bits, and the curator causes 0, 20 and 143. Gaussian noise with $\sigma = 5.59$ causes only about 17.
+:::
 
 ## The Fundamental Law of Information Recovery {#sec-recon-law}
 
-### Context
+The attacks so far say when answers are too accurate. Before they add up to a law, two questions remain. Is error of order $\sqrt n$ enough to stop reconstruction, or is it just where the proofs stop? And how many queries does any attack need? This section answers the first with a curator that answers from a secret sample, and the second with a count of bits.
 
-The attacks so far say when answers are too accurate. Two questions remain. Is error of order $\sqrt n$ really enough to stop reconstruction, or is it just where the proofs stop? And how many queries does *any* attack need? This section answers both, with one construction and one counting argument, and collects the results in the form Dwork and Roth call the Fundamental Law of Information Recovery: overly accurate answers to too many questions destroy privacy, and they do so spectacularly.
+::: {#def-recon-sampling name="Sampling curator"}
+The **sampling curator** fixes a sampling rate $q$ and draws a secret set $T$ of people, keeping each person independently with probability $q$. It answers the query that names the set $S_j$ with
+$$a_j = \frac1q\sum_{i \in S_j \cap T}d_i.$$
+:::
 
-### Statement
+Dividing by $q$ makes each answer correct on average, so its error is of order $\sqrt n$, and yet the people left out of $T$ are hidden completely.
 
-@tbl-recon-law collects the regimes. The first three rows are the attacks of the previous sections; the last two are the converses proved in this section.
+::: {#prp-recon-sampling name="What the sampling curator hides"}
+With probability at least $1 - \beta$, all $m$ answers of the sampling curator have error at most
+$$\max_j|a_j - \langle f_j, d\rangle| \le \sqrt{\frac{n\ln(2m/\beta)}{2q^2}}.$$ {#eq-recon-hoeffding}
+If $d$ is uniform on $\{0, 1\}^n$, no attacker recovers an expected fraction of more than $q + \frac{1 - q}{2}$ of the bits.
+:::
 
-| Queries | Error per answer | Outcome | Source |
-| --- | --- | --- | --- |
-| All $2^n$ subsets | at most $E$ | at most $4E$ wrong bits; $E = o(n)$ is blatantly non-private | @eq-recon-exp |
-| $O(n\log n)$ random subsets | at most $E$, $E = o(\sqrt n)$ | $o(n)$ wrong bits, by a linear program | @eq-recon-lp |
-| $m$ random subsets | independent $\mathcal N(0, \sigma^2)$ | fraction recovered $\approx \Phi(\sqrt{m - n}/(4\sigma))$, tending to 1 as $m$ grows | @eq-recon-ls-random |
-| $m$ arbitrary | $O(\sqrt{n\log m})$, sampling curator | no attack recovers more than $\frac34$ of the bits | @eq-recon-hoeffding |
-| $m$, each answer one of $V$ values | any | at least $n(1 - h(\gamma))/\log_2V$ queries are needed for $\gamma n$ wrong bits | @eq-recon-info |
+::: {.proof}
+The plan is to bound one answer's error with Hoeffding's inequality and all of them with the union bound, then to show that a person outside $T$ is a fair coin to the attacker.
 
-: The regimes of reconstruction from subset sums. The first three rows are attacks; the last two are limits on attacks. {#tbl-recon-law}
+1. *Write the error as a sum.* With $t_i = \mathbf 1[i \in T]$, the error of query $j$ is the sum of $d_i(t_i/q - 1)$ over $i \in S_j$. Only the $k \le n$ people with $d_i = 1$ in $S_j$ contribute, with independent terms that have mean 0 and lie in an interval of length $\frac1q$.
+2. *Bound one error.* Hoeffding's inequality (@thm-conc-hoeffding) says that the mean of such terms exceeds its expectation by $t$ with probability at most $\exp(-2kt^2q^2)$. The sum deviates by $u$ when the mean deviates by $u/k$, so with both tails and $k \le n$,
+$$\Pr\big[|\text{error}| \ge u\big] \le 2\exp(-2q^2u^2/n).$$
+3. *Bound all errors.* By the union bound (@lem-conc-union), some answer has error at least $u$ with probability at most $2m\exp(-2q^2u^2/n)$. Setting this equal to $\beta$ and solving for $u$ gives @eq-recon-hoeffding.
+4. *The answers ignore the people outside $T$.* They depend only on $T$ and on the bits of the people in it, so for $i \notin T$ any guess of the fair bit $d_i$ is right with probability $\frac12$.
+5. *Average over $T$.* Each person is in $T$ with probability $q$, where at best the attacker is always right, and outside with probability $1 - q$, where it is right half the time.
+:::
 
-**A sampling curator.** To show that error of order $\sqrt n$ can stop reconstruction, you need a curator whose errors are that small yet hide many bits completely. The idea is to answer from a random sample of the people and scale up. The curator fixes a sampling rate $q$ and draws a secret set $T$, keeping each person independently with probability $q$, and answers every query by $a_j = \frac1q\sum_{i \in S_j \cap T}d_i$. Dividing by $q$ makes each answer correct on average, and its error is a sum of independent zero-mean terms, one per person, so it is of order $\sqrt n$. People outside $T$ never affect any answer, so nothing reveals their bits. Then, for a failure probability $\beta$, with probability at least $1 - \beta$ all $m$ answers have error at most
-$$\max_j|a_j - \langle f_j, d\rangle| \le \sqrt{\frac{n\ln(2m/\beta)}{2q^2}},$$ {#eq-recon-hoeffding}
-and if $d$ is uniform, no attacker recovers an expected fraction of more than $q + \frac{1 - q}{2}$ of the bits; at $q = \frac12$, $\frac12 + \frac14$, three quarters.
+At $q = \frac12$ the ceiling is three quarters, with error of order $\sqrt{n\ln m}$, only a logarithmic factor above the $o(\sqrt n)$ the attacks need. But this is not privacy, because the people in $T$ enter every answer without noise, so least squares with enough queries recovers each of their bits. Half the people are exposed so that the other half can be hidden, while [Part 3](../part03-dp-foundations/01-definition.md) defines a guarantee for every individual.
 
-**An information bound.** To bound the number of queries any attack needs, count bits of information. The secret is $n$ uniform bits, so it carries $n$ bits of information. An answer that takes at most $V$ values can carry at most $\log_2V$ bits. A guess that is wrong on a fraction $\gamma$ of the bits still leaves some uncertainty, measured by the **binary entropy** $h(\gamma) = -\gamma\log_2\gamma - (1 - \gamma)\log_2(1 - \gamma)$, the uncertainty in bits of a coin that comes up heads with probability $\gamma$. So the answers must carry at least $n(1 - h(\gamma))$ bits. Precisely, let $d$ be uniform on $\{0, 1\}^n$, and let each of the $m$ answers take at most $V$ values (for example, exact counts take $V = n + 1$ values). If an attacker's guess $\hat d$ has an expected fraction $\gamma \le \frac12$ of wrong bits, then
-$$m \ge \frac{n\,(1 - h(\gamma))}{\log_2V},$$ {#eq-recon-info}
-where $h$ is the binary entropy function in bits.
+To bound the number of queries any attack needs, count bits. The secret is $n$ uniform bits, and an answer with at most $V$ possible values carries at most $\log_2V$ bits. A guess that is wrong on a fraction $\gamma$ of the bits leaves the uncertainty of a coin that lands heads with probability $\gamma$, its **binary entropy** $h(\gamma) = -\gamma\log_2\gamma - (1 - \gamma)\log_2(1 - \gamma)$ per bit. So the answers must carry at least $n(1 - h(\gamma))$ bits.
 
-### Derivation
+::: {#thm-recon-info name="The information bound"}
+Let $d$ be uniform on $\{0, 1\}^n$, fix the $m$ queries, and let each answer take at most $V$ values. If an attacker's guess $\hat d$, computed from the answers, has an expected fraction $\gamma \le \frac12$ of wrong bits, then
+$$m \ge \frac{n\,(1 - h(\gamma))}{\log_2V}.$$ {#eq-recon-info}
+:::
 
-**The sampling curator's error (Hoeffding and the union bound).** The plan is to bound one answer's error with Hoeffding's inequality, then all $m$ answers at once with the union bound.
+::: {.proof}
+The plan is to bound the information the guess holds about $d$ from above by what the answers can carry, and from below by what a good guess requires. Write $Y$ for the answers and use the entropy $H$ and mutual information $I$ of [Information theory](../part01-prerequisites/05-information-theory.md).
 
-1. **Write the error as a sum.** With $t_i = \mathbf 1[i \in T]$, the answer is $\sum_{i \in S_j}d_it_i/q$, so the error of query $j$ is $\sum_{i \in S_j}d_i\big(\frac{t_i}{q} - 1\big)$. Only the $k \le n$ people with $d_i = 1$ in $S_j$ contribute. Their terms are independent, have mean $q\cdot\frac1q - 1 = 0$, and lie in $[-1, \frac1q - 1]$, an interval of length $\frac1q$.
-2. **Apply Hoeffding's inequality to the sum.** Hoeffding's inequality ([Concentration inequalities](../part01-prerequisites/02-concentration.md)) says that the mean of independent bounded terms is unlikely to stray far from its expectation, with a tail that falls like a Gaussian's. For a mean $\bar X$ of $k$ independent terms with range $\frac1q$ and expectation $\mu$, it reads $\Pr[\bar X - \mu \ge t] \le \exp(-2kt^2q^2)$. A sum deviates by $u$ when the mean deviates by $u/k$, so substituting $t = u/k$ and counting both tails, $\Pr[|\text{error}| \ge u] \le 2\exp(-2q^2u^2/k) \le 2\exp(-2q^2u^2/n)$, the last step because $k \le n$.
-3. **Union bound over the $m$ queries.** The probability that some answer has error at least $u$ is at most the sum over the $m$ queries: $\Pr[\text{some error} \ge u] \le 2m\exp(-2q^2u^2/n)$. Set this equal to $\beta$ and solve: $2q^2u^2/n = \ln(2m/\beta)$, so $u^2 = n\ln(2m/\beta)/(2q^2)$, which is @eq-recon-hoeffding.
+1. *Bound what the answers can carry.* Mutual information is at most the entropy of the output, a tuple's entropy is at most the sum of its entries' entropies, and a variable with $V$ values has entropy at most $\log_2V$ (@thm-min-entropy-bounds). So
+$$I(d; Y) \le H(Y) \le m\log_2V.$$
+2. *Processing cannot add information.* The guess is computed from $Y$, so $I(d; \hat d) \le I(d; Y)$ by the data-processing inequality (@thm-min-dpi).
+3. *Write what a good guess requires.* Since $d$ has entropy $n$, $I(d; \hat d) = n - H(d \mid \hat d)$. The chain rule (@thm-min-chain-rule) splits $H(d \mid \hat d)$ into one term per bit, and conditioning on less cannot reduce entropy (@cor-min-conditioning), so
+$$H(d \mid \hat d) \le \sum_iH(d_i \mid \hat d_i).$$
+4. *Apply Fano's inequality to each bit.* With two values, Fano's inequality (@thm-min-fano) reads $H(d_i \mid \hat d_i) \le h(P_i)$, where $P_i$ is the probability that the guess of bit $i$ is wrong.
+5. *Average with concavity.* The binary entropy is concave, so by Jensen's inequality the average of the $h(P_i)$ is at most $h(\gamma)$, where $\gamma$ is the average of the $P_i$.
+6. *Combine.* Steps 3 to 5 give $I(d; \hat d) \ge n(1 - h(\gamma))$, and steps 1 and 2 give $I(d; \hat d) \le m\log_2V$.
+:::
 
-**What the attacker can learn.** The idea is that a person outside $T$ is invisible to every answer.
+The attacks use about as few queries as possible, since exact counts take $V = n + 1$ values, so any attack needs of order $n/\ln n$ of them, and least squares with exact answers needs only $n$. The law therefore has two halves, and a defence must control both. "Overly accurate" is the error scale, below $\sqrt n$ for random queries and below $n$ for all queries. "Too many" is the count, because independent noise is averaged away unless it grows with the number of answers.
+::: {#exm-recon-law}
+In the running example the sampling curator with $q = \frac12$ keeps 250 of the 500 people. Its largest error over the 2000 queries is 28.00, or $1.25\sqrt n$, well under the Hoeffding bound of 106.25 at $\beta = 0.05$. Least squares on these answers recovers 0.7560 of the bits, within sampling error of the ceiling $\frac34$ on the expected fraction.
 
-1. **The answers ignore the people outside $T$.** They are a function of $T$ and of $d_i$ for $i \in T$ only.
-2. **So a person outside $T$ is a fair coin to the attacker.** Given $i \notin T$, the answers are independent of $d_i$, which is a fair bit independent of everything else. Any guess of $d_i$ is right with probability $\frac12$.
-3. **Average over who is in $T$.** Each person is in $T$ with probability $q$, and at best the attacker gets all of those right. Each person is outside with probability $1 - q$, and then the attacker is right half the time. The expected fraction recovered is at most $q \cdot 1 + (1 - q)\cdot\frac12 = q + \frac{1 - q}2$.
+For the information bound, take $n = 1000$ and at most 5% wrong bits. Then $h(0.05) = 0.2864$, so each person still needs $0.7136$ bits. An exact answer carries at most $\log_21001 \approx 9.97$ bits, so any attack needs at least 72 queries, from the bound 71.6. Rounding every count to a multiple of 10 leaves at most 102 values and raises the bound to 106.9, and multiples of 32 give 141.5.
 
-**The information bound (entropy and Fano).** Let $Y = (a_1, \dots, a_m)$ be the answers, with the queries fixed. The **mutual information** $I(d; Y)$ is the number of bits the answers reveal about $d$: the uncertainty about $d$ before seeing $Y$ minus the uncertainty after, $H(d) - H(d \mid Y)$, where $H$ is entropy. The plan is to bound it from above by what the answers can carry and from below by what a good guess requires.
-
-1. **Bound what the answers can carry.** $I(d; Y) \le H(Y) \le \sum_jH(a_j) \le m\log_2V$. Mutual information is at most the entropy of the output, because it is $H(Y)$ minus the non-negative $H(Y \mid d)$. The entropy of a tuple is at most the sum of the entropies, with equality only when the entries are independent. And a variable with $V$ values has entropy at most $\log_2V$ bits, attained when all values are equally likely.
-2. **Processing cannot add information.** $\hat d$ is computed from $Y$, so $I(d; \hat d) \le I(d; Y)$ by the DPI, which says that no function of $Y$, random or not, can tell you more about $d$ than $Y$ itself.
-3. **Write what a good guess requires.** $I(d; \hat d) = H(d) - H(d \mid \hat d) = n - H(d \mid \hat d)$, since $n$ uniform bits have entropy $n$. To bound the remaining uncertainty bit by bit, use the chain rule, $H(d \mid \hat d) = \sum_iH(d_i \mid \hat d, d_1, \dots, d_{i-1})$, and the fact that conditioning on less cannot reduce entropy: dropping $d_1, \dots, d_{i-1}$ and then all of $\hat d$ except $\hat d_i$ gives $H(d \mid \hat d) \le \sum_iH(d_i \mid \hat d) \le \sum_iH(d_i \mid \hat d_i)$.
-4. **Apply Fano for one bit.** With two values, Fano's inequality reads $H(d_i \mid \hat d_i) \le h(P_i)$, where $P_i = \Pr[\hat d_i \ne d_i]$. The reason is short: if you knew both the guess $\hat d_i$ and whether it was wrong, you would know $d_i$. So the uncertainty about $d_i$ given $\hat d_i$ is at most the uncertainty about "was the guess wrong?", a coin that comes up "wrong" with probability $P_i$, whose entropy is at most $h(P_i)$.
-5. **Average with concavity.** $h$ is concave (its graph bends downward), so by Jensen's inequality the average of its values is at most its value at the average: $\frac1n\sum_ih(P_i) \le h(\gamma)$, where $\gamma = \frac1n\sum_iP_i \le \frac12$ is the expected fraction of wrong bits.
-6. **Combine.** Steps 3 to 5 give $I(d; \hat d) \ge n - nh(\gamma)$, and steps 1 and 2 give $I(d; \hat d) \le m\log_2V$. So $n - nh(\gamma) \le I(d; \hat d) \le m\log_2V$, which is @eq-recon-info.
-
-### Interpretation
-
-Error of order $\sqrt n$ is necessary to stop reconstruction, and it can be enough. The sampling curator's error is $O(\sqrt{n\log m})$, only a logarithm above the $o(\sqrt n)$ that the attacks need, and it caps every attacker at $\frac34$ of the bits.
-
-But it is not privacy. The same curator answers exactly for the people in $T$: an attacker with enough queries learns their bits perfectly, because least squares recovers $d_i/q$ for every $i \in T$. Half the people are fully exposed so that the other half can be fully hidden. Stopping blatant reconstruction is a much weaker goal than protecting everyone, and [Part 3](../part03-dp-foundations/01-definition.md) defines a guarantee that holds for every individual.
-
-Reconstruction is also the most demanding attack on aggregates, not the only one. An attacker who only wants to know whether one person is in the data needs far less. Homer et al. (2008) showed this with the published allele frequencies of a genome-wide association study: comparing one person's DNA with those averages revealed whether the person had taken part. The US National Institutes of Health withdrew such summaries from public access the same year. That attack, a tracing attack, returns in [Lower bounds](../part03-dp-foundations/10-lower-bounds.md#sec-lower-tracing), where it sets the noise any private release of many averages must add.
-
-The attacks use about as few queries as possible. With exact counts, @eq-recon-info asks for at least $n(1 - h(\gamma))/\log_2(n + 1)$ queries, of order $n/\ln n$, and least squares with exact answers uses $n$. Answers with error, published to a coarser precision, take fewer values, carry fewer bits each and need more queries.
-
-The law has two halves, and a defence must control both. "Overly accurate" is the error scale: below $\sqrt n$ for random queries, below $n$ for all queries. "Too many" is the count: independent noise per answer is averaged away unless it grows with the number of answers. That is why Part 3 tracks a budget that is spent across queries.
-
-### Example: three curators
-
-**The sampling curator at $n = 500$, $m = 2000$.** With $q = \frac12$ the script keeps 250 of the 500 people. The largest error over the 2000 queries is 28.00, or $28.00/\sqrt{500} = 1.25\sqrt n$. That is well under the Hoeffding bound at $\beta = 0.05$: with $q = \frac12$, $2q^2 = \frac12$, so @eq-recon-hoeffding is $\sqrt{2 \cdot 500\ln(4000/0.05)} = 106.25$. (Hoeffding assumes the worst-case spread of each term; the actual terms have a smaller variance.) Least squares on these answers recovers 0.7560 of the bits, right at the ceiling of $\frac34$.
-
-**The information bound at $n = 1000$.** For at most 5% wrong bits, $h(0.05) = 0.2864$, so each person still needs $1 - 0.2864 = 0.7136$ bits. Exact answers ($V = 1001$) carry at most $\log_21001 \approx 9.97$ bits each and need $m \ge 1000 \times 0.7136/\log_21001 = 71.6$ queries, so at least 72. If the curator rounds every count to a multiple of 10, an answer takes at most $\lfloor1000/10\rfloor + 2 = 102$ values (the 101 multiples of 10 from 0 to 1000, plus one to be safe; the script uses $\lfloor n/w\rfloor + 2$ for every width $w$), and the bound rises to 106.9. Rounding to multiples of 32 leaves $\lfloor 1000/32\rfloor + 2 = 33$ values and a bound of 141.5. These are lower bounds for any attack, whatever its running time.
-
-**Independent noise with unlimited queries.** From @tbl-recon-ls, a curator with $\sigma = 2\sqrt n$ lets least squares recover 0.5875 of the bits at $m = 4n$. If it answers any number of queries with the same noise level, an attacker who asks $m = 106.1\,n$ queries recovers 90% (the second Check yourself question of @sec-recon-ls).
-
-### Check yourself
-
-- Why does the information bound need the answers to take finitely many values? *(Step 1 bounds $H(a_j)$ by $\log_2V$. A real-valued answer can carry unbounded information in its low-order digits, so the count of values is what limits it. Any published table has finite precision.)*
-- A curator answers each query with an independent error of size $\sqrt{n\ln m}$ chosen at random. Is it as safe as the sampling curator? *(No. Its errors are independent across queries, so least squares averages them away as $m$ grows. The sampling curator's errors come from one secret set $T$ shared by all answers, so asking more never reveals the people outside $T$.)*
+Against unlimited queries, independent noise loses. A curator with $\sigma = 2\sqrt n$ lets least squares recover only 0.5875 of the bits at $m = 4n$ (@tbl-recon-ls), but $106.1n$ queries recover 90% ([Exercise 5](../../book-exercises/part02-attacks/09-reconstruction.md#sec-sol-recon-5)).
+:::
 
 ## Attacking a deployed query system {#sec-recon-diffix}
 
-### Context
+Do the attacks survive a system built to resist them? In 2017 the company Aircloak offered a bounty to anyone who could re-identify data behind Diffix, its commercial query system, which answered unlimited counting queries in a restricted form of SQL, the standard language for querying databases. Each condition in a query, such as "status is C", added its own layer of Gaussian noise with standard deviation 1. The noise was **sticky**, computed from the query itself, so asking a query twice returned the same answer. And the language forbade OR, so a random subset of people had no short description. Cohen and Nissim (2020) turned the problem around, by drawing a random short description and taking whatever set it selected.
 
-The company Aircloak offered a cash bounty in 2017 to anyone who could re-identify data behind Diffix, its commercial query system. Diffix let an analyst ask an unlimited number of counting queries in a restricted form of SQL, the standard language for querying databases. It protected the data in three ways. First, every answer carried Gaussian noise. A query is a count of the records that satisfy some **conditions**, such as "status is C" or "identifier between 2000 and 3000". Each condition added its own independent layer of noise with standard deviation 1. So the noise grew with the length of the query, not with the number of records or of queries. Second, the noise was **sticky**. It was computed from the query itself, so asking the same query twice returned the same answer, and repetition could not average it away. Third, the query language forbade OR and restricted arithmetic, so that an analyst could not describe an arbitrary set of people.
+::: {#def-recon-digit name="Digit-predicate query"}
+Each record has a public identifier $i$, a whole number. A **digit-predicate query** is fixed by a prime $p$, a digit position, a fractional exponent and a modulus $r$. It selects record $i$ when the digit at that position after the decimal point of the product $p\,i$, raised to the exponent, is divisible by $r$.
+:::
 
-That last rule targets the attack of this chapter. A random subset of $n$ people is a list of about $n/2$ names, and without OR there is no short way to write it down. Each name written as a separate condition would add a layer of noise. Cohen and Nissim (2020) turned the problem around. Instead of drawing a random set and then describing it, they drew a random short description and took whatever set it selected. This section derives what least squares achieves with such queries, if they behave like random subsets, and checks by simulation that they do.
+Diffix counted the whole test as one condition. The first 25 primes, the digit positions 1 to 5, the 14 exponents $0.5, 0.6, \dots, 1.9$ other than 1, and the moduli 2 and 5 make 3500 queries. A digit is divisible by 2 for five of its ten values and by 5 for two, so the fraction $\rho$ of records that a query includes is about $\frac12$ or $\frac15$. If the selections behave like coin flips, least squares works as before, with $\rho(1 - \rho)$ in place of $\frac14$.
 
-### Statement
-
-**The queries.** Each record has a public identifier $i$, a whole number. A query is fixed by four parameters: a prime $p$, a digit position $j$, an exponent $e$ and a modulus $r$. It selects record $i$ when the $j$-th digit after the decimal point of $(p\cdot i)^e$ is divisible by $r$. The exponent is fractional, so $(p\cdot i)^e$ has digits after the decimal point. Diffix's language allowed this arithmetic, and it counted the whole test as one condition, so the predicate adds only one layer of noise. Cohen and Nissim used the first 25 primes and the digit positions 1 to 5. They took the 14 exponents $0.5, 0.6, \dots, 1.9$ other than 1, which would give a whole number, and the moduli 2 and 5. That makes $25 \times 5 \times 14 \times 2 = 3500$ queries. A digit is divisible by 2 for five of its ten values and by 5 for two of them, so the fraction $\rho$ of records that a query includes is about $\frac12$ or $\frac15$.
-
-**The prediction.** Write the query as its 0/1 indicator vector $f$, as before, and stack the $m$ queries as the rows of $A$. Suppose these selections behave like independent coin flips, and the curator adds independent noise of standard deviation $\sigma$ to each of the $m$ distinct queries. Write $v$ for the average of $\rho(1 - \rho)$ over the queries, the average variance of one record's inclusion. Then each coordinate of the least-squares error has standard deviation about $\sigma/\sqrt{v(m - n - 1)}$, and the expected fraction of bits recovered is about
+::: {#prp-recon-diffix name="Least squares with inclusion rates"}
+Let query $j$ include each record independently with probability $\rho_j$, write $v$ for the average of $\rho_j(1 - \rho_j)$ over the $m$ queries, and let each answer carry independent noise of standard deviation $\sigma$. Suppose, as in @prp-recon-ls-random, that $(A^\top A)^{-1}$ has the mean it would have for normal rows. Then each coordinate of the least-squares error has standard deviation about $\sigma/\sqrt{v(m - n - 1)}$, and the expected fraction of bits recovered is about
 $$\Phi\left(\frac{\sqrt{v\,(m - n - 1)}}{2\sigma}\right).$$ {#eq-recon-diffix}
+:::
 
-With $\rho = \frac12$ for every query, $v = \frac14$, and the formula is @eq-recon-ls-random with $m - n - 1$ in place of $m - n$, a difference that vanishes as $m$ grows.
+::: {.proof}
+The proof of @prp-recon-ls-random used the inclusion probability $\frac12$ only in the average Gram matrix, so only that part changes.
 
-### Derivation
+1. *The average Gram matrix of one query.* A query with rate $\rho$ has $\mathbb E[f_i^2] = \rho$ and $\mathbb E[f_if_k] = \rho^2$ for $i \ne k$, so $\mathbb E[ff^\top] = \rho(1 - \rho)I + \rho^2\mathbf 1\mathbf 1^\top$.
+2. *Add up the queries.* Summing gives $\mathbb E[A^\top A] = m\big(vI + \overline{\rho^2}\,\mathbf 1\mathbf 1^\top\big)$, where $\overline{\rho^2}$ is the average of $\rho_j^2$.
+3. *Invert it.* As in [Exercise 4](../../book-exercises/part02-attacks/09-reconstruction.md#sec-sol-recon-4), the all-ones part changes each diagonal entry of the inverse by a fraction below $\frac1n$, so each is about $1/(mv)$.
+4. *Correct for finite $m$ and finish.* As in steps 4 and 5 of @prp-recon-ls-random, the inverse-Wishart mean replaces $m$ by $m - n - 1$, which gives the variance $\sigma^2/\big(v(m - n - 1)\big)$, and a bit goes wrong when its error passes $\frac12$.
+:::
 
-The derivation of @eq-recon-ls-random used the inclusion probability $\frac12$ only in the average Gram matrix. Redo that step with a general rate.
+A digit of $p\,i$ raised to a power is a fixed function of $i$, not a coin, so independence is a modelling assumption that the example checks. Diffix's noise was not small by this chapter's standard, because each attack query also had conditions on a range of identifiers and on the status, for a total standard deviation of 4. For a range of 73 records that is $0.47\sqrt n$, and what defeated it was the number of queries. The noise did not grow with $m$, so 3,500 distinct queries averaged it away, and sticky noise did not help because the attack never repeats a query.
 
-1. **The average Gram matrix of one query.** A query that includes each record independently with probability $\rho$ has 0/1 entries, so $f_i^2 = f_i$ and $\mathbb E f_i^2 = \mathbb E f_i = \rho$, and $\mathbb E f_iq_k = \rho^2$ for $i \ne k$. So $\mathbb E[qq^\top] = \rho(1 - \rho)I + \rho^2\mathbf 1\mathbf 1^\top$: the variance $\rho(1 - \rho)$ on the diagonal, plus the square of the mean everywhere.
-2. **Add up the queries.** The Gram matrix is a sum over the rows of $A$, namely $A^\top A = \sum_jq_jq_j^\top$. Summing step 1 over the $m$ queries therefore gives $\mathbb E[A^\top A] = m\big(vI + w\mathbf 1\mathbf 1^\top\big)$, where $v$ is the average of $\rho(1 - \rho)$ and $w$ the average of $\rho^2$.
-3. **Invert it.** For $a, b > 0$, the matrix $aI + b\mathbf 1\mathbf 1^\top$ has inverse $\frac1a\big(I - \frac{b}{a + nb}\mathbf 1\mathbf 1^\top\big)$, which you can check by multiplying out as in [Exercise 4](../../book-exercises/part02-attacks/09-reconstruction.md#sec-sol-recon-4). Its diagonal is $\frac1a\big(1 - \frac{b}{a + nb}\big)$, and the correction $\frac{b}{a + nb}$ is below $\frac1n$, negligible for all but tiny $n$. With $a = mv$ and $b = mw$, each diagonal entry of $\mathbb E[A^\top A]^{-1}$ is therefore about $1/(mv)$.
-4. **Correct for finite $m$ and finish.** As in step 4 of the earlier derivation, the inverse-Wishart mean (@sec-apx-mat-wishart) replaces $m$ by $m - n - 1$. It is exact only for Gaussian rows, so here, as there, it is an approximation that the simulation checks. The covariance of the error is $\sigma^2(A^\top A)^{-1}$, so each coordinate has variance about $\sigma^2/\big(v(m - n - 1)\big)$. A bit goes wrong when its error passes $\frac12$, which gives @eq-recon-diffix as in step 5 there.
+Restricting the query language did not help either, because any short formula that splits the records independently of their secrets serves as a random query. To stop this attack, the noise would have to grow with the number of queries. Keeping least squares down to 75% of the bits with 3,500 queries takes a standard deviation of about 19.5, 4.9 times what Diffix added, and ten times as many queries need about $\sqrt{10}$ times as much noise ([Exercise 10](../../book-exercises/part02-attacks/09-reconstruction.md#sec-sol-recon-10)). The privacy definition of [Part 3](../part03-dp-foundations/01-definition.md) makes that growth automatic, because it charges every answer against a fixed privacy budget.
 
-The derivation assumes that inclusions are independent coin flips. The digit of $(p\cdot i)^e$ is a fixed function of $i$, not a coin, so this is a modelling assumption, and the example below checks it by simulation.
+::: {#exm-recon-diffix}
+Cohen and Nissim asked the 3,500 queries about the loans of a public banking dataset in each of four ranges of identifiers, holding between 73 and 142 loans, and that variant of the linear program reconstructed all four ranges perfectly. The script repeats the experiment on synthetic data with least squares. It gives 73 distinct identifiers a fair secret bit each and answers all 3,500 queries with Gaussian noise of standard deviation 4. Averaging $\rho(1 - \rho)$ over the queries gives $v = 0.2016$. Over 50 runs the attack recovered every bit in 49, an average of 0.02 wrong bits per run, while @eq-recon-diffix predicts 0.036. With 142 records it was perfect in 45 of 50 runs, with 0.10 wrong bits per run against 0.077 predicted. So the digit predicates are close enough to coin flips, and even with noise of $2\sqrt n = 17.1$ the prediction for 3,500 queries is 0.779 of the bits (@fig-recon-diffix).
+:::
 
-### Interpretation
-
-The noise was not small by the chapter's standard. Each attack query also carried conditions on a range of identifiers and on the status asked about, and Cohen and Nissim report a total standard deviation of 4. For the smallest range, 73 records, that is $0.47\sqrt n$, far above the errors the linear-programming theorem tolerates. What defeated the noise was the number of queries. Diffix's noise did not grow with $m$, so 3,500 distinct queries averaged it away. That is the second half of the Fundamental Law: independent errors that do not grow with the number of answers are averaged away by asking more. Sticky noise does not change this, because it stops only the repetition of one query, and the attacker never repeats one.
-
-Restricting the query language did not help either. A rule that forbids describing an arbitrary set is a rule about syntax, and any short formula that splits the records in a way unrelated to their secret bits serves as a random query. Aircloak then restricted the arithmetic Diffix accepts further, which blocks this formula but not the principle. A defence has to bound what the answers reveal, whatever the queries look like.
-
-To stop the attack, the noise would have to grow with the number of queries. Solving @eq-recon-diffix for $\sigma$, keeping least squares down to 75% of the bits with 3,500 queries takes a standard deviation of about 19.5, which is 4.9 times what Diffix added. Once $m$ is much larger than $n$, ten times as many queries need about $\sqrt{10}$ times as much noise ([Exercise 10](../../book-exercises/part02-attacks/09-reconstruction.md#sec-sol-recon-10)). The privacy definition of [Part 3](../part03-dp-foundations/01-definition.md) makes that growth automatic, because it charges every answer against a fixed privacy budget.
-
-### Example: replaying the attack
-
-Cohen and Nissim attacked the loans table of a public banking dataset, 827 loans with a status from A to D. The secret was one bit per loan: whether the loan had a given status. They restricted the queries to four ranges of identifiers, holding between 73 and 142 loans. In each range they asked the 3,500 queries and decoded the answers with the linear program of Dwork, McSherry and Talwar (2007). The program reconstructed all four ranges perfectly.
-
-The script repeats the experiment on synthetic data with the least-squares decoder. It draws 73 distinct identifiers, as many as Cohen and Nissim's smallest range held, and gives each a fair secret bit. It then answers all 3,500 digit-predicate queries with Gaussian noise of standard deviation 4. The inclusion rates are as the statement assumed: on average a query with modulus 2 includes 0.502 of the records, and a query with modulus 5 includes 0.198. Averaging $\rho(1 - \rho)$ query by query, which is slightly less than plugging in these two averages, gives $v = 0.2016$. Over 50 runs the attack recovered every bit in 49, an average of 0.02 wrong bits per run, while @eq-recon-diffix predicts 0.036 wrong bits per run. With 142 records it was perfect in 45 of 50 runs, an average of 0.10 wrong bits against 0.077 predicted. Agreement this close also says that the digit predicates are close enough to independent coin flips for the model.
-
-@fig-recon-diffix shows the same attack as the number of queries grows. With a few hundred queries least squares already recovers most bits, and the prediction follows the simulation. Even with noise of $2\sqrt n = 17.1$, the prediction for all 3,500 queries is 0.779 of the bits.
-
-![Fraction of 73 secret bits recovered by least squares from the first $m$ of the 3,500 digit-predicate queries, for noise of standard deviation 4 (as reported for Diffix) and $2\sqrt n$, averaged over 20 runs. Lines are @eq-recon-diffix.](figures/recon_diffix.svg){#fig-recon-diffix}
-
-### Check yourself
-
-- Diffix returned the same noisy answer when the same query was asked again. Why did that not protect it? *(The attack never asks a query twice. Each of the 3,500 predicates is a different query, so each got its own noise, and least squares averaged the independent errors away.)*
-- A query that includes each record with probability $\frac15$ is less informative than one with probability $\frac12$. By how much, in this analysis? *(Each query contributes $\rho(1 - \rho)$ to $v$: $\frac{4}{25} = 0.16$ against $\frac14$. So a query with modulus 5 is worth 0.64 of a query with modulus 2.)*
+![Fraction of 73 secret bits recovered by least squares from the first $m$ of the 3,500 digit-predicate queries, for noise of standard deviation 4 and $2\sqrt n$, averaged over 20 runs. Lines are @eq-recon-diffix.](figures/recon_diffix.svg){#fig-recon-diffix}
 
 ## Reconstructing a census block {#sec-recon-census}
 
-### Context
+National statistical offices publish many tables computed from the same confidential records, such as counts, medians and means by age, sex and race for every block. Each cell is a query, so do the tables determine the records? Garfinkel, Abowd and Martindale (2019) showed with a toy block of seven people that they can. This section repeats the experiment on a block of its own, decoded by a search over all databases consistent with the tables.
 
-National statistical offices publish many tables computed from the same confidential records: counts by age, sex and race for every block, the same counts by household type, medians and means, and so on. Each table cell is a query. Garfinkel, Abowd and Martindale (2019) showed with a toy block of seven people that a modest set of published statistics can determine every person's age, sex, race and marital status, and that a constraint solver finds the solution in seconds. Finding whole-number ages that satisfy a list of constraints is an integer program, a problem that is hard in the worst case, but off-the-shelf satisfiability and integer-programming solvers handle blocks of this size easily. By then the US Census Bureau had already run the attack on its own 2010 publications at national scale, an experiment Abowd (2021) later described in detail.
-
-This section repeats the toy experiment with a block of our own. It is a reconstruction game where the queries are not random subsets but the tables an agency actually publishes, and where the decoder is a search over all databases consistent with them.
-
-### Statement
-
-A fictional block has seven people, each with an age (a whole number from 0 to 99), a sex, a race (Black or White) and a marital status, and nobody under 18 is married. @tbl-recon-census-published is everything the agency publishes about the block. Means are given to two decimals, which is enough to recover the sum of ages in each group exactly: the sum is a whole number, and $34.29 \times 7 = 240.03$, so the total is 240.
+The fictional block has seven people, each with an age from 0 to 99, a sex, a race (Black or White) and a marital status, and nobody under 18 is married. @tbl-recon-census-published is everything the agency publishes. Means are given to two decimals, which recovers each sum of ages exactly because the sum is a whole number. For example $34.29 \times 7 = 240.03$, so the total is 240.
 
 | Group | Count | Median age | Mean age |
 | --- | --- | --- | --- |
@@ -415,46 +334,26 @@ A fictional block has seven people, each with an age (a whole number from 0 to 9
 
 : The published statistics for a fictional census block of seven people. A median over an even count is the average of the two middle ages. {#tbl-recon-census-published}
 
-Each statistic is a constraint on the unknown ages and labels, and the claim is that together they leave no freedom at all.
+::: {#prp-recon-census name="The block is determined"}
+Exactly one block of seven people is consistent with @tbl-recon-census-published, and it is the true block. Its women are aged 7, 27, 35 and 52 and its men 15, 33 and 71, the people aged 7, 15, 52 and 71 are Black, and those aged 33, 35, 52 and 71 are married.
+:::
 
-**Claim.** Exactly one block of seven people is consistent with @tbl-recon-census-published, and it is the true one (@tbl-recon-census-block).
+::: {.proof}
+The plan is to enumerate the age lists that fit the sex statistics, then to discard those with no race split or no marital split that fits the table.
 
-| Person | 1 | 2 | 3 | 4 | 5 | 6 | 7 |
-| --- | --- | --- | --- | --- | --- | --- | --- |
-| Age | 7 | 15 | 27 | 33 | 35 | 52 | 71 |
-| Sex | F | M | F | M | F | F | M |
-| Race | B | B | W | W | W | B | B |
-| Married | no | no | no | yes | yes | yes | yes |
+1. *Turn means into sums.* Mean times count gives the sums of ages: total 240, female 121, male 119, Black 145, White 95, married 191.
+2. *Enumerate the women's ages.* With four women the two middle ages sum to $2 \times 31 = 62$, so the youngest and oldest sum to 59. The order of the ages requires the second youngest $b$ to be at most 31 and the youngest to be at most $b - 3$. For each $b$ from 3 to 31 that leaves $b - 2$ choices, so there are $1 + 2 + \dots + 29 = 435$ age lists.
+3. *Enumerate the men's ages.* Three ages with median 33 and sum 119 have the other two summing to 86. Every youngest age from 0 to 33 gives an oldest between 53 and 86, so there are 34 lists.
+4. *Combine and check the total median.* The $435 \times 34 = 14\,790$ combined age vectors include 12 906 that have overall median 33.
+5. *Check the race split.* For each age vector, try the $\binom74 = 35$ ways of choosing 4 of the 7 people as Black. Only 387 age vectors admit a choice with the published Black and White medians and sums.
+6. *Check the marital split* in the same way, with married median 43.5, married sum 191 and every married person at least 18. Only 33 age vectors admit one.
+7. *Require all three at once.* Exactly one age vector admits a valid sex split, race split and marital split, and its splits are unique, which gives the block of the statement.
+:::
 
-: The block reconstructed from @tbl-recon-census-published, which is the true block. {#tbl-recon-census-block}
+No single table determines the block, only their intersection, and real tables cross-classify many variables, so the same people appear in thousands of cells. The Census Bureau's own reconstruction of the 2010 Census rebuilt a record for each of the 308,745,538 people counted, and about 46% matched a real person exactly on block, sex, age, race and ethnicity (Abowd 2021). The Bureau then based its method for the 2020 Census on the privacy definition of [Part 3](../part03-dp-foundations/01-definition.md).
 
-### Derivation
-
-The decoder enumerates candidate blocks and discards those that contradict a published number. Each step uses the statistics in a way you can check by hand.
-
-1. **Turn means into sums.** Mean × count gives the sum of ages: total 240, female 121, male 119, Black 145, White 95, married 191. The sums for female and male add to 240, so the male mean is implied by the other two; the same holds for Black and White. Single people number $7 - 4 = 3$ and their ages sum to $240 - 191 = 49$.
-2. **Enumerate the women's ages.** Sort them $a \le b \le c \le d$. With four women the median is the average of the two middle ages, so $b + c = 2 \times 31 = 62$, and the sum gives $a + d = 121 - 62 = 59$. Choose $b \le 31$ (so that $c = 62 - b \ge b$) and $a \le b$; then $d = 59 - a$ must be at least $c = 62 - b$, that is $a \le b - 3$. For each $b$ from 3 to 31 that leaves $a = 0, \dots, b - 3$, which is $b - 2$ choices, so there are $1 + 2 + \dots + 29 = \sum_{k=1}^{29}k = 435$ age lists in all.
-3. **Enumerate the men's ages.** Three sorted ages with median 33 and sum 119: the middle one is 33, so $x_1 + x_3 = 119 - 33 = 86$ with $x_1 \le 33 \le x_3 \le 99$. Every $x_1$ from 0 to 33 gives $x_3 = 86 - x_1$ between 53 and 86, which is allowed, so $x_1$ ranges over $0, \dots, 33$: 34 lists.
-4. **Combine and check the total median.** The $435 \times 34 = 14\,790$ combined age vectors are all distinct; 12 906 have overall median 33.
-5. **Check the race split.** For each age vector, try every way of choosing 4 of the 7 people as Black ($\binom74 = 35$ ways), and keep it if the Black ages have median 33.5 and sum 145 and the White ages have median 33 and sum 95. Only 387 age vectors admit such a split.
-6. **Check the marital split** in the same way (married median 43.5, sum 191, everyone married at least 18): 33 age vectors admit one.
-7. **Require all three at once.** Exactly one age vector admits a valid sex split, race split and marital split, and its splits are unique. Assigning each person the labels of the splits gives @tbl-recon-census-block.
-
-Each published statistic removes most of the remaining candidates. The block is not determined by any one table, but by their intersection.
-
-### Interpretation
-
-Withholding one number rarely helps. @fig-recon-census repeats the search with each of the twelve medians and means withheld in turn. Eight of the twelve leave the block uniquely determined, because the remaining statistics imply the missing one or pin the block down without it ([Exercise 8](../../book-exercises/part02-attacks/09-reconstruction.md#sec-sol-recon-8)). The worst case for the attacker, withholding the married mean, still leaves only 45 consistent blocks, and 51% of them have the true sex, race and marital pattern of all seven people.
-
-Real publications are far more exposed than this toy, because published tables overlap. Real tables cross-classify many variables at many geographic levels, so the same people appear in thousands of cells. That is exactly the "many queries" condition of the Fundamental Law. The main protection of the 2010 Census, swapping a small fraction of households between blocks, changes some answers but leaves most constraints exact. Coarsening (age bands instead of single years) and suppressing small cells, common in other tables, have the same weakness: they remove some constraints and leave the rest exact. A suppressed cell does not even vanish from the system. Publishing that a count was suppressed tells the attacker that it is below the threshold, and the solver adds that inequality like any other constraint.
-
-The attack also works at scale. The Census Bureau's own reconstruction of the 2010 Census, described by Abowd (2021), rebuilt a record for each of the 308,745,538 people counted, with block, sex, age, race and ethnicity. About 46% of the reconstructed records matched a real person exactly on all five fields, and about 71% matched when the age was allowed to be off by one year. Linking them to commercial data confirmed the identity of about 17% of the population. The Bureau's response was to change its disclosure-avoidance method for the 2020 Census to one based on the privacy definition of [Part 3](../part03-dp-foundations/01-definition.md).
-
-![Number of seven-person blocks consistent with @tbl-recon-census-published when one median or mean is withheld (log scale). Blue bars: the block is still unique. Red bars: a few candidates remain, still far fewer than the possible blocks.](figures/recon_census.svg){#fig-recon-census}
-
-### Example: what each withheld statistic leaves
-
-@tbl-recon-census-withheld lists, for each statistic whose removal leaves more than one block, how many blocks remain, how many different sex/race/marital patterns they show, and what share of them has the true pattern.
+::: {#exm-recon-census}
+To test whether withholding one number helps, @fig-recon-census repeats the search with each of the twelve medians and means withheld in turn. Eight leave the block uniquely determined, because the rest of the table implies the missing number or pins the block down without it ([Exercise 8](../../book-exercises/part02-attacks/09-reconstruction.md#sec-sol-recon-8)), and @tbl-recon-census-withheld lists the other four.
 
 | Withheld | Consistent blocks | Distinct sex/race/marital patterns | Share with the true pattern |
 | --- | --- | --- | --- |
@@ -464,46 +363,56 @@ The attack also works at scale. The Census Bureau's own reconstruction of the 20
 | Married mean | 45 | 7 | 0.51 |
 | Any of the other eight | 1 | 1 | 1.00 |
 
-: Blocks consistent with the published table when one statistic is withheld. {#tbl-recon-census-withheld}
+: Blocks consistent with the published table when one statistic is withheld, and the share of them whose sex, race and marital labels are the true ones. {#tbl-recon-census-withheld}
 
-Withholding the married mean hurts the attacker most, because it is the only statistic about the single people's ages: without it, the married and single sums are no longer known. Withholding the female mean changes nothing, because the total and male sums imply it: it equals $(240 - 119)/4$.
+Withholding the married mean, the only statistic that splits the total age between married and single people, hurts the attacker most, and still only 45 blocks remain.
+:::
 
-### Check yourself
+![Number of seven-person blocks consistent with @tbl-recon-census-published when one median or mean is withheld (log scale).](figures/recon_census.svg){#fig-recon-census}
 
-- Why can the attacker turn a mean published to two decimals into an exact sum? *(The sum is a whole number and the mean is the sum over a count of at most 7. Two decimals locate the sum to within $7 \times 0.005 = 0.035$, which leaves one whole number.)*
-- If the agency published only counts and no ages, could the attacker still reconstruct something? *(Yes: counts of every cross-classification by sex, race and marital status fix how many people fall in each combination, which is the attribute pattern. Ages need age statistics, which real tables publish in single years for small groups.)*
+## Code {#sec-recon-code}
 
-## Code: check every attack by computation and simulation
-
-The script [code/reconstruction.py](../../code/part02-attacks/reconstruction.py) computes every number in this chapter and draws every figure. Each attack, bound and curator is a small typed function, and the figures loop over them. It uses NumPy only and runs in well under a minute. From the repository root:
+The script [code/reconstruction.py](../../code/part02-attacks/reconstruction.py) computes every number in this chapter and draws every figure. It checks the exponential attack against every candidate, the linear program's lemma and the least-squares predictions by simulation, and the census block by exhaustive search. From the repository root:
 
 ```bash
 uv run python code/part02-attacks/reconstruction.py
 ```
 
-**Output** (seed 0), summarized in @tbl-recon-code:
-
 | Experiment | Result |
 | --- | --- |
-| Fact 1, $d = (1, 0, 1, 1)$ | The 16 subset sums, in binary order: 0, 1, 0, 1, 1, 2, 1, 2, 1, 2, 1, 2, 2, 3, 2, 3 |
-| Exponential attack, $n = 10$ | Survivors 1, 35, 242, 630, 912 and largest distance 0, 2, 4, 6, 8 for $E = 0, 0.5, 1, 1.5, 2$; rounding to multiples of 2 or 4: one survivor |
-| Fact 2 | $\mathbb E(s_1 + s_2 + s_3)^4 = 21$ by enumeration and by formula |
-| Lemma, $n = 1000$, $\gamma = 0.1$ | Threshold 0.8333; escape probability 0.6161 (balanced), 1.0000 (aligned), bound 0.1875 |
-| Theorem, $n = 1000$, $\gamma = 0.1$, $\beta = 0.01$ | $E \le 0.1667$; $m \ge 33\,296$ ($33.3n$) |
-| Least squares, Gaussian noise, $n = 500$, $m = 2000$ | @tbl-recon-ls; $m/n$ for 90% recovery: 106.1 at $\sigma = 2\sqrt n$, 657.9 at $5\sqrt n$ |
-| Least squares, worst case, $n = 500$, $m = 2000$ | $s_{\min} = 11.43$ (approximation 11.18); wrong bits 0, 20, 143 for $E = 1, 2, 5.59$, bounds 61.2, 245.0, 1914.0 |
-| Sampling curator, $q = \frac12$ | Kept 250 of 500; max error 28.00 ($1.25\sqrt n$); Hoeffding bound 106.25; recovered 0.7560 |
-| Information bound, $n = 1000$ | $\gamma = 0.05$: 71.6 (exact), 106.9 (rounded to 10), 141.5 (rounded to 32); $\gamma = 0.01$: 92.2 (exact) |
-| Digit-predicate queries, $\sigma = 4$ | 3500 queries; inclusion 0.502 (modulus 2), 0.198 (modulus 5), $v = 0.2016$. $n = 73$: perfect in 49 of 50 runs, 0.02 wrong bits per run, predicted fraction 0.99950; $n = 142$: perfect in 45 of 50, predicted 0.99946. $\sigma$ for 75% recovery 19.5 (4.9 times 4); at $\sigma = 2\sqrt n = 17.1$, predicted 0.779 |
-| Census block | 435 female and 34 male age lists; 14 790 age vectors; 12 906 after the total median; 387 with a race split; 33 with a marital split; 1 block; @tbl-recon-census-withheld |
+| Exponential attack, $n = 10$ | @tbl-recon-exp; rounding to multiples of 2 or 4: one survivor |
+| @lem-recon-anti, $n = 1000$ | Threshold 0.8333; escape 0.6161, 1.0000; bound 0.1875 |
+| @thm-recon-lp, $\beta = 0.01$ | $E \le 0.1667$; $m \ge 33\,296$ ($33.3n$) |
+| Least squares, Gaussian noise | @tbl-recon-ls; $m/n$ for 90%: 106.1 at $\sigma = 2\sqrt n$, 657.9 at $5\sqrt n$ |
+| Least squares, worst case | $s_{\min} = 11.43$ (11.18); wrong bits 0, 20, 143, bounds 61.2, 245.0, 1914.0 |
+| Sampling curator, $q = \frac12$ | Kept 250; max error 28.00; bound 106.25; recovered 0.7560 |
+| Information bound, $n = 1000$ | $\gamma = 0.05$: 71.6, 106.9, 141.5; $\gamma = 0.01$: 92.2 |
+| Digit predicates, $\sigma = 4$ | $v = 0.2016$; $n = 73$: 49 of 50 perfect, predicted 0.99950; $n = 142$: 45 of 50, predicted 0.99946; 19.5 for 75% |
+| Census block | 435 and 34 age lists; 14 790, 12 906, 387, 33, 1; @tbl-recon-census-withheld |
 
 : The script's output with the default seed. {#tbl-recon-code}
 
 [tests/test_reconstruction.py](../../tests/test_reconstruction.py) checks that the output still matches.
 
-**What to take from it.** Six things stand out. First, the exponential attack's bound is exact: every surviving candidate is within $4E$ of $d$, and some candidate is at exactly $4E$, so no better guarantee is possible for that attack. Second, the proved constants are pessimistic, but the scaling is not. The theorem tolerates only $E \le 0.17$ at $n = 1000$, yet least squares with $m = 4n$ recovers 96.55% of 500 bits at $\sigma = 5.59$, because both are governed by the same $\sqrt n$ scale and only the proof's constants differ. Third, the least-squares prediction is accurate: @eq-recon-ls-random is within 0.013 of the simulation at every noise level, once the $m - n$ correction is included. Fourth, the sampling curator meets its ceiling: its answers have error $1.25\sqrt n$, and the best decoder gets exactly the people in its sample, plus half of the rest by chance. Fifth, a real query system falls to the same analysis: one-condition "random" queries behave like random subsets, and noise that does not grow with the number of queries is averaged away. Sixth, published tables are systems of equations: eighteen numbers determine seven people's ages, sexes, races and marital statuses.
+## Summary {#sec-recon-summary}
 
-## References
+| Result | Statement | Use |
+| --- | --- | --- |
+| @thm-recon-exponential | All $2^n$ subsets with error $E$: at most $4E$ wrong bits | Against unlimited queries the error must be of order $n$ |
+| @prp-recon-exp-tight | Some curator attains distance $2\lfloor 2E\rfloor$ | Tight only against adversarial errors |
+| @lem-recon-pz | $\Pr[W > \lambda\,\mathbb E[W]] \ge (1 - \lambda)^2\,\mathbb E[W]^2/\mathbb E[W^2]$ | Anti-concentration; Appendix @sec-apx-mat-smin |
+| @lem-recon-anti | $\Pr[\lvert\langle f, z\rangle\rvert > \sqrt{\gamma n}/12] \ge \frac3{16}$ | A random query's threat scale is $\sqrt n$ |
+| @thm-recon-lp | Error $o(\sqrt n)$, $O(n\log n)$ random queries: $o(n)$ wrong bits | The Dinur–Nissim attack; [Lower bounds](../part03-dp-foundations/10-lower-bounds.md) |
+| @prp-recon-ls-worst | Wrong bits $\le 4mE^2/s_{\min}(A)^2$ | Errors aimed at the weakest direction hurt most |
+| @prp-recon-ls-random | Recovered $\approx \Phi(\sqrt{m - n}/(4\sigma))$ | Independent noise must grow like $\sqrt m$ |
+| @prp-recon-sampling | Error $\le \sqrt{n\ln(2m/\beta)/(2q^2)}$; recovery $\le q + \frac{1 - q}{2}$ | Stopping reconstruction is not privacy |
+| @thm-recon-info | $m \ge n(1 - h(\gamma))/\log_2V$ | Any attack needs of order $n/\ln n$ exact counts |
+| @prp-recon-diffix | Recovered $\approx \Phi(\sqrt{v(m - n - 1)}/(2\sigma))$ | Restricting query syntax is no defence |
+| @prp-recon-census | One block fits the published table | Overlapping exact tables are a solvable system |
+
+: The results of this chapter, and where each is used. {#tbl-recon-summary}
+
+## References {#sec-recon-references}
 
 - Dinur & Nissim, "Revealing Information while Preserving Privacy" (PODS 2003). The original attacks: all subset sums with error $o(n)$, and polynomially many random subset sums with error $o(\sqrt n)$ decoded by a linear program. The "blatantly non-private" definition is theirs.
 - Dwork & Roth, *The Algorithmic Foundations of Differential Privacy* (2014), ch. 8. The reconstruction attacks as lower bounds, and the Fundamental Law of Information Recovery.
@@ -516,32 +425,5 @@ uv run python code/part02-attacks/reconstruction.py
 - Garfinkel, Abowd & Martindale, "Understanding Database Reconstruction Attacks on Public Data" (CACM 2019). The seven-person block reconstructed with a solver; the model for @sec-recon-census.
 - Abowd, declaration in *State of Alabama v. US Department of Commerce* (2021), Appendix B. The Census Bureau's reconstruction and re-identification experiment on the 2010 Census.
 - Vershynin, *High-Dimensional Probability* (2018), ch. 4. Singular values of random matrices, used in the worst-case least-squares bound. Muirhead, *Aspects of Multivariate Statistical Theory* (1982), ch. 3, for the inverse-Wishart mean.
-
-## Cheat sheet
-
-$d \in \{0, 1\}^n$ is the secret, $A$ the $m \times n$ 0/1 query matrix, $a = Ad + e$ the answers, $E$ a bound on every $|e_j|$, $\sigma$ the scale of random noise, $\gamma$ a fraction of wrong bits, $\beta$ a failure probability. @tbl-recon-cheat collects the results.
-
-| Result | Statement | Proof idea |
-| --- | --- | --- |
-| Exponential attack | All $2^n$ subsets, error $E$: any consistent $c$ has $\mathrm{dist}(c, d) \le 4E$; tight | Triangle inequality on $S_0$ and $S_1$ |
-| Paley–Zygmund | $\Pr[W > \lambda\,\mathbb E W] \ge (1 - \lambda)^2(\mathbb E W)^2/\mathbb E W^2$ | Split $\mathbb E W$; Cauchy–Schwarz |
-| Anti-concentration lemma | $\gamma n$ entries of $z$ at least $\frac13$: $\Pr[\lvert\langle f, z\rangle\rvert > \sqrt{\gamma n}/12] \ge \frac3{16}$ | Fourth moment $\le 3\times$ squared second moment |
-| Linear-programming decoder | $2E + \frac12 \le \sqrt{\gamma n}/12$ and $m \ge \frac{n\ln(n+1) + \ln(1/\beta)}{\ln(16/13)}$: at most $\gamma n$ wrong bits | Grid of step $1/n$, lemma, union bound |
-| Least squares, worst case | Wrong bits $\le 4mE^2/s_{\min}^2 \approx 16E^2/(1 - \sqrt{n/m})^2$ | $\| A^+e\| \le \| e\|/s_{\min}$ |
-| Least squares, Gaussian noise | Fraction recovered $\approx \Phi(\sqrt{m - n}/(4\sigma))$ | Covariance $\sigma^2(A^\top A)^{-1}$; inverse-Wishart mean |
-| Sampling curator | Error $\le \sqrt{n\ln(2m/\beta)/(2q^2)}$; recovery $\le q + \frac{1 - q}2$ | Hoeffding, union bound; unsampled bits are independent of the answers |
-| Information bound | $m \ge n(1 - h(\gamma))/\log_2V$ | DPI, chain rule, Fano for one bit, concavity of $h$ |
-| Least squares, inclusion rate $\rho$ | Fraction recovered $\approx \Phi(\sqrt{v(m - n - 1)}/(2\sigma))$, $v$ the mean of $\rho(1 - \rho)$ | Gram matrix $m(vI + w\mathbf 1\mathbf 1^\top)$ |
-
-: Every result in this chapter. {#tbl-recon-cheat}
-
-**Rules of thumb**
-
-- The threat scale of a random subset-sum query is $\sqrt n$; of the worst query, $n$. Errors well below that scale reveal the database.
-- Independent noise per answer is averaged away by more answers: to keep reconstruction at bay, the noise must grow like $\sqrt m$.
-- A curator that stops blatant reconstruction can still expose many individuals completely; stopping reconstruction is not the same as privacy.
-- Exact counts carry at most $\log_2(n + 1)$ bits each, so about $n/\ln n$ of them can already determine $n$ bits.
-- Restricting what queries may say is not a defence: any short formula that splits the records independently of their secrets is a random query.
-- Every published table cell is a constraint. Many overlapping tables of exact or nearly exact statistics are a solvable system.
 
 **Practice.** Exercises for this chapter, each with a worked solution, are in [the exercise book](../../book-exercises/part02-attacks/09-reconstruction.md).

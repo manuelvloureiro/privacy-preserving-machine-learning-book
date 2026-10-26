@@ -33,7 +33,7 @@ Here $p = \frac34$.
 
 ## How many users? {#sec-sol-shuf-2}
 
-> **Exercise 2.** **How many users?** Using the normal approximation @eq-shuf-rr-clt and the GDP conversion of Fact 3, estimate how many users $n$ make shuffled randomized response with $\varepsilon_0 = 2$ reach $\varepsilon = 0.1$ at $\delta = 10^{-6}$, then check your $n$ with the exact computation. *Hint: find the $\mu$ whose $\varepsilon$ at $\delta = 10^{-6}$ is 0.1, then solve $2\sinh(1)/\sqrt n = \mu$.* *Check: the approximation gives $n = 7282$; the exact computation needs $n = 7781$.* *(Central limit approximation)*
+> **Exercise 2.** **How many users?** Using the normal approximation @eq-shuf-rr-clt and the exact Gaussian curve of @thm-lg-analytic, estimate how many users $n$ make shuffled randomized response with $\varepsilon_0 = 2$ reach $\varepsilon = 0.1$ at $\delta = 10^{-6}$, then check your $n$ with the exact computation. *Hint: find the $\mu$ whose $\varepsilon$ at $\delta = 10^{-6}$ is 0.1, then solve $2\sinh(1)/\sqrt n = \mu$.* *Check: the approximation gives $n = 7282$; the exact computation needs $n = 7781$.* *(Central limit approximation)*
 
 ::: {.callout-tip collapse="true" title="Solution"}
 1. **Target $\mu$.** The $\varepsilon$ of $\mu$-GDP at fixed $\delta$ increases with $\mu$, so bisection on $\delta(\varepsilon) = \Phi(-\frac\varepsilon\mu + \frac\mu2) - e^\varepsilon\Phi(-\frac\varepsilon\mu - \frac\mu2)$ finds the $\mu$ with $\delta(0.1) = 10^{-6}$: $\mu^* = 0.027545$.
@@ -52,9 +52,9 @@ The approximation undershoots: the exact computation needs 1.069 times as many u
 ::: {.callout-tip collapse="true" title="Solution"}
 1. **The three report distributions,** in 48ths on outputs $(1, 2, 3)$: $R(1) = (32, 8, 8)$, $R(2) = (8, 32, 8)$, $R(3) = (8, 8, 32)$. The largest likelihood ratio is $\frac{32}{8} = 4 = e^{\varepsilon_0}$, so the randomizer is $\ln 4$-DP.
 2. **The clone part** is $\frac{e^{-\varepsilon_0}}2\big(R(1) + R(2)\big) = \frac18(40, 40, 16)/48 = (5, 5, 2)/48$.
-3. **The leftover mass** is $R(3)$ minus the clone part: $(3, 3, 30)/48$, of total $\frac{36}{48} = \frac34 = 1 - e^{-\varepsilon_0}$. Dividing by $\frac34$ gives $\mathrm{LO}(3) = (\frac1{12}, \frac1{12}, \frac56)$. All entries are non-negative, as step 1 of the clone derivation guarantees.
+3. **The leftover mass** is $R(3)$ minus the clone part: $(3, 3, 30)/48$, of total $\frac{36}{48} = \frac34 = 1 - e^{-\varepsilon_0}$. Dividing by $\frac34$ gives $\mathrm{LO}(3) = (\frac1{12}, \frac1{12}, \frac56)$. All entries are non-negative, as @lem-trust-clones guarantees.
 4. **The largest clone probability.** The decomposition with probability $r$ needs $R(x)(y) \ge \frac r2\big(R(x^0)(y) + R(x^1)(y)\big)$ for every output $y$, that is $r \le \min_y\frac{2R(x)(y)}{R(x^0)(y) + R(x^1)(y)}$. For $x = 3$ the binding outputs are 1 and 2: $\frac{2\cdot8}{32 + 8} = \frac25$. For $x = 1$ (a user with your $D$ value) the binding output is 2: $\frac{2\cdot8}{8 + 32} = \frac25$; $x = 2$ is symmetric. So $r = \frac25 = 0.4000$ works for every user, against $e^{-\varepsilon_0} = 0.2500$.
-5. **Why the general argument uses less.** Step 1 of the clone derivation uses only $R(x) \ge e^{-\varepsilon_0}R(x^0)$ and $R(x) \ge e^{-\varepsilon_0}R(x^1)$ separately. Averaging two separate lower bounds wastes slack whenever they are not both tight at the same output. For $k$-ary randomized response they are never both tight, since $R(x^0)$ and $R(x^1)$ peak at different outputs. Binary randomized response at $\varepsilon_0 = \ln 3$ likewise allows $r = 0.5000 = 2/(1 + e^{\varepsilon_0})$, above $e^{-\varepsilon_0} = \frac13$.
+5. **Why the general argument uses less.** The proof of @lem-trust-clones uses only $R(x) \ge e^{-\varepsilon_0}R(x^0)$ and $R(x) \ge e^{-\varepsilon_0}R(x^1)$ separately. Averaging two separate lower bounds wastes slack whenever they are not both tight at the same output. For $k$-ary randomized response they are never both tight, since $R(x^0)$ and $R(x^1)$ peak at different outputs. Binary randomized response at $\varepsilon_0 = \ln 3$ likewise allows $r = 0.5000 = 2/(1 + e^{\varepsilon_0})$, above $e^{-\varepsilon_0} = \frac13$.
 
 More clones mean a smaller $\varepsilon$. Section 4 of Feldman, McMillan & Talwar (2021) gives an analysis for specific randomizers that exploits this.
 
@@ -63,16 +63,15 @@ More clones mean a smaller $\varepsilon$. Section 4 of Feldman, McMillan & Talwa
 
 ## The best shift schedule {#sec-sol-shuf-4}
 
-> **Exercise 4.** **The best shift schedule.** Show that among payments $a_1, \dots, a_m \ge 0$ with $\sum_ka_k = z$, the even schedule minimizes $\sum_k\alpha a_k^2/(2\sigma^2)$, and derive Theorem 23 from it. *Check: with $z = 1$, $\sigma = 1$, $\alpha = 2$, the schedule $(0.8, 0.2)$ costs 0.6800 against 0.5000 for $(0.5, 0.5)$.* Then let one record be used at steps 1 and 4 of a four-step run of translations (two passes), with shift 1 each time. Show that the even schedule is not allowed and find the best one. *Check: $(\frac13, \frac13, \frac13, 1)$, cost 1.3333.* *(Cauchy–Schwarz, shift reduction)*
+> **Exercise 4.** **The best shift schedule.** Step 3 of the proof of @thm-shuf-sgd shows that even payments are the cheapest way to pay off one shift $z$. Check this on two payments. *Check: with $z = 1$, $\sigma = 1$, $\alpha = 2$, the schedule $(0.8, 0.2)$ costs 0.6800 against 0.5000 for $(0.5, 0.5)$.* Then let one record be used at steps 1 and 4 of a four-step run of translations (two passes), with shift 1 each time. Show that the even schedule is not allowed and find the best one. *Check: $(\frac13, \frac13, \frac13, 1)$, cost 1.3333.* *(Cauchy–Schwarz, shift reduction)*
 
 ::: {.callout-tip collapse="true" title="Solution"}
 **One use.**
 
-1. **Cauchy–Schwarz.** $z = \sum_k1\cdot a_k \le \sqrt m\sqrt{\sum_ka_k^2}$, so $\sum_ka_k^2 \ge z^2/m$, with equality when all $a_k$ are equal.
-2. **The cost.** $\frac{\alpha}{2\sigma^2}\sum_ka_k^2 \ge \frac{\alpha z^2}{2m\sigma^2}$, attained by $a_k = z/m$. With $z = 1$, $\sigma = 1$, $\alpha = 2$, $m = 2$: $(0.5, 0.5)$ costs 0.5000 and $(0.8, 0.2)$ costs $0.64 + 0.04 = 0.6800$.
-3. **Theorem 23.** For the record at step $t$ of $n$, the two runs differ by $s \le 2\eta G$ at step $t$ only, and the noise in parameter space has standard deviation $\eta\sigma$. Before step $t$ nothing needs paying ($a_k = 0$). From step $t$ on there are $m = n - t + 1$ noisy steps, and the even schedule keeps every remaining shift $z_k$ non-negative and ends at 0. The cost is $\frac{\alpha(2\eta G)^2}{2(n - t + 1)\eta^2\sigma^2} = \frac{2\alpha G^2}{\sigma^2(n - t + 1)}$.
+1. **The bound.** By the Cauchy–Schwarz step of the proof of @thm-shuf-sgd, $m$ payments that total $z$ cost at least $\frac{\alpha z^2}{2m\sigma^2}$, attained by $a_k = z/m$. With $z = 1$, $\sigma = 1$, $\alpha = 2$ and $m = 2$ that minimum is 0.5000.
+2. **The two schedules.** Each payment costs $\alpha a_k^2/(2\sigma^2) = a_k^2$ here (@eq-shuf-gauss-cost). So $(0.5, 0.5)$ costs 0.5000, the minimum, and $(0.8, 0.2)$ costs $0.64 + 0.04 = 0.6800$.
 
-**Two uses.** Now $s_1 = s_4 = 1$, $s_2 = s_3 = 0$, and Theorem 22 needs $z_t = \sum_{i\le t}(s_i - a_i) \ge 0$ for every $t$ and $z_4 = 0$.
+**Two uses.** Now $s_1 = s_4 = 1$, $s_2 = s_3 = 0$, and @thm-shuf-chain needs $z_t = \sum_{i\le t}(s_i - a_i) \ge 0$ for every $t$ and $z_4 = 0$.
 
 1. **The even schedule fails.** Paying $\frac24 = 0.5$ at every step gives $z = (0.5, 0, -0.5, 0)$. At step 3 more has been paid than has arrived, which the shifted divergence does not allow: you cannot pay off a shift before the record creates it.
 2. **The constraint.** Since $z_3 = 1 - (a_1 + a_2 + a_3) \ge 0$, the first three payments total $S \le 1$, and $a_4 = 2 - S$.
@@ -85,28 +84,24 @@ For translations the exact value is smaller: the final means differ by 2 and the
 
 ## The hidden-state limit {#sec-sol-shuf-5}
 
-> **Exercise 5.** **The hidden-state limit.** Derive the limit in @eq-shuf-last-iterate and find the number of steps after which full-batch noisy GD with $c = 0.9$ and $s/\sigma = 1$ is within 1% of its limit. Show that the number of steps needed grows like $1/(1 - c)$. *Check: the limit is 4.3589, and $\mu_T$ is within 1% of it from $T = 44$.* *(Geometric series)*
+> **Exercise 5.** **The hidden-state limit.** Starting from the limit in @eq-shuf-last-iterate, find the number of steps after which full-batch noisy GD with $c = 0.9$ and $s/\sigma = 1$ is within 1% of its limit. Show that the number of steps needed grows like $1/(1 - c)$. *Check: the limit is 4.3589, and $\mu_T$ is within 1% of it from $T = 44$.* *(Geometric series)*
 
 ::: {.callout-tip collapse="true" title="Solution"}
-1. **The two sums.** With $t = 1$, the mean difference is $s\sum_{k=1}^Tc^{T-k} = s\frac{1 - c^T}{1 - c}$, and the variance is $\sigma^2\sum_{j=0}^{T-1}c^{2j} = \sigma^2\frac{1 - c^{2T}}{1 - c^2}$ (geometric series).
-2. **The ratio.** $\mu_T = \frac s\sigma\cdot\frac{1 - c^T}{1 - c}\sqrt{\frac{1 - c^2}{1 - c^{2T}}} = \frac s\sigma\sqrt{\frac{1 + c}{1 - c}}\cdot\frac{1 - c^T}{\sqrt{1 - c^{2T}}}$, using $1 - c^2 = (1 - c)(1 + c)$.
-3. **The limit.** For $0 \le c < 1$, $c^T \to 0$, so $\mu_T \to \frac s\sigma\sqrt{\frac{1 + c}{1 - c}}$. At $c = 0.9$: $\sqrt{19} = 4.3589$.
-4. **The approach.** The correction factor is $g(T) = \frac{1 - c^T}{\sqrt{1 - c^{2T}}} = \sqrt{\frac{1 - c^T}{1 + c^T}}$ (divide $1 - c^{2T} = (1 - c^T)(1 + c^T)$). For small $c^T$, $g \approx 1 - c^T$. So $g \ge 0.99$ needs roughly $c^T \le 0.01$, that is $T \ge \ln 100/\ln(1/c) \approx 4.61/(1 - c)$, using $\ln(1/c) \approx 1 - c$ for $c$ near 1.
-5. **Numerically.** The script finds the first $T$ with $\mu_T \ge 0.99\lim\mu$: 44 steps for $c = 0.9$ and 458 for $c = 0.99$ (limit 14.1067). Times $1 - c$ these are 4.40 and 4.58, close to $\ln 100 = 4.61$.
+1. **The ratio to the limit.** Step 5 of the proof of @thm-shuf-quadratic writes $\mu_T$ with the geometric sums $(1 - c^T)/(1 - c)$ and $(1 - c^{2T})/(1 - c^2)$. Using $1 - c^2 = (1 - c)(1 + c)$, that is $\mu_T = \frac s\sigma\sqrt{\frac{1 + c}{1 - c}}\cdot\frac{1 - c^T}{\sqrt{1 - c^{2T}}}$, the limit times a correction factor. At $c = 0.9$ the limit is $\sqrt{19} = 4.3589$.
+2. **The approach.** The correction factor is $g(T) = \frac{1 - c^T}{\sqrt{1 - c^{2T}}} = \sqrt{\frac{1 - c^T}{1 + c^T}}$ (divide $1 - c^{2T} = (1 - c^T)(1 + c^T)$). For small $c^T$, $g \approx 1 - c^T$. So $g \ge 0.99$ needs roughly $c^T \le 0.01$, that is $T \ge \ln 100/\ln(1/c) \approx 4.61/(1 - c)$, using $\ln(1/c) \approx 1 - c$ for $c$ near 1.
+3. **Numerically.** The script finds the first $T$ with $\mu_T \ge 0.99\lim\mu$: 44 steps for $c = 0.9$ and 458 for $c = 0.99$ (limit 14.1067). Times $1 - c$ these are 4.40 and 4.58, close to $\ln 100 = 4.61$.
 
 *The last iterate forgets at the rate the optimizer contracts. After a few multiples of $1/(1 - c)$ steps, more training costs no more privacy.*
 :::
 
 ## Where the plateau starts {#sec-sol-shuf-6}
 
-> **Exercise 6.** **Where the plateau starts.** In @eq-shuf-plateau, show that the minimum over $m$ is at $m = d_K/s$ when $d_K/s$ is an integer, that the plateau is $2\alpha d_Ks/\sigma^2$, and that the bound leaves composition at $T = 4d_K/s$. Evaluate both at $d_K = 1$, $s = 0.01$, $\sigma = 0.1$ and $\alpha = 2$. *Check: plateau 4.0000, starting at $T = 400$.* *(Optimizing a schedule)*
+> **Exercise 6.** **Where the plateau starts.** Step 5 of the proof of @prp-shuf-plateau puts the best window at $m = d_K/s$, available once $T \ge d_K/s$. Show that the bound @eq-shuf-plateau nevertheless follows composition until $T = 4d_K/s$, and evaluate the plateau and that step at $d_K = 1$, $s = 0.01$, $\sigma = 0.1$ and $\alpha = 2$. *Check: plateau 4.0000, starting at $T = 400$.* *(Optimizing a schedule)*
 
 ::: {.callout-tip collapse="true" title="Solution"}
-1. **Expand.** $h(m) = \frac{(d_K + ms)^2}m = \frac{d_K^2}m + 2d_Ks + ms^2$.
-2. **Minimize.** $h'(m) = -\frac{d_K^2}{m^2} + s^2 = 0$ at $m = d_K/s$, and $h'' = 2d_K^2/m^3 > 0$, so it is a minimum over real $m > 0$: $h(d_K/s) = d_Ks + 2d_Ks + d_Ks = 4d_Ks$. When $d_K/s$ is an integer this $m$ is allowed. (Otherwise take the better of the two integer neighbours, which costs less than an extra $s^2$; here $d_K/s = 100$ is an integer.)
-3. **The plateau.** $\frac{\alpha}{2\sigma^2}\cdot 4d_Ks = \frac{2\alpha d_Ks}{\sigma^2}$, independent of $T$, available once $T \ge d_K/s$.
-4. **Where it beats composition.** The composition term is $\frac{\alpha Ts^2}{2\sigma^2}$. It equals the plateau when $Ts^2 = 4d_Ks$, at $T = 4d_K/s$. For $d_K/s \le T < 4d_K/s$, the minimum over $m \le T$ is still $4d_Ks$, but composition is smaller, so the bound follows composition until $T = 4d_K/s$.
-5. **Numbers.** $m^* = 100$, the plateau is $2\cdot2\cdot1\cdot0.01/0.1^2 = 4.0000$, and it starts at $T = 400$. The script gives the bound as 3.9900 at $T = 399$ (composition), 4.0000 at $T = 400$, and 4.0000 at $T = 10{,}000$.
+1. **The plateau.** By step 5 of the proof of @prp-shuf-plateau, the best window $m = d_K/s$ costs $h(d_K/s) = 4d_Ks$, where $h(m) = (d_K + ms)^2/m$, so the plateau is $\frac{\alpha}{2\sigma^2}\cdot 4d_Ks = \frac{2\alpha d_Ks}{\sigma^2}$, independent of $T$. Here $d_K/s = 100$ is an integer, so that window is allowed.
+2. **Where it beats composition.** The composition term is $\frac{\alpha Ts^2}{2\sigma^2}$. It equals the plateau when $Ts^2 = 4d_Ks$, at $T = 4d_K/s$. For $d_K/s \le T < 4d_K/s$, the minimum over $m \le T$ is still $4d_Ks$, but composition is smaller, so the bound follows composition until $T = 4d_K/s$.
+3. **Numbers.** $m^* = 100$, the plateau is $2\cdot2\cdot1\cdot0.01/0.1^2 = 4.0000$, and it starts at $T = 400$. The script gives the bound as 3.9900 at $T = 399$ (composition), 4.0000 at $T = 400$, and 4.0000 at $T = 10{,}000$.
 
 *Only the last $d_K/s$ steps are paid for: the steps before are summarized by a starting point somewhere in the domain.*
 :::

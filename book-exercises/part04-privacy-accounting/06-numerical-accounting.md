@@ -10,8 +10,8 @@ The solutions use the chapter's notation. $P$ and $Q$ are the output distributio
 
 ::: {.callout-tip collapse="true" title="Solution"}
 1. **The swapped loss.** For the pair $(Q, P)$ the privacy loss is $\ln\frac{Q(y)}{P(y)} = -L(y)$, and its PLD is the law of $-L(Y)$ with $Y \sim Q$.
-2. **Split $Q$ by the support of $P$.** Where $P(y) > 0$, Fact 1 of the chapter gives $Q(y) = e^{-L(y)}P(y)$. So for any set $A$ of finite losses, $\Pr_Q[L \in A] = \int_Ae^{-\ell}\omega(\mathrm d\ell)$, and $-L$ takes the value $-\ell$ with that weight.
-3. **The rest of $Q$.** The $Q$-mass where $P(y) = 0$ is $1 - Q(P > 0) = 1 - \mathbb E_\omega[e^{-L}]$. There $Q/P = \infty$, so the swapped loss is $+\infty$.
+2. **The law of $L$ under $Q$.** @thm-num-delta gives it: $e^{-\ell}\omega(\mathrm d\ell)$ on the finite losses, so $-L$ takes the value $-\ell$ with that weight.
+3. **The rest of $Q$.** The same theorem puts the remaining mass $1 - \mathbb E_\omega[e^{-L}]$ where $P(y) = 0$, at $L = -\infty$. There $Q/P = \infty$, so the swapped loss is $+\infty$.
 4. **The subsampled Gaussian.** The add pair $(\mathcal N(0, \sigma^2), \text{mixture})$ is the remove pair (mixture, $\mathcal N(0, \sigma^2)$) swapped. By steps 2 and 3 its PLD is the remove PLD tilted by $e^{-\ell}$ and reflected. One accountant run can serve both directions.
 5. **The Gaussian pair.** Tilting $\mathcal N(\frac{\mu^2}2, \mu^2)$ by $e^{-\ell}$ and normalizing gives $\mathcal N(\frac{\mu^2}2 - \mu^2, \mu^2) = \mathcal N(-\frac{\mu^2}2, \mu^2)$: complete the square in $-\frac{(\ell - m)^2}{2v} - \ell = -\frac{(\ell - m + v)^2}{2v} + \text{const}$. Here $\mathbb E[e^{-L}] = e^{-m + v/2} = 1$, so the tilt needs no normalization and there is no atom. Reflecting gives $\mathcal N(\frac{\mu^2}2, \mu^2)$ again.
 
@@ -57,11 +57,10 @@ The rounded-up remove PLD has $\mathbb E[e^{-L}] = 0.999995$, so the swap puts $
 > **Exercise 3.** **The sandwich width.** Show that, without truncation, $\varepsilon^\uparrow(\delta) - \varepsilon^\downarrow(\delta) \le kh$, with equality when no loss lies on the grid and $\varepsilon^\downarrow(\delta) > 0$. When is the width zero? *Check: for three-fold randomized response with $\varepsilon_0 = \ln 3$ at $\delta = 0.3$, the width is 1.5000 for $h = 0.5$, 0.3000 for $h = 0.1$, and 0 for $h = \ln 3/2$.* *(Coupling)*
 
 ::: {.callout-tip collapse="true" title="Solution"}
-1. **Couple the roundings.** Draw the true per-step losses $L_1, \dots, L_k$ and round each up and down. Since $\lceil x\rceil - \lfloor x\rfloor \le 1$, $L_i^\uparrow \le L_i^\downarrow + h$, so the totals satisfy $S^\uparrow \le S^\downarrow + kh$.
-2. **Shift $\delta$.** Write $g_\varepsilon(\ell) = (1 - e^{\varepsilon - \ell})_+$. Then $g_\varepsilon(s + c) = g_{\varepsilon - c}(s)$. With step 1 and monotonicity, $\delta^\uparrow(\varepsilon) = \mathbb E[g_\varepsilon(S^\uparrow)] \le \mathbb E[g_\varepsilon(S^\downarrow + kh)] = \delta^\downarrow(\varepsilon - kh)$.
-3. **Invert.** At $\varepsilon = \varepsilon^\downarrow(\delta) + kh$, step 2 gives $\delta^\uparrow \le \delta^\downarrow(\varepsilon^\downarrow(\delta)) \le \delta$, so $\varepsilon^\uparrow(\delta) \le \varepsilon^\downarrow(\delta) + kh$.
-4. **Equality.** If no loss lies on the grid, $\lceil x\rceil - \lfloor x\rfloor = 1$ for every loss, so $S^\uparrow = S^\downarrow + kh$ exactly, step 2 is an equality, and the two $\delta$ curves are shifts of each other. Their crossing points with level $\delta$ differ by exactly $kh$, unless the lower one is cut off at $\varepsilon = 0$.
-5. **Zero width.** If every loss is on the grid, both roundings return the true PLD and the width is 0. For randomized response, the losses $\pm\ln 3$ are on the grid when $h = \ln 3/j$ for an integer $j$.
+1. **The inequality.** Part 2 of @thm-num-sandwich proves it: coupling the roundings gives totals with $S^\uparrow \le S^\downarrow + kh$, and since $g_\varepsilon(\ell) = (1 - e^{\varepsilon - \ell})_+$ satisfies $g_\varepsilon(s + c) = g_{\varepsilon - c}(s)$, this gives $\delta^\uparrow(\varepsilon) \le \delta^\downarrow(\varepsilon - kh)$.
+2. **Invert.** At $\varepsilon = \varepsilon^\downarrow(\delta) + kh$, step 1 gives $\delta^\uparrow \le \delta^\downarrow(\varepsilon^\downarrow(\delta)) \le \delta$, so $\varepsilon^\uparrow(\delta) \le \varepsilon^\downarrow(\delta) + kh$.
+3. **Equality.** If no loss lies on the grid, $\lceil x\rceil - \lfloor x\rfloor = 1$ for every loss, so $S^\uparrow = S^\downarrow + kh$ exactly, the inequality of step 1 is an equality, and the two $\delta$ curves are shifts of each other. Their crossing points with level $\delta$ differ by exactly $kh$, unless the lower one is cut off at $\varepsilon = 0$.
+4. **Zero width.** If every loss is on the grid, both roundings return the true PLD and the width is 0. For randomized response, the losses $\pm\ln 3$ are on the grid when $h = \ln 3/j$ for an integer $j$.
 
 **Concretely,** for three-fold randomized response (@tbl-sol-num-width).
 
@@ -83,7 +82,7 @@ The widths are $3.2583 - 1.7583 = 1.5$ and $2.0583 - 1.7583 = 0.3$, that is $3h$
 > **Exercise 4.** **Wraparound.** Show that the $k$-th power of the discrete Fourier transform on a circular window of $N$ bins computes the PLD of the total loss reduced modulo $Nh$ into the window, and that the error in $\delta(\varepsilon)$ is at most the mass of the composed PLD outside the window. Use Chebyshev's inequality to choose a window for ten Gaussian steps with $\mu = 1$. *Check: a window of width 20 around the mean has mass $1.57\text{e-}03$ outside it (Chebyshev: 0.1000), and an actual $\delta(1)$ error of $9.27\text{e-}06$.* *(Circular convolution, Chebyshev)*
 
 ::: {.callout-tip collapse="true" title="Solution"}
-1. **Circular convolution.** By Fact 3 of the chapter, multiplying transforms of length $N$ convolves with indices added modulo $N$. Applied $k - 1$ times, total index $n$ lands at $n \bmod N$. Placing the window at grid points $s, \dots, s + N - 1$ means each total loss $\ell$ lands at the unique point of the window congruent to $\ell$ modulo $Nh$.
+1. **Circular convolution.** @prp-num-fft shows that a window of $N$ bins reduces the total loss modulo $Nh$. Placing the window at grid points $s, \dots, s + N - 1$ means each total loss $\ell$ lands at the unique point of the window congruent to $\ell$ modulo $Nh$.
 2. **Mass inside the window is untouched.** A total that is already in the window is its own residue, so its mass is in the right place.
 3. **Error bound.** Write $\delta = \sum_\ell m_\ell\,g(\ell)$ with $0 \le g \le 1$. Wraparound moves only the mass $m_{\text{out}}$ outside the window, and each moved unit changes its weight $g$ by at most 1 in absolute value. So $|\delta_{\text{circ}} - \delta| \le m_{\text{out}}$.
 4. **Chebyshev.** The composed PLD has mean $k\mu^2/2 = 5$ and variance $k\mu^2 = 10$. For a window of width $W$ centred at the mean, $\Pr_P[|S - 5| \ge W/2] \le 10/(W/2)^2$. For this to be at most $\tau$ you need $W \ge 2\sqrt{10/\tau}$. For an error of at most $\tau = 10^{-5}$, that is $W \ge 2\sqrt{10/10^{-5}} = 2000$, a hundred times wider than the width 20 that already gives an error of $9.27\text{e-}06$ (@tbl-sol-num-wrap). Chebyshev is safe but very wasteful here.
@@ -123,4 +122,19 @@ Every actual error is below the mass outside the window, as step 3 requires, and
 4. **Why not add values of $\varepsilon$.** Adding $(\varepsilon_1, \delta_1)$ and $(\varepsilon_2, \delta_2)$ is basic composition. It would need a $\delta$ for each part, and the Gaussian's loss is unbounded, so on its own it needs $\varepsilon = 0.3407$ at $\delta = 10^{-5}$, while the convolution adds only $1.8749 - 1.8332 = 0.0417$. The convolution instead adds a loss with mean $0.005$ and standard deviation 0.1 to the DP-SGD loss, which barely moves the tail. On the pessimistic side the final release costs 0.0417 in $\varepsilon$, about an eighth of its stand-alone 0.3407.
 
 *PLDs compose any mix of mechanisms exactly; only their discretization costs anything.*
+:::
+
+## Why a short window errs upwards {#sec-sol-num-6}
+
+> **Exercise 6.** **Why a short window errs upwards.** Ten Gaussian steps with $\mu = 1$ have the PLD $\mathcal N(5, 10)$. Composed on a circular window from loss 0 to 10 with $h = 10^{-3}$, they give $\delta(1) = 0.83478562$, against 0.81891018 with padding. Explain why the wrapped value is too large here, and why the sign of a wraparound error is unknown in general. *Check, from the chapter's script: each tail beyond the window has mass $\Phi(-5/\sqrt{10}) = 0.0569$, and a share 0.51 of the mass above 10 lies above 11.* *(Circular convolution, the weight of a loss)*
+
+::: {.callout-tip collapse="true" title="Solution"}
+1. **Where the outside mass goes.** By @prp-num-fft the window reduces each total loss modulo 10. A total below 0 lands 10 higher, near the top of the window, and a total above 10 lands 10 lower, near the bottom.
+2. **The two tails are equal.** The composed PLD has standard deviation $\sqrt{10} = 3.162$, and the window reaches 5 on either side of the mean. So each tail has mass $\Phi(-5/\sqrt{10}) = \Phi(-1.581) = 0.0569$.
+3. **The lower tail gains weight.** At $\varepsilon = 1$ the weight $g(\ell) = (1 - e^{1 - \ell})_+$ is 0 for every negative total, so these totals counted nothing towards $\delta(1)$. Most of their mass lies just below 0 and wraps to just below 10, where the weight is close to 1, for example $1 - e^{-8} = 0.9997$ at $\ell = 9$. So the window gains nearly the whole 0.0569.
+4. **The upper tail loses less.** Totals above 10 had weights close to 1. Those between 10 and 11 land between 0 and 1, below $\varepsilon$, and lose their whole weight. But a share 0.51 of the upper tail lies above 11, lands above 1, and keeps part of its weight. So the window loses less than 0.0569.
+5. **The net error.** The gain exceeds the loss, so the wrapped $\delta(1)$ is too large, by $0.83478562 - 0.81891018 = 0.0159$. This is the error of $1.59\text{e-}02$ in @tbl-sol-num-wrap, below the mass outside the window, as Exercise 4 requires.
+6. **The sign in general.** The sign depends on how much mass each tail holds and on where it lands relative to $\varepsilon$. A window placed off the mean, or a different $\varepsilon$, can make the lost weight exceed the gained weight. So the wraparound error has no known sign and cannot be part of a certified bound.
+
+*A wrapped answer can be too large or too small. Only padding, or truncation in the safe directions, keeps the sign of the error known.*
 :::

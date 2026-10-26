@@ -11,7 +11,7 @@ The solutions use the chapter's notation. Stochastic gradient descent (SGD) with
 ::: {.callout-tip collapse="true" title="Solution"}
 1. **Three numbers.** The improved conversion is an upper bound on what the RDP curve certifies, the optimal conversion is exactly what it certifies, and the PLD upper bound is what the real pair certifies, up to the grid. Always
 $$\varepsilon_{\text{improved}} - \varepsilon^\uparrow_{\text{PLD}} = \underbrace{(\varepsilon_{\text{improved}} - \varepsilon_{\text{optimal}})}_{\text{conversion slack}} + \underbrace{(\varepsilon_{\text{optimal}} - \varepsilon^\uparrow_{\text{PLD}})}_{\text{curve slack}},$$
-The conversion slack is non-negative by @eq-choose-order. The curve slack is not covered by the theory: the pessimistic PLD may exceed the true $\varepsilon$ by up to $Th$, so in general the curve slack is only $\ge -Th$ (without truncation). On this example it is non-negative at every $T$, and the script of the chapter checks it.
+The conversion slack is non-negative by the first chain of @thm-choose-order. The curve slack is not covered by the theorem, which bounds it only below by $-Th$ (without truncation). On this example it is non-negative at every $T$, and the chapter's script checks it.
 2. **The numbers** are in @tbl-sol-choose-slack.
 
 | $T$ | Best order | RDP, improved | RDP, optimal | PLD upper | Conversion slack | Curve slack |
@@ -23,7 +23,7 @@ The conversion slack is non-negative by @eq-choose-order. The curve slack is not
 : Splitting the excess of the RDP accountant over the PLD upper bound. {#tbl-sol-choose-slack}
 
 3. **Why the conversion dominates at $T = 1$.** The improved conversion at order $\alpha$ is $T\,\varepsilon(\alpha) + \ln\frac{\alpha - 1}{\alpha} - \frac{\ln\delta + \ln\alpha}{\alpha - 1}$. Its last term contains $\ln(1/\delta)/(\alpha - 1)$, which does not depend on $T$ or on the mechanism. At the best order 9.9 it is $\ln(10^5)/8.9 = 1.2936$, far more than the true $\varepsilon$, which the PLD puts at 0.1995 (to four decimals). The curve term $\varepsilon(9.9)$ is tiny for one step. To shrink the fixed cost, the conversion would need a larger order, but at orders above about 10 the subsampled curve explodes (@sec-sub-small-q). The improved conversion's correction terms win back some of this, and the optimal conversion more, but every conversion from the curve must pay for not knowing the distribution beyond its moments.
-4. **Why it vanishes at large $T$.** At $T = 10{,}000$ the best order is 4.1, and the curve $T\,\varepsilon(\alpha)$ is large. The optimal conversion then matches the improved one to four decimals, as chapter 30 found for the Gaussian at every $\mu$. What remains, 0.4750, is the curve slack: pairs other than the subsampled Gaussian have the same RDP curve and a larger $\delta$.
+4. **Why it vanishes at large $T$.** At $T = 10{,}000$ the best order is 4.1, and the curve $T\,\varepsilon(\alpha)$ is large. The optimal conversion then matches the improved one to four decimals, as [the conversions chapter](../../book-full/part04-privacy-accounting/02-rdp-conversions.md) found for the Gaussian at every $\mu$. What remains, 0.4750, is the curve slack: pairs other than the subsampled Gaussian have the same RDP curve and a larger $\delta$.
 
 *For short runs, a better conversion would help; for long runs, only a better summary than the RDP curve helps, and the PLD is that summary.*
 :::
@@ -33,7 +33,7 @@ The conversion slack is non-negative by @eq-choose-order. The curve slack is not
 > **Exercise 2.** **Steps under a budget.** With $q = 0.01$, $\sigma = 1$ and a budget of $\varepsilon = 3$ at $\delta = 10^{-5}$, find the largest number of steps each accountant allows: RDP with the improved conversion, the PLD upper bound, and the CLT. Is the CLT's answer safe? *Check: 2195, 2643 and 3009 steps; at 3009 steps the PLD lower bound is 3.1823.* *(Monotonicity in $T$, binary search)*
 
 ::: {.callout-tip collapse="true" title="Solution"}
-1. **Monotonicity in $T$.** Running one more step is never more private: the $T$-step transcript is a post-processing (a projection) of the $(T + 1)$-step one. Every divergence, and so every bound in this part, is non-decreasing in $T$. The largest admissible $T$ is therefore well defined, and binary search over the integers finds it.
+1. **Monotonicity in $T$.** No correct accountant's $\varepsilon$ decreases as $T$ grows (@prp-choose-checks, property 4). The largest admissible $T$ is therefore well defined, and binary search over the integers finds it.
 2. **RDP.** Binary search gives $T = 2195$: the accountant reports 3.0000 there (to four decimals, and at most 3) and 3.0006 at 2196 steps.
 3. **PLD.** Binary search with the pessimistic PLD, recomposed at each trial $T$, gives $T = 2643$: 2.9995 there and 3.0001 at 2644.
 4. **CLT.** The CLT has a closed form. Find the $\mu^*$ whose GDP profile gives $\varepsilon = 3$ at $\delta$, then $q^2T(e^{1/\sigma^2} - 1) \le \mu^{*2}$ gives $T = \lfloor(\mu^*/q)^2/(e^{1/\sigma^2} - 1)\rfloor = 3009$.

@@ -6,8 +6,8 @@ The two chapters both call their matrix $A$, but it is a different matrix in eac
 
 | Result | Where the chapter states or uses it |
 | --- | --- |
-| The average inverse of a Gram matrix with Gaussian rows is $\Sigma^{-1}/(m - n - 1)$ | @sec-recon-ls, step 4 of the random-noise derivation; @sec-recon-diffix, step 4 |
-| A random subset matrix has $s_{\min}(A) \ge \sqrt m/14$ once $m$ is of order $n\ln n$ | @sec-recon-ls, the worst-case bound @eq-recon-ls-worst and step 5 |
+| The average inverse of a Gram matrix with Gaussian rows is $\Sigma^{-1}/(m - n - 1)$ | @prp-recon-ls-random, step 4 of its proof; @prp-recon-diffix, step 4 of its proof |
+| A random subset matrix has $s_{\min}(A) \ge \sqrt m/14$ once $m$ is of order $n\ln n$ | @sec-recon-ls, the worst-case bound @eq-recon-ls-worst (@prp-recon-ls-worst) and the paragraph after it |
 | The prefix-sum matrix: singular values, trace-norm duality, the square root's coefficients, how close the square root is to optimal | @sec-mfac-mechanism, steps 5 and 6; @sec-mfac-sqrt, step 6 and the comparison with the lower bound |
 | The optimal factorization for the root-mean-square error | @sec-mfac-sqrt, "The optimal factorization" |
 | Lower-triangular factors lose nothing; several adaptive participations | @sec-mfac-mechanism, step 3 and "Streaming needs lower-triangular factors"; @sec-mfac-epochs, step 3 |
@@ -18,7 +18,7 @@ The two chapters both call their matrix $A$, but it is a different matrix in eac
 
 ### What the chapter uses
 
-Least squares turns noisy answers into an estimate, and under random noise its error is set by the inverse of the **Gram matrix** $A^\top A$, the matrix of inner products between the columns of the query matrix. In @sec-recon-ls, step 4 of the random-noise derivation needs the average of that inverse. The chapter uses a result for Gaussian rows. Let $Z$ be an $m \times n$ matrix whose $m$ rows are independent, each a normal vector with mean 0 and covariance matrix $\Sigma$. Then $Z^\top Z$ is called a **Wishart matrix**, and, as long as $m \ge n + 2$,
+Least squares turns noisy answers into an estimate, and under random noise its error is set by the inverse of the **Gram matrix** $A^\top A$, the matrix of inner products between the columns of the query matrix. In @sec-recon-ls, step 4 of the proof of @prp-recon-ls-random needs the average of that inverse. The chapter uses a result for Gaussian rows. Let $Z$ be an $m \times n$ matrix whose $m$ rows are independent, each a normal vector with mean 0 and covariance matrix $\Sigma$. Then $Z^\top Z$ is called a **Wishart matrix**, and, as long as $m \ge n + 2$,
 $$\mathbb E\big[(Z^\top Z)^{-1}\big] = \frac{\Sigma^{-1}}{m - n - 1}.$$ {#eq-apx-mat-wishart}
 Here $m$ is the number of rows, $n$ the number of columns and $\Sigma^{-1}$ the inverse of the covariance. The chapter cites Muirhead (1982, ch. 3) for it. It applies it to rows that are random 0/1 queries $q$, by matching a normal row with the same second-moment matrix, $\Sigma = \mathbb E[qq^\top]$, and it says that for 0/1 rows this is only an approximation. @sec-recon-diffix reuses it in its step 4, which gives @eq-recon-diffix. The chapter checks the final recovery rates by simulation but not the formula itself.
 
@@ -75,7 +75,7 @@ The condition $m \ge n + 2$ is needed. At $m = n + 1$ the residual is a $\chi^2_
 
 ### What the chapter uses
 
-The worst-case bound of @sec-recon-ls, @eq-recon-ls-worst, says that least squares gets at most $4mE^2/s_{\min}(A)^2$ bits wrong when every answer has error at most $E$. Here $s_{\min}(A)$, the **smallest singular value**, is the smallest length $\|Ax\|$ over unit vectors $x$. The bound is useful only if $s_{\min}(A)$ is of order $\sqrt m$. Step 5 there says that for a random matrix $s_{\min}$ "concentrates near $\sqrt m - \sqrt n$ times the scale of the rows" and cites Vershynin, *High-Dimensional Probability*, ch. 4. It then argues by a heuristic that $s_{\min}(A) \approx \frac12(\sqrt m - \sqrt n)$ for random subsets, checks this at one size, and concludes that error $E = o(\sqrt n)$ gives $o(n)$ wrong bits with $m = 4n$ queries.
+The worst-case bound of @sec-recon-ls, @eq-recon-ls-worst, says that least squares gets at most $4mE^2/s_{\min}(A)^2$ bits wrong when every answer has error at most $E$. Here $s_{\min}(A)$, the **smallest singular value**, is the smallest length $\|Ax\|$ over unit vectors $x$. The bound is useful only if $s_{\min}(A)$ is of order $\sqrt m$. The paragraph after @prp-recon-ls-worst says that for random rows $s_{\min}$ "concentrates near $\sqrt m - \sqrt n$ times the scale of the rows" and cites Vershynin, *High-Dimensional Probability*, ch. 4. It then suggests by a heuristic that $s_{\min}(A) \approx \frac12(\sqrt m - \sqrt n)$ for random subsets, checks this at one size, and points here for a proof.
 
 This section proves a version with a worse constant and an extra logarithm, but a complete proof. Let $A$ be an $m \times n$ matrix whose rows are independent uniformly random subsets $q_1, \dots, q_m$, so each entry is an independent fair 0 or 1. For a failure probability $\beta$,
 $$s_{\min}(A) \ge \frac{\sqrt m}{14} \quad\text{with probability at least } 1 - \beta, \quad\text{once}\quad m \ge 128\Big(n\ln(80n + 1) + \ln\frac1\beta\Big).$$ {#eq-apx-mat-smin}
