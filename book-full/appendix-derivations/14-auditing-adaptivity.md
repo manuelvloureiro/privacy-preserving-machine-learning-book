@@ -8,7 +8,7 @@ The four results sit together because they use the same few tools. Each proof co
 
 | Derivation | What it proves | Where the chapter states or uses it |
 | --- | --- | --- |
-| @sec-apx-audit-onerun | Correct guesses in a one-run audit are dominated by a binomial | @sec-audit-onerun, step 4 of the derivation |
+| @sec-apx-audit-onerun | Correct guesses in a one-run audit are dominated by a binomial | @sec-audit-onerun, step 4 of the proof of @thm-audit-onerun |
 | @sec-apx-audit-transfer | Private answers that are accurate on the sample are accurate on the population with high probability | @sec-ada-gauss, the first of the three cited results |
 | @sec-apx-audit-ladder | The Ladder leaderboard's error is of order $(\ln k/n)^{1/3}$ against any analyst | @sec-ada-practice, rule 5 |
 | @sec-apx-audit-recon | An unbiased reconstruction has mean squared error at least $w^2/(4(e^\varepsilon - 1))$ | @sec-epsc-recon, the paragraph on Guo et al. |

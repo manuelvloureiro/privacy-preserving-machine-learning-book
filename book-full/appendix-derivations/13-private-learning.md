@@ -145,7 +145,7 @@ Under these, the order-$\alpha$ divergence of the answer on the dataset from the
 $$D_\alpha\big(P\|P'\big) \le \frac{1}{\alpha - 1}\ln\Big[(1 - \tilde\beta)A^{\alpha - 1} + \tilde\beta B^{\alpha - 1}\Big],\quad A = \frac{1 - \tilde\beta}{1 - (\tilde\beta e^{\varepsilon_2})^{(\alpha_2 - 1)/\alpha_2}},\quad B = \frac{e^{\varepsilon_1}}{\tilde\beta^{1/(\alpha_1 - 1)}}.$$
 Here $D_\alpha$ is the Rényi divergence of order $\alpha$, defined in @eq-pate-renyi by
 $$e^{(\alpha - 1)D_\alpha(P\|P')} = \sum_yP(y)^\alpha P'(y)^{1 - \alpha}.$$
-The chapter derives the simpler pure-DP form @eq-pate-dd-pure and says of the Gaussian form that "its proof is in Papernot et al. (2018, Appendix A)". In step 4 of its derivation, it also uses that the pure-DP bound increases in $\beta$, which step 7 below proves.
+The chapter derives the simpler pure-DP form @eq-pate-dd-pure and says of the Gaussian form that "its proof is in Papernot et al. (2018, Appendix A)". In step 4 of the proof of @thm-pate-dd-pure, it also uses that the pure-DP bound increases in $\beta$, which step 7 below proves.
 
 This section proves the Gaussian bound with the true $\beta$ in place of $\tilde\beta$. It then shows that the largest value over all $\beta \le \tilde\beta$ is a valid bound with no condition at all, and checks that this largest value is the value at $\tilde\beta$ in the chapter's setting. It also proves that the pure-DP bound always increases in $\beta$, which closes the gap in step 4.
 
@@ -209,7 +209,7 @@ $$\varepsilon_M(\alpha) \le \varepsilon(\alpha) + (1 + \nu)\Big(1 - \frac1{\hat\
 
 The chapter derives the generic bound @eq-hpt-generic. For neighbours with run distributions $Q, Q'$,
 $$D_\alpha\big(M(D)\|M(D')\big) \le D_\alpha(Q\|Q') + \frac1{\alpha - 1}\ln\Big[f'(p)^\alpha f'(p')^{1 - \alpha}\Big],$$
-where $p$ and $p'$ are the probabilities that one and the same randomized test accepts a run's output, on $D$ and on $D'$. The chapter takes outputs to be finite and $\Pr[K = 0] = 0$. Its step 9 then says that the truncated negative binomial case follows by bounding the rejection probabilities through the run's RDP at a second order $\hat\alpha$, and that "Papernot & Steinke (2022, Appendix B.2) carry out the algebra". The chapter also quotes their Corollary 3, $(2 + \nu)\varepsilon$-DP for an $\varepsilon$-DP run, and Corollary 4 for zero-concentrated DP runs. This section carries out that algebra and derives both corollaries.
+where $p$ and $p'$ are the probabilities that one and the same randomized test accepts a run's output, on $D$ and on $D'$. The chapter takes outputs to be finite and $\Pr[K = 0] = 0$. For the truncated negative binomial case, @thm-hpt-tnb says that the proof follows the Poisson one, with the rejection probabilities bounded through the run's RDP at a second order $\hat\alpha$, and that "Papernot & Steinke (2022, Appendix B.2) carry out the algebra". The chapter also quotes their Corollary 3, $(2 + \nu)\varepsilon$-DP for an $\varepsilon$-DP run, and Corollary 4 for zero-concentrated DP runs. This section carries out that algebra and derives both corollaries.
 
 ### The idea
 
@@ -219,7 +219,7 @@ Two facts stop that. The run's RDP guarantee says that the neighbour cannot reje
 
 ### Derivation
 
-The steps continue the chapter's derivation, whose steps 1 to 5 give @eq-hpt-generic. Write $r = 1 - p$ and $r' = 1 - p'$ for the probabilities that the test rejects a run's output, on $D$ and $D'$.
+The steps continue the chapter's proof of @thm-hpt-generic, whose steps 1 to 5 give @eq-hpt-generic. Write $r = 1 - p$ and $r' = 1 - p'$ for the probabilities that the test rejects a run's output, on $D$ and $D'$.
 
 1. **The generating function.** The weights of the distribution are $\Pr[K = k] = (1 - \omega)^k\binom{k + \nu - 1}{k}/(\omega^{-\nu} - 1)$ for $k \ge 1$, because $\prod_{j = 0}^{k - 1}\frac{j + \nu}{j + 1} = \binom{k + \nu - 1}k$. The negative binomial series $\sum_{k \ge 0}\binom{k + \nu - 1}kz^k = (1 - z)^{-\nu}$, with the $k = 0$ term removed, gives
 $$f(x) = \frac{(1 - (1 - \omega)x)^{-\nu} - 1}{\omega^{-\nu} - 1}, \qquad f'(x) = \mathbb E[K]\,\omega^{\nu + 1}\,a(x)^{-(\nu + 1)}, \quad a(x) = 1 - (1 - \omega)x.$$
@@ -228,7 +228,7 @@ $$\mathbb E[K] = f'(1) = \frac{\nu(1 - \omega)}{\omega(1 - \omega^\nu)}.$$
 Since $a(1) = \omega$, the formula for $f'$ is consistent at $x = 1$. For $\nu = 0$ the same formulas hold in the limit, where $f$ becomes $\ln(1 - (1 - \omega)x)/\ln\omega$.
 2. **The worst-case term.** Write $a = a(p) = \omega + (1 - \omega)r$ and $a' = a(p') = \omega + (1 - \omega)r'$. The constant $\mathbb E[K]\omega^{\nu + 1}$ appears with total power $\alpha + (1 - \alpha) = 1$, so
 $$f'(p)^\alpha f'(p')^{1 - \alpha} = \mathbb E[K]\omega^{\nu + 1}\big(a^{-\alpha}a'^{\alpha - 1}\big)^{\nu + 1} = \mathbb E[K]\Big(\frac{\omega\,a'^{\alpha - 1}}{a^\alpha}\Big)^{1 + \nu}.$$
-3. **The neighbour cannot reject much more often.** The run is $(\hat\alpha, \hat\varepsilon)$-RDP with $\hat\varepsilon = \varepsilon(\hat\alpha)$, for both orders of every pair of neighbours. The test's verdict, reject or accept, is post-processing of a run's output (Fact 2 of the chapter), so $D_{\hat\alpha}$ between the verdict's distributions on $D'$ and on $D$ is at most $\hat\varepsilon$. Their Rényi sum is at least its "reject" term, so
+3. **The neighbour cannot reject much more often.** The run is $(\hat\alpha, \hat\varepsilon)$-RDP with $\hat\varepsilon = \varepsilon(\hat\alpha)$, for both orders of every pair of neighbours. The test's verdict, reject or accept, is post-processing of a run's output (@thm-rdp-post), so $D_{\hat\alpha}$ between the verdict's distributions on $D'$ and on $D$ is at most $\hat\varepsilon$. Their Rényi sum is at least its "reject" term, so
 $$r'^{\hat\alpha}r^{1 - \hat\alpha} \le e^{(\hat\alpha - 1)\hat\varepsilon}, \qquad\text{so}\qquad r' \le e^{s\hat\varepsilon}r^s, \quad s = 1 - \frac1{\hat\alpha}.$$
 4. **Carry it to $a'$.** Since $e^{s\hat\varepsilon} \ge 1$, step 3 gives
 $$a' \le \omega + (1 - \omega)e^{s\hat\varepsilon}r^s \le e^{s\hat\varepsilon}\big(\omega\cdot 1^s + (1 - \omega)r^s\big) \le e^{s\hat\varepsilon}\big(\omega + (1 - \omega)r\big)^s = e^{s\hat\varepsilon}a^s.$$
@@ -247,7 +247,7 @@ which is at least 1 when $\rho \le \ln(1/\omega)$. So
 $$\varepsilon_M(\alpha) \le \rho\alpha + \frac{\ln\mathbb E[K]}{\alpha - 1} + 2(1 + \nu)\sqrt{\rho\ln(1/\omega)} - (1 + \nu)\rho.$$
 By the same rule, applied to $\rho(\alpha - 1) + \ln\mathbb E[K]/(\alpha - 1)$, the first two terms are smallest at the order
 $$\alpha^* = 1 + \sqrt{\frac{\ln\mathbb E[K]}{\rho}},$$
-where they equal $\rho + 2\sqrt{\rho\ln\mathbb E[K]}$. Adding up gives the chapter's closed form, $2\sqrt{\rho\ln\mathbb E[K]} + 2(1 + \nu)\sqrt{\rho\ln(1/\omega)} - \nu\rho$, at $\alpha^*$. The Rényi divergence grows with the order, so the bound at $\alpha^*$ also holds at every order $\alpha \le \alpha^*$.
+where they equal $\rho + 2\sqrt{\rho\ln\mathbb E[K]}$. Adding up gives the closed form of Papernot & Steinke's Corollary 4, which the chapter mentions, $2\sqrt{\rho\ln\mathbb E[K]} + 2(1 + \nu)\sqrt{\rho\ln(1/\omega)} - \nu\rho$, at $\alpha^*$. The Rényi divergence grows with the order, so the bound at $\alpha^*$ also holds at every order $\alpha \le \alpha^*$.
 
 ### Checking it
 
@@ -336,13 +336,13 @@ The argument needs an integer order, because step 4 multiplies out the $\alpha$-
 
 ### What the chapter uses
 
-[Disparate impact](../part05-dp-ml/08-disparate-impact.md) splits the records into groups $g$ with shares $s_g$, and asks why DP-SGD hurts small groups more. In @sec-fair-noise it describes in words a result of Tran, Dinh & Fioretto (2021). The expected change in a group's loss in one step has a clipping term, driven by the group's gradient norms, and a noise term proportional to $\eta^2\sigma^2C^2$ times the trace of the group's loss Hessian. Here $\eta$ is the learning rate, $\sigma$ the noise multiplier and $C$ the clipping norm. The chapter gives no formula. This section derives the decomposition and shows that it is exact for quadratic losses. It also shows that it contains the chapter's noise floor @eq-fair-floor.
+[Disparate impact](../part05-dp-ml/08-disparate-impact.md) splits the records into groups $g$ with shares $s_g$, and asks why DP-SGD hurts small groups more. In @sec-fair-noise it cites, without stating it, a result of Tran, Dinh & Fioretto (2021). The expected change in a group's loss in one step has a clipping term, driven by the group's gradient norms, and a noise term proportional to $\eta^2\sigma^2C^2$ times the trace of the group's loss Hessian. Here $\eta$ is the learning rate, $\sigma$ the noise multiplier and $C$ the clipping norm. The chapter gives no formula. This section derives the decomposition and shows that it is exact for quadratic losses. It also shows that it contains the chapter's noise floor @eq-fair-floor.
 
 Write $\mathcal L_g$ for group $g$'s average loss, $\nabla\mathcal L_g$ for its gradient (the group's average gradient $\bar g_g$ of the chapter), and $H_g$ for its Hessian. The unclipped training gradient is $\nabla\mathcal L = \sum_hs_h\nabla\mathcal L_h$, the share-weighted average of the groups' gradients.
 
 One step moves the weights by $-\eta u$, with update $u = G_t/B + \tau\xi$. Here $G_t$ is the sum of the batch's clipped gradients, $B$ the expected batch size, $\xi$ standard normal noise and $\tau = \sigma C/B$ the noise per coordinate. By @eq-fair-groups, the update's mean is $m = \sum_hs_hm_h$, with $m_h$ the group's average clipped gradient. Write $\Sigma_B$ for the covariance of $G_t/B$, which comes from sampling the batch, and $\Delta\mathcal L_g$ for the change in $\mathcal L_g$ over the step. Then, to second order in $\eta$,
 $$\mathbb E[\Delta\mathcal L_g] \approx \underbrace{-\eta\langle\nabla\mathcal L_g, \nabla\mathcal L\rangle}_{\text{descent}}\;\underbrace{-\;\eta\langle\nabla\mathcal L_g, m - \nabla\mathcal L\rangle}_{\text{clipping}} + \frac{\eta^2}2\Big(\underbrace{m^\top H_gm}_{\text{curvature}} + \underbrace{\operatorname{tr}(H_g\Sigma_B)}_{\text{sampling}} + \underbrace{\tau^2\operatorname{tr}H_g}_{\text{noise}}\Big),$$ {#eq-apx-learn-fair-step}
-and the approximation is exact when $\mathcal L_g$ is quadratic. The noise term is $\eta^2\sigma^2C^2\operatorname{tr}H_g/(2B^2)$, the form the chapter describes.
+and the approximation is exact when $\mathcal L_g$ is quadratic. The noise term is $\eta^2\sigma^2C^2\operatorname{tr}H_g/(2B^2)$, the form Tran, Dinh & Fioretto give.
 
 ### The idea
 

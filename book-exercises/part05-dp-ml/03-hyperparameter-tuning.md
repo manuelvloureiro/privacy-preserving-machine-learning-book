@@ -6,12 +6,12 @@ The solutions use the chapter's notation. A run $Q$ is a private training algori
 
 ## Composition is nearly tight at large orders {#sec-sol-hpt-1}
 
-> **Exercise 1.** **Composition is nearly tight at large orders.** For randomized response with $\varepsilon = 0.5$ and the best of $k = 5$ runs, compute the exact Rényi divergence $D_\alpha(M(D)\|M(D'))$ at orders 2, 10 and 100, and compare it with the lower bound $k\varepsilon - k\ln(1 + e^{-\varepsilon})/(\alpha - 1)$ of @sec-hpt-leak and with composition, $k$ times one run's divergence. *Check: at order 2 the three numbers are 0.6763, 0.1296 and 1.1367; at order 10, 2.2366, 2.2366 and 2.2367.* *(Rényi divergence of discrete distributions)*
+> **Exercise 1.** **Composition is nearly tight at large orders.** For randomized response with $\varepsilon = 0.5$ and the best of $k = 5$ runs, compute the exact Rényi divergence $D_\alpha(M(D)\|M(D'))$ at orders 2, 10 and 100, and compare it with the lower bound $k\varepsilon - k\ln(1 + e^{-\varepsilon})/(\alpha - 1)$ of @prp-hpt-rr-k and with composition, $k$ times one run's divergence. *Check: at order 2 the three numbers are 0.6763, 0.1296 and 1.1367; at order 10, 2.2366, 2.2366 and 2.2367.* *(Rényi divergence of discrete distributions)*
 
 ::: {.callout-tip collapse="true" title="Solution"}
 1. **The two distributions.** The best of 5 is bad only if all five runs are bad. On $D$ that has probability $s^5$ with $s = e^{0.5}/(1 + e^{0.5}) = 0.6225$, on $D'$ probability $(1 - s)^5$; the good outcome takes the rest.
 2. **The divergence.** $D_\alpha = \frac{1}{\alpha - 1}\ln\big[(s^5)^\alpha((1 - s)^5)^{1 - \alpha} + (1 - s^5)^\alpha(1 - (1 - s)^5)^{1 - \alpha}\big]$. At order 2 this is 0.6763, at order 10 it is 2.2366 and at order 100 it is 2.4761.
-3. **The lower bound.** It keeps only the bad term of the sum: $5 \times 0.5 - 5\ln(1 + e^{-0.5})/(\alpha - 1)$, which is 0.1296 at order 2, 2.2366 at order 10 and 2.4761 at order 100.
+3. **The lower bound.** @prp-hpt-rr-k with $k = 5$ gives $5 \times 0.5 - 5\ln(1 + e^{-0.5})/(\alpha - 1)$, which is 0.1296 at order 2, 2.2366 at order 10 and 2.4761 at order 100.
 4. **Composition.** Five times one run's divergence (@eq-hpt-compose): 1.1367 at order 2, 2.2367 at order 10 and 2.4761 at order 100.
 5. **Reading it.** At low orders the good outcome contributes most of the sum, so the lower bound is loose and composition overstates the exact value by 68%. At high orders the bad outcome, with its likelihood ratio $e^{5\varepsilon}$, dominates the sum, and all three agree.
 
@@ -20,7 +20,7 @@ The solutions use the chapter's notation. A run $Q$ is a private training algori
 
 ## Geometric stopping on randomized response {#sec-sol-hpt-2}
 
-> **Exercise 2.** **Geometric stopping on randomized response.** Run randomized response with $\varepsilon = 0.5$ a geometric number of times, stopping after each run with probability $\omega$, and release the best outcome. Using Fact 3 of the chapter, show that the log ratio of the probabilities of "bad" is $\varepsilon + \ln\frac{\omega + (1 - \omega)s}{\omega + (1 - \omega)(1 - s)}$, find its limits as $\omega \to 1$ and $\omega \to 0$, and evaluate it for $\omega = 0.5$, 0.1, 0.01 and 0.001. *Check: 0.6636, 0.9063, 0.9897 and 0.9990, approaching $2\varepsilon = 1$.* *(Generating functions)*
+> **Exercise 2.** **Geometric stopping on randomized response.** Run randomized response with $\varepsilon = 0.5$ a geometric number of times, stopping after each run with probability $\omega$, and release the best outcome. Using @lem-hpt-pgf, show that the log ratio of the probabilities of "bad" is $\varepsilon + \ln\frac{\omega + (1 - \omega)s}{\omega + (1 - \omega)(1 - s)}$, find its limits as $\omega \to 1$ and $\omega \to 0$, and evaluate it for $\omega = 0.5$, 0.1, 0.01 and 0.001. *Check: 0.6636, 0.9063, 0.9897 and 0.9990, approaching $2\varepsilon = 1$.* *(Generating functions)*
 
 ::: {.callout-tip collapse="true" title="Solution"}
 1. **The probability of "bad".** The best is bad only if every run is bad, so by @eq-hpt-pgf $\Pr[M = \text{bad}] = f(\Pr[\text{run is bad}])$ with the geometric generating function $f(x) = \omega x/(1 - (1 - \omega)x)$.
@@ -65,7 +65,7 @@ using $s/(1 - s) = e^\varepsilon$ and $1 - (1 - \omega)x = \omega + (1 - \omega)
 > **Exercise 5.** **Calibrating the noise of a search.** You want to tune the running example's DP-SGD runs of 10,000 steps with $q = 0.01$ over about 10 configurations, and the whole search must satisfy $\varepsilon = 6.71$ at $\delta = 10^{-5}$, the budget of one run at $\sigma = 1$. Find the noise multiplier each run needs under composition of 10 runs, and with a Poisson, geometric or logarithmic number of runs with mean 10. *Check: 2.45, 1.65, 1.47 and 1.31.* *(Inverting an accountant)*
 
 ::: {.callout-tip collapse="true" title="Solution"}
-1. **The total as a function of $\sigma$.** For each $\sigma$ the accountant gives one run's RDP curve, $10{,}000\,\varepsilon_{q,\sigma}(\alpha)$. Composition multiplies it by 10 (@eq-hpt-compose); the random-$K$ bounds transform it by @eq-hpt-poisson or @eq-hpt-tnb, with the best second order $\hat\alpha$; @eq-hpt-convert converts the result.
+1. **The total as a function of $\sigma$.** For each $\sigma$ the accountant gives one run's RDP curve, $10{,}000\,\varepsilon_{q,\sigma}(\alpha)$. Composition multiplies it by 10 (@eq-hpt-compose); the random-$K$ bounds transform it by @eq-hpt-poisson or @eq-hpt-tnb, with the best second order $\hat\alpha$; @eq-conv-improved converts the result.
 2. **Monotonicity.** More noise lowers the curve at every order, and each of the transformations is increasing in the curve, so the total $\varepsilon$ falls as $\sigma$ grows. Bisection over $\sigma$ (to three significant digits, rounding up) finds the smallest $\sigma$ within budget.
 3. **Numbers.** Composition needs $\sigma = 2.45$ (as in @tbl-hpt-compose); Poisson 1.65; geometric 1.47; logarithmic 1.31.
 4. **Reading it.** With the logarithmic distribution each run is only 31% noisier than the untuned run, against 145% more noise for composition. Whether that buys accuracy depends on how often the skewed distribution stops early (Exercise 3).
@@ -75,7 +75,7 @@ using $s/(1 - s) = e^\varepsilon$ and $1 - (1 - \omega)x = \omega + (1 - \omega)
 
 ## How large a validation set? {#sec-sol-hpt-6}
 
-> **Exercise 6.** **How large a validation set?** You select among the fixed candidates in $\mathcal R$, the candidate set, with the exponential mechanism at $\varepsilon = 0.5$, scoring each candidate by its number $u$ of correct predictions on $m$ private validation records. Using the tail bound $\Pr[\text{gap} \ge \frac{2\Delta u}{\varepsilon}(\ln|\mathcal R| + t)] \le e^{-t}$ of [Selection](../../book-full/part03-dp-foundations/05-selection.md), find the smallest $m$ that keeps the accuracy gap below 0.5 percentage points with probability at least 0.95, for $|\mathcal R| = 8$ and $|\mathcal R| = 1{,}000$. *Check: 4,061 and 7,923 records.* *(Utility of the exponential mechanism)*
+> **Exercise 6.** **How large a validation set?** You select among the fixed candidates in $\mathcal R$, the candidate set, with the exponential mechanism at $\varepsilon = 0.5$, scoring each candidate by its number $u$ of correct predictions on $m$ private validation records. Using the tail bound $\Pr[\text{gap} \ge \frac{2\Delta u}{\varepsilon}(\ln|\mathcal R| + t)] \le e^{-t}$ of [Selection](../../book-full/part03-dp-foundations/05-selection.md) (@thm-sel-em-utility), find the smallest $m$ that keeps the accuracy gap below 0.5 percentage points with probability at least 0.95, for $|\mathcal R| = 8$ and $|\mathcal R| = 1{,}000$. *Check: 4,061 and 7,923 records.* *(Utility of the exponential mechanism)*
 
 ::: {.callout-tip collapse="true" title="Solution"}
 1. **From counts to accuracy.** With $\Delta u = 1$ the gap in correct predictions exceeds $\frac{2}{\varepsilon}(\ln|\mathcal R| + t)$ with probability at most $e^{-t}$. Dividing by $m$, the accuracy gap exceeds $\frac{2(\ln|\mathcal R| + t)}{\varepsilon m}$ with probability at most $e^{-t}$.

@@ -14,7 +14,7 @@ $$\varepsilon = \rho + 2\sqrt{\rho\ln(1/\delta)}.$$
 ::: {.callout-tip collapse="true" title="Solution"}
 1. **The population value.** The final query is 1 on a value exactly when that value occurs in the sample. A fresh record has each value with probability $1/N$, so the population value is the fraction of the $N$ values that the sample covers.
 2. **Its expectation.** A given value is missed by one draw with probability $1 - 1/N$, and by all $n$ independent draws with probability $(1 - 1/N)^n$. So it is covered with probability $1 - (1 - 1/N)^n$, and by linearity of expectation the expected covered fraction is the same number.
-3. **The upper bound.** The sample has $n$ records, so it covers at most $n$ values, and the covered fraction is at most $n/N$ for every sample, hence also on average.
+3. **The upper bound.** Step 3 of the proof of @prp-ada-point shows that the covered fraction is at most $n/N$ for every sample, so it is also at most $n/N$ on average.
 4. **The error.** The final query's empirical value is 1, so its expected error is $(1 - 1/N)^n$. This exceeds $\frac12$ when $n\ln(1 - 1/N) > -\ln 2$.
 5. **Solve.** For large $N$, $\ln(1 - 1/N) \approx -1/N$, so the condition is about $N > n/\ln 2 = 1{,}442.7$. The script checks every $N$ and finds that the smallest is $N = 1{,}444$. With $N = 2{,}000$ the expected population value is 0.3935 and the error 0.6065, and with $N = 10{,}000$ the error is 0.9048.
 
@@ -28,9 +28,9 @@ $$\varepsilon = \rho + 2\sqrt{\rho\ln(1/\delta)}.$$
 ::: {.callout-tip collapse="true" title="Solution"}
 **(a)**
 
-1. **DP in the other direction.** Hold $D$ and $x_i'$ fixed. The samples $D^{(i)}$ and $D$ are neighbours, and the replace-one relation is symmetric. So Fact 3 of the chapter, applied to $f(q) = q(x_i)$, gives $\mathbb E_W[q_{W(D^{(i)})}(x_i)] \le e^\varepsilon\,\mathbb E_W[q_{W(D)}(x_i)] + \delta$.
-2. **Average.** Averaging over $D$ and $x_i'$ keeps the inequality. Averaging over $i$ turns the right side into $e^\varepsilon\,\mathbb E[q_W(D)] + \delta$, by step 1 of the lemma's derivation.
-3. **The left side.** By the renaming of Fact 2, $\mathbb E[q_{W(D^{(i)})}(x_i)] = \mathbb E[q_{W(D)}(x_i')] = \mathbb E[q_W(\mathcal D)]$, because $x_i'$ is a record that $W$ never saw. This gives the claim.
+1. **DP in the other direction.** Hold $D$ and $x_i'$ fixed. The samples $D^{(i)}$ and $D$ are neighbours, and the replace-one relation is symmetric. So @eq-ada-avg, the bound of @lem-dpprop-tests on averages, applied to $f(q) = q(x_i)$, gives $\mathbb E_W[q_{W(D^{(i)})}(x_i)] \le e^\varepsilon\,\mathbb E_W[q_{W(D)}(x_i)] + \delta$.
+2. **Average.** Averaging over $D$ and $x_i'$ keeps the inequality. Averaging over $i$ turns the right side into $e^\varepsilon\,\mathbb E[q_W(D)] + \delta$, by step 1 of the proof of @lem-ada-transfer.
+3. **The left side.** By the swap of @lem-stability-swap, as in step 2 of the proof of @lem-ada-transfer, $\mathbb E[q_{W(D^{(i)})}(x_i)] = \mathbb E[q_{W(D)}(x_i')] = \mathbb E[q_W(\mathcal D)]$, because $x_i'$ is a record that $W$ never saw. This gives the claim.
 
 **(b)**
 
@@ -45,29 +45,26 @@ $$\varepsilon = \rho + 2\sqrt{\rho\ln(1/\delta)}.$$
 
 ## Why the complements are needed {#sec-sol-ada-3}
 
-> **Exercise 3.** **Why the complements are needed.** In the transfer theorem's proof, suppose you skip step 1 and let $W$ choose, among the original $k$ queries only, the one with the largest signed error $q_j(\mathcal D) - a_j$. What does the proof then bound? Show that adding the complements costs no privacy, and that answering $1 - q_j$ with $1 - a_j$ keeps the accuracy on the sample. *(Post-processing)*
+> **Exercise 3.** **Why the complements are needed.** In the proof of @thm-ada-transfer, suppose you skip step 1 and let $W$ choose, among the original $k$ queries only, the one with the largest signed error $q_j(\mathcal D) - a_j$. What does the proof then bound? Why is adding the complements simpler than running the proof a second time for answers that are too high? *(Post-processing)*
 
 ::: {.callout-tip collapse="true" title="Solution"}
 1. **Without complements.** The same steps bound $\mathbb E[\max_j(q_j(\mathcal D) - a_j)]$, the largest error in one direction only: answers that are too low. Answers that are too high, with $a_j > q_j(\mathcal D)$, are invisible to this $W$. In @tbl-ada-complement, $W$ would pick $q_2$ with error 0.05 and miss $q_1$, whose answer is 0.12 too high.
 2. **A second selector.** One could instead run the proof again with a selector that maximizes $a_j - q_j(\mathcal D)$, but that needs the lemma for queries of the form $1 - q$. That is exactly what the complements provide, in one pass.
-3. **No privacy cost.** The complement answers $1 - a_j$ are computed from the answers $a_j$ alone, without touching the data. By post-processing, the extended transcript is as private as the original one, $(\varepsilon, \delta)$-DP.
-4. **Same accuracy.** The error of a complement on the sample is $|(1 - a_j) - (1 - q_j(D))| = |a_j - q_j(D)|$. So the largest error on the sample over the $2k$ queries is the same as over the original $k$, at most $\alpha$ on average.
-5. **The complement is a statistical query.** $1 - q_j$ maps each record to $[0, 1]$, so the lemma applies to it.
+3. **What the complements cost.** Nothing. Step 1 of the proof of @thm-ada-transfer computes the complement answers from the original ones, so by post-processing they cost no privacy. Step 4 uses that a complement's error on the sample equals the original's, so they cost no accuracy either.
+4. **The complement is a statistical query.** $1 - q_j$ maps each record to $[0, 1]$, so @lem-ada-transfer applies to it, and one selector over the $2k$ queries covers both directions.
 
 *The complements are a bookkeeping trick: they let one private choice carry the largest error in either direction, at no cost in privacy or accuracy.*
 :::
 
 ## Gaussian noise for 1,000 queries {#sec-sol-ada-4}
 
-> **Exercise 4.** **Gaussian noise for 1,000 queries.** Use the balancing argument of @sec-ada-gauss to show that the Gaussian mechanism with the transfer theorem reaches an expected largest error $\alpha$ with about $n = 4\sqrt{4k\ln(2k)\ln(1/\delta)}/\alpha^2$ records. Evaluate it for $k = 1{,}000$, $\alpha = 0.05$ and $\delta = 0.0019$, and compare it with the exact optimum of @tbl-ada-rates. At that optimum, compute $\rho$ from $\sigma$. *Check: the formula gives 697,435 records against 764,337; at the optimum $\sigma = 0.00620$, $\rho = 2.224\times10^{-5}$ and $\varepsilon = 0.0236$.* *(zCDP composition; optimizing a sum $\sigma A + B/\sigma$)*
+> **Exercise 4.** **Gaussian noise for 1,000 queries.** @cor-ada-rate says that the Gaussian mechanism with the transfer theorem reaches an expected largest error $\alpha$ with about $n = 8\sqrt{k\ln(2k)\ln(1/\delta)}/\alpha^2$ records, which is $4\sqrt{4k\ln(2k)\ln(1/\delta)}/\alpha^2$. Evaluate it for $k = 1{,}000$, $\alpha = 0.05$ and $\delta = 0.0019$, and compare it with the exact optimum of @tbl-ada-rates. At that optimum, compute $\rho$ from $\sigma$. *Check: the formula gives 697,435 records against 764,337; at the optimum $\sigma = 0.00620$, $\rho = 2.224\times10^{-5}$ and $\varepsilon = 0.0236$.* *(zCDP composition and conversion)*
 
 ::: {.callout-tip collapse="true" title="Solution"}
-1. **The two terms.** By @eq-ada-gauss the bound is the expected largest noise, $\sigma\sqrt{2\ln(2k)}$, plus the transfer term $e^\varepsilon - 1 + \delta$. With $\rho = k/(2n^2\sigma^2)$ and small $\varepsilon$, the transfer term is about $2\sqrt{\rho\ln(1/\delta)} = \sqrt{2k\ln(1/\delta)}/(n\sigma)$, plus $\delta$.
-2. **Balance.** Write the sum as $\sigma A + B/\sigma$ with $A = \sqrt{2\ln(2k)}$ and $B = \sqrt{2k\ln(1/\delta)}/n$. Its derivative in $\sigma$, $A - B/\sigma^2$, vanishes at $\sigma = \sqrt{B/A}$, where the sum is $2\sqrt{AB}$.
-3. **Solve for $n$.** Setting $2\sqrt{AB} = \alpha$ gives $AB = \alpha^2/4$, that is $\sqrt{2\ln(2k)}\sqrt{2k\ln(1/\delta)}/n = \alpha^2/4$, so $n = 4\sqrt{4k\ln(2k)\ln(1/\delta)}/\alpha^2$.
-4. **Numbers.** With $k = 1{,}000$, $\ln(2k) = 7.601$, and with $\delta = 0.0019$, $\ln(1/\delta)$ is about 6.27. The formula gives 697,435 records.
-5. **Against the optimum.** The exact minimization of @eq-ada-gauss needs 764,337 records. The formula is about 9% low because it drops the $\rho$ term of the conversion, the $\delta$ term and the curvature of $e^\varepsilon$, all of which add to the bound.
-6. **The parameters at the optimum.** There $\sigma = 0.00620$, so $\rho = 1{,}000/(2 \times 764{,}337^2 \times 0.00620^2) = 2.224\times10^{-5}$. The conversion with $\delta = 0.0019$ gives $\varepsilon = 0.0236$. The noise term is 0.0242 and the transfer term 0.0258, almost equal, as the balancing argument predicts.
+1. **The formula.** @cor-ada-rate balances the noise term $\sigma\sqrt{2\ln(2k)}$ of @eq-ada-gauss against the leading part of its transfer term, $\sqrt{2k\ln(1/\delta)}/(n\sigma)$. Its size $8\sqrt{k\ln(2k)\ln(1/\delta)}/\alpha^2$ equals $4\sqrt{4k\ln(2k)\ln(1/\delta)}/\alpha^2$, because $4\sqrt4 = 8$.
+2. **Numbers.** With $k = 1{,}000$, $\ln(2k) = 7.601$, and with $\delta = 0.0019$, $\ln(1/\delta)$ is about 6.27. The formula gives 697,435 records.
+3. **Against the optimum.** The exact minimization of @eq-ada-gauss needs 764,337 records. The formula is about 9% low because it drops the $\rho$ term of the conversion, the $\delta$ term and the curvature of $e^\varepsilon$, all of which add to the bound.
+4. **The parameters at the optimum.** There $\sigma = 0.00620$, so $\rho = 1{,}000/(2 \times 764{,}337^2 \times 0.00620^2) = 2.224\times10^{-5}$. The conversion with $\delta = 0.0019$ gives $\varepsilon = 0.0236$. The noise term is 0.0242 and the transfer term 0.0258, almost equal, as the balancing argument predicts.
 
 *The rate grows like $\sqrt k$, but the constant is large: three quarters of a million records for 1,000 queries at an error of 0.05.*
 :::
@@ -77,8 +74,8 @@ $$\varepsilon = \rho + 2\sqrt{\rho\ln(1/\delta)}.$$
 > **Exercise 5.** **Rounds of adaptivity.** An analysis asks $k$ queries in $r$ rounds. The queries of each round are fixed before any of that round's answers are seen. Show that splitting the sample into $r$ parts, one per round, gives an expected largest error of at most $\sqrt{r\ln(2k)/(2n)}$. For $k = 1{,}000$ and $\alpha = 0.05$, compute the records needed for $r = 1$, 10 and 1,000, and explain why splitting is linear in $k$ when every query is its own round. *Check: 1,521, 15,202 and 1,520,181 records.* *(Conditioning; the maximal inequality)*
 
 ::: {.callout-tip collapse="true" title="Solution"}
-1. **One round.** Fix the parts used by earlier rounds. The queries of round $\ell$ are then fixed, and part $\ell$, of $n/r$ records, is independent of them. Each query's error on part $\ell$ has a moment generating function at most $e^{\lambda^2r/(8n)}$, by Hoeffding's lemma with $n/r$ records.
-2. **All rounds.** Averaging over the earlier parts keeps the bound, so every one of the $2k$ signed errors satisfies it. The maximal inequality with $v = r/(4n)$ and $m = 2k$ gives $\sqrt{2\cdot r/(4n)\cdot\ln(2k)} = \sqrt{r\ln(2k)/(2n)}$.
+1. **One round.** Fix the parts used by earlier rounds. The queries of round $\ell$ are then fixed, and part $\ell$, of $n/r$ records, is independent of them. This is the situation of step 1 of the proof of @prp-stability-splitting, with $n/r$ records per part, so each query's error has a moment generating function at most $e^{\lambda^2r/(8n)}$.
+2. **All rounds.** That proof finishes with the maximal inequality over the $2k$ signed errors, which never needs them to be independent and never counts parts. With $n/r$ in place of $n/k$, it gives $\sqrt{r\ln(2k)/(2n)}$: only the factor in front of $\ln(2k)$ changes.
 3. **Records needed.** Setting this equal to $\alpha$ gives $n = r\ln(2k)/(2\alpha^2) = r \times 7.601/0.005$. That is 1,521 records for $r = 1$, 15,202 for $r = 10$ and 1,520,181 for $r = 1{,}000$, after rounding up.
 4. **Why linear in $k$.** When every query is chosen from the previous answers, each query is its own round, so $r = k$ and the cost is $k\ln(2k)/(2\alpha^2)$. Each record answers one query only, so the data must grow with the number of queries.
 

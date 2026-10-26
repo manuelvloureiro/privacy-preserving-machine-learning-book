@@ -9,10 +9,10 @@ The solutions use the chapter's notation. A guarantee of differential privacy (D
 > **Exercise 1.** **Group privacy at a small $\delta$.** A mechanism is example-level $(1, 10^{-6})$-DP. Using @eq-ulvl-group, give the user-level guarantee for users with 2, 5 and 10 records. For which of them is the guarantee meaningful if the dataset has 10,000 users? *Check: $\delta_2 = 3.718 \times 10^{-6}$, $\delta_5 = 8.579 \times 10^{-5}$, $\delta_{10} = 0.01282$.* *(The geometric sum of group privacy)*
 
 ::: {.callout-tip collapse="true" title="Solution"}
-1. **The formula.** A chain of $k$ neighbouring steps gives $\varepsilon_k = k\varepsilon$ and $\delta_k = \delta(e^{k\varepsilon} - 1)/(e^\varepsilon - 1)$, because each step's $\delta$ is multiplied by the $e^\varepsilon$ of every later step.
-2. **$k = 2$.** $\delta_2 = 10^{-6}(e^2 - 1)/(e - 1) = 10^{-6}(1 + e) = 3.718 \times 10^{-6}$, with $\varepsilon_2 = 2$.
-3. **$k = 5$.** $\delta_5 = 10^{-6}(e^5 - 1)/(e - 1) = 8.579 \times 10^{-5}$, with $\varepsilon_5 = 5$.
-4. **$k = 10$.** $\delta_{10} = 10^{-6}(e^{10} - 1)/(e - 1) = 0.01282$, with $\varepsilon_{10} = 10$.
+1. **The formula.** By @prp-ulvl-group, a user with $k$ records gets $\varepsilon_k = k\varepsilon$ and $\delta_k = \delta(e^{k\varepsilon} - 1)/(e^\varepsilon - 1)$.
+2. **$k = 2$.** The user gets $\varepsilon_2 = 2$ and $\delta_2 = 10^{-6}(e^2 - 1)/(e - 1) = 10^{-6}(1 + e) = 3.718 \times 10^{-6}$.
+3. **$k = 5$.** The user gets $\varepsilon_5 = 5$ and $\delta_5 = 10^{-6}(e^5 - 1)/(e - 1) = 8.579 \times 10^{-5}$.
+4. **$k = 10$.** The user gets $\varepsilon_{10} = 10$ and $\delta_{10} = 10^{-6}(e^{10} - 1)/(e - 1) = 0.01282$.
 5. **Which are meaningful.** $\delta$ is the probability that the guarantee fails outright, so for $U = 10{,}000$ users it should be well below $1/U = 10^{-4}$. Only $k = 2$ satisfies that comfortably; $k = 5$ is just below $10^{-4}$, and $k = 10$ allows a failure for about one user in 78.
 
 *The $\delta$ of group privacy grows like $e^{(k-1)\varepsilon}$, so a guarantee designed for records must start from a much smaller $\delta$ to survive the step to users.*
@@ -46,7 +46,7 @@ The solutions use the chapter's notation. A guarantee of differential privacy (D
 > **Exercise 3.** **The second moment and the rate-kq rule.** At order $\alpha = 2$, @eq-ulvl-pair says $A_2 = \mathbb E[e^{H_1H_2/\sigma^2}]$ for two independent copies of $H \sim \mathrm{Bin}(k, q)$. Compute $\varepsilon(2) = \ln A_2$ for $q = 0.01$, $\sigma = 1$ and $k = 2$, 5 and 10, and compare with @eq-ulvl-rate's single record at rate $kq$, $\ln(1 + (kq)^2(e^{1/\sigma^2} - 1))$. Explain the result for $k = 10$. *Check: ratios 1.0177, 1.0793 and 469.* *(Moments of a mixture)*
 
 ::: {.callout-tip collapse="true" title="Solution"}
-1. **Exact.** $A_2 = \sum_{a,b}b_ab_be^{ab/\sigma^2}$ with $b_m = \binom km q^m(1 - q)^{k-m}$: a double sum over the possible numbers of drawn records in two independent batches. It gives $\varepsilon(2) = 6.992273 \times 10^{-4}$ for $k = 2$, $4.626224 \times 10^{-3}$ for $k = 5$ and $7.990343$ for $k = 10$, the same values as the chapter's numerical integral for $k = 2$ and 5.
+1. **Exact.** The moment is a double sum over the possible numbers $a$ and $b$ of drawn records in two independent batches, $A_2 = \sum_{a,b}b_ab_be^{ab/\sigma^2}$ with $b_m = \binom km q^m(1 - q)^{k-m}$. It gives $\varepsilon(2) = 6.992273 \times 10^{-4}$ for $k = 2$, $4.626224 \times 10^{-3}$ for $k = 5$ and $7.990343$ for $k = 10$, the same values as the chapter's numerical integral for $k = 2$ and 5.
 2. **Rate $kq$.** $\ln(1 + (kq)^2(e - 1))$ gives $6.870766 \times 10^{-4}$, $4.286504 \times 10^{-3}$ and $1.703686 \times 10^{-2}$.
 3. **Ratios.** 1.0177, 1.0793 and 469. For $k = 2$ and 5 the rule is good to 2% and 8%: the terms it drops, with $ab \ge 2$, have probability of order $(kq)^3$ or smaller.
 4. **What breaks at $k = 10$.** The term $a = b = k$, both batches drawing all of the user's records, has probability $q^{2k}$ and factor $e^{k^2/\sigma^2}$. For $k = 10$ that is $10^{-40}e^{100} \approx e^{7.90}$, larger than everything else together: the exact $\ln A_2 = 7.99$ is almost entirely this one term. A tiny probability cannot cancel a factor that grows like $e^{k^2}$.
@@ -60,10 +60,9 @@ The solutions use the chapter's notation. A guarantee of differential privacy (D
 > **Exercise 4.** **Per-record clipping inside user-level sampling.** User-level DP-SGD with $q = 0.1$, $T = 1{,}000$ and per-user clipping needs $\sigma = 3.78$ for $\varepsilon = 4$ at $\delta = 10^{-5}$. Instead, you clip each record to $C$ and sum at most $k$ records per user. Using @eq-ulvl-together, what noise multiplier gives the same guarantee for $k = 2$ and $k = 5$? Verify numerically at $\alpha = 3$. *Check: 7.56 and 18.9.* *(Rescaling a Gaussian mechanism)*
 
 ::: {.callout-tip collapse="true" title="Solution"}
-1. **The sensitivity.** A user's sum of at most $k$ clipped records has length at most $kC$, and the user is sampled whole with probability $q$.
-2. **Rescale.** Dividing the noisy sum by $k$ is invertible, so it changes no divergence. After it, the shift is at most $C$ and the noise is $\sigma C/k$: a mechanism with noise multiplier $\sigma/k$. That is @eq-ulvl-together.
-3. **Match the guarantee.** To be as private as per-user clipping with $\sigma = 3.78$, the noise multiplier must satisfy $\sigma/k = 3.78$: $\sigma = 7.56$ for $k = 2$ and $18.9$ for $k = 5$.
-4. **Check.** At $\alpha = 3$, the binomial sum with $k = 2$ and $\sigma = 7.56$, and with $k = 1$ and $\sigma = 3.78$, both give $1.094286 \times 10^{-3}$; so does $k = 5$ with $\sigma = 18.9$.
+1. **The effective noise.** By @prp-ulvl-capped-sum, per-record clipping with a cap of $k$ has the curve of noise multiplier $\sigma/k$, given by @eq-ulvl-together.
+2. **Match the guarantee.** To be as private as per-user clipping with $\sigma = 3.78$, the noise multiplier must satisfy $\sigma/k = 3.78$: $\sigma = 7.56$ for $k = 2$ and $18.9$ for $k = 5$.
+3. **Check.** At $\alpha = 3$, the binomial sum with $k = 2$ and $\sigma = 7.56$, and with $k = 1$ and $\sigma = 3.78$, both give $1.094286 \times 10^{-3}$; so does $k = 5$ with $\sigma = 18.9$.
 
 *Summing clipped records costs a factor $k$ in noise, where clipping the user's average costs nothing. Per-record clipping is convenient when the code for per-example gradients already exists, but its noise grows with the cap.*
 :::
@@ -87,8 +86,8 @@ The solutions use the chapter's notation. A guarantee of differential privacy (D
 
 ::: {.callout-tip collapse="true" title="Solution"}
 1. **The noise.** The exact calibration of the Gaussian mechanism for $(1, 10^{-5})$ and sensitivity 1 gives standard deviation 3.731, so a cap of $k$ needs $3.731k$.
-2. **The bias.** Capping at $k$ removes $n - n_k$ records, all from users with more than $k$. From the population: $n_k = 1{,}000$ at $k = 1$ (bias $-9{,}000$), 5,063 at $k = 10$, 8,437 at $k = 50$, 9,214 at $k = 100$, 9,756 at $k = 200$ and 10,000 at $k = 348$.
-3. **The error.** $\sqrt{(n - n_k)^2 + (3.731k)^2}$ is 9,000 at $k = 1$, 1,574.1 at $k = 50$, 870.0 at $k = 100$, 785.0 at $k = 200$ and 1,298.3 at $k = 348$, where the bias vanishes and the noise standard deviation is 1,298.3.
+2. **The bias.** Capping at $k$ removes $n - n_k$ records, all from users with more than $k$. In the population, $n_k = 1{,}000$ at $k = 1$, a bias of $-9{,}000$, and 5,063 at $k = 10$. It rises to 8,437 at $k = 50$ and 9,214 at $k = 100$, and then to 9,756 at $k = 200$ and 10,000 at $k = 348$.
+3. **The error.** The error $\sqrt{(n - n_k)^2 + (3.731k)^2}$ is 9,000 at $k = 1$ and 1,574.1 at $k = 50$. It falls to 870.0 at $k = 100$ and 785.0 at $k = 200$. At $k = 348$ the bias vanishes, and the error is the noise standard deviation, 1,298.3.
 4. **The best cap.** Scanning every $k$ gives $k = 158$, with $n_k = 9{,}625$ and error 698.6. Below it, each extra unit of $k$ removes more bias than it adds noise, because many users still have more records; above it, only a few heavy users gain and the noise keeps growing in proportion to $k$.
 
 *The best cap is set by the tail of the distribution of user sizes, as Amin et al. (2019) show in general. Choosing it from the data, as here, is itself a release that should use public information or be made privately.*

@@ -6,7 +6,7 @@ The solutions use the chapter's notation. To give differential privacy (DP), sto
 
 ## When does the signal beat the noise? {#sec-sol-dpsgd-1}
 
-> **Exercise 1.** **When does the signal beat the noise?** In the running example the averaged clipped gradient has length about 0.026. Using the argument of @sec-dpsgd-algorithm, compute the length of the noise on the averaged gradient and the number of steps after which accumulated signal exceeds accumulated noise, at $\varepsilon = 8$, 4 and 1 ($\delta = 10^{-5}$, $T = 10{,}000$). *Check: 104, 228 and 2,100 steps.* *(Drift against random walk)*
+> **Exercise 1.** **When does the signal beat the noise?** In the running example the averaged clipped gradient has length about 0.026. Using the argument of @exm-dpsgd-epsilon, compute the length of the noise on the averaged gradient and the number of steps after which accumulated signal exceeds accumulated noise, at $\varepsilon = 8$, 4 and 1 ($\delta = 10^{-5}$, $T = 10{,}000$). *Check: 104, 228 and 2,100 steps.* *(Drift against random walk)*
 
 ::: {.callout-tip collapse="true" title="Solution"}
 1. **The noise multipliers.** From the accountant, $\sigma = 0.917$, 1.36 and 4.13 for the three budgets (@tbl-dpsgd-sigma).
@@ -26,14 +26,14 @@ The solutions use the chapter's notation. To give differential privacy (DP), sto
 2. **Relative spread.** $\sqrt{nq(1 - q)}/(nq) = \sqrt{(1 - q)/(nq)}$: $\sqrt{0.99/100} = 0.0995$ for $n = 10{,}000$, and $\sqrt{0.99/10} = 0.3146$ for $n = 1{,}000$.
 3. **Empty batch.** $(1 - q)^n$: $10^{-43.6}$ for $n = 10{,}000$, and $10^{-4.36}$, about 1 in 23,000, for $n = 1{,}000$.
 4. **Less than half.** The normal approximation gives $\Phi(-\frac{B/2}{\sqrt{nq(1-q)}})$: $2.5 \times 10^{-7}$ for $B = 100$, and 0.056 for $B = 10$.
-5. **Why it breaks the proof anyway.** The derivation needs the update to be a function of the noisy sum $G_t$ alone. Dividing by $|S_t|$ uses a second data-dependent quantity, which changes by one when the target record is drawn. The accountant has not paid for releasing it, and the sensitivity of $G_t/|S_t|$ is no longer $C$ divided by a constant. A proof does not hold "with high probability" unless it was written that way.
+5. **Why it breaks the proof anyway.** Step 3 of the proof of @thm-dpsgd-privacy needs the update to be a function of the noisy sum $G_t$ alone. Dividing by $|S_t|$ uses a second data-dependent quantity, which changes by one when the target record is drawn. The accountant has not paid for releasing it, and the sensitivity of $G_t/|S_t|$ is no longer $C$ divided by a constant. A proof does not hold "with high probability" unless it was written that way.
 
 *Small batch sizes vary a lot, and a correct implementation divides by the public $B$; the update is then unbiased (@eq-dpsgd-expected), at the price of a step length that varies a little with $|S_t|$.*
 :::
 
 ## Adam does not see the clipping norm {#sec-sol-dpsgd-3}
 
-> **Exercise 3.** **Adam does not see the clipping norm.** Suppose every per-example gradient is clipped, so each noisy sum is $C$ times a quantity that does not depend on $C$ (@eq-dpsgd-normalized). Show that Adam's update is then independent of $C$ up to its small constant $c_{\text{Adam}}$ in the denominator, so with Adam the clipping norm does not even need to be matched by the learning rate. Check numerically with 20 random gradients, $C = 0.01$ and $C = 10$. *Check: the updates agree to a relative difference of $7.3 \times 10^{-5}$.* *(Scale invariance of adaptive optimizers)*
+> **Exercise 3.** **Adam does not see the clipping norm.** Suppose every per-example gradient is clipped, so each noisy sum is $C$ times a quantity that does not depend on $C$ (@prp-dpsgd-scale). Show that Adam's update is then independent of $C$ up to its small constant $c_{\text{Adam}}$ in the denominator, so with Adam the clipping norm does not even need to be matched by the learning rate. Check numerically with 20 random gradients, $C = 0.01$ and $C = 10$. *Check: the updates agree to a relative difference of $7.3 \times 10^{-5}$.* *(Scale invariance of adaptive optimizers)*
 
 ::: {.callout-tip collapse="true" title="Solution"}
 1. **Adam's update.** Adam keeps running averages $m_t$ of the gradients and $v_t$ of their squares, coordinate by coordinate, corrects them for their start at zero, and steps by $-\eta\hat m_t/(\sqrt{\hat v_t} + c_{\text{Adam}})$.
@@ -89,7 +89,7 @@ The solutions use the chapter's notation. To give differential privacy (DP), sto
 > **Exercise 7.** **What microbatches cost.** Microbatched DP-SGD (@eq-dpsgd-microbatch) clips the mean gradient of groups of $m$ records fixed in advance, and adds noise $2\sigma C$ to keep the accountant's $\varepsilon$. For the running example ($q = 0.01$, $B = 100$, $C = 0.5$, $\sigma = 1$, 10,000 steps, $\varepsilon = 6.71$), find by what factor microbatches of $m = 2$ and $m = 4$ multiply the noise on the averaged update. Per-example DP-SGD with that much more noise would have what $\varepsilon$? Explain the factor 2 in the sensitivity with a two-record example. *Check: factors 4 and 8; per-example DP-SGD with $\sigma = 4$ and 8 has $\varepsilon = 1.035$ and 0.481.* *(Sensitivity of clipped means)*
 
 ::: {.callout-tip collapse="true" title="Solution"}
-1. **The factor.** The noise per coordinate is $2\sigma C/(B/m) = 2m\,\sigma C/B$, against $\sigma C/B$ for per-example clipping, a factor $2m$: 4 for $m = 2$ and 8 for $m = 4$.
+1. **The factor.** By @prp-dpsgd-microbatch the noise per coordinate is $2m$ times that of per-example clipping, which is 4 for $m = 2$ and 8 for $m = 4$.
 2. **The same noise, spent per example.** Per-example DP-SGD with noise multiplier 4 or 8 has exactly as much noise on its averaged update as these microbatched runs. The accountant gives it $\varepsilon = 1.035$ and 0.481. So microbatches of 4 buy the accuracy of a run at $\varepsilon \approx 0.5$ while paying $\varepsilon = 6.71$.
 3. **The factor 2.** Take a microbatch with one other record whose gradient is $Cu$ for a unit vector $u$, and add a record whose gradient is $-3Cu$. The mean changes from $Cu$ to $-Cu$, both of length $C$ after clipping, so the clipped mean moves by $2C$. Under per-example clipping the added record contributes its own clipped term, $-Cu$, and the sum moves by only $C$.
 

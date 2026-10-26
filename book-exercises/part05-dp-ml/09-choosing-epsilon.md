@@ -12,20 +12,19 @@ The solutions use the chapter's notation. A mechanism satisfies differential pri
 1. **Invert the line.** Every test satisfies $\mathrm{TPR} \le e^\varepsilon\mathrm{FPR} + \delta$, so a measured pair is possible only if $e^\varepsilon \ge (\mathrm{TPR} - \delta)/\mathrm{FPR}$, that is $\varepsilon \ge \ln\frac{\mathrm{TPR} - \delta}{\mathrm{FPR}}$.
 2. **The first measurement.** $\ln\frac{0.05 - 10^{-5}}{10^{-3}} = \ln 49.99 = 3.912$. A model claimed to be $(3, 10^{-5})$-DP would be refuted by it; one claimed $(4, 10^{-5})$-DP would not.
 3. **The best possible tests against the $\varepsilon = 8$ run.** $\ln(58.89) = 4.076$ at FPR $10^{-3}$, $\ln\frac{0.2092 - 10^{-5}}{0.01} = 3.041$ at $10^{-2}$ and $\ln\frac{0.5901 - 10^{-5}}{0.1} = 1.775$ at $10^{-1}$.
-4. **Reading it.** These are the largest lower bounds that any audit of this run can reach at these FPRs, even with the optimal attack and exact error rates, and they are far below the run's true $\varepsilon$ of about 7.3. The reason is the chapter's: the line $e^\varepsilon\mathrm{FPR} + \delta$ touches the curve of DP-SGD only at a tiny FPR, so an audit can certify the accountant's $\varepsilon$ only by measuring at FPRs of that order.
+4. **Reading it.** These are the largest lower bounds that any audit of this run can reach at these FPRs, even with the optimal attack and exact error rates, and they are far below the run's true $\varepsilon$ of about 7.3. The reason is @thm-epsc-curve: the line $e^\varepsilon\mathrm{FPR} + \delta$ touches the curve of DP-SGD only at an FPR of at most $e^{-\varepsilon}Q[L > \varepsilon]$, so an audit can certify the accountant's $\varepsilon$ only by measuring at FPRs of that order.
 
 *Tight audits need very low false positive rates, hence many trials and very exposed canaries; [Auditing private training](../../book-full/part05-dp-ml/10-auditing.md) takes this up. An audit that compares its measurement with the whole curve, rather than with one line, can be much more informative.*
 :::
 
 ## The advantage of Gaussian DP {#sec-sol-epsc-2}
 
-> **Exercise 2.** **The advantage of Gaussian DP.** Show that the largest advantage $\mathrm{TPR} - \mathrm{FPR}$ against $\mathcal N(0, 1)$ versus $\mathcal N(\mu, 1)$ is $2\Phi(\mu/2) - 1$. Evaluate it for the Gaussian differential privacy (GDP) approximations of the $\varepsilon = 4$ and $\varepsilon = 8$ runs, $\mu = 0.847$ and 1.511 (@tbl-epsc-accountants), and find the $\varepsilon$ of randomized response, whose advantage is $(e^\varepsilon - 1)/(e^\varepsilon + 1)$, with the same advantage. *Check: 0.3281 and 0.5501; randomized response with $\varepsilon = 0.681$ and 1.237.* *(Total variation of two Gaussians)*
+> **Exercise 2.** **The advantage of Gaussian DP.** The largest advantage $\mathrm{TPR} - \mathrm{FPR}$ against $\mathcal N(0, 1)$ versus $\mathcal N(\mu, 1)$ is $2\Phi(\mu/2) - 1$ (@cor-ht-tv-pairs). Evaluate it for the Gaussian differential privacy (GDP) approximations of the $\varepsilon = 4$ and $\varepsilon = 8$ runs, $\mu = 0.847$ and 1.511 (@tbl-epsc-accountants), and find the $\varepsilon$ of randomized response, whose advantage is $(e^\varepsilon - 1)/(e^\varepsilon + 1)$, with the same advantage. *Check: 0.3281 and 0.5501; randomized response with $\varepsilon = 0.681$ and 1.237.* *(Total variation of two Gaussians)*
 
 ::: {.callout-tip collapse="true" title="Solution"}
-1. **The best test.** By the Neyman–Pearson lemma the best tests threshold the output at some $\tau$: $\mathrm{FPR} = 1 - \Phi(\tau)$, $\mathrm{TPR} = 1 - \Phi(\tau - \mu)$, so the advantage is $\Phi(\tau) - \Phi(\tau - \mu)$.
-2. **Maximize over $\tau$.** The derivative is $\varphi(\tau) - \varphi(\tau - \mu)$, with $\varphi$ the standard normal density, which is zero where the two densities cross, at $\tau = \mu/2$ by symmetry. There the advantage is $\Phi(\mu/2) - \Phi(-\mu/2) = 2\Phi(\mu/2) - 1$.
-3. **Numbers.** $2\Phi(0.4235) - 1 = 0.3281$ and $2\Phi(0.7555) - 1 = 0.5501$. The chapter's 0.3280 for the first comes from the unrounded $\mu$.
-4. **Randomized response.** Solving $(e^\varepsilon - 1)/(e^\varepsilon + 1) = A$ for $\varepsilon$ gives $e^\varepsilon = (1 + A)/(1 - A)$: $\ln(1.3281/0.6719) = 0.681$ and $\ln(1.5501/0.4499) = 1.237$.
+1. **The best test.** By @thm-ht-tv the largest advantage is the total variation of the two Gaussians, and @cor-ht-tv-pairs evaluates it as $2\Phi(\mu/2) - 1$: the best test thresholds the output at $\mu/2$, where the two densities cross.
+2. **Numbers.** $2\Phi(0.4235) - 1 = 0.3281$ and $2\Phi(0.7555) - 1 = 0.5501$. The chapter's script prints 0.3280 for the first, from the unrounded $\mu$.
+3. **Randomized response.** Solving $(e^\varepsilon - 1)/(e^\varepsilon + 1) = A$ for $\varepsilon$ gives $e^\varepsilon = (1 + A)/(1 - A)$: $\ln(1.3281/0.6719) = 0.681$ and $\ln(1.5501/0.4499) = 1.237$.
 
 *Measured by advantage alone, the $\varepsilon = 8$ run of DP-SGD is about as private as randomized response with $\varepsilon = 1.24$. The comparison is fair only at that one point of the curve: at low FPR the Gaussian curve rises above the randomized-response line, which is why a single summary number never suffices.*
 :::
@@ -48,7 +47,7 @@ The solutions use the chapter's notation. A mechanism satisfies differential pri
 > **Exercise 4.** **A family in the data.** Three members of one family are in the training set, one record each, and the privacy unit is a record. Group privacy says that a mechanism that is $(\varepsilon, \delta)$-DP for one record is $(k\varepsilon, ke^{(k - 1)\varepsilon}\delta)$-DP for $k$ records. Compute the family's guarantee for $(1, 10^{-5})$ and for $(4, 10^{-5})$, and the largest posterior that the family took part, from a prior of 0.01, when the loss is at most $3\varepsilon$ for $\varepsilon = 1$. *Check: $(3, 2.22\times10^{-4})$, posterior 0.1687; $(12, 0.0894)$.* *(Group privacy)*
 
 ::: {.callout-tip collapse="true" title="Solution"}
-1. **Why group privacy.** Datasets that differ in $k$ records are joined by a chain of $k$ neighbouring steps. Applying the definition along the chain multiplies the factor $e^\varepsilon$ $k$ times, and each step's $\delta$ is multiplied by the factors $e^\varepsilon$ of the steps after it; summing gives at most $ke^{(k - 1)\varepsilon}\delta$.
+1. **Why group privacy.** Datasets that differ in $k$ records are joined by a chain of $k$ neighbouring steps, and @thm-dpprop-group chains the definition along it to give $(k\varepsilon, ke^{(k - 1)\varepsilon}\delta)$.
 2. **At $\varepsilon = 1$.** $(3 \times 1, 3e^2 \times 10^{-5}) = (3, 2.22\times10^{-4})$.
 3. **Posterior.** @eq-epsc-posterior with $3$ in place of $\varepsilon$: $0.01e^3/(0.01e^3 + 0.99) = 0.1687$, against 0.0267 for one person.
 4. **At $\varepsilon = 4$.** $(12, 3e^8 \times 10^{-5}) = (12, 0.0894)$: a $\delta$ of almost 9% means no meaningful guarantee for the family through this route.
@@ -73,7 +72,7 @@ The solutions use the chapter's notation. A mechanism satisfies differential pri
 > **Exercise 6.** **Retraining every month.** A team retrains the running example's $\varepsilon = 2$ configuration (noise multiplier 2.28) every month on the same data and publishes every model. What is the total $\varepsilon$ at $\delta = 10^{-5}$ after 1, 3 and 12 months under RDP composition, and under basic composition of the $(\varepsilon, \delta)$ guarantees? *Check: RDP 1.998, 3.675, 8.185; basic 2, 6, 24.* *(Composition over releases)*
 
 ::: {.callout-tip collapse="true" title="Solution"}
-1. **RDP composition.** Each run's RDP curve is $T\varepsilon_{q,\sigma}(\alpha)$, and $k$ runs on the same data add up to $kT\varepsilon_{q,\sigma}(\alpha)$, exactly one run of $kT$ steps. Converting at $\delta = 10^{-5}$ gives 1.998, 3.675 and 8.185.
+1. **RDP composition.** Each run's RDP curve is $T\varepsilon_{q,\sigma}(\alpha)$, and by @thm-rdp-composition $k$ runs on the same data add up to $kT\varepsilon_{q,\sigma}(\alpha)$, exactly one run of $kT$ steps. Converting at $\delta = 10^{-5}$ gives 1.998, 3.675 and 8.185.
 2. **Basic composition.** Adding $\varepsilon$ and $\delta$ gives $2k$ at $\delta = k \times 10^{-5}$: 2, 6 and 24, at a larger $\delta$.
 3. **Reading it.** A year of monthly releases at "$\varepsilon = 2$" is an $\varepsilon \approx 8$ guarantee for the year, by the tightest of the two accountings. The budget in the model card must be the budget for the period the data are used, not for one run.
 
