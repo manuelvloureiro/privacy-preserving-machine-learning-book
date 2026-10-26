@@ -309,7 +309,7 @@ So moving the centre off the integers can only lower the sum. At $\sigma = 0.5$ 
 
 The second comparison is in Rényi divergence. For two distributions $P$ and $Q$ on the integers, the **Rényi divergence** of order $\alpha > 1$ is
 $$D_\alpha(P\|Q) = \frac{1}{\alpha - 1}\ln\sum_xP(x)^\alpha Q(x)^{1 - \alpha},$$
-an average of the privacy loss that weights large losses more as $\alpha$ grows ([Divergences](../part01-prerequisites/03-divergences.md)). For continuous Gaussians with variance $\sigma^2$ and means $\mu$ and $\nu$ it is $\alpha(\mu - \nu)^2/(2\sigma^2)$ (@eq-gauss-renyi). For discrete ones, completing a square turns the sum into a bump summed over the integers, which the lemma bounds.
+an average of the privacy loss that weights large losses more as $\alpha$ grows ([Divergences](../part01-prerequisites/03-divergences.md)). For continuous Gaussians with variance $\sigma^2$ and means $\mu$ and $\nu$ it is $\alpha(\mu - \nu)^2/(2\sigma^2)$ (@eq-div-gauss-renyi). For discrete ones, completing a square turns the sum into a bump summed over the integers, which the lemma bounds.
 
 ::: {#thm-discrete-dgauss-renyi name="Rényi divergence of two discrete Gaussians"}
 For integers $\mu$ and $\nu$ and every $\alpha > 1$,

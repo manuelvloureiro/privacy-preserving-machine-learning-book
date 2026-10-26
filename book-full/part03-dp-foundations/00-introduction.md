@@ -4,7 +4,7 @@ The previous part showed that models and statistics leak: membership, attributes
 
 ## Who this part is for
 
-You are expected to have read the [Prerequisites](../part01-prerequisites/00-introduction.md) and [Threat models and attacks](../part02-attacks/00-introduction.md). This part uses the max-divergence and the hockey-stick divergence, the data processing inequality, the trade-off function of a hypothesis test, and tail bounds for the Laplace and normal distributions, all derived in the prerequisites. It uses the games and the advantage of the attacks part, since the definition of DP is a bound on exactly those games.
+You are expected to have read the [Prerequisites](../part01-prerequisites/00-introduction.md) and [Threat models and attacks](../part02-attacks/00-introduction.md). This part uses the max-divergence, the hockey-stick divergence and the data processing inequality of [Divergences](../part01-prerequisites/03-divergences.md), the trade-off function of [Hypothesis testing](../part01-prerequisites/04-hypothesis-testing.md), and the tail bounds for the Laplace and normal distributions of [Concentration inequalities](../part01-prerequisites/02-concentration.md). It uses the games and the advantage of [Threat models and privacy games](../part02-attacks/01-threat-models.md), since the definition of DP is a bound on exactly those games. Each chapter restates in one sentence every fact it takes from an earlier page, and links to the page that proves it.
 
 ## The common thread
 
@@ -18,17 +18,17 @@ A randomized algorithm is differentially private when changing one person's reco
 
 | Chapter | The question it answers | Builds on |
 | --- | --- | --- |
-| [The definition of differential privacy](01-definition.md) | What exactly does DP promise, to whom, and what does it not protect? How do you tell a privacy violation from learning about the population? | 3, 4, 9, 10 |
-| [Post-processing, group privacy and composition](02-properties.md) | Which operations keep a guarantee, and how do guarantees add up? | 3, 18 |
-| [The Laplace and Gaussian mechanisms](03-laplace-gaussian.md) | How much noise does a numerical query need, and what is the exact privacy of Gaussian noise? | 1, 2, 3, 18, 19 |
-| [Advanced and optimal composition](04-composition.md) | How does privacy degrade over many releases, exactly? | 2, 3, 4, 18, 19 |
-| [Selection: exponential mechanism, report-noisy-max, sparse vector](05-selection.md) | How do you privately choose the best of many options, or find the few queries above a threshold? | 1, 2, 18–20 |
-| [Query release and private multiplicative weights](06-query-release.md) | How do you answer millions of linear queries, or publish a synthetic dataset, when noise on every answer would drown them? | 2, 18, 20–22 |
+| [The definition of differential privacy](01-definition.md) | What exactly does DP promise, to whom, and what does it not protect? How do you tell a privacy violation from learning about the population? | 3, 4, 9–11, 13 |
+| [Post-processing, group privacy and composition](02-properties.md) | Which operations keep a guarantee, and how do guarantees add up? | 2, 3, 9, 10, 18 |
+| [The Laplace and Gaussian mechanisms](03-laplace-gaussian.md) | How much noise does a numerical query need, and what is the exact privacy of Gaussian noise? | 1–4, 18, 19 |
+| [Advanced and optimal composition](04-composition.md) | How does privacy degrade over many releases, exactly? | 2–4, 18–20 |
+| [Selection: exponential mechanism, report-noisy-max, sparse vector](05-selection.md) | How do you privately choose the best of many options, or find the few queries above a threshold? | 1, 2, 18–21 |
+| [Query release and private multiplicative weights](06-query-release.md) | How do you answer millions of linear queries, or publish a synthetic dataset, when noise on every answer would drown them? | 2, 17, 18, 20–22 |
 | [Beyond global sensitivity](07-sensitivity.md) | What if the worst case is far from the data you actually have? | 1, 2, 3, 9, 18–20, 22 |
-| [Discrete and floating-point-safe mechanisms](08-discrete-mechanisms.md) | Why do textbook mechanisms break on real computers, and how is that fixed? | 1, 3, 18, 20 |
-| [Local, shuffle and distributed trust models](09-trust-models.md) | What changes when no one is trusted with the raw data? | 2, 8, 9, 18, 20 |
-| [Lower bounds: what privacy costs](10-lower-bounds.md) | How much accuracy must every private mechanism give up? | 2, 4, 5, 10, 17, 18–20 |
-| [Private mean estimation](11-mean-estimation.md) | How many records does a private estimate of a population mean need, and what does not knowing the range, the dimension or the tails cost? | 1, 2, 20–22, 24, 27 |
+| [Discrete and floating-point-safe mechanisms](08-discrete-mechanisms.md) | Why do textbook mechanisms break on real computers, and how is that fixed? | 1, 3, 18–20 |
+| [Local, shuffle and distributed trust models](09-trust-models.md) | What changes when no one is trusted with the raw data? | 1–4, 8, 9, 18–20 |
+| [Lower bounds: what privacy costs](10-lower-bounds.md) | How much accuracy must every private mechanism give up? | 2, 4, 5, 10, 17–20, 22–24 |
+| [Private mean estimation](11-mean-estimation.md) | How many records does a private estimate of a population mean need, and what does not knowing the range, the dimension or the tails cost? | 1, 2, 18–22, 24, 27 |
 
 : The chapters of this part, the question each one answers, and the earlier chapters it uses, by number (chapters 1–8 are the prerequisites, 9–17 the attacks part). {#tbl-dp-map}
 
@@ -36,7 +36,7 @@ A randomized algorithm is differentially private when changing one person's reco
 
 **Order.** Chapters 18 to 21 are the core and should be read in order: the definition, the properties that make it usable, the two mechanisms everything else is built from, and advanced and optimal composition, which finishes the story of composition that chapter 19 starts and introduces the privacy loss random variable that the next part uses throughout. Chapter 22 adds mechanisms for selection, and chapter 23 builds on them to answer many queries at once, by releasing synthetic data with private multiplicative weights. Chapter 24 handles data whose worst case is far from typical. Chapter 25 is short and practical: read it before you implement any mechanism yourself. Chapter 26 changes who is trusted with the raw data. Chapter 27 is the most theoretical; it ties back to reconstruction and membership attacks and says what privacy must cost. Chapter 28 closes the part by putting these tools together on the most common statistical task, estimating a mean, and matches each of its error rates with a lower bound from chapter 27.
 
-**Structure of a chapter.** Every chapter has the same shape as in the earlier parts: why it matters, a toolkit, one section per result with a statement, derivation, interpretation, worked example and two *check yourself* questions, then code, references and a cheat sheet. Exercises with worked solutions are collected in the exercise book, a companion website, with a link at the end of each chapter.
+**Structure of a chapter.** Every chapter opens with the question it answers and a running example with its numbers, such as the counting query of [the Laplace and Gaussian mechanisms](03-laplace-gaussian.md) or the dashboard of a hundred counts in [Advanced and optimal composition](04-composition.md). Then comes one section per topic. Its definitions, theorems, lemmas and worked examples are numbered environments, so that later chapters can cite them by number, and every theorem is followed at once by its proof in numbered steps. A Code section runs the script that checks every quoted number. A Summary table then lists each result of the chapter, its statement in a line and where it is used, and References close the chapter. The exercises, each with a worked solution, are in the exercise book, a companion website, and the last line of each chapter links to them.
 
 **Proofs you can check by computer.** Most privacy claims in this part are checked numerically as well as proved: the exact privacy profile of a mechanism is computed and compared with its bound, a composition formula is compared with brute-force enumeration, and a buggy mechanism is shown to leak by computing its privacy loss. Running the scripts is the fastest way to see how loose each bound is. From the repository root, for example,
 
@@ -63,7 +63,7 @@ The chapters share the conventions in @tbl-dp-notation, set in [the definition o
 | $r \in \mathcal R$, $u(D, r)$, $\Delta u$ | The exponential mechanism's candidates, its score function and the score's sensitivity |
 | $\mathcal Q$, $\tau$, $\bot$, $\top$ | A workload of counting queries; the sparse vector technique's threshold and its answers "below" and "above" |
 | $(\alpha, \beta)$ | An $(\alpha, \beta)$-accurate mechanism errs by at most $\alpha$ with probability at least $1 - \beta$; $\beta$ is a failure probability |
-| $\mathrm{FPR}$, $\mathrm{FNR}$ | A test's false positive and false negative rates, its type I and type II errors, written $\alpha$ and $\beta$ on a page without an accuracy guarantee |
+| $\mathrm{FPR}$, $\mathrm{FNR}$ | A test's false positive and false negative rates, its type I and type II errors, written $\alpha$ and $\beta$ only on a page where neither letter has another meaning |
 | $R\colon \mathcal X \to \mathcal Y$, $\varepsilon_0$ | A local randomizer and its privacy parameter |
 
 : Notation shared by the chapters of this part and the next. {#tbl-dp-notation}
@@ -72,14 +72,16 @@ The chapters share the conventions in @tbl-dp-notation, set in [the definition o
 
 By the end of this part you should be able to:
 
-- state pure and approximate DP for a stated neighbouring relation and unit of privacy, and translate a guarantee into a bound on membership advantage and on posterior odds;
+- state pure and approximate DP for a stated neighbouring relation and unit of privacy, translate a guarantee into a bound on membership advantage and on posterior odds, and say why $\delta$ must be much smaller than $1/n$;
 - prove post-processing, group privacy and basic composition, and say what does not compose;
 - calibrate the Laplace and Gaussian mechanisms, including the exact (analytic) Gaussian calibration;
 - derive advanced composition and compute optimal composition exactly;
 - prove the exponential mechanism, report-noisy-max and the sparse vector technique private, and recognize the common broken variants of the last;
-- handle data-dependent sensitivity with smooth sensitivity, propose-test-release, subsample-and-aggregate and clipping;
+- answer a large workload of linear queries with private multiplicative weights, and bound its error through the regret of multiplicative weights;
+- handle data-dependent sensitivity with smooth sensitivity, propose-test-release, inverse sensitivity, subsample-and-aggregate and clipping;
 - implement discrete Laplace and discrete Gaussian samplers exactly, and explain why naive floating-point noise is not private;
 - design frequency estimation in the local model and explain what shuffling and secure aggregation buy;
-- prove packing and fingerprinting lower bounds, and run the tracing attack they come from.
+- prove packing and fingerprinting lower bounds, and run the tracing attack they come from;
+- estimate a mean privately when its range, its dimension or its tails are unknown, and match each error rate with a lower bound.
 
 Each of these is a result derived in one of the chapters that follow.

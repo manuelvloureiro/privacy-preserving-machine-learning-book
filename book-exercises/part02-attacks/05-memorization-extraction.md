@@ -9,7 +9,7 @@ The notation is the chapter's: $\mathcal R$ is the canary's randomness space, th
 > **Exercise 1.** **Expected exposure of a small space.** For $|\mathcal R| = 10$ and a canary that was not inserted (no ties), compute $\mathbb E[\mathrm{exposure}]$ from @eq-memo-null-mean and $\Pr[\mathrm{exposure} \ge 2]$ exactly. *Check: 1.1428 bits and 0.2.* *(Null distribution of exposure)*
 
 ::: {.callout-tip collapse="true" title="Solution"}
-1. **The rank is uniform.** The canary was not inserted, so the model does not depend on it, and with no ties its rank is uniform on $\{1, \dots, 10\}$ (step 2 of the null-distribution derivation).
+1. **The rank is uniform.** The canary was not inserted, so the model does not depend on it, and with no ties its rank is uniform on $\{1, \dots, 10\}$ (step 2 of the proof of @thm-memo-null).
 2. **The mean.** $\mathbb E[\log_2\operatorname{rank}] = \frac{1}{10}\sum_{i=1}^{10}\log_2i = \frac{\log_2(10!)}{10} = \frac{\log_2 3{,}628{,}800}{10} = \frac{21.791}{10} = 2.1791$.
 3. **Subtract from $\log_2 10 = 3.3219$:** $\mathbb E[\mathrm{exposure}] = 3.3219 - 2.1791 = 1.1428$ bits. It is below the limit $\log_2e = 1.4427$: the $O(\ln N/N)$ correction in Stirling's formula is still large at $N = 10$.
 4. **The tail.** Exposure $\ge 2$ means $\log_2\operatorname{rank} \le \log_210 - 2$, that is $\operatorname{rank} \le 10/4 = 2.5$. Ranks 1 and 2 qualify, so the probability is $2/10 = 0.2$, below the bound $2^{-2} = 0.25$. The bound is loose here because $10 \cdot 2^{-2}$ is not an integer.
@@ -19,20 +19,20 @@ The notation is the chapter's: $\mathcal R$ is the canary's randomness space, th
 
 ## Samples for extraction {#sec-sol-memo-2}
 
-> **Exercise 2.** **Samples for extraction.** A secret has probability $p = 0.0442$ after its prefix. How many samples does the bound @eq-memo-samples ask for to extract it with probability 99%, and how many does the exact condition $(1 - p)^m \le 0.01$ ask for? *Check: 105 and 102.* *(Samples needed)*
+> **Exercise 2.** **Samples for extraction.** A secret has probability $q = 0.0442$ after its prefix. How many samples does the bound @eq-memo-samples of @prp-memo-samples ask for to extract it with probability 99%, and how many does the exact condition $(1 - q)^m \le 0.01$ ask for? *Check: 105 and 102.* *(Samples needed)*
 
 ::: {.callout-tip collapse="true" title="Solution"}
-1. **The bound.** $m \ge \ln(1/0.01)/p = 4.6052/0.0442 = 104.19$, so $m = 105$.
-2. **The exact condition.** $(1 - p)^m \le 0.01$ is $m\ln(1 - p) \le \ln 0.01$. Dividing by the negative $\ln(1 - p) = -0.04521$ flips the inequality: $m \ge 4.6052/0.04521 = 101.9$, so $m = 102$.
+1. **The bound.** $m \ge \ln(1/0.01)/q = 4.6052/0.0442 = 104.19$, so $m = 105$.
+2. **The exact condition.** $(1 - q)^m \le 0.01$ is $m\ln(1 - q) \le \ln 0.01$. Dividing by the negative $\ln(1 - q) = -0.04521$ flips the inequality: $m \ge 4.6052/0.04521 = 101.9$, so $m = 102$.
 3. **Check.** With 102 samples the success probability is $1 - 0.9558^{102} = 0.9901$; with 101 it is 0.9896, just short of 99%.
-4. **Why the bound is close.** $1 - p \le e^{-p}$ loses only a factor $e^{-p^2/2}$ per sample for small $p$ ($\ln(1 - p) = -p - p^2/2 - \dots$). The relative error of the bound is about $p/2 = 2\%$, which is the gap between 104.2 and 101.9.
+4. **Why the bound is close.** Step 3 of the proof of @prp-memo-samples replaces $1 - q$ by $e^{-q}$, which loses only a factor $e^{-q^2/2}$ per sample for small $q$ ($\ln(1 - q) = -q - q^2/2 - \dots$). The relative error of the bound is about $q/2 = 2\%$, which is the gap between 104.2 and 101.9.
 
-*For rare strings the bound and the exact count agree; the useful rule is "about $4.6/p$ samples for 99%".*
+*For rare strings the bound and the exact count agree; the useful rule is "about $4.6/q$ samples for 99%".*
 :::
 
 ## A canary in unique contexts has maximal exposure {#sec-sol-memo-3}
 
-> **Exercise 3.** **A canary in unique contexts has maximal exposure.** Suppose the order $n$ is large enough that every context met while scoring a pin after "my pin is " contains at least the prefix's last two characters, the "s" and the space after it (for five digits and the end-of-line symbol, $n \ge 8$), and that these contexts, each a stretch of the prefix ending in "s " followed by the digits scored so far, occur in the training data only in the $k \ge 1$ copies of the canary. (A context that held only the space would not do: a space followed by digits can also occur in the background text.) Show that the canary is the unique most likely pin, so its exposure is $\log_2|\mathcal R|$. *Hint: compare the canary with a pin that first differs at position $j$; after position $j$ that pin's contexts were never seen, so each of its later symbols has probability $1/V$, and use @eq-memo-unseen.* *Check: the order-8 model of the script gives the canary of @tbl-memo-exposure exposure 16.61 at $k = 1$.* *(Fact 2, rank)*
+> **Exercise 3.** **A canary in unique contexts has maximal exposure.** Suppose the order $n$ is large enough that every context met while scoring a pin after "my pin is " contains at least the prefix's last two characters, the "s" and the space after it (for five digits and the end-of-line symbol, $n \ge 8$), and that these contexts, each a stretch of the prefix ending in "s " followed by the digits scored so far, occur in the training data only in the $k \ge 1$ copies of the canary. (A context that held only the space would not do: a space followed by digits can also occur in the background text.) Show that the canary is the unique most likely pin, so its exposure is $\log_2|\mathcal R|$. *Hint: compare the canary with a pin that first differs at position $j$; after position $j$ that pin's contexts were never seen, so each of its later symbols has probability $1/V$, and use @eq-memo-unseen.* *Check: the order-8 model of the script gives the canary of @tbl-memo-exposure exposure 16.61 at $k = 1$.* *(@lem-memo-ngram, rank)*
 
 ::: {.callout-tip collapse="true" title="Solution"}
 Write the canary as $\hat r = \hat r_1\dots\hat r_5$ and let $\hat r_6$ be the end-of-line symbol; a candidate $r$ is scored on the same six steps (@eq-memo-chain).
@@ -40,7 +40,7 @@ Write the canary as $\hat r = \hat r_1\dots\hat r_5$ and let $\hat r_6$ be the e
 1. **Which contexts have counts.** Every context met while scoring contains the "s " that ends the prefix, so by assumption it can only have been seen in the canary's copies. The canary's own contexts were seen exactly $k$ times each, always followed by the canary's next symbol. A context that is not on the canary's path was never seen.
 2. **Take a candidate $r \ne \hat r$** and let $j$ be the first position where $r_j \ne \hat r_j$. Positions before $j$ contribute the same factors to both scores, so only positions $j, \dots, 6$ matter.
 3. **Position $j$.** Both are scored in the canary's context $c_j$. By @eq-memo-unseen the canary gets $\frac{k + \alpha}{k + \alpha V}$ and $r$ gets $\frac{\alpha}{k + \alpha V}$, strictly less.
-4. **Positions after $j$.** The candidate's context now contains $r_j \ne \hat r_j$, so it is not on the canary's path and was never seen: $N(c) = 0$ and @eq-memo-ngram gives $\alpha/(\alpha V) = 1/V$ for every symbol. The canary keeps getting $\frac{k + \alpha}{k + \alpha V}$.
+4. **Positions after $j$.** The candidate's context now contains $r_j \ne \hat r_j$, so it is not on the canary's path and was never seen, and by part 3 of @lem-memo-ngram every symbol gets $1/V$. The canary keeps getting $\frac{k + \alpha}{k + \alpha V}$.
 5. **Compare the factors.** $\frac{k + \alpha}{k + \alpha V} \ge \frac1V$ is equivalent to $V(k + \alpha) \ge k + \alpha V$, that is $Vk \ge k$, which holds. At $k = 1$: $0.2245 \ge 1/39 = 0.0256$.
 6. **Conclude.** Every factor of the canary is at least the candidate's, and the one at position $j$ is strictly larger, so $p(\hat r) > p(r)$. This holds for every $r \ne \hat r$, so the canary has rank 1 and exposure $\log_2|\mathcal R| = \log_2 10^5 = 16.61$.
 
@@ -51,7 +51,7 @@ Write the canary as $\hat r = \hat r_1\dots\hat r_5$ and let $\hat r_6$ be the e
 
 ## Copies needed by hand {#sec-sol-memo-4}
 
-> **Exercise 4.** **Copies needed by hand.** A secret's five steps have counts (true digit, strongest rival) without the secret of $(1, 2), (0, 2), (0, 5), (0, 1), (0, 1)$, and every rival has a lower code than the true digit. What is $k^*$? Which step decides it? If a larger model split that context so that the rival count at the third step fell from 5 to 2, what would $k^*$ become? *Check: 6, then 3.* *(@eq-memo-kstar)*
+> **Exercise 4.** **Copies needed by hand.** A secret's five steps have counts (true digit, strongest rival) without the secret of $(1, 2), (0, 2), (0, 5), (0, 1), (0, 1)$, and every rival has a lower code than the true digit. What is $k^*$? Which step decides it? If a larger model split that context so that the rival count at the third step fell from 5 to 2, what would $k^*$ become? *Check: 6, then 3.* *(@thm-memo-kstar)*
 
 ::: {.callout-tip collapse="true" title="Solution"}
 1. **Ties go to the rival.** Greedy decoding breaks ties toward the lowest code, and every rival has a lower code, so the true digit must win strictly at every step: $k \ge \text{rival} - \text{true} + 1$.
@@ -81,10 +81,9 @@ Write the canary as $\hat r = \hat r_1\dots\hat r_5$ and let $\hat r_6$ be the e
 > **Exercise 6.** **Which secrets an unprompted sampler finds.** By the chain rule, one sample from the start of a line equals a given training line with probability $p(\text{line})$. Predict the fraction of the secrets of each duplication group that appear at least once among 20,000 samples from the order-6 model (trained without the public lines), and compare with a simulation. *Check: for the secrets with 16 copies the mean $p(\text{line})$ is $1.34 \times 10^{-4}$, the predicted fraction 0.91 and the simulated one 0.96; for 4 copies, 0.01 and 0.02.* *(Chain rule, samples needed)*
 
 ::: {.callout-tip collapse="true" title="Solution"}
-1. **One sample.** A temperature-1 sample draws each symbol from $p(x_t \mid x_{<t})$ and stops at the end-of-line symbol, so it equals a given line, end of line included, with probability $p(\text{line})$ (@eq-memo-chain).
-2. **Many samples.** The samples are independent, so a line with probability $p$ appears at least once among $m$ of them with probability $1 - (1 - p)^m$, as in the derivation of @eq-memo-samples.
-3. **Average over each group.** For each secret compute $p$ under the model and average $1 - (1 - p)^{20{,}000}$ over the 100 secrets of the group. Averaging the probabilities, not plugging in the mean $p$, matters: the per-secret probabilities differ by orders of magnitude.
-4. **Compare** (@tbl-sol-memo-sampling).
+1. **One line, many samples.** A sample from the start of a line stops at the end-of-line symbol, so steps 1 and 2 of the proof of @prp-memo-samples, with the empty prompt, say that a line of probability $q = p(\text{line})$ appears at least once among $m$ samples with probability $1 - (1 - q)^m$.
+2. **Average over each group.** For each secret compute $q$ under the model and average $1 - (1 - q)^{20{,}000}$ over the 100 secrets of the group. Averaging the probabilities, not plugging in the mean $q$, matters: the per-secret probabilities differ by orders of magnitude.
+3. **Compare** (@tbl-sol-memo-sampling).
 
 | Copies $k$ | Mean $p(\text{line})$ | Expected appearances, $20{,}000\,p$ | Predicted fraction | Simulated fraction |
 | --- | --- | --- | --- | --- |
@@ -96,7 +95,7 @@ Write the canary as $\hat r = \hat r_1\dots\hat r_5$ and let $\hat r_6$ be the e
 
 : Secret lines generated by 20,000 unprompted samples of the order-6 model: predicted from the line probabilities, and simulated. {#tbl-sol-memo-sampling}
 
-5. **Why the probability climbs so fast with $k$.** The line's probability is a product over its 13 symbols. The name's first symbols are drawn in contexts shared with every line (the start of a line, then one or two letters). Each copy is one vote in each of those contexts, so each factor grows with $k$, and the product of several growing factors grows faster than $k$: from 4 to 16 copies the mean probability rises by a factor of 280. Once the name reaches contexts of its own, the remaining factors approach 1 (@tbl-memo-unseen).
+4. **Why the probability climbs so fast with $k$.** The line's probability is a product over its 13 symbols. The name's first symbols are drawn in contexts shared with every line (the start of a line, then one or two letters). Each copy is one vote in each of those contexts, so each factor grows with $k$, and the product of several growing factors grows faster than $k$: from 4 to 16 copies the mean probability rises by a factor of 280. Once the name reaches contexts of its own, the remaining factors approach 1 (@tbl-memo-unseen).
 
 The predictions agree with the simulation within the sampling error of 100 secrets per group. They also explain the chapter's attack: the 4-copy secrets have a 1 in 100 chance each, so almost none appear, although 76% of them are discoverably memorized at order 6.
 

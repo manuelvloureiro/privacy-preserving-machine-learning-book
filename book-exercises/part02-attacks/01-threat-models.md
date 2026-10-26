@@ -20,15 +20,12 @@ The solutions use the chapter's notation. $b = 1$ is the world where the target 
 
 ## The exact count in an unknown crowd {#sec-sol-threat-2}
 
-> **Exercise 2.** **The exact count in an unknown crowd.** Show that $\mathrm{TV}\big(\mathrm{Bin}(m, \frac12), 1 + \mathrm{Bin}(m, \frac12)\big) = \binom{m}{\lfloor m/2\rfloor}2^{-m}$, and use Stirling's formula to show it is about $\sqrt{2/(\pi m)}$. *Hint: write the sum $\sum_k(q_k - p_k)_+$ with $q_k = p_{k-1}$, and notice it telescopes.* *Check: 0.0796 for $m = 100$, against $\sqrt{2/(100\pi)} = 0.0798$.* *(TV, average case)*
+> **Exercise 2.** **The exact count in an unknown crowd.** By @prp-threat-avg-worst, $\mathrm{TV}\big(\mathrm{Bin}(m, \frac12), 1 + \mathrm{Bin}(m, \frac12)\big) = \binom{m}{\lfloor m/2\rfloor}2^{-m}$. Use Stirling's formula to show that this is about $\sqrt{2/(\pi m)}$, and check the central weight against a direct sum. *Hint: for even $m = 2j$, apply $n! \approx \sqrt{2\pi n}(n/e)^n$ to the three factorials of $\binom{2j}{j}$.* *Check: 0.0796 for $m = 100$, against $\sqrt{2/(100\pi)} = 0.0798$.* *(TV, average case)*
 
 ::: {.callout-tip collapse="true" title="Solution"}
-1. **The two distributions.** Let $p_k = \binom mk2^{-m}$ for $0 \le k \le m$ and $p_k = 0$ otherwise. Without the target the count is $k$ with probability $p_k$; with it, with probability $q_k = p_{k-1}$.
-2. **Where $q$ beats $p$.** $p_k/p_{k-1} = (m - k + 1)/k$, which is below 1 exactly when $k > (m + 1)/2$. So $q_k > p_k$ exactly for $k \ge j := \lfloor (m + 1)/2\rfloor + 1$, up to $k = m + 1$.
-3. **Telescope.** $\mathrm{TV} = \sum_{k \ge j}(p_{k-1} - p_k) = p_{j-1} - p_{m+1} = p_{\lfloor(m+1)/2\rfloor}$.
-4. **The central weight.** For even $m$, $\lfloor (m+1)/2\rfloor = m/2$. For odd $m$ it is $(m+1)/2 = \lceil m/2\rceil$, and $\binom{m}{\lceil m/2\rceil} = \binom{m}{\lfloor m/2\rfloor}$. Either way $\mathrm{TV} = \binom{m}{\lfloor m/2\rfloor}2^{-m}$.
-5. **Stirling.** For $m = 2j$, $n! \approx \sqrt{2\pi n}(n/e)^n$ gives $\binom{2j}{j} \approx \frac{\sqrt{4\pi j}(2j/e)^{2j}}{2\pi j(j/e)^{2j}} = \frac{4^j}{\sqrt{\pi j}}$, so $\mathrm{TV} \approx 1/\sqrt{\pi j} = \sqrt{2/(\pi m)}$.
-6. **Check.** Summing $\frac12\sum_k|p_k - q_k|$ directly and taking the central weight both give 0.2461 for $m = 10$ and 0.0796 for $m = 100$. Stirling gives 0.2523 and 0.0798.
+1. **The central weight.** By @prp-threat-avg-worst, whose proof telescopes the excess of the shifted binomial weights, the TV distance is the largest weight $\binom{m}{\lfloor m/2\rfloor}2^{-m}$.
+2. **Stirling.** For $m = 2j$, $n! \approx \sqrt{2\pi n}(n/e)^n$ gives $\binom{2j}{j} \approx \frac{\sqrt{4\pi j}(2j/e)^{2j}}{2\pi j(j/e)^{2j}} = \frac{4^j}{\sqrt{\pi j}}$, so $\mathrm{TV} \approx 1/\sqrt{\pi j} = \sqrt{2/(\pi m)}$.
+3. **Check.** With $p_k = \binom mk2^{-m}$ and $q_k = p_{k-1}$, summing $\frac12\sum_k|p_k - q_k|$ directly and taking the central weight both give 0.2461 for $m = 10$ and 0.0796 for $m = 100$. Stirling gives 0.2523 and 0.0798.
 
 *Knowing the other records turns this TV from 0.08 into 1: the exact count reveals the target's presence completely. Only the adversary's ignorance hides it.*
 :::
@@ -48,13 +45,11 @@ The solutions use the chapter's notation. $b = 1$ is the world where the target 
 
 ## Reconstruction from one count {#sec-sol-threat-4}
 
-> **Exercise 4.** **Reconstruction from one count.** Prove that the best reconstruction of $m$ uniform bits from their exact sum recovers an expected fraction $\mathbb E[\max(K, m - K)]/m$ with $K \sim \mathrm{Bin}(m, \frac12)$. Compute it by hand for $m = 1, 2, 3$. *Check: 1, 0.75, 0.75; and 0.6230 for $m = 10$.* *(Reconstruction game, posterior)*
+> **Exercise 4.** **Reconstruction from one count.** By @prp-threat-recon, the best reconstruction of $m$ uniform bits from their exact sum recovers an expected fraction $\mathbb E[\max(K, m - K)]/m$ with $K \sim \mathrm{Bin}(m, \frac12)$. Compute it by hand for $m = 1, 2, 3$. *Check: 1, 0.75, 0.75; and 0.6230 for $m = 10$.* *(Reconstruction game, posterior)*
 
 ::: {.callout-tip collapse="true" title="Solution"}
-1. **Score by bits.** A reconstruction is a guess $x'_1, \dots, x'_m$ that may depend on $K$. Its expected gain is $\frac1m\sum_i\Pr[x'_i = x_i]$, so each bit can be optimized separately.
-2. **Posterior of a bit.** Given $K = k$, all $\binom mk$ arrangements are equally likely, and bit $i$ is 1 in $\binom{m-1}{k-1}$ of them. So $\Pr[x_i = 1 \mid K = k] = \binom{m-1}{k-1}/\binom mk = k/m$.
-3. **Best guess.** Guess 1 if $k/m > \frac12$, else 0 (at $k = m/2$ both are equally good). The expected number of correct bits given $K = k$ is $\max(k, m - k)$. Averaging over $K$ gives the claim.
-4. **By hand.**
+1. **The formula.** By @prp-threat-recon, every bit is guessed as the majority value of the count, which gets $\max(k, m - k)$ bits right when $K = k$. So the expected fraction is $\mathbb E[\max(K, m - K)]/m$, and only the distribution of $K$ is needed. At $k = m/2$ both guesses are equally good.
+2. **By hand.**
 
 | $m$ | Distribution of $K$ | $\max(K, m - K)$ | Expected fraction |
 | --- | --- | --- | --- |
@@ -64,7 +59,7 @@ The solutions use the chapter's notation. $b = 1$ is the world where the target 
 
 : The best reconstruction of $m$ uniform bits from their exact sum, for small $m$. {#tbl-sol-threat-recon}
 
-5. **Check.** The script gives 1, 0.75, 0.75 and, for $m = 10$, 0.6230.
+3. **Check.** The script gives 1, 0.75, 0.75 and, for $m = 10$, 0.6230.
 
 *For $m = 1$ the count is the record. From $m = 2$ on, one count says less and less about each bit, and the gain over guessing shrinks like $1/\sqrt{2\pi m}$.*
 :::
@@ -101,7 +96,7 @@ The solutions use the chapter's notation. $b = 1$ is the world where the target 
 
 ## Mixing hides {#sec-sol-threat-7}
 
-> **Exercise 7.** **Mixing hides.** One other record with a uniform bit $\omega$; the mechanism releases the exact count $\omega + b$. Compute the best advantage of an adversary who knows $\omega$ and of one who does not, and check them against @eq-threat-mixing. *Check: 1 and 0.5.* *(Fact 3)*
+> **Exercise 7.** **Mixing hides.** One other record with a uniform bit $\omega$; the mechanism releases the exact count $\omega + b$. Compute the best advantage of an adversary who knows $\omega$ and of one who does not, and check them against @eq-threat-mixing. *Check: 1 and 0.5.* *(Mixing, @lem-threat-mixing)*
 
 ::: {.callout-tip collapse="true" title="Solution"}
 1. **Knowing $\omega$.** For each $\omega$, the release is $\omega$ when $b = 0$ and $\omega + 1$ when $b = 1$: two point masses at different places. $\mathrm{TV}(P_\omega, Q_\omega) = 1$, and the attack "say member when the count exceeds $\omega$" is always right.

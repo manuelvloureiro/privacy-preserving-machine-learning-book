@@ -6,7 +6,7 @@ This part collects the mathematics the rest of the book stands on. It contains n
 
 You are expected to know undergraduate calculus and linear algebra, the basics of probability (random variables, expectation, variance, independence, conditional probability), and enough machine learning to recognise a loss function, a training set and stochastic gradient descent. You should be able to read short Python programs that use NumPy. Nothing beyond that is assumed. Every inequality, divergence or definition that the later parts rely on is stated and derived here, so you can check each step for yourself instead of taking it on trust.
 
-If you already know a topic well, skim its cheat sheet and try its exercises in the exercise book. If they go smoothly, move on.
+If you already know a topic well, read the Summary table at the end of its chapter and try its exercises in the exercise book. If they go smoothly, move on.
 
 ## The common thread
 
@@ -31,15 +31,7 @@ Two ideas run through all eight chapters. The first is the **likelihood ratio** 
 
 **Order.** Read chapters 1 to 4 in order, since each one uses the previous ones. Together they form the core of this part: tail bounds, then a number for how different two distributions are, then what that number means for anyone trying to tell them apart. Chapter 5, information theory, continues that thread: it measures how much an observation reveals, on average and for a single best guess. Then read chapters 6 and 7, which go together: how training moves when one record changes, and why that matters for generalization. Chapter 8 is used by three later chapters: chapter 9 on threat models uses its security games and advantage, chapter 15 on linkage uses its birthday bound, and chapter 26 on trust models builds secure aggregation from its secret sharing. A planned later part on cryptographic approaches will use all of it. You can defer it until you reach chapter 9.
 
-**Structure of a chapter.** Every chapter follows the same shape, so you always know where to look:
-
-- **Why this matters** states the question the chapter answers, the one idea that organizes it, and a table of its results and where each is used.
-- **Toolkit** collects the few facts that the derivations share, each proved once.
-- **One section per result**, each with the same arc: the context, the statement, a step-by-step derivation that names the fact used at each step, an interpretation that says when the result is tight and when it is loose, a worked example with real numbers, and two *check yourself* questions with their answers.
-- **Code** runs a script that checks every quoted number by exact computation or simulation.
-- **References** and a one-table **Cheat sheet** close the chapter.
-
-The exercises, each with a worked solution, are collected in the exercise book, a companion website. Each chapter ends with a link to its exercises.
+**Structure of a chapter.** Every chapter has the same shape, so you always know where to look. It opens with the question it answers, the one idea that organizes the answer, and a running example with its numbers. Then comes one section per topic, in teaching order. Each section opens with its question, and its definitions, theorems and worked examples are numbered so that later chapters can point to them. Every theorem is followed at once by its proof in numbered steps, and then by what it means and how tight it is. A **Code** section runs the script that checks every quoted number, a **Summary** table lists each result with where it is used, and **References** close the chapter. The exercises, each with a worked solution, are in the exercise book, a companion website, and the last line of each chapter links to them.
 
 **Abstract steps are made concrete.** Where a derivation takes an abstract step, such as writing a probability as the expectation of an indicator or changing the distribution an expectation is taken under, the text works the step out on a small case first, usually a die or a coin with a table of every outcome. If a step feels like a trick, look for that table. It is there to show that the step is just bookkeeping.
 

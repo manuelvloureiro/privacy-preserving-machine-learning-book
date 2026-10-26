@@ -1,353 +1,422 @@
 # Probability distributions
 
-## Why this matters
+A handful of distributions do almost all the work in this book. Counts of events are binomial, and Poisson when the events are rare. Waiting times are exponential, and additive noise is usually normal or Laplace. Every later chapter is stated in terms of these few families, so this chapter asks what each one is, and what its mean, variance, moment generating function (MGF) and tail are.
 
-A handful of distributions do almost all the work in this book. Counts of events (errors, successes, records drawn into a batch) are binomial, and Poisson when the events are rare. Additive noise is usually normal or Laplace. Every later chapter — concentration, divergences, hypothesis testing — is stated in terms of these few families. So you need to know each one well: its density, mean, variance, moment generating function (MGF), tails, and how it relates to the others.
+The idea that organizes the answer is that the families are built from one another. A binomial is a sum of coin flips, and a Poisson is a binomial with many unlikely trials. An exponential is the wait for the first event in that same setting, and a Laplace is two exponentials back to back. A normal is what any sum of many small independent pieces looks like. So each family's moments can be computed from its pieces.
 
-The idea that ties the chapter together is that these families are not a zoo of unrelated formulas. They are built from one another. A binomial is a sum of coin flips. A Poisson is a binomial with many trials and a small success probability. An exponential is the waiting time for the first event in that same Poisson setting. A Laplace is two exponentials placed back to back. A normal is what any sum of many small independent pieces looks like. Because each family is built from simpler ones, its mean, variance and MGF can be computed from the pieces, and that is how this chapter derives them.
+The running example is a classifier tested on $n = 2{,}000$ records, which errs on each one independently with probability $p = 0.05$. It makes about 100 errors, give or take 9.7, and the count is binomial. When errors are rare it is close to a Poisson count, the wait for a first error in deployment is exponential, and the normal approximation says how the measured error rate spreads. The last section compares a normal and a Laplace density with copies of themselves moved sideways, which is where the next chapters begin.
 
-This chapter covers five families (@tbl-families):
+## Moments {#sec-dist-moments}
 
-| Family | Models | Key fact for later |
-| --- | --- | --- |
-| Bernoulli and binomial | One yes/no outcome; the count of successes in $n$ trials | Mean and variance add over independent trials |
-| Poisson | Counts of rare events | Its MGF $e^{\mu(e^\lambda - 1)}$ drives the Chernoff bound |
-| Exponential | Waiting times; a building block | A difference of two exponentials is Laplace |
-| Laplace | Symmetric noise with exponential tails | Its log density is piecewise linear, so shifted copies differ by a bounded factor |
-| Normal | Sums of many small effects; symmetric noise with light tails | Closed under sums; a $d$-dimensional normal vector has norm $\approx\sigma\sqrt d$ |
+Every family below is described by the same few summaries, and the first two say where the distribution sits and how widely it spreads. This section defines them and proves the rules that compute them for sums, which every later section uses.
 
-: The five families in this chapter, what each models, and the fact about it that later chapters use. {#tbl-families}
+::: {#def-dist-moments name="Mean, variance and covariance"}
+For a random variable $X$, the **mean** $\mathbb E[X]$ is the average of its values weighted by their probabilities. The **variance** is the average squared distance from the mean,
+$$\operatorname{Var}(X) = \mathbb E\big[(X - \mathbb E[X])^2\big] = \mathbb E[X^2] - \mathbb E[X]^2,$$
+and its square root is the **standard deviation**. The $k$-th **moment** of $X$ is $\mathbb E[X^k]$. For two variables $X$ and $Y$, the **covariance** is $\operatorname{Cov}(X, Y) = \mathbb E[XY] - \mathbb E[X]\,\mathbb E[Y]$.
+:::
 
-A last section puts the normal and the Laplace side by side and asks how different a density is from a copy of itself moved sideways. That comparison is where the next chapters begin.
+The two forms of the variance agree, because expanding the square gives $X^2 - 2X\,\mathbb E[X] + \mathbb E[X]^2$, and averaging each term gives $\mathbb E[X^2] - 2\mathbb E[X]^2 + \mathbb E[X]^2$. Three rules cover almost every calculation in this chapter.
 
-Each section follows the same arc: context, definition, derivations of the moments, interpretation, an example from machine learning, and a self-check.
+::: {#lem-dist-moment-rules name="Means and variances of sums"}
+Let $X$ and $Y$ be random variables and $c$ a constant. The mean of a sum is the sum of the means, whether or not $X$ and $Y$ are independent. Scaling by $c$ multiplies the variance by $c^2$. If $X$ and $Y$ are independent, their variances add:
+$$\mathbb E[X + Y] = \mathbb E[X] + \mathbb E[Y], \qquad \operatorname{Var}(cX) = c^2\operatorname{Var}(X), \qquad \operatorname{Var}(X + Y) = \operatorname{Var}(X) + \operatorname{Var}(Y).$$
+:::
 
-## Toolkit: what to know for each distribution
+::: {.proof}
+1. *Means add.* An expectation is a weighted sum over outcomes, and the weighted sum of $X + Y$ splits into the weighted sum of $X$ plus that of $Y$. No step uses independence, and the same splitting gives $\mathbb E[cX] = c\,\mathbb E[X]$.
+2. *Scaling.* Multiplying $X$ by $c$ multiplies its mean by $c$, so every deviation from the mean is multiplied by $c$. Squaring the deviation turns that factor into $c^2$.
+3. *Expand the square.* The deviation of $X + Y$ is the sum of the two deviations. Its square is the two squares plus twice their product, and the mean of that product expands to $\mathbb E[XY] - \mathbb E[X]\,\mathbb E[Y]$, the covariance, so
+$$\operatorname{Var}(X + Y) = \operatorname{Var}(X) + \operatorname{Var}(Y) + 2\operatorname{Cov}(X, Y).$$
+4. *Independence removes the cross term.* For independent variables the mean of a product is the product of the means, so the covariance is 0.
+:::
 
-For every family below you will meet the same three summaries: its moments, its moment generating function and its tail. This section says what each one is, why it is worth computing, and the few rules for working with it.
+The third rule needs independence. If $X_1, \dots, X_n$ are all the same variable, their sum is $nX_1$, whose variance is $n^2\operatorname{Var}(X_1)$, not $n\operatorname{Var}(X_1)$. With independent copies, the rules give the law that governs every average.
 
-### Moments: where the distribution sits and how wide it is {#sec-dist-moments}
+::: {#cor-dist-sqrt-n name="The square-root law for averages"}
+The average of $n$ independent copies of $X$ has mean $\mathbb E[X]$ and variance $\operatorname{Var}(X)/n$, so its standard deviation is that of one draw divided by $\sqrt n$.
+:::
 
-The **mean** $\mathbb E[X]$ is the centre of mass of the distribution: the long-run average of many independent draws. The **variance** measures how far draws typically land from the mean. It squares each draw's distance from the mean, so that distances on either side count the same, and averages. Expanding the square $(X - \mathbb E X)^2 = X^2 - 2X\,\mathbb E X + (\mathbb E X)^2$ and averaging each term gives a second form that is often easier to compute, "mean of the square minus square of the mean":
-$$\operatorname{Var}(X) = \mathbb E\big[(X - \mathbb E X)^2\big] = \mathbb E[X^2] - (\mathbb E X)^2.$$
-Its square root, the **standard deviation**, is in the same units as $X$, so it is the number to compare with the mean. For a fair die, $\mathbb E X = (1 + \dots + 6)/6 = 3.5$ and $\mathbb E X^2 = (1 + 4 + \dots + 36)/6 = 91/6$, so $\operatorname{Var}X = 91/6 - 3.5^2 = 35/12 \approx 2.92$ and the standard deviation is about 1.71.
+::: {.proof}
+1. The average is the sum of the copies times $1/n$. By the first rule of @lem-dist-moment-rules its mean is $n\,\mathbb E[X]/n = \mathbb E[X]$.
+2. By the third rule the sum has variance $n\operatorname{Var}(X)$, and by the second, multiplying by $1/n$ divides that by $n^2$.
+:::
 
-Three rules cover almost every calculation in this chapter. The first is that the mean of a sum is the sum of the means, $\mathbb E[X + Y] = \mathbb E X + \mathbb E Y$, always, even when $X$ and $Y$ are dependent. The reason is that an expectation is a weighted sum over outcomes, and a weighted sum of $X + Y$ splits into the weighted sum of $X$ plus the weighted sum of $Y$.
+::: {#exm-dist-die}
+A fair die has mean $(1 + \dots + 6)/6 = 3.5$ and mean of the square $(1 + 4 + \dots + 36)/6 = 91/6$. So its variance is $91/6 - 3.5^2 = 35/12 \approx 2.92$, and its standard deviation is about 1.71.:::
 
-The second rule says what scaling does to the spread: $\operatorname{Var}(cX) = c^2\operatorname{Var}(X)$. Multiplying $X$ by $c$ multiplies every deviation $X - \mathbb E X$ by $c$, and squaring the deviation turns that into $c^2$.
+## The moment generating function {#sec-dist-mgf}
 
-The third rule is that variances add when the variables are independent: $\operatorname{Var}(X + Y) = \operatorname{Var}X + \operatorname{Var}Y$. To see where independence enters, expand the square in the definition. In general $\operatorname{Var}(X + Y) = \operatorname{Var}X + \operatorname{Var}Y + 2\operatorname{Cov}(X, Y)$, where the cross term is the **covariance** $\operatorname{Cov}(X, Y) = \mathbb E[XY] - \mathbb E X\,\mathbb E Y$. Independence makes $\mathbb E[XY] = \mathbb E X\,\mathbb E Y$, so the covariance vanishes and only the two variances remain.
+The mean and variance summarize a distribution by two numbers. Later sections need more: the distribution of a sum of independent variables, and how fast large values become rare. One function does both jobs, and the idea behind it is to average not $X$ itself but an exponential of it.
 
-The second and third rules together give the $1/\sqrt n$ law. The average of $n$ independent copies of $X$ is their sum times $1/n$. The sum has variance $n\operatorname{Var}(X)$ by the third rule, and multiplying by $1/n$ divides that by $n^2$ by the second, so the average has variance $n\operatorname{Var}(X)/n^2 = \operatorname{Var}(X)/n$. Its standard deviation is therefore the standard deviation of one draw divided by $\sqrt n$.
+::: {#def-dist-mgf name="Moment generating function"}
+The **moment generating function** of a random variable $X$ is the function
+$$M_X(\lambda) = \mathbb E\big[e^{\lambda X}\big]$$
+of a real number $\lambda$, wherever this average is finite. Its logarithm is written $K_X(\lambda) = \ln M_X(\lambda)$.
+:::
 
-### The moment generating function {#sec-dist-mgf}
+The number $\lambda$ is not a parameter of the distribution but a dial that you set. With $\lambda > 0$ large values of $X$ dominate the average, and at $\lambda = 0$ every weight is 1, so $M_X(0) = 1$.
 
-The mean and variance summarize a distribution by two numbers. The moment generating function summarizes it by a whole function, and that function turns out to be the right tool for sums of independent variables and for tails. The idea is to average not $X$ itself but an exponential of it, $e^{\lambda X}$, for a number $\lambda$ of your choice. The **moment generating function** (MGF) of $X$ is
-$$M_X(\lambda) = \mathbb E\big[e^{\lambda X}\big].$$
-Here $\lambda$ is a real number that *you* choose. It is not a parameter of the distribution; it is a dial. For each setting of the dial you get one number, $\mathbb E[e^{\lambda X}]$, and the MGF is the whole function $\lambda \mapsto M_X(\lambda)$. With $\lambda > 0$, the weight $e^{\lambda X}$ grows exponentially in $X$, so large values of $X$ dominate the average; the larger $\lambda$, the further into the right tail it looks. With $\lambda < 0$ it looks at the left tail instead. At $\lambda = 0$ every weight is $e^0 = 1$, so $M_X(0) = 1$ for every distribution.
-
-**A concrete case: where $e^\lambda$ comes from.** Take a coin $X \sim \mathrm{Bern}(p)$, which is 1 with probability $p$ and 0 otherwise. To compute $\mathbb E[e^{\lambda X}]$, list each outcome, the value $e^{\lambda X}$ takes there, and its probability (@tbl-mgf-coin).
+::: {#exm-dist-coin-mgf}
+One test record of the running example is a coin $X \sim \mathrm{Bern}(p)$, which is 1 when the classifier errs, with probability $p$, and 0 otherwise. To compute $\mathbb E[e^{\lambda X}]$, list each outcome, the value $e^{\lambda X}$ takes there, and its probability (@tbl-dist-mgf-coin).
 
 | Outcome $x$ | $\Pr[X = x]$ | $e^{\lambda x}$ |
 | --- | --- | --- |
-| 0 | $1 - p$ | $e^{\lambda\cdot0} = 1$ |
-| 1 | $p$ | $e^{\lambda\cdot1} = e^\lambda$ |
+| 0 | $1 - p$ | 1 |
+| 1 | $p$ | $e^\lambda$ |
 
-: The MGF of a coin, outcome by outcome. The factor $e^\lambda$ is just $e^{\lambda x}$ evaluated at $x = 1$. {#tbl-mgf-coin}
+: The MGF of a coin, outcome by outcome. {#tbl-dist-mgf-coin}
 
-An expectation is the value at each outcome times its probability, added up, so
+An expectation adds up the value at each outcome times its probability, so
 $$M_X(\lambda) = (1 - p)\cdot1 + p\cdot e^\lambda = 1 + p(e^\lambda - 1).$$
-So the $e^\lambda$ in the Bernoulli, binomial and Poisson MGFs is nothing mysterious: it is the weight $e^{\lambda x}$ of the outcome $x = 1$. For a count $k$ the weight is $e^{\lambda k} = (e^\lambda)^k$, which is why $e^\lambda$ keeps reappearing for the counting distributions. With $p = 0.3$ and $\lambda = 1$, for instance, $M_X(1) = 0.7 + 0.3e \approx 1.52$.
+So the $e^\lambda$ in the MGFs of all the counting distributions below is the weight of the outcome 1. With $p = 0.3$ and $\lambda = 1$, for instance, $M_X(1) = 0.7 + 0.3e \approx 1.52$.
+:::
 
-**Why it "generates" moments.** The $k$-th **moment** of $X$ is $\mathbb E X^k$; the mean is the first. The MGF contains all of them, and the way to see this is to expand the exponential in its power series, $e^u = 1 + u + u^2/2! + u^3/3! + \cdots$, with $u = \lambda X$, and take the expectation of each term separately (the first rule of @sec-dist-moments, extended to many terms):
-$$M_X(\lambda) = \mathbb E\Big[1 + \lambda X + \frac{\lambda^2X^2}{2!} + \frac{\lambda^3X^3}{3!} + \cdots\Big] = 1 + \lambda\,\mathbb E X + \frac{\lambda^2}{2!}\mathbb E X^2 + \cdots.$$
-The $k$-th moment $\mathbb E X^k$ is $k!$ times the coefficient of $\lambda^k$, and differentiating $k$ times at $\lambda = 0$ picks it out, because differentiation kills the lower powers of $\lambda$ and setting $\lambda = 0$ kills the higher ones: $M_X'(0) = \mathbb E X$, $M_X''(0) = \mathbb E X^2$. For the coin, expanding $e^\lambda$ the same way gives $1 + p(e^\lambda - 1) = 1 + p\lambda + p\lambda^2/2! + \cdots$, so every moment equals $p$, as it must, since $X^k = X$ when $X \in \{0, 1\}$.
+The MGF gets its name from the first thing it does. Its derivatives at 0 are the moments, and the derivatives of its logarithm are the mean and the variance directly.
 
-**The log-MGF gives mean and variance directly.** The derivatives of $M_X$ give the raw moments $\mathbb E X$ and $\mathbb E X^2$, and the variance then needs a subtraction. Taking the logarithm first does the subtraction for you, and it will also turn products of MGFs into sums. Let $\psi_X(\lambda) = \ln M_X(\lambda)$. The chain rule gives $\psi' = M'/M$, and the quotient rule applied to $M'/M$ gives $\psi'' = M''/M - (M'/M)^2$. At 0, where $M = 1$, $M' = \mathbb E X$ and $M'' = \mathbb E X^2$,
-$$\psi_X'(0) = \mathbb E X, \qquad \psi_X''(0) = \mathbb E X^2 - (\mathbb E X)^2 = \operatorname{Var}X.$$
-The derivatives of $\psi_X$ at 0 are called the **cumulants** of $X$: the first is the mean, the second the variance, and the higher ones measure finer features of the shape. For the Poisson below, $\psi$ turns out so simple that both derivatives can be read off in one line.
+::: {#prp-dist-mgf-moments name="The MGF generates the moments"}
+If $M_X$ is finite on an interval around 0, then its $k$-th derivative at 0 is the $k$-th moment, $M_X^{(k)}(0) = \mathbb E[X^k]$. The first two derivatives of $K_X$ at 0 are the mean and the variance,
+$$K_X'(0) = \mathbb E[X], \qquad K_X''(0) = \operatorname{Var}(X).$$
+:::
 
-**Sums become products.** The main reason to use MGFs is that adding independent variables multiplies their MGFs. The exponential turns the sum into a product, and independence lets the expectation of that product split. If $X$ and $Y$ are independent, then
-$$M_{X+Y}(\lambda) = \mathbb E\big[e^{\lambda X}e^{\lambda Y}\big] = \mathbb E\big[e^{\lambda X}\big]\,\mathbb E\big[e^{\lambda Y}\big] = M_X(\lambda)M_Y(\lambda).$$
-The first step is $e^{a + b} = e^ae^b$; the second uses independence, which lets the expectation of a product split into a product of expectations. In log form, $\psi_{X+Y} = \psi_X + \psi_Y$. This is how you get the binomial MGF from the Bernoulli one without touching the probability table, and it is the starting point of every exponential tail bound in [Concentration inequalities](02-concentration.md).
+::: {.proof}
+The plan is to expand the exponential as a power series and read the moments off its coefficients, then to differentiate the logarithm.
 
-**The MGF pins down the distribution.** If two distributions have the same MGF on an interval around 0, they are the same distribution. This is a standard theorem of probability (it is proved in Blitzstein & Hwang, listed in the references); its proof needs more analysis than this book uses, so take it as given. You can check each sum this chapter identifies without it: @sec-apx-prob-convolution in the appendices derives every one directly, by integrating or summing over the ways the two values can add up. We use it to identify sums: compute the MGF of $X + Y$ as a product, recognise it as the MGF of a known family, and conclude that $X + Y$ belongs to that family ("the sum of independent Poissons is Poisson"). The MGF can be infinite for some $\lambda$, and for heavy-tailed distributions it is infinite for every $\lambda > 0$; the identification needs it finite near 0.
+1. *Expand.* Put $u = \lambda X$ in the power series $e^u = 1 + u + u^2/2! + \cdots$ and average term by term, using the first rule of @lem-dist-moment-rules:
+$$M_X(\lambda) = 1 + \lambda\,\mathbb E[X] + \frac{\lambda^2}{2!}\mathbb E[X^2] + \frac{\lambda^3}{3!}\mathbb E[X^3] + \cdots.$$
+2. *Differentiate $k$ times at 0.* Differentiating removes the lower powers of $\lambda$, and setting $\lambda = 0$ removes the higher ones. Only the term $\lambda^k\,\mathbb E[X^k]/k!$ is left, and it contributes $\mathbb E[X^k]$.
+3. *First derivative of the logarithm.* The chain rule gives $K_X' = M_X'/M_X$, and at 0, where $M_X = 1$, this is $\mathbb E[X]$.
+4. *Second derivative.* The quotient rule gives $K_X'' = M_X''/M_X - (M_X'/M_X)^2$. At 0 this is $\mathbb E[X^2] - \mathbb E[X]^2$, the variance.
+:::
 
-### Tails: how fast large values become rare {#sec-dist-tails}
+The main reason to use MGFs, though, is that adding independent variables multiplies them, which is the first step of every exponential tail bound in [Concentration inequalities](02-concentration.md).
 
-The **tail** of $X$ is $\Pr[X \ge t]$ as a function of $t$, for $t$ well above the mean. The mean and variance describe the bulk of the distribution; the tail describes the rare, large outcomes, which are what a worst-case guarantee has to control. What matters is the *shape* of the decay, and three shapes recur. Evaluate each at $t = 5$. A polynomial decay such as $1/t^2$ gives $1/25 = 0.04$. An exponential decay such as $e^{-t}$ gives $e^{-5}$, about $6.7 \times 10^{-3}$. A Gaussian decay such as $e^{-t^2/2}$ gives $e^{-12.5}$, about $3.7 \times 10^{-6}$.
+::: {#lem-dist-mgf-sum name="MGFs of independent sums multiply"}
+If $X$ and $Y$ are independent, then at every $\lambda$ where both MGFs are finite,
+$$M_{X+Y}(\lambda) = M_X(\lambda)\,M_Y(\lambda), \qquad K_{X+Y}(\lambda) = K_X(\lambda) + K_Y(\lambda).$$
+:::
 
-The gap widens quickly as $t$ grows, because the exponent of the Gaussian decay grows like $t^2$ while that of the exponential grows like $t$. Exponential tails are those of the exponential and Laplace families below; Gaussian tails are those of the normal.
+::: {.proof}
+1. The exponential turns the sum into a product, $e^{\lambda(X+Y)} = e^{\lambda X}e^{\lambda Y}$.
+2. The two factors are independent because $X$ and $Y$ are, and the mean of a product of independent variables is the product of the means. Taking logarithms turns the product into a sum.
+:::
 
-The tail and the MGF are tied together, and the link is a one-line argument. Fix $\lambda > 0$. Whenever $X \ge t$, the weight $e^{\lambda X}$ is at least $e^{\lambda t}$, and it is never negative, so averaging gives $M_X(\lambda) = \mathbb E[e^{\lambda X}] \ge e^{\lambda t}\Pr[X \ge t]$. Rearranged, $\Pr[X \ge t] \le M_X(\lambda)e^{-\lambda t}$. So if $M_X(\lambda)$ is finite for some $\lambda > 0$, the tail decays at least exponentially in $t$. [Concentration inequalities](02-concentration.md) turns this into explicit bounds by choosing $\lambda$ well. Which decay a distribution has decides which concentration inequalities apply to it.
+To conclude which family a sum belongs to, the chapter needs one more fact: the MGF determines the distribution.
 
-## Bernoulli and binomial
+::: {#thm-dist-mgf-unique name="The MGF determines the distribution"}
+If $X$ and $Y$ have MGFs that are finite and equal on an interval around 0, then $X$ and $Y$ have the same distribution.
+:::
+<!-- proof: cited -->
 
-### Context
+This is a standard theorem of probability, proved in Blitzstein & Hwang (listed in the references). Its proof needs more analysis than this book uses, so take it as given. @sec-apx-prob-convolution in the appendices checks each sum this chapter identifies without it, by summing or integrating directly. The chapter uses the theorem to identify a sum whose MGF, computed as a product, is that of a known family. For heavy-tailed distributions the MGF is infinite for every $\lambda > 0$, and then the theorem says nothing.
 
-The simplest random quantity is a yes/no outcome: a test record is misclassified or not, a coin lands heads or not, a record is included in a sample or not. Count the yeses over $n$ independent trials and you get a binomial. Every estimated rate in machine learning — accuracy, error rate, false-positive rate — is a binomial count divided by $n$.
+The last summary is the **tail** of $X$, the probability $\Pr[X \ge t]$ as a function of a point $t$ well above the mean. It describes the rare, large outcomes that a worst-case guarantee has to control. At $t = 5$, a polynomial decay $1/t^2$ gives 0.04 and an exponential decay $e^{-t}$ about $6.7\times10^{-3}$. A Gaussian (normal) decay $e^{-t^2/2}$ gives about $3.7\times10^{-6}$, because its exponent grows like $t^2$. The MGF controls the tail in two lines.
 
-### Definitions
+::: {#prp-dist-mgf-tail name="The MGF bounds the tail"}
+For every $t$ and every $\lambda > 0$ at which $M_X(\lambda)$ is finite,
+$$\Pr[X \ge t] \le M_X(\lambda)\,e^{-\lambda t}.$$
+:::
 
-$X \sim \mathrm{Bern}(p)$ takes value 1 with probability $p$ and 0 with probability $1 - p$.
+::: {.proof}
+1. Write $\mathbf 1[X \ge t]$ for the indicator that is 1 when $X \ge t$ and 0 otherwise. Whenever $X \ge t$, the weight $e^{\lambda X}$ is at least $e^{\lambda t}$, because $\lambda > 0$, and elsewhere it is still positive. So $e^{\lambda X} \ge e^{\lambda t}\,\mathbf 1[X \ge t]$ at every outcome.
+2. Averaging both sides turns the indicator into a probability, which gives $M_X(\lambda) \ge e^{\lambda t}\Pr[X \ge t]$.
+:::
 
-$S \sim \mathrm{Bin}(n, p)$ is the number of ones in $n$ independent $\mathrm{Bern}(p)$ trials. The probability of exactly $k$ ones is the number of ways to place $k$ ones among $n$ trials, times the probability of any one such placement. That gives the probability mass function (PMF), the table of probabilities of each count,
-$$\Pr[S = k] = \binom nk p^k(1-p)^{n-k}, \qquad k = 0, 1, \dots, n.$$
+So a finite MGF at some $\lambda > 0$ makes the tail decay at least exponentially in $t$, and [Concentration inequalities](02-concentration.md) turns this into explicit bounds by choosing $\lambda$ well.
 
-**Derivation of the PMF.** Any particular sequence with exactly $k$ ones has probability $p^k(1-p)^{n-k}$, because the trials are independent and the probability of a sequence is the product of the probabilities of its entries: $p$ for each one and $1 - p$ for each zero. There are $\binom nk$ such sequences — choose which $k$ positions hold the ones — and they are disjoint events, so their probabilities add.
+## Bernoulli and binomial {#sec-dist-binomial}
 
-### Moments
+The simplest random quantity is a yes/no outcome, such as whether a test record is misclassified. Count the yeses over $n$ independent trials and you get a binomial. Every estimated rate in machine learning, such as an accuracy or a false positive rate, is a binomial count divided by $n$, so this is the first family the running example needs.
 
-**Bernoulli.** $\mathbb E X = 1\cdot p + 0\cdot(1-p) = p$. Since $X^2 = X$, $\mathbb E X^2 = p$, so $\operatorname{Var}X = p - p^2 = p(1-p)$. The MGF, computed outcome by outcome in @tbl-mgf-coin, is $M_X(\lambda) = (1 - p) + pe^\lambda = 1 + p(e^\lambda - 1)$.
+::: {#def-dist-binomial name="Bernoulli and binomial distributions"}
+A **Bernoulli** variable $X \sim \mathrm{Bern}(p)$ takes the value 1 with probability $p$ and 0 with probability $1 - p$. A **binomial** variable $S \sim \mathrm{Bin}(n, p)$ is the number of ones among $n$ independent $\mathrm{Bern}(p)$ trials.
+:::
 
-**Binomial.** Rather than work with the PMF, write the count as a sum of the trials, $S = X_1 + \dots + X_n$ with independent Bernoullis, and apply the rules of the Toolkit to the sum. The mean of a sum is the sum of the $n$ means, each $p$. The trials are independent, so the variances add, $n$ times $p(1-p)$. And the MGF of an independent sum is the product of $n$ identical Bernoulli MGFs. Together,
-$$\mathbb E S = np, \qquad \operatorname{Var}S = np(1-p), \qquad M_S(\lambda) = \big(1 + p(e^\lambda - 1)\big)^n.$$
-No sums over the PMF are needed: decomposing into simple pieces is almost always easier than computing with the PMF directly.
+The binomial's probability mass function (PMF), the table of probabilities of each count, follows by counting sequences of trials. Its moments follow from the rules of @sec-dist-moments, without any sum over that table.
 
-### Interpretation
+::: {#prp-dist-binomial name="Binomial PMF and moments"}
+For $S \sim \mathrm{Bin}(n, p)$ and each count $k = 0, 1, \dots, n$,
+$$\Pr[S = k] = \binom nk p^k(1-p)^{n-k},$$
+$$\mathbb E[S] = np, \qquad \operatorname{Var}(S) = np(1-p), \qquad M_S(\lambda) = \big(1 + p(e^\lambda - 1)\big)^n.$$
+:::
 
-The variance $p(1-p)$ is a downward parabola in $p$ that is zero at $p = 0$ and $p = 1$, so it is largest halfway between, at $p = \frac12$, where it is $\frac12 \cdot \frac12 = \frac14$, and small near 0 or 1. A rate near 0 is therefore estimated much more precisely than one near $\frac12$. Bounds that use only the fact that each trial lies between 0 and 1, such as Hoeffding's inequality in [Concentration inequalities](02-concentration.md), cannot see this difference, and it matters later.
+::: {.proof}
+The plan is to count sequences for the PMF, then to compute the moments of one trial and combine them over the $n$ trials.
 
-The estimated rate $\hat p = S/n$ is the count scaled by $1/n$. By the scaling rules of @sec-dist-moments it has mean $np/n = p$ and variance $np(1-p)/n^2 = p(1-p)/n$, so its standard deviation is $\sqrt{p(1-p)/n}$. Precision improves like $1/\sqrt n$: four times the data halves the error, since $\sqrt 4 = 2$.
+1. *One sequence.* A particular sequence with exactly $k$ ones has probability $p^k(1-p)^{n-k}$, because the trials are independent and each one contributes $p$ or $1 - p$.
+2. *All sequences.* There are $\binom nk$ such sequences, one for each choice of the $k$ positions that hold the ones. They are disjoint events, so their probabilities add.
+3. *One trial.* A Bernoulli has mean $p$. Since $X^2 = X$, its mean square is also $p$, so its variance is $p - p^2 = p(1-p)$. Its MGF is $1 + p(e^\lambda - 1)$ by @exm-dist-coin-mgf.
+4. *Combine the trials.* Write $S = X_1 + \dots + X_n$ with independent Bernoullis. By @lem-dist-moment-rules the means add to $np$ and the variances to $np(1-p)$. By @lem-dist-mgf-sum the MGF is the product of $n$ identical Bernoulli MGFs.
+:::
 
-### Example: estimating a classifier's error rate
+[Exercise 1](../../book-exercises/part01-prerequisites/01-distributions.md#sec-sol-dist-1) computes the variance the long way, from the PMF, for comparison. The variance $p(1-p)$ is largest at $p = \frac12$ and small near 0 or 1, so in absolute terms a rate near 0 is estimated more precisely than one near $\frac12$. The estimated rate $\hat p = S/n$ is an average of $n$ independent trials, so by @cor-dist-sqrt-n it has standard deviation $\sqrt{p(1-p)/n}$.
 
-A classifier makes an error on each test record independently with probability $p = 0.05$. On $n = 2{,}000$ test records the error count is $\mathrm{Bin}(2000, 0.05)$, with mean $2000 \times 0.05 = 100$ and standard deviation $\sqrt{2000 \times 0.05 \times 0.95} \approx 9.7$. Divided by $n$, that standard deviation is about $9.7/2000 \approx 0.005$ of the rate, so the measured error rate is typically within about $\pm 0.5$ percentage points of the true 5%. At $p = 0.001$ the count has mean 2 and standard deviation $\sqrt{2000 \times 0.001 \times 0.999} \approx 1.4$: the *relative* error, $1.4/2$, is now about 70%, and a single test set can easily show 0 errors (that happens with probability $0.999^{2000} \approx e^{-2}$, about one test set in seven).
+::: {#exm-dist-error-rate}
+The classifier errs on each test record independently with probability $p = 0.05$. On $n = 2{,}000$ records its error count is $\mathrm{Bin}(2000, 0.05)$, with mean $2000 \times 0.05 = 100$. Its standard deviation is $\sqrt{2000 \times 0.05 \times 0.95} \approx 9.7$, so the measured rate has standard deviation about $9.7/2000 \approx 0.005$. So the measured error rate is typically within about half a percentage point of the true 5%.
 
-### Check yourself
+A better classifier, with $p = 0.001$, makes 2 errors on average, with standard deviation $\sqrt{2000 \times 0.001 \times 0.999} \approx 1.4$. Now the *relative* error, $1.4/2$, is about 70%, and a single test set can easily show no errors at all. The probability of that is $0.999^{2000} \approx e^{-2}$, about one test set in seven. In general $(1 - p)^n \approx e^{-np}$, because $1 - p \approx e^{-p}$ for small $p$, so you need $n$ on the order of $1/p$ before you expect to see any error.
+:::
 
-- Why is $\operatorname{Var}(X_1 + \dots + X_n) = n\operatorname{Var}(X_1)$ wrong if the $X_i$ are copies of the same variable? *(Then the sum is $nX_1$, whose variance is $n^2\operatorname{Var}X_1$. Independence is what makes variances add.)*
-- What is $\Pr[S = 0]$ for $\mathrm{Bin}(n, p)$, and roughly how large must $n$ be before you expect to see at least one success? *($(1-p)^n \approx e^{-np}$, using $1 - p \approx e^{-p}$ for small $p$; this is small only once $np$ is around 1 or more, so you need $n$ on the order of $1/p$.)*
+## Poisson {#sec-dist-poisson}
 
-## Poisson
+In the running example at $p = 0.001$, the classifier makes about 2 errors in 2,000 records: many trials, each unlikely. In that regime the binomial depends on $n$ and $p$ only through the mean $np$, and its limit is the Poisson distribution, the law of rare events. The same law describes the size of a minibatch when each of many records is included independently with a small probability.
 
-### Context
-
-When $n$ is large and $p$ is small, the binomial depends on $n$ and $p$ only through the mean $\mu = np$, as the limit below shows. The limit is the Poisson distribution: the law of rare events. It describes the number of errors in a large test set with a tiny error rate, the number of rare tokens in a document, or the size of a minibatch when each of many records is included independently with small probability.
-
-### Definition
-
-$N \sim \mathrm{Poisson}(\mu)$ for $\mu > 0$ counts events whose expected number is $\mu$. It takes values $k = 0, 1, 2, \dots$ with
+::: {#def-dist-poisson name="Poisson distribution"}
+A **Poisson** variable $N \sim \mathrm{Poisson}(\mu)$ with mean $\mu > 0$ takes the values $k = 0, 1, 2, \dots$ with probabilities
 $$\Pr[N = k] = e^{-\mu}\frac{\mu^k}{k!}.$$
-The factor $e^{-\mu}$ makes the probabilities add up to 1, since $\sum_k \mu^k/k! = e^\mu$ is the power series of the exponential.
+:::
 
-### The Poisson limit of the binomial
+The factor $e^{-\mu}$ makes the probabilities add up to 1, since $\sum_k \mu^k/k! = e^\mu$. The limit that produces this distribution holds the expected count $\mu$ fixed while the number of trials grows.
 
-Hold the expected count $\mu$ fixed and let the number of trials grow, so each trial has success probability $p = \mu/n$. Put that into the binomial PMF for a fixed count $k$, write $\binom nk = n(n-1)\cdots(n-k+1)/k!$, and group the result into four factors, each of which has a simple limit as $n \to \infty$:
-$$\binom nk\left(\frac\mu n\right)^k\left(1 - \frac\mu n\right)^{n-k} = \underbrace{\frac{n(n-1)\cdots(n-k+1)}{n^k}}_{\to\, 1}\cdot\frac{\mu^k}{k!}\cdot\underbrace{\left(1 - \frac\mu n\right)^n}_{\to\, e^{-\mu}}\cdot\underbrace{\left(1 - \frac\mu n\right)^{-k}}_{\to\, 1}.$$
-The first factor is a product of $k$ fractions $n/n, (n-1)/n, \dots$, each tending to 1, and there are only $k$ of them. The middle factor does not depend on $n$. The third is the classic limit that defines $e$: its logarithm is $n\ln(1 - \mu/n)$, and since $\ln(1 - u) \approx -u$ for small $u$, that is close to $n \cdot (-\mu/n) = -\mu$. The last factor has a fixed exponent $-k$ and a base tending to 1. The limit is $e^{-\mu}\mu^k/k!$. @fig-poisson-limit shows the convergence: at $n = 10$ the binomial is visibly narrower than the Poisson, while at $n = 100$ they almost coincide.
+::: {#thm-dist-poisson-limit name="Poisson limit of the binomial"}
+Fix a mean $\mu > 0$ and a count $k \ge 0$. As $n \to \infty$,
+$$\Pr\big[\mathrm{Bin}(n, \mu/n) = k\big] \to e^{-\mu}\frac{\mu^k}{k!}.$$
+:::
 
-![$\mathrm{Bin}(n, 5/n)$ for $n = 10$ and $100$, against $\mathrm{Poisson}(5)$ and its normal approximation.](figures/poisson_limit.svg){#fig-poisson-limit}
+::: {.proof}
+The plan is to write the binomial PMF at $p = \mu/n$ as a product of four factors, each of which has a simple limit.
 
-### Moments via the MGF
+1. *Split into four factors.* Write $\binom nk = n(n-1)\cdots(n-k+1)/k!$ and group the terms:
+$$\binom nk\Big(\frac\mu n\Big)^k\Big(1 - \frac\mu n\Big)^{n-k} = \frac{n(n-1)\cdots(n-k+1)}{n^k}\cdot\frac{\mu^k}{k!}\cdot\Big(1 - \frac\mu n\Big)^n\cdot\Big(1 - \frac\mu n\Big)^{-k}.$$
+2. *The first factor tends to 1.* It is a product of $k$ fractions $n/n, (n-1)/n, \dots$, each tending to 1. The second factor does not depend on $n$.
+3. *The third factor tends to $e^{-\mu}$.* Its logarithm is $n\ln(1 - \mu/n)$. Since $\ln(1 - u) = -u + O(u^2)$ for small $u$, that is $-\mu + O(1/n)$.
+4. *The fourth factor tends to 1.* It has a fixed exponent and a base that tends to 1.
+:::
 
-The MGF is the sum, over all counts $k$, of the weight $e^{\lambda k}$ times the probability of $k$. Gathering the powers of $k$ into $(\mu e^\lambda)^k$ leaves the power series of the exponential, evaluated at $\mu e^\lambda$:
-$$M_N(\lambda) = \sum_{k\ge0}e^{\lambda k}e^{-\mu}\frac{\mu^k}{k!} = e^{-\mu}\sum_{k\ge0}\frac{(\mu e^\lambda)^k}{k!} = e^{-\mu}e^{\mu e^\lambda} = \exp\big(\mu(e^\lambda - 1)\big).$$
-So the log-MGF is $\psi_N(\lambda) = \mu(e^\lambda - 1)$. Its derivatives are all $\mu e^\lambda$, which equals $\mu$ at $\lambda = 0$. Since $\psi'(0)$ is the mean and $\psi''(0)$ the variance (@sec-dist-mgf),
-$$\mathbb E N = \operatorname{Var}N = \mu.$$
+@fig-dist-poisson-limit shows the convergence. At $n = 10$ the binomial is visibly narrower than the Poisson, while at $n = 100$ the two almost coincide, and [Exercise 3](../../book-exercises/part01-prerequisites/01-distributions.md#sec-sol-dist-3) finds that the gap shrinks like $1/n$.
 
-**Sums.** Take independent $N_1 \sim \mathrm{Poisson}(\mu_1)$ and $N_2 \sim \mathrm{Poisson}(\mu_2)$. The MGF of the sum is the product of the two MGFs, and multiplying two exponentials adds their exponents, which gives $\exp((\mu_1 + \mu_2)(e^\lambda - 1))$. That is the Poisson MGF with mean $\mu_1 + \mu_2$, and since the MGF pins down the distribution, $N_1 + N_2 \sim \mathrm{Poisson}(\mu_1 + \mu_2)$.
+![$\mathrm{Bin}(n, 5/n)$ for $n = 10$ and $100$, against $\mathrm{Poisson}(5)$ and its normal approximation.](figures/poisson_limit.svg){#fig-dist-poisson-limit}
 
-### Interpretation
+::: {#prp-dist-poisson name="Poisson MGF, moments and sums"}
+For $N \sim \mathrm{Poisson}(\mu)$,
+$$M_N(\lambda) = \exp\big(\mu(e^\lambda - 1)\big), \qquad \mathbb E[N] = \operatorname{Var}(N) = \mu.$$
+If $N_1 \sim \mathrm{Poisson}(\mu_1)$ and $N_2 \sim \mathrm{Poisson}(\mu_2)$ are independent, then $N_1 + N_2 \sim \mathrm{Poisson}(\mu_1 + \mu_2)$.
+:::
 
-**Mean equals variance.** The standard deviation is $\sqrt\mu$, so the spread relative to the mean, $\sqrt\mu/\mu = 1/\sqrt\mu$, shrinks only once you expect many events. With $\mu = 4$ the standard deviation is 2, so a count of 0 or 8, two standard deviations from the mean, is unremarkable.
+::: {.proof}
+1. *The MGF.* Weight each count $k$ by $e^{\lambda k}$. Gathering the powers into $(\mu e^\lambda)^k$ leaves the power series of the exponential at $\mu e^\lambda$:
+$$M_N(\lambda) = e^{-\mu}\sum_{k\ge0}\frac{(\mu e^\lambda)^k}{k!} = e^{-\mu}e^{\mu e^\lambda}.$$
+2. *Mean and variance.* So $K_N(\lambda) = \mu(e^\lambda - 1)$, all of whose derivatives equal $\mu$ at 0. By @prp-dist-mgf-moments the mean and the variance are both $\mu$.
+3. *Sums.* By @lem-dist-mgf-sum the MGF of $N_1 + N_2$ is the product of the two MGFs, $\exp\big((\mu_1 + \mu_2)(e^\lambda - 1)\big)$. That is the $\mathrm{Poisson}(\mu_1 + \mu_2)$ MGF, so @thm-dist-mgf-unique identifies the sum.
+:::
 
-**The Poisson MGF bounds the Bernoulli MGF.** The inequality $1 + x \le e^x$ holds for every $x$: the exponential is convex, and $1 + x$ is its tangent line at 0, which a convex curve always lies above. Apply it with $x = p(e^\lambda - 1)$:
-$$M_{\mathrm{Bern}(p)}(\lambda) = 1 + p(e^\lambda - 1) \le \exp(p(e^\lambda - 1)) = M_{\mathrm{Poisson}(p)}(\lambda).$$
-Now take independent Bernoullis with probabilities $p_1, \dots, p_n$ and mean $\mu = p_1 + \dots + p_n$. The MGF of their sum is the product of their MGFs, each at most $\exp(p_i(e^\lambda - 1))$, and the product of those is $\exp(\mu(e^\lambda - 1))$. So the MGF of any sum of independent Bernoullis with mean $\mu$ is at most the Poisson($\mu$) MGF. This one-line inequality is the first step of the Chernoff bound in [Concentration inequalities](02-concentration.md), which bounds the tail of a count through its MGF, as in @sec-dist-tails.
+The binomial variance $np(1-p)$ tends to $\mu$ as well, because $1 - p$ tends to 1. The spread relative to the mean, $1/\sqrt\mu$, shrinks only once you expect many events, so with $\mu = 4$ a count of 0 or 8, two standard deviations of 2 from the mean, is unremarkable. Randomly discarding events from a Poisson count leaves a Poisson count, as [Exercise 2](../../book-exercises/part01-prerequisites/01-distributions.md#sec-sol-dist-2) proves.
 
-**Right tail.** Count data are right-skewed: the count cannot go below 0 but can run far above the mean. For large $k$, $\Pr[N = k]$ decays like $(e\mu/k)^k$. To see this, use the bound $k! \ge (k/e)^k$ (it follows from $e^k = \sum_j k^j/j! \ge k^k/k!$), which gives $\Pr[N = k] \le e^{-\mu}\mu^k(e/k)^k \le (e\mu/k)^k$. Written as $e^{-k\ln(k/(e\mu))}$, the exponent grows like $k\ln k$, so the decay is faster than any exponential $e^{-ck}$, but slower than the $e^{-k^2/(2\mu)}$ of a normal with the same variance.
+The Chernoff bound in [Concentration inequalities](02-concentration.md) bounds the tail of a count of independent yes/no events through its MGF, as in @prp-dist-mgf-tail. Its first step is that, as far as the MGF can tell, such a count is dominated by a Poisson count with the same mean.
 
-### Example: minibatch sizes under independent sampling
+::: {#prp-dist-bern-poisson name="A Bernoulli sum is dominated by a Poisson count"}
+Let $X_1, \dots, X_n$ be independent, with $X_i \sim \mathrm{Bern}(p_i)$, where the probabilities $p_i$ may differ, and let $\mu = p_1 + \dots + p_n$. For every $\lambda$,
+$$M_{X_1 + \dots + X_n}(\lambda) \le \exp\big(\mu(e^\lambda - 1)\big).$$
+:::
 
-Some training procedures form a minibatch by including each of $n = 60{,}000$ records independently with probability $q = 0.01$. The batch size is $\mathrm{Bin}(60000, 0.01)$: many trials, each unlikely, so it is very close to $\mathrm{Poisson}(600)$, with mean $60000 \times 0.01 = 600$ and standard deviation $\sqrt{600}$, about 24.5. Batch sizes between 550 and 650, about two standard deviations either side, are typical; [Concentration inequalities](02-concentration.md) shows how unlikely anything outside $600 \pm 20\%$ is.
+::: {.proof}
+1. *The tangent line.* The inequality $1 + x \le e^x$ holds for every $x$, because the exponential is convex and $1 + x$ is its tangent line at 0, which a convex curve lies above.
+2. *One trial.* With $x = p_i(e^\lambda - 1)$ it bounds the Bernoulli MGF $1 + p_i(e^\lambda - 1)$ by $\exp\big(p_i(e^\lambda - 1)\big)$.
+3. *The sum.* By @lem-dist-mgf-sum the MGF of the sum is the product of the $n$ positive Bernoulli MGFs. Multiplying their bounds adds the exponents, to $\mu(e^\lambda - 1)$.
+:::
 
-### Check yourself
+::: {#exm-dist-minibatch}
+Some training procedures form a minibatch by including each of $n = 60{,}000$ records independently with probability $q = 0.01$. The batch size is $\mathrm{Bin}(60000, 0.01)$, so by @thm-dist-poisson-limit it is very close to $\mathrm{Poisson}(600)$, with mean $60000 \times 0.01 = 600$ and standard deviation $\sqrt{600}$, about 24.5. So batch sizes between 550 and 650, about two standard deviations either side, are typical. The classifier's errors at $p = 0.001$ are the same kind of count, close to $\mathrm{Poisson}(2)$.
+:::
 
-- Using only the MGF, show that $\mathbb E[N(N-1)] = \mu^2$. *(Differentiate $M_N$ twice at 0 to get $\mathbb E N^2 = \mu^2 + \mu$, then subtract $\mathbb E N$.)*
-- The binomial variance $np(1-p)$ tends to $\mu$ under the Poisson limit. Which factor disappears, and why? *($(1-p) \to 1$ because $p = \mu/n \to 0$.)*
+## Exponential {#sec-dist-exponential}
 
-## Exponential
+The Poisson counts how many rare events land in a fixed window. Turn the question around: how long until the first one, such as a deployed classifier's first error? The answer is the exponential distribution, which comes out of the same construction as the Poisson and is the building block of the Laplace.
 
-### Context
+The construction chops time into short slots. Fix a scale $b > 0$, which will turn out to be the average wait, and split each unit of time into $n$ slots. As the slots get finer, each must get less likely to hold an event. So let each slot hold an event independently with probability $p = 1/(bn)$, which keeps the expected number of events per unit of time at $1/b$.
 
-The Poisson counts how many rare events land in a fixed window. Turn the question around: starting now, *how long* until the first one? A model in production makes a rare error, a cache entry is evicted, a request arrives. The answer is the exponential distribution, and it comes out of the same construction as the Poisson: chop time into many short slots, give each slot a small, independent chance of holding an event, and let the slots shrink. For us it is mainly a building block: the Laplace distribution is two exponentials glued back to back, and the simplest exponential-type tail bounds are calculations with it.
+::: {#thm-dist-exponential-limit name="The waiting time in the Poisson limit"}
+Let each slot of width $1/n$ hold an event independently with probability $1/(bn)$, and let $T_n$ be the time of the first event. For every time $t \ge 0$, as $n \to \infty$,
+$$\Pr[T_n > t] \to e^{-t/b}.$$ {#eq-dist-exponential-survival}
+:::
 
-### Derivation: the waiting time in the Poisson limit
+::: {.proof}
+The plan is to find the wait in slots, convert it to time, and rewrite the result in the form whose limit @thm-dist-poisson-limit already found.
 
-Fix a scale $b > 0$, which will turn out to be the average waiting time. Split each unit of time into $n$ slots of width $1/n$. As the slots get finer, each one must get less likely to hold an event, or the number of events per unit of time would blow up. So choose the per-slot probability to keep the expected number of events per unit of time at $1/b$, whatever $n$ is. With $n$ slots per unit of time, that means each slot holds an event independently with probability
-$$p = \frac{1}{bn},$$
-since then $np = 1/b$. This is the Poisson setup: in the Poisson limit we held the mean $\mu = np$ fixed and let $n \to \infty$, and here we hold the mean *rate* $1/b$ fixed in the same way.
-
-1. **The wait in slots is geometric.** Let $G$ be the index of the first slot that holds an event. $G > j$ means the first $j$ slots are all empty, each with probability $1 - p$. The slots are independent, so these probabilities multiply:
+1. *The wait in slots is geometric.* Let $G$ be the index of the first slot that holds an event. The event $G > j$ means that the first $j$ slots are all empty, and independent slots multiply:
 $$\Pr[G > j] = (1 - p)^j, \qquad j = 0, 1, 2, \dots$$
-@tbl-geometric-wait lists the first few outcomes. This is the **geometric distribution**: the number of coin flips up to and including the first head.
+This is the **geometric distribution** $\mathrm{Geom}(p)$, the number of coin flips up to and including the first head (@tbl-dist-geometric-wait).
 
-| $j$ | Slots $1, \dots, j$ when $G = j$ | $\Pr[G = j]$ | $\Pr[G > j]$ |
+| $j$ | Slots until the first event | $\Pr[G = j]$ | $\Pr[G > j]$ |
 | --- | --- | --- | --- |
 | 1 | event | $p$ | $1 - p$ |
 | 2 | empty, event | $(1 - p)p$ | $(1 - p)^2$ |
 | 3 | empty, empty, event | $(1 - p)^2p$ | $(1 - p)^3$ |
-| $j$ | $j - 1$ empty, then event | $(1 - p)^{j-1}p$ | $(1 - p)^j$ |
 
-: The waiting time $G$, in slots, until the first event. Each row is one outcome. $G > j$ exactly when the first $j$ slots are empty. {#tbl-geometric-wait}
+: The waiting time $G$, in slots, until the first event. {#tbl-dist-geometric-wait}
 
-2. **Convert slots to time.** Each slot lasts $1/n$, so the first event happens at time $T_n = G/n$. Time $t$ covers $\lfloor nt\rfloor$ whole slots (the floor $\lfloor\cdot\rfloor$ rounds down to a whole number), so $T_n > t$ means those slots are all empty:
-$$\Pr[T_n > t] = \Pr[G > \lfloor nt\rfloor] = \left(1 - \frac{1}{bn}\right)^{\lfloor nt\rfloor}.$$
+2. *Convert slots to time.* Each slot lasts $1/n$, so $T_n = G/n$. Time $t$ covers $\lfloor nt\rfloor$ whole slots, where the floor rounds down to a whole number, so
+$$\Pr[T_n > t] = \Big(1 - \frac{1}{bn}\Big)^{\lfloor nt\rfloor}.$$
+3. *Rewrite.* The goal is the form $(1 - \mu/m)^m$, whose limit $e^{-\mu}$ appeared in step 3 of the proof of @thm-dist-poisson-limit. Write the exponent as $nt - r$, where $0 \le r < 1$ is the fractional part of $nt$, and write $\frac{1}{bn}$ as $\frac{t/b}{nt}$:
+$$\Big(1 - \frac{1}{bn}\Big)^{\lfloor nt\rfloor} = \Big(1 - \frac{t/b}{nt}\Big)^{nt}\cdot\Big(1 - \frac{1}{bn}\Big)^{-r}.$$
+4. *Take the limit.* The first factor is $(1 - \mu/m)^m$ with $\mu = t/b$ and $m = nt$, so it tends to $e^{-t/b}$. The second has a bounded exponent and a base that tends to 1.
+:::
 
-3. **Let the slots shrink.** The goal is to bring this into the form $(1 - \mu/m)^m$, whose limit $e^{-\mu}$ we already know from the Poisson limit. Two rewrites do it. Write the exponent as $nt - r$, where $0 \le r < 1$ is the fractional part of $nt$, and write $\frac{1}{bn}$ as $\frac{t/b}{nt}$, which is the same number. Then
-$$\left(1 - \frac{1}{bn}\right)^{\lfloor nt\rfloor} = \underbrace{\left(1 - \frac{t/b}{nt}\right)^{nt}}_{\to\, e^{-t/b}}\cdot\underbrace{\left(1 - \frac{1}{bn}\right)^{-r}}_{\to\, 1}.$$
-The first factor is the limit $(1 - \mu/m)^m \to e^{-\mu}$ with $\mu = t/b$ and $m = nt$ slots. The second has a bounded exponent and a base tending to 1. So the limiting waiting time $T$ satisfies
-$$\Pr[T > t] = e^{-t/b}, \qquad t \ge 0.$$ {#eq-exponential-survival}
+Counting gives the same answer. The window $[0, t]$ holds about $nt$ slots with $1/(bn)$ chance each, so by @thm-dist-poisson-limit its count of events tends to $\mathrm{Poisson}(t/b)$, which is 0 with probability $e^{-t/b}$. The limit has $\Pr[T \le t] = 1 - e^{-t/b}$, and its derivative is the density that defines the family.
 
-4. **Differentiate to get the density.** The probability that the wait is at most $t$ is $\Pr[T \le t] = 1 - e^{-t/b}$, and a density is the derivative of this function, here $\frac1be^{-t/b}$.
-
-**The same answer from the Poisson count.** The first event comes after $t$ exactly when no event falls in $[0, t]$. The number of events in $[0, t]$ is a count over $\lfloor nt\rfloor$ independent slots, $\mathrm{Bin}(\lfloor nt\rfloor, \frac{1}{bn})$, with mean about $t/b$; by the Poisson limit it tends to $\mathrm{Poisson}(t/b)$, and $\Pr[\mathrm{Poisson}(t/b) = 0] = e^{-t/b}$. Counting events in a window gives a Poisson count, and waiting for the first event gives an exponential time. Both come from the same slots.
-
-### Definition
-
-$Y \sim \mathrm{Exp}(b)$ with *scale* $b > 0$ has the density just derived,
+::: {#def-dist-exponential name="Exponential distribution"}
+A variable $Y \sim \mathrm{Exp}(b)$ with **scale** $b > 0$ has density
 $$f(y) = \frac1b e^{-y/b}, \qquad y \ge 0.$$
-(Some texts use the rate $1/b$ instead. NumPy's `rng.exponential(b)` uses the scale.)
+:::
 
-@fig-exponential-limit shows the limit for $b = 2$. With one slot per unit of time, each slot holds an event with probability $p = 1/(2 \cdot 1) = \frac12$, so $\Pr[T_n > t] = (\frac12)^{\lfloor t\rfloor}$ is a staircase that halves at every integer. With five slots it already hugs $e^{-t/2}$. At $t = 4$ the script gives $\Pr[T_n > 4] = 0.0625$, $0.1216$ and $0.1347$ for $n = 1, 5, 100$, against $e^{-2} = 0.1353$. The first two follow from the formula of step 2: $(\frac12)^4 = 0.0625$, and with $n = 5$, $p = 0.1$ and $(0.9)^{20} = 0.1216$.
+The rate of events is $1/b$. @fig-dist-exponential-limit shows the limit for $b = 2$. With one slot per unit of time the curve is a staircase that halves at every integer, and with five it already hugs $e^{-t/2}$. @tbl-dist-slotted-wait gives the values at $t = 4$ from the chapter's script (@sec-dist-code). The first two follow from step 2 of the proof: $(\frac12)^4 = 0.0625$, and with five slots the probability per slot is 0.1, so $0.9^{20} = 0.1216$.
 
-![$\Pr[T_n > t]$ for the slotted waiting time with $b = 2$ and $n = 1$ or $5$ slots per unit of time, against the exponential tail $e^{-t/2}$.](figures/exponential_limit.svg){#fig-exponential-limit}
+![$\Pr[T_n > t]$ for the slotted waiting time with $b = 2$ and $n = 1$ or $5$ slots per unit of time, against the exponential tail $e^{-t/2}$.](figures/exponential_limit.svg){#fig-dist-exponential-limit}
 
-### Moments and tail
+| Slots per unit of time | $\Pr[T_n > 4]$ | Mean of $T_n$ | Variance of $T_n$ |
+| --- | --- | --- | --- |
+| 1 | 0.0625 | 1.998 | 2.001 |
+| 5 | 0.1216 | 2.000 | 3.596 |
+| 100 | 0.1347 | 2.001 | 3.984 |
+| Limit | 0.1353 | 2 | 4 |
 
-Everything about the exponential follows from its density by short integrals.
+: The slotted waiting time with $b = 2$. The probability is exact; the mean and variance are over 1,000,000 draws (seed 0). {#tbl-dist-slotted-wait}
 
-The **tail** is the area under the density to the right of $t$: $\Pr[Y \ge t] = \int_t^\infty \frac1be^{-y/b}\,\mathrm dy = e^{-t/b}$, which is @eq-exponential-survival again.
+The simulated mean is close to $b$ for every $n$, and the variance approaches $b^2$ as the slots shrink. The exponential's other summaries follow from its density by short integrals.
 
-The **mean** is easiest from the tail. A non-negative variable can be written as $Y = \int_0^\infty \mathbf 1[Y \ge t]\,\mathrm dt$, where $\mathbf 1[\cdot]$ is 1 when the condition holds and 0 otherwise: the integrand is 1 for $t$ from 0 up to $Y$, so the integral is the length $Y$. Taking expectations turns each indicator into a probability, $\mathbb E Y = \int_0^\infty\Pr[Y \ge t]\,\mathrm dt = \int_0^\infty e^{-t/b}\,\mathrm dt = b$. So $b$ is indeed the average wait.
+::: {#prp-dist-exponential name="Exponential tail, moments and MGF"}
+For $Y \sim \mathrm{Exp}(b)$, every $t \ge 0$, every $k = 1, 2, \dots$ and every $\lambda < 1/b$,
+$$\Pr[Y \ge t] = e^{-t/b}, \qquad \mathbb E[Y^k] = k!\,b^k, \qquad M_Y(\lambda) = \frac{1}{1 - b\lambda}.$$
+So $\mathbb E[Y] = b$ and $\operatorname{Var}(Y) = b^2$, and $M_Y(\lambda)$ is infinite for $\lambda \ge 1/b$.
+:::
 
-The **second moment** uses the Gamma integral $\int_0^\infty y^k e^{-y/b}\,\mathrm dy = k!\,b^{k+1}$. Substituting $u = y/b$ turns it into $b^{k+1}\int_0^\infty u^ke^{-u}\,\mathrm du$, and integrating by parts $k$ times reduces the last integral to $k!$. With $k = 2$ and the factor $\frac1b$ from the density, $\mathbb E Y^2 = 2b^2$, so $\operatorname{Var}Y = 2b^2 - b^2 = b^2$.
-
-The **MGF** multiplies the density by $e^{\lambda y}$, which combines the two exponents into $-(1/b - \lambda)y$. As long as $\lambda < 1/b$ that exponent is negative and the integral converges:
+::: {.proof}
+1. *Tail.* Integrating the density from $t$ to infinity gives $e^{-t/b}$, which is @eq-dist-exponential-survival again.
+2. *Moments.* The substitution $u = y/b$, then $k$ integrations by parts, give the Gamma integral
+$$\int_0^\infty y^ke^{-y/b}\,\mathrm dy = b^{k+1}\int_0^\infty u^ke^{-u}\,\mathrm du = k!\,b^{k+1}.$$
+With the factor $\frac1b$ of the density, $\mathbb E[Y^k] = k!\,b^k$, so the mean is $b$ and the variance $2b^2 - b^2 = b^2$.
+3. *MGF.* Multiplying the density by $e^{\lambda y}$ combines the exponents into $-(1/b - \lambda)y$, which is negative for $\lambda < 1/b$:
 $$M_Y(\lambda) = \frac1b\int_0^\infty e^{-(1/b - \lambda)y}\,\mathrm dy = \frac{1}{1 - b\lambda}.$$
-For $\lambda \ge 1/b$ the exponent is zero or positive, the integrand does not shrink, and the integral diverges. The MGF exists only on part of the line: the hallmark of an exponential, rather than Gaussian, tail.
+For $\lambda \ge 1/b$ the integrand does not shrink, and the integral diverges.
+:::
 
-### Interpretation: memorylessness
+The MGF exists only on part of the line, which is the hallmark of an exponential tail rather than a Gaussian one. The exponential also forgets how long you have waited.
 
-The exponential forgets how long you have waited. Given that you have already waited $s$ without an event, the chance of waiting at least $t$ more is the same as the chance of waiting $t$ from scratch. In symbols, the conditional probability is the ratio of the two tails,
-$$\Pr[Y \ge s + t \mid Y \ge s] = e^{-(s+t)/b}/e^{-s/b} = e^{-t/b} = \Pr[Y \ge t].$$
-Having already waited $s$ tells you nothing about the remaining wait. The derivation explains why: the slots after time $s$ are independent of the empty slots before it, so the wait starts afresh. The geometric distribution is memoryless for the same reason. The exponential is also the only continuous distribution with this property: memorylessness says the tail $g(t) = \Pr[Y \ge t]$ satisfies $g(s + t) = g(s)g(t)$, and the only decreasing functions with that property are exponentials $e^{-t/b}$.
+::: {#prp-dist-memoryless name="Memorylessness"}
+For $Y \sim \mathrm{Exp}(b)$ and all times $s, t \ge 0$,
+$$\Pr[Y \ge s + t \mid Y \ge s] = \Pr[Y \ge t].$$
+:::
 
-### Example: time to a model's first error
+::: {.proof}
+1. The event $Y \ge s + t$ lies inside the event $Y \ge s$, so the conditional probability is the ratio of the two tails.
+2. By @prp-dist-exponential that ratio is $e^{-(s+t)/b}/e^{-s/b} = e^{-t/b}$.
+:::
 
-A deployed classifier serves 50 requests per second and misclassifies each one independently with probability $10^{-4}$. Each request is a slot, so errors arrive at rate $50 \times 10^{-4} = 0.005$ per second, and the time to the first error is approximately $\mathrm{Exp}(b)$ with $b = 1/0.005 = 200$ seconds. A 10-minute window is 600 seconds, so the probability of a clean window is $e^{-600/200} = e^{-3} \approx 0.050$. The exact slotted answer is $(1 - 10^{-4})^{30000}$, one factor for each of the $50 \times 600 = 30{,}000$ requests, which agrees to three decimals because $p$ is tiny. Memorylessness says that after 10 error-free minutes, the expected wait for the first error is still 200 seconds.
+In the slotted picture, the slots after time $s$ are independent of the empty ones before it, so the wait starts afresh.
 
-### Check yourself
+::: {#exm-dist-first-error}
+A deployed classifier serves 50 requests per second and misclassifies each one independently with probability $10^{-4}$. Each request is a slot, so errors arrive at rate $50 \times 10^{-4} = 0.005$ per second, and the wait is approximately $\mathrm{Exp}(200)$ in seconds. So a 10-minute window is clean with probability $e^{-600/200} = e^{-3} \approx 0.050$. The exact answer, $(1 - 10^{-4})^{30000}$ with one factor per request, agrees to three decimals. By @prp-dist-memoryless, after 10 quiet minutes the expected wait is still 200 seconds.
+:::
 
-- Show that $\mathbb E Y^k = k!\,b^k$ by differentiating the MGF $k$ times. *($M^{(k)}(\lambda) = k!\,b^k(1 - b\lambda)^{-k-1}$, which is $k!\,b^k$ at $\lambda = 0$.)*
-- The slotted wait has $\mathbb E T_n = \mathbb E G/n = b$ for every $n$, and $\operatorname{Var}T_n = (1 - p)b^2$. Which factor disappears in the limit, and why? *($(1 - p) \to 1$ because $p = 1/(bn) \to 0$, just as for the binomial variance under the Poisson limit. The script's samples give variances 2.001, 3.596 and 3.984 for $n = 1, 5, 100$, against $b^2 = 4$.)*
+## Laplace {#sec-dist-laplace}
 
-## Laplace
+The Laplace distribution is symmetric noise with exponential tails. In machine learning it is the noise model behind absolute-error loss, and in later parts it is one of the two standard noise distributions. This section builds it from the exponential, which gives its moments almost for free.
 
-### Context
-
-The Laplace distribution is symmetric noise with exponential tails. Compared with a normal of the same variance it puts more mass near zero *and* more mass far out. In machine learning it appears as the noise model behind absolute-error loss: assuming Laplace noise and maximizing the likelihood gives least-absolute-deviation regression, just as normal noise gives least squares. In later parts it is one of the two standard noise distributions.
-
-### Definition
-
-The Laplace density is an exponential density on each side of a centre $\mu$, mirrored, with each side carrying half the probability. $X \sim \mathrm{Lap}(\mu, b)$ with location $\mu$ and scale $b > 0$ has density
+::: {#def-dist-laplace name="Laplace distribution"}
+A variable $X \sim \mathrm{Lap}(\mu, b)$ with **location** $\mu$ and **scale** $b > 0$ has density
 $$f(x) = \frac{1}{2b}e^{-|x - \mu|/b}.$$
-We write $\mathrm{Lap}(b)$ for $\mathrm{Lap}(0, b)$. The cumulative distribution function (CDF), the probability $\Pr[X \le x]$, comes from integrating the density up to $x$. Left of the centre only the left half contributes, and right of it you subtract the remaining right tail from 1: the CDF is $\frac12e^{(x-\mu)/b}$ for $x < \mu$ and $1 - \frac12e^{-(x-\mu)/b}$ for $x \ge \mu$.
+We write $\mathrm{Lap}(b)$ for $\mathrm{Lap}(0, b)$.
+:::
 
-### Moments and tail
+The density is an exponential density on each side of the centre, mirrored, with each side carrying half the probability. So its cumulative distribution function (CDF) is $\frac12e^{(x-\mu)/b}$ left of the centre and $1 - \frac12e^{-(x-\mu)/b}$ right of it.
 
-Take $\mu = 0$. The density takes the same value at $x$ and $-x$, so the size $|X|$ collects the density from both sides: its density is $2\cdot\frac{1}{2b}e^{-x/b} = \frac1be^{-x/b}$ on $x \ge 0$, which is the $\mathrm{Exp}(b)$ density. So $|X| \sim \mathrm{Exp}(b)$, and everything follows from the exponential.
+::: {#prp-dist-laplace name="Laplace tail, moments and MGF"}
+Let $X \sim \mathrm{Lap}(b)$. Its size $|X|$ has the $\mathrm{Exp}(b)$ distribution, so
+$$\Pr[|X| \ge t] = e^{-t/b}, \qquad \mathbb E[|X|] = b, \qquad \operatorname{Var}(X) = 2b^2.$$
+For $|\lambda| < 1/b$ its MGF is
+$$M_X(\lambda) = \frac{1}{1 - b^2\lambda^2}.$$
+:::
 
-The tail of $|X|$ is the exponential tail, $\Pr[|X| \ge t] = e^{-t/b}$. The event $|X| \ge t$ is made of two equally likely pieces, $X \ge t$ and $X \le -t$, because the density is mirror-symmetric about 0, so one side alone has half of it: $\Pr[X \ge t] = \frac12e^{-t/b}$. The mean absolute deviation is the exponential mean, $\mathbb E|X| = b$.
+::: {.proof}
+1. *The size is exponential.* The density takes the same value at $x$ and $-x$, so on $x \ge 0$ the density of $|X|$ is $2\cdot\frac{1}{2b}e^{-x/b} = \frac1be^{-x/b}$, the $\mathrm{Exp}(b)$ density. Its tail and mean are then those of @prp-dist-exponential.
+2. *Variance.* Since $X^2 = |X|^2$, the mean square is the exponential second moment $2b^2$, and the mean is 0 by symmetry.
+3. *MGF.* Split the integral at 0. The right half is $\frac{1}{2b}\cdot\frac{1}{1/b - \lambda}$, which needs $\lambda < 1/b$, and the left half is the same with $-\lambda$ in place of $\lambda$. Over the common denominator $1/b^2 - \lambda^2$,
+$$M_X(\lambda) = \frac{1}{2b}\Big(\frac{1}{1/b - \lambda} + \frac{1}{1/b + \lambda}\Big) = \frac{1}{1 - b^2\lambda^2}.$$
+:::
 
-For the variance, note that $X^2 = |X|^2$, so $\mathbb E X^2$ is the exponential second moment $2b^2$. The mean is 0 by symmetry, so $\operatorname{Var}X = 2b^2$. Turned around, a Laplace variable with variance $\sigma^2$ has scale $b = \sigma/\sqrt2$.
+So a Laplace variable with variance $\sigma^2$ has scale $b = \sigma/\sqrt2$, and by symmetry one side alone has half of the tail. Since the Laplace is two exponentials back to back, it can also be built by subtracting one exponential from another.
 
-For the MGF, split the integral at 0 into the two exponential halves. On the right, $\frac{1}{2b}\int_0^\infty e^{\lambda x - x/b}\,\mathrm dx = \frac{1}{2b}\cdot\frac{1}{1/b - \lambda}$, which needs $\lambda < 1/b$; the left half is the same with $-\lambda$ in place of $\lambda$, which needs $\lambda > -1/b$. So for $|\lambda| < 1/b$, putting the two fractions over the common denominator $1/b^2 - \lambda^2$,
-$$M_X(\lambda) = \frac{1}{2b}\left(\frac{1}{1/b - \lambda} + \frac{1}{1/b + \lambda}\right) = \frac{1}{1 - b^2\lambda^2}.$$
+::: {#prp-dist-laplace-difference name="A Laplace variable is a difference of exponentials"}
+If $Y_1, Y_2 \sim \mathrm{Exp}(b)$ are independent, then $Y_1 - Y_2 \sim \mathrm{Lap}(b)$.
+:::
 
-### A Laplace variable is a difference of exponentials
+::: {.proof}
+1. *Negation flips the dial.* The MGF of $-Y_2$ at $\lambda$ is $M_{Y_2}(-\lambda)$.
+2. *Multiply.* For $|\lambda| < 1/b$, @lem-dist-mgf-sum and @prp-dist-exponential give the MGF of $Y_1 - Y_2$:
+$$M_{Y_1}(\lambda)\,M_{Y_2}(-\lambda) = \frac{1}{1 - b\lambda}\cdot\frac{1}{1 + b\lambda} = \frac{1}{1 - b^2\lambda^2}.$$
+3. *Identify.* That is the Laplace MGF of @prp-dist-laplace, so @thm-dist-mgf-unique gives $Y_1 - Y_2 \sim \mathrm{Lap}(b)$.
+:::
 
-The Laplace is two exponentials back to back, which suggests building it by subtracting one exponential from another: the positive one supplies the right half, the negated one the left half. The MGF confirms it. Let $Y_1, Y_2 \sim \mathrm{Exp}(b)$ be independent. Negating a variable flips the dial, $\mathbb E[e^{\lambda(-Y_2)}] = M_{Y_2}(-\lambda)$, and the MGF of an independent sum is the product, so the MGF of $Y_1 - Y_2$ is
-$$M_{Y_1}(\lambda)\,M_{Y_2}(-\lambda) = \frac{1}{1 - b\lambda}\cdot\frac{1}{1 + b\lambda} = \frac{1}{1 - b^2\lambda^2},$$
-which is the Laplace MGF. Since the MGF pins down the distribution, $Y_1 - Y_2 \sim \mathrm{Lap}(b)$. The script checks this numerically: over a million samples, the empirical CDF of $\mathrm{Exp}(1) - \mathrm{Exp}(1)$ is within 0.0006 of the $\mathrm{Lap}(1)$ CDF everywhere on $[-5, 5]$ (@fig-difference-of-exponentials).
+Over a million samples, the empirical CDF of $\mathrm{Exp}(1) - \mathrm{Exp}(1)$ is within 0.0006 of the $\mathrm{Lap}(1)$ CDF everywhere on $[-5, 5]$ (@fig-dist-difference-of-exponentials).
 
-![Histogram of $\mathrm{Exp}(1) - \mathrm{Exp}(1)$ samples against the $\mathrm{Lap}(0, 1)$ density.](figures/difference_of_exponentials.svg){#fig-difference-of-exponentials}
+![Histogram of $\mathrm{Exp}(1) - \mathrm{Exp}(1)$ samples against the $\mathrm{Lap}(0, 1)$ density.](figures/difference_of_exponentials.svg){#fig-dist-difference-of-exponentials}
 
-### Interpretation: Laplace against normal
+Put a Laplace with $b = 1$ and a normal (@sec-dist-normal) with standard deviation $\sqrt2$ side by side, both with variance 2 (@fig-dist-laplace-vs-normal). The Laplace has a sharp peak at 0 and fatter tails. On a log scale the difference is structural, because the normal's log density is a parabola, $-x^2/(2\sigma^2)$, while the Laplace's is two straight lines, $-|x|/b$. Far out, a parabola always falls below a line. At $3b$, for instance, the Laplace has $\Pr[|X| \ge 3b] = e^{-3} \approx 0.050$, while for the normal with the same variance, $3b$ is $3/\sqrt2$ standard deviations and the probability is about 0.034.
+![Normal and Laplace densities with variance 2, on linear and log scales.](figures/laplace_vs_normal.svg){#fig-dist-laplace-vs-normal}
 
-Put a Laplace and a normal side by side with the same variance, here 2, which means a normal with $\sigma = \sqrt2$ and a Laplace with $b = 1$ (@fig-laplace-vs-normal, left). The Laplace has a sharp peak at 0 and fatter tails. On a log scale (right) the difference is structural. Taking the logarithm of each density removes the exponential and leaves its exponent, plus a constant: the normal log density is a parabola, $-x^2/(2\sigma^2)$, while the Laplace log density is two straight lines, $-|x|/b$. Far out, a parabola always falls below a line, so the normal's tails are much lighter.
+::: {#exm-dist-absolute-error}
+The classifier's error counts are not Laplace, so this example shows what the Laplace model of noise implies when you fit a model. Suppose $y_i = \theta^\top x_i + \xi_i$, with parameters $\theta$ and independent noise $\xi_i \sim \mathrm{Lap}(b)$. The log-likelihood of the data is the sum of the log densities of the residuals,
+$$-n\ln(2b) - \frac1b\sum_i|y_i - \theta^\top x_i|.$$
+Only the second term depends on $\theta$, so the maximum-likelihood $\theta$, the one that makes the observed data most probable, minimizes the sum of absolute errors. When the model is a single constant $m$ in place of $\theta^\top x_i$, the best $m$ is the *median*, where half the points lie on each side ([Exercise 4](../../book-exercises/part01-prerequisites/01-distributions.md#sec-sol-dist-4)). The median is far less sensitive to outliers than the mean, because moving one extreme point further out does not change which point is in the middle.
+:::
 
-![Normal and Laplace densities with variance 2, on linear and log scales.](figures/laplace_vs_normal.svg){#fig-laplace-vs-normal}
+## The normal distribution {#sec-dist-normal}
 
-The same fact explains why the Laplace MGF exists only for $|\lambda| < 1/b$. Inside the MGF integral the weight $e^{\lambda x}$ multiplies the density, so the exponents add: $\lambda x - |x|/b$. For large positive $x$ that is $(\lambda - 1/b)x$, which goes to $-\infty$, and keeps the integral finite, only when $\lambda < 1/b$; the left side needs $\lambda > -1/b$. A quadratic decay $-x^2/(2\sigma^2)$ beats the linear term $\lambda x$ for every $\lambda$, which is why the normal MGF is finite everywhere.
+The normal distribution appears whenever many small independent effects add up, and it is the default model for measurement noise. This section derives its MGF and shows that it is closed under sums. It then states the central limit theorem (CLT), the reason the normal appears everywhere, including in the running example's error count.
 
-### Example: absolute-error regression
-
-Suppose $y_i = \theta^\top x_i + \xi_i$, with parameters $\theta$ and independent noise $\xi_i \sim \mathrm{Lap}(b)$. The likelihood of the data is the product of the $n$ Laplace densities of the residuals $y_i - \theta^\top x_i$, and its logarithm is the sum of their log densities, $-n\ln(2b) - \frac1b\sum_i|y_i - \theta^\top x_i|$. Only the second term depends on $\theta$, and it enters with a minus sign, so the maximum-likelihood $\theta$ minimizes the sum of absolute errors. With no features this estimates the location by the *median*: moving a candidate location $m$ to the right lowers the absolute error of every point above $m$ and raises it for every point below, so the sum stops decreasing exactly when half the points are on each side. The median is far less sensitive to outliers than the mean, because moving one extreme point further out does not change which point is in the middle. That insensitivity is the same heavy-tail property seen in the figure: under a Laplace model, large residuals are not surprising enough to dominate the fit.
-
-### Check yourself
-
-- If $X \sim \mathrm{Lap}(b)$, what is $\Pr[|X| \ge 3b]$, and what is the corresponding probability for a normal with the same variance? *($e^{-3b/b} = e^{-3} \approx 0.050$; for the normal, $\sigma = \sqrt2 b$, so $3b$ is $3/\sqrt2$ standard deviations and $\Pr[|Z| \ge 3/\sqrt2] \approx 0.034$. The Laplace wins this far out, and the gap grows quickly.)*
-- Derive $\mathbb E|X| = b$ from the exponential. *($|X| \sim \mathrm{Exp}(b)$.)*
-
-## Normal
-
-### Context
-
-The normal distribution appears whenever many small independent effects add up — that is the central limit theorem (CLT) — and it is the default model for measurement noise, weight initialization and random projections. It is the light-tailed counterpart of the Laplace: closed under sums and scalings, with an MGF that is finite everywhere and a tail that decays like $e^{-t^2/2}$.
-
-### Definition
-
-The normal density is the bell curve: its logarithm is a downward parabola centred at the mean $\mu$, with width set by the standard deviation $\sigma$. $X \sim \mathcal N(\mu, \sigma^2)$ has density
+::: {#def-dist-normal name="Normal distribution"}
+A variable $X \sim \mathcal N(\mu, \sigma^2)$ with mean $\mu$ and standard deviation $\sigma > 0$ has density
 $$f(x) = \frac{1}{\sigma\sqrt{2\pi}}e^{-(x-\mu)^2/(2\sigma^2)}.$$
-**Standardization:** subtracting the mean and dividing by the standard deviation gives $Z = (X - \mu)/\sigma \sim \mathcal N(0, 1)$, the standard normal, with density $\varphi$ and CDF $\Phi$. So $\Phi(t)$ is the probability that a standard normal is below $t$, and every normal probability reduces to it: $\Pr[X \le x] = \Phi((x - \mu)/\sigma)$. There is no closed form for $\Phi$. In code, use the complementary error function $\operatorname{erfc}$ that every maths library provides, through $\Phi(x) = \frac12\operatorname{erfc}(-x/\sqrt2)$. It stays accurate far into the tail, where computing a small tail as $1 - \Phi$ by subtraction would lose all its digits.
+The **standard normal** $\mathcal N(0, 1)$ has density $\varphi$ and CDF $\Phi$.
+:::
 
-### MGF and moments
+Subtracting the mean and dividing by $\sigma$ gives a standard normal, so $\Pr[X \le x] = \Phi((x - \mu)/\sigma)$. There is no closed form for $\Phi$. In code, compute it as $\Phi(x) = \frac12\operatorname{erfc}(-x/\sqrt2)$ with the complementary error function, which stays accurate far into the tail, where $1 - \Phi$ would lose all its digits.
 
-The MGF integrates $e^{\lambda x}$ against the density, so the two exponents add, and the trick is to recognize the sum as another normal density. Take $\mu = 0$ first. Completing the square in the combined exponent gives
-$\lambda x - \frac{x^2}{2\sigma^2} = -\frac{(x - \lambda\sigma^2)^2}{2\sigma^2} + \frac{\lambda^2\sigma^2}{2}$. The first term is the exponent of a normal density centred at $\lambda\sigma^2$, which integrates to 1 against the normalizer $\frac{1}{\sigma\sqrt{2\pi}}$, so only the factor $e^{\lambda^2\sigma^2/2}$ survives. A mean $\mu$ adds the constant $\mu$ to $X$, which multiplies $e^{\lambda X}$ by $e^{\lambda\mu}$. So
+The MGF integrates $e^{\lambda x}$ against the density, so the two exponents add. The trick is to recognize their sum as the exponent of another normal density.
+
+::: {#prp-dist-normal-mgf name="Normal MGF"}
+For $X \sim \mathcal N(\mu, \sigma^2)$ and every real $\lambda$,
 $$M_X(\lambda) = e^{\mu\lambda + \sigma^2\lambda^2/2}.$$
-Then $\psi(\lambda) = \mu\lambda + \sigma^2\lambda^2/2$ gives $\psi'(0) = \mu$ and $\psi''(0) = \sigma^2$. Because $\psi$ is a quadratic, its third and higher derivatives are zero, so all higher cumulants (the higher derivatives of the log-MGF at 0, @sec-dist-mgf) are zero.
+So $K_X(\lambda) = \mu\lambda + \sigma^2\lambda^2/2$, whose third and higher derivatives are 0.
+:::
 
-### Sums and linear maps
+::: {.proof}
+1. *Centre first.* Take $\mu = 0$, and complete the square in the combined exponent:
+$$\lambda x - \frac{x^2}{2\sigma^2} = -\frac{(x - \lambda\sigma^2)^2}{2\sigma^2} + \frac{\lambda^2\sigma^2}{2}.$$
+2. *Integrate.* The first term is the exponent of a normal density centred at $\lambda\sigma^2$, which integrates to 1 against the normalizer, so only the factor $e^{\lambda^2\sigma^2/2}$ survives.
+3. *Add the mean.* A mean $\mu$ adds the constant $\mu$ to $X$, which multiplies $e^{\lambda X}$ by $e^{\lambda\mu}$.
+4. *Higher derivatives.* So $K_X$ is a quadratic, whose third and higher derivatives are 0.
+:::
 
-Scaling and adding independent normals gives another normal. The MGF shows it: scaling $X_i$ by $a_i$ evaluates its MGF at $a_i\lambda$, and adding independent variables multiplies MGFs, which adds the exponents. For independent $X_i \sim \mathcal N(\mu_i, \sigma_i^2)$, the MGF of $\sum_i a_iX_i$ is therefore $\exp\big(\lambda\sum_i a_i\mu_i + \frac{\lambda^2}2\sum_i a_i^2\sigma_i^2\big)$. That is the normal MGF with mean $\sum_i a_i\mu_i$ and variance $\sum_i a_i^2\sigma_i^2$, and since the MGF pins down the distribution,
+::: {#prp-dist-normal-sums name="Linear combinations of independent normals"}
+For independent $X_i \sim \mathcal N(\mu_i, \sigma_i^2)$ and constants $a_i$,
 $$\sum_i a_iX_i \sim \mathcal N\Big(\sum_i a_i\mu_i,\ \sum_i a_i^2\sigma_i^2\Big).$$
-Among distributions with finite variance, the normal is the only one for which every linear combination of independent copies stays in the same family, up to location and scale (a classical result of Lévy on what are called stable distributions). The Laplace, for instance, fails: the sum of two independent $\mathrm{Lap}(b)$ variables has MGF $1/(1 - b^2\lambda^2)^2$, which is not a Laplace MGF.
+:::
 
-### The normal in many dimensions
+::: {.proof}
+1. *Scaling.* Scaling $X_i$ by $a_i$ evaluates its MGF at $a_i\lambda$.
+2. *Adding.* By @lem-dist-mgf-sum the MGF of the sum is the product, which adds the exponents of @prp-dist-normal-mgf:
+$$M_{\sum_i a_iX_i}(\lambda) = \exp\Big(\lambda\sum_i a_i\mu_i + \frac{\lambda^2}{2}\sum_i a_i^2\sigma_i^2\Big).$$
+3. *Identify.* That is a normal MGF, so @thm-dist-mgf-unique identifies the sum.
+:::
 
-$X \sim \mathcal N(0, \sigma^2I_d)$ means the $d$ coordinates are independent $\mathcal N(0, \sigma^2)$; $I_d$ is the $d \times d$ identity matrix. Two facts are used constantly.
+The Laplace has no such property. By @lem-dist-mgf-sum the sum of two independent $\mathrm{Lap}(b)$ variables has MGF $1/(1 - b^2\lambda^2)^2$, which is not of the form $1/(1 - b'^2\lambda^2)$ for any scale $b'$, so the sum is not Laplace.
 
-**Rotation invariance.** The noise looks the same in every direction, so a question about one direction is a one-dimensional question. To see it, project $X$ onto a unit vector $u$, one with $\sum_i u_i^2 = 1$. The projection $\langle u, X\rangle = \sum_i u_iX_i$ is a linear combination of independent normals, so by the rule above $\langle u, X\rangle \sim \mathcal N(0, \sigma^2\sum_i u_i^2) = \mathcal N(0, \sigma^2)$, whatever the direction $u$.
+The running example's error count is a sum of 2,000 independent pieces. By @lem-dist-moment-rules, a sum of $n$ independent draws with mean $\mu$ and variance $\sigma^2$ has mean $n\mu$ and standard deviation $\sigma\sqrt n$, so standardizing it always leaves mean 0 and variance 1. The CLT says more: whatever the distribution of each draw, the *shape* of the standardized sum approaches the standard normal.
 
-**The norm concentrates at $\sigma\sqrt d$.** The squared length $\|X\|^2 = \sum_i X_i^2$ is a sum of $d$ independent terms, so its mean and variance are $d$ times those of one term. Write $X_i = \sigma Z$ with $Z$ standard normal. Then $\mathbb E X_i^2 = \sigma^2$, and $\operatorname{Var}X_i^2 = \sigma^4(\mathbb E Z^4 - (\mathbb E Z^2)^2) = \sigma^4(3 - 1) = 2\sigma^4$. The value $\mathbb E Z^4 = 3$ comes from the MGF: $e^{\lambda^2/2} = 1 + \lambda^2/2 + \lambda^4/8 + \cdots$, and the coefficient of $\lambda^4$ times $4!$ is $24/8 = 3$. So
-$$\mathbb E\|X\|^2 = d\sigma^2, \qquad \operatorname{Var}\|X\|^2 = 2d\sigma^4, \qquad \frac{\|X\|^2}{d\sigma^2} = 1 \pm O\!\left(\frac{1}{\sqrt d}\right).$$
-The last statement divides by the mean: the ratio has mean 1 and standard deviation $\sqrt{2d\sigma^4}/(d\sigma^2) = \sqrt{2/d}$, and $O(1/\sqrt d)$ means "at most a constant times $1/\sqrt d$". In high dimension a normal vector is almost never near the origin: it lives on a thin shell of radius $\sigma\sqrt d$. The script measures $\|X\|/\sqrt d$ for $\sigma = 1$ (@tbl-gaussian-norms and @fig-gaussian-norms):
+::: {#thm-dist-clt name="Central limit theorem"}
+Let $X_1, X_2, \dots$ be independent and identically distributed (i.i.d.) with mean $\mu$ and finite variance $\sigma^2 > 0$. Then for every $z$, as $n \to \infty$,
+$$\Pr\Big[\frac{X_1 + \dots + X_n - n\mu}{\sigma\sqrt n} \le z\Big] \to \Phi(z).$$
+:::
+<!-- proof: cited -->
 
-| $d$ | 1 | 10 | 100 | 1,000 | 10,000 |
-| --- | --- | --- | --- | --- | --- |
-| mean of $\|X\|/\sqrt d$ | 0.802 | 0.977 | 0.998 | 1.000 | 1.000 |
-| std of $\|X\|/\sqrt d$ | 0.611 | 0.220 | 0.069 | 0.022 | 0.007 |
+The proof needs more than this chapter's tools. @sec-apx-prob-clt in the appendices proves the theorem by swapping one term at a time for a normal one, with a slower rate than the one below. The best way to see that the shape of each draw does not matter is to start from one that looks nothing like a normal.
 
-: Mean and standard deviation of $\|X\|/\sqrt d$ over 2,000 draws of $X \sim \mathcal N(0, I_d)$. {#tbl-gaussian-norms}
+Take $X_i \sim \mathrm{Exp}(1)$, with mean and variance 1, which is badly skewed. The sum $S_n = X_1 + \dots + X_n$ has the $\mathrm{Gamma}(n, 1)$ density $x^{n-1}e^{-x}/(n-1)!$, whose MGF $(1 - \lambda)^{-n}$ is the product of $n$ exponential MGFs. So you can watch the standardized sum change shape as $n$ grows (@fig-dist-clt-exponential). At $n = 1$ it has a hard wall at $-1$, from the constraint $X_1 \ge 0$. At $n = 30$ the curve is close to $\mathcal N(0, 1)$, though a small lean remains.
 
-The standard deviation falls like $1/\sqrt{2d}$. That is half the $\sqrt{2/d}$ found for the squared norm, because taking a square root halves small relative deviations: $\sqrt{1 + e} \approx 1 + e/2$. At $d = 10{,}000$, for instance, $1/\sqrt{20000} \approx 0.007$. At $d = 1$ the mean is $\mathbb E|Z| = 2\int_0^\infty z\varphi(z)\,\mathrm dz = 2/\sqrt{2\pi} = \sqrt{2/\pi} \approx 0.798$.
+![The standardized sum of $n$ independent $\mathrm{Exp}(1)$ variables for $n = 1, 2, 5, 30$: histogram of 50,000 simulated sums, the exact density from $\mathrm{Gamma}(n, 1)$, and the $\mathcal N(0, 1)$ density.](figures/clt_exponential.svg){#fig-dist-clt-exponential}
 
-![Histograms of $\|X\|/\sqrt d$ for $X \sim \mathcal N(0, I_d)$ and $d$ from 1 to 10,000.](figures/gaussian_norms.svg){#fig-gaussian-norms}
-
-### The central limit theorem
-
-Take a sum of $n$ independent draws from the same distribution, with mean $\mu$ and finite variance $\sigma^2$. By the rules of @sec-dist-moments the sum has mean $n\mu$ and standard deviation $\sigma\sqrt n$. Subtract the first and divide by the second, and the result always has mean 0 and variance 1. The central limit theorem says more: whatever the distribution of each draw, the *shape* of this standardized sum approaches the standard normal. In symbols, if $X_1, X_2, \dots$ are independent and identically distributed with mean $\mu$ and finite variance $\sigma^2$, then
-$$\frac{X_1 + \dots + X_n - n\mu}{\sigma\sqrt n} \to \mathcal N(0, 1) \quad\text{in distribution,}$$
-which means that its CDF approaches $\Phi$ at every point. The theorem holds whatever the shape of the $X_i$, and the best way to see this is to start from a distribution that looks nothing like a normal. Take $X_i \sim \mathrm{Exp}(1)$, so $\mu = \sigma^2 = 1$. One draw is badly skewed: it can't go below 0, its density is highest at 0, and it has a long right tail. The sum $S_n = X_1 + \dots + X_n$ has a known density, the $\mathrm{Gamma}(n, 1)$ density $x^{n-1}e^{-x}/(n-1)!$ (its MGF is $(1 - \lambda)^{-n}$, the product of $n$ exponential MGFs), so you can watch the standardized sum $(S_n - n)/\sqrt n$ change shape as $n$ grows (@fig-clt-exponential).
-
-At $n = 1$ it is the exponential itself, shifted to mean 0. The hard wall at $z = (0 - 1)/1 = -1$ is the constraint $X \ge 0$. At $n = 2$ the wall moves to $(0 - 2)/\sqrt 2 = -\sqrt 2$, and the peak rounds off, because two draws are rarely both near 0. At $n = 5$ the bump is in the right place but leans left, with a longer right tail. At $n = 30$ the curve is close to $\mathcal N(0, 1)$, though a small lean to the left remains.
-
-![The standardized sum of $n$ independent $\mathrm{Exp}(1)$ variables for $n = 1, 2, 5, 30$: histogram of 50,000 simulated sums, the exact density from $\mathrm{Gamma}(n, 1)$, and the $\mathcal N(0, 1)$ density. The skewed exponential becomes a normal step by step.](figures/clt_exponential.svg){#fig-clt-exponential}
-
-The leftover lean is measured by the **skewness** $\mathbb E[(X - \mu)^3]/\sigma^3$, the average cubed deviation in units of the standard deviation. Cubing keeps the sign, so a long right tail makes it positive; it is 0 for every normal, which is symmetric. The third central moment, like the variance, adds over independent terms: expand $\mathbb E[(\sum_i (X_i - \mu))^3]$, and every cross term contains some $\mathbb E[X_i - \mu] = 0$ as a factor. For $\mathrm{Exp}(1)$ the third central moment is 2: with $\mathbb E Y^k = k!$, it is $\mathbb E Y^3 - 3\mathbb E Y^2 + 3\mathbb E Y - 1 = 6 - 6 + 3 - 1 = 2$. So $S_n$ has third central moment $2n$ and standard deviation $\sqrt n$, and its skewness is $2n/n^{3/2} = 2/\sqrt n$. The skewness falls, but only like $1/\sqrt n$. The largest gap between the CDF of the standardized sum and the normal CDF, which the script computes exactly from the Gamma CDF, falls at the same rate (@tbl-clt-exponential).
+The lean is measured by the **skewness** $\mathbb E[(X - \mu)^3]/\sigma^3$, the third central moment (the mean cubed deviation) over the cubed standard deviation, which is 0 for every normal. The third central moment adds over independent terms, because each cross term in the cube of a sum of deviations contains some deviation $X_i - \mu$ to the first power, which has mean 0 and is independent of the rest. For $\mathrm{Exp}(1)$, expanding $(Y - 1)^3$ and using $\mathbb E[Y^k] = k!$ from @prp-dist-exponential gives $6 - 6 + 3 - 1 = 2$. So $S_n$ has third central moment $2n$ and standard deviation $\sqrt n$, and skewness $2n/n^{3/2} = 2/\sqrt n$. The largest gap between the CDF of the standardized sum and $\Phi$, computed exactly from the Gamma CDF, falls at the same rate (@tbl-dist-clt-exponential).
 
 | $n$ | Skewness $2/\sqrt n$ | Largest CDF gap to $\mathcal N(0, 1)$ |
 | --- | --- | --- |
@@ -356,97 +425,126 @@ The leftover lean is measured by the **skewness** $\mathbb E[(X - \mu)^3]/\sigma
 | 5 | 0.894 | 0.0596 |
 | 30 | 0.365 | 0.0243 |
 
-: How far the standardized sum of $n$ $\mathrm{Exp}(1)$ variables is from $\mathcal N(0, 1)$. The CDF gap is the maximum of $|F_n(z) - \Phi(z)|$ over $z \in [-5, 5]$ in steps of 0.01. {#tbl-clt-exponential}
+: How far the standardized sum of $n$ $\mathrm{Exp}(1)$ variables is from $\mathcal N(0, 1)$. The CDF gap is the maximum of $|F_n(z) - \Phi(z)|$ over $z \in [-5, 5]$ in steps of 0.01. {#tbl-dist-clt-exponential}
 
-Multiply each gap by $\sqrt n$ and you get 0.159, 0.134, 0.133 and 0.133: the product settles to a constant, so the error decays like $1/\sqrt n$. This rate holds in general. The Berry–Esseen theorem bounds the gap by $c\,\mathbb E|X - \mu|^3/(\sigma^3\sqrt n)$ for a universal constant $c < 0.48$ (Shevtsova, 2011). @sec-apx-prob-clt in the appendices proves the central limit theorem itself, with a slower rate, by swapping one term at a time for a normal one. The numerator is a third moment, like the skewness, so the more skewed the summands, the more terms you need.
+Multiply each gap by $\sqrt n$ and you get 0.159, 0.134, 0.133 and 0.133, so the error decays like $1/\sqrt n$. In general the Berry–Esseen theorem bounds the gap by $c\,\mathbb E[|X - \mu|^3]/(\sigma^3\sqrt n)$ for a constant $c \le 0.4748$ (Shevtsova, 2011). The CLT is a statement about the *bulk*, the region within a few standard deviations of the mean. In the far tails it can be badly wrong, because a gap of order $1/\sqrt n$ is far larger than the tiny tail probabilities themselves, and bounding those is the job of the next chapter.
 
-This is also why the normal curve in @fig-poisson-limit fits so well: $\mathrm{Poisson}(5)$ is a sum of five independent $\mathrm{Poisson}(1)$ variables, since Poisson means add, so the CLT already applies to it. A common rule of thumb is that the normal approximation to a binomial is reasonable once $np(1-p) \gtrsim 10$. The CLT is a statement about the *bulk*. In the far tails, where worst-case guarantees operate, it can be badly wrong, because the gap it controls is an absolute error of order $1/\sqrt n$, far larger than the tiny tail probabilities themselves; that is the job of the concentration inequalities in the next chapter.
+::: {#exm-dist-error-rate-normal}
+A common rule of thumb is that the normal approximation to a binomial is reasonable once $np(1-p) \gtrsim 10$. The running example's error count has $np(1-p) = 95$, so in the bulk it is close to $\mathcal N(100, 95)$, with the standard deviation 9.7 of @exm-dist-error-rate. A normal variable is within 1.96 standard deviations of its mean with probability $\Phi(1.96) - \Phi(-1.96) = 0.95$, so about 95% of test sets show 81 to 119 errors. At $p = 0.001$, by contrast, $np(1-p)$ is about 2, and the count is better described by $\mathrm{Poisson}(2)$.:::
 
-### Example: noise in high dimension
+## Normal vectors in many dimensions {#sec-dist-high-dim}
 
-Add $\mathcal N(0, \sigma^2I_d)$ noise to a model with $d = 10^6$ parameters and $\sigma = 0.01$. The noise vector has norm about $\sigma\sqrt d = 0.01 \times 1000 = 10$, almost surely within a fraction of a percent of that: the relative standard deviation is $1/\sqrt{2d} = 1/\sqrt{2 \times 10^6}$, under 0.1%. Yet by rotation invariance its projection onto any fixed unit vector is only $\mathcal N(0, 0.01^2)$. Large in norm, small in every direction: both facts come from rotation invariance and norm concentration.
+A random weight initialization, or noise added to every weight of a model, is a normal vector with many coordinates. Later parts use two facts about it: it looks the same in every direction, and its length is almost fixed. Write $X \sim \mathcal N(0, \sigma^2I_d)$ for a vector whose $d$ coordinates are independent $\mathcal N(0, \sigma^2)$, where $I_d$ is the $d \times d$ identity matrix. The first fact turns a question about one direction into a one-dimensional question.
 
-### Check yourself
+::: {#prp-dist-rotation name="Rotation invariance"}
+Let $X \sim \mathcal N(0, \sigma^2I_d)$ and let $u$ be a unit vector, one with $\sum_i u_i^2 = 1$. Whatever the direction $u$, the projection $\langle u, X\rangle = \sum_i u_iX_i$ has the $\mathcal N(0, \sigma^2)$ distribution.
+:::
 
-- If $X \sim \mathcal N(0, \sigma^2I_d)$ and $u, v$ are orthogonal unit vectors, are $\langle u, X\rangle$ and $\langle v, X\rangle$ independent? *(Yes. They are jointly normal with covariance $\sigma^2\langle u, v\rangle = 0$, and for jointly normal variables zero covariance means independence, which @sec-apx-prob-convolution proves by rotation.)*
-- Why does the mean of $\|X\|/\sqrt d$ approach 1 from below? *(Jensen's inequality says that for a concave function $g$, such as the square root, $\mathbb E g(Y) \le g(\mathbb E Y)$. With $Y = \|X\|^2$ this gives $\mathbb E\|X\| \le \sqrt{\mathbb E\|X\|^2} = \sqrt d$.)*
+::: {.proof}
+1. The projection is a linear combination of independent normals, so by @prp-dist-normal-sums it is normal with mean 0 and variance $\sigma^2\sum_i u_i^2 = \sigma^2$.
+:::
 
-## Comparing a density with its shifted copy
+The second fact is about the length. The squared length $\|X\|^2 = \sum_i X_i^2$ is a sum of $d$ independent terms, so its mean and variance are $d$ times those of one term.
 
-### Context
+::: {#prp-dist-norm name="The norm concentrates"}
+For $X \sim \mathcal N(0, \sigma^2I_d)$,
+$$\mathbb E\big[\|X\|^2\big] = d\sigma^2, \qquad \operatorname{Var}\big(\|X\|^2\big) = 2d\sigma^4.$$
+So the ratio $\|X\|^2/(d\sigma^2)$ has mean 1 and standard deviation $\sqrt{2/d}$.
+:::
 
-You take a noisy measurement $x = \mu + X$ of an unknown value $\mu$: a sensor reading, a timing measurement, or a statistic computed from a random sample. The noise $X$ has density $f$ centred at 0. Suppose $\mu$ can only be one of two values, $0$ or $s$. The number $s \in \mathbb R$ is the **shift**, the distance between the two candidate values. It is fixed and known, and it may be positive or negative.
+::: {.proof}
+The plan is to find the mean and variance of one squared coordinate, which needs the fourth moment of a standard normal, and then to add over coordinates.
 
-Each candidate gives $x$ its own density. If $\mu = 0$, then $x = X$, with density $f(x)$. If $\mu = s$, then $x = s + X$, with density $f(x - s)$: the same curve, moved sideways by $s$.
+1. *One coordinate.* Write $X_i = \sigma Z$ with $Z$ standard normal. Then $\mathbb E[X_i^2] = \sigma^2$ and $\operatorname{Var}(X_i^2) = \sigma^4\big(\mathbb E[Z^4] - 1\big)$.
+2. *The fourth moment.* The MGF of $Z$ expands as $e^{\lambda^2/2} = 1 + \lambda^2/2 + \lambda^4/8 + \cdots$. By @prp-dist-mgf-moments, $\mathbb E[Z^4]$ is $4!$ times the coefficient of $\lambda^4$, which is $24/8 = 3$, so $\operatorname{Var}(X_i^2) = 2\sigma^4$.
+3. *Add the coordinates.* By @lem-dist-moment-rules the $d$ independent squares add to mean $d\sigma^2$ and variance $2d\sigma^4$.
+4. *Divide by the mean.* By the scaling rule, the ratio has standard deviation $\sqrt{2d\sigma^4}/(d\sigma^2) = \sqrt{2/d}$.
+:::
 
-The second claim is the step to check. The CDF of $s + X$ at a point $t$ is $\Pr[s + X \le t] = \Pr[X \le t - s] = F(t - s)$, where $F$ is the CDF of $X$, and differentiating in $t$ gives the density $f(t - s)$. So $f(x - s)$ is the graph of $f$ moved right by $s$: its value at $x$ is the value $f$ had at $x - s$. With $s = 1$, for instance, $f(x - 1)$ at $x = 1$ equals $f(0)$, so the shifted copy has its peak at 1.
+In high dimension a normal vector is almost never near the origin, because it lives on a thin shell of radius $\sigma\sqrt d$. The length itself has a relative spread of about $1/\sqrt{2d}$, half that of the squared length, because a square root halves small relative deviations, $\sqrt{1 + e} \approx 1 + e/2$. The script measures $\|X\|/\sqrt d$ for $\sigma = 1$ (@tbl-dist-gaussian-norms and @fig-dist-gaussian-norms).
 
-To decide between the two candidates from one observation $x$, compare the two densities at $x$. Their ratio $f(x)/f(x - s)$ says how many times more likely $x$ is under $\mu = 0$ than under $\mu = s$. Taking its logarithm turns the ratio into a difference, and since both densities below are exponentials of something, it leaves just the difference of the exponents. That logarithm is the **log ratio**
+| $d$ | 1 | 10 | 100 | 1,000 | 10,000 |
+| --- | --- | --- | --- | --- | --- |
+| mean of $\Vert X\Vert/\sqrt d$ | 0.802 | 0.977 | 0.998 | 1.000 | 1.000 |
+| std of $\Vert X\Vert/\sqrt d$ | 0.611 | 0.220 | 0.069 | 0.022 | 0.007 |
+
+: Mean and standard deviation of $\Vert X\Vert/\sqrt d$ over 2,000 draws of $X \sim \mathcal N(0, I_d)$. {#tbl-dist-gaussian-norms}
+
+At $d = 10{,}000$, for instance, $1/\sqrt{20000} \approx 0.007$, and at $d = 1$ the exact mean is $\mathbb E[|Z|] = \sqrt{2/\pi} \approx 0.798$. The mean approaches 1 from below because the square root is concave. Jensen's inequality says that $\mathbb E[g(W)] \le g(\mathbb E[W])$ for a concave $g$, and with $W = \|X\|^2$ it gives $\mathbb E[\|X\|] \le \sqrt d$.
+
+![Histograms of $\|X\|/\sqrt d$ for $X \sim \mathcal N(0, I_d)$ and $d$ from 1 to 10,000.](figures/gaussian_norms.svg){#fig-dist-gaussian-norms}
+
+::: {#exm-dist-high-dim}
+The error counts are not vectors, so take the classifier's weights instead. Add $\mathcal N(0, \sigma^2I_d)$ noise to a model with $d = 10^6$ parameters and $\sigma = 0.01$. By @prp-dist-norm the noise vector has length about $\sigma\sqrt d = 10$, with a relative spread $1/\sqrt{2 \times 10^6}$ under 0.1%. Yet by @prp-dist-rotation its projection onto any fixed unit vector is only $\mathcal N(0, 0.01^2)$. [Exercise 7](../../book-exercises/part01-prerequisites/01-distributions.md#sec-sol-dist-7) uses the same two facts to show that two independent random directions are almost orthogonal.
+:::
+
+## A density against its shifted copy {#sec-dist-shift}
+
+You take a noisy measurement $x = \mu + X$ of an unknown value $\mu$, such as a sensor reading. The noise $X$ has density $f$ centred at 0, and $\mu$ can only be 0 or a known **shift** $s$. This section asks how strongly one observation can favour one candidate, and the normal and the Laplace give opposite answers. [Divergences](03-divergences.md) and [hypothesis testing](04-hypothesis-testing.md) build on that answer.
+
+If $\mu = 0$, then $x$ has density $f(x)$. If $\mu = s$, the CDF of $s + X$ at $x$ is $\Pr[X \le x - s] = F(x - s)$, where $F$ is the CDF of $X$. Differentiating gives the density $f(x - s)$, the same curve moved right by $s$. The ratio $f(x)/f(x - s)$ says how many times more likely $x$ is under $\mu = 0$ than under $\mu = s$, and its logarithm turns the ratio into a difference.
+
+::: {#def-dist-log-ratio name="Log ratio of a density and its shifted copy"}
+For a density $f$ and a shift $s$, the **log ratio** at an observation $x$ is
 $$L(x) = \ln\frac{f(x)}{f(x - s)} = \ln f(x) - \ln f(x - s).$$
-It is positive when $x$ favours $\mu = 0$, negative when $x$ favours $\mu = s$, and zero when $x$ says nothing.
+:::
 
-The question this section answers is: **how large can $|L(x)|$ get?** If it is bounded, no single observation can make one candidate much more likely than the other. If it is unbounded, some observations settle the question almost for certain. The normal and the Laplace give opposite answers. Later parts compare distributions in exactly this way, and the next chapters build on it: [divergences](03-divergences.md) average the log ratio over $x$, and [hypothesis testing](04-hypothesis-testing.md) uses it to decide.
+If the log ratio is bounded, no single observation can make one candidate much more likely than the other. The answer follows from the shapes of the log densities. A normal log density is a parabola, and a parabola minus its shifted copy is a straight line, which grows without bound. A Laplace log density is a pair of straight lines with slopes $\pm 1/b$, and shifting it changes its value at any point by at most $|s|/b$.
 
-### Statement
-
-The answer follows from the shapes of the two log densities. A normal log density is a parabola, and the difference of a parabola and the same parabola shifted is a straight line, which grows without bound. A Laplace log density is a pair of straight lines with slopes $\pm 1/b$, and the difference of two such shapes can never exceed what the shift moves it, $|s|/b$. For any shift $s \in \mathbb R$, if $f$ is the $\mathcal N(0, \sigma^2)$ density, then
+::: {#thm-dist-shift name="Normal and Laplace against their shifted copies"}
+Let $s$ be any real shift. If $f$ is the $\mathcal N(0, \sigma^2)$ density, then
 $$L(x) = \frac{s^2 - 2sx}{2\sigma^2},$$
-which is linear in $x$ and unbounded. If $f$ is the $\mathrm{Lap}(b)$ density, then
-$$L(x) = \frac{|x - s| - |x|}{b}, \qquad |L(x)| \le \frac{|s|}{b} \quad\text{for every } x.$$
+which is linear in $x$ and unbounded when $s \ne 0$. If $f$ is the $\mathrm{Lap}(b)$ density, then
+$$L(x) = \frac{|x - s| - |x|}{b}, \qquad |L(x)| \le \frac{|s|}{b} \quad\text{for every } x,$$
+and for $s > 0$ the bound is reached: $L(x) = s/b$ for every $x \le 0$, and $L(x) = -s/b$ for every $x \ge s$.
+:::
 
-### Derivation
+::: {.proof}
+The plan is to cancel the constants in each ratio and simplify the difference of the exponents, then, for the Laplace, to bound that difference above and below with the triangle inequality.
 
-**Normal.** Start from the normal density with $\mu = 0$, $f(x) = \frac{1}{\sigma\sqrt{2\pi}}e^{-x^2/(2\sigma^2)}$.
+1. *Normal: the ratio.* Replacing $x$ by $x - s$ changes only the exponent, so the constants cancel, and the logarithm of a ratio of exponentials is the difference of the exponents:
+$$L(x) = \frac{(x - s)^2 - x^2}{2\sigma^2}.$$
+2. *Normal: expand the square.* Since $(x - s)^2 = x^2 - 2sx + s^2$, the $x^2$ cancels, which leaves $(s^2 - 2sx)/(2\sigma^2)$. A line with nonzero slope $-s/\sigma^2$ has no bound.
+3. *Laplace: the ratio.* As for the normal, the constants cancel and $L(x) = (|x - s| - |x|)/b$.
+4. *Laplace: bound from above.* The triangle inequality $|a + c| \le |a| + |c|$ with $a = x$ and $c = -s$ gives $|x - s| \le |x| + |s|$, so $|x - s| - |x| \le |s|$.
+5. *Laplace: bound from below.* The same inequality with $a = x - s$ and $c = s$ gives $|x| \le |x - s| + |s|$, so $|x - s| - |x| \ge -|s|$.
+6. *Laplace: equality.* Take $s > 0$. For $x \le 0$ both $x$ and $x - s$ are at most 0, so $|x - s| - |x| = (s - x) - (-x) = s$. For $x \ge s$ both are at least 0, and the difference is $(x - s) - x = -s$.
+:::
 
-1. *Write the shifted density.* Replace $x$ by $x - s$: $f(x - s) = \frac{1}{\sigma\sqrt{2\pi}}e^{-(x - s)^2/(2\sigma^2)}$. The constant in front is the same; only the exponent changes.
-2. *Take the ratio.* The constants cancel, and $e^a/e^c = e^{a - c}$:
-$$\frac{f(x)}{f(x - s)} = \frac{e^{-x^2/(2\sigma^2)}}{e^{-(x - s)^2/(2\sigma^2)}} = \exp\!\left(\frac{(x - s)^2 - x^2}{2\sigma^2}\right).$$
-3. *Take the logarithm.* Since $\ln e^c = c$, the log ratio is the exponent: $L(x) = \dfrac{(x - s)^2 - x^2}{2\sigma^2}$.
-4. *Expand the square.* $(x - s)^2 = x^2 - 2sx + s^2$, and the $x^2$ cancels against $-x^2$, leaving $L(x) = \dfrac{s^2 - 2sx}{2\sigma^2}$.
+So two Laplace copies are within the factor $e^{|s|/b}$ of each other everywhere, while two normal copies have an unbounded ratio in the tails. There is very little probability in those tails, though. Since the normal log ratio is linear in $x$, it is itself normal when $x$ is drawn from $f$.
 
-The $x^2$ terms cancel because both densities have the same curvature; what is left is linear in $x$, with slope $-s/\sigma^2$. A line with nonzero slope has no bound, so $|L(x)| \to \infty$ as $|x| \to \infty$.
+::: {#cor-dist-shift-normal-law name="The normal log ratio is normal"}
+If $f$ is the $\mathcal N(0, \sigma^2)$ density and the observation $x$ is drawn from $f$, then
+$$L(x) \sim \mathcal N\Big(\frac{s^2}{2\sigma^2},\ \frac{s^2}{\sigma^2}\Big).$$
+:::
 
-**Laplace.** Start from $f(x) = \frac{1}{2b}e^{-|x|/b}$.
+::: {.proof}
+1. By @thm-dist-shift, $L(x)$ is the constant $s^2/(2\sigma^2)$ minus the multiple $s/\sigma^2$ of $x$.
+2. By @prp-dist-normal-sums with a single term, that multiple is normal with mean 0 and variance $(s/\sigma^2)^2\sigma^2 = s^2/\sigma^2$, and adding the constant moves the mean.
+:::
 
-1. *Write the shifted density.* $f(x - s) = \frac{1}{2b}e^{-|x - s|/b}$.
-2. *Take the ratio and the logarithm,* as for the normal: the constants cancel and the log leaves the difference of exponents, $L(x) = -\dfrac{|x|}{b} + \dfrac{|x - s|}{b} = \dfrac{|x - s| - |x|}{b}$.
-3. *Bound it from above.* The triangle inequality $|a + c| \le |a| + |c|$ says that the size of a sum is at most the sum of the sizes. With $a = x$, $c = -s$ it gives $|x - s| \le |x| + |s|$, so $|x - s| - |x| \le |s|$.
-4. *Bound it from below.* The same inequality with $a = x - s$, $c = s$ gives $|x| \le |x - s| + |s|$, so $|x - s| - |x| \ge -|s|$.
-5. *Combine.* $\big||x - s| - |x|\big| \le |s|$, so $|L(x)| \le |s|/b$ for every $x$, and the ratio of the two densities never exceeds $e^{|s|/b}$.
-
-The bound is reached, not just approached. For $s > 0$ and any $x \le 0$, $|x - s| - |x| = (s - x) - (-x) = s$; for any $x \ge s$, it is $(x - s) - x = -s$. Between 0 and $s$ the log ratio falls linearly from $s/b$ to $-s/b$.
-
-@tbl-shifted-log-ratio puts numbers on both formulas for $s = 1$, $\sigma = 1$ and $b = 1$, where they read $L(x) = (1 - 2x)/2$ and $L(x) = |x - 1| - |x|$.
+::: {#exm-dist-shift}
+@tbl-dist-shifted-log-ratio puts numbers on @thm-dist-shift for $s = 1$, $\sigma = 1$ and $b = 1$.
 
 | $x$ | $-2$ | $0$ | $0.5$ | $1$ | $3$ | $10$ |
 | --- | --- | --- | --- | --- | --- | --- |
 | Normal, $L(x) = (1 - 2x)/2$ | 2.5 | 0.5 | 0 | $-0.5$ | $-2.5$ | $-9.5$ |
 | Laplace, $L(x) = \lvert x - 1\rvert - \lvert x\rvert$ | 1 | 1 | 0 | $-1$ | $-1$ | $-1$ |
 
-: The log ratio $L(x)$ of a density and its copy shifted by $s = 1$, for $\mathcal N(0, 1)$ and $\mathrm{Lap}(1)$, at a few observations $x$. {#tbl-shifted-log-ratio}
+: The log ratio $L(x)$ of a density and its copy shifted by $s = 1$, for $\mathcal N(0, 1)$ and $\mathrm{Lap}(1)$. {#tbl-dist-shifted-log-ratio}
 
-Both vanish at the midpoint $x = 0.5$, where the two candidates are equally plausible. Far out they part ways. At $x = 10$ the normal log ratio is $-9.5$, so the observation is $e^{9.5} \approx 13{,}360$ times more likely under $\mu = 1$ than under $\mu = 0$. The Laplace never says more than $e^1 \approx 2.72$ times, however far out $x$ is (@fig-shifted-log-ratio).
+Both vanish at the midpoint $x = 0.5$, where the two densities cross. At $x = 10$ the normal log ratio is $-9.5$, so the observation is $e^{9.5} \approx 13{,}360$ times more likely under $\mu = 1$ than under $\mu = 0$. The Laplace never says more than $e^1 \approx 2.72$ times (@fig-dist-shifted-log-ratio). Such far-out observations are rare, because by @cor-dist-shift-normal-law the normal log ratio under $\mu = 0$ is $\mathcal N(0.5, 1)$. The next three chapters make "rare" precise.
+:::
 
-![Log ratio $L(x)$ of a density and its copy shifted by $s = 1$, for the standard normal and $\mathrm{Lap}(1)$.](figures/shifted_log_ratio.svg){#fig-shifted-log-ratio}
+![Log ratio $L(x)$ of a density and its copy shifted by $s = 1$, for the standard normal and $\mathrm{Lap}(1)$.](figures/shifted_log_ratio.svg){#fig-dist-shifted-log-ratio}
 
-### Interpretation
+## Code {#sec-dist-code}
 
-For the Laplace, the two copies are within a fixed factor of each other everywhere. For the normal, they are close in the bulk, but the ratio is unbounded in the tails — where, however, there is very little probability. How to make "very little probability" precise is the subject of the next three chapters: concentration bounds it, divergences summarize it, and hypothesis testing says what an observer can do with it.
-
-### Check yourself
-
-- For the normal, at which $x$ is $L(x) = 0$, and why is that point natural? *($x = s/2$, the midpoint, where the two densities cross.)*
-- Under $x \sim \mathcal N(0, \sigma^2)$, what is the distribution of $L(x)$? *(It is linear in a normal, so normal: mean $s^2/(2\sigma^2)$, variance $(s/\sigma^2)^2\sigma^2 = s^2/\sigma^2$.)*
-
-## Code: check the facts by simulation
-
-The script [code/distributions.py](../../code/part01-prerequisites/distributions.py) draws every figure in this chapter and checks the formulas against simulation. Each probability function and each simulated quantity is a small typed function; the script calls them once for the tables and loops them over parameters for the figures. From the repository root:
+The script [code/distributions.py](../../code/part01-prerequisites/distributions.py) draws every figure in this chapter and checks the formulas against simulation. From the repository root:
 
 ```bash
 uv run python code/part01-prerequisites/distributions.py
 ```
-
-@tbl-moments compares each formula with 1,000,000 samples:
 
 | Distribution | Mean (formula / sample) | Variance (formula / sample) |
 | --- | --- | --- |
@@ -457,40 +555,44 @@ uv run python code/part01-prerequisites/distributions.py
 | $\mathrm{Lap}(0, 2)$ | 0.000 / −0.000 | 8.000 / 7.993 |
 | $\mathcal N(1, 3^2)$ | 1.000 / 1.002 | 9.000 / 8.977 |
 
-: Mean and variance from the formulas against 1,000,000 samples (seed 0). {#tbl-moments}
+: Mean and variance from the formulas against 1,000,000 samples (seed 0). The script's other checks are reported in their sections. {#tbl-dist-code}
 
-The formulas in each row are the ones derived above: $p(1-p)$, $np(1-p)$, $\mu$, $b^2$, $2b^2$ and $\sigma^2$. Every sample value is within a few thousandths of its formula, which is the sampling error you expect from a million draws. The other four checks are reported in their sections above: the slotted waiting time, the difference of exponentials, the norm of a normal vector, and the convergence of standardized exponential sums to the normal. [tests/test_distributions.py](../../tests/test_distributions.py) checks that the output still matches.
+[tests/test_distributions.py](../../tests/test_distributions.py) checks that the output still matches.
 
-## References
+## Summary {#sec-dist-summary}
 
-- Blitzstein & Hwang, *Introduction to Probability* (2nd ed., 2019), ch. 3–5 and 7: every distribution here, with worked examples
-- Wasserman, *All of Statistics* (2004), ch. 2–3: a compact reference
-- Vershynin, *High-Dimensional Probability* (2018), §3.1: concentration of the norm of a normal vector
-- Shevtsova, "On the absolute constants in the Berry–Esseen type inequalities for identically distributed summands" (2011): the constant $c \le 0.4748$ in the Berry–Esseen bound
+| Result | Statement | Use |
+| --- | --- | --- |
+| @lem-dist-moment-rules | Means add; $\operatorname{Var}(cX) = c^2\operatorname{Var}(X)$; independent variances add | Moments of every sum |
+| @cor-dist-sqrt-n | Averages of $n$ copies: standard deviation over $\sqrt n$ | Four times the data halves the error |
+| @prp-dist-mgf-moments | $K_X'(0) = \mathbb E[X]$, $K_X''(0) = \operatorname{Var}(X)$ | Moments in one line |
+| @lem-dist-mgf-sum | $M_{X+Y} = M_XM_Y$ for independent $X, Y$ | Sums; every Chernoff bound |
+| @thm-dist-mgf-unique | Equal MGFs near 0, equal distributions | Identify a sum from its MGF |
+| @prp-dist-mgf-tail | $\Pr[X \ge t] \le M_X(\lambda)e^{-\lambda t}$ | A finite MGF means an exponential tail |
+| @prp-dist-binomial | Mean $np$, variance $np(1-p)$ | Error counts; rates near 0 are precise |
+| @thm-dist-poisson-limit | $\mathrm{Bin}(n, \mu/n) \to \mathrm{Poisson}(\mu)$ | Rare events, with error of order $1/n$ |
+| @prp-dist-poisson | Mean and variance $\mu$; Poissons add | Sampled batch sizes, spread $\sqrt\mu$ |
+| @prp-dist-bern-poisson | Bernoulli-sum MGF $\le e^{\mu(e^\lambda - 1)}$ | First step of the Chernoff bound |
+| @thm-dist-exponential-limit | Waiting time $\to \mathrm{Exp}(b)$ | Time to a first event |
+| @prp-dist-exponential | $\mathbb E[Y^k] = k!\,b^k$ | Building block of the Laplace |
+| @prp-dist-memoryless | The wait starts afresh | Waiting after a quiet period |
+| @prp-dist-laplace | $\vert X\vert \sim \mathrm{Exp}(b)$, variance $2b^2$ | Scale $b = \sigma/\sqrt2$ for variance $\sigma^2$ |
+| @prp-dist-laplace-difference | $\mathrm{Exp}(b) - \mathrm{Exp}(b) \sim \mathrm{Lap}(b)$ | Sampling Laplace noise |
+| @prp-dist-normal-mgf | $M_X(\lambda) = e^{\mu\lambda + \sigma^2\lambda^2/2}$ | Gaussian tails |
+| @prp-dist-normal-sums | Independent normals combine into a normal | The Laplace does not |
+| @thm-dist-clt | Standardized i.i.d. sums tend to $\mathcal N(0, 1)$ | The bulk, once $np(1-p) \gtrsim 10$; never the far tails |
+| @prp-dist-rotation | Each projection is $\mathcal N(0, \sigma^2)$ | Noise is small in every direction |
+| @prp-dist-norm | $\Vert X\Vert \approx \sigma\sqrt d$, relative spread $1/\sqrt{2d}$ | Noise is large in length |
+| @thm-dist-shift | Normal $L(x)$ unbounded; Laplace $\vert L(x)\vert \le \vert s\vert/b$ | Shifted Laplace copies differ by a bounded factor |
+| @cor-dist-shift-normal-law | $L \sim \mathcal N(s^2/(2\sigma^2), s^2/\sigma^2)$ | Large normal log ratios are rare |
 
-## Cheat sheet
+: The results of this chapter, and where each is used. {#tbl-dist-summary}
 
-@tbl-distributions-cheat-sheet collects the facts above.
+## References {#sec-dist-references}
 
-| Distribution | Density or PMF | Mean | Variance | MGF | Tail |
-| --- | --- | --- | --- | --- | --- |
-| $\mathrm{Bern}(p)$ | $p^x(1-p)^{1-x}$, $x \in \{0, 1\}$ | $p$ | $p(1-p)$ | $1 + p(e^\lambda - 1)$ | — |
-| $\mathrm{Bin}(n, p)$ | $\binom nk p^k(1-p)^{n-k}$ | $np$ | $np(1-p)$ | $(1 + p(e^\lambda - 1))^n$ | Chernoff, see [chapter 2](02-concentration.md) |
-| $\mathrm{Poisson}(\mu)$ | $e^{-\mu}\mu^k/k!$ | $\mu$ | $\mu$ | $e^{\mu(e^\lambda - 1)}$ | $\approx(e\mu/k)^k$ |
-| $\mathrm{Exp}(b)$ | $\frac1be^{-y/b}$, $y \ge 0$ | $b$ | $b^2$ | $\frac{1}{1 - b\lambda}$, $\lambda < \frac1b$ | $e^{-t/b}$ |
-| $\mathrm{Lap}(\mu, b)$ | $\frac{1}{2b}e^{-\lvert x-\mu\rvert/b}$ | $\mu$ | $2b^2$ | $\frac{e^{\mu\lambda}}{1 - b^2\lambda^2}$, $\lvert\lambda\rvert < \frac1b$ | $\Pr[\lvert X - \mu\rvert \ge t] = e^{-t/b}$ |
-| $\mathcal N(\mu, \sigma^2)$ | $\frac{1}{\sigma\sqrt{2\pi}}e^{-(x-\mu)^2/(2\sigma^2)}$ | $\mu$ | $\sigma^2$ | $e^{\mu\lambda + \sigma^2\lambda^2/2}$ | $\Pr[X - \mu \ge t] \le \frac12e^{-t^2/(2\sigma^2)}$ |
-
-: Summary of the five families: density, moments, MGF and tail. {#tbl-distributions-cheat-sheet}
-
-**Relationships**
-
-- $\mathrm{Bin}(n, \mu/n) \to \mathrm{Poisson}(\mu)$ as $n \to \infty$.
-- $\mathrm{Geom}(\frac{1}{bn})/n \to \mathrm{Exp}(b)$ as $n \to \infty$: the waiting time for the first event in the same slots as the Poisson limit.
-- $\mathrm{Bin}(n, p) \approx \mathcal N(np, np(1-p))$ in the bulk when $np(1-p) \gtrsim 10$.
-- $\mathrm{Exp}(b) - \mathrm{Exp}(b) \sim \mathrm{Lap}(b)$, and $|\mathrm{Lap}(b)| \sim \mathrm{Exp}(b)$.
-- Independent Poissons add to a Poisson, and independent normals add to a normal.
-- CLT: $(S_n - n\mu)/(\sigma\sqrt n) \to \mathcal N(0, 1)$ for any i.i.d. summands with finite variance. The CDF error is $O(1/\sqrt n)$ and grows with the skewness (Berry–Esseen).
-- $\mathcal N(0, \sigma^2I_d)$ has norm $\approx\sigma\sqrt d$ and is $\mathcal N(0, \sigma^2)$ along every unit direction.
+- Blitzstein & Hwang, *Introduction to Probability* (2nd ed., 2019), ch. 3–5 and 7: every distribution here, with worked examples, and the proofs of @thm-dist-mgf-unique and the central limit theorem.
+- Wasserman, *All of Statistics* (2004), ch. 2–3: a compact reference.
+- Vershynin, *High-Dimensional Probability* (2018), §3.1: concentration of the norm of a normal vector.
+- Shevtsova, "On the absolute constants in the Berry–Esseen type inequalities for identically distributed summands" (2011): the constant $c \le 0.4748$ in the Berry–Esseen bound.
 
 **Practice.** Exercises for this chapter, each with a worked solution, are in [the exercise book](../../book-exercises/part01-prerequisites/01-distributions.md).

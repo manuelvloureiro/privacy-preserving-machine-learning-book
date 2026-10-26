@@ -17,7 +17,7 @@ The solutions use the chapter's notation. A record is $(s, x, y)$, $f_y(x, s)$ i
 | smoker | 0.12 | **0.08** | 0.09 | **0.21** |
 | $\Pr[\text{smoker} \mid x, y]$ | 0.3077 | 0.7273 | 0.3913 | 0.7778 |
 
-: The smoking table with a balanced prior, column maxima in bold. {#tbl-sol-attribute-inference-balanced}
+: The smoking table with a balanced prior, column maxima in bold. {#tbl-sol-attr-balanced}
 
 2. **No observation.** Both values have probability 0.5, so $V(S) = 0.5$.
 3. **Age alone.** Young: non-smoker $0.27 + 0.03 = 0.3$ against smoker $0.12 + 0.08 = 0.2$. Old: non-smoker $0.2$ against smoker $0.3$. The best guess is "non-smoker" for the young and "smoker" for the old, and $V(S \mid X) = 0.3 + 0.3 = 0.6$.
@@ -31,7 +31,7 @@ The solutions use the chapter's notation. A record is $(s, x, y)$, $f_y(x, s)$ i
 
 ## The marginal prior {#sec-sol-attr-2}
 
-> **Exercise 2.** **The marginal prior.** Fredrikson et al.'s attack uses $p(s)$ in place of $p(s \mid x)$. On the smoking table, with a calibrated model, compute the success of $\arg\max_s p(s)\,f_y(x, s)$, breaking ties towards "non-smoker". *Check: 0.706, against 0.748 for imputation.* Which cell causes the loss? *(Bayes' rule, Fact 1)*
+> **Exercise 2.** **The marginal prior.** Fredrikson et al.'s attack uses $p(s)$ in place of $p(s \mid x)$. On the smoking table, with a calibrated model, compute the success of $\arg\max_s p(s)\,f_y(x, s)$, breaking ties towards "non-smoker". *Check: 0.706, against 0.748 for imputation.* Which cell causes the loss? *(Bayes' rule, @def-attr-vulnerability)*
 
 ::: {.callout-tip collapse="true" title="Solution"}
 1. **Scores.** With a calibrated model, $f_y(x, s) = \Pr[y \mid x, s]$. The scores $p(s)\Pr[y \mid x, s]$ for (non-smoker, smoker) in each cell are:
@@ -41,14 +41,14 @@ The solutions use the chapter's notation. A record is $(s, x, y)$, $f_y(x, s)$ i
    - old, disease: $0.7 \times 0.3 = 0.21$ against $0.3 \times 0.7 = 0.21$, a tie, broken towards non-smoker.
 2. **Success.** Add the mass of the guessed value in each cell of the smoking table: $0.378 + 0.048 + 0.196 + 0.084 = 0.706$. The check value is right.
 3. **Where the loss is.** Only the last cell differs from imputation, which guesses "smoker" there and gets $0.126$ instead of $0.084$. The loss is $0.748 - 0.706 = 0.042$.
-4. **Why.** Bayes' rule needs $p(s \mid x)$: an old person is a smoker with probability $0.3913$, not $0.3$. With it the scores are $0.3913 \times 0.7 = 0.2739$ against $0.6087 \times 0.3 = 0.1826$, and the tie is broken the right way. Dropping the dependence of $s$ on $x$ throws that evidence away. By Fact 1, any rule other than the MAP guess can only do worse.
+4. **Why.** Bayes' rule needs $p(s \mid x)$, and an old person is a smoker with probability $0.3913$, not $0.3$. With it, the scores of @exm-attr-inversion are 0.2739 against 0.1826, and the tie is broken the right way. Dropping the dependence of $s$ on $x$ throws that evidence away. The MAP guess of @def-attr-vulnerability is the best rule, so any rule that differs from it can only do worse.
 
 *An inversion attack is only as good as the adversary's model of how the sensitive attribute relates to what it already knows.*
 :::
 
 ## The reduction at low false positive rate {#sec-sol-attr-3}
 
-> **Exercise 3.** **The reduction at low false positive rate.** The membership test $\mathcal B$ built from the toy attack has TPR 0.7832 at FPR 0.7262. Using the mixing of tests in [Hypothesis testing](../../book-full/part01-prerequisites/04-hypothesis-testing.md), find the best TPR it can reach at FPR $10^{-3}$. *Check: $0.00108$.* Why can it not do better? *Hint: its only output is one bit.* *(Neyman–Pearson, mixing tests)*
+> **Exercise 3.** **The reduction at low false positive rate.** The membership test $\mathcal B$ of @prp-attr-reduction, built from the toy attack, has TPR 0.7832 at FPR 0.7262. Using the mixing of tests in [Hypothesis testing](../../book-full/part01-prerequisites/04-hypothesis-testing.md), find the best TPR it can reach at FPR $10^{-3}$. *Check: $0.00108$.* Why can it not do better? *Hint: its only output is one bit.* *(Neyman–Pearson, mixing tests)*
 
 ::: {.callout-tip collapse="true" title="Solution"}
 1. **What the test sees.** $\mathcal B$ observes one bit: whether the attribute guess was right. "Right" happens with probability 0.7832 for members and 0.7262 for non-members; "wrong" with 0.2168 and 0.2738.
@@ -63,7 +63,7 @@ The solutions use the chapter's notation. A record is $(s, x, y)$, $f_y(x, s)$ i
 
 ## Label-only inversion {#sec-sol-attr-4}
 
-> **Exercise 4.** **Label-only inversion.** The hospital releases only a label: "disease" when $\Pr[y = 1 \mid x, s] > \frac12$. On the smoking table, the adversary queries the label at both values of $s$, scores $p(s \mid x)\,\mathbf 1[\mathrm{label}(x, s) = y]$, and breaks ties with $p(s \mid x)$. Compute its success. *Check: 0.742, a loss of 0.006 against imputation.* *(Fact 3, MAP guess)*
+> **Exercise 4.** **Label-only inversion.** The hospital releases only a label: "disease" when $\Pr[y = 1 \mid x, s] > \frac12$. On the smoking table, the adversary queries the label at both values of $s$, scores $p(s \mid x)\,\mathbf 1[\mathrm{label}(x, s) = y]$, and breaks ties with $p(s \mid x)$. Compute its success. *Check: 0.742, a loss of 0.006 against imputation.* *(@lem-attr-processing, MAP guess)*
 
 ::: {.callout-tip collapse="true" title="Solution"}
 1. **The labels.** Only the old smoker has disease probability above $\frac12$ (0.7). So the label is "disease" at (old, smoker) and "no disease" at the other three inputs.
@@ -73,7 +73,7 @@ The solutions use the chapter's notation. A record is $(s, x, y)$, $f_y(x, s)$ i
    - old, no disease: only the non-smoker label matches, guess non-smoker, right on $0.196$;
    - old, disease: only the smoker label matches, guess smoker, right on $0.126$.
 3. **Success.** $0.378 + 0.042 + 0.196 + 0.126 = 0.742$. The check value is right.
-4. **The loss.** Imputation guesses "smoker" for young people with the disease and gets $0.048$ there instead of $0.042$: a loss of $0.006$. The label is a function of the confidences, so by Fact 3 a loss, not a gain, was the only possibility.
+4. **The loss.** Imputation guesses "smoker" for young people with the disease and gets $0.048$ there instead of $0.042$: a loss of $0.006$. The label is a function of the confidences, so by @lem-attr-processing a loss, not a gain, was the only possibility.
 
 *A coarse output costs the attacker only in the cells where the coarse answer cannot tell the candidates apart; everywhere else it is as good as the full confidence.*
 :::
@@ -95,10 +95,10 @@ The solutions use the chapter's notation. A record is $(s, x, y)$, $f_y(x, s)$ i
 
 ## A model that memorizes {#sec-sol-attr-6}
 
-> **Exercise 6.** **A model that memorizes.** A lookup model stores each training record under a unique record identifier, such as a patient number. Queried with a person's identifier and a candidate $(x, s, y)$, it returns $f_y(x, s) = 1$ when that person is a training member and the candidate is their stored record, and the population's $p(y \mid x, s)$ for every other query. The lookup is keyed on the identifier, not on the values, because the smoking table has only eight kinds of record and many people share each one. So a non-member's query never hits a stored record, and a member's query hits only at the member's own true values. On the smoking table, compute the success of MAP inversion on members and on non-members. *Check: 0.874 on members, 0.748 on non-members, an advantage of 0.126.* Which members does the attack still get wrong? *(The game, the non-member ceiling)*
+> **Exercise 6.** **A model that memorizes.** A lookup model stores each training record under a unique record identifier, such as a patient number. Queried with a person's identifier and a candidate $(x, s, y)$, it returns $f_y(x, s) = 1$ when that person is a training member and the candidate is their stored record, and the population's $p(y \mid x, s)$ for every other query. The lookup is keyed on the identifier, not on the values, because the smoking table has only eight kinds of record and many people share each one. So a non-member's query never hits a stored record, and a member's query hits only at the member's own true values. On the smoking table, compute the success of MAP inversion on members and on non-members. *Check: 0.874 on members, 0.748 on non-members, an advantage of 0.126.* Which members does the attack still get wrong? *(@def-attr-game, @thm-attr-ceiling)*
 
 ::: {.callout-tip collapse="true" title="Solution"}
-1. **Non-members.** None of their queries is stored, so the model answers with $p(y \mid x, s)$ at both candidates. It is calibrated, so MAP inversion is imputation and succeeds with $V(S \mid X, Y) = 0.748$.
+1. **Non-members.** None of their queries is stored, so the model answers with $p(y \mid x, s)$ at both candidates. It is calibrated, so by @prp-attr-calibrated MAP inversion is imputation and succeeds with $V(S \mid X, Y) = 0.748$.
 2. **Members.** At the true value $s$ the model returns 1. At the other value $s'$ it returns the population's $p(y \mid x, s')$. The attack is right exactly when $p(s \mid x) \times 1 > p(s' \mid x)\,p(y \mid x, s')$.
 3. **Check each of the eight records.** With $p(\text{smoker} \mid \text{young}) = 0.2222$ and $p(\text{smoker} \mid \text{old}) = 0.3913$:
 
@@ -113,7 +113,7 @@ The solutions use the chapter's notation. A record is $(s, x, y)$, $f_y(x, s)$ i
 | smoker | old, no disease | 0.054 | 0.3913 | $0.6087 \times 0.7 = 0.4261$ | no |
 | smoker | old, disease | 0.126 | 0.3913 | $0.6087 \times 0.3 = 0.1826$ | yes |
 
-: MAP inversion against a model that memorizes its training records, for a member of each kind. {#tbl-sol-attribute-inference-lookup}
+: MAP inversion against a model that memorizes its training records, for a member of each kind. {#tbl-sol-attr-lookup}
 
 4. **Success on members.** Everything except the two "no" rows: $1 - 0.072 - 0.054 = 0.874$.
 5. **Advantage.** $0.874 - 0.748 = 0.126$. Members are guessed 0.126 above the non-member ceiling, which no population-level knowledge could achieve.

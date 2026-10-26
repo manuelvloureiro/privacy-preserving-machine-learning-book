@@ -4,8 +4,8 @@ This appendix proves two results that [Cryptography basics](../part01-prerequisi
 
 | Derivation | Where the chapter states it | What the chapter gives |
 | --- | --- | --- |
-| @sec-apx-crypto-ggm: the GGM tree is a PRF, with advantage at most $nQ$ times the PRG's | @sec-crypto-ggm | A proof sketch, citing Goldreich for the full proof |
-| @sec-apx-crypto-lwe: search LWE reduces to decision LWE for prime $p$ polynomial in $d$ | @sec-crypto-lwe, Definition | One sentence describing Regev's idea |
+| @sec-apx-crypto-ggm: the GGM tree is a PRF, with advantage at most $nQ$ times the PRG's | @sec-crypto-ggm | The theorem with its proof cited to Goldreich, and the idea in one paragraph |
+| @sec-apx-crypto-lwe: search LWE reduces to decision LWE for prime $p$ polynomial in $d$ | @def-crypto-lwe | One sentence describing Regev's idea |
 
 : The two derivations in this appendix and the chapter section that states each one. {#tbl-apx-crypto-map}
 
@@ -60,7 +60,7 @@ The proof has four parts. Steps 1 to 3 set up the hybrids and show that two neig
 
 2. **Split the advantage into levels.** Write $h_j = \Pr[\mathcal A^{H_j} = 1]$ for how often the adversary says 1 in hybrid $H_j$. In the sum $\sum_{j=1}^n (h_{j-1} - h_j)$, each intermediate $h_j$ appears once with a plus sign and once with a minus sign, so the sum telescopes:
    $$h_0 - h_n = \sum_{j=1}^n (h_{j-1} - h_j).$$ {#eq-apx-crypto-telescope}
-   The chapter calls this telescoping Fact 3, where it is used with absolute values. The left side is $\Pr[\mathcal A^{F_k} = 1] - \Pr[\mathcal A^f = 1]$, whose absolute value is $\mathrm{Adv}_{\mathrm{PRF}}(\mathcal A)$.
+   The chapter states this telescoping, with absolute values, as @lem-crypto-chain. The left side is $\Pr[\mathcal A^{F_k} = 1] - \Pr[\mathcal A^f = 1]$, whose absolute value is $\mathrm{Adv}_{\mathrm{PRF}}(\mathcal A)$.
 
 3. **Write two neighbouring hybrids as one table.** Fix $j \ge 1$ and look at a node $w$ at depth $j - 1$. In $H_{j-1}$, its two children $w0$ and $w1$ get the two halves of $G(L(w))$, so together they carry the string $G(L(w))$. Different nodes $w$ have independent uniform labels, so these strings are independent, each distributed as $G(U_\lambda)$. In $H_j$, the children carry two independent uniform labels, so together they carry a string distributed as $U_{2\lambda}$, again independently for each $w$. Below depth $j$ both hybrids compute with $G$ in the same way. So the two hybrids are one and the same world, except for the distribution $P$ that the children's strings come from. In that world, a table $T$ gives each node $w$ at depth $j - 1$ its own independent draw $T(w)$ from $P$. The query $x$ is answered by taking the half of $T(x_1\cdots x_{j-1})$ that bit $x_j$ selects and walking down with $G$:
    $$W_j^{P}(x) = G_{x_n}\big(\cdots G_{x_{j+1}}\big(\text{half } x_j \text{ of } T(x_1\cdots x_{j-1})\big)\cdots\big).$$
@@ -148,7 +148,7 @@ Fix a coordinate $\ell$ and a guess $g \in \mathbb Z_p$. Steps 1 to 4 show what 
 1. **Re-randomize.** Take an LWE sample $(a, b)$ with $b = \langle a, s\rangle + e$. Draw a fresh $r$ uniform in $\mathbb Z_p$, independent of everything else. Let $a'$ be $a$ with $r$ added to its $\ell$-th coordinate, and let $b' = b + rg \bmod p$. Adding $r$ to $a_\ell$ adds $r s_\ell$ to the inner product, so $\langle a', s\rangle = \langle a, s\rangle + r s_\ell$. Subtracting this from $b'$ leaves the **residual**
    $$b' - \langle a', s\rangle = e + r(g - s_\ell) \bmod p.$$ {#eq-apx-crypto-residual}
 
-2. **The new vector is still uniform.** For each fixed $r$, adding $r$ to one coordinate is a bijection of $\mathbb Z_p^d$. By the chapter's Fact 4, a bijection maps the uniform distribution to itself. Since $a$ is uniform and independent of $r$ and $e$, the vector $a'$ is uniform and independent of $e$.
+2. **The new vector is still uniform.** For each fixed $r$, adding $r$ to one coordinate is a bijection of $\mathbb Z_p^d$. By @lem-crypto-bijection, a bijection maps the uniform distribution to itself. Since $a$ is uniform and independent of $r$ and $e$, the vector $a'$ is uniform and independent of $e$.
 
 3. **A right guess gives an LWE sample.** If $g = s_\ell$, the residual @eq-apx-crypto-residual is just $e$, so $b' = \langle a', s\rangle + e$. With step 2, $a'$ is uniform and $e$ is an independent draw from $\chi$, so $(a', b')$ is an LWE sample with the same secret $s$.
 

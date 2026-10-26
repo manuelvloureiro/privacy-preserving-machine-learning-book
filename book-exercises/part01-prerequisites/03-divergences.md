@@ -2,7 +2,7 @@
 
 Exercises for [Divergences](../../book-full/part01-prerequisites/03-divergences.md), each with a worked solution. Try each exercise before opening its solution. The script `code/part01-prerequisites/solutions_divergences.py` computes every number quoted here; run it with `uv run python code/part01-prerequisites/solutions_divergences.py`.
 
-The solutions use the chapter's notation and its three acronyms: the Kullback–Leibler (KL) divergence, the total variation (TV) distance and the data processing inequality (DPI). $r = p/q$ is the likelihood ratio and $L = \ln r$ the log-likelihood ratio, logarithms are natural, and on the die $P$ is the loaded die and $Q$ the fair one (@tbl-div-die).
+The solutions use the chapter's notation and three acronyms: the Kullback–Leibler (KL) divergence, the total variation (TV) distance and the data processing inequality (DPI). $r = p/q$ is the likelihood ratio and $L = \ln r$ the log-likelihood ratio, logarithms are natural, and on the die $P$ is the loaded die and $Q$ the fair one (@tbl-div-die).
 
 ## Chain rule for KL {#sec-sol-div-1}
 
@@ -16,7 +16,7 @@ $$\ln\frac{p(x, y)}{q(x, y)} = \ln\frac{p(x)}{q(x)} + \ln\frac{p(y\mid x)}{q(y\m
 4. **Average the second term in two stages:** first over $y$ given $x$, then over $x$. For fixed $x$, $\sum_yp(y\mid x)\ln\frac{p(y\mid x)}{q(y\mid x)} = D_{\mathrm{KL}}(P_{Y\mid x}\|Q_{Y\mid x})$. Averaging over $x \sim P_X$ gives the expected conditional KL.
 5. **Add the two averages** (linearity of expectation). This is the chain rule.
 
-**Additivity.** If $X$ and $Y$ are independent under both distributions, then $p(y\mid x) = p_2(y)$ and $q(y\mid x) = q_2(y)$ for every $x$. The conditional KL in step 4 is then $D_{\mathrm{KL}}(P_2\|Q_2)$ for every $x$, and its average over $x$ is the same number. The chain rule becomes @eq-kl-additive.
+**Additivity.** If $X$ and $Y$ are independent under both distributions, then $p(y\mid x) = p_2(y)$ and $q(y\mid x) = q_2(y)$ for every $x$. The conditional KL in step 4 is then $D_{\mathrm{KL}}(P_2\|Q_2)$ for every $x$, and its average over $x$ is the same number. The chain rule becomes @eq-div-kl-additive.
 
 **Concretely, on the die.** Let $Y$ be the roll and $X$ its parity. Then $(X, Y)$ carries the same information as $Y$, so the left side is $D_{\mathrm{KL}}(P\|Q) = 0.2939$. The parity part is $0.0823$ (from @tbl-div-dpi-die). Given "even", the loaded die gives rolls 2, 4, 6 with probabilities $0.1/0.7, 0.1/0.7, 0.5/0.7 = \frac17, \frac17, \frac57$, and the fair die gives $\frac13$ each. Given "odd", both are uniform on 1, 3, 5.
 
@@ -25,7 +25,7 @@ $$\ln\frac{p(x, y)}{q(x, y)} = \ln\frac{p(x)}{q(x)} + \ln\frac{p(y\mid x)}{q(y\m
 | even | 0.7 | $(\frac17, \frac17, \frac57)$ | $(\frac13, \frac13, \frac13)$ | $\frac27\ln\frac37 + \frac57\ln\frac{15}7 = 0.3023$ |
 | odd | 0.3 | $(\frac13, \frac13, \frac13)$ | $(\frac13, \frac13, \frac13)$ | 0 |
 
-: The chain rule on the die, with $X$ the parity and $Y$ the roll. {#tbl-sol-divergences-chain}
+: The chain rule on the die, with $X$ the parity and $Y$ the roll. {#tbl-sol-div-chain}
 
 The expected conditional KL is $0.7 \times 0.3023 = 0.2116$, and $0.0823 + 0.2116 = 0.2939$, the KL of the raw roll.
 
@@ -34,7 +34,7 @@ The expected conditional KL is $0.7 \times 0.3023 = 0.2116$, and $0.0823 + 0.211
 
 ## Gaussians with different variances {#sec-sol-div-2}
 
-> **Exercise 2.** **Gaussians with different variances.** Show $D_{\mathrm{KL}}(\mathcal N(m_0, \sigma_0^2)\|\mathcal N(m_1, \sigma_1^2)) = \ln\frac{\sigma_1}{\sigma_0} + \frac{\sigma_0^2 + (m_0 - m_1)^2}{2\sigma_1^2} - \frac12$. *Check: $D_{\mathrm{KL}}(\mathcal N(0, 1)\|\mathcal N(0, 4)) = \ln2 + \frac18 - \frac12 = 0.3181$.* For the Rényi divergence, repeat route 1 of the Gaussian section and find the condition on $\alpha$ under which the integral is finite. *Hint: the coefficient of $x^2$ must stay negative: $\alpha/\sigma_0^2 + (1-\alpha)/\sigma_1^2 > 0$.* *(Completing the square)*
+> **Exercise 2.** **Gaussians with different variances.** Show $D_{\mathrm{KL}}(\mathcal N(m_0, \sigma_0^2)\|\mathcal N(m_1, \sigma_1^2)) = \ln\frac{\sigma_1}{\sigma_0} + \frac{\sigma_0^2 + (m_0 - m_1)^2}{2\sigma_1^2} - \frac12$. *Check: $D_{\mathrm{KL}}(\mathcal N(0, 1)\|\mathcal N(0, 4)) = \ln2 + \frac18 - \frac12 = 0.3181$.* For the Rényi divergence, repeat the proof of @prp-div-gauss and find the condition on $\alpha$ under which the integral is finite. *Hint: the coefficient of $x^2$ must stay negative: $\alpha/\sigma_0^2 + (1-\alpha)/\sigma_1^2 > 0$.* *(Completing the square)*
 
 ::: {.callout-tip collapse="true" title="Solution"}
 Write $P = \mathcal N(m_0, \sigma_0^2)$ and $Q = \mathcal N(m_1, \sigma_1^2)$, with means $m_0, m_1$, and $s = m_0 - m_1$.
@@ -46,9 +46,9 @@ $$L(x) = \ln\frac{\sigma_1}{\sigma_0} - \frac{(x - m_0)^2}{2\sigma_0^2} + \frac{
 Unlike the equal-variance case, $L$ is quadratic in $x$.
 2. **Two second moments under $P$.** $\mathbb E_P(X - m_0)^2 = \sigma_0^2$. For the other, write $X - m_1 = (X - m_0) + s$; the cross term averages to 0, so $\mathbb E_P(X - m_1)^2 = \sigma_0^2 + s^2$.
 3. **Average $L$ under $P$:** $D_{\mathrm{KL}} = \ln\frac{\sigma_1}{\sigma_0} - \frac12 + \frac{\sigma_0^2 + s^2}{2\sigma_1^2}$, the claimed formula.
-4. **Check.** For $\mathcal N(0, 1)\|\mathcal N(0, 4)$: $\sigma_0 = 1$, $\sigma_1 = 2$, $s = 0$, so $D_{\mathrm{KL}} = \ln2 + \frac18 - \frac12 = 0.3181$. A numerical integral of $p\ln(p/q)$ gives 0.3181 as well. In the other direction, $D_{\mathrm{KL}}(\mathcal N(0, 4)\|\mathcal N(0, 1)) = -\ln2 + 2 - \frac12 = 0.8069$: KL is not symmetric here. With $\sigma_0 = \sigma_1$ the formula reduces to $s^2/(2\sigma^2)$, as in @eq-gauss-renyi.
+4. **Check.** For $\mathcal N(0, 1)\|\mathcal N(0, 4)$: $\sigma_0 = 1$, $\sigma_1 = 2$, $s = 0$, so $D_{\mathrm{KL}} = \ln2 + \frac18 - \frac12 = 0.3181$. A numerical integral of $p\ln(p/q)$ gives 0.3181 as well. In the other direction, $D_{\mathrm{KL}}(\mathcal N(0, 4)\|\mathcal N(0, 1)) = -\ln2 + 2 - \frac12 = 0.8069$: KL is not symmetric here. With $\sigma_0 = \sigma_1$ the formula reduces to $s^2/(2\sigma^2)$, as in @eq-div-gauss-renyi.
 
-**Rényi, by route 1.**
+**Rényi, as in the proof of @prp-div-gauss.**
 
 1. **Constants.** $p^\alpha q^{1-\alpha}$ has the constant factor $\frac{1}{\sqrt{2\pi}}\sigma_0^{-\alpha}\sigma_1^{-(1-\alpha)}$ times $\exp\big(-\frac12B(x)\big)$, with
 $$B(x) = w_0(x - m_0)^2 + w_1(x - m_1)^2, \qquad w_0 = \frac{\alpha}{\sigma_0^2},\quad w_1 = \frac{1 - \alpha}{\sigma_1^2}.$$
@@ -65,7 +65,7 @@ $$D_\alpha(P\|Q) = \ln\frac{\sigma_1}{\sigma_0} + \frac{1}{2(\alpha - 1)}\ln\fra
 $$\alpha < \frac{\sigma_0^2}{\sigma_0^2 - \sigma_1^2}.$$
 The reason: $r^{\alpha-1}$ grows like $e^{cx^2}$ in the tails when $Q$ is the narrower one, and for large $\alpha$ that beats the decay of $p$.
 
-**Checks.** As $\alpha \to 1$, $\sigma_\alpha^2 \to \sigma_1^2$ and $\frac{1}{\alpha - 1}\ln\frac{\sigma_1^2}{\sigma_\alpha^2} \to -\frac{\sigma_1^2 - \sigma_0^2}{\sigma_1^2}$ (the derivative of $-\ln\sigma_\alpha^2$ at $\alpha = 1$), so $D_\alpha \to \ln\frac{\sigma_1}{\sigma_0} + \frac{\sigma_0^2}{2\sigma_1^2} - \frac12 + \frac{s^2}{2\sigma_1^2}$, the KL above. With $\sigma_0 = \sigma_1$, $\sigma_\alpha = \sigma$ and only $\alpha s^2/(2\sigma^2)$ remains, which is @eq-gauss-renyi. @tbl-sol-divergences-gauss compares the formula with a numerical integral.
+**Checks.** As $\alpha \to 1$, $\sigma_\alpha^2 \to \sigma_1^2$ and $\frac{1}{\alpha - 1}\ln\frac{\sigma_1^2}{\sigma_\alpha^2} \to -\frac{\sigma_1^2 - \sigma_0^2}{\sigma_1^2}$ (the derivative of $-\ln\sigma_\alpha^2$ at $\alpha = 1$), so $D_\alpha \to \ln\frac{\sigma_1}{\sigma_0} + \frac{\sigma_0^2}{2\sigma_1^2} - \frac12 + \frac{s^2}{2\sigma_1^2}$, the KL above. With $\sigma_0 = \sigma_1$, $\sigma_\alpha = \sigma$ and only $\alpha s^2/(2\sigma^2)$ remains, which is @eq-div-gauss-renyi. @tbl-sol-div-gauss compares the formula with a numerical integral.
 
 | Pair $P\Vert Q$ | Order | Formula | Numerical integral |
 | --- | --- | --- | --- |
@@ -74,7 +74,7 @@ The reason: $r^{\alpha-1}$ grows like $e^{cx^2}$ in the tails when $Q$ is the na
 | $\mathcal N(0, 4)\Vert\mathcal N(0, 1)$ | $\alpha = 1.2$, $\sigma_{1.2}^2 = 0.4$ | $-\ln2 + \frac{1}{0.4}\ln\frac{1}{0.4} = 1.5976$ | 1.5976 |
 | $\mathcal N(0, 4)\Vert\mathcal N(0, 1)$ | $\alpha = 2$, $\sigma_2^2 = -2$ | $\infty$ | — |
 
-: Rényi divergences between Gaussians with different variances, from the closed form and by numerical integration. {#tbl-sol-divergences-gauss}
+: Rényi divergences between Gaussians with different variances, from the closed form and by numerical integration. {#tbl-sol-div-gauss}
 
 For $\mathcal N(0, 4)\|\mathcal N(0, 1)$ the limit is $\alpha < \frac{4}{4 - 1} = 1.3333$: every order $\alpha \ge \frac43$ is infinite, although the KL (order 1) is only 0.8069.
 
@@ -94,8 +94,8 @@ For $\mathcal N(0, 4)\|\mathcal N(0, 1)$ the limit is $\alpha < \frac{4}{4 - 1} 
 
 **For the Gaussian pair.** $P = \mathcal N(0, \sigma^2)$, $Q = \mathcal N(s, \sigma^2)$, $\mu = s/\sigma$.
 
-1. Step 4 of route 1 in the Gaussian section, at $\alpha = \frac12$, gives $\mathrm{BC} = \int\sqrt{pq}\,\mathrm dx = \exp\big(-\frac{\frac12\cdot\frac12 s^2}{2\sigma^2}\big) = e^{-\mu^2/8}$.
-2. So $D_{1/2} = -2\ln e^{-\mu^2/8} = \mu^2/4$. This is @eq-gauss-renyi at $\alpha = \frac12$.
+1. Step 5 of the proof of @prp-div-gauss, at $\alpha = \frac12$, gives $\mathrm{BC} = \int\sqrt{pq}\,\mathrm dx = \exp\big(-\frac{\frac12\cdot\frac12 s^2}{2\sigma^2}\big) = e^{-\mu^2/8}$.
+2. So $D_{1/2} = -2\ln e^{-\mu^2/8} = \mu^2/4$. This is @eq-div-gauss-renyi at $\alpha = \frac12$.
 3. As a by-product, $H^2 = 2\big(1 - e^{-\mu^2/8}\big)$.
 
 At $\mu = 1/\sqrt2$ (the Gaussian pair with the variance of the Laplace pair at $t = 1$) this gives $D_{1/2} = 0.1250$, the entry in @tbl-div-laplace-gauss.
@@ -105,7 +105,7 @@ At $\mu = 1/\sqrt2$ (the Gaussian pair with the variance of the Laplace pair at 
 
 ## Rejection sampling {#sec-sol-div-4}
 
-> **Exercise 4.** **Rejection sampling.** In the rejection-sampling example, show in general that $\mathrm{TV}(P, \tilde P) \le E_\gamma(P\|Q)$. *Hint: write $\min(p, \gamma q) = p - e$ with $e = (p - \gamma q)_+$, so $\tilde p = (p - e)/(1 - E_\gamma)$, and use $e \le p$.* *(Hockey-stick)*
+> **Exercise 4.** **Rejection sampling.** In @exm-div-rejection, show in general that $\mathrm{TV}(P, \tilde P) \le E_\gamma(P\|Q)$. *Hint: write $\min(p, \gamma q) = p - e$ with $e = (p - \gamma q)_+$, so $\tilde p = (p - e)/(1 - E_\gamma)$, and use $e \le p$.* *(Hockey-stick)*
 
 ::: {.callout-tip collapse="true" title="Solution"}
 Write $E = E_\gamma(P\|Q)$ and assume $E < 1$, so that some proposals are accepted.
@@ -114,10 +114,10 @@ Write $E = E_\gamma(P\|Q)$ and assume $E < 1$, so that some proposals are accept
 2. **Normalize.** $\sum_xe(x) = E$ by the definition of $E_\gamma$, so $\sum_x\min(p, \gamma q) = 1 - E$ and $\tilde p = (p - e)/(1 - E)$.
 3. **The difference $p - \tilde p$.** $p - \tilde p = \frac{p(1 - E) - p + e}{1 - E} = \frac{e - pE}{1 - E}$.
 4. **Use $e \le p$.** Since $e \le p$ and $E \ge 0$, $e - pE \le e - eE = e(1 - E)$. The right side is non-negative, so $(e - pE)_+ \le e(1 - E)$.
-5. **Sum, using the form $\mathrm{TV} = \sum(p - \tilde p)_+$ of @eq-tv:**
+5. **Sum, using the form $\mathrm{TV} = \sum(p - \tilde p)_+$ of @eq-div-tv:**
 $$\mathrm{TV}(P, \tilde P) = \frac{1}{1 - E}\sum_x(e - pE)_+ \le \frac{1}{1 - E}\sum_xe(1 - E) = E.$$
 
-**On the die.** @tbl-sol-divergences-reject runs the envelope $\gamma\cdot$fair over the range $1 \le \gamma \le 3$. The bound holds everywhere, and both sides reach 0 at $\gamma = 3 = \max r$.
+**On the die.** @tbl-sol-div-reject runs the envelope $\gamma\cdot$fair over the range $1 \le \gamma \le 3$. The bound holds everywhere, and both sides reach 0 at $\gamma = 3 = \max r$.
 
 | $\gamma$ | 1 | 1.5 | 2 | 2.5 | 3 |
 | --- | --- | --- | --- | --- | --- |
@@ -125,7 +125,7 @@ $$\mathrm{TV}(P, \tilde P) = \frac{1}{1 - E}\sum_x(e - pE)_+ \le \frac{1}{1 - E}
 | $\mathrm{TV}(P, \tilde P)$ | 0.2500 | 0.1667 | 0.1000 | 0.0455 | 0.0000 |
 | $E_\gamma(P\Vert Q)$ | 0.3333 | 0.2500 | 0.1667 | 0.0833 | 0.0000 |
 
-: Rejection sampling from the loaded die with a fair-die proposal and envelope $\gamma q$: the output's distance from the target, against the hockey-stick divergence. {#tbl-sol-divergences-reject}
+: Rejection sampling from the loaded die with a fair-die proposal and envelope $\gamma q$: the output's distance from the target, against the hockey-stick divergence. {#tbl-sol-div-reject}
 
 The bound is loose by the factor $1 - E$ lost in step 4: the deficit $e$ is not all removed from $\tilde p$, because renormalizing gives part of it back.
 
@@ -134,15 +134,15 @@ The bound is loose by the factor $1 - E$ lost in step 4: the deficit $e$ is not 
 
 ## DPI for $E_\gamma$ directly {#sec-sol-div-5}
 
-> **Exercise 5.** **DPI for $E_\gamma$ directly.** Without the f-divergence machinery, show $E_\gamma(PK\|QK) \le E_\gamma(P\|Q)$. *Hint: $PK(B) - \gamma QK(B) = \sum_xK(B\mid x)\big(p(x) - \gamma q(x)\big)$ with $K(B\mid x) \in [0, 1]$; use the randomized version of Fact 3.* *(Fact 3, DPI)*
+> **Exercise 5.** **DPI for $E_\gamma$ directly.** Without the f-divergence machinery, show $E_\gamma(PK\|QK) \le E_\gamma(P\|Q)$. *Hint: $PK(B) - \gamma QK(B) = \sum_xK(B\mid x)\big(p(x) - \gamma q(x)\big)$ with $K(B\mid x) \in [0, 1]$; use the soft-event part of @lem-div-best-event.* *(@lem-div-best-event, DPI)*
 
 ::: {.callout-tip collapse="true" title="Solution"}
-This is the data-processing inequality of @sec-div-dpi, for $E_\gamma$ alone.
+This is @thm-div-dpi for $E_\gamma$ alone.
 
 1. **Output probabilities of an event.** For an output event $B$, $PK(B) = \sum_{y\in B}\sum_xp(x)K(y\mid x) = \sum_xp(x)K(B\mid x)$, where $K(B\mid x) = \sum_{y\in B}K(y\mid x)$ is the probability that input $x$ lands in $B$. The same holds for $Q$. Subtract:
 $$PK(B) - \gamma QK(B) = \sum_xK(B\mid x)\big(p(x) - \gamma q(x)\big).$$
-2. **This is a randomized test on the input.** $\phi(x) = K(B\mid x)$ takes values in $[0, 1]$. By the second part of Fact 3, $\sum_x\phi(x)(p(x) - \gamma q(x)) \le \sum_x(p(x) - \gamma q(x))_+ = E_\gamma(P\|Q)$.
-3. **Maximize over $B$.** Step 2 holds for every $B$. By Fact 3 on the output space, $E_\gamma(PK\|QK) = \max_B[PK(B) - \gamma QK(B)]$, so it is at most $E_\gamma(P\|Q)$.
+2. **This is a randomized test on the input.** $\phi(x) = K(B\mid x)$ takes values in $[0, 1]$. By the soft-event part of @lem-div-best-event, $\sum_x\phi(x)(p(x) - \gamma q(x)) \le \sum_x(p(x) - \gamma q(x))_+ = E_\gamma(P\|Q)$.
+3. **Maximize over $B$.** Step 2 holds for every $B$. By @def-div-hockey on the output space, $E_\gamma(PK\|QK) = \max_B[PK(B) - \gamma QK(B)]$, so it is at most $E_\gamma(P\|Q)$.
 
 **On the die, reporting the parity** ($PK = (0.7, 0.3)$, $QK = (0.5, 0.5)$ for even, odd):
 
@@ -166,14 +166,14 @@ $$(\tfrac12 + \xi)(2\xi - 2\xi^2) = \xi - \xi^2 + 2\xi^2 + O(\xi^3), \qquad (\tf
 
 **Why this makes the constant sharp.** Here $\mathrm{TV}(P, Q) = \xi$ (one outcome gains $\xi$, the other loses it). Pinsker says $D_{\mathrm{KL}}(P\|Q) \ge 2\,\mathrm{TV}(P, Q)^2 = 2\xi^2$. If some constant $c > 2$ worked, $D_{\mathrm{KL}}(P\|Q) \ge c\,\mathrm{TV}(P, Q)^2$, the ratio $\mathrm{kl}(\frac12 + \xi\|\frac12)/(2\xi^2)$ would stay at least $c/2 > 1$ for all $\xi$, which contradicts the limit 1.
 
-**How fast.** kl is even in $\xi$ (swapping heads and tails maps $\xi$ to $-\xi$), so the $O(\xi^3)$ term is in fact zero; carrying the expansion one order further gives the ratio $1 + \frac23\xi^2 + O(\xi^4)$. @tbl-sol-divergences-pinsker shows it.
+**How fast.** kl is even in $\xi$ (swapping heads and tails maps $\xi$ to $-\xi$), so the $O(\xi^3)$ term is in fact zero; carrying the expansion one order further gives the ratio $1 + \frac23\xi^2 + O(\xi^4)$. @tbl-sol-div-pinsker shows it.
 
 | $\xi$ | 0.2 | 0.1 | 0.01 |
 | --- | --- | --- | --- |
 | $\mathrm{kl}(\frac12 + \xi\|\frac12)/(2\xi^2)$ | 1.0285 | 1.0068 | 1.0001 |
 | $1 + \frac23\xi^2$ | 1.0267 | 1.0067 | 1.0001 |
 
-: The ratio of the binary KL to Pinsker's lower bound $2\xi^2$, for a coin with bias $\frac12 + \xi$ against a fair coin. {#tbl-sol-divergences-pinsker}
+: The ratio of the binary KL to Pinsker's lower bound $2\xi^2$, for a coin with bias $\frac12 + \xi$ against a fair coin. {#tbl-sol-div-pinsker}
 
 *Near two fair coins, Pinsker's inequality is an equality to first order, so its constant cannot be improved.*
 :::
@@ -184,11 +184,11 @@ $$(\tfrac12 + \xi)(2\xi - 2\xi^2) = \xi - \xi^2 + 2\xi^2 + O(\xi^3), \qquad (\tf
 
 ::: {.callout-tip collapse="true" title="Solution"}
 1. **One flip.** $\mathrm{kl}(0.6\|0.5) = 0.6\ln\frac{0.6}{0.5} + 0.4\ln\frac{0.4}{0.5} = 0.6\ln1.2 + 0.4\ln0.8 = 0.02014$.
-2. **$n$ flips, by additivity** (@eq-kl-additive): $D_{\mathrm{KL}}(P^n\|Q^n) = 0.02014\,n$, where $P$ is the biased coin and $Q$ the fair one.
-3. **Pinsker** (@eq-pinsker): $\mathrm{TV}(P^n, Q^n) \le \sqrt{D_{\mathrm{KL}}(P^n\|Q^n)/2} = \sqrt{0.02014\,n/2}$.
+2. **$n$ flips, by additivity** (@eq-div-kl-additive): $D_{\mathrm{KL}}(P^n\|Q^n) = 0.02014\,n$, where $P$ is the biased coin and $Q$ the fair one.
+3. **Pinsker** (@eq-div-pinsker): $\mathrm{TV}(P^n, Q^n) \le \sqrt{D_{\mathrm{KL}}(P^n\|Q^n)/2} = \sqrt{0.02014\,n/2}$.
 4. **Require TV to reach 0.8.** That needs $\sqrt{0.02014\,n/2} \ge 0.8$, that is $n \ge 2\times0.8^2/0.02014 = 63.6$. Since $n$ is an integer, $n \ge 64$. The check value is right.
 
-**Lower or upper bound?** A **lower bound**. Pinsker caps the TV, so with fewer than 64 flips *no* test can reach TV 0.8. It does not say 64 flips are enough. The exact TV (computed on the number of heads, which is a sufficient statistic, so by the equality case of the DPI it has the same TV as the whole sequence) is only 0.5805 at $n = 64$, and first reaches 0.8 at $n = 162$. Pinsker is off by a factor of about 2.5 here, because it is tight only near TV $= 0$. Bretagnolle–Huber (@eq-bh) gives the weaker requirement $n \ge \ln\frac{1}{1 - 0.64}/0.02014$, that is $n \ge 51$: the KL that Pinsker needs for TV $= 0.8$ is $2\times0.8^2 = 1.28$, below the crossover 1.59 of @sec-div-pinsker, so Pinsker is the stronger of the two here.
+**Lower or upper bound?** A **lower bound**. Pinsker caps the TV, so with fewer than 64 flips *no* test can reach TV 0.8. It does not say 64 flips are enough. The exact TV (computed on the number of heads, which is a sufficient statistic, so by the equality case of the DPI it has the same TV as the whole sequence) is only 0.5805 at $n = 64$, and first reaches 0.8 at $n = 162$. Pinsker is off by a factor of about 2.5 here, because it is tight only near TV $= 0$. Bretagnolle–Huber (@eq-div-bh) gives the weaker requirement $n \ge \ln\frac{1}{1 - 0.64}/0.02014$, that is $n \ge 51$: the KL that Pinsker needs for TV $= 0.8$ is $2\times0.8^2 = 1.28$, below the crossover 1.59 of @sec-div-pinsker, so Pinsker is the stronger of the two here.
 
 *Pinsker turns "KL is small" into "no test can succeed yet", which is always a statement about necessary, not sufficient, sample sizes.*
 :::
@@ -200,9 +200,9 @@ $$(\tfrac12 + \xi)(2\xi - 2\xi^2) = \xi - \xi^2 + 2\xi^2 + O(\xi^3), \qquad (\tf
 ::: {.callout-tip collapse="true" title="Solution"}
 1. **The channel.** Let $K$ map $(x_1, \dots, x_{n+1})$ to $(x_1, \dots, x_n)$ with probability 1: $K(y\mid x) = \mathbf 1[y = (x_1, \dots, x_n)]$. It is a deterministic function, so a channel.
 2. **It maps $P^{n+1}$ to $P^n$.** $P^{n+1}K(x_1, \dots, x_n) = \sum_{x_{n+1}}p(x_1)\cdots p(x_n)\,p(x_{n+1}) = p(x_1)\cdots p(x_n)$, since $p$ sums to 1. The same for $Q$.
-3. **Apply the DPI.** TV is the f-divergence with $f(t) = \frac12\lvert t - 1\rvert$ (@tbl-div-f), so @sec-div-dpi gives $\mathrm{TV}(P^n, Q^n) = \mathrm{TV}(P^{n+1}K, Q^{n+1}K) \le \mathrm{TV}(P^{n+1}, Q^{n+1})$.
+3. **Apply the DPI.** TV is the f-divergence with $f(u) = \frac12\lvert u - 1\rvert$ (@tbl-div-f), so @thm-div-dpi gives $\mathrm{TV}(P^n, Q^n) = \mathrm{TV}(P^{n+1}K, Q^{n+1}K) \le \mathrm{TV}(P^{n+1}, Q^{n+1})$.
 
-You can also see it directly from the max form of @eq-tv: any event about the first $n$ samples is also an event about the first $n + 1$ (it ignores the last one), so the maximum over the larger family of events is at least as large.
+You can also see it directly from the max form of @eq-div-tv: any event about the first $n$ samples is also an event about the first $n + 1$ (it ignores the last one), so the maximum over the larger family of events is at least as large.
 
 **Concretely, with the coins of Exercise 7.** One flip: TV $= 0.6 - 0.5 = 0.1$. Two flips:
 
@@ -212,7 +212,7 @@ You can also see it directly from the max form of @eq-tv: any event about the fi
 | $q$ (fair) | 0.25 | 0.25 | 0.25 | 0.25 | 1 |
 | $(p - q)_+$ | 0.11 | 0 | 0 | 0 | 0.11 |
 
-: Total variation between two flips of a coin with heads probability 0.6 and two flips of a fair coin. {#tbl-sol-divergences-two-flips}
+: Total variation between two flips of a coin with heads probability 0.6 and two flips of a fair coin. {#tbl-sol-div-two-flips}
 
 So TV rises from 0.1000 to 0.1100. Further values are 0.1480 at $n = 3$, 0.1627 at $n = 4$, 0.3143 at $n = 16$, 0.5805 at $n = 64$ and 0.8930 at $n = 256$. The growth is slow and uneven (only 0.01 from one flip to two), but it never goes down.
 

@@ -17,7 +17,7 @@ Each case compares $\mu(\lambda)$ with $\lambda^{-c}$, as @eq-crypto-negligible 
 
 It is negligible only barely. Against $\lambda^{-10}$ it needs $\lambda > 2^{1024}$, and at $\lambda = 128$ it equals $128^{-\log_2 7} = 2^{-19.65}$, larger than the non-negligible $\lambda^{-10} = 2^{-70}$.
 
-**$2^{-(\log_2\lambda)^2}$: yes.** Write $2^{-(\log_2\lambda)^2} = (2^{\log_2\lambda})^{-\log_2\lambda} = \lambda^{-\log_2\lambda}$. This is example 2 of the chapter: it is below $\lambda^{-c}$ for all $\lambda > 2^c$.
+**$2^{-(\log_2\lambda)^2}$: yes.** Write $2^{-(\log_2\lambda)^2} = (2^{\log_2\lambda})^{-\log_2\lambda} = \lambda^{-\log_2\lambda}$. This is one of the chapter's negligible examples, and it is below $\lambda^{-c}$ for all $\lambda > 2^c$, because both sides are powers of $\lambda$ and $\log_2\lambda > c$ there.
 
 **$1/\lambda^{100}$: no.** Take $c = 101$. Then $\lambda^{-100} < \lambda^{-101}$ would need $\lambda < 1$, which never holds for $\lambda \ge 1$. One exponent $c$ that fails is enough.
 
@@ -32,30 +32,30 @@ It is negligible only barely. Against $\lambda^{-10}$ it needs $\lambda > 2^{102
 
 ## Hybrids for TV {#sec-sol-crypto-2}
 
-> **Exercise 2.** **Hybrids for TV.** Prove $\mathrm{TV}(P_0^{\otimes m}, P_1^{\otimes m}) \le m\,\mathrm{TV}(P_0, P_1)$ directly with the chain $H_i$ and Fact 3. Then show that for two coins the true value grows like $\sqrt m$ when $\mathrm{TV}(P_0, P_1)$ is small. *(Hybrid argument)*
+> **Exercise 2.** **Hybrids for TV.** Prove $\mathrm{TV}(P_0^{\otimes Q}, P_1^{\otimes Q}) \le Q\,\mathrm{TV}(P_0, P_1)$ directly with the chain $H_i$ and @lem-crypto-chain. Then show that for two coins the true value grows like $\sqrt Q$ when $\mathrm{TV}(P_0, P_1)$ is small. *(Hybrid argument)*
 
 ::: {.callout-tip collapse="true" title="Solution"}
-**The bound.** $\mathrm{TV}$ is the TV distance of Fact 2.
+**The bound.** The chapter's @eq-crypto-tv says that no distinguisher's advantage exceeds the TV distance, and the best unbounded distinguisher attains it.
 
-1. **Hybrids.** Let $H_i = (V_1, \dots, V_i, U_{i+1}, \dots, U_m)$: $m$ independent entries, the first $i$ drawn from $P_1$ and the rest from $P_0$. Then $H_0 = P_0^{\otimes m}$ and $H_m = P_1^{\otimes m}$.
-2. **Fix a distinguisher.** Let $\mathcal A$ be any distinguisher on $m$-tuples, randomized or not, with no limit on its running time.
-3. **One step changes one entry.** $H_{i-1}$ and $H_i$ differ only in entry $i$: $P_0$ in $H_{i-1}$, $P_1$ in $H_i$. The other $m - 1$ entries have the same distribution in both, and are independent of entry $i$. Condition on their values $w$. Then $\mathcal A(\dots)$ becomes a distinguisher $\mathcal \mathcal A_w$ that sees only entry $i$, so by Fact 2
-$$\big|\Pr[\mathcal A(H_{i-1}) = 1 \mid w] - \Pr[\mathcal A(H_i) = 1 \mid w]\big| = \mathrm{Adv}_{\mathcal \mathcal A_w}(P_0, P_1) \le \mathrm{TV}(P_0, P_1).$$
+1. **Hybrids.** Let $H_i = (V_1, \dots, V_i, U_{i+1}, \dots, U_Q)$: $Q$ independent entries, the first $i$ drawn from $P_1$ and the rest from $P_0$. Then $H_0 = P_0^{\otimes Q}$ and $H_Q = P_1^{\otimes Q}$.
+2. **Fix a distinguisher.** Let $\mathcal A$ be any distinguisher on $Q$-tuples, randomized or not, with no limit on its running time.
+3. **One step changes one entry.** $H_{i-1}$ and $H_i$ differ only in entry $i$: $P_0$ in $H_{i-1}$, $P_1$ in $H_i$. The other $Q - 1$ entries have the same distribution in both, and are independent of entry $i$. Condition on their values $w$. Then $\mathcal A(\dots)$ becomes a distinguisher $\mathcal A_w$ that sees only entry $i$, so by @eq-crypto-tv
+$$\big|\Pr[\mathcal A(H_{i-1}) = 1 \mid w] - \Pr[\mathcal A(H_i) = 1 \mid w]\big| = \mathrm{Adv}_{\mathcal A_w}(P_0, P_1) \le \mathrm{TV}(P_0, P_1).$$
 4. **Average over $w$.** The two conditional probabilities are averaged with the same weights in both hybrids, so the triangle inequality gives $\mathrm{Adv}_{\mathcal A}(H_{i-1}, H_i) \le \mathrm{TV}(P_0, P_1)$.
-5. **Chain.** By Fact 3, $\mathrm{Adv}_{\mathcal A}(H_0, H_m) \le \sum_{i=1}^m\mathrm{Adv}_{\mathcal A}(H_{i-1}, H_i) \le m\,\mathrm{TV}(P_0, P_1)$.
-6. **Take the best $\mathcal A$.** By Fact 2 the best unbounded distinguisher attains $\mathrm{TV}(H_0, H_m)$. Step 5 holds for it too, so $\mathrm{TV}(P_0^{\otimes m}, P_1^{\otimes m}) \le m\,\mathrm{TV}(P_0, P_1)$.
+5. **Chain.** By @lem-crypto-chain, $\mathrm{Adv}_{\mathcal A}(H_0, H_Q) \le \sum_{i=1}^Q\mathrm{Adv}_{\mathcal A}(H_{i-1}, H_i) \le Q\,\mathrm{TV}(P_0, P_1)$.
+6. **Take the best $\mathcal A$.** The best unbounded distinguisher attains $\mathrm{TV}(H_0, H_Q)$. Step 5 holds for it too, so $\mathrm{TV}(P_0^{\otimes Q}, P_1^{\otimes Q}) \le Q\,\mathrm{TV}(P_0, P_1)$.
 
-**The true growth for two coins.** Let $P_0$ be a coin with heads probability $\frac12 + \xi$ and $P_1$ a fair coin, so $\mathrm{TV}(P_0, P_1) = \xi$.
+**The true growth for two coins.** As in the chapter's running example, let $P_0$ be a fair coin and $P_1$ a coin with heads probability $\frac12 + \xi$, so $\mathrm{TV}(P_0, P_1) = \xi$.
 
-1. **Only the count matters.** A sequence $\omega$ with $k$ heads has $P_0^{\otimes m}(\omega) = (\frac12 + \xi)^k(\frac12 - \xi)^{m - k}$ and $P_1^{\otimes m}(\omega) = 2^{-m}$, which depend on $\omega$ only through $k$. In $\mathrm{TV} = \frac12\sum_\omega|P_0^{\otimes m}(\omega) - P_1^{\otimes m}(\omega)|$ (@eq-tv), group the $\binom mk$ sequences with $k$ heads. Each group contributes $\frac12|\mathrm{Bin}(m, \frac12 + \xi)(k) - \mathrm{Bin}(m, \frac12)(k)|$, so the TV distance between the tuples equals the TV distance between the two head counts.
-2. **Normal approximation.** The biased count has mean $\frac m2 + m\xi$ and variance $m(\frac14 - \xi^2) \approx \frac m4$. The fair count has mean $\frac m2$ and variance $\frac m4$. For large $m$ both are close to normal with standard deviation $\sigma = \sqrt m/2$.
-3. **TV between two normals.** In [Divergences](../../book-full/part01-prerequisites/03-divergences.md), two normals with the same $\sigma$ and means $s$ apart have $\mathrm{TV} = 2\Phi(\mu/2) - 1$ with $\mu = s/\sigma$. Here $s = m\xi$, so $\mu/2 = m\xi/\sqrt m = \xi\sqrt m$ and
-$$\mathrm{TV}(P_0^{\otimes m}, P_1^{\otimes m}) \approx 2\Phi(\xi\sqrt m) - 1.$$
-4. **Small argument.** Near 0, $\Phi(x) \approx \frac12 + x\varphi(0)$ with $\varphi(0) = 1/\sqrt{2\pi}$. So while $\xi\sqrt m$ is small, $\mathrm{TV} \approx \sqrt{2/\pi}\,\xi\sqrt m \approx 0.80\,\xi\sqrt m$: it grows like $\sqrt m$, not like $m$.
+1. **Only the count matters.** A sequence $\omega$ with $k$ heads has $P_1^{\otimes Q}(\omega) = (\frac12 + \xi)^k(\frac12 - \xi)^{Q - k}$ and $P_0^{\otimes Q}(\omega) = 2^{-Q}$, which depend on $\omega$ only through $k$. In $\mathrm{TV} = \frac12\sum_\omega|P_0^{\otimes Q}(\omega) - P_1^{\otimes Q}(\omega)|$ (@eq-div-tv), group the $\binom Qk$ sequences with $k$ heads. Each group contributes $\frac12|\mathrm{Bin}(Q, \frac12 + \xi)(k) - \mathrm{Bin}(Q, \frac12)(k)|$, so the TV distance between the tuples equals the TV distance between the two head counts.
+2. **Normal approximation.** The biased count has mean $\frac Q2 + Q\xi$ and variance $Q(\frac14 - \xi^2) \approx \frac Q4$. The fair count has mean $\frac Q2$ and variance $\frac Q4$. For large $Q$ both are close to normal with standard deviation $\sigma = \sqrt Q/2$.
+3. **TV between two normals.** In [Divergences](../../book-full/part01-prerequisites/03-divergences.md), two normals with the same $\sigma$ and means $s$ apart have $\mathrm{TV} = 2\Phi(\mu/2) - 1$ with $\mu = s/\sigma$. Here $s = Q\xi$, so $\mu/2 = Q\xi/\sqrt Q = \xi\sqrt Q$ and
+$$\mathrm{TV}(P_0^{\otimes Q}, P_1^{\otimes Q}) \approx 2\Phi(\xi\sqrt Q) - 1.$$
+4. **Small argument.** Near 0, $\Phi(x) \approx \frac12 + x\varphi(0)$ with $\varphi(0) = 1/\sqrt{2\pi}$. So while $\xi\sqrt Q$ is small, $\mathrm{TV} \approx \sqrt{2/\pi}\,\xi\sqrt Q \approx 0.80\,\xi\sqrt Q$: it grows like $\sqrt Q$, not like $Q$.
 
-@tbl-sol-crypto-basics-tv compares the exact TV distance with both approximations and with the hybrid bound, for $\xi = 0.01$.
+@tbl-sol-crypto-tv compares the exact TV distance with both approximations and with the hybrid bound, for $\xi = 0.01$.
 
-| Flips $m$ | Exact TV | $2\Phi(\xi\sqrt m) - 1$ | $\sqrt{2/\pi}\,\xi\sqrt m$ | Hybrid bound $\min(1, m\xi)$ |
+| Flips $Q$ | Exact TV | $2\Phi(\xi\sqrt Q) - 1$ | $\sqrt{2/\pi}\,\xi\sqrt Q$ | Hybrid bound $\min(1, Q\xi)$ |
 | --- | --- | --- | --- | --- |
 | 1 | 0.0100 | 0.0080 | 0.0080 | 0.0100 |
 | 100 | 0.0799 | 0.0797 | 0.0798 | 1.0000 |
@@ -63,31 +63,31 @@ $$\mathrm{TV}(P_0^{\otimes m}, P_1^{\otimes m}) \approx 2\Phi(\xi\sqrt m) - 1.$$
 | 2,500 | 0.3830 | 0.3829 | 0.3989 | 1.0000 |
 | 10,000 | 0.6827 | 0.6827 | 0.7979 | 1.0000 |
 
-: TV distance between $m$ flips of a $0.51$-coin and $m$ fair flips: exact, the normal approximation, its small-argument form, and the hybrid bound. {#tbl-sol-crypto-basics-tv}
+: TV distance between $Q$ flips of a $0.51$-coin and $Q$ fair flips: exact, the normal approximation, its small-argument form, and the hybrid bound. {#tbl-sol-crypto-tv}
 
-Each fourfold increase in $m$ (100 to 400) doubles the TV distance, as $\sqrt m$ predicts. The normal approximation is poor only at $m = 1$, where the count is a single coin flip and the bound $m\xi$ is exact. The linear form overshoots once $\xi\sqrt m$ is no longer small, because $2\Phi(x) - 1$ bends over towards 1.
+Each fourfold increase in $Q$ (100 to 400) doubles the TV distance, as $\sqrt Q$ predicts. The normal approximation is poor only at $Q = 1$, where the count is a single coin flip and the bound $Q\xi$ is exact. The linear form overshoots once $\xi\sqrt Q$ is no longer small, because $2\Phi(x) - 1$ bends over towards 1.
 
-*The hybrid bound is tight for one sample and loose by a factor of order $\sqrt m$ afterwards, because the per-step losses in Fact 3 do not add up in the same direction.*
+*The hybrid bound is tight for one sample and loose by a factor of order $\sqrt Q$ afterwards, because the per-step losses in @lem-crypto-chain do not add up in the same direction.*
 :::
 
 ## The best threshold {#sec-sol-crypto-3}
 
-> **Exercise 3.** **The best threshold.** For $m$ flips of a $(\frac12 + \xi)$-coin against a fair coin, show that the likelihood ratio is increasing in the number of heads, so the best test is a threshold, and find where the two binomial probabilities cross. *Check: about $m/2 + m\xi/2$; for $m = 10{,}000$ and $\xi = 0.01$ the best advantage is 0.683.* *(Distinguishers and TV)*
+> **Exercise 3.** **The best threshold.** For $Q$ flips of a $(\frac12 + \xi)$-coin against a fair coin, show that the likelihood ratio is increasing in the number of heads, so the best test is a threshold, and find where the two binomial probabilities cross. *Check: about $Q/2 + Q\xi/2$; for $Q = 10{,}000$ and $\xi = 0.01$ the best advantage is 0.683.* *(Distinguishers and TV)*
 
 ::: {.callout-tip collapse="true" title="Solution"}
 1. **Likelihood ratio.** For a sequence with $k$ heads, divide the two probabilities from Exercise 2:
-$$L(k) = \frac{(\frac12 + \xi)^k(\frac12 - \xi)^{m - k}}{2^{-m}} = (1 + 2\xi)^k(1 - 2\xi)^{m - k}.$$
+$$L(k) = \frac{(\frac12 + \xi)^k(\frac12 - \xi)^{Q - k}}{2^{-Q}} = (1 + 2\xi)^k(1 - 2\xi)^{Q - k}.$$
 2. **It increases in $k$.** One more head multiplies it by $L(k + 1)/L(k) = (1 + 2\xi)/(1 - 2\xi) > 1$ for $\xi > 0$.
-3. **The best test is a threshold.** By Fact 2, the best distinguisher outputs 1 exactly where the biased coin's probability is larger, that is where $L(k) > 1$. Since $L$ increases, this set is $\{k > k^*\}$ for the $k^*$ with $L(k^*) = 1$.
-4. **Where the binomials cross.** The binomial probabilities are $\binom mk$ times the sequence probabilities. The factor $\binom mk$ is the same for both, so they cross at the same $k^*$. Take logarithms of $L(k^*) = 1$:
-$$k^*\ln(1 + 2\xi) + (m - k^*)\ln(1 - 2\xi) = 0 \quad\Longrightarrow\quad k^* = m\,\frac{-\ln(1 - 2\xi)}{\ln(1 + 2\xi) - \ln(1 - 2\xi)}.$$
+3. **The best test is a threshold.** As the chapter recalls before @eq-crypto-tv, the best distinguisher outputs 1 exactly where the biased coin's probability is larger, that is where $L(k) > 1$. Since $L$ increases, this set is $\{k > k^*\}$ for the $k^*$ with $L(k^*) = 1$.
+4. **Where the binomials cross.** The binomial probabilities are $\binom Qk$ times the sequence probabilities. The factor $\binom Qk$ is the same for both, so they cross at the same $k^*$. Take logarithms of $L(k^*) = 1$:
+$$k^*\ln(1 + 2\xi) + (Q - k^*)\ln(1 - 2\xi) = 0 \quad\Longrightarrow\quad k^* = Q\,\frac{-\ln(1 - 2\xi)}{\ln(1 + 2\xi) - \ln(1 - 2\xi)}.$$
 5. **Expand for small $\xi$.** With $u = 2\xi$, $-\ln(1 - u) = u + \frac{u^2}2 + \frac{u^3}3 + \dots$ and $\ln(1 + u) - \ln(1 - u) = 2u + \frac{2u^3}3 + \dots$. The ratio is
 $$\frac{1 + \frac u2 + \frac{u^2}3}{2(1 + \frac{u^2}3)} = \frac12 + \frac u4 + O(u^3) = \frac12 + \frac\xi2 + O(\xi^3).$$
-So $k^* = \frac m2 + \frac{m\xi}2 + O(m\xi^3)$: halfway between the fair mean $\frac m2$ and the biased mean $\frac m2 + m\xi$.
-6. **The numbers.** For $m = 10{,}000$ and $\xi = 0.01$, the exact crossing is $k^* = 5050.0033$, against $m/2 + m\xi/2 = 5050$. The test "output 1 iff $k > k^*$" has advantage 0.6827, equal to the exact TV distance 0.6827, which rounds to the check value 0.683.
-7. **Normal check.** The threshold sits $\frac{m\xi}2 = 50 = 1\cdot\sigma$ from each mean ($\sigma = \sqrt m/2 = 50$). So the advantage is about $\Phi(1) - (1 - \Phi(1)) = 2\Phi(1) - 1 = 0.6827$.
+So $k^* = \frac Q2 + \frac{Q\xi}2 + O(Q\xi^3)$: halfway between the fair mean $\frac Q2$ and the biased mean $\frac Q2 + Q\xi$.
+6. **The numbers.** For $Q = 10{,}000$ and $\xi = 0.01$, the exact crossing is $k^* = 5050.0033$, against $Q/2 + Q\xi/2 = 5050$. The test "output 1 iff $k > k^*$" has advantage 0.6827, equal to the exact TV distance 0.6827, which rounds to the check value 0.683.
+7. **Normal check.** The threshold sits $\frac{Q\xi}2 = 50 = 1\cdot\sigma$ from each mean ($\sigma = \sqrt Q/2 = 50$). So the advantage is about $\Phi(1) - (1 - \Phi(1)) = 2\Phi(1) - 1 = 0.6827$.
 
-Majority vote is the threshold at $\frac m2$ instead of $k^*$. Its exact advantage is 0.4807, which matches the 0.481 simulated in @tbl-crypto-coin-hybrid. The fair count lands above $\frac m2$ almost half the time, so moving the threshold up by one standard deviation gains a lot.
+Majority vote is the threshold at $\frac Q2$ instead of $k^*$. Its exact advantage is 0.4807, which matches the 0.481 simulated in @tbl-crypto-coin-hybrid. The fair count lands above $\frac Q2$ almost half the time, so moving the threshold up by one standard deviation gains a lot.
 
 *The best distinguisher is a likelihood-ratio test, and for coins that test is a threshold on the head count, placed midway between the two means.*
 :::
@@ -116,25 +116,25 @@ So about 77,000 identifiers, in agreement with the check. A table of 100,000 rec
 ::: {.callout-tip collapse="true" title="Solution"}
 **What the eavesdropper learns.**
 
-1. It sees $c_1 = m_1 \oplus K$ and $c_2 = m_2 \oplus K$, byte by byte.
-2. Combine them with $\oplus$. Since $K \oplus K = 0$, $c_1 \oplus c_2 = m_1 \oplus m_2$. The pad cancels.
-3. That is all it learns. By Fact 4, $c_1$ alone is uniform whatever $m_1$ is. Given $c_1$, the second ciphertext is $c_2 = c_1 \oplus (m_1 \oplus m_2)$, fixed. So the pair is $(U, U \oplus (m_1 \oplus m_2))$ with $U$ uniform. A simulator that receives $L = m_1 \oplus m_2$ outputs exactly this distribution, so by @eq-crypto-simulation the pair reveals nothing beyond $m_1 \oplus m_2$.
+1. It sees $y_1 = m_1 \oplus K$ and $y_2 = m_2 \oplus K$, byte by byte.
+2. Combine them with $\oplus$. Since $K \oplus K = 0$, $y_1 \oplus y_2 = m_1 \oplus m_2$. The pad cancels.
+3. That is all it learns. By @lem-crypto-bijection, $y_1$ alone is uniform whatever $m_1$ is. Given $y_1$, the second ciphertext is $y_2 = y_1 \oplus (m_1 \oplus m_2)$, fixed. So the pair is $(U, U \oplus (m_1 \oplus m_2))$ with $U$ uniform. A simulator that receives $L = m_1 \oplus m_2$ outputs exactly this distribution, so by @eq-crypto-simulation the pair reveals nothing beyond $m_1 \oplus m_2$.
 
 But $m_1 \oplus m_2$ is a lot. Perfect secrecy needed a fresh uniform key per message. With the pad reused, the "key" of the second message is the first message, which is English text and far from uniform.
 
-**Why a guessed word reveals the other message.** Suppose you guess that $m_1$ contains the word $w$ at position $j$. Combine $w$ with $c_1 \oplus c_2$ at that position:
-$$(c_1 \oplus c_2)[j..] \oplus w = m_1[j..] \oplus m_2[j..] \oplus w = m_2[j..] \quad\text{if } m_1[j..] = w.$$
+**Why a guessed word reveals the other message.** Suppose you guess that $m_1$ contains the word $w$ at position $j$. Combine $w$ with $y_1 \oplus y_2$ at that position:
+$$(y_1 \oplus y_2)[j..] \oplus w = m_1[j..] \oplus m_2[j..] \oplus w = m_2[j..] \quad\text{if } m_1[j..] = w.$$
 If the guess is right, you read the other message at the same position. If it is wrong, you get $m_2 \oplus m_1 \oplus w$, which is usually gibberish. You slide the guess along every position (**crib dragging**) and keep the positions where readable text comes out. The guess works in both directions: if $w$ is in $m_2$ instead, the same step reveals $m_1$.
 
-The script does this with $m_1$ set to "meet me at the north gate" and $m_2$ to "the password is blue fish", both encrypted under one random pad, and the guess "the " (with its trailing space). Only three positions give lowercase letters and spaces; @tbl-sol-crypto-basics-crib lists them.
+The script does this with $m_1$ set to "meet me at the north gate" and $m_2$ to "the password is blue fish", both encrypted under one random pad, and the guess "the " (with its trailing space). Only three positions give lowercase letters and spaces; @tbl-sol-crypto-crib lists them.
 
-| Position $j$ | $(c_1 \oplus c_2)[j..] \oplus$ "the " | Explanation |
+| Position $j$ | $(y_1 \oplus y_2)[j..] \oplus$ "the " | Explanation |
 | --- | --- | --- |
 | 0 | "meet" | $m_2$ starts with "the ", so this is $m_1$ |
 | 11 | "d is" | $m_1$ has "the " at 11, so this is $m_2$ ("passwor**d is**") |
 | 17 | "jih " | neither message has "the " here: a false alarm |
 
-: Crib dragging the guess "the " across $c_1 \oplus c_2$ for two 25-byte messages under one pad (seed 0). {#tbl-sol-crypto-basics-crib}
+: Crib dragging the guess "the " across $y_1 \oplus y_2$ for two 25-byte messages under one pad (seed 0). {#tbl-sol-crypto-crib}
 
 From "d is" an attacker guesses "password is" and extends both messages a few letters at a time. The false alarm at 17 dies as soon as it is extended, because "jih" does not continue into English.
 
@@ -143,7 +143,7 @@ From "d is" an attacker guesses "password is" and extends both messages a few le
 
 ## Toy GGM {#sec-sol-crypto-6}
 
-> **Exercise 6.** **Toy GGM.** Implement the GGM tree with SHA-256 as a length-doubling generator ($G_0(s) = \mathrm{SHA256}(s\,\|\,0)$, $G_1(s) = \mathrm{SHA256}(s\,\|\,1)$). How many generator calls does one evaluation on $n$-bit inputs cost, and what does the proof lose? *Check: $n$ calls; the loss factor is $nq$.* *(PRFs)*
+> **Exercise 6.** **Toy GGM.** Implement the GGM tree with SHA-256 as a length-doubling generator ($G_0(u) = \mathrm{SHA256}(u\,\|\,0)$, $G_1(u) = \mathrm{SHA256}(u\,\|\,1)$). How many generator calls does one evaluation on $n$-bit inputs cost, and what does the proof lose? *Check: $n$ calls; the loss factor is $nQ$.* *(PRFs)*
 
 ::: {.callout-tip collapse="true" title="Solution"}
 **Implementation.** A seed is 32 bytes and each half $G_b$ returns 32 bytes, so $G = G_0\,\|\,G_1$ maps 32 bytes to 64: a length-doubling pseudorandom generator (PRG), in the toy model where the hash is treated as one. The tree walk is three lines:
@@ -158,15 +158,11 @@ def ggm_eval(gen: CountingGenerator, key: bytes, bits: list[int]) -> bytes:
 
 **Cost.** The walk visits one node per level and computes only the half $G_{x_i}$ it follows. So one evaluation costs $n$ generator calls (one hash each). The script counts them: on $n = 8$ bits, each evaluation makes 8 calls. Evaluating all 256 inputs gives 256 distinct outputs, with a fraction 0.5001 of 1 bits, and re-evaluating an input gives the same output, as a function must.
 
-**What the proof loses.** Follow the proof sketch in the chapter:
+**What the proof loses.** By @thm-crypto-ggm, $\mathrm{Adv}_{\mathrm{PRF}} \le nQ\cdot\mathrm{Adv}_{\mathrm{PRG}}$, a loss factor $nQ$: one factor $Q$ per level from @thm-crypto-hybrid, and $n$ levels added by @lem-crypto-chain.
 
-1. There are $n + 1$ hybrids $H_0, \dots, H_n$, where $H_j$ makes every node at depth $j$ uniform. $H_0$ is $F_k$ and $H_n$ is a random function.
-2. A $Q$-query adversary touches at most $Q$ nodes at each depth. Telling $H_{j-1}$ from $H_j$ is telling $Q$ outputs of $G$ from $Q$ uniform strings, which by the hybrid lemma costs at most $Q\cdot\mathrm{Adv}_{\mathrm{PRG}}$.
-3. Summing the $n$ steps with Fact 3 gives $\mathrm{Adv}_{\mathrm{PRF}} \le nq\cdot\mathrm{Adv}_{\mathrm{PRG}}$: a loss factor $nq$.
+Concretely, with $n = 128$ input bits and $Q = 2^{40}$ queries, $nQ = 2^7\cdot2^{40} = 2^{47}$. For a PRF advantage of at most $2^{-64}$ the generator must have advantage at most $2^{-111}$: the reduction costs 47 bits of security.
 
-Concretely, with $n = 128$ input bits and $Q = 2^{40}$ queries, $nq = 2^7\cdot2^{40} = 2^{47}$. For a PRF advantage of at most $2^{-64}$ the generator must have advantage at most $2^{-111}$: the reduction costs 47 bits of security.
-
-*The GGM tree turns any length-doubling generator into a PRF at $n$ generator calls per input, but the reduction is loose by $nq$, so the generator needs a large security margin.*
+*The GGM tree turns any length-doubling generator into a PRF at $n$ generator calls per input, but the reduction is loose by $nQ$, so the generator needs a large security margin.*
 :::
 
 ## Threshold sharing {#sec-sol-crypto-7}
@@ -180,10 +176,10 @@ Holders are numbered $i = 1, 2, 3$, and $p > 3$ so that these are distinct and n
 
 1. Fix the secret $x$ and a holder $i$. The share $s_i = x + ci \bmod p$ is a function of the randomness $c$ alone.
 2. Because $p$ is prime and $i \ne 0 \bmod p$, $i$ has an inverse mod $p$. For any value $y$, the equation $x + ci = y$ has exactly one solution, $c = (y - x)\,i^{-1}$.
-3. So $c \mapsto x + ci$ is a bijection of $\mathbb Z_p$, and by Fact 4 the share is uniform: each value has probability $1/p$, whatever $x$ is.
+3. So $c \mapsto x + ci$ is a bijection of $\mathbb Z_p$, and by @lem-crypto-bijection the share is uniform: each value has probability $1/p$, whatever $x$ is.
 4. The simulator for one holder, with no leakage, outputs a uniform element of $\mathbb Z_p$, and @eq-crypto-simulation holds with $\equiv$.
 
-@tbl-sol-crypto-basics-shamir walks the count for $p = 5$ and $x = 2$: each holder's column is a permutation of $\mathbb Z_5$.
+@tbl-sol-crypto-shamir walks the count for $p = 5$ and $x = 2$: each holder's column is a permutation of $\mathbb Z_5$.
 
 | $c$ | $s_1 = 2 + c$ | $s_2 = 2 + 2c$ | $s_3 = 2 + 3c$ |
 | --- | --- | --- | --- |
@@ -193,7 +189,7 @@ Holders are numbered $i = 1, 2, 3$, and $p > 3$ so that these are distinct and n
 | 3 | 0 | 3 | 1 |
 | 4 | 1 | 0 | 4 |
 
-: Shamir 2-out-of-3 shares of $x = 2$ in $\mathbb Z_5$. Each column contains every value once, so each single share is uniform. {#tbl-sol-crypto-basics-shamir}
+: Shamir 2-out-of-3 shares of $x = 2$ in $\mathbb Z_5$. Each column contains every value once, so each single share is uniform. {#tbl-sol-crypto-shamir}
 
 **Any two shares determine $x$.**
 
@@ -252,7 +248,7 @@ The first term is the correct encoding of the parity. The second is an extra err
 $$\mathbb E\lfloor w/2\rfloor = \frac{\mathbb E w - \Pr[w \text{ odd}]}{2} = \frac{k - 1}4, \qquad \text{drift} = -\frac{k - 1}4.$$
 This is the "about $-k/4$" of the exercise, exact up to the $\frac14$.
 
-**Measurement.** The script repeats the addition experiment with the prime $p = 4093$ (the largest prime below 4096), errors uniform on $\{-32, \dots, 32\}$, $d = 4$ and 20,000 trials. It computes the drift as $v - \sum_i e_i - (w \bmod 2)t$, centred in $(-p/2, p/2]$, and also reruns $p = 4096$ for comparison. The normal approximation for the odd modulus shifts the mean of the summed error by the predicted drift. @tbl-sol-crypto-basics-odd has the results.
+**Measurement.** The script repeats the addition experiment with the prime $p = 4093$ (the largest prime below 4096), errors uniform on $\{-32, \dots, 32\}$, $d = 4$ and 20,000 trials. It computes the drift as $v - \sum_i e_i - (w \bmod 2)t$, centred in $(-p/2, p/2]$, and also reruns $p = 4096$ for comparison. The normal approximation for the odd modulus shifts the mean of the summed error by the predicted drift. @tbl-sol-crypto-odd has the results.
 
 | $k$ | Drift, $p = 4093$ | Predicted $-(k-1)/4$ | Failure, $p = 4093$ | Normal approximation with drift | Failure, $p = 4096$ |
 | --- | --- | --- | --- | --- | --- |
@@ -262,7 +258,7 @@ This is the "about $-k/4$" of the exercise, exact up to the $\frac14$.
 | 1,024 | $-255.81$ | $-255.75$ | 0.1167 | 0.1171 | 0.0873 |
 | 4,096 | $-1023.82$ | $-1023.75$ | 0.5007 | 0.5001 | 0.3780 |
 
-: Sums of $k$ Regev ciphertexts with the odd modulus $p = 4093$ and encoding $\lfloor p/2\rfloor$, against the even modulus $p = 4096$ (errors uniform on $\{-32, \dots, 32\}$, seed 0, 20,000 trials). {#tbl-sol-crypto-basics-odd}
+: Sums of $k$ Regev ciphertexts with the odd modulus $p = 4093$ and encoding $\lfloor p/2\rfloor$, against the even modulus $p = 4096$ (errors uniform on $\{-32, \dots, 32\}$, seed 0, 20,000 trials). {#tbl-sol-crypto-odd}
 
 - **The drift matches the prediction** to within 0.1 at every $k$. With the even modulus it is exactly 0.
 - **It costs correctness.** The drift grows like $k$, the random part only like $\sqrt k$. At $k = 1024$ the drift ($-256$) is already 0.43 standard deviations of the random part ($\sqrt{352\cdot1024} = 600$), and the failure rate rises from 0.0873 to 0.1167. At $k = 4096$ the drift reaches $-p/4$ by itself, and decryption is a coin flip.

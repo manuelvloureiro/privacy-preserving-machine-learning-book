@@ -1,151 +1,95 @@
 # Property inference
 
-## Why this matters
+A hospital trains a readmission model on its 1,000 patients and shares it with a research partner. Suppose you have checked that no attack on the model can tell, much better than a coin flip, whether any one patient was in the training set. The partner can still learn whether 45% or 55% of the hospital's patients are over 65, and be right almost every time. That secret is not about a record. It is a **property** of the training set as a whole, a statistic of the dataset such as the fraction of records that belong to some subgroup. **Property inference** is the attack that recovers such a statistic from a trained model. Ateniese et al. (2015) introduced it, and Ganju et al. (2018) carried it to neural networks.
 
-A hospital trains a readmission model on its 1,000 patients and shares it with a research partner. Suppose you have checked that no attack on the model can tell, much better than a coin flip, whether any one patient was in the training set. The partner can still learn whether 45% or 55% of the hospital's patients are over 65, and be right almost every time. A company that shares a fraud model may reveal the share of its customers in a market it has not announced. A model trained on a lab's machines may reveal whether those machines had been patched. None of these secrets is about a record. Each is a **property** of the training set as a whole: a statistic $t(D)$ of the dataset $D$, such as the fraction of records that belong to some subgroup.
+This chapter asks how well an attacker can learn a property from a model, and why it can learn a property when it cannot learn a record. The one idea is that a model behaves like a noisy average over its $n$ records. Changing one record moves an average by about $1/n$, while the randomness of which records were sampled moves it by about $1/\sqrt n$, the usual error of an average, so a single record is lost in the noise. A property is different, because raising the subgroup's share from one value $t_0$ to another value $t_1$ changes about $n|t_1 - t_0|$ records at once. Each moves the average by about $1/n$, so together they move it by about the gap $|t_1 - t_0|$, which does not shrink with $n$. Divided by the noise $1/\sqrt n$, the signal is about $\sqrt n\,|t_1 - t_0|$. So property inference gets easier with more data, while membership inference gets harder.
 
-**Property inference** is the attack that recovers such a statistic from a trained model. Ateniese et al. (2015) introduced it. In their examples, the attacker learned whether a speech recognizer had been trained on speakers with a particular accent, and whether a network-traffic classifier had seen a particular kind of traffic. Ganju et al. (2018) carried the attack to fully connected neural networks, and showed that the attacker must first deal with a nuisance: the same network can be written with its hidden units in any order.
+The running example is the hospital, whose records state each patient's age group. An attacker's **advantage** is how much more often it answers "55%" when that is right than when it is wrong. At $n = 1{,}000$, no attacker on any model trained on these records has advantage above 0.9985, and simply publishing the number of patients over 65 reaches that ceiling. On the same published number, the best attacker asking whether one patient took part has advantage 0.0126. Models trained on a synthetic population then show the practical attack. @tbl-prop-symbols lists the symbols, each defined where it first appears.
 
-This chapter works through four questions, each building on the one before. It starts by writing the attack as a game, because only then can you ask what the most any attacker can win is. With that ceiling in hand, it explains why a property leaks when no single record does, and why the leak grows with the size of the dataset. Real models have no formula for their distribution, so it then shows how a practical attacker builds its test by training models of its own, and predicts how well that test does. Finally it turns to neural networks, whose raw weights hide the property from a simple attacker, and finds the representation that brings it back.
-
-### The one idea: a model is a noisy statistic, and a property moves it further than any record does
-
-A trained model $\theta$ is a function of its training set, plus training noise. Think of it as an average over the $n$ records. Changing one record out of $n$ moves an average by about $1/n$. The randomness of which records were sampled moves it by about $1/\sqrt n$, the usual size of the error of an average. Since $1/n$ is much smaller than $1/\sqrt n$ when $n$ is large, a single record is lost in the noise. That is why membership inference gets *harder* with more data.
-
-A property is different. Raising the subgroup's share from $t_0$ to $t_1$ changes about $n|t_1 - t_0|$ records at once. Each moves the average by about $1/n$, so together they move $\theta$ by an amount proportional to $|t_1 - t_0|$ that does not shrink with $n$. Against noise of size $1/\sqrt n$, the signal-to-noise ratio is about $|t_1 - t_0|/(1/\sqrt n) = \sqrt n\,|t_1 - t_0|$, so property inference gets *easier* with more data.
-
-Everything else in this chapter is that argument made precise. The attack is a [hypothesis test](../part01-prerequisites/04-hypothesis-testing.md) that decides whether the model was trained under $t_0$ or under $t_1$, and the attacker approximates the best such test by training models of its own. @tbl-prop-uses lists the results.
-
-| Result | Where it is used |
+| Symbol | Meaning |
 | --- | --- |
-| The property game; advantage at most the total variation (TV) distance between the models, and between the datasets | Stating what a property attack achieves and what no attack can exceed |
-| Membership advantage $\approx 1/\sqrt n$, property advantage $\to 1$ for the same released count | Why protecting records does not protect properties |
-| Trained parameters $\approx \mathcal N(\theta(t), \Sigma_1/n)$; best accuracy $\Phi(\kappa\sqrt n\,\lvert t_1 - t_0\rvert/2)$ | Predicting an attack's accuracy from the model and the data; the $\sqrt n\,\lvert t_1 - t_0\rvert$ scaling law |
-| Shadow models and a linear meta-classifier | The practical attack, when the law of $\theta$ is unknown |
-| Hidden-unit symmetries; invariant representations | Attacking neural networks through their weights or through their outputs |
+| $\mathcal D_t$; $t_0$, $t_1$, $\bar t$ | population with subgroup share $t$; the two candidate shares; their midpoint |
+| $D \sim \mathcal D_t^n$; $S$ | dataset of $n$ records; its number of subgroup records |
+| $\mathcal T$; $\theta$; $P_{n,t}$ | training algorithm; trained parameters; their distribution |
+| $\theta(t)$; $\Sigma_1(t)$ | population fit; its noise covariance per record |
+| $\gamma$; $\kappa$ | separation of two Gaussians in standard deviations; its rate in $\sqrt n\,\lvert t_1 - t_0\rvert$ |
+| $\Phi$ | standard normal distribution function |
+| $h$; $u_j$; $g$ | hidden units; parameters of unit $j$; a symmetry of the units |
 
-: The results of this chapter and where each is used. {#tbl-prop-uses}
-
-**What this chapter assumes.** Every tool the derivations need is restated where it is used, so you can read this chapter on its own. For more detail: the game view, the advantage (how much more often an attack says 1 when the answer is 1 than when it is 0) and the fact that processing the view cannot help the attacker are in [Threat models and privacy games](01-threat-models.md). Shadow models first appear in [Membership inference](02-membership-inference.md). The TV distance, the data processing inequality and sufficient statistics are in [Divergences](../part01-prerequisites/03-divergences.md). The Neyman–Pearson lemma and the Gaussian trade-off curve are in [Hypothesis testing](../part01-prerequisites/04-hypothesis-testing.md). The binomial distribution and its normal approximation are in [Probability distributions](../part01-prerequisites/01-distributions.md).
-
-**Conventions.** Records come from a population that mixes a majority group $A$ and a subgroup $B$. Write $\mathcal D_A$ and $\mathcal D_B$ for the distributions of a record from each group. A population in which a fraction $t$ of people belong to $B$ is the mixture $\mathcal D_t = (1 - t)\mathcal D_A + t\,\mathcal D_B$: to draw a record, first pick $B$ with probability $t$ and $A$ otherwise, then draw from that group. A dataset $D$ is $n$ independent records from $\mathcal D_t$, written $D \sim \mathcal D_t^n$. A training algorithm $\mathcal T$ maps it to parameters $\theta = \mathcal T(D)$, possibly using random choices of its own (initialization, mini-batch order). $P_{n,t}$ is the distribution of $\theta$, over both the random data and the training randomness. The secret is which of two shares, $t_0$ or $t_1$, was used. A challenger picks it with a hidden bit $b$, which is 0 or 1 with probability $\frac12$ each (a **fair bit**); $b = 0$, share $t_0$, is the null hypothesis, and $b = 1$, share $t_1$, the alternative. The attacker outputs a guess $b'$. Its **true positive rate** (TPR), $\mathrm{TPR} = \Pr[b' = 1 \mid b = 1]$ is how often it says 1 when the bit is 1, and its **false positive rate** (FPR), $\mathrm{FPR} = \Pr[b' = 1 \mid b = 0]$ is how often it says 1 when the bit is 0. Its **advantage** is $\mathrm{TPR} - \mathrm{FPR}$: how much more often it says 1 in the world where 1 is right. Its **accuracy** is $\Pr[b' = b]$, the probability that the guess matches the hidden bit, whichever value the bit has. It is not the probability that $b$ is 1. With a fair bit, half the games have $b = 1$, where the attacker wins with probability TPR, and half have $b = 0$, where it wins with probability $1 - \mathrm{FPR}$, so $\Pr[b' = b] = \frac12\mathrm{TPR} + \frac12(1 - \mathrm{FPR}) = \frac12(1 + \text{advantage})$. An attacker who ignores the model says 1 equally often in both worlds, so its advantage is 0 and its accuracy is $\frac12$: that is the coin-flip baseline. $\Phi(z) = \Pr[Z \le z]$ is the standard normal distribution function, for $Z \sim \mathcal N(0, 1)$.
-
-## Toolkit: three facts every derivation uses
-
-### Fact 1 — The best advantage is the total variation distance
-
-The attacker sees a view, such as the trained parameters, whose distribution is $P$ when $b = 0$ and $Q$ when $b = 1$. Some views are more likely in one world than in the other, and that difference is all the attacker has to go on. The best it can do is say 1 exactly on the views that are more likely under $Q$. How well that works is measured by the **total variation distance**, half the total absolute difference between the two probability tables $p$ and $q$:
-$$\mathrm{TV}(P, Q) = \tfrac12\sum_x|p(x) - q(x)|.$$
-(For continuous views, the sum is an integral over densities.) The fact is that every attack has advantage at most $\mathrm{TV}(P, Q)$, and the **likelihood-ratio test** "guess 1 when $q > p$" attains it. With a fair bit, the best accuracy is therefore $\frac12 + \frac12\mathrm{TV}(P, Q)$.
-
-The argument takes two lines. An attack may randomize, so describe it by $\phi(x)$, the probability that it says 1 on view $x$. Its TPR is $\sum_x\phi(x)q(x)$ and its FPR is $\sum_x\phi(x)p(x)$, so its advantage is $\sum_x\phi(x)(q(x) - p(x))$. Each term is largest when $\phi(x) = 1$ where $q(x) > p(x)$ and $\phi(x) = 0$ elsewhere, and the maximum is the total excess of $q$ over $p$. Both tables sum to 1, so the excess of $q$ over $p$ equals the excess of $p$ over $q$, and each is half the total absolute difference: the TV distance. This is the best-advantage result of [Hypothesis testing](../part01-prerequisites/04-hypothesis-testing.md), restated for games in [Threat models and privacy games](01-threat-models.md).
-
-A Gaussian case gives a number you will see again. Let $P = \mathcal N(0, 1)$ and $Q = \mathcal N(1, 1)$. The two densities cross halfway between the means, at $\frac12$, and $q > p$ to the right of it, so the best test says 1 when the view exceeds $\frac12$. Its TPR is $\Pr[\mathcal N(1, 1) > \frac12] = \Phi(\frac12)$, because $\frac12$ is half a standard deviation below the mean 1. Its FPR is $\Pr[\mathcal N(0, 1) > \frac12] = 1 - \Phi(\frac12)$. So $\mathrm{TV} = \Phi(\frac12) - (1 - \Phi(\frac12)) = 2\Phi(\frac12) - 1 = 0.3829$, and the best accuracy is $\frac12 + \frac12(0.3829) = 0.6915$, which is $\Phi(\frac12)$ itself. This fact sets the ceiling on the property game and turns every advantage in this chapter into an accuracy.
-
-### Fact 2 — Training cannot add information about the property
-
-The attacker sees the model, not the data, and the model is computed from the data. Whatever the attacker could learn from $\theta$, someone holding $D$ could learn too: they could train $\theta$ themselves, using the same algorithm and fresh random choices, and run the attacker's test on it. So the best test on $\theta$ can be no better than the best test on $D$. In terms of Fact 1, if $\theta = \mathcal T(D)$, where $\mathcal T$ may use randomness that does not depend on $b$, then
-$$\mathrm{TV}(P_{n,t_0}, P_{n,t_1}) \le \mathrm{TV}(\mathcal D_{t_0}^n, \mathcal D_{t_1}^n).$$
-This is the **data processing inequality** of [Divergences](../part01-prerequisites/03-divergences.md): passing a view through any channel whose behaviour does not depend on the secret cannot increase its TV distance. It is the same as the "processing cannot help the adversary" fact of [Threat models and privacy games](01-threat-models.md).
-
-Equality holds when $\theta$ is a **sufficient statistic** for $t$, which means that the likelihood ratio between the two worlds can be computed from $\theta$ alone, so $\theta$ keeps everything in $D$ that bears on $t$. The two extreme cases show the range. A model that ignores its data entirely has $P_{n,t_0} = P_{n,t_1}$, and TV 0. Releasing the dataset itself attains the ceiling. Fact 2 gives the ceiling in the game section, and it is why a released count turns out to be the worst case.
-
-### Fact 3 — Two Gaussians with a shared covariance: the best test is linear
-
-The trained parameters of many models are approximately Gaussian, as @sec-prop-meta shows. So the most useful special case of Fact 1 is two Gaussians in $\mathbb R^d$ with the same covariance $\Sigma$ and different means, $P = \mathcal N(m_0, \Sigma)$ and $Q = \mathcal N(m_1, \Sigma)$. How hard are they to tell apart? In one dimension, the answer depends on how far apart the means are, measured in standard deviations. In $d$ dimensions the noise can be larger in some directions than in others, so a shift along a noisy direction counts for less than the same shift along a quiet one. The **Mahalanobis distance** measures the shift in exactly this way, in standard deviations along its own direction:
-$$\gamma = \sqrt{(m_1 - m_0)^\top\Sigma^{-1}(m_1 - m_0)}.$$
-For $d = 1$ and $\Sigma = \sigma^2$, it is $|m_1 - m_0|/\sigma$.
-
-The fact has two parts. First, the log of the likelihood ratio is a linear function of $\theta$: it measures how far $\theta$ lies past the midpoint of the two means, along a direction $\omega$,
-$$\ln\frac{q(\theta)}{p(\theta)} = \omega^\top\Big(\theta - \frac{m_0 + m_1}2\Big), \qquad \omega = \Sigma^{-1}(m_1 - m_0).$$
-So the best test of Fact 1, "say 1 when $q > p$", is a linear test: say 1 when $\theta$ lies on $m_1$'s side of a hyperplane through the midpoint. Second, its accuracy with a fair bit depends only on the Mahalanobis distance,
-$$\Phi(\gamma/2).$$ {#eq-prop-gauss-acc}
-
-*Derivation.* The idea is to write out the two Gaussian log-densities, watch the quadratic parts cancel because the covariances are equal, and then find the distribution of what is left.
-
-1. **Expand the two quadratics.** A Gaussian log-density is $-\frac12(\theta - m)^\top\Sigma^{-1}(\theta - m)$ plus a constant that depends only on $\Sigma$, and that constant is the same for $P$ and $Q$. So $\ln q - \ln p = -\frac12(\theta - m_1)^\top\Sigma^{-1}(\theta - m_1) + \frac12(\theta - m_0)^\top\Sigma^{-1}(\theta - m_0)$. Multiplying out, the terms $\theta^\top\Sigma^{-1}\theta$ appear with opposite signs and cancel, which leaves $(m_1 - m_0)^\top\Sigma^{-1}\theta - \frac12(m_1^\top\Sigma^{-1}m_1 - m_0^\top\Sigma^{-1}m_0)$.
-2. **Factor the constant.** $m_1^\top\Sigma^{-1}m_1 - m_0^\top\Sigma^{-1}m_0 = (m_1 - m_0)^\top\Sigma^{-1}(m_1 + m_0)$, because when you multiply out the right-hand side, the cross terms $m_1^\top\Sigma^{-1}m_0$ and $m_0^\top\Sigma^{-1}m_1$ are equal ($\Sigma^{-1}$ is symmetric) and cancel. Pulling out $\omega^\top = (m_1 - m_0)^\top\Sigma^{-1}$ gives the linear form.
-3. **Find its distribution.** $L = \omega^\top(\theta - \frac{m_0 + m_1}2)$ is a linear function of a Gaussian, so it is Gaussian. Under $Q$, $\theta$ has mean $m_1$, so $L$ has mean $\omega^\top(m_1 - \frac{m_0 + m_1}2) = \omega^\top\frac{m_1 - m_0}2 = \frac{\gamma^2}2$, by the definition of $\gamma$. Under $P$ the same computation with $m_0$ gives $-\frac{\gamma^2}2$. Under both, its variance is $\omega^\top\Sigma \omega = (m_1 - m_0)^\top\Sigma^{-1}\Sigma\Sigma^{-1}(m_1 - m_0) = \gamma^2$, so its standard deviation is $\gamma$.
-4. **Compute the accuracy of the best test.** By Fact 1, the best test guesses 1 when $q > p$, that is, when $L > 0$. Under $Q$, $L$ has mean $\frac{\gamma^2}2$ and standard deviation $\gamma$, so 0 lies $\frac{\gamma^2/2}{\gamma} = \frac\gamma2$ standard deviations below the mean, and the test is right with probability $\Pr[\mathcal N(\gamma^2/2, \gamma^2) > 0] = \Phi(\gamma/2)$. Under $P$, $L$ has mean $-\frac{\gamma^2}2$, and the test is right when $L < 0$, which lies $\frac\gamma2$ standard deviations above that mean: the same probability, $\Phi(\gamma/2)$. Averaging the two worlds gives @eq-prop-gauss-acc.
-
-In one dimension with $\Sigma = 1$, $\gamma = |m_1 - m_0|$, and @eq-prop-gauss-acc is the Gaussian pair of Fact 1: $\gamma = 1$ gives $\Phi(0.5) = 0.6915$. In many dimensions, only the length of the mean shift measured with $\Sigma^{-1}$ matters, so a shift along a direction where $\theta$ is noisy counts for little. This fact gives the accuracy of every attack on a model whose parameters are approximately Gaussian, and it says which meta-classifier to train: a linear one.
+: The symbols of this chapter. {#tbl-prop-symbols}
 
 ## The property-inference game {#sec-prop-game}
 
-### Context
+To ask whether an attacker can learn the property, you must fix who draws the data, what the attacker sees and knows, and how its guess is scored. [Threat models and privacy games](01-threat-models.md) writes attacks as games between a **challenger**, who runs the training pipeline with a hidden secret, and an **adversary**, who tries to guess the secret (Salem et al. 2023). In the property game the secret is one bit about the population that produced the training set. This section sets up that game and finds the most any attacker can win, because every attack later in the chapter is measured against that ceiling.
 
-"Can the attacker learn the property?" needs the same care as any attack: who draws the data, what the attacker sees and knows, and how its guess is scored. [Threat models and privacy games](01-threat-models.md) writes attacks as games between a **challenger**, who runs the training pipeline with a hidden secret, and an **adversary**, who tries to guess the secret. It follows Salem et al. (2023). The property game is the version in which the secret is one bit about the population that produced the training set: was the subgroup's share $t_0$ or $t_1$? Suri & Evans (2022) call it **distribution inference** and study it in this form.
+Records come from a population that mixes a majority group $A$ and a subgroup $B$. Write $\mathcal D_A$ and $\mathcal D_B$ for the distributions of a record from each group. A population in which a fraction $t$ of people belong to $B$ is the mixture $\mathcal D_t = (1 - t)\mathcal D_A + t\,\mathcal D_B$. To draw a record from it, first pick $B$ with probability $t$ and $A$ otherwise, then draw from that group.
 
-### Statement
+::: {#def-prop-game name="Property-inference game"}
+Fix a dataset size $n$, two shares $t_0 \ne t_1$, and a training algorithm $\mathcal T$ that maps a dataset to parameters and may use random choices of its own, such as its initialization. The **property-inference game** runs in four steps.
 
-The **property-inference game** with parameters $(n, t_0, t_1)$ runs in four steps. The secret is drawn at random by a fair bit so that neither answer is right more often by default, and an attacker who learns nothing scores exactly $\frac12$.
+1. The challenger draws a hidden bit $b$, which is 0 or 1 with probability $\frac12$ each.
+2. It draws a dataset $D \sim \mathcal D_{t_b}^n$ of $n$ independent records and trains $\theta = \mathcal T(D)$.
+3. The adversary receives a view of $\theta$: the parameters (white-box), or answers to queries (black-box). It knows $\mathcal D_A$, $\mathcal D_B$, $n$, $t_0$, $t_1$ and $\mathcal T$.
+4. It outputs a guess $b'$ and wins if $b' = b$.
+:::
 
-1. The challenger draws a fair bit $b$.
-2. It draws a dataset $D \sim \mathcal D_{t_b}^n$ and trains $\theta = \mathcal T(D)$.
-3. The adversary receives a view of $\theta$: the parameters (white-box), or answers to queries (black-box). It knows $\mathcal D_A$, $\mathcal D_B$, $n$, $t_0$, $t_1$ and the training algorithm $\mathcal T$.
-4. It outputs $b'$ and wins if $b' = b$.
+With a fair bit, an attacker who learns nothing scores exactly $\frac12$. Knowing $\mathcal D_A$, $\mathcal D_B$ and $\mathcal T$ means, in practice, holding auxiliary data from both groups and being able to train models the way the victim does. Ateniese et al. and Ganju et al. assume exactly this, and the shadow models of @sec-prop-meta rely on it. Suri & Evans (2022) study the game in this form and call it **distribution inference**.
 
-What limits the adversary? Its view is a model whose distribution is $P_{n,t_0}$ or $P_{n,t_1}$, so by Fact 1 its advantage is at most the TV distance between them. The model is computed from the data, so by Fact 2 that distance is at most the TV distance between the two dataset distributions. For every adversary,
+The attack is scored as in [Threat models and privacy games](01-threat-models.md). Its **true positive rate** $\mathrm{TPR} = \Pr[b' = 1 \mid b = 1]$ is how often it says 1 when the bit is 1, and its **false positive rate** $\mathrm{FPR} = \Pr[b' = 1 \mid b = 0]$ is how often it says 1 when the bit is 0. Its **advantage** is $\mathrm{TPR} - \mathrm{FPR}$. Half the games have $b = 1$, where the attacker wins with probability $\mathrm{TPR}$, and half have $b = 0$, where it wins with probability $1 - \mathrm{FPR}$. So its accuracy is
+
+$$\Pr[b' = b] = \tfrac12\big(1 + \mathrm{TPR} - \mathrm{FPR}\big).$$
+
+Write $P_{n,t}$ for the distribution of $\theta$, over both the random data and the training randomness. Two results from Part 1 bound what the attacker can do. The first says that the best advantage at telling two distributions apart is their total variation (TV) distance, half the total absolute difference between their probabilities (an integral of densities for continuous views). The test that attains it says 1 wherever the second distribution is more likely than the first ([Hypothesis testing](../part01-prerequisites/04-hypothesis-testing.md#sec-ht-tv)).
+
+The second result is the **data processing inequality** ([Divergences](../part01-prerequisites/03-divergences.md#sec-div-dpi)). Passing a view through any random function whose behaviour does not depend on the secret cannot increase its TV distance. Equality holds when the output is a **sufficient statistic**, meaning that the likelihood ratio of the view between the two worlds can be computed from the output alone, because the best test needs nothing else.
+
+The model is computed from the data, so the attacker can never learn more from $\theta$ than from $D$ itself, and when each record shows its group only the count of subgroup records matters.
+
+::: {#thm-prop-ceiling name="The ceiling on property inference"}
+In the game of @def-prop-game, every adversary has
 $$\mathrm{TPR} - \mathrm{FPR} \le \mathrm{TV}(P_{n,t_0}, P_{n,t_1}) \le \mathrm{TV}(\mathcal D_{t_0}^n, \mathcal D_{t_1}^n).$$ {#eq-prop-ceiling}
-The right-hand side becomes concrete when the group of each record can be read off the record ($\mathcal D_A$ and $\mathcal D_B$ have disjoint supports: no record could come from both groups). Then the only thing in $D$ that says anything about $t$ is how many records come from the subgroup. Call that count $S$. It is a sufficient statistic, and $S$ is binomial: each of the $n$ records is from the subgroup with probability $t$, independently. So the right-hand side is exactly
+If in addition $\mathcal D_A$ and $\mathcal D_B$ have disjoint supports, so that no record could come from both groups, then the right-hand side equals
 $$\mathrm{TV}\big(\mathrm{Bin}(n, t_0), \mathrm{Bin}(n, t_1)\big).$$ {#eq-prop-count-ceiling}
+:::
 
-### Derivation
+::: {.proof}
+The plan is to bound the advantage by the TV distance of the models, then by that of the datasets, and then to show that with visible groups the count $S$ of subgroup records carries everything the dataset says about the share.
 
-1. **The game is a test.** The view has distribution $P_{n,t_0}$ when $b = 0$ and $P_{n,t_1}$ when $b = 1$. By Fact 1, no attacker's advantage exceeds the TV distance between them. This is the left inequality of @eq-prop-ceiling.
-2. **Training is a channel.** The view is a randomized function of $D$, with randomness that does not depend on $b$. Fact 2 says such processing cannot increase the TV distance, which gives the right inequality.
-3. **Write the likelihood ratio of a dataset.** To find what in $D$ matters, compare how likely $D$ is under the two shares. With disjoint supports, a record $x$ from $B$ has density $t\,\mathcal D_B(x)$ under $\mathcal D_t$ (pick group $B$, then draw $x$), and a record from $A$ has $(1 - t)\mathcal D_A(x)$. The records are independent, so the density of $D$ is the product over its $n$ records. Divide the $t_1$ version by the $t_0$ version. The factors $\mathcal D_A(x)$ and $\mathcal D_B(x)$ are the same in both and cancel. Each of the $S$ subgroup records leaves a factor $t_1/t_0$, and each of the $n - S$ others a factor $(1 - t_1)/(1 - t_0)$:
-$$\frac{d\mathcal D_{t_1}^n}{d\mathcal D_{t_0}^n}(D) = \Big(\frac{t_1}{t_0}\Big)^S\Big(\frac{1 - t_1}{1 - t_0}\Big)^{n - S}.$$
-4. **Conclude that the count is sufficient.** The likelihood ratio depends on $D$ only through $S$, so $S$ is sufficient: the best test of Fact 1 can be computed from $S$ alone, and the data processing inequality of Fact 2 holds with equality. The TV distance between the datasets therefore equals the TV distance between the laws of $S$, which are $\mathrm{Bin}(n, t_0)$ and $\mathrm{Bin}(n, t_1)$. That is @eq-prop-count-ceiling.
+1. *The game is a test.* The view has distribution $P_{n,t_0}$ when $b = 0$ and $P_{n,t_1}$ when $b = 1$. No test between two distributions has advantage above their TV distance, which gives the left inequality of @eq-prop-ceiling.
+2. *Training is a channel.* The view is a randomized function of $D$, and its randomness does not depend on $b$. By the data processing inequality such processing cannot increase the TV distance, which gives the right inequality.
+3. *Write the likelihood ratio of a dataset.* To find what in $D$ matters, compare how likely $D$ is under the two shares. Write $\mathcal D_A(x)$ and $\mathcal D_B(x)$ also for the densities of the two groups. With disjoint supports, a record $x$ from $B$ has density $t\,\mathcal D_B(x)$ under $\mathcal D_t$ (pick group $B$, then draw $x$), and a record from $A$ has $(1 - t)\mathcal D_A(x)$. The records are independent, so the density of $D$ is the product over its records. In the ratio of the density under $t_1$ to that under $t_0$, the factors $\mathcal D_A(x)$ and $\mathcal D_B(x)$ cancel. Each of the $S$ subgroup records leaves a factor $t_1/t_0$, and each of the $n - S$ others leaves $(1 - t_1)/(1 - t_0)$, so the likelihood ratio is
+$$\Big(\frac{t_1}{t_0}\Big)^S\Big(\frac{1 - t_1}{1 - t_0}\Big)^{n - S}.$$
+4. *Conclude that the count is sufficient.* The likelihood ratio depends on $D$ only through $S$, so $S$ is sufficient, and the data processing inequality from $D$ to $S$ holds with equality. Each record is from the subgroup with probability $t$, independently, so $S$ has law $\mathrm{Bin}(n, t)$, and the TV distance between the datasets is @eq-prop-count-ceiling.
+:::
 
-### Interpretation
+The theorem says that **releasing the count is the worst case**. When the group is visible in each record, no model trained on $D$ can leak more about the share than the count does, because the count already carries everything $D$ says about it. A model that never sees the group, like the logistic regression of @sec-prop-meta, is still bound by this ceiling, since it is computed from the same records, and @sec-prop-meta measures how far below it falls.
 
-The first lesson is that **releasing the count is the worst case**. When the group is visible in each record, no model trained on $D$ can leak more about $t$ than the count of subgroup records, because the count already carries everything $D$ says about $t$. A model that does not see the group, like the logistic regression of @sec-prop-meta, leaks less, and how much less is a number you can measure.
+The secret belongs to a group, not a person, and that changes how the attack is scored. A membership attacker faces many targets, and exposing a few of them with high confidence is already a harm, so its score is the true positive rate at a low false positive rate. Here each dataset carries one secret, so the plain accuracy is the natural score.
 
-The game also says **what the attacker needs**. It gives the adversary $\mathcal D_A$, $\mathcal D_B$ and $\mathcal T$. In practice this means auxiliary data from both groups and the ability to train models the way the victim does. Ateniese et al. and Ganju et al. assume exactly this. It is the same assumption that makes shadow models work in [Membership inference](02-membership-inference.md): the attacker trains its own copies of the victim's pipeline on data it controls.
+::: {#exm-prop-hospital}
+The hospital has $n = 1{,}000$ patients, and whether 45% or 55% of them are over 65 is the secret. If age group is part of each record, @eq-prop-count-ceiling gives the ceiling $\mathrm{TV}(\mathrm{Bin}(1000, 0.45), \mathrm{Bin}(1000, 0.55)) = 0.9985$ for every model trained on the data. The reason it is so close to 1 is that the count has mean 450 in one world and 550 in the other, with standard deviation $\sqrt{1000 \times 0.45 \times 0.55} \approx 15.7$. The two means are more than six standard deviations apart, so the two distributions barely overlap. An attacker on the count itself reaches the ceiling and is right more than 99.9% of the time.
 
-**The secret belongs to a group, not a person**, and that changes how the attack is scored. The game has no target record. Its baseline is a coin flip, and the score is accuracy, not the true positive rate at a low false positive rate. In membership inference, the attacker faces many targets, and a few records exposed with high confidence matter even if most are not, so the end of the curve with few false positives is what counts. Here each dataset carries one secret, so the plain probability of guessing it is the natural score.
-
-You may ask whether this **is an attack at all**. Learning that smokers get more lung cancer is the purpose of a medical study, not a breach. Property inference is a harm when the property describes the *data owner* rather than the world: the share of a company's customers in a region, the demographics of one hospital's patients, the configuration of one lab's machines. When $D$ is a small sample from a public population, its property is public knowledge anyway.
-
-Finally, the game has **variants**. The secret can be a real number (estimate $t$ rather than choose between $t_0$ and $t_1$), or the presence of any record with a given feature. Some games fix the subgroup count at exactly $\lfloor tn\rfloor$ instead of drawing it at random. With a fixed count and the group visible, the ceiling is 1, because the count itself differs between the two worlds and reveals the bit. The attacker's difficulty then comes only from the training noise and from the group being hidden.
-
-### Example: one hospital's patients
-
-A hospital has $n = 1{,}000$ patients. Whether 45% or 55% of them are over 65 is the secret. If age group is part of each record, @eq-prop-count-ceiling gives the ceiling $\mathrm{TV}(\mathrm{Bin}(1000, 0.45), \mathrm{Bin}(1000, 0.55)) = 0.9985$ for every model trained on the data. You can see why it is so close to 1. The count has mean 450 in one world and 550 in the other, and its standard deviation is $\sqrt{1000 \times 0.45 \times 0.55} \approx 15.7$, so the two means are more than six standard deviations apart and the two distributions barely overlap. A model from which the count can be read off reaches the ceiling: by Fact 1 its attacker is right with probability $\frac12 + \frac12(0.9985)$, more than 99.9% of the time.
-
-At $n = 100$ the means are 45 and 55, the standard deviation is about 5, and the distributions overlap much more. The ceiling is $0.6827$, and 200,000 simulated games with the likelihood-ratio test on the count give an advantage of 0.6811, within sampling error of the formula.
-
-### Check yourself
-
-- Why can no attacker on any model trained on $D$ beat @eq-prop-count-ceiling when the group is visible in every record? *(The model is a randomized function of $D$, so by the data processing inequality its TV is at most that of $D$, and the count $S$ is sufficient, so the TV of $D$ equals that of $S$.)*
-- A defender trains on a dataset from which the group column has been deleted. Does @eq-prop-ceiling still hold, and does @eq-prop-count-ceiling? *(@eq-prop-ceiling holds for any training algorithm. @eq-prop-count-ceiling still bounds it, because the defender's dataset is a function of the original one; it may no longer be attained.)*
+At $n = 100$ the means are 45 and 55 and the standard deviation is about 5, so the ceiling falls to $0.6827$. Over 200,000 simulated games, the likelihood-ratio test on the count has advantage 0.6811, within sampling error of the formula.
+:::
 
 ## Why a property leaks when no record does {#sec-prop-scaling}
 
-### Context
+The opening claimed that more data hides each record better and the property worse. This section proves it for the simplest release of all, the count $S$ of subgroup records. Two attackers look at the same count. One asks whether a target, a member of the subgroup, is in $D$. The other asks whether $D$ was drawn with share $t_0$ or $t_1$. For a count, both best advantages can be computed exactly, and they move in opposite directions as $n$ grows.
 
-Take the simplest model of all: the training algorithm releases the count $S$ of subgroup records. Two attackers look at the same release. One asks about a record: "is my target, a member of the subgroup, in $D$?" The other asks about the property: "was $D$ drawn with $t_0$ or $t_1$?" For a count, both best advantages can be computed exactly, and they move in opposite directions as $n$ grows. This makes the one idea of the chapter exact.
+The membership attacker sees the count with or without one extra subgroup record. Step 4 of the proof of its advantage, @prp-prop-membership below, needs to know how far the distribution of a count moves when the count is shifted by one, and the answer depends on the shape of the distribution. A probability mass function is **unimodal** if it rises to a most likely value, the mode, and then falls.
 
-### Statement
+::: {#lem-prop-shift name="Shifting a unimodal count by one"}
+Let $X$ be an integer-valued random variable with finite support, whose probability mass function $p_k = \Pr[X = k]$ is unimodal. Then
+$$\mathrm{TV}\big(\mathrm{Law}(X + 1), \mathrm{Law}(X)\big) = \max_k p_k,$$
+where $\mathrm{Law}(\cdot)$ means "the distribution of".
+:::
 
-**Membership.** In the membership game, $D$ holds $n - 1$ records from $\mathcal D_t$ plus one more: either the target (a subgroup member) or a fresh record from $\mathcal D_t$. Let $X \sim \mathrm{Bin}(n - 1, t)$ be the subgroup count among the $n - 1$ other records. The target adds exactly 1 to the count, and a fresh record adds 1 only a fraction $t$ of the time. So the target is detectable only through how much one extra unit changes the distribution of a count that already varies by about $\sqrt n$. That change is governed by the height of the most likely count, and the best advantage is
-$$\mathrm{Adv}_{\mathrm{mem}}(n) = (1 - t)\max_k\Pr[X = k] \approx \frac{1 - t}{\sqrt{2\pi(n - 1)t(1 - t)}}.$$ {#eq-prop-membership}
-
-**Property.** Under the two hypotheses the fraction $S/n$ centres on $t_0$ or on $t_1$, with standard deviation about $\sqrt{t(1 - t)/n}$. The best advantage is the TV distance between the two binomials, and by the normal approximation it depends on how many standard deviations apart the two centres are. With the midpoint share $\bar t = \frac{t_0 + t_1}2$,
-$$\mathrm{Adv}_{\mathrm{prop}}(n) = \mathrm{TV}\big(\mathrm{Bin}(n, t_0), \mathrm{Bin}(n, t_1)\big) \approx 2\Phi\Big(\frac{\sqrt n\,|t_1 - t_0|}{2\sqrt{\bar t(1 - \bar t)}}\Big) - 1.$$ {#eq-prop-property}
-
-The first falls like $1/\sqrt n$. The second rises to 1 once $\sqrt n\,|t_1 - t_0|$ is a few times $\sqrt{\bar t(1 - \bar t)}$.
-
-### Derivation
-
-**Membership.** The plan is to write the two views as distributions of the count, notice that one of them is a mixture containing the other, and reduce the TV distance to the effect of shifting a binomial by one.
-
-1. **Write the two views.** With the target in $D$, $S = X + 1$. With a fresh record, $S = X + B'$, where $B' \sim \mathrm{Bern}(t)$ is 1 when the fresh record is from the subgroup.
-2. **See the second view as a mixture.** $X + B'$ equals $X + 1$ with probability $t$ and $X$ with probability $1 - t$, so its law is $t\,\mathrm{Law}(X + 1) + (1 - t)\,\mathrm{Law}(X)$, where $\mathrm{Law}(\cdot)$ means "the distribution of". A fraction $t$ of the time the non-member world looks exactly like the member world.
-3. **Mixing scales the TV distance.** For any $P$ and $Q$, $\mathrm{TV}(P, tP + (1 - t)Q) = \frac12\sum_x|p(x) - tp(x) - (1 - t)q(x)| = \frac12\sum_x|(1 - t)(p(x) - q(x))| = (1 - t)\mathrm{TV}(P, Q)$. By Fact 1, the best advantage is therefore $(1 - t)\,\mathrm{TV}(\mathrm{Law}(X + 1), \mathrm{Law}(X))$.
-4. **Shift a single-peaked distribution by one.** Write $p_k = \Pr[X = k]$. Then $\Pr[X + 1 = k] = p_{k-1}$, so $\mathrm{TV}(\mathrm{Law}(X + 1), \mathrm{Law}(X)) = \frac12\sum_k|p_k - p_{k-1}|$, half the total size of the steps between neighbouring probabilities. A binomial probability mass function is **unimodal**: it rises to its most likely value, the mode $k^*$, and then falls. So the upward steps add up to the climb from 0 to the top, $p_{k^*}$, and the downward steps add up to the descent back to 0, also $p_{k^*}$. Half of the total is $p_{k^*} = \max_k p_k$. @tbl-prop-shift walks through $X \sim \mathrm{Bin}(4, \frac12)$.
-5. **Estimate the height of the mode.** By the normal approximation of [Probability distributions](../part01-prerequisites/01-distributions.md), a binomial with many trials is close to a normal with the same mean and variance, here $\mathcal N((n - 1)t, (n - 1)t(1 - t))$. A normal density with variance $s^2$ has height $1/\sqrt{2\pi s^2}$ at its peak, here $1/\sqrt{2\pi(n - 1)t(1 - t)}$. The probability of the most likely integer is close to that peak height, because the integers are spaced one apart and the density is nearly flat over a unit interval at the top. (@sec-apx-prob-stirling in the appendices proves both facts, and makes the second exact: for a binomial with $N$ trials and success probability $p$, once $Np(1 - p) \ge 4$ the most likely value's probability is within a factor $e^{\pm3.5/(Np(1 - p))}$ of the peak height.) That gives @eq-prop-membership.
+::: {.proof}
+1. *Write the TV distance as steps.* The shifted variable takes the value $k$ with probability $\Pr[X + 1 = k] = p_{k-1}$. So the TV distance is half the total size of the steps between neighbouring probabilities,
+$$\mathrm{TV}\big(\mathrm{Law}(X + 1), \mathrm{Law}(X)\big) = \frac12\sum_k|p_k - p_{k-1}|.$$
+2. *Add the climb and the descent.* Let $k^*$ be the mode. The support is finite, so the probabilities start and end at 0. Up to $k^*$ every step goes up, so the steps add to the climb from 0 to the top, $p_{k^*}$. After $k^*$ every step goes down, so they add to the descent back to 0, also $p_{k^*}$.
+3. *Halve.* The total is $2p_{k^*}$, and half of it is $p_{k^*} = \max_kp_k$. @tbl-prop-shift walks through $X \sim \mathrm{Bin}(4, \frac12)$.
+:::
 
 | $k$ | 0 | 1 | 2 | 3 | 4 | 5 |
 | --- | --- | --- | --- | --- | --- | --- |
@@ -155,29 +99,51 @@ The first falls like $1/\sqrt n$. The second rises to 1 once $\sqrt n\,|t_1 - t_
 
 : Shifting $X \sim \mathrm{Bin}(4, \frac12)$ by one. The positive differences add up to $6/16$, the height of the mode, and so do the negative ones. Half the total absolute difference is $\frac12 \times \frac{12}{16} = \frac{6}{16} = 0.375 = \max_k\Pr[X = k]$. {#tbl-prop-shift}
 
-**Property.** Here the plan is to use the exact answer from the game section, then approximate both binomials by normals with a common spread so that the Gaussian pair of Fact 1 applies.
+Unimodality matters, and [Exercise 1](../../book-exercises/part02-attacks/04-property-inference.md#sec-sol-prop-1) gives a distribution that rises twice, for which the identity fails. For a count, the membership advantage is then the height of the most likely count, up to a factor $1 - t$. That height shrinks like $1/\sqrt n$, because the count's standard deviation grows like $\sqrt n$ and its probability is spread over that many likely values.
 
-1. **Start from the exact answer.** By @sec-prop-game, the released count $S$ is a sufficient statistic, so the best advantage is the TV distance between the two binomials.
-2. **Approximate by two normals.** By the normal approximation, $S/n$ is close to $\mathcal N(t, t(1 - t)/n)$. The two variances $t_0(1 - t_0)/n$ and $t_1(1 - t_1)/n$ are close when the gap is small, so replace both by the one at the midpoint, $\bar t(1 - \bar t)/n$. Now divide $S/n$ by its standard deviation $\sqrt{\bar t(1 - \bar t)/n}$. The problem becomes a pair of unit-variance Gaussians whose means are $\mu = \sqrt n\,|t_1 - t_0|/\sqrt{\bar t(1 - \bar t)}$ apart.
-3. **Use the Gaussian pair.** As in the example of Fact 1, two unit-variance Gaussians with means $\mu$ apart have densities that cross at the midpoint, $\mu/2$ from each mean, so the best test has $\mathrm{TPR} = \Phi(\mu/2)$ and $\mathrm{FPR} = 1 - \Phi(\mu/2)$, and the TV distance is $2\Phi(\mu/2) - 1$. Substituting $\mu$ gives @eq-prop-property.
+::: {#prp-prop-membership name="Membership from a released count"}
+Let the dataset hold $n - 1$ records from $\mathcal D_t$ plus one more, either a target from the subgroup or a fresh record from $\mathcal D_t$, and let the release be the count $S$ of subgroup records. Write $X \sim \mathrm{Bin}(n - 1, t)$ for the count among the $n - 1$ other records. The best advantage at telling the two cases apart is
+$$\mathrm{Adv}_{\mathrm{mem}}(n) = (1 - t)\max_k\Pr[X = k] \approx \frac{1 - t}{\sqrt{2\pi(n - 1)t(1 - t)}}.$$ {#eq-prop-membership}
+:::
 
-**The general pattern.** Neither argument is special to counts. Most estimators behave like averages: $\theta \approx \theta(\mathcal D) + \frac1n\sum_i\psi(x_i)$, where $\theta(\mathcal D)$ is the value the estimator would take on the whole population and $\psi(x)$ is the **influence** of one record $x$, how far it pulls the estimate (@sec-prop-meta derives this for logistic regression). One record $z$ shifts $\theta$ by $\psi(z)/n$, while the sampling noise has size $\sigma/\sqrt n$, where $\sigma$ is the standard deviation of $\psi(x)$. The shift measured in noise units is $(|\psi(z)|/n)/(\sigma/\sqrt n) = |\psi(z)|/(\sigma\sqrt n) \to 0$. The property instead shifts the centre from $\theta(\mathcal D_{t_0})$ to $\theta(\mathcal D_{t_1})$, a fixed distance, so in noise units the shift grows like $\sqrt n$.
+::: {.proof}
+The plan is to write the two views as distributions of the count, to notice that one of them is a mixture containing the other, and to reduce the TV distance to the effect of shifting a binomial by one.
 
-### Interpretation
+1. *Write the two views.* With the target in $D$, the count is $S = X + 1$. With a fresh record, the count is $X + 1$ when the fresh record is from the subgroup, which happens with probability $t$, and $X$ otherwise.
+2. *See the second view as a mixture.* So the law of the second view is $t\,\mathrm{Law}(X + 1) + (1 - t)\,\mathrm{Law}(X)$, and a fraction $t$ of the time the non-member world looks exactly like the member world.
+3. *Mixing scales the TV distance.* Write $P = \mathrm{Law}(X + 1)$ and $Q = \mathrm{Law}(X)$, with mass functions $p$ and $q$. In the TV distance between $P$ and $tP + (1 - t)Q$, the part $tp(x)$ cancels from each term, which leaves a factor $1 - t$:
+$$\mathrm{TV}\big(P, tP + (1 - t)Q\big) = \frac12\sum_x(1 - t)|p(x) - q(x)| = (1 - t)\,\mathrm{TV}(P, Q).$$
+The best advantage is this TV distance, so it is $(1 - t)\,\mathrm{TV}(\mathrm{Law}(X + 1), \mathrm{Law}(X))$.
+4. *Shift the binomial.* A binomial mass function is unimodal, so @lem-prop-shift turns the TV distance into $\max_k\Pr[X = k]$, which gives the exact form of @eq-prop-membership.
+5. *Estimate the height of the mode.* By the normal approximation of [Probability distributions](../part01-prerequisites/01-distributions.md), $X$ is close to a normal with the same mean and variance $(n - 1)t(1 - t)$. A normal density with variance $s^2$ has height $1/\sqrt{2\pi s^2}$ at its peak. The probability of the most likely integer is close to that height, because the integers are spaced one apart and the density is nearly flat over a unit interval at the top. That gives the approximate form. @sec-apx-prob-stirling in the appendices proves both facts and bounds the error of the second.
+:::
 
-The headline is that **more data protects records and exposes properties**. @fig-prop-count-leak (right) shows both advantages against $n$ on log axes. The membership advantage falls along a line of slope $-\frac12$, which is what $1/\sqrt n$ looks like on log axes. The property advantage climbs to 1, sooner for a larger gap $|t_1 - t_0|$.
+The property attacker sees the same count, but its two worlds centre the fraction $S/n$ on $t_0$ and on $t_1$, with spread about $\sqrt{t(1 - t)/n}$ at share $t$. Its advantage therefore depends on how many spreads apart the two centres are, and that number grows like $\sqrt n$.
 
-The reason is that **a property is a group of records**. Moving from $t_0$ to $t_1$ changes about $n|t_1 - t_0|$ records: for the hospital, $1{,}000 \times 0.1 = 100$ of its 1,000 patients. A protection measured one record at a time says little about a change to 100 records at once. [Part 3](../part03-dp-foundations/02-properties.md) makes this precise with its group-privacy property, whose guarantee weakens with the size of the group.
+::: {#prp-prop-property name="The property from a released count"}
+Let the release be the count $S$ of a dataset drawn from $\mathcal D_{t_0}^n$ or $\mathcal D_{t_1}^n$, with the groups visible, and let $\bar t = \frac{t_0 + t_1}2$ be the midpoint share. The best advantage is
+$$\mathrm{Adv}_{\mathrm{prop}}(n) = \mathrm{TV}\big(\mathrm{Bin}(n, t_0), \mathrm{Bin}(n, t_1)\big) \approx 2\Phi\Big(\frac{\sqrt n\,|t_1 - t_0|}{2\sqrt{\bar t(1 - \bar t)}}\Big) - 1.$$ {#eq-prop-property}
+:::
 
-It follows that **hiding the property means hiding the population**. To push the property advantage down, the released statistic must be noisy on the scale of $n|t_1 - t_0|$, not on the scale of one record. That much noise also destroys what the statistic was for ([Exercise 6](../../book-exercises/part02-attacks/04-property-inference.md#sec-sol-prop-6)).
+::: {.proof}
+1. *Start from the exact answer.* The count is sufficient (@thm-prop-ceiling), so the best advantage is the TV distance between the two binomials.
+2. *Approximate by two normals.* By the normal approximation, $S/n$ is close to $\mathcal N(t, t(1 - t)/n)$. The two variances are close when the gap is small, so replace both by the one at the midpoint, $\bar t(1 - \bar t)/n$. Measured in units of that standard deviation, the two means are a distance
+$$\gamma = \frac{\sqrt n\,|t_1 - t_0|}{\sqrt{\bar t(1 - \bar t)}}$$
+apart, so the problem is two unit-variance normals with means $\gamma$ apart.
+3. *Use the Gaussian pair.* For two unit-variance normals with means $\gamma$ apart, the densities cross halfway between the means, and the best advantage is $2\Phi(\gamma/2) - 1$ ([Hypothesis testing](../part01-prerequisites/04-hypothesis-testing.md#sec-ht-tv)). Substituting $\gamma$ gives @eq-prop-property.
+:::
 
-**The approximations are good here.** At $n = 100$ the normal approximation to the property advantage is exact to four decimals, and the one to the membership advantage is off by less than 1% (@tbl-prop-count).
+The two results say that **more data protects records and exposes properties**. The membership advantage falls like $1/\sqrt n$, a line of slope $-\frac12$ on the log axes of @fig-prop-count-leak (right). The property advantage climbs to 1 once $\sqrt n\,|t_1 - t_0|$ is a few times $\sqrt{\bar t(1 - \bar t)}$, sooner for a larger gap. Neither argument is special to counts, because most fitted models behave like averages of their records, as @sec-prop-meta shows.
+
+The reason is that **a property is a group of records**. Moving from $t_0$ to $t_1$ changes about $n|t_1 - t_0|$ records, which for the hospital is $1{,}000 \times 0.1 = 100$ of its 1,000 patients. A protection measured one record at a time says little about a change to 100 records at once, and [Part 3](../part03-dp-foundations/02-properties.md) makes this precise with group privacy, whose guarantee weakens with the size of the group. To hide the property, a released statistic must be noisy on the scale of $n|t_1 - t_0|$, and that much noise also destroys what the statistic was for ([Exercise 6](../../book-exercises/part02-attacks/04-property-inference.md#sec-sol-prop-6)).
 
 ![Left: the released fraction $S/n$ at $n = 1{,}000$ under $t = 0.45$ and $t = 0.55$, and under $t = 0.5$ with and without one target from the subgroup; the last two curves are indistinguishable. Right: the best property advantage for two gaps, and the best membership advantage of one record, against $n$.](figures/prop_count_leak.svg){#fig-prop-count-leak}
 
-### Example: the same release, two attackers
+::: {#exm-prop-two-attackers}
+@tbl-prop-count gives both advantages for the hospital's shares $t_0 = 0.45$ and $t_1 = 0.55$, and for membership at $t = 0.5$. You can check the first row by hand. For the property, $\bar t = 0.5$, so $\sqrt{\bar t(1 - \bar t)} = 0.5$ and the argument of $\Phi$ in @eq-prop-property is $\sqrt{100} \times 0.1/(2 \times 0.5) = 1$. Then $2\Phi(1) - 1 = 2(0.8413) - 1 = 0.6827$. For membership, @eq-prop-membership gives $0.5/\sqrt{2\pi \times 99 \times 0.25} = 0.5/12.47 = 0.0401$. Both approximations are within 1% of the exact values.
 
-@tbl-prop-count gives both advantages for $t_0 = 0.45$, $t_1 = 0.55$, and for membership at $t = 0.5$. You can check the first row by hand. For the property, $\bar t = 0.5$, so $\sqrt{\bar t(1 - \bar t)} = 0.5$ and the argument of $\Phi$ in @eq-prop-property is $\sqrt{100} \times 0.1/(2 \times 0.5) = 1$; then $2\Phi(1) - 1 = 2(0.8413) - 1 = 0.6827$. For membership, @eq-prop-membership gives $0.5/\sqrt{2\pi \times 99 \times 0.25} = 0.5/12.47 = 0.0401$.
+At $n = 10{,}000$, an attacker who wants to know whether one patient is in the data has advantage 0.0040, so with a fair bit it is right with probability $\frac12 + \frac12(0.0040) = 0.502$. An attacker who wants the share of patients over 65 is never wrong to four decimals. The data, the release and the attacker's knowledge are the same, and only the question differs.
+:::
 
 | $n$ | Property, exact | Property, @eq-prop-property | Membership, exact | Membership, @eq-prop-membership |
 | --- | --- | --- | --- | --- |
@@ -187,67 +153,94 @@ It follows that **hiding the property means hiding the population**. To push the
 
 : Best advantages from a released count of subgroup records. Property: $t_0 = 0.45$ against $t_1 = 0.55$. Membership: one subgroup record, population share $t = 0.5$. {#tbl-prop-count}
 
-At $n = 10{,}000$, an attacker who wants to know whether one patient is in the data has advantage 0.0040: with a fair bit it is right with probability $\frac12 + \frac12(0.0040) = 0.502$. An attacker who wants the share of patients over 65 is never wrong to four decimals. The data, the release and the attacker's knowledge are the same; only the question differs.
-
-### Check yourself
-
-- In step 4 of the membership derivation, why does the argument need the probability mass function to be unimodal? *(For one that rises and falls several times, the climbs and descents add up to more than twice the maximum. For $X$ uniform on $\{0, 2\}$, $\mathrm{TV}(X, X + 1) = 1$ while the maximum is $\frac12$.)*
-- Doubling the gap $|t_1 - t_0|$ has the same effect on @eq-prop-property as multiplying $n$ by what? *(By 4: the formula depends on $n$ and the gap only through $\sqrt n\,|t_1 - t_0|$.)*
-
 ## Shadow models and meta-classifiers {#sec-prop-meta}
 
-### Context
+For a real model nobody can write down $P_{n,t}$, the distribution of the trained parameters, so the best test of @thm-prop-ceiling is out of reach. Ateniese et al. (2015) gave the recipe every later attack uses: if you cannot compute the two distributions, sample from them. This section states that recipe, and then answers the two questions it leaves open, which classifier to train and how accurate it can be.
 
-For a real model nobody can write down $P_{n,t}$, the distribution of the trained parameters, so the likelihood-ratio test of Fact 1 is out of reach. Ateniese et al. (2015) gave the recipe every later attack uses: if you cannot compute the two distributions, sample from them. Draw many datasets from $\mathcal D_{t_0}$ and from $\mathcal D_{t_1}$, using auxiliary data. Train a **shadow model** on each, exactly as the victim trains. Label each shadow model's parameters with the bit that produced them, and train a classifier on these labelled parameter vectors: the **meta-classifier**. Then apply it to the victim's model. This is the shadow-model idea of [Membership inference](02-membership-inference.md), with whole models as the data points.
+::: {#def-prop-shadow name="Shadow-model attack"}
+The attacker draws many datasets of $n$ records from $\mathcal D_{t_0}$ and from $\mathcal D_{t_1}$, using auxiliary data, and trains a **shadow model** on each with the victim's algorithm $\mathcal T$. It labels each shadow model's parameters with the bit that produced them, trains a classifier on these labelled parameter vectors, the **meta-classifier**, and applies it to the victim's model.
+:::
 
-Which meta-classifier should you train, and how accurate can it be? For models fitted by minimizing an average loss, the parameters turn out to be approximately Gaussian with a covariance that shrinks like $1/n$. Fact 3 then answers both questions: train a linear classifier, and expect accuracy $\Phi(\gamma/2)$.
+This is the shadow-model idea of [Membership inference](02-membership-inference.md), with whole models as the data points. To say which meta-classifier is best, you need the distribution of the parameters, and for models fitted by minimizing an average loss it is approximately Gaussian.
 
-### Statement
+Let $\theta$ minimize the average loss $\frac1n\sum_i\ell(\theta; x_i)$ over the training records, and let $\theta(t)$ minimize the expected loss under $\mathcal D_t$, the model you would get from infinitely many records. How noisy $\theta$ is around $\theta(t)$ depends on two things. A sharply curved loss pins the minimizer down, and records whose gradients point in different directions pull it about.
 
-The setting is a model fitted by minimizing an average loss. Let $\theta$ minimize the average loss $\frac1n\sum_i\ell(\theta; x_i)$ over the training records, and let $\theta(t)$ minimize the expected loss under $\mathcal D_t$: the model you would get from infinitely many records. How noisy $\theta$ is around $\theta(t)$ depends on two matrices. $H$ is the average curvature of the loss at $\theta(t)$: a sharply curved loss pins the minimizer down. $G$ is the covariance of the per-record gradients at $\theta(t)$: how much each record pulls in its own direction. Together they give $\Sigma_1(t)$, the covariance of the fit for a single record's worth of data (the subscript 1):
-$$H = \mathbb E_{\mathcal D_t}\nabla^2\ell(\theta(t); x), \qquad G = \mathbb E_{\mathcal D_t}\big[\nabla\ell(\theta(t); x)\nabla\ell(\theta(t); x)^\top\big], \qquad \Sigma_1(t) = H^{-1}GH^{-1}.$$
-$\Sigma_1$ is called the **sandwich covariance**, because $G$ sits between two copies of $H^{-1}$. Then, for large $n$:
+::: {#prp-prop-mest name="Fitted parameters are approximately Gaussian"}
+Let the average curvature of the loss be $H = \mathbb E_{\mathcal D_t}\nabla^2\ell(\theta(t); x)$ and the second moment of the per-record gradients $G = \mathbb E_{\mathcal D_t}\big[\nabla\ell(\theta(t); x)\nabla\ell(\theta(t); x)^\top\big]$, with $H$ invertible, and define the **sandwich covariance** $\Sigma_1(t) = H^{-1}GH^{-1}$, named for $G$ sitting between two copies of $H^{-1}$. Under the regularity conditions of van der Vaart (1998, ch. 5), for large $n$,
+$$\theta \approx \mathcal N\big(\theta(t), \Sigma_1(t)/n\big).$$
+:::
 
-1. **The parameters are approximately Gaussian,** centred on the population fit with covariance shrinking like $1/n$: $\theta \approx \mathcal N\big(\theta(t), \Sigma_1(t)/n\big)$.
-2. **The best attack is linear,** and its accuracy is that of Fact 3 with the shift $\theta(t_1) - \theta(t_0)$ measured against the noise $\bar\Sigma_1/n$:
-$$\Phi(\gamma/2), \qquad \gamma = \sqrt{n\,\big(\theta(t_1) - \theta(t_0)\big)^\top\bar\Sigma_1^{-1}\big(\theta(t_1) - \theta(t_0)\big)},$$ {#eq-prop-delta}
-where $\bar\Sigma_1$ is the average of $\Sigma_1(t_0)$ and $\Sigma_1(t_1)$.
-3. **For a small gap, only $\sqrt n\,|t_1 - t_0|$ matters.** The shift is then about the slope $\theta'(\bar t) = \frac{d\theta}{dt}$ times the gap, so $\gamma$ is the gap times $\sqrt n$ times a constant $\kappa$, which is the length of the slope measured against the noise:
-$$\gamma \approx \kappa\sqrt n\,|t_1 - t_0|, \qquad \kappa = \sqrt{\theta'(\bar t)^\top\Sigma_1(\bar t)^{-1}\theta'(\bar t)}.$$ {#eq-prop-kappa}
-For the released fraction $\theta = S/n$, $\kappa = 1/\sqrt{\bar t(1 - \bar t)}$, which is $1/\sqrt{0.25} = 2$ at $\bar t = \frac12$, and @eq-prop-delta becomes @eq-prop-property.
+::: {.proof}
+This is the asymptotic normality of **M-estimators**, estimators defined as the minimizer of an average loss. The plan is to write the fit as a linear function of an average of per-record gradients, which is approximately Gaussian. Van der Vaart gives the conditions for each approximation, and @sec-apx-opt-mest proves them for logistic regression.
 
-### Derivation
-
-**The parameters are approximately Gaussian.** This is the standard asymptotic normality of **M-estimators**, estimators defined as the minimizer of an average loss (van der Vaart 1998, ch. 5; @sec-apx-opt-mest in the appendices proves it step by step for logistic regression). The idea: near its minimum, the fitted parameter is a linear function of an average of per-record gradients, and an average is approximately Gaussian. Four steps make this precise.
-
-1. **The fit solves an average equation.** At a minimizer the gradient is zero, so $\frac1n\sum_i\nabla\ell(\theta; x_i) = 0$.
-2. **Linearize around $\theta(t)$.** For large $n$, $\theta$ is close to $\theta(t)$, so a first-order Taylor expansion of the gradient around $\theta(t)$ is accurate: $0 \approx \frac1n\sum_i\nabla\ell(\theta(t); x_i) + H(\theta - \theta(t))$. Here the sample average of the Hessians has been replaced by its expectation $H$, which the law of large numbers allows for large $n$. Solving for $\theta$,
+1. *The fit solves an average equation.* At a minimizer the gradient is zero, so $\frac1n\sum_i\nabla\ell(\theta; x_i) = 0$.
+2. *Linearize around $\theta(t)$.* For large $n$, $\theta$ is close to $\theta(t)$, so a first-order Taylor expansion of the gradient is accurate. The sample average of the Hessians is close to its expectation $H$ by the law of large numbers, so $0 \approx \frac1n\sum_i\nabla\ell(\theta(t); x_i) + H(\theta - \theta(t))$. Solving for $\theta$,
 $$\theta - \theta(t) \approx -H^{-1}\,\frac1n\sum_i\nabla\ell(\theta(t); x_i).$$
-This is the average form of @sec-prop-scaling, with influence $\psi(x) = -H^{-1}\nabla\ell(\theta(t); x)$: each record pulls the fit by its gradient, scaled by the inverse curvature.
-3. **The average gradient has mean zero.** $\theta(t)$ minimizes the expected loss, so the expected gradient there is zero, $\mathbb E_{\mathcal D_t}\nabla\ell(\theta(t); x) = 0$. Each gradient therefore has mean zero and covariance $G$, and an average of $n$ independent copies has covariance $G/n$.
-4. **Apply the central limit theorem.** An average of many independent terms is approximately Gaussian, so the average gradient is approximately $\mathcal N(0, G/n)$. Multiplying a Gaussian vector by the matrix $-H^{-1}$ multiplies its covariance by $H^{-1}$ on both sides ($H$ is symmetric), which gives $\mathcal N(0, H^{-1}GH^{-1}/n)$.
+So the fit is an average, as in @sec-prop-scaling, in which each record pulls by its gradient scaled by the inverse curvature.
+3. *The average gradient has mean zero.* $\theta(t)$ minimizes the expected loss, so the expected gradient there is zero. Each gradient therefore has mean zero, so its second moment $G$ is its covariance, and an average of $n$ independent copies has covariance $G/n$.
+4. *Apply the central limit theorem.* The average gradient is approximately $\mathcal N(0, G/n)$. Multiplying a Gaussian vector by the symmetric matrix $-H^{-1}$ multiplies its covariance by $H^{-1}$ on both sides, which gives $\mathcal N(0, H^{-1}GH^{-1}/n)$.
+:::
 
-**The best attack and its accuracy.** Under the two hypotheses, $\theta$ is approximately $\mathcal N(\theta(t_0), \Sigma_1(t_0)/n)$ and $\mathcal N(\theta(t_1), \Sigma_1(t_1)/n)$. Fact 3 needs a shared covariance; when the two covariances are close, replace both by $\bar\Sigma_1/n$. Fact 3 then applies with $m_b = \theta(t_b)$ and $\Sigma = \bar\Sigma_1/n$. Since $\Sigma^{-1} = n\,\bar\Sigma_1^{-1}$, the factor $n$ comes out of the Mahalanobis distance, which gives @eq-prop-delta. Fact 3 also says the best test is linear in $\theta$: a **linear discriminant**, which is the meta-classifier to train.
+Under the two hypotheses, then, the parameters are two Gaussians, whose covariances are nearly equal when the gap is small. Step 2 of the next theorem's proof needs the best test between two such Gaussians, and the following lemma gives it. In $d$ dimensions the noise can be larger in some directions than in others, so a shift along a noisy direction counts for less than the same shift along a quiet one. The **Mahalanobis distance** measures a shift in exactly this way, in standard deviations along its own direction.
 
-**The scaling law.** For a small gap, the population fit changes almost linearly in $t$, so $\theta(t_1) - \theta(t_0) \approx \theta'(\bar t)(t_1 - t_0)$, and the covariance hardly changes, so $\bar\Sigma_1 \approx \Sigma_1(\bar t)$. Substituting into @eq-prop-delta gives $\gamma^2 \approx n(t_1 - t_0)^2\,\theta'(\bar t)^\top\Sigma_1(\bar t)^{-1}\theta'(\bar t)$, whose square root is @eq-prop-kappa.
+::: {#lem-prop-gauss name="Two Gaussians with a shared covariance"}
+Let $P = \mathcal N(m_0, \Sigma)$ and $Q = \mathcal N(m_1, \Sigma)$ on $\mathbb R^d$ with $\Sigma$ invertible, with densities $p$ and $q$, and let
+$$\gamma = \sqrt{(m_1 - m_0)^\top\Sigma^{-1}(m_1 - m_0)}$$
+be their Mahalanobis distance. Then the log-likelihood ratio is linear in $\theta$,
+$$\ln\frac{q(\theta)}{p(\theta)} = \omega^\top\Big(\theta - \frac{m_0 + m_1}2\Big), \qquad \omega = \Sigma^{-1}(m_1 - m_0),$$
+and the best test with a fair bit has accuracy
+$$\Phi(\gamma/2).$$ {#eq-prop-gauss-acc}
+:::
 
-**The released fraction.** The count fits the same mould, which checks the general formula against @sec-prop-scaling. Take $\ell(\theta; x) = \frac12(\theta - a)^2$, where $a \in \{0, 1\}$ marks the subgroup. The minimizer of the average of $\frac12(\theta - a_i)^2$ is the mean of the $a_i$, which is $\theta = S/n$. Its population version is $\theta(t) = \mathbb E[a] = t$, so $\theta' = 1$. The second derivative of the loss is $H = 1$, and the gradient $\theta(t) - a = t - a$ has variance $G = t(1 - t)$, the variance of a $\mathrm{Bern}(t)$ variable. So $\Sigma_1 = t(1 - t)$ and $\kappa = 1/\sqrt{t(1 - t)}$. With this $\kappa$, the accuracy $\Phi(\gamma/2)$ turns into the advantage $2\Phi(\gamma/2) - 1$ of @eq-prop-property, because advantage is twice accuracy minus 1.
+::: {.proof}
+The plan is to write out the two log-densities, let the quadratic parts cancel because the covariances are equal, and find the distribution of what is left.
 
-### Interpretation
+1. *Expand the two quadratics.* A Gaussian log-density is $-\frac12(\theta - m)^\top\Sigma^{-1}(\theta - m)$ plus a constant that depends only on $\Sigma$, so the constants cancel in $\ln q - \ln p$. Multiplying out, the terms $\theta^\top\Sigma^{-1}\theta$ appear with opposite signs and cancel too, which leaves $(m_1 - m_0)^\top\Sigma^{-1}\theta - \frac12(m_1^\top\Sigma^{-1}m_1 - m_0^\top\Sigma^{-1}m_0)$.
+2. *Factor the constant.* Because $\Sigma^{-1}$ is symmetric, the cross terms $m_1^\top\Sigma^{-1}m_0$ and $m_0^\top\Sigma^{-1}m_1$ are equal, so the bracketed constant factors as $(m_1 - m_0)^\top\Sigma^{-1}(m_1 + m_0)$, and with its factor $-\frac12$ it becomes $-(m_1 - m_0)^\top\Sigma^{-1}\frac{m_0 + m_1}2$. Pulling out $\omega^\top = (m_1 - m_0)^\top\Sigma^{-1}$ gives the linear form.
+3. *Find its distribution.* Call the linear form $\Lambda$. As a linear function of a Gaussian it is Gaussian. Under $Q$ its mean is $\omega^\top\frac{m_1 - m_0}2 = \frac{\gamma^2}2$, by the definition of $\gamma$, and under $P$ the same computation gives $-\frac{\gamma^2}2$. Under both, its variance is $\omega^\top\Sigma\omega = (m_1 - m_0)^\top\Sigma^{-1}(m_1 - m_0) = \gamma^2$.
+4. *Compute the accuracy.* The best test says 1 where $q > p$, that is, where $\Lambda > 0$. Under $Q$ the threshold 0 lies $\frac{\gamma^2/2}{\gamma} = \frac\gamma2$ standard deviations below the mean, so the test is right with probability $\Phi(\gamma/2)$. Under $P$ it is right when $\Lambda < 0$, which by symmetry has the same probability. Averaging the two worlds gives @eq-prop-gauss-acc.
+:::
 
-**Two numbers set the leak.** $\theta'(t)$ says how much the property moves what the model learns, and $\Sigma_1$ says how noisy that is. If the property does not affect what the model fits, then $\theta' = 0$ and, to first order, nothing leaks, however large $n$ is. If it does, the leak is a side effect of fitting the data well, and no amount of care in the training code removes it.
+Putting the lemma together with @prp-prop-mest gives the accuracy of the best attack on a fitted model, and says that the best meta-classifier is linear.
 
-**$\kappa$ compares any model with the count.** With the group visible, the count has $\kappa = 1/\sqrt{\bar t(1 - \bar t)}$. Suppose a model has a smaller $\kappa$. How many records $n'$ would the count need to leak as much as the model does on $n$? Setting the two values of $\gamma$ equal, $\kappa\sqrt n = \sqrt{n'}/\sqrt{\bar t(1 - \bar t)}$, so $n' = n(\kappa\sqrt{\bar t(1 - \bar t)})^2$, a fraction of the real $n$. Suri & Evans (2022) measure leakage in exactly these units, as the number of records an attacker would need to see directly to match the model ([Exercise 3](../../book-exercises/part02-attacks/04-property-inference.md#sec-sol-prop-3)).
+::: {#thm-prop-meta name="The best attack on a fitted model"}
+Suppose the parameters satisfy @prp-prop-mest under both hypotheses, and that the gap is small enough to replace $\Sigma_1(t_0)$ and $\Sigma_1(t_1)$ by their average $\bar\Sigma_1$. Then the best attack is a linear test in $\theta$, and its accuracy is
+$$\Phi(\gamma/2), \qquad \gamma = \sqrt{n\,\big(\theta(t_1) - \theta(t_0)\big)^\top\bar\Sigma_1^{-1}\big(\theta(t_1) - \theta(t_0)\big)}.$$ {#eq-prop-delta}
+For a small gap, with $\theta'(\bar t) = \frac{\mathrm d\theta}{\mathrm dt}$ the slope of the population fit at the midpoint,
+$$\gamma \approx \kappa\sqrt n\,|t_1 - t_0|, \qquad \kappa = \sqrt{\theta'(\bar t)^\top\Sigma_1(\bar t)^{-1}\theta'(\bar t)}.$$ {#eq-prop-kappa}
+:::
 
-**Where the Gaussian picture fails.** The derivation used a Taylor expansion and the central limit theorem, both of which need large $n$. When $n$ is small or the model is far from its large-$n$ regime, the parameters are skewed and the linear meta-classifier is no longer optimal. A second gap comes from the attacker's own sampling. When the meta-classifier is trained on few shadow models, it estimates its direction $\omega$ with error, and falls short of $\Phi(\gamma/2)$. That shortfall is largest when the true effect is small, because then the noise in the shadow models swamps the shift it is trying to find.
+::: {.proof}
+1. *Two Gaussians.* Under the two hypotheses $\theta$ is approximately $\mathcal N(\theta(t_b), \bar\Sigma_1/n)$, for $b = 0, 1$.
+2. *Apply the lemma.* @lem-prop-gauss with $m_b = \theta(t_b)$ and $\Sigma = \bar\Sigma_1/n$ says the best test is linear, with accuracy $\Phi(\gamma/2)$. Since $\Sigma^{-1} = n\,\bar\Sigma_1^{-1}$, the factor $n$ comes out of the Mahalanobis distance, which gives @eq-prop-delta.
+3. *Linearize in the share.* For a small gap the population fit changes almost linearly in $t$, so $\theta(t_1) - \theta(t_0) \approx \theta'(\bar t)(t_1 - t_0)$, and the covariance hardly changes, so $\bar\Sigma_1 \approx \Sigma_1(\bar t)$. Substituting both into @eq-prop-delta gives $\gamma^2 \approx n(t_1 - t_0)^2\,\theta'(\bar t)^\top\Sigma_1(\bar t)^{-1}\theta'(\bar t)$, whose square root is @eq-prop-kappa.
+:::
 
-**The real pipeline.** Ganju et al. (2018) attack networks trained on census income data and other datasets, with many shadow models per hypothesis and a neural network as the meta-classifier. The toy below keeps every step but runs in seconds.
+The count of @sec-prop-scaling fits the same mould, which checks the theorem against an exact answer.
 
-### Example: logistic regression with a hidden subgroup
+::: {#cor-prop-count name="The released fraction"}
+For the released fraction $\theta = S/n$, the constant is $\kappa = 1/\sqrt{\bar t(1 - \bar t)}$, which is 2 at $\bar t = \frac12$, and the advantage $2\Phi(\gamma/2) - 1$ is @eq-prop-property.
+:::
 
-Each record has two features $x \sim \mathcal N(0, I_2)$ and a label. The majority labels with $\Pr[y = 1 \mid x] = \sigma(2x_1 + x_2)$, the subgroup with $\sigma(2x_1 - x_2)$, where $\sigma(z) = 1/(1 + e^{-z})$ is the logistic function. Think of a symptom $x_2$ that raises risk in most patients and lowers it in a minority. **The group is never a feature**: the model sees $(x_1, x_2, y)$ only. A logistic regression with weights $(\theta_1, \theta_2)$ and an intercept is trained on $n$ records, by Newton's method with a tiny ridge penalty $10^{-3}$.
+::: {.proof}
+1. *The fraction is a fitted model.* Take the loss $\ell(\theta; x) = \frac12(\theta - a)^2$, where $a \in \{0, 1\}$ marks the subgroup. The minimizer of its average is the mean of the marks, $\theta = S/n$, and its population version is $\theta(t) = t$, so $\theta' = 1$.
+2. *Compute the sandwich.* The second derivative of the loss is $H = 1$. The gradient $t - a$ has variance $G = t(1 - t)$, the variance of a $\mathrm{Bern}(t)$ variable. So $\Sigma_1 = t(1 - t)$, and @eq-prop-kappa gives $\kappa = 1/\sqrt{\bar t(1 - \bar t)}$.
+3. *Turn accuracy into advantage.* Advantage is twice accuracy minus 1, so $\Phi(\gamma/2)$ becomes $2\Phi(\gamma/2) - 1$, which with this $\kappa$ is @eq-prop-property.
+:::
 
-The script computes $\theta(t)$ and $\Sigma_1(t)$ exactly, by Gauss–Hermite quadrature over $x$ (a numerical rule for integrals against a Gaussian), as @tbl-prop-theta shows.
+**Two numbers set the leak.** The slope $\theta'$ says how much the property moves what the model learns, and $\Sigma_1$ says how noisy that is. If the property does not affect what the model fits, then $\theta' = 0$ and, to first order, nothing leaks however large $n$ is. The constant also compares any model with the count. Setting the model's $\gamma = \kappa\sqrt n\,|t_1 - t_0|$ equal to that of the count on $n'$ records shows that the model leaks as much as the count on $n' = n(\kappa\sqrt{\bar t(1 - \bar t)})^2$ records, which is how Suri & Evans (2022) measure leakage ([Exercise 3](../../book-exercises/part02-attacks/04-property-inference.md#sec-sol-prop-3)).
+
+The Gaussian picture fails where its approximations do. With small $n$ the parameters are skewed, and the linear meta-classifier is no longer optimal. The attacker's own sampling adds a second shortfall, because a meta-classifier trained on few shadow models estimates the direction $\omega$ with error. The meta-classifier then falls short of $\Phi(\gamma/2)$ most when the true effect is small, since then the noise in the shadow models swamps the shift it is looking for.
+
+::: {#exm-prop-logistic}
+Each record has two features $x \sim \mathcal N(0, I_2)$ and a label. The majority labels with $\Pr[y = 1 \mid x] = \sigma(2x_1 + x_2)$ and the subgroup with $\sigma(2x_1 - x_2)$, where $\sigma(z) = 1/(1 + e^{-z})$ is the logistic function. Think of a symptom $x_2$ that raises risk in most patients and lowers it in a minority. **The group is never a feature**, so the model sees $(x_1, x_2, y)$ only. A logistic regression with weights $(\theta_1, \theta_2)$ and an intercept is trained on $n$ records by Newton's method, with a tiny ridge penalty $10^{-3}$. The chapter's script (@sec-prop-code) computes $\theta(t)$, shown in @tbl-prop-theta, and $\Sigma_1(t)$ exactly, by Gauss–Hermite quadrature over $x$ (a numerical rule for integrals against a Gaussian).
+
+The property moves $\theta_2$. At $t = \frac12$ the two rules cancel in $\theta_2$, because half the population pushes it up and half down. As $t$ grows, the subgroup's rule wins and $\theta_2$ goes negative, with slope, computed by the script, $\theta'(\frac12) = (0, -1.704, 0)$ for $(\theta_1, \theta_2, \text{intercept})$. Mixing the rules also shrinks $\theta_1$ from 2 to 1.704, but symmetrically in $t$, so $\theta_1$ is flat at $\frac12$ and carries no information there. The intercept is 0 for every $t$, so it carries none either.
+
+The noise $\Sigma_1(\frac12)$ has diagonal $(12.59, 6.94, 6.04)$ and zero off-diagonal entries. Flipping the sign of $x_2$ swaps the two groups' rules and leaves the population at $t = \frac12$ unchanged, which makes $\theta_2$ uncorrelated with the rest. Flipping the sign of $x$ and swapping the labels flips only the intercept, which makes it uncorrelated with the weights. Two thousand models trained on $n = 1{,}000$ records at $t = \frac12$ test this. Their variances, times $n$, are $(11.92, 6.80, 6.08)$, and their mean $\theta_1$ is 1.693, so the Gaussian picture is right to within about 5%. Most of the difference in the variance of $\theta_1$ comes from the ridge penalty, which the population fit omits; including it lowers the predicted value from 12.59 to 11.83 (@sec-apx-opt-mest).
+
+Only $\theta_2$ has a nonzero slope and $\Sigma_1$ is diagonal, so @eq-prop-kappa reduces to the slope of $\theta_2$ over its standard deviation, $\kappa = 1.704/\sqrt{6.94} = 0.647$, against 2 for the count (@cor-prop-count). By the comparison with the count above, the model leaks the property as well as $(0.647/2)^2 = 0.105$ of its records would, about one record in ten.
+:::
 
 | $t$ | 0 | 0.25 | 0.5 | 0.75 | 1 |
 | --- | --- | --- | --- | --- | --- |
@@ -256,17 +249,11 @@ The script computes $\theta(t)$ and $\Sigma_1(t)$ exactly, by Gauss–Hermite qu
 
 : The population fit $\theta(t)$ of the logistic regression, against the subgroup share $t$. The intercept is 0 for every $t$. {#tbl-prop-theta}
 
-To use @eq-prop-kappa you need the slope $\theta'$ and the noise $\Sigma_1$ at the midpoint $t = \frac12$. Start with the slope, which says **the property moves $\theta_2$**. At $t = \frac12$ the two rules cancel in $\theta_2$: half the population pushes it up and half down. As $t$ grows, the subgroup's rule wins and $\theta_2$ goes negative, with slope $\theta'(\frac12) = (0, -1.704, 0)$ for $(\theta_1, \theta_2, \text{intercept})$. The table agrees: between $t = 0.25$ and $t = 0.75$, $\theta_2$ falls by $0.442 - (-0.442) = 0.884$ over a step of 0.5 in $t$, a slope of $-1.768$, close to the slope at $\frac12$. Mixing the rules also makes the labels noisier, which shrinks $\theta_1$ from 2 to 1.704. But the table shows it shrinks symmetrically in $t$ (1.767 at both 0.25 and 0.75), so $\theta_1$ is flat at $\frac12$ and carries no information there. The intercept is 0 for every $t$, so it carries none either.
-
-Next, **the noise.** $\Sigma_1(\frac12)$ has diagonal $(12.59, 6.94, 6.04)$ for $(\theta_1, \theta_2, \text{intercept})$, and zero off-diagonal entries. The zeros come from two symmetries of the population at $t = \frac12$. Flipping the sign of $x_2$ swaps the two groups' rules, and with half of each the mixture is unchanged. The flip turns a fitted $(\theta_1, \theta_2, \text{intercept})$ into $(\theta_1, -\theta_2, \text{intercept})$, so the two are equally likely, and $\theta_2$ is therefore uncorrelated with the other two parameters. Flipping the sign of $x$ and swapping the labels $y \to 1 - y$ also leaves the population unchanged and flips only the sign of the intercept, which makes the intercept uncorrelated with the weights. To test the Gaussian picture, the script trains two thousand models on $n = 1{,}000$ records at $t = \frac12$. $n$ times their variances are $(11.92, 6.80, 6.08)$, and their mean $\theta_1$ is 1.693. The Gaussian picture is right to within about 5%. Almost all of the difference in $\theta_1$ comes from the ridge penalty $10^{-3}$ the models are trained with: including it in the population objective lowers the predicted value from 12.59 to 11.83 (@sec-apx-opt-mest in the appendices).
-
-Now **the constant.** Only $\theta_2$ has a nonzero slope, and $\Sigma_1$ is diagonal, so @eq-prop-kappa reduces to the slope of $\theta_2$ over its standard deviation: $\kappa = 1.704/\sqrt{6.94} = 0.647$, against 2 for the count. By the comparison in the interpretation, the model leaks the property as well as $(0.647/2)^2 = 0.105$ of its records would: about one record in ten.
-
-@fig-prop-parameter-cloud shows the trained models for $t_0 = 0.4$ and $t_1 = 0.6$. At $n = 100$ the two clouds overlap. At $n = 1{,}000$ they have separated along $\theta_2$, and a line splits them.
+In @fig-prop-parameter-cloud, models trained at $t_0 = 0.4$ and $t_1 = 0.6$ overlap at $n = 100$ and separate along $\theta_2$ at $n = 1{,}000$.
 
 ![The parameters $(\theta_1, \theta_2)$ of 300 logistic regressions trained with subgroup share $t = 0.4$ and 300 with $t = 0.6$, at $n = 100$ (left) and $n = 1{,}000$ (right), with the linear meta-classifier fitted to them. The clouds shrink like $1/\sqrt n$; the gap between their centres stays fixed.](figures/prop_parameter_cloud.svg){#fig-prop-parameter-cloud}
 
-Now the attack itself. For each $n$ and gap, with $t_0, t_1$ centred on $\frac12$, the script trains 150 shadow models per hypothesis, fits the linear discriminant on their three parameters, and measures its accuracy on 150 fresh target models per hypothesis (@tbl-prop-sweep). Each accuracy is an average over 300 right-or-wrong outcomes, each with variance at most $\frac12 \cdot \frac12 = 0.25$, so its standard error is at most $\sqrt{0.25/300} = 0.029$.
+For the attack itself, the script trains 150 shadow models per hypothesis for each $n$ and gap, with $t_0$ and $t_1$ centred on $\frac12$. It fits the linear test of @lem-prop-gauss, with means and covariance estimated from the shadow models' three parameters, and measures its accuracy on 150 fresh target models per hypothesis (@tbl-prop-sweep). Each accuracy averages 300 outcomes, so its standard error is at most $\sqrt{0.25/300} = 0.029$. Most cells agree with $\Phi(\gamma/2)$ to within two standard errors. The exceptions are small effects ($n \le 200$, gap $\le 0.1$), where the meta-classifier finds the direction of $\omega$ badly.
 
 | $n$ | gap 0.05 | gap 0.1 | gap 0.2 | gap 0.4 |
 | --- | --- | --- | --- | --- |
@@ -278,59 +265,53 @@ Now the attack itself. For each $n$ and gap, with $t_0, t_1$ centred on $\frac12
 
 : Accuracy of the meta-classifier against logistic regressions, by dataset size $n$ and gap $\lvert t_1 - t_0\rvert$, with the prediction $\Phi(\gamma/2)$ of @eq-prop-delta in parentheses. {#tbl-prop-sweep}
 
-**The prediction holds.** Most cells agree with $\Phi(\gamma/2)$ to within two standard errors. The exceptions are at small effects ($n \le 200$, gap $\le 0.1$), where the meta-classifier, fitted to 300 noisy shadow models, finds the direction of $\omega$ badly. There the attack is weaker than the best test, as the interpretation predicted.
-
-**The scaling law holds.** @eq-prop-kappa says the accuracy depends on $n$ and the gap only through $\sqrt n\,|t_1 - t_0|$. Plotted against that product, the four curves fall on one, the curve $\Phi(\kappa\sqrt n\,|t_1 - t_0|/2)$ with $\kappa = 0.647$ (@fig-prop-meta-accuracy). So a gap of 0.05 at $n = 1{,}000$ is about as easy as a gap of 0.1 at $n = 200$ or so: $\sqrt{1000}\times0.05 = 1.58$, against $\sqrt{200}\times0.1 = 1.41$.
+The scaling law holds too. By @eq-prop-kappa the accuracy depends on $n$ and the gap only through $\sqrt n\,|t_1 - t_0|$, and plotted against that product the four curves fall on one (@fig-prop-meta-accuracy). So a gap of 0.05 at $n = 1{,}000$ is about as easy as a gap of 0.1 at $n = 200$ or so, since $\sqrt{1000}\times0.05 = 1.58$ against $\sqrt{200}\times0.1 = 1.41$.
 
 ![Left: accuracy of the meta-classifier against $n$ for four gaps $\lvert t_1 - t_0\rvert$ (150 shadow and 150 target models per hypothesis, seed 1). Right: the same accuracies against $\sqrt n\,\lvert t_1 - t_0\rvert$, with the Gaussian prediction $\Phi(\kappa\sqrt n\,\lvert t_1 - t_0\rvert/2)$, $\kappa = 0.647$.](figures/prop_meta_accuracy.svg){#fig-prop-meta-accuracy}
 
-### Check yourself
-
-- If the subgroup used the majority's label rule $\sigma(2x_1 + x_2)$, what would $\kappa$ be? *(Zero. $\mathcal D_A = \mathcal D_B$, so $\mathcal D_t$ does not depend on $t$, $\theta' = 0$, and no attack beats a coin flip; the property is then undetectable even from the data.)*
-- Why does the best meta-classifier ignore the intercept and $\theta_1$ in this example, even though they vary from model to model? *(Near $t = \frac12$ their means do not depend on $t$, and they are uncorrelated with $\theta_2$, so they add noise without signal; the linear discriminant gives them weight $\Sigma^{-1}(m_1 - m_0)$, which is zero in those coordinates.)*
-
 ## Permutation invariance {#sec-prop-symmetry}
 
-### Context
+A logistic regression has one parameter vector per function, since different weights give different predictions, but a neural network has many. Swap two hidden units, together with their incoming and outgoing weights, and the network computes exactly the same function. Ganju et al. (2018) observed that a meta-classifier fed the flattened weights then sees each unit in an arbitrary position of the vector, and does poorly. This section works out why for one hidden layer of tanh units, and which representations bring the property back.
 
-A logistic regression has one parameter vector per function: different weights give different predictions. A neural network has many. Swap two hidden units, together with their incoming and outgoing weights, and the network computes exactly the same function. Ganju et al. (2018) observed that a meta-classifier fed the flattened weights must then learn the same pattern in every slot and every order, and does poorly. Their remedy is a representation that does not depend on the order of the units. This section works it out for a network with one hidden layer of tanh units, which has a second symmetry as well: because tanh is odd, flipping the signs of a unit's weights in and out also leaves the function unchanged.
+::: {#def-prop-network name="A one-layer tanh network and its symmetries"}
+A network with $h$ hidden units computes
+$$f_\theta(x) = \sigma\big(v^\top\tanh(Wx + \beta) + c\big),$$
+where row $j$ of the matrix $W$ and entry $\beta_j$ of the hidden bias vector $\beta$ compute unit $j$'s input, $v_j$ is its outgoing weight, and $c$ is the output bias. Unit $j$'s parameters are $u_j = (W_{j\cdot}, \beta_j, v_j)$. A **symmetry** is a matrix $g = F\Pi$, where the permutation matrix $\Pi$ reorders the units and the diagonal matrix $F$ with entries $\pm1$ flips the sign of some of them. It acts on $\theta$ by applying $g$ to the rows of $W$ and to the entries of $\beta$ and $v$, leaving $c$ alone.
+:::
 
-### Statement
+There are $h!$ orders and $2^h$ sign patterns, so a generic network, one whose units are nonzero and pairwise neither equal nor opposite, has $h!\,2^h$ parameter vectors that compute the same function: $4! \times 2^4 = 384$ for $h = 4$ ([Exercise 4](../../book-exercises/part02-attacks/04-property-inference.md#sec-sol-prop-4) proves that they are distinct). The symmetry of the function carries over to the distribution of the trained weights, provided training treats every arrangement of the units alike. That has a sharp consequence for a linear attacker.
 
-Let $f_\theta(x) = \sigma\big(v^\top\tanh(Wx + \beta) + c\big)$ be a network with $h$ hidden units. Row $j$ of $W$ and entry $\beta_j$ compute unit $j$'s input, $v_j$ is its outgoing weight, and $c$ is the output bias. Collect unit $j$'s parameters as $u_j = (W_{j\cdot}, \beta_j, v_j)$. The two symmetries are a reordering of the units and a sign flip of some of them. A **permutation matrix** $\Pi$ reorders the entries of a vector, and a diagonal matrix $F$ with entries $\pm1$ flips the sign of some of them. Applying $g = F\Pi$ to the rows of $W$ and the entries of $\beta$ and $v$ reorders the units and flips some. It does not change the function:
+::: {#prp-prop-symmetry name="Symmetries hide the property from raw weights"}
+Every symmetry $g$ leaves the network's function unchanged,
 $$f_{(gW,\ g\beta,\ gv,\ c)} = f_{(W,\ \beta,\ v,\ c)}.$$ {#eq-prop-symmetry}
-There are $h!$ orders and $2^h$ sign patterns, so each generic network has $h!\,2^h$ parameter vectors: $4! \times 2^4 = 24 \times 16 = 384$ for $h = 4$. Suppose the initialization is invariant under every $g$ (for example, independent entries drawn from a distribution symmetric about 0) and training is gradient descent. Then the symmetry carries over from the function to the distribution of the trained weights, with three consequences:
+Suppose the initial parameters have the same law as their image under every $g$ (for example, independent entries drawn from a distribution symmetric about 0) and training is gradient descent. Then, under both hypotheses of the game,
 
-1. the law of the trained parameters is invariant under every $g$, under both hypotheses;
-2. every coordinate of every $u_j$ has mean zero under both hypotheses, so a linear meta-classifier on the raw parameters can use none of them;
-3. the second-moment features $\sum_j u_ju_j^\top$ are invariant under every $g$, and keep information that the raw means lose.
+1. the law of the trained parameters is invariant under every $g$;
+2. every coordinate of every $u_j$ has mean zero, so no linear score of the raw parameters has a mean that depends on the hypothesis through them;
+3. the second-moment features $\sum_j u_ju_j^\top$ are invariant under every $g$.
+:::
 
-### Derivation
+::: {.proof}
+The plan is to show that $g$ passes through tanh, so it leaves the output unchanged, then that it passes through every step of gradient descent, and then to read off what this means for averages.
 
-The plan is to show that $g$ passes through tanh, so it leaves the network's output unchanged; then that it passes through every step of gradient descent; and then to read off what this means for averages.
+1. *tanh commutes with $g$.* tanh acts entry by entry, so permuting its input permutes its output in the same way. tanh is odd, $\tanh(-z) = -\tanh(z)$, so flipping the sign of an entry flips the sign of its output. Hence $\tanh(gz) = g\tanh(z)$.
+2. *The output is unchanged.* By step 1 the symmetry can be pulled out of tanh, and $g^\top g = \Pi^\top F^2\Pi = I$, because each entry of $F$ is $\pm1$ and undoing a reordering gives back the original. So $(gv)^\top\tanh(gWx + g\beta) = v^\top g^\top g\tanh(Wx + \beta) = v^\top\tanh(Wx + \beta)$, which is @eq-prop-symmetry.
+3. *Gradient descent commutes with $g$.* Let $\mathcal L$ be the training loss, and let $g$ also denote its action on the whole parameter vector, which only reorders entries and flips signs, so it is linear and orthogonal. Step 2 says $\mathcal L(g\theta) = \mathcal L(\theta)$ for every $\theta$. Differentiating both sides with the chain rule gives $g^\top\nabla\mathcal L(g\theta) = \nabla\mathcal L(\theta)$, so $\nabla\mathcal L(g\theta) = g\nabla\mathcal L(\theta)$. One step with learning rate $\eta$ from $g\theta$ therefore lands at $g\theta - \eta g\nabla\mathcal L(\theta) = g(\theta - \eta\nabla\mathcal L(\theta))$. Repeating, if $T$ steps from $\theta_0$ reach $\theta_T$, then from $g\theta_0$ they reach $g\theta_T$.
+4. *The law is invariant.* The initial parameters $\theta_0$ have the same law as $g\theta_0$. Training maps them to $\theta_T$ and, by step 3, to $g\theta_T$, so $\theta_T$ and $g\theta_T$ have the same law for every dataset, and averaging over datasets under either hypothesis keeps this. That is claim 1.
+5. *Raw means vanish.* Take the $g$ that flips unit $j$ only. By claim 1, $u_j$ and $-u_j$ have the same law, so $\mathbb E[u_j] = -\mathbb E[u_j]$, which forces $\mathbb E[u_j] = 0$ under both hypotheses. A linear score $w^\top\theta$ has means $w^\top m_0$ and $w^\top m_1$ under the two hypotheses, where $m_0$ and $m_1$ are the mean parameter vectors. Their difference $m_1 - m_0$ is zero in every unit coordinate, so the score's mean shift comes only from the output bias $c$, which no $g$ touches. That is claim 2.
+6. *Second moments are invariant.* A permutation only reorders the terms of $\sum_ju_ju_j^\top$, which does not change the sum. A sign flip turns $u_j$ into $-u_j$, and $(-u_j)(-u_j)^\top = u_ju_j^\top$. That is claim 3.
+:::
 
-1. **tanh commutes with $g$.** tanh acts entry by entry, so permuting its input permutes its output in the same way. tanh is odd, $\tanh(-z) = -\tanh(z)$, so flipping the sign of an entry flips the sign of its output. Hence $\tanh(gz) = g\tanh(z)$.
-2. **The output is unchanged.** Using step 1, $(gv)^\top\tanh(gWx + g\beta) = v^\top g^\top g\tanh(Wx + \beta) = v^\top\tanh(Wx + \beta)$, because $g^\top g = \Pi^\top F^2\Pi = I$: $F^2 = I$ since each entry is $\pm1$, and $\Pi^\top\Pi = I$ since undoing a reordering gives back the original. This is @eq-prop-symmetry. Distinct $\Pi$ and $F$ give distinct parameter vectors when the units are distinct and no $v_j$ is 0, which gives the count $h!\,2^h$.
-3. **Gradient descent commutes with $g$.** Let $\mathcal L$ be the training loss and let $g$ also denote its action on the whole parameter vector, which is linear and orthogonal (it only reorders entries and flips signs). Step 2 says $\mathcal L(g\theta) = \mathcal L(\theta)$ for every $\theta$. Differentiating both sides with the chain rule gives $g^\top\nabla\mathcal L(g\theta) = \nabla\mathcal L(\theta)$, so $\nabla\mathcal L(g\theta) = g\nabla\mathcal L(\theta)$. One step of gradient descent from $g\theta$ therefore lands at $g\theta - \eta g\nabla\mathcal L(\theta) = g(\theta - \eta\nabla\mathcal L(\theta))$, where $\eta$ is the learning rate: $g$ applied to the step from $\theta$. Repeating, if $T$ steps of gradient descent from $\theta_0$ reach $\theta_T$, then from $g\theta_0$ they reach $g\theta_T$.
-4. **The law is invariant.** By assumption, the initial parameters $\theta_0$ have the same law as $g\theta_0$. Training maps $\theta_0$ to $\theta_T$ and, by step 3, $g\theta_0$ to $g\theta_T$, so $\theta_T$ and $g\theta_T$ have the same law, for every dataset. Averaging over datasets drawn under either hypothesis keeps this.
-5. **Raw means vanish.** Take the $g$ that flips unit $j$ only. Invariance says $u_j$ and $-u_j$ have the same law, so $\mathbb E[u_j] = \mathbb E[-u_j] = -\mathbb E[u_j]$, which forces $\mathbb E[u_j] = 0$, under both hypotheses. The linear discriminant of Fact 3 puts weight $\Sigma^{-1}(m_1 - m_0)$ on the features, where $m_0$ and $m_1$ are the mean parameter vectors under the two hypotheses; their difference is zero in every unit coordinate, so the weight is zero apart from the output bias $c$, which no $g$ touches.
-6. **Second moments are invariant.** A permutation only reorders the terms of $\sum_ju_ju_j^\top$, which does not change the sum. A sign flip turns $u_j$ into $-u_j$, and $(-u_j)(-u_j)^\top = u_ju_j^\top$.
+Raw weights hide the property because each position in the parameter vector holds a random one of the network's units, with a random sign. The property changes the set of units the network learns, not their positions, so averaging position by position washes it out. There are three ways to undo the symmetry. A **canonical form** picks one parameter vector per function: flip each unit so that $v_j > 0$, then sort the units by $v_j$. Sorting is the first remedy of Ganju et al., but it is fragile, because two units with nearly equal $v_j$ swap places from one network to the next. A **set representation** feeds each unit through the same map $\phi$, adds the results and applies a second map, $\rho\big(\sum_j\phi(u_j)\big)$, which does not depend on the order (Zaheer et al. 2017). The features $\sum_ju_ju_j^\top$ are the case $\phi(u) = uu^\top$, with $\rho$ the identity. **Query features** use the network's outputs on fixed probe inputs, which are invariant automatically and need only black-box access.
 
-### Interpretation
+The example below shows that **black-box can beat white-box**. Whoever holds the weights can compute any query output, so white-box access is never weaker for the best attack. But a fixed linear meta-classifier is not the best attack, and for it a better representation can matter more than more access. Zhang, Tople & Ohrimenko (2021) attack properties through queries alone.
 
-**Raw weights hide the property from a linear attacker.** Because of the symmetries, each unit slot holds a random one of the network's units, with a random sign. The property shows in *which* units the network has, not in which slot holds which unit, so averaging over networks slot by slot washes it out.
+::: {#exm-prop-tanh}
+The data are as in @exm-prop-logistic, with $t_0 = 0.2$ and $t_1 = 0.8$. Each network has $h = 4$ tanh units and is trained on $n = 200$ records by 300 steps of full-batch gradient descent from a random start. For each hypothesis, 150 shadow networks fit the linear discriminant and 150 target networks measure its accuracy.
+Each unit has four parameters (two input weights, a bias and an output weight), so the raw parameters number $4 \times 4 + 1 = 17$ with the output bias. The symmetric second-moment matrix has 10 distinct entries, which with the output bias gives 11 features. To see which features carry signal, @tbl-prop-representations also reports each representation's largest **standardized mean gap**: for each feature, the difference of its means under $t_0$ and $t_1$, divided by its pooled standard deviation.
 
-There are **three ways to undo the symmetry**. A **canonical form** picks one parameter vector per function: flip each unit so that $v_j > 0$, then sort the units by $v_j$. Sorting the neurons of each layer is the first of the two remedies Ganju et al. propose; their networks use ReLU units, which have no sign symmetry, so for them sorting alone gives the canonical form, and it beats raw weights in their experiments. It is fragile, because two units with nearly equal $v_j$ swap places from one network to the next. A **set representation** feeds each unit through the same map $\phi$, adds the results, and applies a second map: $\rho\big(\sum_j\phi(u_j)\big)$. The sum does not depend on the order of the units. Ganju et al. use this DeepSets form (Zaheer et al. 2017), with $\phi$ and $\rho$ learned networks. The features $\sum_ju_ju_j^\top$ are the case $\phi(u) = uu^\top$, which is also unchanged by sign flips. **Query features** use the network's outputs on fixed probe inputs. A function does not depend on how it is parameterized, so these are invariant automatically, and they need only black-box access.
-
-**Deeper networks** have the same problem at each layer. Each hidden layer has its own permutations, and they compose, so a set representation is applied layer by layer.
-
-Finally, **black-box can beat white-box.** Fact 2 of [Threat models and privacy games](01-threat-models.md) says that processing the view cannot help the attacker: whoever holds the weights can compute any query output, so white-box access is never weaker *for the best attack*. That says nothing about a fixed simple attack. For a linear meta-classifier, a better representation of the same model can matter more than more access, and the example shows probe outputs beating raw weights. Zhang, Tople & Ohrimenko (2021) attack properties through queries alone.
-
-### Example: a tanh network with four hidden units
-
-The data are as in @sec-prop-meta, with $t_0 = 0.2$ and $t_1 = 0.8$. Each network has $h = 4$ tanh units and is trained on $n = 200$ records by 300 steps of full-batch gradient descent from a random start. On each side, 150 shadow networks fit the linear discriminant and 150 target networks measure its accuracy. The script also checks @eq-prop-symmetry directly: a network with permuted and sign-flipped units gives the same logits on 1,000 inputs, to $10^{-12}$.
-
-Each unit has four parameters (two input weights, a bias and an output weight), so the raw parameters number $4 \times 4 + 1 = 17$, counting the output bias $c$. The canonical form reorders the same 17. The second-moment matrix $\sum_j u_ju_j^\top$ is a symmetric $4 \times 4$ matrix with $4 \times 5/2 = 10$ distinct entries, plus $c$, which gives 11. To see which features carry signal, @tbl-prop-representations also reports each representation's largest **standardized mean gap**: for each feature, the difference of its means under $t_0$ and $t_1$, divided by its pooled standard deviation.
+Raw parameters are at chance, as claim 2 predicts. Their largest standardized gap, 0.34, is noise: a difference of two means of 150 standardized values has standard deviation $\sqrt{2/150} = 0.115$, and the largest of 17 is typically two to three times that. Canonical order lifts the accuracy to 0.807, mostly through one feature (@fig-prop-symmetries, left). Second moments do better with fewer features, because they need no tie-breaking. Probe outputs are best, because they measure the function the property changes directly.
+:::
 
 | Representation | Features | Largest standardized mean gap | Accuracy |
 | --- | --- | --- | --- |
@@ -341,26 +322,15 @@ Each unit has four parameters (two input weights, a bias and an output weight), 
 
 : The linear meta-classifier against tanh networks, by representation. The standardized gap of a feature is the difference of its means under $t_0$ and $t_1$, over its pooled standard deviation, on the shadow networks. {#tbl-prop-representations}
 
-**Raw parameters are at chance**, as step 5 predicts. Their largest standardized gap, 0.34, is the size expected from noise alone. A standardized feature has variance 1, so its mean over 150 networks has variance $1/150$, and the difference of two such means has variance $2/150$, a standard deviation of $\sqrt{2/150} = 0.115$. The largest of 17 such gaps is typically two to three times that.
-
-**Canonical order recovers most of the signal,** with one feature carrying most of it (@fig-prop-symmetries, left). **Second moments do better with fewer features,** because they need no tie-breaking between units with nearly equal $v_j$. **Probe outputs are best.** The property changes the function the network computes, and probe outputs measure that function directly, without passing through any parameterization.
-
 ![Left: for each representation of 100 tanh networks per hypothesis ($t = 0.2$ against $t = 0.8$), the standardized mean gap of every feature. Right: accuracy of the linear meta-classifier on 100 further networks per hypothesis (seed 1). Raw parameters carry no mean signal; invariant representations do.](figures/prop_symmetries.svg){#fig-prop-symmetries}
 
-### Check yourself
+## Code {#sec-prop-code}
 
-- Would the raw means vanish for a network with ReLU units instead of tanh? *(Not by this argument. ReLU is not odd, so the sign flip is not a symmetry; only the permutations remain. They force every unit slot to have the same mean, but that common mean can differ between $t_0$ and $t_1$.)*
-- Why does a linear meta-classifier on the sum $\sum_ju_j$ fail for tanh networks, even though the sum is permutation invariant? *(The sign flips still apply: $\mathbb E[u_j] = 0$ for every $j$, so the sum has mean zero under both hypotheses. An invariant feature needs to be even in each $u_j$, like $u_ju_j^\top$.)*
-
-## Code: check every result by computation and simulation
-
-The script [code/property_inference.py](../../code/part02-attacks/property_inference.py) computes every number in this chapter and draws every figure. The binomial advantages are exact sums. The population fit and the sandwich covariance of the logistic regression are computed by Gauss–Hermite quadrature on a $40\times40$ grid. Shadow and target models are trained in batches with NumPy: logistic regressions by Newton's method, tanh networks by full-batch gradient descent. From the repository root:
+The script [code/property_inference.py](../../code/part02-attacks/property_inference.py) computes every number in this chapter and draws every figure. The binomial advantages are exact sums, and the logistic regression's population fit and sandwich covariance come from Gauss–Hermite quadrature on a $40\times40$ grid. From the repository root:
 
 ```bash
 uv run python code/part02-attacks/property_inference.py
 ```
-
-**Output** (seed 0), summarized in @tbl-prop-code:
 
 | Experiment | Result |
 | --- | --- |
@@ -376,9 +346,22 @@ uv run python code/part02-attacks/property_inference.py
 
 [tests/test_property_inference.py](../../tests/test_property_inference.py) checks that the output still matches.
 
-**What to take from it.** Four things stand out. First, more data helps the property attacker: the same release that hides each record better as $n$ grows reveals the property better. Second, the Gaussian picture predicts real attacks: two numbers computed from the population, $\theta'$ and $\Sigma_1$, predict the meta-classifier's accuracy across a 20-fold range of $n$ and an 8-fold range of gaps. Third, hiding the group column does not hide the property: the logistic regression never sees the group, and still leaks the property as well as a tenth of its records would. Fourth, representation matters before access does: the same networks are opaque to a linear attacker in raw form and transparent once the hidden-unit symmetries are removed.
+## Summary {#sec-prop-summary}
 
-## References
+| Result | Statement | Use |
+| --- | --- | --- |
+| @thm-prop-ceiling | $\mathrm{Adv} \le \mathrm{TV}(P_{n,t_0}, P_{n,t_1}) \le \mathrm{TV}(\mathcal D_{t_0}^n, \mathcal D_{t_1}^n)$, the binomial TV when groups are visible | The ceiling; a released count is the worst case; report accuracy |
+| @lem-prop-shift | A unimodal count shifted by one moves by its largest probability | Membership on a count |
+| @prp-prop-membership | $(1 - t)\max_k\Pr[\mathrm{Bin}(n - 1, t) = k]$ | Membership gets harder like $1/\sqrt n$ |
+| @prp-prop-property | $2\Phi\big(\sqrt n\,\lvert t_1 - t_0\rvert/(2\sqrt{\bar t(1 - \bar t)})\big) - 1$ | Properties get easier with $n$; defences sized for one record do not cover them |
+| @prp-prop-mest | $\theta \approx \mathcal N(\theta(t), H^{-1}GH^{-1}/n)$ | The law of a fitted model |
+| @lem-prop-gauss | Best accuracy $\Phi(\gamma/2)$, by a linear test | Train a linear meta-classifier |
+| @thm-prop-meta, @cor-prop-count | Accuracy $\Phi(\kappa\sqrt n\,\lvert t_1 - t_0\rvert/2)$; $\kappa = 2$ for the count at $\bar t = \frac12$ | Predict an attack from $\theta'$ and $\Sigma_1$; dropping the group column does not hide the property |
+| @prp-prop-symmetry | $h!\,2^h$ equivalent parameter vectors; raw means vanish for tanh | Use canonical order, sums over units or probe outputs |
+
+: The results of this chapter, and where each is used. {#tbl-prop-summary}
+
+## References {#sec-prop-references}
 
 - Ateniese, Mancini, Spognardi, Villani, Vitali & Felici, "Hacking Smart Machines with Smarter Ones: How to Extract Meaningful Data from Machine Learning Classifiers" (International Journal of Security and Networks, 2015). The first property-inference attack: shadow models trained with and without the property, and a meta-classifier on their parameters. Read it for the recipe and its threat model.
 - Ganju, Wang, Yang, Gunter & Borisov, "Property Inference Attacks on Fully Connected Neural Networks using Permutation Invariant Representations" (CCS 2018). The permutation problem for neural networks, neuron sorting, and the DeepSets meta-classifier. The source of @sec-prop-symmetry.
@@ -389,29 +372,5 @@ uv run python code/part02-attacks/property_inference.py
 - Salem, Cherubin, Evans, Köpf, Paverd, Suri, Tople & Zanella-Béguelin, "SoK: Let the Privacy Games Begin! A Unified Treatment of Data Inference Privacy in Machine Learning" (IEEE S&P 2023). Property inference as one game among the others of this part.
 - Zaheer, Kottur, Ravanbakhsh, Póczos, Salakhutdinov & Smola, "Deep Sets" (NeurIPS 2017). The $\rho(\sum_j\phi(u_j))$ form of permutation-invariant functions.
 - van der Vaart, *Asymptotic Statistics* (1998), ch. 5. Asymptotic normality of M-estimators and the sandwich covariance $H^{-1}GH^{-1}$, with the regularity conditions this chapter skips.
-
-## Cheat sheet
-
-$\mathcal D_t$ mixes the majority and a subgroup of share $t$; $D \sim \mathcal D_t^n$; $\theta = \mathcal T(D) \sim P_{n,t}$; $\bar t = \frac{t_0 + t_1}2$. @tbl-prop-cheat collects the results.
-
-| Result | Formula | Note |
-| --- | --- | --- |
-| Ceiling on any attack | $\mathrm{Adv} \le \mathrm{TV}(P_{n,t_0}, P_{n,t_1}) \le \mathrm{TV}(\mathcal D_{t_0}^n, \mathcal D_{t_1}^n)$ | Equals $\mathrm{TV}(\mathrm{Bin}(n, t_0), \mathrm{Bin}(n, t_1))$ when the group is visible |
-| Property, released count | $2\Phi\big(\sqrt n\,\lvert t_1 - t_0\rvert/(2\sqrt{\bar t(1 - \bar t)})\big) - 1$ | $\to 1$ as $n$ grows |
-| Membership, released count | $(1 - t)\max_k\Pr[\mathrm{Bin}(n - 1, t) = k] \approx (1 - t)/\sqrt{2\pi(n - 1)t(1 - t)}$ | $\to 0$ like $1/\sqrt n$ |
-| Two Gaussians, shared $\Sigma$ | Best accuracy $\Phi(\gamma/2)$; linear test $\omega = \Sigma^{-1}(m_1 - m_0)$ | $\gamma$ the Mahalanobis distance |
-| Trained parameters | $\theta \approx \mathcal N(\theta(t), H^{-1}GH^{-1}/n)$ | M-estimators, large $n$ |
-| Meta-classifier accuracy | $\Phi(\kappa\sqrt n\,\lvert t_1 - t_0\rvert/2)$, $\kappa = \lvert\theta'\rvert_{\Sigma_1^{-1}}$ | Count: $\kappa = 1/\sqrt{\bar t(1 - \bar t)}$ |
-| Hidden-unit symmetry | $f_{(gW, g\beta, gv, c)} = f_{(W, \beta, v, c)}$, $g = F\Pi$ | $h!\,2^h$ copies; raw means vanish for tanh |
-
-: Every result of the chapter. {#tbl-prop-cheat}
-
-**Rules of thumb**
-
-- Property inference gets easier with more data, membership inference harder. What matters for a property is $\sqrt n\,|t_1 - t_0|$.
-- A property changes about $n|t_1 - t_0|$ records at once. Defences sized for one record do not cover it.
-- Removing the sensitive column does not remove the property. Whatever correlates with it moves the model.
-- Train the meta-classifier on a representation that respects the model's symmetries: canonical order, sums over units, or outputs on probe inputs.
-- Report accuracy for property attacks: there is one secret per dataset, not a population of targets.
 
 **Practice.** Exercises for this chapter, each with a worked solution, are in [the exercise book](../../book-exercises/part02-attacks/04-property-inference.md).

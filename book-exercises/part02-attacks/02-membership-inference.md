@@ -2,15 +2,15 @@
 
 Exercises for [Membership inference](../../book-full/part02-attacks/02-membership-inference.md), each with a worked solution. Try each exercise before opening its solution. The script `code/part02-attacks/solutions_membership_inference.py` computes every number quoted here; run it with `uv run python code/part02-attacks/solutions_membership_inference.py`.
 
-The solutions use the chapter's notation. $\phi = y\langle \theta, x\rangle$ is the logit of the model's confidence in the true label, IN and OUT are the distributions of a record's $\phi$ over models trained with and without it, and an attack's true positive rate (TPR) and false positive rate (FPR) are measured over (target model, pool point) pairs of the running example. The likelihood ratio attack (LiRA) is the per-example test of the chapter, and attacks are compared by their receiver operating characteristic (ROC) curves and the area under the curve (AUC). Exercises 1 and 7 reuse the chapter's experiment with seed 0, so their numbers match the chapter's tables; Exercise 6 draws a fresh pool.
+The solutions use the chapter's notation. $\phi = y\langle \theta, x\rangle$ is the logit of the model's confidence in the true label, IN and OUT are the distributions of a record's $\phi$ over models trained with and without it, and an attack's true positive rate (TPR) and false positive rate (FPR) are measured over (target model, pool point) pairs of the running example. The likelihood ratio attack (LiRA) is the per-record test of the chapter, and attacks are compared by their receiver operating characteristic (ROC) curves and the area under the curve (AUC). Exercises 1 and 7 reuse the chapter's experiment with seed 0, so their numbers match the chapter's tables; Exercise 6 draws a fresh pool.
 
 ## Accuracy with an unbalanced prior {#sec-sol-mia-1}
 
-> **Exercise 1.** **Accuracy with an unbalanced prior.** Suppose a fraction $\pi_1$ of the queried records are members. Show that "member if correctly classified" has accuracy $\pi_1(1 - e_{\mathrm{train}}) + (1 - \pi_1)e_{\mathrm{test}}$. With the running example's errors, compare it with the trivial attack "always non-member" at $\pi_1 = 0.5$ and $\pi_1 = 0.1$. *Check: 0.5584 against 0.5, and 0.3247 against 0.9.* What does this say about reporting accuracy? *(Fact 1, Yeom's attack)*
+> **Exercise 1.** **Accuracy with an unbalanced prior.** Suppose a fraction $\pi_1$ of the queried records are members. Show that "member if correctly classified" has accuracy $\pi_1(1 - e_{\mathrm{train}}) + (1 - \pi_1)e_{\mathrm{test}}$. With the running example's errors, compare it with the trivial attack "always non-member" at $\pi_1 = 0.5$ and $\pi_1 = 0.1$. *Check: 0.5584 against 0.5, and 0.3247 against 0.9.* What does this say about reporting accuracy? *(The win rate of a game, @prp-mia-yeom)*
 
 ::: {.callout-tip collapse="true" title="Solution"}
-1. **Condition on membership** (Fact 1 of [Threat models and privacy games](../../book-full/part02-attacks/01-threat-models.md)): accuracy $= \pi_1\,\mathrm{TPR} + (1 - \pi_1)(1 - \mathrm{FPR})$.
-2. **The rates of this attack.** A member is flagged when it is classified correctly, so $\mathrm{TPR} = 1 - e_{\mathrm{train}}$. A non-member is flagged when it is classified correctly, so $\mathrm{FPR} = 1 - e_{\mathrm{test}}$ and $1 - \mathrm{FPR} = e_{\mathrm{test}}$.
+1. **Condition on membership**, as in @prp-threat-win of [Threat models and privacy games](../../book-full/part02-attacks/01-threat-models.md): accuracy $= \pi_1\,\mathrm{TPR} + (1 - \pi_1)(1 - \mathrm{FPR})$.
+2. **The rates of this attack.** By @prp-mia-yeom with the 0-1 loss, $\mathrm{TPR} = 1 - e_{\mathrm{train}}$ and $\mathrm{FPR} = 1 - e_{\mathrm{test}}$, so $1 - \mathrm{FPR} = e_{\mathrm{test}}$.
 3. **Substitute:** accuracy $= \pi_1(1 - e_{\mathrm{train}}) + (1 - \pi_1)e_{\mathrm{test}}$.
 4. **The running example** has $e_{\mathrm{train}} = 0.1495$ and $e_{\mathrm{test}} = 0.2663$.
    - At $\pi_1 = 0.5$: $0.5 \times 0.8505 + 0.5 \times 0.2663 = 0.5584$, against 0.5 for "always non-member". This is $\frac12 + \frac12 \times 0.1168$, the advantage of the chapter.
@@ -40,21 +40,12 @@ The attack has the same TPR and FPR in both cases; only the prior changed. At $\
 
 ## Same AUC, different exposure {#sec-sol-mia-3}
 
-> **Exercise 3.** **Same AUC, different exposure.** Derive the AUC, best advantage and TPR at FPR $\alpha$ of attacks A and B in @sec-mia-eval, and repeat the comparison at $r = 0.01$. *Check: AUC 0.5050, $\mu = 0.0177$, TPR at $10^{-3}$ 0.01099 for A and 0.00106 for B.* *(AUC as a ranking probability, Gaussian trade-off)*
+> **Exercise 3.** **Same AUC, different exposure.** Repeat the comparison of attacks A and B of @prp-mia-same-auc at $r = 0.01$. *Check: AUC 0.5050, $\mu = 0.0177$, TPR at $10^{-3}$ 0.01099 for A and 0.00106 for B.* *(AUC as a ranking probability, Gaussian trade-off)*
 
 ::: {.callout-tip collapse="true" title="Solution"}
-**Attack A.**
-
-1. **AUC.** The AUC is $\Pr[\text{member's score} > \text{non-member's score}]$, with ties counted as one half. With probability $r$ the member is exposed and wins outright; otherwise its score has the same distribution as the non-member's and it wins half the time. So $\mathrm{AUC} = r + \frac12(1 - r) = \frac12 + \frac r2$.
-2. **TPR.** At a threshold with FPR $\alpha$, the exposed members always pass and the rest pass with probability $\alpha$: $\mathrm{TPR} = r + (1 - r)\alpha$.
-3. **Best advantage.** $\mathrm{TPR} - \mathrm{FPR} = r(1 - \alpha)$, largest as $\alpha \to 0$, where it tends to $r$.
-
-**Attack B.**
-
-4. **AUC.** A member's score minus a non-member's is $\mathcal N(\mu, 2)$, positive with probability $\Phi(\mu/\sqrt2)$. Setting this equal to $\frac12 + \frac r2$ gives $\mu = \sqrt2\,\Phi^{-1}(\frac12 + \frac r2)$.
-5. **TPR** is @eq-mia-gauss-tpr with $s = \mu$, and the **best advantage** is the total variation between $\mathcal N(0, 1)$ and $\mathcal N(\mu, 1)$, $2\Phi(\mu/2) - 1$.
-
-**Numbers** at $\alpha = 10^{-3}$ (@tbl-sol-mia-same-auc):
+1. **The formulas.** @prp-mia-same-auc gives A the AUC $\frac12 + \frac r2$, best advantage $r$ and $\mathrm{TPR} = r + (1 - r)\alpha$, and B the AUC $\Phi(\mu/\sqrt2)$, best advantage $2\Phi(\mu/2) - 1$ and the TPR of @eq-mia-gauss-tpr with $s = \mu$.
+2. **Match the AUCs.** Setting $\Phi(\mu/\sqrt2) = \frac12 + \frac r2$ and inverting $\Phi$ gives $\mu = \sqrt2\,\Phi^{-1}(\frac12 + \frac r2)$.
+3. **Numbers** at $\alpha = 10^{-3}$ (@tbl-sol-mia-same-auc). At $r = 0.01$ the AUC is $0.5050$, so $\mu = \sqrt2\,\Phi^{-1}(0.5050) = 0.0177$. A's TPR is $0.01 + 0.99 \times 10^{-3} = 0.01099$, and B's is $1 - \Phi(3.0902 - 0.0177) = 0.00106$.
 
 | $r$ | AUC | A: advantage | A: TPR | B: $\mu$ | B: advantage | B: TPR |
 | --- | --- | --- | --- | --- | --- | --- |
@@ -85,7 +76,7 @@ The running example has 64,000 non-member pairs, so a threshold at FPR $10^{-3}$
 
 ## Membership in a Gaussian mean {#sec-sol-mia-5}
 
-> **Exercise 5.** **Membership in a Gaussian mean.** A "model" is the mean $\hat\theta$ of $n$ points drawn from $\mathcal N(0, I_d)$. The attacker sees $\hat\theta$ and a target $z$, and uses $T = \langle z, \hat\theta\rangle/(\|z\|/\sqrt n)$. Show that $T \sim \mathcal N(0, 1)$ when $z$ is not in the sample, and approximately $\mathcal N(\sqrt{d/n}, 1)$ when it is. Deduce the TPR at FPR $10^{-3}$ for $d = 1{,}000$ and $n = 100$, and check it by simulation. *Check: separation 3.1623, TPR 0.5287.* *Hint: given $z$, $\langle z, \sum_{j \ne i}x_j\rangle \sim \mathcal N(0, (n - 1)\|z\|^2)$, and $\|z\|^2 \approx d$.* *(Per-example separation)*
+> **Exercise 5.** **Membership in a Gaussian mean.** A "model" is the mean $\hat\theta$ of $n$ points drawn from $\mathcal N(0, I_d)$. The attacker sees $\hat\theta$ and a target $z$, and uses $T = \langle z, \hat\theta\rangle/(\|z\|/\sqrt n)$. Show that $T \sim \mathcal N(0, 1)$ when $z$ is not in the sample, and approximately $\mathcal N(\sqrt{d/n}, 1)$ when it is. Deduce the TPR at FPR $10^{-3}$ for $d = 1{,}000$ and $n = 100$, and check it by simulation. *Check: separation 3.1623, TPR 0.5287.* *Hint: given $z$, $\langle z, \sum_{j \ne i}x_j\rangle \sim \mathcal N(0, (n - 1)\|z\|^2)$, and $\|z\|^2 \approx d$.* *(Per-record separation, @prp-mia-per-example)*
 
 ::: {.callout-tip collapse="true" title="Solution"}
 1. **OUT.** If $z$ is not in the sample, $\hat\theta = \frac1n\sum_jx_j$ is independent of $z$ and $\hat\theta \sim \mathcal N(0, I_d/n)$. Given $z$, $\langle z, \hat\theta\rangle$ is a linear combination of independent Gaussians, so it is $\mathcal N(0, \|z\|^2/n)$. Dividing by $\|z\|/\sqrt n$ gives $T \sim \mathcal N(0, 1)$, exactly, whatever $z$ is.
@@ -94,7 +85,7 @@ $$\langle z, \hat\theta\rangle = \frac{\|z\|^2}n + \frac1n\Big\langle z, \sum_{j
 Given $z$, the second term is $\mathcal N\big(0, (n - 1)\|z\|^2/n^2\big)$ by the hint.
 3. **Standardize.** Divide by $\|z\|/\sqrt n$: $T = \|z\|/\sqrt n + \mathcal N\big(0, (n - 1)/n\big)$.
 4. **Approximate.** $\|z\|^2$ is a sum of $d$ squared standard normals, with mean $d$ and relative spread $\sqrt{2/d}$, so $\|z\|/\sqrt n \approx \sqrt{d/n}$. And $(n - 1)/n \approx 1$. So $T \approx \mathcal N(\sqrt{d/n}, 1)$.
-5. **TPR.** By Fact 2 of the chapter with separation $s = \sqrt{d/n}$, $\mathrm{TPR} = 1 - \Phi(3.0902 - s)$.
+5. **TPR.** By @eq-mia-gauss-tpr with separation $s = \sqrt{d/n}$, $\mathrm{TPR} = 1 - \Phi(3.0902 - s)$.
 
 | $d$ | $n$ | Separation $\sqrt{d/n}$ | Formula TPR | Simulated TPR | Simulated FPR |
 | --- | --- | --- | --- | --- | --- |
@@ -114,7 +105,7 @@ The simulation (@tbl-sol-mia-mean) matches the formula within its sampling error
 > **Exercise 6.** **The onion effect.** Remove the 50 outliers from the pool, retrain all target and shadow models, and rerun online LiRA. Before running, predict whether the TPR at FPR $10^{-3}$ *on typical points* goes up or down. Then run it (the solutions script does) and explain the result with self-influence. *(Self-influence, outliers)*
 
 ::: {.callout-tip collapse="true" title="Solution"}
-1. **Setup.** Draw a new pool as in the chapter (seed 0 stream, after the earlier exercises), train 128 target and 64 shadow models on it, and compute online LiRA with per-example variances. Restrict the evaluation to typical points: build the ROC curve from the (target model, typical point) pairs only and read off the TPR at FPR $10^{-3}$. Then delete the 50 outliers, leaving a pool of 950, retrain all 192 models on random halves of it, and repeat.
+1. **Setup.** Draw a new pool as in the chapter (seed 0 stream, after the earlier exercises), train 128 target and 64 shadow models on it, and compute online LiRA with a variance per record. Restrict the evaluation to typical points: build the ROC curve from the (target model, typical point) pairs only and read off the TPR at FPR $10^{-3}$. Then delete the 50 outliers, leaving a pool of 950, retrain all 192 models on random halves of it, and repeat.
 2. **Result.** On typical points the TPR at FPR $10^{-3}$ goes from 0.0027 with the outliers to 0.0037 without them, with 60,800 typical member pairs behind each number. (The first number differs from the 0.0020 in @tbl-mia-outliers because there the threshold was set on all points, outliers included, and the pool is a fresh draw.)
 3. **Why it goes up.** Each model now trains on 475 points instead of 500, all typical, and the outliers no longer take up the model's capacity. The typical points that are hardest to predict, those whose labels go against the trend, become the most atypical points in the data. Their self-influence rises, and with it their separation and their exposure. The mean separation of typical points, estimated from the shadow models, goes from 0.502 to 0.621.
 
@@ -123,11 +114,11 @@ The simulation (@tbl-sol-mia-mean) matches the formula within its sampling error
 
 ## The shadow attack model is a threshold {#sec-sol-mia-7}
 
-> **Exercise 7.** **The shadow attack model is a threshold.** Show that if the attack model for class $c$ is $\sigma(\kappa_c + \lambda_c\phi)$ with $\lambda_c > 0$, then within class $c$ it ranks pairs exactly as the loss does, and it says "member" with probability above $\frac12$ when $\phi > -\kappa_c/\lambda_c$. Compute these cut points for the running example. *Check: 0.751 for $y = -1$ and 0.813 for $y = +1$.* *(Shadow models, Fact 3)*
+> **Exercise 7.** **The shadow attack model is a threshold.** Show that if the attack model for class $c$ is $\sigma(\kappa_c + \lambda_c\phi)$ with $\lambda_c > 0$, then within class $c$ it ranks pairs exactly as the loss does, and it says "member" with probability above $\frac12$ when $\phi > -\kappa_c/\lambda_c$. Compute these cut points for the running example. *Check: 0.751 for $y = -1$ and 0.813 for $y = +1$.* *(Shadow models, @lem-mia-margin)*
 
 ::: {.callout-tip collapse="true" title="Solution"}
 1. **Monotone in $\phi$.** $\sigma$ is increasing and $\lambda_c > 0$, so $\phi \mapsto \sigma(\kappa_c + \lambda_c\phi)$ is increasing. Within class $c$, a larger $\phi$ always gives a larger attack score.
-2. **Monotone in the loss.** By Fact 3 of the chapter, $\ell = \ln(1 + e^{-\phi})$ is decreasing in $\phi$. So within the class, the attack score is a decreasing function of the loss, and it orders pairs exactly as "lower loss means member" does. Any threshold on the score is a threshold on the loss, and the two attacks have the same ROC curve on the pairs of that class.
+2. **Monotone in the loss.** By @lem-mia-margin, $\ell = \ln(1 + e^{-\phi})$ is decreasing in $\phi$. So within the class, the attack score is a decreasing function of the loss, and it orders pairs exactly as "lower loss means member" does. Any threshold on the score is a threshold on the loss, and the two attacks have the same ROC curve on the pairs of that class.
 3. **The cut point.** $\sigma(u) > \frac12$ exactly when $u > 0$, so the attack model favours "member" when $\kappa_c + \lambda_c\phi > 0$, that is, $\phi > -\kappa_c/\lambda_c$.
 4. **The running example.** The fitted models are $\kappa_{-1} = -0.179$, $\lambda_{-1} = 0.238$ and $\kappa_{+1} = -0.128$, $\lambda_{+1} = 0.158$. The cut points are $0.179/0.238 = 0.751$ and $0.128/0.158 = 0.813$ (computed from the unrounded coefficients).
 5. **Across classes.** Pooling the two classes with one threshold on the attack score puts slightly different thresholds on $\phi$ in each class, so the pooled ROC differs from the loss attack's only through that offset. The chapter's @tbl-mia-attacks shows how little that buys: AUC 0.577 for both, and TPR at FPR 1% of 0.0104 against 0.0103 for the loss attack.

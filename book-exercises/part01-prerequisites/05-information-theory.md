@@ -13,7 +13,7 @@ $$H(X) = \sum_{j \ge 1} p(j)\log_2\frac{1}{p(j)} = \sum_{j \ge 1} j\,2^{-j}.$$
 3. **Sum the series** (the hint). Let $S = \sum_{j \ge 1} j\,2^{-j}$. Then $S/2 = \sum_{j \ge 1} j\,2^{-(j+1)} = \sum_{j \ge 2}(j - 1)2^{-j}$. Subtract term by term: $S - S/2 = \sum_{j \ge 1} 2^{-j} = 1$, so $S = 2$ and $H(X) = 2$ bits.
 4. **Min-entropy.** The most likely value is $j = 1$, so $V(X) = \max_j 2^{-j} = \frac12$ and $H_\infty(X) = -\log_2\frac12 = 1$ bit.
 
-The series converges fast. The partial sums up to $j = 5$, $10$ and $20$ are 1.7812, 1.9883 and 2.0000. As predicted by $H_\infty \le H$, the min-entropy is below the entropy. The bound $H \le \log_2\lvert\mathcal X\rvert$ says nothing here, because $X$ has infinitely many values.
+The series converges fast. The partial sums up to $j = 5$, $10$ and $20$ are 1.7812, 1.9883 and 2.0000. As @prp-min-min-vs-shannon predicts, the min-entropy is below the entropy. The bound $H \le \log_2\lvert\mathcal X\rvert$ says nothing here, because $X$ has infinitely many values.
 
 *A variable with infinitely many values can still have a small finite entropy, and its best single guess (here $X = 1$) succeeds half the time.*
 :::
@@ -25,8 +25,8 @@ The series converges fast. The partial sums up to $j = 5$, $10$ and $20$ are 1.7
 ::: {.callout-tip collapse="true" title="Solution"}
 *The inequality.* Use the symmetric form $I(X; Y_1, Y_2) = H(Y_1, Y_2) - H(Y_1, Y_2 \mid X)$.
 
-1. **The noise part splits.** Apply @eq-chain-rule conditioned on $X$ throughout, as in the Fano derivation: $H(Y_1, Y_2 \mid X) = H(Y_1 \mid X) + H(Y_2 \mid Y_1, X)$. Given $X$, $Y_2$ is independent of $Y_1$, so the posterior of $Y_2$ given $(Y_1, X)$ is its posterior given $X$, and $H(Y_2 \mid Y_1, X) = H(Y_2 \mid X)$. So $H(Y_1, Y_2 \mid X) = H(Y_1 \mid X) + H(Y_2 \mid X)$.
-2. **The total part is subadditive.** By the chain rule and "conditioning reduces entropy", $H(Y_1, Y_2) = H(Y_1) + H(Y_2 \mid Y_1) \le H(Y_1) + H(Y_2)$ (the second Check yourself question under Shannon entropy).
+1. **The noise part splits.** Apply @eq-min-chain-rule conditioned on $X$ throughout, as in the proof of @thm-min-fano: $H(Y_1, Y_2 \mid X) = H(Y_1 \mid X) + H(Y_2 \mid Y_1, X)$. Given $X$, $Y_2$ is independent of $Y_1$, so the posterior of $Y_2$ given $(Y_1, X)$ is its posterior given $X$, and $H(Y_2 \mid Y_1, X) = H(Y_2 \mid X)$. So $H(Y_1, Y_2 \mid X) = H(Y_1 \mid X) + H(Y_2 \mid X)$.
+2. **The total part is subadditive.** By @cor-min-conditioning, $H(Y_1, Y_2) \le H(Y_1) + H(Y_2)$.
 3. **Subtract.** Combining steps 1 and 2:
 $$I(X; Y_1, Y_2) \le \big[H(Y_1) - H(Y_1 \mid X)\big] + \big[H(Y_2) - H(Y_2 \mid X)\big] = I(X; Y_1) + I(X; Y_2).$$
 
@@ -41,9 +41,9 @@ Two observations that are independent given $X$ can repeat each other's informat
 | 1 | 0 | 1 | 1/4 |
 | 1 | 1 | 0 | 1/4 |
 
-: The exclusive-or counterexample: every row has probability 1/4. {#tbl-sol-information-theory-xor}
+: The exclusive-or counterexample: every row has probability 1/4. {#tbl-sol-min-xor}
 
-1. **One observation tells nothing.** In @tbl-sol-information-theory-xor, fix $Y_1 = 0$. The two remaining rows have $X = 0$ and $X = 1$, equally likely. The same happens for $Y_1 = 1$. So $X$ is a fair bit whatever $Y_1$ is, $X$ and $Y_1$ are independent, and $I(X; Y_1) = 0$. By symmetry, $I(X; Y_2) = 0$.
+1. **One observation tells nothing.** In @tbl-sol-min-xor, fix $Y_1 = 0$. The two remaining rows have $X = 0$ and $X = 1$, equally likely. The same happens for $Y_1 = 1$. So $X$ is a fair bit whatever $Y_1$ is, $X$ and $Y_1$ are independent, and $I(X; Y_1) = 0$. By symmetry, $I(X; Y_2) = 0$.
 2. **Both observations tell everything.** Given $(Y_1, Y_2)$, $X$ is determined, so $H(X \mid Y_1, Y_2) = 0$ and $I(X; Y_1, Y_2) = H(X) - 0 = 1$ bit.
 3. **The inequality fails:** $1 > 0 + 0$. The script confirms $I(X; Y_1) = I(X; Y_2) = 0.0000$ and $I(X; Y_1, Y_2) = 1.0000$.
 4. **Why the proof breaks.** Given $X = 0$, the pair is $(0, 0)$ or $(1, 1)$: $Y_2 = Y_1$. So $Y_1$ and $Y_2$ are fully dependent given $X$, $H(Y_1, Y_2 \mid X) = 1$, while $H(Y_1 \mid X) + H(Y_2 \mid X) = 2$. Step 1 above fails.
@@ -57,9 +57,9 @@ Two observations that are independent given $X$ can repeat each other's informat
 
 ::: {.callout-tip collapse="true" title="Solution"}
 1. **Min-entropy of a coin.** For $B \sim \mathrm{Bern}(p)$, $V(B) = \max(p, 1 - p)$, so $H_\infty(B) = -\log_2\max(p, 1 - p)$.
-2. **Apply $H_\infty \le H$** (Min-entropy and guessing): $-\log_2\max(p, 1 - p) \le h(p)$.
+2. **Apply $H_\infty \le H$** (@prp-min-min-vs-shannon): $-\log_2\max(p, 1 - p) \le h(p)$.
 3. **Rearrange.** Subtract both sides from 1: $1 - h(p) \le 1 + \log_2\max(p, 1 - p) = \log_2 2 + \log_2\max(p, 1 - p) = \log_2\big(2\max(p, 1 - p)\big)$.
-4. **Read the two sides.** The left side is the capacity @eq-bsc-capacity. The right side is @eq-min-capacity for $\mathrm{BSC}(p)$, whose two column maxima are both $\max(p, 1 - p)$.
+4. **Read the two sides.** The left side is the capacity @eq-min-bsc-capacity. The right side is @eq-min-capacity for $\mathrm{BSC}(p)$, whose two column maxima are both $\max(p, 1 - p)$.
 5. **Check.** At $p = 0.25$: $1 - h(0.25) = 0.1887$ and $\log_2(2 \cdot 0.75) = \log_2 1.5 = 0.5850$. At $p = 0.11$ the two are 0.5001 and 0.8319. On a grid of 1,001 values of $p$, the smallest gap between the two sides is 0.0000.
 
 Equality holds exactly when $H_\infty(B) = H(B)$, that is when $B$ is uniform on its support: $p \in \{0, \frac12, 1\}$. That is where the grid finds the zero gap.
@@ -101,12 +101,12 @@ The optimum puts less weight on input 1 because sending a 1 is expensive: half o
 ::: {.callout-tip collapse="true" title="Solution"}
 The channel keeps the input with probability $1 - p$ and otherwise sends one of the other $k - 1$ symbols, each with probability $p/(k - 1)$. Every row of $K$ holds one entry $1 - p$ and $k - 1$ entries $p/(k - 1)$, and so does every column.
 
-*Shannon capacity.* Follow the binary symmetric channel derivation.
+*Shannon capacity.* Follow the proof of @thm-min-bsc.
 
 1. **Noise entropy does not depend on the input.** Row $x$ has entropy
 $$H(Y \mid X = x) = -(1 - p)\log_2(1 - p) - (k - 1)\frac{p}{k - 1}\log_2\frac{p}{k - 1} = h(p) + p\log_2(k - 1),$$
 using $-p\log_2\frac{p}{k - 1} = -p\log_2p + p\log_2(k - 1)$. The rows are permutations of each other, so this holds for every $x$, and $H(Y \mid X) = h(p) + p\log_2(k - 1)$ for every prior.
-2. **Maximize $H(Y)$.** $Y$ takes $k$ values, so $H(Y) \le \log_2 k$, with equality iff $Y$ is uniform (the entropy upper bound).
+2. **Maximize $H(Y)$.** $Y$ takes $k$ values, so $H(Y) \le \log_2 k$, with equality iff $Y$ is uniform (@thm-min-entropy-bounds).
 3. **The uniform input attains it.** With $\pi(x) = 1/k$, $\Pr[Y = y] = \frac1k\sum_x K[x, y] = \frac1k\big[(1 - p) + (k - 1)\frac{p}{k - 1}\big] = \frac1k$.
 4. **So** $\mathcal C = \log_2 k - h(p) - p\log_2(k - 1)$.
 
@@ -129,51 +129,51 @@ At $k = 8$, $p = 0.3$: $p/(k - 1) = 0.0429 \le 0.7$, so the condition holds, and
 ::: {.callout-tip collapse="true" title="Solution"}
 *The inequality.*
 
-1. **Write Smith's value as a log of an average.** By the derivation of @eq-posterior-vulnerability, $V(X \mid Y) = \sum_y p(y)\,V(X \mid Y = y)$, where $V(X \mid Y = y) = \max_x p(x \mid y)$. Let $g(y) = V(X \mid Y = y)$ and $Z = g(Y)$, a positive random variable. Then $H_\infty(X \mid Y) = -\log_2\mathbb E[Z]$.
+1. **Write Smith's value as a log of an average.** By @prp-min-map, $V(X \mid Y) = \sum_y p(y)\,V(X \mid Y = y)$, where $V(X \mid Y = y) = \max_x p(x \mid y)$. Let $g(y) = V(X \mid Y = y)$ and $Z = g(Y)$, a positive random variable. Then $H_\infty(X \mid Y) = -\log_2\mathbb E[Z]$.
 2. **Write the other side as an average of logs.** $\sum_y p(y)H_\infty(X \mid Y = y) = \sum_y p(y)\big(-\log_2 V(X \mid Y = y)\big) = \mathbb E[-\log_2 Z]$.
-3. **Apply Fact 1 in its mirror form** for the convex $-\log_2$: $-\log_2\mathbb E[Z] \le \mathbb E[-\log_2 Z]$. That is the claim. Equality holds iff $Z$ is constant, that is, when the best guess is equally likely to be right after every observation.
+3. **Apply Jensen's inequality** ([Divergences](../../book-full/part01-prerequisites/03-divergences.md)) to the convex function $-\log_2$: $-\log_2\mathbb E[Z] \le \mathbb E[-\log_2 Z]$. That is the claim. Equality holds iff $Z$ is constant, that is, when the best guess is equally likely to be right after every observation.
 
 In the walk-through, Smith's value is 0.5995 bits and the average of logs is 0.6548, as the check says.
 
-*A large gap.* Reuse reveal-if-zero(1) from @sec-shannon-vs-min: $X$ is uniform on $n$-bit strings, and $Y$ is $X$ itself if its lowest bit is 0 (probability $\frac12$), and $\bot$ otherwise.
+*A large gap.* Reuse reveal-if-zero(1) from @def-min-reveal: $X$ is uniform on $w$-bit strings, and $Y$ is $X$ itself if its lowest bit is 0 (probability $\frac12$), and $\bot$ otherwise.
 
 1. **If $Y$ is a string,** the posterior is a point mass: $V(X \mid Y = y) = 1$ and $H_\infty(X \mid Y = y) = 0$.
-2. **If $Y = \bot$,** the posterior is uniform on the $2^{n-1}$ odd strings: $V(X \mid Y = \bot) = 2^{-(n-1)}$ and $H_\infty(X \mid Y = \bot) = n - 1$.
-3. **Average of logs:** $\frac12\cdot0 + \frac12(n - 1) = \frac{n - 1}{2}$.
-4. **Smith:** $V(X \mid Y) = \frac12\cdot1 + \frac12\cdot2^{-(n-1)} = \frac12 + 2^{-n}$, so $H_\infty(X \mid Y) = -\log_2\big(\tfrac12 + 2^{-n}\big) = n - \log_2\big(2^{n-1} + 1\big)$, just under 1 bit.
+2. **If $Y = \bot$,** the posterior is uniform on the $2^{w-1}$ odd strings: $V(X \mid Y = \bot) = 2^{-(w-1)}$ and $H_\infty(X \mid Y = \bot) = w - 1$.
+3. **Average of logs:** $\frac12\cdot0 + \frac12(w - 1) = \frac{w - 1}{2}$.
+4. **Smith:** $V(X \mid Y) = \frac12\cdot1 + \frac12\cdot2^{-(w-1)} = \frac12 + 2^{-w}$, so $H_\infty(X \mid Y) = -\log_2\big(\tfrac12 + 2^{-w}\big) = w - \log_2\big(2^{w-1} + 1\big)$, just under 1 bit.
 
-| $n$ | Smith $H_\infty(X \mid Y)$ | Average of $H_\infty(X \mid Y = y)$ |
+| $w$ | Smith $H_\infty(X \mid Y)$ | Average of $H_\infty(X \mid Y = y)$ |
 | --- | --- | --- |
 | 6 | 0.9556 | 2.5000 |
 | 64 | 1.0000 | 31.5000 |
 
-: Smith's conditional min-entropy against the average of logs for reveal-if-zero(1) on a uniform $n$-bit secret. The $n = 6$ row is computed from the explicit channel matrix and agrees with the closed forms. {#tbl-sol-information-theory-smith}
+: Smith's conditional min-entropy against the average of logs for reveal-if-zero(1) on a uniform $w$-bit secret. The $w = 6$ row is computed from the explicit channel matrix and agrees with the closed forms. {#tbl-sol-min-smith}
 
-@tbl-sol-information-theory-smith shows that the gap grows without bound: about $\frac{n - 1}{2} - 1$ bits. The average of logs says the secret keeps 31.5 bits of guessing difficulty. But a guesser who sees $Y$ wins more than half the time, because half the time $Y$ hands over $X$, and the maximum a posteriori (MAP) guesser takes that half for free. Smith's value, about 1 bit, reflects exactly that.
+@tbl-sol-min-smith shows that the gap grows without bound: about $\frac{w - 1}{2} - 1$ bits. The average of logs says the secret keeps 31.5 bits of guessing difficulty. But a guesser who sees $Y$ wins more than half the time, because half the time $Y$ hands over $X$, and the maximum a posteriori (MAP) guesser takes that half for free. Smith's value, about 1 bit, reflects exactly that.
 
 *Averaging the logs lets one very uncertain outcome hide an outcome that reveals everything. Smith's definition keeps the meaning "log of a success probability".*
 :::
 
 ## Fano is tight on the symmetric channel {#sec-sol-min-7}
 
-> **Exercise 7.** **Fano is tight on the symmetric channel.** Show that the MAP error of the $k$-ary symmetric channel with uniform input is $p$ for $p \le (k - 1)/k$, and that @eq-fano holds with equality. *(Fano)*
+> **Exercise 7.** **Fano is tight on the symmetric channel.** Show that the MAP error of the $k$-ary symmetric channel with uniform input is $p$ for $p \le (k - 1)/k$, and that @eq-min-fano holds with equality. *(Fano)*
 
 ::: {.callout-tip collapse="true" title="Solution"}
 *The MAP error.*
 
 1. **Joint table.** With uniform input, $p(x, y) = \frac1k K[x, y]$: $\frac{1 - p}{k}$ on the diagonal and $\frac{p}{k(k - 1)}$ off it.
 2. **When the diagonal wins.** $1 - p \ge \frac{p}{k - 1}$ iff $(k - 1)(1 - p) \ge p$ iff $k - 1 \ge kp$ iff $p \le \frac{k - 1}{k}$. Under this condition the MAP guess on observation $y$ is $x = y$.
-3. **Success probability** by @eq-posterior-vulnerability: $V(X \mid Y) = \sum_{y=1}^{k}\frac{1 - p}{k} = 1 - p$. So the MAP error is $1 - V(X \mid Y) = p$.
+3. **Success probability** by @eq-min-posterior-vulnerability: $V(X \mid Y) = \sum_{y=1}^{k}\frac{1 - p}{k} = 1 - p$. So the MAP error is $1 - V(X \mid Y) = p$.
 
 *Fano holds with equality.*
 
 1. **The output is uniform.** Each column of $K$ sums to 1 (Exercise 5), so $p(y) = \frac1k$.
 2. **The posterior is a column of $K$.** $p(x \mid y) = \frac{p(x, y)}{p(y)} = K[x, y]$: $1 - p$ on $x = y$ and $\frac{p}{k - 1}$ on each of the other $k - 1$ values.
 3. **Its entropy** is the row entropy computed in Exercise 5: $H(X \mid Y = y) = h(p) + p\log_2(k - 1)$ for every $y$. Averaging over $y$ gives the same value for $H(X \mid Y)$.
-4. **Compare with @eq-fano at $P_e = p$.** The right side is $h(p) + p\log_2(k - 1)$, the same expression. So @eq-fano holds with equality for the MAP estimator.
-5. **Why each step of the derivation is tight.** Step 3 there, $H(E \mid \hat X) \le H(E)$, is tight because the error $E$ has probability $p$ whatever the guess is, so $E$ is independent of $\hat X$. Step 4 is tight because, given an error, the true value is uniform over the $k - 1$ wrong values. Step 6 is tight because the MAP guess is $\hat X = Y$, so $\hat X$ and $Y$ carry the same information.
+4. **Compare with @eq-min-fano at $P_e = p$.** The right side is $h(p) + p\log_2(k - 1)$, the same expression. So @eq-min-fano holds with equality for the MAP estimator.
+5. **Why each step of the proof of @thm-min-fano is tight.** Step 2 there, $H(E \mid \hat X) \le H(E)$, is tight because the error $E$ has probability $p$ whatever the guess is, so $E$ is independent of $\hat X$. Step 3 is tight because, given an error, the true value is uniform over the $k - 1$ wrong values. Step 5 is tight because the MAP guess is $\hat X = Y$, so $\hat X$ and $Y$ carry the same information.
 
-Since the right side of @eq-fano increases in $P_e$ on $[0, (k - 1)/k]$, the Fano bound obtained by inverting it equals $p$ exactly. @tbl-sol-information-theory-fano checks this at $k = 8$.
+Since the right side of @eq-min-fano increases in $P_e$ on $[0, (k - 1)/k]$, the Fano bound obtained by inverting it equals $p$ exactly. @tbl-sol-min-fano checks this at $k = 8$.
 
 | $p$ | MAP error | $H(X \mid Y)$ | $h(p) + p\log_2 7$ | Fano bound |
 | --- | --- | --- | --- | --- |
@@ -182,7 +182,7 @@ Since the right side of @eq-fano increases in $P_e$ on $[0, (k - 1)/k]$, the Fan
 | 0.5 | 0.5000 | 2.4037 | 2.4037 | 0.5000 |
 | 0.875 | 0.8750 | 3.0000 | 3.0000 | 0.8750 |
 
-: The $8$-ary symmetric channel with uniform input: MAP error, conditional entropy, the right side of Fano's inequality at $P_e = p$, and the inverted Fano bound. The two entropy columns agree to floating-point precision. {#tbl-sol-information-theory-fano}
+: The $8$-ary symmetric channel with uniform input: MAP error, conditional entropy, the right side of Fano's inequality at $P_e = p$, and the inverted Fano bound. The two entropy columns agree to floating-point precision. {#tbl-sol-min-fano}
 
 At $p = \frac78$ the output is independent of the input, $H(X \mid Y) = \log_2 8 = 3$, and the best guess is right only by chance.
 
@@ -191,7 +191,7 @@ At $p = \frac78$ the output is independent of the input, $H(X \mid Y) = \log_2 8
 
 ## A sample-size lower bound {#sec-sol-min-8}
 
-> **Exercise 8.** **A sample-size lower bound.** In Fano's method, how many samples must you have before the bound $P_e \ge 1 - (n\kappa + 1)/\log_2 k$ allows $P_e \le 0.1$? Express $n$ in terms of $\kappa$ and $k$. *Check: with $k = 1024$ and $\kappa = 0.01$ bits, $n \ge 800$.* *(Fano's method)*
+> **Exercise 8.** **A sample-size lower bound.** In Fano's method (@prp-min-fano-method), how many samples must you have before the bound $P_e \ge 1 - (n\kappa + 1)/\log_2 k$ allows $P_e \le 0.1$? Express $n$ in terms of $\kappa$ and $k$. *Check: with $k = 1024$ and $\kappa = 0.01$ bits, $n \ge 800$.* *(Fano's method)*
 
 ::: {.callout-tip collapse="true" title="Solution"}
 1. **What "allows" means.** The bound rules out $P_e \le 0.1$ as long as its right side is above 0.1. It stops ruling it out when

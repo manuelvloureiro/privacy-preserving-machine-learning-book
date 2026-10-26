@@ -19,7 +19,7 @@ Several chapters state a fact about tails, tests or divergences and then use it 
 
 ### What the chapter uses
 
-[Concentration inequalities](../part01-prerequisites/02-concentration.md) states Bernstein's inequality at the end of its section on sub-Gaussian variables and Hoeffding's inequality. It says that the inequality "is proved by the same Chernoff recipe" and cites Boucheron, Lugosi & Rassart (chapter 2) for the derivation.
+[Concentration inequalities](../part01-prerequisites/02-concentration.md) states Bernstein's inequality as @thm-conc-bernstein, in its section on sub-Gaussian variables and Hoeffding's inequality. It says that "the proof is the same Chernoff recipe" and cites Boucheron, Lugosi & Massart (chapter 2) for the derivation.
 
 The setting is an average of independent measurements. Take a number $n$ of independent variables $X_1, \dots, X_n$, all with the same mean $\mu$ and the same variance $\sigma^2$. Assume that each one stays within a distance $R$ of its mean, so that $|X_i - \mu| \le R$, and write $\bar X_n$ for their average. Then for every deviation $t > 0$,
 $$\Pr\big[\bar X_n - \mu \ge t\big] \le \exp\left(-\frac{nt^2}{2\sigma^2 + \frac23 Rt}\right).$$ {#eq-apx-tail-bernstein}
@@ -80,10 +80,10 @@ The appendix's script, `apx_tails.py` (see the Code section), checks steps 3 and
 
 ### What the chapter uses
 
-Let $X_1, \dots, X_n$ be independent copies of a variable $X$ with mean $\mu$, and let $S_n = X_1 + \dots + X_n$. Write $\psi(\lambda) = \ln\mathbb E[e^{\lambda X}]$ for the log-MGF of one copy. The Chernoff method of [Concentration inequalities](../part01-prerequisites/02-concentration.md) bounds the chance that the sum reaches $nt$, for a level $t$ above the mean, by
-$$\Pr[S_n \ge nt] \le e^{-n\psi^*(t)}, \qquad \psi^*(t) = \sup_{\lambda > 0}\big(\lambda t - \psi(\lambda)\big).$$
+Let $X_1, \dots, X_n$ be independent copies of a variable $X$ with mean $\mu$, and let $S_n = X_1 + \dots + X_n$. Write $K_X(\lambda) = \ln\mathbb E[e^{\lambda X}]$ for the log-MGF of one copy. The Chernoff method of [Concentration inequalities](../part01-prerequisites/02-concentration.md) bounds the chance that the sum reaches $nt$, for a level $t$ above the mean, by
+$$\Pr[S_n \ge nt] \le e^{-nK_X^*(t)}, \qquad K_X^*(t) = \sup_{\lambda > 0}\big(\lambda t - K_X(\lambda)\big).$$
 The chapter then says that "Cramér's theorem says that ... the probability of a large deviation decays exponentially in $n$ with exactly the rate the optimized Chernoff bound gives, so no method can improve its exponent for large sums". It does not prove this. In symbols, for every $t$ between the mean $\mu$ and the largest value $x_{\max}$ that $X$ can take,
-$$\lim_{n\to\infty}-\frac1n\ln\Pr[S_n \ge nt] = \psi^*(t).$$ {#eq-apx-tail-cramer}
+$$\lim_{n\to\infty}-\frac1n\ln\Pr[S_n \ge nt] = K_X^*(t).$$ {#eq-apx-tail-cramer}
 
 @sec-ht-np makes the same kind of claim about tests, and cites Cover & Thomas (chapter 11) for it. You observe $n$ independent draws and test $H_0$, that they come from $P$, against $H_1$, that they come from $Q$. Hold the type I error at a level $\mathrm{FPR}$ in $(0, 1)$, and write $\mathrm{FNR}_n^*(\mathrm{FPR})$ for the smallest type II error of any test, randomized or not, whose type I error is at most $\mathrm{FPR}$. The **Chernoff–Stein lemma** says that
 $$\lim_{n\to\infty}-\frac1n\ln \mathrm{FNR}_n^*(\mathrm{FPR}) = D_{\mathrm{KL}}(P\|Q), \qquad D_{\mathrm{KL}}(P\|Q) = \mathbb E_P\Big[\ln\frac{p(X)}{q(X)}\Big],$$ {#eq-apx-tail-stein}
@@ -91,7 +91,7 @@ where $D_{\mathrm{KL}}$ is the Kullback–Leibler (KL) divergence. The errors $\
 
 ### The idea
 
-Chernoff's bound shows that the probability is *at most* about $e^{-n\psi^*(t)}$. To show that it is also *at least* about that, change the distribution so that the rare event becomes typical, and then pay for the change. The change is the **tilted** distribution of [Divergences](../part01-prerequisites/03-divergences.md), which multiplies the probability of each outcome $x$ by $e^{\lambda x}$ and renormalizes. With $\lambda > 0$ it moves mass toward large values. Pick $\lambda$ so that the tilted mean sits just above $t$, so that most of the tilted sums land in a narrow window just above $nt$. Under the tilt, $S_n$ then lands near $nt$ most of the time, by Chebyshev's inequality. The price of switching back is the ratio of the two distributions on those samples, which is about $e^{-n(\lambda t - \psi(\lambda))}$, and that is the Chernoff exponent.
+Chernoff's bound shows that the probability is *at most* about $e^{-nK_X^*(t)}$. To show that it is also *at least* about that, change the distribution so that the rare event becomes typical, and then pay for the change. The change is the **tilted** distribution of [Divergences](../part01-prerequisites/03-divergences.md), which multiplies the probability of each outcome $x$ by $e^{\lambda x}$ and renormalizes. With $\lambda > 0$ it moves mass toward large values. Pick $\lambda$ so that the tilted mean sits just above $t$, so that most of the tilted sums land in a narrow window just above $nt$. Under the tilt, $S_n$ then lands near $nt$ most of the time, by Chebyshev's inequality. The price of switching back is the ratio of the two distributions on those samples, which is about $e^{-n(\lambda t - K_X(\lambda))}$, and that is the Chernoff exponent.
 
 Here is a concrete case. A coin lands heads with probability 0.1, and you ask how likely 100 tosses are to give at least 20 heads, twice the expected number. Tilting by $e^{\lambda x}$, with $x = 1$ for heads and 0 for tails, turns it into a coin with heads probability $0.1e^\lambda/(0.9 + 0.1e^\lambda)$. With $\lambda = \ln 2.25 = 0.8109$ that probability is exactly 0.2, so for the tilted coin 20 heads in 100 is the typical outcome, not a rare one.
 
@@ -99,30 +99,30 @@ The Chernoff–Stein lemma uses the same trick, with the two distributions alrea
 
 ### Derivation
 
-Two facts from the chapters do the work. The first is the **change of measure** (Fact 1 of [Divergences](../part01-prerequisites/03-divergences.md), Fact 2 of [Hypothesis testing](../part01-prerequisites/04-hypothesis-testing.md)). If $P$ and $Q'$ give positive probability to the same outcomes, then for any event $A$,
+Two facts from the chapters do the work. The first is the **change of measure** (@lem-div-change-of-measure, @lem-ht-change-of-measure). If $P$ and $Q'$ give positive probability to the same outcomes, then for any event $A$,
 $$\Pr_P[X \in A] = \sum_{x \in A}p(x) = \sum_{x\in A}q'(x)\frac{p(x)}{q'(x)} = \mathbb E_{Q'}\Big[\frac{p(X)}{q'(X)}\mathbf 1[X \in A]\Big],$$
 because multiplying and dividing by $q'(x)$ changes nothing. The second is the **tilted distribution** with parameter $\lambda$, whose probabilities are
-$$q_\lambda(x) = p(x)\,e^{\lambda x - \psi(\lambda)}.$$
-They add up to 1 because $e^{\psi(\lambda)} = \sum_xp(x)e^{\lambda x}$. Its mean is $\psi'(\lambda)$ and its variance is $\psi''(\lambda)$, as the Rényi section of [Divergences](../part01-prerequisites/03-divergences.md) shows for the log-likelihood ratio. Here you only need these facts for a bounded $X$, where the sums are finite and the derivatives can be taken term by term.
+$$q_\lambda(x) = p(x)\,e^{\lambda x - K_X(\lambda)}.$$
+They add up to 1 because $e^{K_X(\lambda)} = \sum_xp(x)e^{\lambda x}$. Its mean is $K_X'(\lambda)$ and its variance is $K_X''(\lambda)$, as the Rényi section of [Divergences](../part01-prerequisites/03-divergences.md) shows for the log-likelihood ratio. Here you only need these facts for a bounded $X$, where the sums are finite and the derivatives can be taken term by term.
 
 **Cramér's lower bound.** Assume that $X$ is bounded and not constant, and that $\mu < t < x_{\max}$.
 
-1. **Tilt to just above $t$.** Fix a small $\kappa > 0$ with $t + \kappa < x_{\max}$. The tilted mean $\psi'(\lambda)$ equals $\mu$ at $\lambda = 0$. It increases with $\lambda$, because its derivative is a variance, which is positive for a variable that is not constant. It tends to $x_{\max}$ as $\lambda \to \infty$, because the weight $e^{\lambda x}$ favours the largest values more and more. So there is one $\lambda > 0$ with $\psi'(\lambda) = t + \kappa/2$.
-2. **Change the measure of the whole sample.** Tilt each of the $n$ copies. The ratio of the two probabilities of a sample is the product of the ratios of its draws, $\prod_ip(x_i)/q_\lambda(x_i) = e^{-\lambda S_n + n\psi(\lambda)}$. The change of measure therefore gives, for any event $A$ about the sample,
-$$\Pr[A] = \mathbb E_{Q_\lambda}\big[e^{-\lambda S_n + n\psi(\lambda)}\,\mathbf 1[A]\big].$$
+1. **Tilt to just above $t$.** Fix a small $\kappa > 0$ with $t + \kappa < x_{\max}$. The tilted mean $K_X'(\lambda)$ equals $\mu$ at $\lambda = 0$. It increases with $\lambda$, because its derivative is a variance, which is positive for a variable that is not constant. It tends to $x_{\max}$ as $\lambda \to \infty$, because the weight $e^{\lambda x}$ favours the largest values more and more. So there is one $\lambda > 0$ with $K_X'(\lambda) = t + \kappa/2$.
+2. **Change the measure of the whole sample.** Tilt each of the $n$ copies. The ratio of the two probabilities of a sample is the product of the ratios of its draws, $\prod_ip(x_i)/q_\lambda(x_i) = e^{-\lambda S_n + nK_X(\lambda)}$. The change of measure therefore gives, for any event $A$ about the sample,
+$$\Pr[A] = \mathbb E_{Q_\lambda}\big[e^{-\lambda S_n + nK_X(\lambda)}\,\mathbf 1[A]\big].$$
 3. **Restrict to a window.** Let $A$ be the event $nt \le S_n \le n(t + \kappa)$. It is part of the event $S_n \ge nt$. On $A$, the sum is at most $n(t + \kappa)$, and $\lambda > 0$, so $e^{-\lambda S_n} \ge e^{-\lambda n(t + \kappa)}$. Hence
-$$\Pr[S_n \ge nt] \ge \Pr[A] \ge e^{-n(\lambda(t + \kappa) - \psi(\lambda))}\,\Pr_{Q_\lambda}[A].$$
-4. **The window is likely under the tilt.** Under $Q_\lambda$, the average $S_n/n$ has mean $t + \kappa/2$ and variance $\psi''(\lambda)/n$. The window contains every average within $\kappa/2$ of that mean. Chebyshev's inequality bounds the chance of falling outside, so
-$$\Pr_{Q_\lambda}[A] \ge 1 - \frac{4\psi''(\lambda)}{n\kappa^2},$$
+$$\Pr[S_n \ge nt] \ge \Pr[A] \ge e^{-n(\lambda(t + \kappa) - K_X(\lambda))}\,\Pr_{Q_\lambda}[A].$$
+4. **The window is likely under the tilt.** Under $Q_\lambda$, the average $S_n/n$ has mean $t + \kappa/2$ and variance $K_X''(\lambda)/n$. The window contains every average within $\kappa/2$ of that mean. Chebyshev's inequality bounds the chance of falling outside, so
+$$\Pr_{Q_\lambda}[A] \ge 1 - \frac{4K_X''(\lambda)}{n\kappa^2},$$
 which tends to 1 as $n$ grows.
 5. **Let $n$ grow.** Take logarithms in step 3 and divide by $-n$. The term $-\frac1n\ln \Pr_{Q_\lambda}[A]$ tends to 0, so
-$$\limsup_{n\to\infty}-\frac1n\ln\Pr[S_n \ge nt] \le \lambda(t + \kappa) - \psi(\lambda).$$
-6. **Let $\kappa$ shrink.** As $\kappa \to 0$, the chosen $\lambda$ tends to the $\lambda_0$ with $\psi'(\lambda_0) = t$, because $\psi'$ is continuous and increasing. The right side of step 5 then tends to $\lambda_0t - \psi(\lambda_0)$. The function $\lambda t - \psi(\lambda)$ is concave, since $\psi$ is convex, and its slope $t - \psi'(\lambda)$ is zero at $\lambda_0$. So $\lambda_0$ is where it is largest, and $\lambda_0t - \psi(\lambda_0) = \psi^*(t)$.
-7. **Combine with Chernoff.** Chernoff's bound gives $-\frac1n\ln\Pr[S_n \ge nt] \ge \psi^*(t)$ for every $n$. Step 6 gives the matching upper limit, which proves @eq-apx-tail-cramer.
+$$\limsup_{n\to\infty}-\frac1n\ln\Pr[S_n \ge nt] \le \lambda(t + \kappa) - K_X(\lambda).$$
+6. **Let $\kappa$ shrink.** As $\kappa \to 0$, the chosen $\lambda$ tends to the $\lambda_0$ with $K_X'(\lambda_0) = t$, because $K_X'$ is continuous and increasing. The right side of step 5 then tends to $\lambda_0t - K_X(\lambda_0)$. The function $\lambda t - K_X(\lambda)$ is concave, since $K_X$ is convex, and its slope $t - K_X'(\lambda)$ is zero at $\lambda_0$. So $\lambda_0$ is where it is largest, and $\lambda_0t - K_X(\lambda_0) = K_X^*(t)$.
+7. **Combine with Chernoff.** Chernoff's bound gives $-\frac1n\ln\Pr[S_n \ge nt] \ge K_X^*(t)$ for every $n$. Step 6 gives the matching upper limit, which proves @eq-apx-tail-cramer.
 
-For the coin, $\psi(\lambda) = \ln(1 - p + pe^\lambda)$ with $p = 0.1$, and solving $\psi'(\lambda_0) = t$ gives $e^{\lambda_0} = t(1 - p)/\big(p(1 - t)\big)$. Substituting, the exponent is the **binary KL divergence**
-$$\psi^*(t) = \mathrm{kl}(t\|p) = t\ln\frac tp + (1 - t)\ln\frac{1 - t}{1 - p}.$$
-With $t = 0.2$ this is $\lambda_0 = \ln 2.25 = 0.8109$, $\psi(\lambda_0) = \ln1.125 = 0.11778$, and $\psi^*(0.2) = 0.2 \times 0.8109 - 0.11778 = 0.04440$.
+For the coin, $K_X(\lambda) = \ln(1 - p + pe^\lambda)$ with $p = 0.1$, and solving $K_X'(\lambda_0) = t$ gives $e^{\lambda_0} = t(1 - p)/\big(p(1 - t)\big)$. Substituting, the exponent is the **binary KL divergence**
+$$K_X^*(t) = \mathrm{kl}(t\|p) = t\ln\frac tp + (1 - t)\ln\frac{1 - t}{1 - p}.$$
+With $t = 0.2$ this is $\lambda_0 = \ln 2.25 = 0.8109$, $K_X(\lambda_0) = \ln1.125 = 0.11778$, and $K_X^*(0.2) = 0.2 \times 0.8109 - 0.11778 = 0.04440$.
 
 **Chernoff–Stein, achievability.** Assume that $P$ and $Q$ give positive probability to the same outcomes. Write $L(x)$ for the evidence $\ln(p(x)/q(x))$ of one draw $x$. Under $P$ its mean is the divergence $D_{\mathrm{KL}}(P\|Q)$, written $D_{\mathrm{KL}}$ below, and assume that its variance $V$ is finite. For a whole sample $x = (x_1, \dots, x_n)$, write $p^n(x)$ and $q^n(x)$ for its probabilities under the two hypotheses. Each is a product over the draws, so the change of measure becomes
 $$q^n(x) = p^n(x)\,e^{-\sum_iL(x_i)}.$$
@@ -216,8 +216,8 @@ For example, with two trials and $k = 0$, $F_p(0) = (1 - p)^2$ has derivative $-
 ### What the chapter uses
 
 @sec-div-renyi writes the Rényi divergence of order $\alpha$ through the likelihood ratio $r = p/q$ and the log-MGF of the evidence $\ln r$ under $P$,
-$$\psi(\lambda) = \ln\mathbb E_P\big[r^\lambda\big], \qquad D_\alpha(P\|Q) = \frac{\psi(\alpha - 1)}{\alpha - 1}.$$
-That is @eq-renyi-psi. Here $\psi$ is the log-MGF of the evidence $\ln r$, not of a sum as in the previous section. Property 1 there says that $D_\alpha \to D_{\mathrm{KL}}(P\|Q)$ as $\alpha \to 1$, where $D_{\mathrm{KL}}(P\|Q) = \mathbb E_P[\ln r]$ is the KL divergence. The chapter proves it as the slope of $\psi$ at 0, by passing a derivative inside an average. It adds: "This needs $\psi$ to be finite near 0. van Erven & Harremoës prove the limit in general." Write $\lambda = \alpha - 1$. This section proves two statements without derivatives:
+$$K_L(\lambda) = \ln\mathbb E_P\big[r^\lambda\big], \qquad D_\alpha(P\|Q) = \frac{K_L(\alpha - 1)}{\alpha - 1}.$$
+That is @eq-div-renyi-psi. Here $K_L$ is the log-MGF of the evidence $L = \ln r$, not of a sum as in the previous section. Property 1 there says that $D_\alpha \to D_{\mathrm{KL}}(P\|Q)$ as $\alpha \to 1$, where $D_{\mathrm{KL}}(P\|Q) = \mathbb E_P[\ln r]$ is the KL divergence. The chapter proves it as the slope of $K_L$ at 0, by passing a derivative inside an average. It adds: "This needs $K_L$ to be finite near 0. van Erven & Harremoës prove the limit in general." Write $\lambda = \alpha - 1$. This section proves two statements without derivatives:
 $$\lim_{\alpha \uparrow 1}D_\alpha(P\|Q) = D_{\mathrm{KL}}(P\|Q) \text{ always}, \qquad \lim_{\alpha\downarrow1}D_\alpha(P\|Q) = D_{\mathrm{KL}}(P\|Q) \text{ if } D_{\alpha_0}(P\|Q) < \infty \text{ for some } \alpha_0 > 1.$$
 The first holds even when the KL divergence is infinite.
 
@@ -225,11 +225,11 @@ The first holds even when the KL divergence is infinite.
 
 ### The idea
 
-The divergence $D_{1+\lambda}$ is $\psi(\lambda)/\lambda$, and two simple inequalities trap it between the KL divergence and a quantity whose limit is easy. The first is Jensen's inequality for the concave logarithm: the log of an average is at least the average of the log. The second is the tangent-line bound $\ln m \le m - 1$. Applied to the average $\mathbb E_P[r^\lambda]$, they give
-$$\lambda D_{\mathrm{KL}} = \mathbb E_P[\ln r^\lambda] \le \psi(\lambda) \le \mathbb E_P[r^\lambda] - 1.$$
+The divergence $D_{1+\lambda}$ is $K_L(\lambda)/\lambda$, and two simple inequalities trap it between the KL divergence and a quantity whose limit is easy. The first is Jensen's inequality for the concave logarithm: the log of an average is at least the average of the log. The second is the tangent-line bound $\ln m \le m - 1$. Applied to the average $\mathbb E_P[r^\lambda]$, they give
+$$\lambda D_{\mathrm{KL}} = \mathbb E_P[\ln r^\lambda] \le K_L(\lambda) \le \mathbb E_P[r^\lambda] - 1.$$
 Dividing by $\lambda$, with care for its sign, puts $D_{1+\lambda}$ between $D_{\mathrm{KL}}$ and the average of the **power slope**
 $$h_\lambda(r) = \frac{r^\lambda - 1}{\lambda}.$$
-For each fixed value of the ratio $r$, the power slope moves steadily toward $\ln r$ as $\lambda$ tends to 0. So its average moves toward the average of $\ln r$, which is the KL divergence, and no derivative of $\psi$ is needed.
+For each fixed value of the ratio $r$, the power slope moves steadily toward $\ln r$ as $\lambda$ tends to 0. So its average moves toward the average of $\ln r$, which is the KL divergence, and no derivative of $K_L$ is needed.
 
 On the die of @tbl-div-die, $r$ is 3 on a six and 0.6 otherwise. @tbl-apx-tail-power-slopes shows $h_\lambda$ at both values. Each row increases from left to right, and the middle column, $\lambda = 0$, is $\ln r$.
 
@@ -247,10 +247,10 @@ The derivation uses one theorem about averages, the **monotone convergence theor
 1. **The power slopes.** For a number $x > 0$, write $z = \ln x$, so that $x^\lambda = e^{\lambda z}$. Then the power slope is an integral,
 $$h_\lambda(x) = \frac{e^{\lambda z} - 1}{\lambda} = \int_0^z e^{\lambda s}\,ds,$$
 which runs backward when $z < 0$. At $\lambda = 0$ the integral is $z = \ln x$, and it changes continuously with $\lambda$. It is also non-decreasing in $\lambda$. If $z > 0$, every $s$ in the integral is positive, so $e^{\lambda s}$ grows with $\lambda$. If $z < 0$, the integral is $-\int_z^0e^{\lambda s}\,ds$ with negative $s$, so $e^{\lambda s}$ shrinks with $\lambda$ and its negative grows. So as $\lambda \uparrow 0$, $h_\lambda(x)$ increases to $\ln x$, and as $\lambda \downarrow 0$ it decreases to $\ln x$.
-2. **Below order 1, an upper bound.** Take $\lambda \in (-1, 0)$. Then $r^\lambda = (q/p)^{|\lambda|}$, and Jensen's inequality for the concave power $|\lambda| < 1$ gives $\mathbb E_P[r^\lambda] \le \big(\mathbb E_P[q/p]\big)^{|\lambda|} \le 1$, so $\psi(\lambda)$ is not $+\infty$. (If $P$ and $Q$ share no outcome, $\psi(\lambda) = -\infty$ and every divergence is infinite, so there is nothing to prove.) Next, the logarithm is concave, so Jensen's inequality gives
-$$\psi(\lambda) = \ln\mathbb E_P[r^\lambda] \ge \mathbb E_P[\ln r^\lambda] = \lambda D_{\mathrm{KL}}.$$
+2. **Below order 1, an upper bound.** Take $\lambda \in (-1, 0)$. Then $r^\lambda = (q/p)^{|\lambda|}$, and Jensen's inequality for the concave power $|\lambda| < 1$ gives $\mathbb E_P[r^\lambda] \le \big(\mathbb E_P[q/p]\big)^{|\lambda|} \le 1$, so $K_L(\lambda)$ is not $+\infty$. (If $P$ and $Q$ share no outcome, $K_L(\lambda) = -\infty$ and every divergence is infinite, so there is nothing to prove.) Next, the logarithm is concave, so Jensen's inequality gives
+$$K_L(\lambda) = \ln\mathbb E_P[r^\lambda] \ge \mathbb E_P[\ln r^\lambda] = \lambda D_{\mathrm{KL}}.$$
 Dividing by the negative $\lambda$ flips the inequality, so $D_{1+\lambda}$ is at most $D_{\mathrm{KL}}$. When the KL divergence is infinite this says nothing, and nothing is needed.
-3. **Below order 1, a lower bound.** Since $\ln m \le m - 1$, $\psi(\lambda) \le \mathbb E_P[r^\lambda] - 1 = \lambda\,\mathbb E_P[h_\lambda(r)]$. Dividing by the negative $\lambda$ flips it again:
+3. **Below order 1, a lower bound.** Since $\ln m \le m - 1$, $K_L(\lambda) \le \mathbb E_P[r^\lambda] - 1 = \lambda\,\mathbb E_P[h_\lambda(r)]$. Dividing by the negative $\lambda$ flips it again:
 $$\mathbb E_P[h_\lambda(r)] \le D_{1+\lambda} \le D_{\mathrm{KL}}, \qquad -1 < \lambda < 0.$$
 4. **The limit from below.** As $\lambda \uparrow 0$, $h_\lambda(r)$ increases to $\ln r$ by step 1. The sequence starts above an integrable variable: at $\lambda = -1$, $h_{-1}(r) = 1 - 1/r$, and $\mathbb E_P[1/r] = \sum_{x:\,p(x)>0}q(x) \le 1$, so $\mathbb E_P[h_{-1}(r)] \ge 0$. So monotone convergence applies, and the average of the power slope tends to the average of $\ln r$, which is the KL divergence. Both sides of step 3 tend to $D_{\mathrm{KL}}$, so $D_\alpha \to D_{\mathrm{KL}}$ as $\alpha \uparrow 1$. This includes an infinite KL divergence, where the lower bound alone grows without limit.
 5. **Above order 1.** For $\lambda > 0$ the same two inequalities hold, and dividing by the positive $\lambda$ keeps their direction:
@@ -265,7 +265,7 @@ $$\lim_{\alpha\to\infty}H_\alpha(X) = -\log_2\max_xp(x) = H_\infty(X).$$
 
 @fig-apx-tail-renyi-sandwich draws the sandwich for the die and for the pair $\mathcal N(0, 1)$ against $\mathcal N(1, 1)$, whose KL divergence is $\frac12$. The black curve is $D_{1+\lambda}$ and the blue curve is $\mathbb E_P[h_\lambda(r)]$. The blue curve lies below the black on the left of 0 and above it on the right, and both meet the KL line at $\lambda = 0$. On the die, where $D_{\mathrm{KL}} = 0.2939$, the divergence at $\lambda = -0.01$ is 0.2907 with the lower bound 0.2902, and at $\lambda = +0.01$ it is 0.2971 with the upper bound 0.2976.
 
-![The Rényi divergence $D_{1+\lambda} = \psi(\lambda)/\lambda$ (black) and the bound $\mathbb E_P[(r^\lambda - 1)/\lambda]$ (blue) as functions of $\lambda = \alpha - 1$, with the KL divergence (dashed). Left: the loaded die against the fair die. Right: $\mathcal N(0, 1)$ against $\mathcal N(1, 1)$.](figures/tail_renyi_sandwich.svg){#fig-apx-tail-renyi-sandwich}
+![The Rényi divergence $D_{1+\lambda} = K_L(\lambda)/\lambda$ (black) and the bound $\mathbb E_P[(r^\lambda - 1)/\lambda]$ (blue) as functions of $\lambda = \alpha - 1$, with the KL divergence (dashed). Left: the loaded die against the fair die. Right: $\mathcal N(0, 1)$ against $\mathcal N(1, 1)$.](figures/tail_renyi_sandwich.svg){#fig-apx-tail-renyi-sandwich}
 
 For the PIN example of @sec-min-entropy, with 10% on one PIN and the rest uniform over the other 9,999, the Shannon entropy is $H = 12.4278$ bits. The script finds $H_{0.999} = 12.4310$ and $H_{1.001} = 12.4246$ on either side of it. As the order grows, $H_2 = 6.6322$ and $H_{100} = 3.3555$ approach the min-entropy $H_\infty = 3.3219$. The identity of step 7 holds to rounding error.
 
