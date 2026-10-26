@@ -1,0 +1,34 @@
+# A standalone study note: one page as a website, plus a PDF linked from it.
+# Built by `make notes` into _book/notes/privacy-utility-tradeoff/; never render this folder in place.
+# Its numbers, figures and tables come from code/notes/privacy_utility_tradeoff.py, which make runs first.
+project:
+  type: default
+  output-dir: _site
+
+toc: true
+number-sections: true
+
+filters:
+  - filters/links.lua        # links to code/ and tests/ go to GitHub
+  - filters/book-checks.lua  # numbers every equation, warns on uncaptioned tables and figures
+  - quarto
+
+format:
+  html:
+    toc-location: left
+    code-overflow: wrap      # the page quotes the script; long lines wrap instead of scrolling
+  pdf:
+    documentclass: scrartcl
+    classoption: [DIV=13]
+    output-file: Pricing-the-Privacy-Utility-Trade-off.pdf
+    linkcolor: blue
+    urlcolor: blue
+    # Wrap long code lines at the margin instead of letting them run off the page. This goes in
+    # header-includes, not include-in-header, which _common.yml sets and would replace.
+    header-includes: |
+      \usepackage{fvextra}
+      \RecustomVerbatimEnvironment{Highlighting}{Verbatim}{commandchars=\\\{\},breaklines,breakanywhere,fontsize=\small}
+
+# Fonts, theme and PDF engine: shared with the books, copied into the staged copy by the Makefile.
+metadata-files:
+  - _common.yml

@@ -1,0 +1,27 @@
+# A standalone study note: one page as a website, plus a PDF linked from it.
+# Built by `make notes` into _book/notes/aim/; never render this folder in place.
+project:
+  type: default
+  output-dir: _site
+
+toc: true
+number-sections: true
+
+filters:
+  - filters/links.lua        # links to code/ and tests/ go to GitHub
+  - filters/book-checks.lua  # numbers every equation, warns on uncaptioned tables and figures
+  - quarto
+
+format:
+  html:
+    toc-location: left
+  pdf:
+    documentclass: scrartcl
+    classoption: [DIV=13]
+    output-file: AIM-Explained-From-Scratch.pdf
+    linkcolor: blue
+    urlcolor: blue
+
+# Fonts, theme and PDF engine: shared with the books, copied into the staged copy by the Makefile.
+metadata-files:
+  - _common.yml
