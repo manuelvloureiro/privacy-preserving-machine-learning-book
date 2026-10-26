@@ -6,22 +6,24 @@
 #   book-exercises/     the full edition's exercises with worked solutions (website only)
 #   book-practitioner/  the practitioner edition, without proofs (website and PDF)
 #   book-course/        the course: differential privacy one topic per chapter, every proof (website and PDF)
+#   book-opendp/        the OpenDP book: the library from its first release to synthetic data (website and PDF)
 # and the study notes, one page each, in notes/<name>/ (website and PDF). Each website renders to
 # _book/<book>/ or _book/notes/<name>/, so the sites link to each other by relative path.
 
 OUT       := _book
 BUILD     := _build
-BOOKS     := book-full book-exercises book-practitioner book-course
+BOOKS     := book-full book-exercises book-practitioner book-course book-opendp
 NOTE_DIRS := $(patsubst %/,%,$(wildcard notes/*/))
-# The chapter scripts that draw figures. The practitioner workflows (practitioner_*.py) are slow, need the
-# datasets in data/ and draw no figures, so their tests run them instead (pytest marker `libs`).
+# The chapter scripts that draw figures. The practitioner workflows (practitioner_*.py) and the OpenDP book's
+# scripts (opendp_*.py) are slow, need the datasets in data/ and draw no figures, so their tests run them instead
 # (pytest marker `libs`). The study notes' scripts (code/notes/) run only when their note is built.
-SCRIPTS   := $(foreach f,$(filter-out code/notes/%,$(wildcard code/*/*.py)),$(if $(findstring /practitioner_,$(f)),,$(f)))
+SCRIPTS   := $(foreach f,$(filter-out code/notes/%,$(wildcard code/*/*.py)),$(if $(or $(findstring /practitioner_,$(f)),$(findstring /opendp_,$(f))),,$(f)))
 QUARTO    := uv run quarto
 # The PDF file names, as each book's _quarto.yml sets them in `output-file`.
 PDF_full         := $(OUT)/Privacy-Preserving-Machine-Learning.pdf
 PDF_practitioner := $(OUT)/Privacy-Preserving-Machine-Learning-Practitioner.pdf
 PDF_course       := $(OUT)/A-Course-in-Differential-Privacy.pdf
+PDF_opendp       := $(OUT)/Differential-Privacy-with-OpenDP.pdf
 
 # Keep Python's bytecode caches out of the source tree.
 export PYTHONPYCACHEPREFIX := $(CURDIR)/$(BUILD)/pycache
@@ -38,7 +40,7 @@ TEX_PKGS  := svg imakeidx makeindex trimspaces catchfile transparent caption kom
              newcomputermodern dejavu
 
 .DEFAULT_GOAL := help
-.PHONY: help setup hooks tex-deps datasets test-fast figures figures-force full full-pdf exercises practitioner practitioner-pdf course course-pdf \
+.PHONY: help setup hooks tex-deps datasets test-fast figures figures-force full full-pdf exercises practitioner practitioner-pdf course course-pdf opendp opendp-pdf \
         website pdf book notes note preview publish terms-check acronyms index-candidates prose prose-check notation notation-check \
         structure structure-check format test typecheck check all clean
 
@@ -134,6 +136,7 @@ endef
 $(eval $(call BOOK_TARGETS,full,book-full))
 $(eval $(call BOOK_TARGETS,practitioner,book-practitioner))
 $(eval $(call BOOK_TARGETS,course,book-course))
+$(eval $(call BOOK_TARGETS,opendp,book-opendp))
 
 full: ## Build the full edition's website into _book/book-full/
 full-pdf: ## Build the full edition's PDF
@@ -141,6 +144,8 @@ practitioner: ## Build the practitioner edition's website into _book/book-practi
 practitioner-pdf: ## Build the practitioner edition's PDF
 course: ## Build the course's website into _book/book-course/
 course-pdf: ## Build the course's PDF
+opendp: ## Build the OpenDP book's website into _book/book-opendp/
+opendp-pdf: ## Build the OpenDP book's PDF
 
 # The exercise book cross-references the full edition's equations, so it needs the rendered full
 # edition: tools/xrefs.py reads its labels and numbers into _xrefs.json for filters/xrefs.lua.
@@ -153,9 +158,9 @@ exercises: full ## Build the exercise book's website into _book/book-exercises/ 
 	@rsync -a --delete $(BUILD)/exercises-website/_book/ $(OUT)/book-exercises/
 	@echo "Website: $(OUT)/book-exercises/index.html"
 
-website: full exercises practitioner course ## Build every website into _book/
+website: full exercises practitioner course opendp ## Build every website into _book/
 
-pdf: full-pdf practitioner-pdf course-pdf ## Build every PDF into _book/
+pdf: full-pdf practitioner-pdf course-pdf opendp-pdf ## Build every PDF into _book/
 
 book: website pdf notes ## Build every website and PDF, and the study notes
 

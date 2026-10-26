@@ -1,5 +1,5 @@
--- Links that leave this book. The repository holds four books side by side (book-full/,
--- book-exercises/, book-practitioner/, book-course/) next to code/ and tests/, and a page links to them by
+-- Links that leave this book. The repository holds five books side by side (book-full/,
+-- book-exercises/, book-practitioner/, book-course/, book-opendp/) next to code/ and tests/, and a page links to them by
 -- relative path from its source file, so the links also work when browsing the repository.
 --
 -- * A link to code/ or tests/ points to the file on GitHub, since neither folder is part of the
@@ -20,6 +20,7 @@ local where = {
   ["book-exercises"] = "in the exercise book",
   ["book-practitioner"] = "in the practitioner edition",
   ["book-course"] = "in the course",
+  ["book-opendp"] = "in the OpenDP book",
 }
 
 return {

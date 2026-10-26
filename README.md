@@ -6,6 +6,7 @@ Five books and a set of study notes on privacy-preserving machine learning, buil
 - **The exercise book** (`book-exercises/`) has the full edition's exercises, each with a worked solution, one page per chapter.
 - **The practitioner edition** (`book-practitioner/`) covers the same topics without proofs, organized around the work of people who build, release and audit private machine-learning systems, with workflows that run the real libraries on public data.
 - **The course** (`book-course/`) teaches differential privacy one topic per chapter, light in text and complete in its proofs; it stands alone.
+- **The OpenDP book** (`book-opendp/`) teaches the OpenDP library from its first release to synthetic data generation, following its documentation, with every number computed by a script a test checks.
 - **Study notes** (`notes/<name>/`) are one-page treatments of a single question, each with its PDF.
 
 ## Layout
@@ -17,10 +18,11 @@ book-full/                       the full edition: _quarto.yml, index.md, one fo
 book-exercises/partNN-<topic>/   a chapter's exercises and worked solutions, same file name as the chapter
 book-practitioner/               the practitioner edition: the same parts and chapters, plus workflow chapters
 book-course/partNN-<topic>/      the course, with its own parts and chapters
+book-opendp/partNN-<topic>/      the OpenDP book, with its own parts and chapters
 notes/<name>/                    a study note: _quarto.yml and index.md
 code/<folder>/                   one script per chapter (the figures and every number a page quotes),
                                  one per exercise page (solutions_*.py), one per practitioner workflow
-                                 (practitioner_*.py), one per note (code/notes/); folders are named after the parts
+                                 (practitioner_*.py), one per OpenDP chapter (opendp_*.py), one per note
                                  (code/notes/); folders are named after the parts
 tests/                           one test per script, checking that it still prints what the pages quote
 tools/                           terms.py (acronyms, glossary, index), notation.py, prose.py, structure.py, xrefs.py

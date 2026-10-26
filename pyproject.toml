@@ -22,7 +22,8 @@ dev = [
 # The library the study notes' synthetic-data experiment runs: Private-PGM (mbi), the graphical-model inference
 # engine behind AIM and MST. Pinned exactly, like the practitioner group. It brings in jax (CPU).
 notes = [
-    "mbi==2.0.0",
+    "mbi==1.1.0", # the version OpenDP 0.16.0 pins in its [mbi] extra; the OpenDP book runs it too
+    "pandas==3.1.0",  # mbi 1.1.0 builds a DataFrame when OpenDP synthesizes rows from a fitted model
 ]
 # The libraries the practitioner edition's snippets and workflow scripts run (tests marked `libs`).
 # Pinned exactly, so the numbers the book quotes stay reproducible. torch is the CPU build.
@@ -32,7 +33,7 @@ practitioner = [
     "diffprivlib==0.6.6",
     "fastexcel==0.21.0",
     "opacus==1.6.0",
-    "opendp[polars]==0.16.0",
+    "opendp[mbi,polars]==0.16.0",
     "peft==0.21.2",
     "scikit-learn==1.8.0",  # diffprivlib 0.6.6 does not import with scikit-learn 1.9
     "torch==2.14.1",

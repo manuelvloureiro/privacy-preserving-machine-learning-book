@@ -4,12 +4,13 @@ How the books are built and checked. The other three documents cover the rest: [
 
 ## The projects
 
-Four [Quarto](https://quarto.org) book projects sit side by side and share `code/`, `filters/`, `terms.toml`, `notation.toml` and the Quarto settings in `_common.yml` and `_book-common.yml`:
+Five [Quarto](https://quarto.org) book projects sit side by side and share `code/`, `filters/`, `terms.toml`, `notation.toml` and the Quarto settings in `_common.yml` and `_book-common.yml`:
 
 - `book-full/`: the full edition, with every derivation. Website and PDF.
 - `book-exercises/`: the full edition's exercises with worked solutions, one page per chapter. Website only.
 - `book-practitioner/`: the practitioner edition, the same parts and topics without proofs, plus workflow chapters that run real libraries. Website and PDF.
 - `book-course/`: a course in differential privacy, one topic per chapter, light in text and complete in its proofs. It links to no other book. Website and PDF.
+- `book-opendp/`: the OpenDP book, which teaches the OpenDP library from its first release to synthetic data in the order of its documentation, with its own parts; its code runs the library on the France Labour Force Survey sample. Website and PDF.
 
 Next to them, `notes/<name>/` holds standalone study notes: each is a one-page Quarto project (`_quarto.yml` and `index.md`, with a script in `code/notes/` when it computes anything) that renders to a web page with its PDF. The landing page `site/index.html` links to every book, PDF and note.
 
@@ -24,7 +25,7 @@ make website      # every website, into _book/<book>/
 make pdf          # the three PDFs, into _book/
 make notes        # the study notes, into _book/notes/<name>/
 make book         # all of the above
-make full         # one target: full, full-pdf, exercises, practitioner, practitioner-pdf, course, course-pdf
+make full         # one target: full, full-pdf, exercises, practitioner, practitioner-pdf, course, course-pdf, opendp, opendp-pdf
 make preview      # serve the full edition from its staged copy (rerun after editing book-full/)
 make help         # every target
 ```
@@ -35,7 +36,7 @@ make help         # every target
 
 **Figures are build output.** Each script in `code/<folder>/` writes its SVG figures into `_build/figures/<folder>/`, deterministically, and staging copies them into the book folder of the same name (`<part>/figures/`, `appendix-derivations/figures/`), so a page references a figure as `figures/<name>.svg` and no figure is committed. Every build runs `make figures` first, which reruns a script only when a file in its folder changed; its printed tables go to `_build/logs/`, which doubles as the up-to-date marker. Regenerating everything takes about ten minutes, so pass `-j`. `make figures-force` reruns them all.
 
-**Two naming schemes share `code/`.** The full, exercise and practitioner books use the parts `part01-prerequisites` … `part05-dp-ml`; the course has its own, `part01-privacy-failures` … `part05-deployments`. Both sets of folders sit in `code/`, and only the folder name ties a script's figures to a book's part, so a new part must not reuse a name from the other scheme. The practitioner workflows (`code/<part>/practitioner_*.py`) and the notes' scripts (`code/notes/`) draw no figures and are not run by `make figures`.
+**Three naming schemes share `code/`.** The full, exercise and practitioner books use the parts `part01-prerequisites` … `part05-dp-ml`; the course has its own, `part01-privacy-failures` … `part05-deployments`; the OpenDP book has `part01-getting-started` … `part05-synthetic-data`. All three sets of folders sit in `code/`, and only the folder name ties a script's figures to a book's part, so a new part must not reuse a name from another scheme. The practitioner workflows (`code/<part>/practitioner_*.py`), the OpenDP book's scripts (`code/<part>/opendp_*.py`) and the notes' scripts (`code/notes/`) draw no figures and are not run by `make figures`.
 
 **Links between the books.** A page links to another book, to `code/` or to `tests/` by its relative path in the repository (`../../book-exercises/part03-dp-foundations/03-laplace-gaussian.md#sec-sol-lg-2`), so the links also work when browsing the source. `filters/links.lua` rewrites them for the output: a link to `code/` or `tests/` points to the file on GitHub; on a website a link to another book points to its page there, since `_book/` mirrors the repository's layout; in a PDF it becomes plain text followed by "in the exercise book", "in the full edition", "in the practitioner edition" or "in the course". The exercise book also cross-references the full edition's labels as `@eq-name`, `@thm-name` and so on, which Quarto resolves only within one book: `make exercises` therefore builds the full edition first, `tools/xrefs.py` reads its labels and numbers into the staged `_xrefs.json`, and `filters/xrefs.lua` turns each reference into a link that reads "Equation 20.9" or "Theorem 20.2".
 
@@ -66,6 +67,6 @@ make structure-check    # every page in its kind's shape (tools/structure.toml);
 make website            # a chapter that fails to render, or warns, is a broken chapter
 ```
 
-`make structure-check` reads `tools/structure.toml`: for each book, which skeleton each page follows (full chapter, part page, appendix, exercise page, practitioner page, course chapter, note) and what the skeleton requires. Pages listed under a book's `legacy` have not been converted to their skeleton yet and are skipped until their line is removed; `make structure BOOK=book-full` reports words per page and section.
+`make structure-check` reads `tools/structure.toml`: for each book, which skeleton each page follows (full chapter, part page, appendix, exercise page, practitioner page, course chapter, OpenDP chapter, note) and what the skeleton requires. Pages listed under a book's `legacy` have not been converted to their skeleton yet and are skipped until their line is removed; `make structure BOOK=book-full` reports words per page and section.
 
-**The practitioner edition's code** runs real libraries (Opacus, CPU PyTorch, `dp-accounting`, OpenDP, diffprivlib, `peft`, `transformers`, scikit-learn, SciPy, ART), pinned in the `practitioner` dependency group, which `uv` installs by default. Its tests are marked `libs`. The workflow scripts read public datasets through `code/practitioner_datasets.py`, which caches them in `data/` (git-ignored); `make datasets` fills the cache and `make test` runs it first. Untyped libraries are typed by hand-written stubs in `typings/`. `tests/test_practitioner_excerpts.py` checks that every code block on a practitioner page is a snippet, a `text` or `bash` block, or an excerpt that matches a marked region of a script; `tests/test_practitioner_snippets.py` runs the snippets. [AGENTS.md](AGENTS.md) has the rules.
+**The practitioner edition's code** runs real libraries (Opacus, CPU PyTorch, `dp-accounting`, OpenDP, diffprivlib, `peft`, `transformers`, scikit-learn, SciPy, ART), pinned in the `practitioner` dependency group, which `uv` installs by default. Its tests are marked `libs`. The workflow scripts read public datasets through `code/practitioner_datasets.py`, which caches them in `data/` (git-ignored); `make datasets` fills the cache and `make test` runs it first. Untyped libraries are typed by hand-written stubs in `typings/`. `tests/test_practitioner_excerpts.py` checks that every code block on a practitioner or OpenDP page is a snippet, a `text` or `bash` block, or an excerpt that matches a marked region of a script; `tests/test_practitioner_snippets.py` runs the snippets of both books. The OpenDP book's scripts (`code/<part>/opendp_*.py`, tests marked `libs`) run OpenDP on the France Labour Force Survey sample, which `code/practitioner_datasets.py` caches like the other datasets. [AGENTS.md](AGENTS.md) has the rules.

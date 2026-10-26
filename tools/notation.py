@@ -23,7 +23,7 @@ from pathlib import Path
 from typing import Any, cast
 
 ROOT = Path(__file__).resolve().parent.parent
-BOOKS = ["book-full", "book-exercises", "book-practitioner", "book-course", "notes"]
+BOOKS = ["book-full", "book-exercises", "book-practitioner", "book-course", "book-opendp", "notes"]
 GENERATED = {"glossary.md", "term-index.md"}
 ASYMPTOTIC = re.compile(r"(?:\\tilde\s*)?(?:O|\\Theta|\\Omega|o|\\omega)\s*\($")
 
