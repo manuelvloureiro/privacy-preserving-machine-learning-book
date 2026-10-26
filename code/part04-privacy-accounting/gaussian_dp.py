@@ -8,21 +8,22 @@ then saves the chapter's figures.
 
 Conventions. P = M(D) and Q = M(D') are the output distributions on two neighbours. A test
 rejects "the data is D" when it fires; its type I error is a = E_P[φ] and its type II error is
-b = 1 - E_Q[φ]. The letter α is kept for Rényi orders, so it never names a type I error here.
+b = 1 - E_Q[φ], which the chapter writes FPR and FNR because it keeps α for Rényi orders.
 The trade-off function T(P, Q)(a) is the smallest b at type I error at most a. The privacy loss
 is L = ln(p/q), and the privacy loss random variable is L(Y) with Y ~ P.
 """
 
 import argparse
 import math
+import sys
 from collections.abc import Callable, Sequence
 from pathlib import Path
 
-import matplotlib
+sys.path.insert(0, str(Path(__file__).resolve().parents[1]))  # for code/shared
+from shared.figures import configure
+from shared.stats import normal_cdf
 
-matplotlib.use("Agg")
-matplotlib.rcParams["svg.hashsalt"] = "gaussian_dp"  # stable element ids, so reruns don't churn the SVGs
-matplotlib.rcParams["svg.fonttype"] = "none"  # keep text as text: smaller, diffable files
+configure("gaussian_dp")
 
 import matplotlib.pyplot as plt
 import numpy as np
@@ -42,11 +43,6 @@ SGD_DELTA = 1e-5
 SGD_STEPS: tuple[int, ...] = (100, 1000, 10_000)
 
 # --- Normal distribution (no SciPy) ----------------------------------------------------------
-
-
-def normal_cdf(x: float) -> float:
-    """Φ(x) = Pr[Z <= x]; erfc keeps full relative precision in the lower tail."""
-    return 0.5 * math.erfc(-x / math.sqrt(2))
 
 
 def normal_isf(p: float) -> float:
@@ -711,7 +707,7 @@ GRID = [i / 1000 for i in range(1001)]
 
 def plot_eps_delta_vs_gdp() -> Figure:
     fig, ax = plt.subplots(figsize=(6, 5))
-    ax.plot(GRID, [1 - a for a in GRID], color="gray", linestyle=":", label="perfect privacy $1 - a$")
+    ax.plot(GRID, [1 - a for a in GRID], color="gray", linestyle=":", label=r"perfect privacy $1 - \mathrm{FPR}$")
     ax.plot(GRID, [eps_delta_tradeoff(1.0, 0.0, a) for a in GRID], label=r"$f_{1,0}$ (randomized response)")
     ax.plot(GRID, [eps_delta_tradeoff(1.0, 0.1, a) for a in GRID], label=r"$f_{1,0.1}$")
     ax.plot(
@@ -719,8 +715,8 @@ def plot_eps_delta_vs_gdp() -> Figure:
     )
     ax.plot(GRID, [gaussian_tradeoff(1.0, a) for a in GRID], color="k", label=r"$G_1$ (Gaussian, $\sigma = 1$)")
     ax.set(
-        xlabel="type I error $a$",
-        ylabel="type II error $b$",
+        xlabel=r"type I error $\mathrm{FPR}$",
+        ylabel=r"type II error $\mathrm{FNR}$",
         xlim=(0, 1),
         ylim=(0, 1),
         title="Privacy guarantees as trade-off curves",
@@ -759,8 +755,8 @@ def plot_duality(mu: float = 1.0) -> Figure:
     right.set(
         xlim=(0, 1),
         ylim=(0, 1),
-        xlabel="type I error $a$",
-        ylabel="type II error $b$",
+        xlabel=r"type I error $\mathrm{FPR}$",
+        ylabel=r"type II error $\mathrm{FNR}$",
         title=r"$G_1$ is the upper envelope of its $(\varepsilon,\delta)$ curves",
     )
     right.legend(loc="upper right", fontsize=8)
@@ -779,7 +775,7 @@ def plot_composition(rng: np.random.Generator, mus: tuple[float, float] = (1.0, 
     u = np.array(mus) / mu
     along = np.linspace(-4, 4, 2)
     base = t * u
-    left.plot(base[0] + along * -u[1], base[1] + along * u[0], "k--", label="LR threshold at $a = 0.05$")
+    left.plot(base[0] + along * -u[1], base[1] + along * u[0], "k--", label=r"LR threshold at $\mathrm{FPR} = 0.05$")
     left.annotate("", xy=(mus[0], mus[1]), xytext=(0, 0), arrowprops={"arrowstyle": "->", "color": "k"})
     left.set(
         xlim=(-4, 5),
@@ -797,8 +793,8 @@ def plot_composition(rng: np.random.Generator, mus: tuple[float, float] = (1.0, 
     right.set(
         xlim=(0, 1),
         ylim=(0, 1),
-        xlabel="type I error $a$",
-        ylabel="type II error $b$",
+        xlabel=r"type I error $\mathrm{FPR}$",
+        ylabel=r"type II error $\mathrm{FNR}$",
         title=r"$G_1 \otimes G_1 = G_\mu$ with $\mu = 2^{1/2}$ = 1.41",
     )
     right.legend(loc="upper right")
@@ -818,8 +814,8 @@ def plot_clt() -> Figure:
     left.set(
         xlim=(0, 1),
         ylim=(0, 1),
-        xlabel="type I error $a$",
-        ylabel="type II error $b$",
+        xlabel=r"type I error $\mathrm{FPR}$",
+        ylabel=r"type II error $\mathrm{FNR}$",
         title=r"Composed randomized response, $k\varepsilon_0^2 = 1$",
     )
     left.legend(loc="upper right", fontsize=8)
@@ -901,8 +897,8 @@ def plot_rdp_lossy(mu: float = 1.0, eps: float = 1.0) -> Figure:
     ax.set(
         xlim=(0, 1),
         ylim=(0, 1),
-        xlabel="type I error $a$",
-        ylabel="type II error $b$",
+        xlabel=r"type I error $\mathrm{FPR}$",
+        ylabel=r"type II error $\mathrm{FNR}$",
         title=rf"What the RDP curve keeps, and its $\varepsilon = {eps:g}$ line",
     )
     ax.legend(loc="upper right", fontsize=8)

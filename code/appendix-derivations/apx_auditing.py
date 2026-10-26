@@ -18,15 +18,15 @@ with the default seed), then saves the appendix's figures. The script checks
 
 import argparse
 import math
+import sys
 from collections.abc import Callable
 from dataclasses import dataclass
 from pathlib import Path
 
-import matplotlib
+sys.path.insert(0, str(Path(__file__).resolve().parents[1]))  # for code/shared
+from shared.figures import configure
 
-matplotlib.use("Agg")
-matplotlib.rcParams["svg.hashsalt"] = "apx_auditing"  # stable element ids, so reruns don't churn the SVGs
-matplotlib.rcParams["svg.fonttype"] = "none"  # keep text as text: smaller, diffable files
+configure("apx_auditing")
 
 import matplotlib.pyplot as plt
 import numpy as np

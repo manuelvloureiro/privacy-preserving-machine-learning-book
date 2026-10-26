@@ -15,15 +15,16 @@ e^ε / (1 + e^ε); its privacy loss is +ε or -ε. Logs are natural.
 import argparse
 import itertools
 import math
+import sys
 from collections.abc import Sequence
 from fractions import Fraction
 from pathlib import Path
 
-import matplotlib
+sys.path.insert(0, str(Path(__file__).resolve().parents[1]))  # for code/shared
+from shared.figures import configure
+from shared.stats import normal_cdf
 
-matplotlib.use("Agg")
-matplotlib.rcParams["svg.hashsalt"] = "composition"  # stable element ids, so reruns don't churn the SVGs
-matplotlib.rcParams["svg.fonttype"] = "none"  # keep text as text: smaller, diffable files
+configure("composition")
 
 import matplotlib.pyplot as plt
 import numpy as np
@@ -34,11 +35,6 @@ from numpy.typing import NDArray
 FIGURES = Path(__file__).resolve().parents[2] / "_build" / "figures" / Path(__file__).parent.name
 
 Dist = Sequence[float]  # a distribution on a finite set, as a list of probabilities
-
-
-def normal_cdf(x: float) -> float:
-    """Φ(x); erfc keeps full relative precision in the lower tail."""
-    return 0.5 * math.erfc(-x / math.sqrt(2))
 
 
 def logsumexp(values: NDArray[np.float64]) -> float:

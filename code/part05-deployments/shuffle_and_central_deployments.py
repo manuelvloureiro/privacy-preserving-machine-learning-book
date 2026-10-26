@@ -12,13 +12,13 @@ mechanisms and a budget under zero-concentrated differential privacy.
 
 import argparse
 import math
+import sys
 from pathlib import Path
 
-import matplotlib
+sys.path.insert(0, str(Path(__file__).resolve().parents[1]))  # for code/shared
+from shared.figures import configure
 
-matplotlib.use("Agg")
-matplotlib.rcParams["svg.hashsalt"] = "shuffle_and_central_deployments"  # stable element ids across reruns
-matplotlib.rcParams["svg.fonttype"] = "none"  # keep text as text
+configure("shuffle_and_central_deployments")
 
 import matplotlib.pyplot as plt
 import numpy as np

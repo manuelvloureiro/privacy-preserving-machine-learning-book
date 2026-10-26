@@ -27,14 +27,14 @@ os.environ.setdefault("OPENBLAS_NUM_THREADS", "1")
 
 import argparse
 import math
+import sys
 from dataclasses import dataclass, field
 from pathlib import Path
 
-import matplotlib
+sys.path.insert(0, str(Path(__file__).resolve().parents[1]))  # for code/shared
+from shared.figures import configure
 
-matplotlib.use("Agg")
-matplotlib.rcParams["svg.hashsalt"] = "disparate_impact"  # stable element ids, so reruns don't churn the SVGs
-matplotlib.rcParams["svg.fonttype"] = "none"  # keep text as text: smaller, diffable files
+configure("disparate_impact")
 
 import matplotlib.pyplot as plt
 import numpy as np

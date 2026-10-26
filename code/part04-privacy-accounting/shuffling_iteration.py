@@ -17,15 +17,16 @@ noise multiplier is σ/s. Logarithms are natural.
 
 import argparse
 import math
+import sys
 from collections.abc import Callable, Sequence
 from functools import cache
 from pathlib import Path
 
-import matplotlib
+sys.path.insert(0, str(Path(__file__).resolve().parents[1]))  # for code/shared
+from shared.figures import configure
+from shared.stats import normal_cdf
 
-matplotlib.use("Agg")
-matplotlib.rcParams["svg.hashsalt"] = "shuffling_iteration"  # stable element ids, so reruns don't churn the SVGs
-matplotlib.rcParams["svg.fonttype"] = "none"  # keep text as text: smaller, diffable files
+configure("shuffling_iteration")
 
 import matplotlib.pyplot as plt
 import numpy as np
@@ -47,11 +48,6 @@ SHUFFLE_DELTA = 1e-6
 
 
 # --- Toolkit: normal CDF, hockey-stick on log-probabilities, conversions ----------------------------
-
-
-def normal_cdf(x: float) -> float:
-    """Φ(x); erfc keeps full relative precision in the lower tail."""
-    return 0.5 * math.erfc(-x / math.sqrt(2))
 
 
 @cache

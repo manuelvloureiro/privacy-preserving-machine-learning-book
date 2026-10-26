@@ -14,15 +14,16 @@ Logs are natural.
 
 import argparse
 import math
+import sys
 from collections.abc import Callable, Sequence
 from functools import cache
 from pathlib import Path
 
-import matplotlib
+sys.path.insert(0, str(Path(__file__).resolve().parents[1]))  # for code/shared
+from shared.figures import configure
+from shared.stats import normal_cdf
 
-matplotlib.use("Agg")
-matplotlib.rcParams["svg.hashsalt"] = "properties"  # stable element ids, so reruns don't churn the SVGs
-matplotlib.rcParams["svg.fonttype"] = "none"  # keep text as text: smaller, diffable files
+configure("properties")
 
 import matplotlib.pyplot as plt
 import numpy as np
@@ -47,7 +48,7 @@ def hockey_stick(p: Dist, q: Dist, eps: float) -> float:
 
 
 def privacy_profile(p: Dist, q: Dist, eps: float) -> float:
-    """δ(ε) for the pair, in both directions: the smallest δ with (ε, δ)-DP for D ≃ D'."""
+    """δ(ε) for the pair, in both directions: the smallest δ with (ε, δ)-DP for D ∼ D'."""
     return max(hockey_stick(p, q, eps), hockey_stick(q, p, eps))
 
 
@@ -170,10 +171,6 @@ def alarm_mechanism(eps: float, delta: float, size: int, count: int) -> list[flo
     """
     a = delta * sum(math.exp(j * eps) for j in range(max(size - count, 0)))
     return [a, 1 - a]
-
-
-def normal_cdf(x: float) -> float:
-    return 0.5 * math.erfc(-x / math.sqrt(2))
 
 
 def gaussian_profile(eps: float, mu: float) -> float:

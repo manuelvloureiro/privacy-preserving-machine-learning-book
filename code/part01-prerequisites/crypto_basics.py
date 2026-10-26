@@ -14,15 +14,16 @@ import argparse
 import hashlib
 import hmac
 import math
+import sys
 from dataclasses import dataclass
 from itertools import product
 from pathlib import Path
 
-import matplotlib
+sys.path.insert(0, str(Path(__file__).resolve().parents[1]))  # for code/shared
+from shared.figures import configure
+from shared.stats import normal_sf
 
-matplotlib.use("Agg")
-matplotlib.rcParams["svg.hashsalt"] = "crypto_basics"  # stable element ids, so reruns don't churn the SVGs
-matplotlib.rcParams["svg.fonttype"] = "none"  # keep text as text: smaller, diffable files
+configure("crypto_basics")
 
 import matplotlib.pyplot as plt
 import numpy as np
@@ -33,11 +34,6 @@ from numpy.typing import NDArray
 FIGURES = Path(__file__).resolve().parents[2] / "_build" / "figures" / Path(__file__).parent.name
 
 IntArray = NDArray[np.int64]
-
-
-def normal_sf(t: float) -> float:
-    """Pr[Z >= t] for Z ~ N(0, 1)."""
-    return 0.5 * math.erfc(t / math.sqrt(2))
 
 
 # --- Negligible functions -------------------------------------------------------------------

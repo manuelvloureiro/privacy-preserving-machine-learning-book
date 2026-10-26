@@ -11,6 +11,7 @@ attribute_inference.py.
 
 import argparse
 import math
+import sys
 from pathlib import Path
 
 import numpy as np
@@ -26,12 +27,10 @@ from attribute_inference import (
 )
 
 # Figures are build output: _build/figures/<part>/, which the build copies into each book.
+sys.path.insert(0, str(Path(__file__).resolve().parents[1]))  # for code/shared
+from shared.stats import normal_cdf
+
 FIGURES = Path(__file__).resolve().parents[2] / "_build" / "figures" / Path(__file__).parent.name
-
-
-def normal_cdf(x: float) -> float:
-    """Φ(x); erfc keeps full relative precision in the lower tail."""
-    return 0.5 * math.erfc(-x / math.sqrt(2))
 
 
 def p_disease(s: int, x: int, y: int) -> float:

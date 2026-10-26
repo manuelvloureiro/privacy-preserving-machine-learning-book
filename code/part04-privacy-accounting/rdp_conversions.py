@@ -10,7 +10,8 @@ Conventions: P = M(D), Q = M(D') are the output distributions on neighbouring da
 L = ln p/q is the privacy loss, so Y ~ P makes L the privacy loss random variable. An RDP curve is
 given as two parallel sequences, the orders α > 1 and the values ε(α). In the hypothesis-testing
 section, α is always the Rényi order: the type I error of a test (reject "the output came from P"
-although it did) is called a, and its type II error is called b.
+although it did) is called a, and its type II error is called b; the chapter writes them FPR
+and FNR.
 
 The Gaussian mechanism with noise multiplier σ composed k times is, for every question asked here,
 the pair P = N(0, 1), Q = N(μ, 1) with μ = √k/σ: its RDP curve is ε(α) = αμ²/2.
@@ -18,14 +19,15 @@ the pair P = N(0, 1), Q = N(μ, 1) with μ = √k/σ: its RDP curve is ε(α) = 
 
 import argparse
 import math
+import sys
 from collections.abc import Callable, Sequence
 from pathlib import Path
 
-import matplotlib
+sys.path.insert(0, str(Path(__file__).resolve().parents[1]))  # for code/shared
+from shared.figures import configure
+from shared.stats import normal_cdf
 
-matplotlib.use("Agg")
-matplotlib.rcParams["svg.hashsalt"] = "rdp_conversions"  # stable element ids, so reruns don't churn the SVGs
-matplotlib.rcParams["svg.fonttype"] = "none"  # keep text as text: smaller, diffable files
+configure("rdp_conversions")
 
 import matplotlib.pyplot as plt
 import numpy as np
@@ -44,11 +46,6 @@ Array = NDArray[np.float64]
 
 
 # --- Normal distribution helpers ------------------------------------------------------------
-
-
-def normal_cdf(x: float) -> float:
-    """Φ(x); erfc keeps full relative precision in the lower tail."""
-    return 0.5 * math.erfc(-x / math.sqrt(2))
 
 
 def log_normal_cdf(x: float) -> float:
@@ -715,7 +712,9 @@ def plot_tradeoff_region(mu: float = 1.0) -> Figure:
     fig, axes = plt.subplots(1, 2, figsize=(11, 4.6))
     a_lin = [i / 200 for i in range(1, 200)]
     for ax, xs, log in ((axes[0], a_lin, False), (axes[1], a_values, True)):
-        ax.plot(xs, [1 - gaussian_tradeoff(a, mu) for a in xs], "k", lw=2, label=r"true Gaussian, $1 - G_1(a)$")
+        ax.plot(
+            xs, [1 - gaussian_tradeoff(a, mu) for a in xs], "k", lw=2, label=r"true Gaussian, $1 - G_1(\mathrm{FPR})$"
+        )
         ax.plot(
             xs,
             [1 - rdp_tradeoff_lower_bound(ORDERS, curve, a) for a in xs],
@@ -740,11 +739,17 @@ def plot_tradeoff_region(mu: float = 1.0) -> Figure:
                 lw=1,
                 label=rf"$(\varepsilon, \delta) = ({e_imp:.2f}, 10^{{-5}})$" + "\nfrom the improved conversion",
             )
-            ax.set(xscale="log", yscale="log", ylim=(1e-6, 1.2), xlim=(1e-10, 1), title="Log axes: the low-$a$ corner")
+            ax.set(
+                xscale="log",
+                yscale="log",
+                ylim=(1e-6, 1.2),
+                xlim=(1e-10, 1),
+                title=r"Log axes: the low-$\mathrm{FPR}$ corner",
+            )
         else:
             ax.plot([0, 1], [0, 1], color="0.8", lw=0.8)
             ax.set(xlim=(0, 1), ylim=(0, 1.02), title="Linear axes")
-        ax.set(xlabel=r"type I error $a$", ylabel=r"power $1 - b$")
+        ax.set(xlabel=r"type I error $\mathrm{FPR}$", ylabel=r"power $1 - \mathrm{FNR}$")
     axes[0].legend(fontsize=8, loc="lower right")
     # The other curves are labelled on the left; here only the (ε, δ) line, in the empty lower-right corner.
     grey = axes[1].get_lines()[-1]

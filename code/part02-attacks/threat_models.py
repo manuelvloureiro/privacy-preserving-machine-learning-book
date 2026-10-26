@@ -22,15 +22,16 @@ Conventions: b = 1 means "the target is in the data" (the alternative, Q); b = 0
 
 import argparse
 import math
+import sys
 from collections.abc import Callable
 from functools import cache
 from pathlib import Path
 
-import matplotlib
+sys.path.insert(0, str(Path(__file__).resolve().parents[1]))  # for code/shared
+from shared.figures import configure
+from shared.stats import normal_cdf, normal_pdf, normal_sf
 
-matplotlib.use("Agg")
-matplotlib.rcParams["svg.hashsalt"] = "threat_models"  # stable element ids, so reruns don't churn the SVGs
-matplotlib.rcParams["svg.fonttype"] = "none"  # keep text as text: smaller, diffable files
+configure("threat_models")
 
 import matplotlib.pyplot as plt
 import numpy as np
@@ -53,20 +54,6 @@ GAMES = 200_000  # games per world in the noisy-count simulations
 
 
 # --- Toolkit: advantage, winning probability, precision ------------------------------------
-
-
-def normal_cdf(x: float) -> float:
-    """Φ(x); erfc keeps full relative precision in the lower tail."""
-    return 0.5 * math.erfc(-x / math.sqrt(2))
-
-
-def normal_sf(x: float) -> float:
-    """1 − Φ(x), the upper tail, without cancellation."""
-    return 0.5 * math.erfc(x / math.sqrt(2))
-
-
-def normal_pdf(x: float, mu: float = 0.0, sigma: float = 1.0) -> float:
-    return math.exp(-((x - mu) ** 2) / (2 * sigma**2)) / (sigma * math.sqrt(2 * math.pi))
 
 
 def bisect(f: Callable[[float], float], lo: float, hi: float, steps: int = 100) -> float:

@@ -11,13 +11,13 @@ smallest δ it achieves at ε is Φ(s/2 - ε/s) - e^ε Φ(-s/2 - ε/s), where s 
 
 import argparse
 import math
+import sys
 from pathlib import Path
 
-import matplotlib
+sys.path.insert(0, str(Path(__file__).resolve().parents[1]))  # for code/shared
+from shared.figures import configure
 
-matplotlib.use("Agg")
-matplotlib.rcParams["svg.hashsalt"] = "approximate_dp"  # stable element ids across reruns
-matplotlib.rcParams["svg.fonttype"] = "none"  # keep text as text
+configure("approximate_dp")
 
 import matplotlib.pyplot as plt
 import numpy as np

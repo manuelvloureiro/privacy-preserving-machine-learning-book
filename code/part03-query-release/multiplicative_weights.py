@@ -13,13 +13,13 @@ weights algorithm for queries on a small domain.
 import argparse
 import itertools
 import math
+import sys
 from pathlib import Path
 
-import matplotlib
+sys.path.insert(0, str(Path(__file__).resolve().parents[1]))  # for code/shared
+from shared.figures import configure
 
-matplotlib.use("Agg")
-matplotlib.rcParams["svg.hashsalt"] = "multiplicative_weights"  # stable element ids across reruns
-matplotlib.rcParams["svg.fonttype"] = "none"  # keep text as text
+configure("multiplicative_weights")
 
 import matplotlib.pyplot as plt
 import numpy as np

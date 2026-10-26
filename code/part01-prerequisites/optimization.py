@@ -9,14 +9,15 @@ then saves the chapter's figures.
 
 import argparse
 import math
+import sys
 from dataclasses import dataclass
 from pathlib import Path
 
-import matplotlib
+sys.path.insert(0, str(Path(__file__).resolve().parents[1]))  # for code/shared
+from shared.figures import configure
+from shared.stats import sigmoid
 
-matplotlib.use("Agg")
-matplotlib.rcParams["svg.hashsalt"] = "optimization"  # stable element ids, so reruns don't churn the SVGs
-matplotlib.rcParams["svg.fonttype"] = "none"  # keep text as text: smaller, diffable files
+configure("optimization")
 
 import matplotlib.pyplot as plt
 import numpy as np
@@ -31,11 +32,6 @@ Array = NDArray[np.float64]
 W_TRUE = np.array([2.0, -2.0, 1.0, 0.0, 0.0])  # the model that generates the labels
 RADIUS = 5.0  # the constraint set W is the ball of this radius
 SIGMOID_SMOOTHNESS = 1 / (6 * math.sqrt(3))  # max |σ''|, the smoothness of the sigmoid loss
-
-
-def sigmoid(s: Array) -> Array:
-    """σ(s) = 1/(1 + e^{-s}), written with tanh so it never overflows."""
-    return 0.5 * (1.0 + np.tanh(0.5 * s))
 
 
 # --- Data: logistic-regression examples with ‖x‖ = 1 --------------------------------------------

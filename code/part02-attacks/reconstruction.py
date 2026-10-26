@@ -15,6 +15,7 @@ import argparse
 import itertools
 import math
 import os
+import sys
 from collections.abc import Sequence
 from dataclasses import dataclass
 from pathlib import Path
@@ -23,11 +24,12 @@ from pathlib import Path
 os.environ.setdefault("OPENBLAS_NUM_THREADS", "1")
 os.environ.setdefault("OMP_NUM_THREADS", "1")
 
-import matplotlib
 
-matplotlib.use("Agg")
-matplotlib.rcParams["svg.hashsalt"] = "reconstruction"  # stable element ids, so reruns don't churn the SVGs
-matplotlib.rcParams["svg.fonttype"] = "none"  # keep text as text: smaller, diffable files
+sys.path.insert(0, str(Path(__file__).resolve().parents[1]))  # for code/shared
+from shared.figures import configure
+from shared.stats import normal_cdf, normal_quantile
+
+configure("reconstruction")
 
 import matplotlib.pyplot as plt
 import numpy as np
@@ -40,23 +42,6 @@ FIGURES = Path(__file__).resolve().parents[2] / "_build" / "figures" / Path(__fi
 FloatArray = NDArray[np.float64]
 IntArray = NDArray[np.int64]
 BoolArray = NDArray[np.bool_]
-
-
-def normal_cdf(x: float) -> float:
-    """Φ(x); erfc keeps full relative precision in the lower tail."""
-    return 0.5 * math.erfc(-x / math.sqrt(2))
-
-
-def normal_quantile(p: float) -> float:
-    """Φ⁻¹(p) by bisection on normal_cdf (accurate to about 1e-12)."""
-    lo, hi = -40.0, 40.0
-    for _ in range(200):
-        mid = (lo + hi) / 2
-        if normal_cdf(mid) < p:
-            lo = mid
-        else:
-            hi = mid
-    return (lo + hi) / 2
 
 
 def binary_entropy(p: float) -> float:

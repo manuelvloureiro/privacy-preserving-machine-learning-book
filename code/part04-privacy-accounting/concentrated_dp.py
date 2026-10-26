@@ -15,14 +15,15 @@ says it uses the fine continuous grid FINE_ALPHAS.
 
 import argparse
 import math
+import sys
 from collections.abc import Sequence
 from pathlib import Path
 
-import matplotlib
+sys.path.insert(0, str(Path(__file__).resolve().parents[1]))  # for code/shared
+from shared.figures import configure
+from shared.stats import logsumexp, normal_cdf
 
-matplotlib.use("Agg")
-matplotlib.rcParams["svg.hashsalt"] = "concentrated_dp"  # stable element ids, so reruns don't churn the SVGs
-matplotlib.rcParams["svg.fonttype"] = "none"  # keep text as text: smaller, diffable files
+configure("concentrated_dp")
 
 import matplotlib.pyplot as plt
 import numpy as np
@@ -42,16 +43,6 @@ Q_RUN = 0.01
 SIGMA_RUN = 1.0
 K_RUN = 10_000
 DELTA = 1e-5
-
-
-def normal_cdf(x: float) -> float:
-    """Φ(x); erfc keeps full relative precision in the lower tail."""
-    return 0.5 * math.erfc(-x / math.sqrt(2))
-
-
-def logsumexp(values: Sequence[float]) -> float:
-    m = max(values)
-    return m + math.log(sum(math.exp(v - m) for v in values))
 
 
 # --- Section 29.3: the definition, the Gaussian mechanism, composition ----------------------------

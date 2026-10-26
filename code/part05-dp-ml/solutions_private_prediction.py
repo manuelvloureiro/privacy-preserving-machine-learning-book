@@ -12,8 +12,10 @@ os.environ.setdefault("OMP_NUM_THREADS", "1")
 
 import argparse
 import math
+import sys
 from pathlib import Path
 
+sys.path.insert(0, str(Path(__file__).resolve().parents[1]))  # for code/shared
 import numpy as np
 from dp_sgd import bisect
 from private_prediction import (
@@ -28,13 +30,10 @@ from private_prediction import (
     stable_epsilon,
     stable_threshold,
 )
+from shared.stats import normal_cdf
 
 # Figures are build output: _build/figures/<part>/, which the build copies into each book.
 FIGURES = Path(__file__).resolve().parents[2] / "_build" / "figures" / Path(__file__).parent.name
-
-
-def normal_cdf(x: float) -> float:
-    return 0.5 * math.erfc(-x / math.sqrt(2))
 
 
 def normal_quantile(p: float) -> float:

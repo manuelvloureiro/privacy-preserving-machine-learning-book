@@ -9,14 +9,15 @@ then saves the appendix's figures.
 
 import argparse
 import math
+import sys
 from collections.abc import Callable, Sequence
 from pathlib import Path
 
-import matplotlib
+sys.path.insert(0, str(Path(__file__).resolve().parents[1]))  # for code/shared
+from shared.figures import configure
+from shared.stats import bisect, normal_cdf
 
-matplotlib.use("Agg")
-matplotlib.rcParams["svg.hashsalt"] = "apx_core_composition"  # stable element ids, so reruns don't churn the SVGs
-matplotlib.rcParams["svg.fonttype"] = "none"  # keep text as text: smaller, diffable files
+configure("apx_core_composition")
 
 import matplotlib.pyplot as plt
 import numpy as np
@@ -39,26 +40,9 @@ SPLITS: list[float] = [10 ** (-x / 4) for x in range(1, 41)]
 # --- Small helpers --------------------------------------------------------------------------
 
 
-def normal_cdf(x: float) -> float:
-    """Φ(x), the standard normal CDF; erfc keeps full relative precision in the lower tail."""
-    return 0.5 * math.erfc(-x / math.sqrt(2))
-
-
 def normal_pdf(x: float, mean: float = 0.0, sd: float = 1.0) -> float:
     z = (x - mean) / sd
     return math.exp(-z * z / 2) / (sd * math.sqrt(2 * math.pi))
-
-
-def bisect(f: Callable[[float], float], lo: float, hi: float, steps: int = 200) -> float:
-    """The root of a function that changes sign once on [lo, hi]."""
-    f_lo = f(lo)
-    for _ in range(steps):
-        mid = (lo + hi) / 2
-        if (f(mid) > 0) == (f_lo > 0):
-            lo, f_lo = mid, f(mid)
-        else:
-            hi = mid
-    return (lo + hi) / 2
 
 
 # --- Basic composition ----------------------------------------------------------------------

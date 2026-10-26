@@ -21,16 +21,17 @@ side; the whole script runs in half a minute to a few minutes, depending on the 
 
 import argparse
 import math
+import sys
 from collections.abc import Callable, Sequence
 from dataclasses import dataclass
 from functools import cache
 from pathlib import Path
 
-import matplotlib
+sys.path.insert(0, str(Path(__file__).resolve().parents[1]))  # for code/shared
+from shared.figures import configure
+from shared.stats import logsumexp, normal_cdf, normal_sf
 
-matplotlib.use("Agg")
-matplotlib.rcParams["svg.hashsalt"] = "numerical_accounting"  # stable element ids, so reruns don't churn the SVGs
-matplotlib.rcParams["svg.fonttype"] = "none"  # keep text as text: smaller, diffable files
+configure("numerical_accounting")
 
 import matplotlib.pyplot as plt
 import numpy as np
@@ -60,16 +61,6 @@ LOSS_CEILING = 200.0
 
 # The RDP orders shared by every chapter of the part.
 ORDERS: list[float] = [1 + x / 10 for x in range(1, 100)] + [float(a) for a in range(12, 64)] + [128.0, 256.0, 512.0]
-
-
-def normal_cdf(x: float) -> float:
-    """Φ(x); erfc keeps full relative precision in the lower tail."""
-    return 0.5 * math.erfc(-x / math.sqrt(2))
-
-
-def normal_sf(x: float) -> float:
-    """1 - Φ(x), accurate in the upper tail."""
-    return 0.5 * math.erfc(x / math.sqrt(2))
 
 
 def normal_cdf_array(x: Array) -> Array:
@@ -503,11 +494,6 @@ def pld_epsilon_subsampled_gaussian(
 
 
 # --- Section 32.8: the accountants to compare against ----------------------------------------------
-
-
-def logsumexp(values: Array) -> float:
-    top = float(np.max(values))
-    return top + math.log(float(np.sum(np.exp(values - top))))
 
 
 def subsampled_gaussian_log_a(alpha: float, q: float, sigma: float, integrate: bool = False) -> float:

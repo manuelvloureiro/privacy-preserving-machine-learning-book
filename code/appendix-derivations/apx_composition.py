@@ -7,23 +7,24 @@ Prints every number quoted in book-full/appendix-derivations/11-composition.md (
 exactly with the default seed), then saves the appendix's figures.
 
 Conventions follow the f-DP chapter: a test fires ("the data was D'") with probability phi(y), its
-type I error is a = E_P[phi] and its type II error is b = 1 - E_Q[phi]; the privacy loss is
+type I error is a = E_P[phi] and its type II error is b = 1 - E_Q[phi] (α and β in the appendix,
+which has no Rényi order); the privacy loss is
 L = ln(p / q). In the dominating-pair section, as in the numerical-accounting chapter, a test fires
 for P and E_gamma(P || Q) = sum (P - gamma Q)_+.
 """
 
 import argparse
 import math
+import sys
 from collections.abc import Callable, Sequence
 from dataclasses import dataclass
 from functools import cache
 from pathlib import Path
 
-import matplotlib
+sys.path.insert(0, str(Path(__file__).resolve().parents[1]))  # for code/shared
+from shared.figures import configure
 
-matplotlib.use("Agg")
-matplotlib.rcParams["svg.hashsalt"] = "apx_composition"  # stable element ids, so reruns don't churn the SVGs
-matplotlib.rcParams["svg.fonttype"] = "none"  # keep text as text: smaller, diffable files
+configure("apx_composition")
 
 import matplotlib.pyplot as plt
 import numpy as np
@@ -779,14 +780,14 @@ def plot_canonical(a: float = 0.1) -> Figure:
     left.plot(x, np.ones_like(x), color="C0", label=r"$P_f$: uniform")
     left.plot(x, dens, color="C1", label=r"$Q_f$: density, minus the slope of $f$ at $1 - x$")
     cut = x >= 1 - a
-    left.fill_between(x[cut], 0, 1, color="C0", alpha=0.35, label=f"fire: type I error $a = {a}$")
+    left.fill_between(x[cut], 0, 1, color="C0", alpha=0.35, label=rf"fire: type I error $\alpha = {a}$")
     left.fill_between(
         x[cut],
         1,
         np.minimum(dens[cut], 4),
         color="C1",
         alpha=0.3,
-        label=f"power $1 - f(a) = {1 - gaussian_tradeoff(1.0, a):.4f}$",
+        label=rf"power $1 - f(\alpha) = {1 - gaussian_tradeoff(1.0, a):.4f}$",
     )
     left.axvline(1 - a, color="gray", linestyle=":")
     left.set(xlim=(0, 1.02), ylim=(0, 4), xlabel="x", ylabel="density", title=r"$f = G_1$: no atom, since $f(0) = 1$")
@@ -833,8 +834,8 @@ def plot_replacement() -> Figure:
         left.annotate("", xy=after, xytext=before, arrowprops={"arrowstyle": "->", "color": color})
         left.plot(*after, "s", color=color, markerfacecolor="white")
     left.set(
-        xlabel="type I error a",
-        ylabel="type II error b",
+        xlabel=r"type I error $\alpha$",
+        ylabel=r"type II error $\beta$",
         title="Step 2: one branch at a time",
         xlim=(0, 1),
         ylim=(0, 1),
@@ -863,8 +864,8 @@ def plot_replacement() -> Figure:
     right.plot([], [], "k^", markerfacecolor="white", label="after step 2, when step 4 moves it")
     right.plot([], [], "ks", markerfacecolor="white", label="after steps 2 and 4")
     right.set(
-        xlabel="type I error a",
-        ylabel="type II error b",
+        xlabel=r"type I error $\alpha$",
+        ylabel=r"type II error $\beta$",
         title="Same type I error, no larger type II error",
         xlim=(0, 1),
         ylim=(0, 1),
@@ -950,8 +951,8 @@ def plot_clt_band() -> Figure:
         ax.set(
             xlim=(0, 1),
             ylim=(0, 1),
-            xlabel="type I error a",
-            ylabel="type II error b",
+            xlabel=r"type I error $\alpha$",
+            ylabel=r"type II error $\beta$",
             title=rf"$k = {k}$ randomized responses, $\varepsilon_0 = k^{{-1/2}}$",
         )
         ax.legend(fontsize=8)

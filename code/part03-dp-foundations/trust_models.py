@@ -14,15 +14,16 @@ estimator's error is measured on fractions, so a count error is n times larger.
 
 import argparse
 import math
+import sys
 from collections.abc import Callable, Sequence
 from functools import cache
 from pathlib import Path
 
-import matplotlib
+sys.path.insert(0, str(Path(__file__).resolve().parents[1]))  # for code/shared
+from shared.figures import configure
+from shared.stats import normal_cdf
 
-matplotlib.use("Agg")
-matplotlib.rcParams["svg.hashsalt"] = "trust_models"  # stable element ids, so reruns don't churn the SVGs
-matplotlib.rcParams["svg.fonttype"] = "none"  # keep text as text: smaller, diffable files
+configure("trust_models")
 
 import matplotlib.pyplot as plt
 import numpy as np
@@ -39,11 +40,6 @@ IntArray = NDArray[np.int64]
 
 
 # --- Shared helpers ---------------------------------------------------------------------------
-
-
-def normal_cdf(x: float) -> float:
-    """Φ(x); erfc keeps full relative precision in the lower tail."""
-    return 0.5 * math.erfc(-x / math.sqrt(2))
 
 
 def bisect(f: Callable[[float], float], lo: float, hi: float, steps: int = 60) -> float:

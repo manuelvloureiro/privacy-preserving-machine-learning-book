@@ -19,14 +19,15 @@ os.environ.setdefault("OPENBLAS_NUM_THREADS", "1")
 import argparse
 import itertools
 import math
+import sys
 from dataclasses import dataclass
 from pathlib import Path
 
-import matplotlib
+sys.path.insert(0, str(Path(__file__).resolve().parents[1]))  # for code/shared
+from shared.figures import configure
+from shared.stats import sigmoid
 
-matplotlib.use("Agg")
-matplotlib.rcParams["svg.hashsalt"] = "apx_optimization"  # stable element ids, so reruns don't churn the SVGs
-matplotlib.rcParams["svg.fonttype"] = "none"  # keep text as text: smaller, diffable files
+configure("apx_optimization")
 
 import matplotlib.pyplot as plt
 import numpy as np
@@ -37,11 +38,6 @@ from numpy.typing import NDArray
 FIGURES = Path(__file__).resolve().parents[2] / "_build" / "figures" / Path(__file__).parent.name
 
 Array = NDArray[np.float64]
-
-
-def sigmoid(s: Array) -> Array:
-    """σ(s) = 1/(1 + e^{-s}), written with tanh so it never overflows."""
-    return 0.5 * (1.0 + np.tanh(0.5 * s))
 
 
 def sigmoid_scalar(s: float) -> float:

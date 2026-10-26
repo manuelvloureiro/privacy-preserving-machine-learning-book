@@ -14,15 +14,15 @@ of the average loss on its batch; the attacker knows the parameters and sees tha
 
 import argparse
 import math
+import sys
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Literal
 
-import matplotlib
+sys.path.insert(0, str(Path(__file__).resolve().parents[1]))  # for code/shared
+from shared.figures import configure
 
-matplotlib.use("Agg")
-matplotlib.rcParams["svg.hashsalt"] = "gradient_inversion"  # stable element ids, so reruns don't churn the SVGs
-matplotlib.rcParams["svg.fonttype"] = "none"  # keep text as text: smaller, diffable files
+configure("gradient_inversion")
 
 import matplotlib.pyplot as plt
 import numpy as np

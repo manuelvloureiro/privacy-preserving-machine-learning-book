@@ -12,13 +12,14 @@ fragment search space of a word-discovery protocol, and the one-bit mean protoco
 
 import argparse
 import math
+import sys
 from pathlib import Path
 
-import matplotlib
+sys.path.insert(0, str(Path(__file__).resolve().parents[1]))  # for code/shared
+from shared.figures import configure
+from shared.stats import binomial_pmf
 
-matplotlib.use("Agg")
-matplotlib.rcParams["svg.hashsalt"] = "local_dp"  # stable element ids across reruns
-matplotlib.rcParams["svg.fonttype"] = "none"  # keep text as text
+configure("local_dp")
 
 import matplotlib.pyplot as plt
 import numpy as np
@@ -72,10 +73,6 @@ def simulate_local(rng: np.random.Generator, eps: float, n: int, mu: float, reps
 
 
 # --- Repeated randomized response --------------------------------------------------------------
-
-
-def binomial_pmf(k: int, n: int, p: float) -> float:
-    return math.comb(n, k) * p**k * (1.0 - p) ** (n - k)
 
 
 # --- RAPPOR ------------------------------------------------------------------------------------

@@ -14,14 +14,15 @@ chosen so that, with probability at least 1 - β, it contains every data point.
 
 import argparse
 import math
+import sys
 from dataclasses import dataclass
 from pathlib import Path
 
-import matplotlib
+sys.path.insert(0, str(Path(__file__).resolve().parents[1]))  # for code/shared
+from shared.figures import configure
+from shared.stats import normal_cdf, normal_pdf
 
-matplotlib.use("Agg")
-matplotlib.rcParams["svg.hashsalt"] = "mean_estimation"  # stable element ids, so reruns don't churn the SVGs
-matplotlib.rcParams["svg.fonttype"] = "none"  # keep text as text: smaller, diffable files
+configure("mean_estimation")
 
 import matplotlib.pyplot as plt
 import numpy as np
@@ -43,15 +44,6 @@ PARETO_SHAPE = 3.0  # heavy-tailed example: a Pareto law with shape 3 and varian
 MULTI_N = 100_000
 MULTI_DIMS = (10, 100, 1000)
 MULTI_RANGE = 1000.0
-
-
-def normal_cdf(x: float) -> float:
-    """Φ(x); erfc keeps full relative precision in the lower tail."""
-    return 0.5 * math.erfc(-x / math.sqrt(2))
-
-
-def normal_pdf(x: float) -> float:
-    return math.exp(-x * x / 2) / math.sqrt(2 * math.pi)
 
 
 # --- Toolkit -----------------------------------------------------------------------------------

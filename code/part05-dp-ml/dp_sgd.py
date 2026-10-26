@@ -29,16 +29,17 @@ os.environ.setdefault("OPENBLAS_NUM_THREADS", "1")
 
 import argparse
 import math
+import sys
 from collections.abc import Callable, Sequence
 from dataclasses import dataclass, field
 from functools import cache
 from pathlib import Path
 
-import matplotlib
+sys.path.insert(0, str(Path(__file__).resolve().parents[1]))  # for code/shared
+from shared.figures import configure
+from shared.stats import logsumexp, sigmoid
 
-matplotlib.use("Agg")
-matplotlib.rcParams["svg.hashsalt"] = "dp_sgd"  # stable element ids, so reruns don't churn the SVGs
-matplotlib.rcParams["svg.fonttype"] = "none"  # keep text as text: smaller, diffable files
+configure("dp_sgd")
 
 import matplotlib.pyplot as plt
 import numpy as np
@@ -64,11 +65,6 @@ EPS_GRID: tuple[float, ...] = (0.5, 1.0, 2.0, 4.0, 8.0)
 # part's scripts stand on their own.
 
 ORDERS: list[float] = [1 + x / 10 for x in range(1, 100)] + [float(a) for a in range(12, 64)] + [128.0, 256.0, 512.0]
-
-
-def logsumexp(values: Array) -> float:
-    top = float(np.max(values))
-    return top + math.log(float(np.sum(np.exp(values - top))))
 
 
 def bisect(f: Callable[[float], bool], lo: float, hi: float, steps: int = 100) -> float:
@@ -205,10 +201,6 @@ def forward(p: Params, x: Array) -> Forward:
 def make_dataset(rng: np.random.Generator, n: int, teacher: Params) -> Dataset:
     x = rng.standard_normal((n, teacher.w1.shape[1] - 1))
     return Dataset(x, np.where(forward(teacher, x).f >= 0, 1.0, -1.0))
-
-
-def sigmoid(s: Array) -> Array:
-    return 0.5 * (1.0 + np.tanh(0.5 * s))
 
 
 def logistic_losses(p: Params, data: Dataset) -> Array:

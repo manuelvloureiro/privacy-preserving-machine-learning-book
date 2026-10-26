@@ -11,13 +11,13 @@ the exact value is that of k independent randomized responses, the worst case.
 
 import argparse
 import math
+import sys
 from pathlib import Path
 
-import matplotlib
+sys.path.insert(0, str(Path(__file__).resolve().parents[1]))  # for code/shared
+from shared.figures import configure
 
-matplotlib.use("Agg")
-matplotlib.rcParams["svg.hashsalt"] = "advanced_composition"  # stable element ids across reruns
-matplotlib.rcParams["svg.fonttype"] = "none"  # keep text as text
+configure("advanced_composition")
 
 import matplotlib.pyplot as plt
 import numpy as np

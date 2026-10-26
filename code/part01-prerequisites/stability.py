@@ -12,15 +12,16 @@ logistic loss is 1-Lipschitz in the weights (L = 1) and 1/4-smooth.
 
 import argparse
 import math
+import sys
 from dataclasses import dataclass
 from functools import cache
 from pathlib import Path
 
-import matplotlib
+sys.path.insert(0, str(Path(__file__).resolve().parents[1]))  # for code/shared
+from shared.figures import configure
+from shared.stats import sigmoid
 
-matplotlib.use("Agg")
-matplotlib.rcParams["svg.hashsalt"] = "stability"  # stable element ids, so reruns don't churn the SVGs
-matplotlib.rcParams["svg.fonttype"] = "none"  # keep text as text: smaller, diffable files
+configure("stability")
 
 import matplotlib.pyplot as plt
 import numpy as np
@@ -107,10 +108,6 @@ def sample_data(rng: np.random.Generator, n: int, d: int = D, signal: float = SI
     p = 1 / (1 + np.exp(-signal * x[:, 0]))
     y = np.where(rng.random(n) < p, 1.0, -1.0)
     return x, y
-
-
-def sigmoid(t: Array) -> Array:
-    return 0.5 * (1 + np.tanh(0.5 * t))  # overflow-free
 
 
 def logistic_losses(w: Array, x: Array, y: Array) -> Array:

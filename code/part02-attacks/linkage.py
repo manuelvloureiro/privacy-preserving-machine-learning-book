@@ -14,15 +14,15 @@ A person is unique when nobody else shares their cell. Logarithms are base 2 for
 import argparse
 import hashlib
 import math
+import sys
 from collections.abc import Sequence
 from dataclasses import dataclass
 from pathlib import Path
 
-import matplotlib
+sys.path.insert(0, str(Path(__file__).resolve().parents[1]))  # for code/shared
+from shared.figures import configure
 
-matplotlib.use("Agg")
-matplotlib.rcParams["svg.hashsalt"] = "linkage"  # stable element ids, so reruns don't churn the SVGs
-matplotlib.rcParams["svg.fonttype"] = "none"  # keep text as text: smaller, diffable files
+configure("linkage")
 
 import matplotlib.pyplot as plt
 import numpy as np

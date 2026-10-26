@@ -13,16 +13,17 @@ P = Lap(0, b), Q = Lap(s, b). Only the standardized shift μ = s/σ or t = s/b m
 
 import argparse
 import math
+import sys
 from collections.abc import Callable, Sequence
 from dataclasses import dataclass
 from functools import cache
 from pathlib import Path
 
-import matplotlib
+sys.path.insert(0, str(Path(__file__).resolve().parents[1]))  # for code/shared
+from shared.figures import configure
+from shared.stats import laplace_pdf, normal_cdf, normal_pdf
 
-matplotlib.use("Agg")
-matplotlib.rcParams["svg.hashsalt"] = "divergences"  # stable element ids, so reruns don't churn the SVGs
-matplotlib.rcParams["svg.fonttype"] = "none"  # keep text as text: smaller, diffable files
+configure("divergences")
 
 import matplotlib.pyplot as plt
 import numpy as np
@@ -37,19 +38,6 @@ Dist = Sequence[float]  # a distribution on a finite set, as a list of probabili
 # The running example: a die loaded so that a six comes up half the time, against a fair die.
 LOADED: list[float] = [0.1, 0.1, 0.1, 0.1, 0.1, 0.5]
 FAIR: list[float] = [1 / 6] * 6
-
-
-def normal_cdf(x: float) -> float:
-    """Φ(x); erfc keeps full relative precision in the lower tail."""
-    return 0.5 * math.erfc(-x / math.sqrt(2))
-
-
-def normal_pdf(x: float, mu: float = 0.0, sigma: float = 1.0) -> float:
-    return math.exp(-((x - mu) ** 2) / (2 * sigma**2)) / (sigma * math.sqrt(2 * math.pi))
-
-
-def laplace_pdf(x: float, mu: float = 0.0, b: float = 1.0) -> float:
-    return math.exp(-abs(x - mu) / b) / (2 * b)
 
 
 # --- Discrete divergences (the die) ---------------------------------------------------------

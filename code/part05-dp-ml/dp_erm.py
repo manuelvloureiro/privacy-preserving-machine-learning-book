@@ -25,15 +25,16 @@ os.environ.setdefault("OPENBLAS_NUM_THREADS", "1")
 
 import argparse
 import math
+import sys
 from collections.abc import Callable
 from dataclasses import dataclass
 from pathlib import Path
 
-import matplotlib
+sys.path.insert(0, str(Path(__file__).resolve().parents[1]))  # for code/shared
+from shared.figures import configure
+from shared.stats import normal_cdf, sigmoid
 
-matplotlib.use("Agg")
-matplotlib.rcParams["svg.hashsalt"] = "dp_erm"  # stable element ids, so reruns don't churn the SVGs
-matplotlib.rcParams["svg.fonttype"] = "none"  # keep text as text: smaller, diffable files
+configure("dp_erm")
 
 import matplotlib.pyplot as plt
 import numpy as np
@@ -56,11 +57,6 @@ W_TRUE: Array = np.full(D_RUN, 5.0 / math.sqrt(D_RUN))  # ‖w_true‖ = 5
 
 
 # --- Gaussian tools -------------------------------------------------------------------------
-
-
-def normal_cdf(x: float) -> float:
-    """Φ(x); erfc keeps full relative precision in the lower tail."""
-    return 0.5 * math.erfc(-x / math.sqrt(2))
 
 
 def bisect(f: Callable[[float], bool], lo: float, hi: float, steps: int = 200) -> float:
@@ -97,11 +93,6 @@ def classic_sigma(sensitivity: float, eps: float, delta: float) -> float:
 
 
 # --- Data and regularized logistic regression ---------------------------------------------------
-
-
-def sigmoid(s: Array) -> Array:
-    """σ(s) = 1/(1 + e^{-s}), written with tanh so it never overflows."""
-    return 0.5 * (1.0 + np.tanh(0.5 * s))
 
 
 @dataclass(frozen=True)

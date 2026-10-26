@@ -13,15 +13,18 @@ privacy parameters are written eps_i (pure DP) or rho_i = eps_i(alpha) (RDP at a
 
 import argparse
 import math
+import sys
 from collections.abc import Callable, Sequence
 from dataclasses import dataclass
 from pathlib import Path
 
 import matplotlib
 
-matplotlib.use("Agg")
-matplotlib.rcParams["svg.hashsalt"] = "adaptive_composition"  # stable element ids
-matplotlib.rcParams["svg.fonttype"] = "none"  # keep text as text
+sys.path.insert(0, str(Path(__file__).resolve().parents[1]))  # for code/shared
+from shared.figures import configure
+from shared.stats import normal_cdf
+
+configure("adaptive_composition")
 
 import matplotlib.pyplot as plt
 import numpy as np
@@ -39,11 +42,6 @@ BoolArray = NDArray[np.bool_]
 
 # The RDP orders shared by the whole part, so optimized numbers agree across chapters.
 ORDERS: list[float] = [1 + x / 10 for x in range(1, 100)] + [float(x) for x in range(12, 64)] + [128.0, 256.0, 512.0]
-
-
-def normal_cdf(x: float) -> float:
-    """Φ(x) via erfc, accurate in the lower tail."""
-    return 0.5 * math.erfc(-x / math.sqrt(2))
 
 
 # --- Toolkit: from a Rényi bound to a tail bound ----------------------------------------------

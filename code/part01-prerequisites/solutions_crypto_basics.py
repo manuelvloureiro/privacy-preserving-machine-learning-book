@@ -20,6 +20,9 @@ from pathlib import Path
 import numpy as np
 from numpy.typing import NDArray
 
+sys.path.insert(0, str(Path(__file__).resolve().parents[1]))  # for code/shared
+from shared.stats import normal_quantile
+
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 
 from crypto_basics import (
@@ -40,18 +43,6 @@ NoiseSampler = Callable[[np.random.Generator, int], IntArray]
 
 def normal_cdf(t: float) -> float:
     return 1.0 - normal_sf(t)
-
-
-def normal_quantile(p: float) -> float:
-    """z with Pr[Z <= z] = p, by bisection on the normal CDF."""
-    lo, hi = -40.0, 40.0
-    for _ in range(200):
-        mid = (lo + hi) / 2
-        if normal_cdf(mid) < p:
-            lo = mid
-        else:
-            hi = mid
-    return (lo + hi) / 2
 
 
 # --- Exercise 1: which are negligible? -----------------------------------------------------

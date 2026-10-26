@@ -10,13 +10,13 @@ otherwise; ε-DP needs 1/2 + γ = e^ε/(1 + e^ε). The analyst debiases the repo
 
 import argparse
 import math
+import sys
 from pathlib import Path
 
-import matplotlib
+sys.path.insert(0, str(Path(__file__).resolve().parents[1]))  # for code/shared
+from shared.figures import configure
 
-matplotlib.use("Agg")
-matplotlib.rcParams["svg.hashsalt"] = "randomized_response"  # stable element ids across reruns
-matplotlib.rcParams["svg.fonttype"] = "none"  # keep text as text
+configure("randomized_response")
 
 import matplotlib.pyplot as plt
 import numpy as np

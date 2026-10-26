@@ -19,6 +19,14 @@ Datasets:
   https://raw.githubusercontent.com/karpathy/char-rnn/master/data/tinyshakespeare/input.txt.
 - Pythia-14m (EleutherAI, Hugging Face model EleutherAI/pythia-14m, licence Apache-2.0), a 14-million-parameter
   causal language model, small enough to fine-tune on a CPU.
+- France LFS (Eurostat, EU Labour Force Survey public microdata, France, 2005-2013, as preprocessed by the OpenDP
+  project for its tutorials: https://github.com/opendp/dp-test-datasets/blob/main/data/eurostat/README.ipynb).
+  https://raw.githubusercontent.com/opendp/dp-test-datasets/refs/heads/main/data/eurostat/V2_FR_LFS.csv.zip. The
+  3,811,932 quarterly responses of 1,682,306 people, with a synthetic person identifier PIDENT and the columns YEAR,
+  QUARTER, SEX, AGE, HWUSUAL, HWACTUAL and ILOSTAT. The same file that `dp.examples.get_france_lfs_path()` downloads,
+  kept here so that every download lands in data/. Converted once from CSV to Parquet, which carries its schema.
+  Eurostat's public microdata are free to reuse for non-commercial research and teaching (Eurostat's licence for the
+  public-use files). Used by the OpenDP book.
 
 The datasets bundled with scikit-learn (breast cancer, digits, diabetes) need no download and are loaded directly
 with sklearn.datasets.
@@ -37,6 +45,9 @@ DATA = Path(__file__).resolve().parent.parent / "data"
 ADULT_URL = "https://archive.ics.uci.edu/static/public/2/adult.zip"
 RETAIL_URL = "https://archive.ics.uci.edu/static/public/352/online+retail.zip"
 SHAKESPEARE_URL = "https://raw.githubusercontent.com/karpathy/char-rnn/master/data/tinyshakespeare/input.txt"
+FRANCE_LFS_URL = (
+    "https://raw.githubusercontent.com/opendp/dp-test-datasets/refs/heads/main/data/eurostat/V2_FR_LFS.csv.zip"
+)
 PYTHIA = "EleutherAI/pythia-14m"
 PYTHIA_REVISION = "cf967c0a9a04383db6f7b1108d86b2962634b4ac"
 
@@ -105,6 +116,21 @@ def online_retail() -> pl.DataFrame:
     return pl.read_parquet(parquet)
 
 
+def france_lfs() -> Path:
+    """The path of the France LFS sample as Parquet (3,811,932 rows), for `pl.scan_parquet`.
+
+    The OpenDP book scans it lazily, as the OpenDP documentation scans its CSV copy, so this returns the path
+    rather than a frame. Integers stay integers; AGE, HWUSUAL and HWACTUAL are floats with nulls, as in the source.
+    """
+    parquet = DATA / "eurostat" / "france_lfs.parquet"
+    if not parquet.exists():
+        archive = _download(FRANCE_LFS_URL, DATA / "eurostat" / "V2_FR_LFS.csv.zip")
+        with zipfile.ZipFile(archive) as z:
+            csv = z.read("V2_FR_LFS.csv")
+        pl.read_csv(csv, infer_schema_length=10_000).write_parquet(parquet)
+    return parquet
+
+
 def shakespeare() -> str:
     """The Tiny Shakespeare text, about 1.1 million characters."""
     return _download(SHAKESPEARE_URL, DATA / "shakespeare.txt").read_text()
@@ -126,6 +152,7 @@ def fetch() -> None:
     print(f"Adult: {len(adult()):,} rows")
     print(f"Online Retail: {online_retail().height:,} rows")
     print(f"Tiny Shakespeare: {len(shakespeare()):,} characters")
+    print(f"France LFS: {pl.scan_parquet(france_lfs()).select(pl.len()).collect().item():,} rows")
     print(f"Pythia-14m: {pythia()}")
 
 

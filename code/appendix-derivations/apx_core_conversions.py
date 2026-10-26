@@ -10,13 +10,13 @@ then saves the page's figures.
 import argparse
 import itertools
 import math
+import sys
 from pathlib import Path
 
-import matplotlib
+sys.path.insert(0, str(Path(__file__).resolve().parents[1]))  # for code/shared
+from shared.figures import configure
 
-matplotlib.use("Agg")
-matplotlib.rcParams["svg.hashsalt"] = "apx_core_conversions"  # stable element ids, so reruns don't churn the SVGs
-matplotlib.rcParams["svg.fonttype"] = "none"  # keep text as text: smaller, diffable files
+configure("apx_core_conversions")
 
 import matplotlib.pyplot as plt
 import numpy as np
@@ -519,7 +519,7 @@ def plot_gdp(mus: tuple[float, ...] = (0.5, 1.0, 2.0)) -> Figure:
         xlim=(0, 1),
         ylim=(0, 1.02),
         aspect="equal",
-        xlabel="false positive rate $a$",
+        xlabel=r"false positive rate $\mathrm{FPR}$",
         ylabel="smallest false negative rate",
         title=r"Each $(\varepsilon, \delta)$ is one line under $G_\mu$",
     )

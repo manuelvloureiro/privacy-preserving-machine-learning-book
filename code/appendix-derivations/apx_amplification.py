@@ -17,14 +17,15 @@ L is the Lipschitz constant of the loss and σ the noise standard deviation. Log
 import argparse
 import itertools
 import math
+import sys
 from collections.abc import Sequence
 from pathlib import Path
 
-import matplotlib
+sys.path.insert(0, str(Path(__file__).resolve().parents[1]))  # for code/shared
+from shared.figures import configure
+from shared.stats import normal_cdf
 
-matplotlib.use("Agg")
-matplotlib.rcParams["svg.hashsalt"] = "apx_amplification"  # stable element ids, so reruns don't churn the SVGs
-matplotlib.rcParams["svg.fonttype"] = "none"  # keep text as text: smaller, diffable files
+configure("apx_amplification")
 
 import matplotlib.pyplot as plt
 import numpy as np
@@ -35,11 +36,6 @@ from numpy.typing import NDArray
 FIGURES = Path(__file__).resolve().parents[2] / "_build" / "figures" / Path(__file__).parent.name
 
 FloatArray = NDArray[np.float64]
-
-
-def normal_cdf(x: float) -> float:
-    """Pr[Z <= x] for Z ~ N(0, 1); erfc keeps full relative precision in the lower tail."""
-    return 0.5 * math.erfc(-x / math.sqrt(2))
 
 
 def log_sum_exp(v: FloatArray) -> float:

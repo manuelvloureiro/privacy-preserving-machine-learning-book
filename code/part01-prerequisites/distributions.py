@@ -9,15 +9,16 @@ then saves the chapter's figures.
 
 import argparse
 import math
+import sys
 from collections.abc import Callable
 from dataclasses import dataclass
 from pathlib import Path
 
-import matplotlib
+sys.path.insert(0, str(Path(__file__).resolve().parents[1]))  # for code/shared
+from shared.figures import configure
+from shared.stats import binomial_pmf, laplace_pdf, normal_pdf
 
-matplotlib.use("Agg")
-matplotlib.rcParams["svg.hashsalt"] = "distributions"  # stable element ids, so reruns don't churn the SVGs
-matplotlib.rcParams["svg.fonttype"] = "none"  # keep text as text: smaller, diffable files
+configure("distributions")
 
 import matplotlib.pyplot as plt
 import numpy as np
@@ -30,10 +31,6 @@ FIGURES = Path(__file__).resolve().parents[2] / "_build" / "figures" / Path(__fi
 Sampler = Callable[[np.random.Generator, int], NDArray[np.float64]]
 
 # --- Probability functions ---------------------------------------------------------------
-
-
-def binomial_pmf(k: int, n: int, p: float) -> float:
-    return math.comb(n, k) * p**k * (1 - p) ** (n - k)
 
 
 def poisson_pmf(k: int, mu: float) -> float:
@@ -49,16 +46,8 @@ def exponential_survival(t: float, b: float) -> float:
     return math.exp(-t / b)
 
 
-def normal_pdf(x: float, mu: float = 0.0, sigma: float = 1.0) -> float:
-    return math.exp(-((x - mu) ** 2) / (2 * sigma**2)) / (sigma * math.sqrt(2 * math.pi))
-
-
 def normal_cdf(x: float, mu: float = 0.0, sigma: float = 1.0) -> float:
     return 0.5 * math.erfc(-(x - mu) / (sigma * math.sqrt(2)))
-
-
-def laplace_pdf(x: float, mu: float = 0.0, b: float = 1.0) -> float:
-    return math.exp(-abs(x - mu) / b) / (2 * b)
 
 
 def laplace_cdf(x: float, mu: float = 0.0, b: float = 1.0) -> float:

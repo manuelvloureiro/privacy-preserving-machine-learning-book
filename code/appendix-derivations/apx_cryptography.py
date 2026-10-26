@@ -19,16 +19,17 @@ Every scheme here is a toy with insecure parameters, and NumPy's generator is no
 
 import argparse
 import math
+import sys
 from collections.abc import Callable
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Protocol
 
-import matplotlib
+sys.path.insert(0, str(Path(__file__).resolve().parents[1]))  # for code/shared
+from shared.figures import configure
+from shared.stats import normal_cdf
 
-matplotlib.use("Agg")
-matplotlib.rcParams["svg.hashsalt"] = "apx_cryptography"  # stable element ids, so reruns don't churn the SVGs
-matplotlib.rcParams["svg.fonttype"] = "none"  # keep text as text: smaller, diffable files
+configure("apx_cryptography")
 
 import matplotlib.pyplot as plt
 import numpy as np
@@ -268,10 +269,6 @@ def tv_from_uniform(values: IntArray, p: int) -> float:
 # --- LWE: search from a decision oracle --------------------------------------------------------
 
 DecisionOracle = Callable[[IntArray, IntArray], BoolArray]
-
-
-def normal_cdf(t: float) -> float:
-    return 0.5 * math.erfc(-t / math.sqrt(2))
 
 
 def accept_prob_lwe(sigma: float, threshold: int) -> float:

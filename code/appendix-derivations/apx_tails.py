@@ -9,14 +9,15 @@ Prints every number quoted in book-full/appendix-derivations/06-tails-tests-dive
 
 import argparse
 import math
+import sys
 from collections.abc import Callable, Sequence
 from pathlib import Path
 
-import matplotlib
+sys.path.insert(0, str(Path(__file__).resolve().parents[1]))  # for code/shared
+from shared.figures import configure
+from shared.stats import normal_cdf
 
-matplotlib.use("Agg")
-matplotlib.rcParams["svg.hashsalt"] = "apx_tails"  # stable element ids, so reruns don't churn the SVGs
-matplotlib.rcParams["svg.fonttype"] = "none"  # keep text as text: smaller, diffable files
+configure("apx_tails")
 
 import matplotlib.pyplot as plt
 import numpy as np
@@ -68,10 +69,6 @@ def kl_bernoulli(a: float, b: float) -> float:
     if a < 1:
         total += (1 - a) * math.log((1 - a) / (1 - b))
     return total
-
-
-def normal_cdf(x: float) -> float:
-    return 0.5 * math.erfc(-x / math.sqrt(2))
 
 
 def bisect(fn: Callable[[float], float], lo: float, hi: float, iters: int = 200) -> float:
@@ -798,7 +795,7 @@ def plot_clopper_cdf(n: int = 1000, level: float = 0.025) -> Figure:
             fontsize=8,
             arrowprops={"arrowstyle": "-", "linewidth": 0.5},
         )
-    ax.axhline(level, color="k", linestyle=":", label=f"level a/2 = {level}")
+    ax.axhline(level, color="k", linestyle=":", label=rf"level $\beta/2$ = {level}")
     ax.set(xlabel="true rate p", ylabel=r"$F_p(k) = \Pr[\mathrm{Bin}(n, p) \leq k]$", title=f"n = {n}")
     ax.legend()
     return fig
@@ -869,9 +866,11 @@ def plot_perspective(alpha: float = 2.0, eps_alpha: float = 1.0) -> Figure:
 
     a_grid = [i / 400 for i in range(1, 400)]
     b_vals = [f_rdp(a, alpha, eps_alpha) for a in a_grid]
-    right.fill_between(a_grid, b_vals, [1 - a for a in a_grid], color="C0", alpha=0.25, label="allowed (a, b)")
-    right.plot(a_grid, b_vals, "C0", label=r"$f_{\mathrm{RDP}}(a)$")
-    right.plot([0, 1], [1, 0], "k:", linewidth=1, label="b = 1 - a (coin flip)")
+    right.fill_between(
+        a_grid, b_vals, [1 - a for a in a_grid], color="C0", alpha=0.25, label=r"allowed $(\mathrm{FPR}, \mathrm{FNR})$"
+    )
+    right.plot(a_grid, b_vals, "C0", label=r"$f_{\mathrm{RDP}}(\mathrm{FPR})$")
+    right.plot([0, 1], [1, 0], "k:", linewidth=1, label=r"$\mathrm{FNR} = 1 - \mathrm{FPR}$ (coin flip)")
     a1, a2 = 0.02, 0.4
     b1, b2 = f_rdp(a1, alpha, eps_alpha), f_rdp(a2, alpha, eps_alpha)
     right.plot([a1, a2], [b1, b2], "k--", linewidth=1, label="chord between two boundary points")
@@ -879,8 +878,8 @@ def plot_perspective(alpha: float = 2.0, eps_alpha: float = 1.0) -> Figure:
     right.set(
         xlim=(0, 1),
         ylim=(0, 1),
-        xlabel="type I error a",
-        ylabel="type II error b",
+        xlabel=r"type I error $\mathrm{FPR}$",
+        ylabel=r"type II error $\mathrm{FNR}$",
         title=rf"Tests allowed by order $\alpha = {alpha:g}$, $\varepsilon(\alpha) = {eps_alpha:g}$",
     )
     right.legend(fontsize=8)

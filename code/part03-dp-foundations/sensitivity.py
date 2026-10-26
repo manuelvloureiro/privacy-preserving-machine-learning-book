@@ -15,14 +15,15 @@ the docstrings, as in the text.
 import argparse
 import itertools
 import math
+import sys
 from dataclasses import dataclass
 from pathlib import Path
 
-import matplotlib
+sys.path.insert(0, str(Path(__file__).resolve().parents[1]))  # for code/shared
+from shared.figures import configure
+from shared.stats import normal_cdf
 
-matplotlib.use("Agg")
-matplotlib.rcParams["svg.hashsalt"] = "sensitivity"  # stable element ids, so reruns don't churn the SVGs
-matplotlib.rcParams["svg.fonttype"] = "none"  # keep text as text: smaller, diffable files
+configure("sensitivity")
 
 import matplotlib.pyplot as plt
 import numpy as np
@@ -44,11 +45,6 @@ LEAK_MAX = 100.0
 WALK_X = (1, 3, 4, 6, 9)  # the walkthrough of the A^(k) formula, on the grid {0, ..., 10}
 WALK_MAX = 10
 WALK_BETA = 0.5
-
-
-def normal_cdf(x: float) -> float:
-    """Φ(x); erfc keeps full relative precision in the lower tail."""
-    return 0.5 * math.erfc(-x / math.sqrt(2))
 
 
 # --- Local sensitivity of the median --------------------------------------------------------

@@ -21,15 +21,16 @@ Three toys:
 
 import argparse
 import math
+import sys
 from collections.abc import Callable
 from dataclasses import dataclass
 from pathlib import Path
 
-import matplotlib
+sys.path.insert(0, str(Path(__file__).resolve().parents[1]))  # for code/shared
+from shared.figures import configure
+from shared.stats import normal_cdf, sigmoid
 
-matplotlib.use("Agg")
-matplotlib.rcParams["svg.hashsalt"] = "property_inference"  # stable element ids, so reruns don't churn the SVGs
-matplotlib.rcParams["svg.fonttype"] = "none"  # keep text as text: smaller, diffable files
+configure("property_inference")
 
 import matplotlib.pyplot as plt
 import numpy as np
@@ -48,27 +49,6 @@ W_MAJORITY: tuple[float, float, float] = (2.0, 1.0, 0.0)  # (w1, w2, bias)
 W_SUBGROUP: tuple[float, float, float] = (2.0, -1.0, 0.0)
 SHADOWS = 150  # shadow models per hypothesis
 TARGETS = 150  # target models per hypothesis, used only to measure accuracy
-
-
-def normal_cdf(x: float) -> float:
-    """Φ(x); erfc keeps full relative precision in the lower tail."""
-    return 0.5 * math.erfc(-x / math.sqrt(2))
-
-
-def normal_quantile(p: float) -> float:
-    """Φ⁻¹(p) by bisection."""
-    lo, hi = -40.0, 40.0
-    for _ in range(200):
-        mid = (lo + hi) / 2
-        if normal_cdf(mid) < p:
-            lo = mid
-        else:
-            hi = mid
-    return (lo + hi) / 2
-
-
-def sigmoid(z: Array) -> Array:
-    return 0.5 * (1.0 + np.tanh(0.5 * z))  # equal to 1/(1 + e^{-z}), without overflow
 
 
 # --- A released count: membership against property ----------------------------------------

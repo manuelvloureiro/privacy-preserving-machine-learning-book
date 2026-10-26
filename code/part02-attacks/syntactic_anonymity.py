@@ -15,15 +15,15 @@ suppresses (deletes) the records of every class that fails the privacy criterion
 import argparse
 import itertools
 import math
+import sys
 from collections.abc import Callable, Sequence
 from dataclasses import dataclass
 from pathlib import Path
 
-import matplotlib
+sys.path.insert(0, str(Path(__file__).resolve().parents[1]))  # for code/shared
+from shared.figures import configure
 
-matplotlib.use("Agg")
-matplotlib.rcParams["svg.hashsalt"] = "syntactic_anonymity"  # stable element ids, so reruns don't churn the SVGs
-matplotlib.rcParams["svg.fonttype"] = "none"  # keep text as text: smaller, diffable files
+configure("syntactic_anonymity")
 
 import matplotlib.pyplot as plt
 import numpy as np

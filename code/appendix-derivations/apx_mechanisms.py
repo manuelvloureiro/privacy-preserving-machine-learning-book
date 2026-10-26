@@ -15,16 +15,17 @@ numerical integration on a fine grid; simulation is used only to check them.
 
 import argparse
 import math
+import sys
 from collections.abc import Callable, Sequence
 from dataclasses import dataclass
 from itertools import permutations
 from pathlib import Path
 
-import matplotlib
+sys.path.insert(0, str(Path(__file__).resolve().parents[1]))  # for code/shared
+from shared.figures import configure
+from shared.stats import normal_cdf
 
-matplotlib.use("Agg")
-matplotlib.rcParams["svg.hashsalt"] = "apx_mechanisms"  # stable element ids, so reruns don't churn the SVGs
-matplotlib.rcParams["svg.fonttype"] = "none"  # keep text as text: smaller, diffable files
+configure("apx_mechanisms")
 
 import matplotlib.pyplot as plt
 import numpy as np
@@ -35,11 +36,6 @@ from numpy.typing import NDArray
 FIGURES = Path(__file__).resolve().parents[2] / "_build" / "figures" / Path(__file__).parent.name
 
 FloatArray = NDArray[np.float64]
-
-
-def normal_cdf(x: float) -> float:
-    """Pr[Z <= x] for Z ~ N(0, 1)."""
-    return 0.5 * math.erfc(-x / math.sqrt(2))
 
 
 # --- 1. Every (ε, δ) pair is a post-processing of the four-point pair -------------------------------

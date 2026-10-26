@@ -15,6 +15,7 @@ with records in {-1, +1}^d and released means in [-1, 1]^d.
 import argparse
 import math
 import os
+import sys
 from collections.abc import Callable, Sequence
 from pathlib import Path
 
@@ -22,11 +23,12 @@ from pathlib import Path
 os.environ.setdefault("OMP_NUM_THREADS", "1")
 os.environ.setdefault("OPENBLAS_NUM_THREADS", "1")
 
-import matplotlib
 
-matplotlib.use("Agg")
-matplotlib.rcParams["svg.hashsalt"] = "lower_bounds"  # stable element ids, so reruns don't churn the SVGs
-matplotlib.rcParams["svg.fonttype"] = "none"  # keep text as text: smaller, diffable files
+sys.path.insert(0, str(Path(__file__).resolve().parents[1]))  # for code/shared
+from shared.figures import configure
+from shared.stats import bisect, normal_cdf
+
+configure("lower_bounds")
 
 import matplotlib.pyplot as plt
 import numpy as np
@@ -50,23 +52,6 @@ TRACE_TRIALS = 200
 DN_N = 200
 DN_QUERIES = 4 * DN_N
 DN_TRIALS = 40
-
-
-def normal_cdf(x: float) -> float:
-    """Φ(x); erfc keeps full relative precision in the lower tail."""
-    return 0.5 * math.erfc(-x / math.sqrt(2))
-
-
-def bisect(f: Callable[[float], float], lo: float, hi: float, steps: int = 200) -> float:
-    """A root of f in [lo, hi], assuming f(lo) and f(hi) have opposite signs."""
-    f_lo = f(lo)
-    for _ in range(steps):
-        mid = 0.5 * (lo + hi)
-        if (f(mid) > 0) == (f_lo > 0):
-            lo, f_lo = mid, f(mid)
-        else:
-            hi = mid
-    return 0.5 * (lo + hi)
 
 
 def normal_upper_quantile(tail: float) -> float:

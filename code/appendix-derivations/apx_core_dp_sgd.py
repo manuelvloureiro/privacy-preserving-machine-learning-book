@@ -10,15 +10,15 @@ here in a few dozen lines, so it can be checked against the chapters' scripts wi
 
 import argparse
 import math
+import sys
 from collections.abc import Callable, Sequence
 from functools import cache
 from pathlib import Path
 
-import matplotlib
+sys.path.insert(0, str(Path(__file__).resolve().parents[1]))  # for code/shared
+from shared.figures import configure
 
-matplotlib.use("Agg")
-matplotlib.rcParams["svg.hashsalt"] = "apx_core_dp_sgd"  # stable element ids, so reruns don't churn the SVGs
-matplotlib.rcParams["svg.fonttype"] = "none"  # keep text as text: smaller, diffable files
+configure("apx_core_dp_sgd")
 
 import matplotlib.pyplot as plt
 import numpy as np

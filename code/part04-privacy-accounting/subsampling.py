@@ -17,15 +17,16 @@ subsampled_gaussian_rdp_curve, dpsgd_eps_rdp.
 
 import argparse
 import math
+import sys
 from collections.abc import Callable, Sequence
 from functools import cache
 from pathlib import Path
 
-import matplotlib
+sys.path.insert(0, str(Path(__file__).resolve().parents[1]))  # for code/shared
+from shared.figures import configure
+from shared.stats import logsumexp, normal_cdf
 
-matplotlib.use("Agg")
-matplotlib.rcParams["svg.hashsalt"] = "subsampling"  # stable element ids, so reruns don't churn the SVGs
-matplotlib.rcParams["svg.fonttype"] = "none"  # keep text as text: smaller, diffable files
+configure("subsampling")
 
 import matplotlib.pyplot as plt
 import numpy as np
@@ -45,21 +46,11 @@ Q_RUN, SIGMA_RUN, DELTA_RUN = 0.01, 1.0, 1e-5
 STEPS_RUN: tuple[int, ...] = (1, 10, 100, 1000, 10_000)
 
 
-def normal_cdf(x: float) -> float:
-    """Φ(x); erfc keeps full relative precision in the lower tail."""
-    return 0.5 * math.erfc(-x / math.sqrt(2))
-
-
 def log_normal_cdf(x: float) -> float:
     """ln Φ(x), accurate in both tails (log1p near Φ = 1)."""
     if x < 0:
         return math.log(0.5 * math.erfc(-x / math.sqrt(2)))
     return math.log1p(-0.5 * math.erfc(x / math.sqrt(2)))
-
-
-def logsumexp(values: Array) -> float:
-    top = float(np.max(values))
-    return top + math.log(float(np.sum(np.exp(values - top))))
 
 
 def bisect(f: Callable[[float], bool], lo: float, hi: float, steps: int = 100) -> float:

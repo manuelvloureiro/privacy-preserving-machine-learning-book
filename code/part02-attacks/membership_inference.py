@@ -21,15 +21,16 @@ os.environ.setdefault("OPENBLAS_NUM_THREADS", "1")
 
 import argparse
 import math
+import sys
 from collections.abc import Callable
 from dataclasses import dataclass
 from pathlib import Path
 
-import matplotlib
+sys.path.insert(0, str(Path(__file__).resolve().parents[1]))  # for code/shared
+from shared.figures import configure
+from shared.stats import normal_cdf, normal_sf, sigmoid
 
-matplotlib.use("Agg")
-matplotlib.rcParams["svg.hashsalt"] = "membership_inference"  # stable element ids across reruns
-matplotlib.rcParams["svg.fonttype"] = "none"  # keep text as text: smaller, diffable files
+configure("membership_inference")
 
 import matplotlib.pyplot as plt
 import numpy as np
@@ -55,16 +56,6 @@ ALPHA = 1e-3  # the false positive rate at which attacks are compared
 
 
 # --- Normal distribution (for the Gaussian fits and the closed-form examples) -----------------
-
-
-def normal_cdf(x: float) -> float:
-    """Φ(x) = Pr[Z <= x] for Z ~ N(0, 1)."""
-    return 0.5 * math.erfc(-x / math.sqrt(2))
-
-
-def normal_sf(x: float) -> float:
-    """1 - Φ(x); erfc keeps full relative precision in the upper tail."""
-    return 0.5 * math.erfc(x / math.sqrt(2))
 
 
 def normal_isf(q: float) -> float:
@@ -125,10 +116,6 @@ def sample_population(
     y = np.where(rng.random(n) < p, 1.0, -1.0)
     y[outlier] = np.where(rng.random(int(outlier.sum())) < 0.5, 1.0, -1.0)
     return Population(x, y, outlier)
-
-
-def sigmoid(t: Array) -> Array:
-    return 0.5 * (1 + np.tanh(0.5 * t))  # overflow-free
 
 
 def logistic_loss(phi: Array) -> Array:

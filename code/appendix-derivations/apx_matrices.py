@@ -10,6 +10,7 @@ the default seed), then saves the appendix's figures.
 import argparse
 import math
 import os
+import sys
 from dataclasses import dataclass
 from functools import cache
 from pathlib import Path
@@ -18,11 +19,11 @@ from pathlib import Path
 os.environ.setdefault("OPENBLAS_NUM_THREADS", "1")
 os.environ.setdefault("OMP_NUM_THREADS", "1")
 
-import matplotlib
 
-matplotlib.use("Agg")
-matplotlib.rcParams["svg.hashsalt"] = "apx_matrices"  # stable element ids, so reruns don't churn the SVGs
-matplotlib.rcParams["svg.fonttype"] = "none"  # keep text as text: smaller, diffable files
+sys.path.insert(0, str(Path(__file__).resolve().parents[1]))  # for code/shared
+from shared.figures import configure
+
+configure("apx_matrices")
 
 import matplotlib.pyplot as plt
 import numpy as np

@@ -29,16 +29,20 @@ os.environ.setdefault("OPENBLAS_NUM_THREADS", "1")
 
 import argparse
 import math
+import sys
 from collections.abc import Callable, Sequence
 from dataclasses import dataclass
 from functools import cache
 from pathlib import Path
 from statistics import NormalDist
 
+sys.path.insert(0, str(Path(__file__).resolve().parents[1]))  # for code/shared
+from shared.figures import configure
+from shared.stats import normal_cdf, normal_sf
+
+configure("choosing_epsilon")
+
 import matplotlib
-
-matplotlib.use("Agg")
-
 import matplotlib.pyplot as plt
 import numpy as np
 from dp_sgd import (
@@ -59,8 +63,7 @@ from matplotlib.figure import Figure
 from numpy.typing import NDArray
 
 # Set after importing dp_sgd, which sets its own salt at import time.
-matplotlib.rcParams["svg.hashsalt"] = "choosing_epsilon"  # stable element ids, so reruns don't churn the SVGs
-matplotlib.rcParams["svg.fonttype"] = "none"  # keep text as text: smaller, diffable files
+matplotlib.rcParams["svg.hashsalt"] = "choosing_epsilon"
 
 # Figures are build output: _build/figures/<part>/, which the build copies into each book.
 FIGURES = Path(__file__).resolve().parents[2] / "_build" / "figures" / Path(__file__).parent.name
@@ -82,16 +85,6 @@ _STD_NORMAL = NormalDist()
 
 
 # --- Gaussian tools ---------------------------------------------------------------------------
-
-
-def normal_cdf(x: float) -> float:
-    """Φ(x); erfc keeps full relative precision in the lower tail."""
-    return 0.5 * math.erfc(-x / math.sqrt(2))
-
-
-def normal_sf(x: float) -> float:
-    """1 - Φ(x), accurate in the upper tail."""
-    return 0.5 * math.erfc(x / math.sqrt(2))
 
 
 def normal_quantile(p: float) -> float:

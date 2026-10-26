@@ -10,15 +10,16 @@ then saves the page's figures.
 import argparse
 import itertools
 import math
+import sys
 from collections.abc import Callable, Sequence
 from dataclasses import dataclass
 from pathlib import Path
 
-import matplotlib
+sys.path.insert(0, str(Path(__file__).resolve().parents[1]))  # for code/shared
+from shared.figures import configure
+from shared.stats import normal_cdf, sigmoid
 
-matplotlib.use("Agg")
-matplotlib.rcParams["svg.hashsalt"] = "apx_learning"  # stable element ids, so reruns don't churn the SVGs
-matplotlib.rcParams["svg.fonttype"] = "none"  # keep text as text: smaller, diffable files
+configure("apx_learning")
 
 import matplotlib.pyplot as plt
 import numpy as np
@@ -32,11 +33,6 @@ Array = NDArray[np.float64]
 
 
 # --- Shared helpers ---------------------------------------------------------------------------
-
-
-def normal_cdf(x: float) -> float:
-    """Φ(x); erfc keeps full relative precision in the lower tail."""
-    return 0.5 * math.erfc(-x / math.sqrt(2))
 
 
 def bisect(f: Callable[[float], bool], lo: float, hi: float, steps: int = 200) -> float:
@@ -128,10 +124,6 @@ def convex_lower(n: int, d: int, radius: float, eps: float, delta: float, lip: f
     k = fingerprint_k(d, eps, delta)
     best = max(m * max(2 / 3 - m / k, 0.0) ** 2 for m in range(1, min(n, math.ceil(k)) + 1))
     return lip * radius * best / (16 * n)
-
-
-def sigmoid(s: Array) -> Array:
-    return 0.5 * (1.0 + np.tanh(0.5 * s))
 
 
 @dataclass(frozen=True)

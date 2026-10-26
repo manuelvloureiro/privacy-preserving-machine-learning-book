@@ -15,14 +15,15 @@ bit truthfully with probability p > 1/2 (the keep-probability).
 
 import argparse
 import math
+import sys
 from collections.abc import Callable, Sequence
 from pathlib import Path
 
-import matplotlib
+sys.path.insert(0, str(Path(__file__).resolve().parents[1]))  # for code/shared
+from shared.figures import configure
+from shared.stats import bisect, logsumexp, normal_cdf
 
-matplotlib.use("Agg")
-matplotlib.rcParams["svg.hashsalt"] = "renyi_dp"  # stable element ids, so reruns don't churn the SVGs
-matplotlib.rcParams["svg.fonttype"] = "none"  # keep text as text: smaller, diffable files
+configure("renyi_dp")
 
 import matplotlib.pyplot as plt
 import numpy as np
@@ -41,34 +42,11 @@ Curve = Callable[[float], float]  # an RDP curve α ↦ ε(α)
 DELTA = 1e-5  # the target δ used throughout the part
 
 
-def normal_cdf(x: float) -> float:
-    """Φ(x); erfc keeps full relative precision in the lower tail."""
-    return 0.5 * math.erfc(-x / math.sqrt(2))
-
-
 def log_normal_cdf(x: float) -> float:
     """ln Φ(x), finite far into the lower tail (asymptotic series once erfc underflows)."""
     if x > -30:
         return math.log(normal_cdf(x))
     return -x * x / 2 - math.log(-x) - 0.5 * math.log(2 * math.pi) + math.log1p(-1 / x**2 + 3 / x**4)
-
-
-def logsumexp(values: Sequence[float]) -> float:
-    m = max(values)
-    return m + math.log(sum(math.exp(v - m) for v in values))
-
-
-def bisect(f: Callable[[float], float], lo: float, hi: float, steps: int = 200) -> float:
-    """A root of f in [lo, hi], given f(lo) and f(hi) of opposite signs."""
-    f_lo = f(lo)
-    for _ in range(steps):
-        mid = (lo + hi) / 2
-        f_mid = f(mid)
-        if (f_mid > 0) == (f_lo > 0):
-            lo, f_lo = mid, f_mid
-        else:
-            hi = mid
-    return (lo + hi) / 2
 
 
 # --- Definition: the RDP curve of a pair ----------------------------------------------------

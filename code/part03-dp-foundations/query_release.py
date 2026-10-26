@@ -16,13 +16,14 @@ cell of every marginal table: 3^8 - 1 = 6560 queries. Logarithms are natural.
 import argparse
 import itertools
 import math
+import sys
 from pathlib import Path
 
-import matplotlib
+sys.path.insert(0, str(Path(__file__).resolve().parents[1]))  # for code/shared
+from shared.figures import configure
+from shared.stats import normal_cdf
 
-matplotlib.use("Agg")
-matplotlib.rcParams["svg.hashsalt"] = "query_release"  # stable element ids, so reruns don't churn the SVGs
-matplotlib.rcParams["svg.fonttype"] = "none"  # keep text as text: smaller, diffable files
+configure("query_release")
 
 import matplotlib.pyplot as plt
 import numpy as np
@@ -218,10 +219,6 @@ def pmw(rng: np.random.Generator, queries: FloatArray, p: FloatArray, n: int, ep
 
 
 # --- Baselines: noise on every answer --------------------------------------------------------------
-
-
-def normal_cdf(x: float) -> float:
-    return 0.5 * math.erfc(-x / math.sqrt(2))
 
 
 def gaussian_delta(mu: float, eps: float) -> float:

@@ -21,13 +21,13 @@ Public functions used by the text: accountant_table, sigma_for_target.
 
 import argparse
 import math
+import sys
 from collections.abc import Callable, Sequence
 from dataclasses import dataclass
 from functools import cache, lru_cache
 from pathlib import Path
 
 # The chapter modules configure matplotlib when imported; this module's settings must come last.
-import matplotlib
 import numpy as np
 from gaussian_dp import clt_mu_subsampled_gaussian, gdp_eps, gdp_mu_for_eps
 from numerical_accounting import (
@@ -57,9 +57,10 @@ from subsampling import (
     subsampled_gaussian_rdp_curve,
 )
 
-matplotlib.use("Agg")
-matplotlib.rcParams["svg.hashsalt"] = "choosing_an_accountant"  # stable element ids, so reruns don't churn the SVGs
-matplotlib.rcParams["svg.fonttype"] = "none"  # keep text as text: smaller, diffable files
+sys.path.insert(0, str(Path(__file__).resolve().parents[1]))  # for code/shared
+from shared.figures import configure
+
+configure("choosing_an_accountant")
 
 import matplotlib.pyplot as plt
 from matplotlib.figure import Figure

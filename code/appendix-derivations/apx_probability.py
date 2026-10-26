@@ -10,13 +10,14 @@ with the default seed), then saves the appendix's figures.
 import argparse
 import cmath
 import math
+import sys
 from pathlib import Path
 
-import matplotlib
+sys.path.insert(0, str(Path(__file__).resolve().parents[1]))  # for code/shared
+from shared.figures import configure
+from shared.stats import laplace_pdf, normal_cdf, normal_pdf
 
-matplotlib.use("Agg")
-matplotlib.rcParams["svg.hashsalt"] = "apx_probability"  # stable element ids, so reruns don't churn the SVGs
-matplotlib.rcParams["svg.fonttype"] = "none"  # keep text as text: smaller, diffable files
+configure("apx_probability")
 
 import matplotlib.pyplot as plt
 import numpy as np
@@ -27,14 +28,6 @@ from numpy.typing import NDArray
 FIGURES = Path(__file__).resolve().parents[2] / "_build" / "figures" / Path(__file__).parent.name
 
 FloatArray = NDArray[np.float64]
-
-
-def normal_cdf(x: float) -> float:
-    return 0.5 * math.erfc(-x / math.sqrt(2))
-
-
-def normal_pdf(x: float) -> float:
-    return math.exp(-x * x / 2) / math.sqrt(2 * math.pi)
 
 
 def trapezoid(values: FloatArray, step: float) -> float:
@@ -56,10 +49,6 @@ def poisson_convolution(mu1: float, mu2: float, k: int) -> float:
 
 def exponential_pdf(y: FloatArray, b: float = 1.0) -> FloatArray:
     return np.where(y >= 0, np.exp(-np.maximum(y, 0.0) / b) / b, 0.0)
-
-
-def laplace_pdf(x: float, b: float = 1.0) -> float:
-    return math.exp(-abs(x) / b) / (2 * b)
 
 
 def exp_difference_density(x: float, b: float = 1.0, upper: float = 60.0, steps: int = 200_001) -> float:

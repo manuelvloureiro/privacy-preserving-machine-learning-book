@@ -5,7 +5,8 @@
 Prints every number quoted in book-exercises/part04-privacy-accounting/04-gaussian-dp.md (seed 0; nothing here is random, the
 seed is accepted for a uniform interface). Makes no figures; --out is accepted and ignored.
 
-Conventions as in gaussian_dp.py: type I error a, type II error b, α only for Rényi orders.
+Conventions as in gaussian_dp.py: type I error a and type II error b in the code; the solutions
+write them α and β, and the chapter, which keeps α for Rényi orders, FPR and FNR.
 """
 
 import argparse

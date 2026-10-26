@@ -15,15 +15,16 @@ role of model size. Secret lines are inserted k times each (duplication). A cana
 
 import argparse
 import math
+import sys
 from collections.abc import Sequence
 from dataclasses import dataclass
 from pathlib import Path
 
-import matplotlib
+sys.path.insert(0, str(Path(__file__).resolve().parents[1]))  # for code/shared
+from shared.figures import configure
+from shared.stats import normal_sf
 
-matplotlib.use("Agg")
-matplotlib.rcParams["svg.hashsalt"] = "memorization"  # stable element ids, so reruns don't churn the SVGs
-matplotlib.rcParams["svg.fonttype"] = "none"  # keep text as text: smaller, diffable files
+configure("memorization")
 
 import matplotlib.pyplot as plt
 import numpy as np
@@ -430,10 +431,6 @@ def all_exposures(log_probs: FloatArray) -> FloatArray:
 def expected_null_exposure(size: int) -> float:
     """E[log2 |R| - log2 rank] for a rank uniform on 1..|R|: log2 |R| - log2(|R|!)/|R| → log2 e."""
     return math.log2(size) - math.lgamma(size + 1) / math.log(2) / size
-
-
-def normal_sf(z: float) -> float:
-    return 0.5 * math.erfc(z / math.sqrt(2))
 
 
 def exposure_normal_estimate(rng: np.random.Generator, log_probs: FloatArray, index: int, samples: int) -> float:

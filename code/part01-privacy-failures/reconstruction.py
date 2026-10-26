@@ -12,17 +12,18 @@ linear feasibility problem, solved here by accelerated projected gradient) and r
 import argparse
 import math
 import os
+import sys
 from pathlib import Path
 
 # One BLAS thread unless the caller sets more: the figure scripts run in parallel under make -j.
 for _var in ("OPENBLAS_NUM_THREADS", "OMP_NUM_THREADS", "MKL_NUM_THREADS"):
     os.environ.setdefault(_var, "1")
 
-import matplotlib
 
-matplotlib.use("Agg")
-matplotlib.rcParams["svg.hashsalt"] = "reconstruction"  # stable element ids across reruns
-matplotlib.rcParams["svg.fonttype"] = "none"  # keep text as text
+sys.path.insert(0, str(Path(__file__).resolve().parents[1]))  # for code/shared
+from shared.figures import configure
+
+configure("reconstruction")
 
 import matplotlib.pyplot as plt
 import numpy as np

@@ -11,8 +11,10 @@ TPR - FPR and accuracy is (1 + advantage) / 2 with a fair bit.
 
 import argparse
 import math
+import sys
 from pathlib import Path
 
+sys.path.insert(0, str(Path(__file__).resolve().parents[1]))  # for code/shared
 import numpy as np
 from property_inference import (
     MLP,
@@ -27,13 +29,13 @@ from property_inference import (
     membership_advantage_count,
     mlp_logits_shared,
     normal_cdf,
-    normal_quantile,
     permute_units,
     predicted_delta,
     property_advantage_count,
     set_features,
     tv_pmf,
 )
+from shared.stats import normal_quantile
 
 # Figures are build output: _build/figures/<part>/, which the build copies into each book.
 FIGURES = Path(__file__).resolve().parents[2] / "_build" / "figures" / Path(__file__).parent.name

@@ -16,16 +16,17 @@ used only to check them.
 
 import argparse
 import math
+import sys
 from collections.abc import Callable, Sequence
 from dataclasses import dataclass
 from itertools import combinations, product
 from pathlib import Path
 
-import matplotlib
+sys.path.insert(0, str(Path(__file__).resolve().parents[1]))  # for code/shared
+from shared.figures import configure
+from shared.stats import normal_cdf, normal_pdf
 
-matplotlib.use("Agg")
-matplotlib.rcParams["svg.hashsalt"] = "apx_core_calibration"  # stable element ids, so reruns don't churn the SVGs
-matplotlib.rcParams["svg.fonttype"] = "none"  # keep text as text: smaller, diffable files
+configure("apx_core_calibration")
 
 import matplotlib.pyplot as plt
 import numpy as np
@@ -37,15 +38,6 @@ from numpy.typing import NDArray
 FIGURES = Path(__file__).resolve().parents[2] / "_build" / "figures" / Path(__file__).parent.name
 
 FloatArray = NDArray[np.float64]
-
-
-def normal_cdf(x: float) -> float:
-    """Φ(x) = Pr[Z <= x] for Z ~ N(0, 1); erfc keeps full relative precision in the lower tail."""
-    return 0.5 * math.erfc(-x / math.sqrt(2))
-
-
-def normal_pdf(x: float) -> float:
-    return math.exp(-x * x / 2) / math.sqrt(2 * math.pi)
 
 
 def bisect_increasing(g: Callable[[float], float], target: float, lo: float, hi: float, steps: int = 200) -> float:
