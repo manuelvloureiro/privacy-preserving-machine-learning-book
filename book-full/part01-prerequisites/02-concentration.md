@@ -38,7 +38,7 @@ $$a\Pr[X \ge a] \le \mathbb E[X].$$
 Dividing by $a > 0$ gives the bound.
 :::
 
-No bound that uses only the mean can do better. The variable that equals $a$ with probability $\mathbb E[X]/a$ and 0 otherwise meets the bound with equality, as [Exercise 1](../../book-exercises/part01-prerequisites/02-concentration.md#sec-sol-conc-1) shows.
+No bound that uses only the mean can do better. When $\mathbb E[X] \le a$, the variable that equals $a$ with probability $\mathbb E[X]/a$ and 0 otherwise has that mean and meets the bound with equality.
 
 Markov's inequality applies to any quantity that is never negative, so you can apply it to a transformed version of $X$ instead of $X$ itself.
 
@@ -173,7 +173,7 @@ The bounds depend on the expected count $\mu$, not on the number of trials $n$, 
 ::: {#exm-conc-chernoff}
 In the running example the number of errors $S$ is a sum of 200 independent $\mathrm{Bern}(0.1)$ variables, so $\mu = 20$. A measured rate of 15% means 30 errors, which is $(1 + r)\mu$ with $r = 0.5$. The simplified upper-tail bound gives
 $$\Pr[S \ge 30] \le \exp\left(-\frac{0.5^2 \times 20}{2.5}\right) = e^{-2} = 0.135.$$
-That is the best bound so far, below Chebyshev's 0.18, but still 14 times the simulated $9.6\times10^{-3}$. Part of the gap is the simplification in step 5 of the proof, and the rest is a factor in front of the exponential that no Chernoff bound captures ([Exercise 6](../../book-exercises/part01-prerequisites/02-concentration.md#sec-sol-conc-6)).
+That is the best bound so far, below Chebyshev's 0.18, but still 14 times the simulated $9.6\times10^{-3}$. Part of the gap is the simplification in step 5 of the proof, and the rest is a factor in front of the exponential, shrinking like $1/\sqrt\mu$, that the Chernoff method cannot see because it bounds only the exponent.
 :::
 
 ## Sub-Gaussian variables and Hoeffding {#sec-conc-hoeffding}
@@ -231,7 +231,7 @@ It remains to show that $\Lambda(w) \le w^2/8$, by a Taylor expansion around $w 
 6. *Taylor with remainder.* Taylor's theorem gives $\Lambda(w) = \Lambda(0) + w\Lambda'(0) + \frac{w^2}{2}\Lambda''(\xi)$ for some $\xi$ between 0 and $w$. With value and slope 0 and curvature at most $\frac14$, this is at most $w^2/8 = \lambda^2(u-l)^2/8$.
 :::
 
-The worst case is a fair coin on the two endpoints, which puts all its mass as far from the mean as the interval allows, and [Exercise 3](../../book-exercises/part01-prerequisites/02-concentration.md#sec-sol-conc-3) reaches the same constant for a coin on $\pm1$ by comparing power series. Combining the lemma with items 3 and 4 of @prp-conc-subgaussian gives Hoeffding's inequality: the mean of $n$ bounded independent variables has a variance proxy that shrinks like $1/n$.
+The constant $\frac18$ cannot be improved. A fair coin on the two endpoints has variance $(u-l)^2/4$, and step 1 of @prp-conc-subgaussian shows that no variance proxy can be below the variance. Combining the lemma with items 3 and 4 of @prp-conc-subgaussian gives Hoeffding's inequality: the mean of $n$ bounded independent variables has a variance proxy that shrinks like $1/n$.
 
 ::: {#thm-conc-hoeffding name="Hoeffding's inequality"}
 Let $X_1, \dots, X_n$ be independent, each with values in $[l, u]$, and let $\bar X_n$ be their mean, with $\mathbb E[\bar X_n] = \mu$. For every $t > 0$,
@@ -272,7 +272,7 @@ The proof is the same Chernoff recipe, with a sharper bound on each factor's MGF
 ::: {#exm-conc-small-rate}
 The variance matters most near zero. A classifier makes 1 false positive on 1,000 negative records, and you want a 95% upper bound on its true false-positive rate, so $\beta = 0.05$ and $\ln(1/\beta) = \ln 20 \approx 3.0$. Inverting only the one-sided bound of @thm-conc-hoeffding, Hoeffding adds the half-width $\sqrt{\ln 20/2000} \approx 0.039$ to the measured rate of $0.001$, because it assumes a variance of $0.25$. Bernstein's inequality with $\sigma^2 \approx 0.001$, $R = 1$ and $n = 1{,}000$ gives the width
 $$\sqrt{\frac{2\times0.001\times3.0}{1000}} + \frac{2\times3.0}{3000} \approx 0.0045,$$
-almost ten times tighter, though only as a heuristic, because $\sigma^2$ was estimated from the same data. The exact **Clopper–Pearson** bound, the largest rate under which 1 or fewer false positives in 1,000 trials still has probability at least $0.05$, is $0.0047$. [Exercise 8](../../book-exercises/part01-prerequisites/02-concentration.md#sec-sol-conc-8) ranks all these bounds for 3 events in 5,000 trials.
+almost ten times tighter, though only as a heuristic, because $\sigma^2$ was estimated from the same data. The exact **Clopper–Pearson** bound, the largest rate under which 1 or fewer false positives in 1,000 trials still has probability at least $0.05$, is $0.0047$.
 :::
 
 ## Many estimates at once {#sec-conc-union}
@@ -517,5 +517,3 @@ uv run python code/part01-prerequisites/concentration.py
 - Vershynin, *High-Dimensional Probability* (2018), ch. 2: sub-Gaussian and sub-exponential variables in depth. Read it after this chapter rather than before.
 - Boucheron, Lugosi & Massart, *Concentration Inequalities* (2013), ch. 2 and 6: reference depth
 - Bousquet & Elisseeff, "Stability and Generalization" (JMLR 2002): McDiarmid applied to learning algorithms
-
-**Practice.** Exercises for this chapter, each with a worked solution, are in [the exercise book](../../book-exercises/part01-prerequisites/02-concentration.md).

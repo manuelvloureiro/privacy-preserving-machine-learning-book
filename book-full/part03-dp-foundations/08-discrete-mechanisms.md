@@ -25,8 +25,6 @@ By the choice of $S$ the multiplicative term is 0 however large $e^\varepsilon$ 
 2. *Pure DP.* Pure $\varepsilon$-DP is the case $\delta = 0$, where @eq-discrete-support-delta forces $\Pr[M(D) \in S] = 0$. So a positive probability rules out every finite $\varepsilon$.
 :::
 
-[Exercise 7](../../book-exercises/part03-dp-foundations/08-discrete-mechanisms.md#sec-sol-discrete-7) reads the argument as an attack, the test "say $D$ when the output is in $S$", and reaches the same bound through the hypothesis-testing form of DP.
-
 The floating-point sampler has such outputs because of how floats are spaced. A float with a $p$-bit significand (IEEE 754 doubles have $p = 53$) is $m\cdot2^e$ for an integer $m < 2^p$, so floats are dense near 0 and sparse far from it. With $f(D) = 0$, the outputs near 0 are the fine-grained noise values themselves. With $f(D') = 1$, an output near 0 needs a noise value near $-1$, where floats are about $2^{-p}$ apart, and adding 1 keeps that coarse spacing. So many outputs of $M(D)$ near 0 are impossible under $M(D')$, and the mismatch of grids elsewhere works in both directions. In the narrow window of @fig-discrete-float-support (left), 3 of the 9 outputs of $M(D)$ cannot come from $M(D')$, and 4 of the 10 outputs of $M(D')$ cannot come from $M(D)$.
 
 Doubles have too many values to enumerate, so the chapter's script (@sec-discrete-code) uses $p$-bit floats with $p$ from 6 to 14. Its $U$ is a real uniform rounded down to a $p$-bit float, the logarithm and the sum are each rounded to $p$ bits, and every output's probability is computed exactly (@tbl-discrete-float).
@@ -77,7 +75,7 @@ $$L_{D,D'}(y) = \ln\frac{\Pr[M(D) = y]}{\Pr[M(D') = y]}.$$
 That chapter showed that for discrete outputs, pure $\varepsilon$-DP is the same as $|L_{D,D'}(y)| \le \varepsilon$ at every output $y$.
 
 ::: {#exm-discrete-snapped}
-Snap the toy sampler of the running example to integers, $\Lambda = 1$ for $b = 1$, and clamp to $[-10, 10]$. Both inputs now reach the same 21 outputs, the integers from $-10$ to 10, as [Exercise 7](../../book-exercises/part03-dp-foundations/08-discrete-mechanisms.md#sec-sol-discrete-7) checks, so $\Pr[M(D) \in S] = 0$ at every precision (@fig-discrete-float-support, right). The largest privacy loss over those outputs is 1.0010 at $p = 12$ and 1.0002 at $p = 14$, against $\varepsilon = 1$ for the exact mechanism, and the excess shrinks with precision as the $\omega$ terms predict, with $\omega = 2^{-p}$ in the toy.
+Snap the toy sampler of the running example to integers, $\Lambda = 1$ for $b = 1$, and clamp to $[-10, 10]$. Both inputs now reach the same 21 outputs, the integers from $-10$ to 10, so $\Pr[M(D) \in S] = 0$ at every precision (@fig-discrete-float-support, right). The largest privacy loss over those outputs is 1.0010 at $p = 12$ and 1.0002 at $p = 14$, against $\varepsilon = 1$ for the exact mechanism, and the excess shrinks with precision as the $\omega$ terms predict, with $\omega = 2^{-p}$ in the toy.
 :::
 
 ## An exact coin with an exponential bias {#sec-discrete-bernoulli-exp}
@@ -116,7 +114,7 @@ Each flip uses one uniform integer, so a coin costs $e^\lambda \le e$ uniform dr
 5. *Large $\lambda$.* A product of probabilities is the probability that independent coins all come up 1, and $e^{-\lambda} = (e^{-1})^{\lfloor\lambda\rfloor}\,e^{-(\lambda - \lfloor\lambda\rfloor)}$, so the output is $\mathrm{Bern}(e^{-\lambda})$. Each coin has an exponent of at most 1, so steps 1 to 3 cover it. Stopping at the first 0 does not change the output, which is 0 as soon as one coin is 0.
 :::
 
-The coin is exact, because no step rounds and the only randomness is uniform integers. It costs at most $e$ draws for $\lambda \le 1$ and below $\frac{e}{1 - e^{-1}} + 1 \approx 5.3$ for any $\lambda$ ([Exercise 1](../../book-exercises/part03-dp-foundations/08-discrete-mechanisms.md#sec-sol-discrete-1)). The cost jumps at each integer (@fig-discrete-bernoulli-exp), from $e = 2.7183$ just below 1 to $e + e^{-1} = 3.0862$ at 1, because there the final coin for the fractional part 0 still costs a draw.
+The coin is exact, because no step rounds and the only randomness is uniform integers. It costs at most $e$ draws for $\lambda \le 1$ and below $\frac{e}{1 - e^{-1}} + 1 \approx 5.3$ for any $\lambda$. The whole-unit coins stop at the first 0, so on average fewer than $1/(1 - e^{-1})$ of them are flipped, at most $e$ draws each, and the last coin, reached with probability at most $e^{-1}$, costs at most $e$. The cost jumps at each integer (@fig-discrete-bernoulli-exp), from $e = 2.7183$ just below 1 to $e + e^{-1} = 3.0862$ at 1, because there the final coin for the fractional part 0 still costs a draw.
 
 ![Left: the distribution of $K$ for $\lambda = 0.7$, exact and from 5,000 runs, odd and even $K$ coloured. Right: the frequency of 1s against $e^{-\lambda}$, with the expected draws per coin.](figures/discrete_bernoulli_exp.svg){#fig-discrete-bernoulli-exp}
 
@@ -243,7 +241,7 @@ To follow steps 3 and 4 by hand, take $t = 3$ and $s = 2$, so $b = 1.5$ (@tbl-di
 
 ![Left: the PMF of $\mathrm{Lap}_{\mathbb Z}(1.5)$ on a log scale, exact and from 10,000 draws of Algorithm 2. Right: the privacy loss between counts 0 and 1, bounded by $\varepsilon = 2/3$.](figures/discrete_laplace.svg){#fig-discrete-laplace}
 
-The discrete Laplace gives the continuous guarantee with slightly less noise. At $b = 1$ its variance is 1.8413 against 2, and [Exercise 3](../../book-exercises/part03-dp-foundations/08-discrete-mechanisms.md#sec-sol-discrete-3) shows that the gap tends to $\frac16$ as $b$ grows. Rounding $f(D) + \mathrm{Lap}(b)$ to an integer would also be $\varepsilon$-DP, but it is a different distribution and needs a floating-point sampler.
+The discrete Laplace gives the continuous guarantee with slightly less noise. At $b = 1$ its variance is 1.8413 against 2, and the gap tends to $\frac16$ as $b$ grows. Rounding $f(D) + \mathrm{Lap}(b)$ to an integer would also be $\varepsilon$-DP, but it is a different distribution and needs a floating-point sampler.
 
 For a single count, the discrete Laplace is the best possible mechanism. Ghosh, Roughgarden and Sundararajan (2009) show that every user, whatever their loss and prior, can post-process its output to do as well as with any other $\varepsilon$-DP mechanism.
 
@@ -352,7 +350,7 @@ $$-\frac{\mathrm d}{\mathrm d\tau}\ln\mathcal Z = \frac{1}{2\tau} - \frac{\theta
 
 The deficit is invisible in practice. Its leading term comes from $k = \pm1$, so the relative deficit $1 - \operatorname{Var}(X)/\sigma^2$ is about $8\pi^2\sigma^2e^{-2\pi^2\sigma^2}$, which is $2.11\times10^{-7}$ at $\sigma = 1$. Only below $\sigma \approx 0.6$ does it show, as $\operatorname{Var}(X) = 0.8601\,\sigma^2$ at $\sigma = 0.5$ (@fig-discrete-gaussian-variance).
 
-One property does not carry over: the sum of two independent discrete Gaussians is not exactly a discrete Gaussian. For $\sigma \ge 1$ it is very close ([Exercise 6](../../book-exercises/part03-dp-foundations/08-discrete-mechanisms.md#sec-sol-discrete-6)), and distributed noise addition, where each client adds a share, relies on that.
+One property does not carry over: the sum of two independent discrete Gaussians is not exactly a discrete Gaussian. For $\sigma \ge 1$ it is very close, and distributed noise addition, where each client adds a share, relies on that.
 
 ![Left: $\operatorname{Var}(X)/\sigma^2$ for $X \sim \mathcal N_{\mathbb Z}(0, \sigma^2)$, by direct summation and from @eq-discrete-dgauss-var. Right: the relative deficit $1 - \operatorname{Var}(X)/\sigma^2$ on a log scale, with its leading term.](figures/discrete_gaussian_variance.svg){#fig-discrete-gaussian-variance}
 
@@ -389,7 +387,7 @@ $$-\frac{|y|}{t} - \frac{(|y| - \sigma^2/t)^2}{2\sigma^2} = -\frac{|y|}{t} - \fr
 The $|y|/t$ terms cancel, leaving $e^{-y^2/(2\sigma^2)}$ times a constant, so by @lem-discrete-rejection the output is $\mathcal N_{\mathbb Z}(0, \sigma^2)$.
 2. *The acceptance is a probability.* Its exponent is minus a square, so it is at most 1.
 3. *Everything is rational.* The integer $t$ is computed as $\lfloor\sqrt{\lfloor\sigma^2\rfloor}\rfloor + 1$ with an integer square root. An integer $n$ has $n^2 \le \sigma^2$ exactly when $n^2 \le \lfloor\sigma^2\rfloor$, so this equals $\lfloor\sigma\rfloor + 1$ without computing $\sigma$. So $\lambda = (|y| - \sigma^2/t)^2/(2\sigma^2)$ is a ratio of integers, and Algorithm 1 applies.
-4. *The acceptance rate.* By @lem-discrete-rejection, $A$ is the average acceptance over proposals. With $\Pr[Z = y] = \frac{1 - r}{1 + r}r^{|y|}$, step 1 turns each term of that average into $\frac{1 - r}{1 + r}e^{-\sigma^2/(2t^2)}e^{-y^2/(2\sigma^2)}$, and the sum over $y$ is @eq-discrete-dgauss-accept. [Exercise 5](../../book-exercises/part03-dp-foundations/08-discrete-mechanisms.md#sec-sol-discrete-5) derives the limit from @eq-discrete-poisson-theta.
+4. *The acceptance rate.* By @lem-discrete-rejection, $A$ is the average acceptance over proposals. With $\Pr[Z = y] = \frac{1 - r}{1 + r}r^{|y|}$, step 1 turns each term of that average into $\frac{1 - r}{1 + r}e^{-\sigma^2/(2t^2)}e^{-y^2/(2\sigma^2)}$, and the sum over $y$ is @eq-discrete-dgauss-accept.
 :::
 
 To follow the algorithm by hand, take $\sigma^2 = 4$, so $t = 3$ and $\frac{1 - r}{1 + r} = 0.1651$ (@tbl-discrete-dgauss-walk). Dividing each product by the first gives $e^{-y^2/8}$, for instance $0.1167/0.1322 = 0.883 = e^{-1/8}$.
@@ -466,5 +464,3 @@ uv run python code/part03-dp-foundations/discrete_mechanisms.py
 - Kairouz, Liu & Steinke, "The Distributed Discrete Gaussian Mechanism for Federated Learning with Secure Aggregation" (ICML 2021). The discrete Gaussian when each client adds its own noise, and how close sums of discrete Gaussians are to a discrete Gaussian.
 - Abowd et al., "The 2020 Census Disclosure Avoidance System TopDown Algorithm" (Harvard Data Science Review, 2022). The largest deployment of the discrete Gaussian.
 - Stein & Shakarchi, *Fourier Analysis: An Introduction* (2003), ch. 5. The Poisson summation formula and the theta function behind @eq-discrete-poisson-theta.
-
-**Practice.** Exercises for this chapter, each with a worked solution, are in [the exercise book](../../book-exercises/part03-dp-foundations/08-discrete-mechanisms.md).

@@ -276,7 +276,7 @@ $$K_M(\lambda) = \lambda\,\varepsilon_M(\lambda + 1), \qquad\text{equivalently}\
 2. *Take the supremum.* The factor $\lambda > 0$ does not change which pair of neighbours is worst, so the supremum of the left side is $K_M(\lambda)$ and that of the right side is $\lambda\,\varepsilon_M(\alpha) = \lambda\,\varepsilon_M(\lambda + 1)$.
 :::
 
-So the two parts of Abadi et al.'s Theorem 2 are results of this chapter. Composability, $K_M(\lambda) \le \sum_i K_{M_i}(\lambda)$, is @eq-rdp-compose at order $\lambda + 1$ multiplied by $\lambda$. The tail bound says that $M$ is $(\varepsilon, \delta)$-DP with $\delta = \min_\lambda\exp\big(K_M(\lambda) - \lambda\varepsilon\big)$. It is the conversion of @sec-rdp-conversion read in the other direction, fixing $\varepsilon$ and solving for $\delta$ ([Exercise 3](../../book-exercises/part04-privacy-accounting/01-renyi-dp.md#sec-sol-rdp-3)). The two accountants give the same numbers with different bookkeeping: the moments accountant stores $(\alpha - 1)\varepsilon(\alpha)$ where RDP stores $\varepsilon(\alpha)$, and both add over steps.
+So the two parts of Abadi et al.'s Theorem 2 are results of this chapter. Composability, $K_M(\lambda) \le \sum_i K_{M_i}(\lambda)$, is @eq-rdp-compose at order $\lambda + 1$ multiplied by $\lambda$. The tail bound says that $M$ is $(\varepsilon, \delta)$-DP with $\delta = \min_\lambda\exp\big(K_M(\lambda) - \lambda\varepsilon\big)$. It is the conversion proved in the next section, @sec-rdp-conversion, read in the other direction, fixing $\varepsilon$ and solving for $\delta$. So the two accountants give the same numbers with different bookkeeping.
 
 The identity itself is simple, so what was new in 2016 was a bound on $K_M(\lambda)$ for the *subsampled* Gaussian step of private stochastic gradient descent (SGD), called DP-SGD, in which each step uses a random fraction of the data. [Amplification by subsampling](05-subsampling.md) derives it in RDP form.
 
@@ -386,7 +386,7 @@ uv run python code/part04-privacy-accounting/renyi_dp.py
 | @thm-rdp-curves | Gaussian $\alpha/(2\sigma^2)$; Laplace @eq-rdp-laplace; randomized response @eq-rdp-rr; all exact | The inputs to every accountant; the Gaussian curve is the base of DP-SGD accounting |
 | @thm-rdp-composition | $\varepsilon_M(\alpha) \le \sum_i\varepsilon_i(\alpha)$, adaptively, with equality for products | Compose in RDP and convert once at the end; $k$ Gaussian steps with noise multiplier $\sigma$ are one with $\sigma/\sqrt k$ |
 | @thm-rdp-post | $\varepsilon_{g\circ M}(\alpha) \le \varepsilon_M(\alpha)$ for $g$ that ignores the data | Releasing models and predictions |
-| @lem-rdp-weak-triangle | $D_\alpha(P\Vert Q) \le \frac{\alpha - 1/u}{\alpha - 1}D_{u\alpha}(P\Vert R) + D_{v(\alpha - 1) + 1}(R\Vert Q)$ | Equality for Gaussians at the best $u$ ([Exercise 4](../../book-exercises/part04-privacy-accounting/01-renyi-dp.md#sec-sol-rdp-4)) |
+| @lem-rdp-weak-triangle | $D_\alpha(P\Vert Q) \le \frac{\alpha - 1/u}{\alpha - 1}D_{u\alpha}(P\Vert R) + D_{v(\alpha - 1) + 1}(R\Vert Q)$ | Equality for Gaussians at the best $u$ |
 | @thm-rdp-group | $2^c$ records: order $\alpha/2^c$ with $3^c\varepsilon$, if $\alpha \ge 2^{c+1}$ | Loose by 1.5 per doubling on the Gaussian; for the Gaussian, use the curve with the group's sensitivity |
 | @prp-rdp-moments | $K_M(\lambda) = \lambda\,\varepsilon_M(\lambda + 1)$ (@def-rdp-log-moment) | Reading Abadi et al. (2016) and the libraries built on the moments accountant |
 | @thm-rdp-conversion | $(\varepsilon(\alpha) + \ln(1/\delta)/(\alpha - 1), \delta)$-DP, at the best order | 18–57% above exact in @tbl-rdp-compare and 1.76 times exact at composed $\mu = 0.01$; for reporting, use [the next chapter](02-rdp-conversions.md) or a numerical accountant |
@@ -402,5 +402,3 @@ uv run python code/part04-privacy-accounting/renyi_dp.py
 - Balle & Wang, "Improving the Gaussian Mechanism for Differential Privacy: Analytical Calibration and Optimal Denoising" (ICML 2018). The exact privacy curve of the Gaussian mechanism used here as the ground truth (Theorem 8).
 - Dwork & Roth, *The Algorithmic Foundations of Differential Privacy* (2014), ch. 3. Basic composition (Theorem 3.16) and advanced composition (Theorem 3.20), the baseline that RDP improves.
 - Mironov, Talwar & Zhang, "Rényi Differential Privacy of the Sampled Gaussian Mechanism" (arXiv 2019). The curves that make DP-SGD accounting work, and the reference implementation behind most RDP accountants; used in [Amplification by subsampling](05-subsampling.md).
-
-**Practice.** Exercises for this chapter, each with a worked solution, are in [the exercise book](../../book-exercises/part04-privacy-accounting/01-renyi-dp.md).

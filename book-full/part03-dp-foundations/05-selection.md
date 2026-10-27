@@ -36,7 +36,7 @@ $$\frac{\Pr[M_E(D) = r]}{\Pr[M_E(D') = r]} = \exp\Big(\frac{\varepsilon\big(u(D,
 4. *Monotone scores.* With weights $e^{\varepsilon u/\Delta}$, each factor alone could reach $e^\varepsilon$. If every score goes up from $D$ to $D'$, the first factor is at most 1 and the normalizer ratio at most $e^\varepsilon$, by step 3 with $\Delta$ for $2\Delta$. If every score goes down, the first factor is at most $e^\varepsilon$ and the normalizer ratio at most 1. Either way the product is at most $e^\varepsilon$.
 :::
 
-The 2 pays for two effects that can act together. One record can raise the score of $r$ and lower its competitors', so $r$'s weight grows while the normalizer shrinks. [Exercise 1](../../book-exercises/part03-dp-foundations/05-selection.md#sec-sol-sel-1) builds neighbours on which the ratio approaches $e^{2\varepsilon}$ without the 2. The mechanism is a softmax of the scores with temperature $2\Delta/\varepsilon$, uniform as $\varepsilon \to 0$ and the argmax as $\varepsilon \to \infty$ (@fig-sel-em-probs).
+The 2 pays for two effects that can act together. One record can raise the score of $r$ and lower its competitors', so $r$'s weight grows while the normalizer shrinks. Without the 2, there are neighbours on which the ratio approaches $e^{2\varepsilon}$. The mechanism is a softmax of the scores with temperature $2\Delta/\varepsilon$, uniform as $\varepsilon \to 0$ and the argmax as $\varepsilon \to \infty$ (@fig-sel-em-probs).
 
 The candidate set must not depend on the data, because the proof compares the same list on $D$ and $D'$. It may be infinite, though. On a continuous range the sum becomes an integral against a fixed base measure, such as length, and the two factors bound the ratio of densities at every point. Nothing else uses the structure of $\mathcal R$, so the candidates can be models, split points, strings or graphs.
 
@@ -119,7 +119,7 @@ $$Z(D) = \int_{-\infty}^\infty e^{-\varepsilon|f(D) - h|/\Delta}\,\mathrm dh = \
 4. *It is the Laplace mechanism.* A density proportional to $e^{-\varepsilon|h - f(D)|/\Delta}$ is the $\mathrm{Lap}(\Delta/\varepsilon)$ density shifted to $f(D)$.
 :::
 
-So monotone scores keep the two factors from both being large, and a data-independent normalizer makes the second one 1. A constant normalizer needs candidates that look the same after a shift and data that only shift the scores, which is why the Laplace mechanism needs only half the scale $2\Delta/\varepsilon$ of the exponential mechanism ([Exercise 7](../../book-exercises/part03-dp-foundations/05-selection.md#sec-sol-sel-7)).
+So monotone scores keep the two factors from both being large, and a data-independent normalizer makes the second one 1. A constant normalizer needs candidates that look the same after a shift and data that only shift the scores, which is why the Laplace mechanism needs only half the scale $2\Delta/\varepsilon$ of the exponential mechanism.
 
 ### A private learner
 
@@ -140,7 +140,7 @@ The plan is to get privacy from @thm-sel-em, then chain two bounds: the choice i
 $$\mathrm{err}(\hat h) \le \mathrm{err}_D(\hat h) + s \le \mathrm{err}_D(h^\star) + c_E + s \le \mathrm{err}(h^\star) + c_E + 2s.$$
 :::
 
-The sampling term falls like $1/\sqrt n$ and the privacy term like $1/n$, so for fine accuracy privacy costs little ([Exercise 8](../../book-exercises/part03-dp-foundations/05-selection.md#sec-sol-sel-8) finds the records each needs). The class must be finite. Alon, Livni, Malliaris and Moran (2019) showed that thresholds at every real number cannot be learned privately in the probably approximately correct (PAC) sense.
+The sampling term falls like $1/\sqrt n$ and the privacy term like $1/n$, so for fine accuracy privacy costs little. The class must be finite. Alon, Livni, Malliaris and Moran (2019) showed that thresholds at every real number cannot be learned privately in the probably approximately correct (PAC) sense.
 
 ### A private median
 
@@ -228,7 +228,7 @@ $$t(D) = \max_{j \ne i}\big(u(D, j) + z_j\big) - u(D, i).$$
 
 The losers enter only through one maximum in step 3, which is why they cost nothing. The 2 is needed in general because competitors can rise while $i$ falls. A histogram under replace neighbours, where one record is swapped for another, does exactly that, so it is not monotone.
 
-Release only the index, because the winning noisy score would publish $Z_i$, the noise the proof averages over. Neither Laplace report-noisy-max nor the exponential mechanism always selects better ([Exercise 6](../../book-exercises/part03-dp-foundations/05-selection.md#sec-sol-sel-6)).
+Release only the index, because the winning noisy score would publish $Z_i$, the noise the proof averages over. Neither Laplace report-noisy-max nor the exponential mechanism always selects better.
 
 ::: {#exm-sel-rnm}
 On the vote of @tbl-sel-em-votes the counts are monotone, so $b = 1$ is allowed at $\varepsilon = 1$. The script's exact winning probabilities give a largest privacy loss of 0.6674, and 0.3626 with $b = 2$. On the 50 models at $\varepsilon = 1$, the general mechanism ($b = 2$) picks the best with probability 0.4241, against 0.3935 for the exponential mechanism, and has expected gap 1.40 against 1.54. The monotone one ($b = 1$) has expected gap 0.54. The accuracy bound at $\beta = 0.05$, 27.63 for $b = 2$, is loose for spread-out scores.
@@ -314,9 +314,9 @@ With runs at the largest $\varepsilon_0$ whose $c$-fold advanced composition ([A
 2. *Accuracy.* Apply @thm-sel-svt to each run at its budget and failure probability $\beta/c$, and take a union bound over the runs.
 :::
 
-The advanced margin grows like $\sqrt c$ instead of $c$, and [Exercise 9](../../book-exercises/part03-dp-foundations/05-selection.md#sec-sol-sel-9) finds where it starts to win.
+The advanced margin grows like $\sqrt c$ instead of $c$.
 
-The $\bot$ answers are free because step 4 pays for all of them through one maximum, whether there are 3 or 3 million. The run must halt because that payment covers one $\top$, and each further $\top$ against the same $\rho$ needs its own shift. Query noise $\mathrm{Lap}(2c\Delta/\varepsilon_2)$ pays for $c$ shifts at once (@sec-apx-mech-svt). The split of $\varepsilon$ matters only for accuracy ([Exercise 4](../../book-exercises/part03-dp-foundations/05-selection.md#sec-sol-sel-4)). The proof is tight in the limit. On the pair of $2m$ queries built in @sec-sel-svt-bugs, the largest privacy loss is 0.994011, 0.999981 and 1.000000 at $m = 10$, 20 and 40. @fig-sel-svt-path shows one run.
+The $\bot$ answers are free because step 4 pays for all of them through one maximum, whether there are 3 or 3 million. The run must halt because that payment covers one $\top$, and each further $\top$ against the same $\rho$ needs its own shift. Query noise $\mathrm{Lap}(2c\Delta/\varepsilon_2)$ pays for $c$ shifts at once (@sec-apx-mech-svt). The split of $\varepsilon$ matters only for accuracy. The proof is tight in the limit. On the pair of $2m$ queries built in @sec-sel-svt-bugs, the largest privacy loss is 0.994011, 0.999981 and 1.000000 at $m = 10$, 20 and 40. @fig-sel-svt-path shows one run.
 
 ![One run of AboveThreshold with $\varepsilon = 1$ on 30 queries whose true answers rise from 8 to 22.5, with threshold $\tau = 20$. Each query's noisy answer is compared with the same noisy threshold. The first one above it is reported and the run halts; later queries are never looked at.](figures/select_svt_path.svg){#fig-sel-svt-path}
 
@@ -358,7 +358,7 @@ $$a_D(t) = F(t)^m\,\bar F(t - 1)^m, \qquad a_{D'}(t) = F(t - 1)^m\,\bar F(t)^m.$
 5. *Average.* The threshold has the same distribution under both datasets, so averaging $a_D \ge e^{m/b}a_{D'}$ gives @eq-sel-no-halt. The pair exists for every $m$, so the loss is unbounded.
 :::
 
-AboveThreshold's proof fails here because each $\top$ after the first needs its own shift, and the halt is what limits them to one. Without query noise (Algorithm 5), even the halting version fails, because two queries can give an output that is impossible on $D'$ ([Exercise 5](../../book-exercises/part03-dp-foundations/05-selection.md#sec-sol-sel-5)). Publishing $f_j + \nu_j$ (Algorithm 3) releases the noise the proof integrates over. The no-halt variant adds as much noise per query as AboveThreshold, so a reviewer who checks only noise scales will not find the bug. An audit will find it. Under $\varepsilon$-DP every test, a rule that says "$D$" or "$D'$" from the output, fires at most $e^\varepsilon$ times as often under $D$ as under $D'$, by [the definition](01-definition.md), and a simple sign test breaks that (@fig-sel-svt-buggy, right).
+AboveThreshold's proof fails here because each $\top$ after the first needs its own shift, and the halt is what limits them to one. Without query noise (Algorithm 5), even the halting version fails, because two queries can give an output that is impossible on $D'$. Publishing $f_j + \nu_j$ (Algorithm 3) releases the noise the proof integrates over. The no-halt variant adds as much noise per query as AboveThreshold, so a reviewer who checks only noise scales will not find the bug. An audit will find it. Under $\varepsilon$-DP every test, a rule that says "$D$" or "$D'$" from the output, fires at most $e^\varepsilon$ times as often under $D$ as under $D'$, by [the definition](01-definition.md), and a simple sign test breaks that (@fig-sel-svt-buggy, right).
 
 ![Left: privacy loss on the neighbouring pair $f(D) = (0^m, 1^m)$, $f(D') = (1^m, 0^m)$ with $\varepsilon = 1$, computed exactly by integrating over the threshold noise. For the no-halt variant, the loss of the output $\bot^m\top^m$ grows linearly in $m$, above the lower bound $m\varepsilon/4$. For AboveThreshold, the largest loss over all outputs levels off at $\varepsilon$. Right: the no-halt variant under a simple test, the probability that the second half has more $\top$ answers than the first. Once the probability under $D$ exceeds $e^\varepsilon$ times the probability under $D'$ (dotted), no $\varepsilon$-DP mechanism could produce it.](figures/select_svt_buggy.svg){#fig-sel-svt-buggy}
 
@@ -434,5 +434,3 @@ uv run python code/part03-dp-foundations/selection.py
 - McKenna & Sheldon, "Permute-and-Flip: A New Mechanism for Differentially Private Selection" (NeurIPS 2020), and Ding et al., "The Permute-and-Flip Mechanism is Identical to Report-Noisy-Max with Exponential Noise" (2021).
 - Maddison, Tarlow & Minka, "A* Sampling" (NeurIPS 2014): the Gumbel-max trick in machine learning, with its history going back to Gumbel and to Yellott (1977).
 - Near & Abuah, *Programming Differential Privacy*, the chapters on the exponential mechanism and the sparse vector technique: short implementations alongside Dwork & Roth.
-
-**Practice.** Exercises for this chapter, each with a worked solution, are in [the exercise book](../../book-exercises/part03-dp-foundations/05-selection.md).

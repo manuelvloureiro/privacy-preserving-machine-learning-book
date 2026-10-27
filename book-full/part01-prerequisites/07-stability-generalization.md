@@ -101,7 +101,7 @@ Step 2 is clearest with every outcome listed. Take $n = 1$: one record $z_1 \in 
 
 : Every outcome of the one-record case. The renamed column is the test column with the rows $(0, 1)$ and $(1, 0)$ exchanged. {#tbl-stability-renaming}
 
-Row by row, the test and renamed columns differ, but the renamed column holds the same values attached to the mirror-image outcome, which has the same probability. That is all step 2 says. The expected gap, test minus train, is $0.285 - 0.075 = 0.21$, and so is renamed minus train. Changing $z_1$ from 0 to 1 moves the loss at $z = 1$ from 1 to 0.25 and at $z = 0$ from 0 to 0.25, so the largest change is $\gamma = 0.75$, above the gap ([Exercise 2](../../book-exercises/part01-prerequisites/07-stability-generalization.md#sec-sol-stability-2)). The running example has too many outcomes to list; @sec-stability-erm takes it up.
+Row by row, the test and renamed columns differ, but the renamed column holds the same values attached to the mirror-image outcome, which has the same probability. That is all step 2 says. The expected gap, test minus train, is $0.285 - 0.075 = 0.21$, and so is renamed minus train. Changing $z_1$ from 0 to 1 moves the loss at $z = 1$ from 1 to 0.25 and at $z = 0$ from 0 to 0.25, so the largest change is $\gamma = 0.75$, above the gap. The running example has too many outcomes to list; @sec-stability-erm takes it up.
 :::
 
 ## Regularized empirical risk minimization {#sec-stability-erm}
@@ -173,7 +173,7 @@ The gap falls like $1/n$ and stays a fixed fraction of the bound: about 3% for $
 $$\Pr\big[g(D) - \mathbb E\,g(D) \ge t\big] \le \exp\Big(-\frac{2t^2}{\sum_ic_i^2}\Big).$$
 Setting the right side equal to a failure probability $\beta$ and solving for $t$ gives the deviation $t = \sqrt{\frac12\sum_ic_i^2\ln(1/\beta)}$.
 
-The theorem below adds this deviation and $\gamma$ to the training loss. It is Theorem 12 of Bousquet & Elisseeff (2002), who define stability by removing a record; replace-one stability is at most twice that ([Exercise 1](../../book-exercises/part01-prerequisites/07-stability-generalization.md#sec-sol-stability-1)).
+The theorem below adds this deviation and $\gamma$ to the training loss. It is Theorem 12 of Bousquet & Elisseeff (2002), who define stability by removing a record; replace-one stability is at most twice that.
 
 ::: {#thm-stability-be name="Bousquet–Elisseeff bound"}
 Let $\mathcal T$ be $\gamma$-uniformly stable, let the loss take values in $[0, K]$, and let $\beta \in (0, 1)$. Then with probability at least $1 - \beta$ over the training set $D$,
@@ -195,7 +195,7 @@ Call the **width** of the bound everything it adds to the training loss. Its par
 
 The looseness comes from step 3, which charges every record the full $2\gamma$ although their effects largely average out. Later work (Feldman & Vondrák 2018, 2019; Bousquet, Klochkov & Zhivotovskiy 2020) reached, for $K = 1$ and up to constant factors (which is what $\lesssim$ means),
 $$\mathrm{gap} \lesssim \gamma\ln n\,\ln(1/\beta) + \sqrt{\frac{\ln(1/\beta)}{n}},$$
-so that $\gamma$ of order $1/\sqrt n$ also gives a gap of order $1/\sqrt n$ up to log factors ([Exercise 7](../../book-exercises/part01-prerequisites/07-stability-generalization.md#sec-sol-stability-7)).
+so that $\gamma$ of order $1/\sqrt n$ also gives a gap of order $1/\sqrt n$ up to log factors.
 
 ![Width of the high-probability bound, @eq-stability-be, with $K = 1$ and $\beta = 0.05$, for stability $\gamma = 1/n$, $n^{-3/4}$ and $n^{-1/2}$, against the Hoeffding width for a single fixed model.](figures/stability_high_probability.svg){#fig-stability-high-probability}
 
@@ -254,7 +254,7 @@ $$\mathbb E\,r_t \le \Big(1 - \frac1n\Big)\mathbb E\,r_{t-1} + \frac1n\big(\math
 
 So stability degrades linearly with training time (@fig-stability-sgd-divergence). With a constant step $\eta$ and $m$ epochs (passes over the data), so $T = mn$ steps, the bound is $\gamma \le 2L^2\eta m$, and for a fixed number of epochs it does not improve with more data. Training longer lowers the training loss but raises $\gamma$, so the test loss, which is the training loss plus the gap, eventually rises: that is the case for stopping early.
 
-The bound is loose because step 1 only uses that a step does not expand distances. A step on a curved loss often contracts them, so the true distance between the runs levels off, and [Exercise 5](../../book-exercises/part01-prerequisites/07-stability-generalization.md#sec-sol-stability-5) shows that a strongly convex loss makes the bound independent of $T$.
+The bound is loose because step 1 only uses that a step does not expand distances. A step on a curved loss often contracts them, and a strongly convex loss makes the bound independent of $T$.
 
 ::: {#exm-stability-sgd}
 Take $n = 100$ records of the running example, no penalty, and a constant step $\eta = 0.25$. At margin $t$ the logistic loss has second derivative $\sigma(t)(1 - \sigma(t))$, a product of two numbers that sum to 1, so at most $\frac14$. With $\|x\| \le 1$ that gives $\beta_s = \frac14$, and $\eta \le 2/\beta_s = 8$ holds. The script averages over 100 coupled pairs of runs, with $z_1$ replaced by a fresh draw, and with $L = 1$ both bounds are $0.5m$.
@@ -294,7 +294,7 @@ Score 1-NN with the 0-1 loss, and assume the training points are distinct. Then 
 
 So zero training error says nothing here. 1-NN is a reasonable classifier: $2p(1 - p)$ is $2\min(p, 1 - p)$ times $\max(p, 1 - p) \le 1$, so its limiting error is within twice the Bayes error. But its training error does not tell you how close it gets. With $\gamma = 1$, @eq-stability-expected only says that the gap is at most 1, which every 0-1 loss satisfies anyway.
 
-A majority vote over several nearest neighbours rarely changes when one record is replaced, although its worst-case $\gamma$ is still 1, and notions of stability that average over the data capture its behaviour (Devroye & Wagner 1979; [Exercise 6](../../book-exercises/part01-prerequisites/07-stability-generalization.md#sec-sol-stability-6)).
+A majority vote over several nearest neighbours rarely changes when one record is replaced, although its worst-case $\gamma$ is still 1, and notions of stability that average over the data capture its behaviour (Devroye & Wagner 1979).
 
 ::: {#exm-stability-nn}
 In the running example the Bayes error is 0.250 and the 1-NN limit $\mathbb E[2p(1 - p)]$ is 0.338, both computed by numerical integration. @tbl-stability-nn compares 1-NN with regularized logistic regression, averaging over 10 training sets, with 0-1 error measured on 2,000 test points.
@@ -329,7 +329,7 @@ The contributions are uneven. Typical records are fitted well whether or not the
 ::: {#exm-stability-self-influence}
 The script draws training sets of $n = 40$ points and, for each $i$, replaces $z_i$ by a fresh draw, refits, and records $\mathrm{mem}_i$. Over 100 training sets, with ± one standard error, the measured gap and the average self-influence agree, as the identity requires. At $\lambda = 0.01$ they are $0.1482 \pm 0.0073$ and $0.1422 \pm 0.0025$, and at $\lambda = 0.1$ they are $0.0420 \pm 0.0017$ and $0.0416 \pm 0.0003$.
 
-To see which records carry the gap, split them by whether the label goes with the trend ($y_ix_{i1} \ge 0$, the more likely label, since $\sigma(5x_1) > \frac12$ exactly when $x_1 > 0$) or against it. About a quarter go against it (24% and 25% at the two values of $\lambda$). At $\lambda = 0.01$ their average self-influence is 0.284, three times the 0.097 of the others. At $\lambda = 0.1$ the two are 0.055 and 0.037, so regularization flattens the profile (@fig-stability-self-influence). [Exercise 8](../../book-exercises/part01-prerequisites/07-stability-generalization.md#sec-sol-stability-8) repeats the experiment with less label noise.
+To see which records carry the gap, split them by whether the label goes with the trend ($y_ix_{i1} \ge 0$, the more likely label, since $\sigma(5x_1) > \frac12$ exactly when $x_1 > 0$) or against it. About a quarter go against it (24% and 25% at the two values of $\lambda$). At $\lambda = 0.01$ their average self-influence is 0.284, three times the 0.097 of the others. At $\lambda = 0.1$ the two are 0.055 and 0.037, so regularization flattens the profile (@fig-stability-self-influence).
 :::
 
 ![Self-influence of each training record against $y_ix_{i1}$, which measures how typical its label is, for $n = 40$ and two values of $\lambda$. The dashed line is the average, which equals the expected gap.](figures/stability_self_influence.svg){#fig-stability-self-influence}
@@ -377,7 +377,7 @@ $$\mathbb E\Big[\max_{j \le k}\big|f_j(H_j) - f_j(\mathcal D)\big|\Big] \le \sqr
 3. *Finish as before.* Steps 2 to 4 of that proof then apply unchanged, with $n/k$ in place of $n$.
 :::
 
-A question chosen with the holdout set's help is like a model trained on it: the analyst is a learning algorithm whose input is $H$, and the answer to the final question plays the part of a training loss, optimistic for the same reason. Splitting removes the bias at the price of a factor $k$. If the questions come in $r$ rounds, and every question of a round is fixed before that round's answers are seen, one part per round suffices, and the factor $k$ in front of $\ln(2k)$ becomes $r$. The classical rule is one round: keep a test set for one final verdict, and use it once ([Exercise 9](../../book-exercises/part01-prerequisites/07-stability-generalization.md#sec-sol-stability-9)).
+A question chosen with the holdout set's help is like a model trained on it: the analyst is a learning algorithm whose input is $H$, and the answer to the final question plays the part of a training loss, optimistic for the same reason. Splitting removes the bias at the price of a factor $k$. If the questions come in $r$ rounds, and every question of a round is fixed before that round's answers are seen, one part per round suffices, and the factor $k$ in front of $\ln(2k)$ becomes $r$. The classical rule is one round: keep a test set for one final verdict, and use it once.
 
 An analyst's choices ("keep the feature if it looks predictive") are thresholds, which one record can flip, so analysts are rarely stable. A later chapter reuses one holdout set safely for many adaptive questions with a randomized form of stability.
 
@@ -453,5 +453,3 @@ uv run python code/part01-prerequisites/stability.py
 - Zhang, Bengio, Hardt, Recht & Vinyals, "Understanding Deep Learning Requires Rethinking Generalization" (ICLR 2017): networks fit random labels.
 - Freedman, "A Note on Screening Regression Equations" (The American Statistician 1983): selecting variables and testing them on the same data, the paradox of @sec-stability-adaptive.
 - Hastie, Tibshirani & Friedman, *The Elements of Statistical Learning* (2nd ed. 2009), §7.10.2: "the wrong and the right way to do cross-validation", the same trap in model selection.
-
-**Practice.** Exercises for this chapter, each with a worked solution, are in [the exercise book](../../book-exercises/part01-prerequisites/07-stability-generalization.md).

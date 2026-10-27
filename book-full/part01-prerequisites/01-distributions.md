@@ -150,7 +150,7 @@ The plan is to count sequences for the PMF, then to compute the moments of one t
 4. *Combine the trials.* Write $S = X_1 + \dots + X_n$ with independent Bernoullis. By @lem-dist-moment-rules the means add to $np$ and the variances to $np(1-p)$. By @lem-dist-mgf-sum the MGF is the product of $n$ identical Bernoulli MGFs.
 :::
 
-[Exercise 1](../../book-exercises/part01-prerequisites/01-distributions.md#sec-sol-dist-1) computes the variance the long way, from the PMF, for comparison. The variance $p(1-p)$ is largest at $p = \frac12$ and small near 0 or 1, so in absolute terms a rate near 0 is estimated more precisely than one near $\frac12$. The estimated rate $\hat p = S/n$ is an average of $n$ independent trials, so by @cor-dist-sqrt-n it has standard deviation $\sqrt{p(1-p)/n}$.
+The variance $p(1-p)$ is largest at $p = \frac12$ and small near 0 or 1, so in absolute terms a rate near 0 is estimated more precisely than one near $\frac12$. The estimated rate $\hat p = S/n$ is an average of $n$ independent trials, so by @cor-dist-sqrt-n it has standard deviation $\sqrt{p(1-p)/n}$.
 
 ::: {#exm-dist-error-rate}
 The classifier errs on each test record independently with probability $p = 0.05$. On $n = 2{,}000$ records its error count is $\mathrm{Bin}(2000, 0.05)$, with mean $2000 \times 0.05 = 100$. Its standard deviation is $\sqrt{2000 \times 0.05 \times 0.95} \approx 9.7$, so the measured rate has standard deviation about $9.7/2000 \approx 0.005$. So the measured error rate is typically within about half a percentage point of the true 5%.
@@ -184,7 +184,7 @@ $$\binom nk\Big(\frac\mu n\Big)^k\Big(1 - \frac\mu n\Big)^{n-k} = \frac{n(n-1)\c
 4. *The fourth factor tends to 1.* It has a fixed exponent and a base that tends to 1.
 :::
 
-@fig-dist-poisson-limit shows the convergence. At $n = 10$ the binomial is visibly narrower than the Poisson, while at $n = 100$ the two almost coincide, and [Exercise 3](../../book-exercises/part01-prerequisites/01-distributions.md#sec-sol-dist-3) finds that the gap shrinks like $1/n$.
+@fig-dist-poisson-limit shows the convergence. At $n = 10$ the binomial is visibly narrower than the Poisson, while at $n = 100$ the two almost coincide, and the gap shrinks like $1/n$.
 
 ![$\mathrm{Bin}(n, 5/n)$ for $n = 10$ and $100$, against $\mathrm{Poisson}(5)$ and its normal approximation.](figures/poisson_limit.svg){#fig-dist-poisson-limit}
 
@@ -201,7 +201,7 @@ $$M_N(\lambda) = e^{-\mu}\sum_{k\ge0}\frac{(\mu e^\lambda)^k}{k!} = e^{-\mu}e^{\
 3. *Sums.* By @lem-dist-mgf-sum the MGF of $N_1 + N_2$ is the product of the two MGFs, $\exp\big((\mu_1 + \mu_2)(e^\lambda - 1)\big)$. That is the $\mathrm{Poisson}(\mu_1 + \mu_2)$ MGF, so @thm-dist-mgf-unique identifies the sum.
 :::
 
-The binomial variance $np(1-p)$ tends to $\mu$ as well, because $1 - p$ tends to 1. The spread relative to the mean, $1/\sqrt\mu$, shrinks only once you expect many events, so with $\mu = 4$ a count of 0 or 8, two standard deviations of 2 from the mean, is unremarkable. Randomly discarding events from a Poisson count leaves a Poisson count, as [Exercise 2](../../book-exercises/part01-prerequisites/01-distributions.md#sec-sol-dist-2) proves.
+The binomial variance $np(1-p)$ tends to $\mu$ as well, because $1 - p$ tends to 1. The spread relative to the mean, $1/\sqrt\mu$, shrinks only once you expect many events, so with $\mu = 4$ a count of 0 or 8, two standard deviations of 2 from the mean, is unremarkable. Far above the mean the probabilities fall like $(e\mu/k)^k$, faster than any exponential but slower than a normal tail, as @sec-apx-prob-poisson-tail derives.
 
 The Chernoff bound in [Concentration inequalities](02-concentration.md) bounds the tail of a count of independent yes/no events through its MGF, as in @prp-dist-mgf-tail. Its first step is that, as far as the MGF can tell, such a count is dominated by a Poisson count with the same mean.
 
@@ -359,7 +359,7 @@ Put a Laplace with $b = 1$ and a normal (@sec-dist-normal) with standard deviati
 ::: {#exm-dist-absolute-error}
 The classifier's error counts are not Laplace, so this example shows what the Laplace model of noise implies when you fit a model. Suppose $y_i = \theta^\top x_i + \xi_i$, with parameters $\theta$ and independent noise $\xi_i \sim \mathrm{Lap}(b)$. The log-likelihood of the data is the sum of the log densities of the residuals,
 $$-n\ln(2b) - \frac1b\sum_i|y_i - \theta^\top x_i|.$$
-Only the second term depends on $\theta$, so the maximum-likelihood $\theta$, the one that makes the observed data most probable, minimizes the sum of absolute errors. When the model is a single constant $m$ in place of $\theta^\top x_i$, the best $m$ is the *median*, where half the points lie on each side ([Exercise 4](../../book-exercises/part01-prerequisites/01-distributions.md#sec-sol-dist-4)). The median is far less sensitive to outliers than the mean, because moving one extreme point further out does not change which point is in the middle.
+Only the second term depends on $\theta$, so the maximum-likelihood $\theta$, the one that makes the observed data most probable, minimizes the sum of absolute errors. When the model is a single constant $m$ in place of $\theta^\top x_i$, the best $m$ is the *median*, where half the points lie on each side. The median is far less sensitive to outliers than the mean, because moving one extreme point further out does not change which point is in the middle.
 :::
 
 ## The normal distribution {#sec-dist-normal}
@@ -478,7 +478,7 @@ At $d = 10{,}000$, for instance, $1/\sqrt{20000} \approx 0.007$, and at $d = 1$ 
 ![Histograms of $\|X\|/\sqrt d$ for $X \sim \mathcal N(0, I_d)$ and $d$ from 1 to 10,000.](figures/gaussian_norms.svg){#fig-dist-gaussian-norms}
 
 ::: {#exm-dist-high-dim}
-The error counts are not vectors, so take the classifier's weights instead. Add $\mathcal N(0, \sigma^2I_d)$ noise to a model with $d = 10^6$ parameters and $\sigma = 0.01$. By @prp-dist-norm the noise vector has length about $\sigma\sqrt d = 10$, with a relative spread $1/\sqrt{2 \times 10^6}$ under 0.1%. Yet by @prp-dist-rotation its projection onto any fixed unit vector is only $\mathcal N(0, 0.01^2)$. [Exercise 7](../../book-exercises/part01-prerequisites/01-distributions.md#sec-sol-dist-7) uses the same two facts to show that two independent random directions are almost orthogonal.
+The error counts are not vectors, so take the classifier's weights instead. Add $\mathcal N(0, \sigma^2I_d)$ noise to a model with $d = 10^6$ parameters and $\sigma = 0.01$. By @prp-dist-norm the noise vector has length about $\sigma\sqrt d = 10$, with a relative spread $1/\sqrt{2 \times 10^6}$ under 0.1%. Yet by @prp-dist-rotation its projection onto any fixed unit vector is only $\mathcal N(0, 0.01^2)$. The same two facts show that two independent random directions are almost orthogonal.
 :::
 
 ## A density against its shifted copy {#sec-dist-shift}
@@ -597,5 +597,3 @@ uv run python code/part01-prerequisites/distributions.py
 - Wasserman, *All of Statistics* (2004), ch. 2–3: a compact reference.
 - Vershynin, *High-Dimensional Probability* (2018), §3.1: concentration of the norm of a normal vector.
 - Shevtsova, "On the absolute constants in the Berry–Esseen type inequalities for identically distributed summands" (2011): the constant $c \le 0.4748$ in the Berry–Esseen bound.
-
-**Practice.** Exercises for this chapter, each with a worked solution, are in [the exercise book](../../book-exercises/part01-prerequisites/01-distributions.md).

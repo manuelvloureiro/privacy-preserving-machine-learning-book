@@ -52,9 +52,6 @@ def test_composition_matches_section(tmp_path: Path) -> None:
         "d=10000: pure Laplace=14142.1  Laplace + advanced=693.0  Laplace + optimal=527.5  Gaussian=373.1",
         "d=1000 per-count eps0: advanced=0.00645  optimal=0.00849",
         "optimal / exact = 8.4",
-        # Exercises
-        "ex2 crossover eps=0.1 delta'=1e-5: formula k > 28.8  search k=29",
-        "ex3 k=2 eps=ln3: delta(0)=0.5000  delta(ln3)=0.3750  delta(2ln3)=0.0000",
     ):
         assert expected in out, expected
     assert {f.name for f in tmp_path.iterdir()} == {

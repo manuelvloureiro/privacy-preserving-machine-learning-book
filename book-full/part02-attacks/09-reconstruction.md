@@ -47,7 +47,7 @@ Let $k = \lfloor 2E\rfloor$, and suppose $d$ has at least $k$ ones and at least 
 3. *Answer the midpoint.* A curator that answers each query with the midpoint of the two databases' sums is within $k/2 \le E$ of both, so $c$ is consistent.
 :::
 
-So a curator whose error is $o(n)$ is blatantly non-private. The attack checks $2^n$ candidates against $2^n$ answers, and the next section makes it efficient. A particular curator can also be weaker than the bound suggests: one that rounds every answer to a multiple of 4 has error at most 2, yet simulating the rounding recovers $d$ exactly ([Exercise 1](../../book-exercises/part02-attacks/09-reconstruction.md#sec-sol-recon-1)).
+So a curator whose error on all $2^n$ queries is $o(n)$ is blatantly non-private, because $4E$ is then $o(n)$. A curator can also be weaker than the bound suggests. One that rounds every answer to a multiple of 4 has error at most 2, yet rounding each candidate's answers the same way and keeping exact matches recovers $d$.
 
 ::: {#exm-recon-exponential}
 For a hospital of ten patients, $d = (1, 1, 1, 0, 0, 0, 0, 0, 0, 1)$, the script checks all 1024 candidates against all 1024 subsets. By the midpoint construction, some curator with error at most $E$ makes $c$ consistent exactly when every subset sum of $c - d$ is at most $2E$ in absolute value (@tbl-recon-exp).
@@ -81,7 +81,7 @@ The true $d$ is a solution, and the theorem below shows that no solution has man
 
 So it needs one fact about sums of random signs. Take independent fair signs $s_i$, each $+1$ or $-1$ with probability $\frac12$, and fixed weights $w_i$. The sum $X = \sum_is_iw_i$ has odd moments 0, because flipping every sign leaves its distribution unchanged. Its fourth moment is at most 3 times its squared second moment, as for a normal variable:
 $$\mathbb E[X^2] = \sum_iw_i^2, \qquad \mathbb E[X^4] \le 3\,\mathbb E[X^2]^2.$$ {#eq-recon-fourth}
-[Exercise 3](../../book-exercises/part02-attacks/09-reconstruction.md#sec-sol-recon-3) proves the exact value $3(\sum_iw_i^2)^2 - 2\sum_iw_i^4$ by counting which products of signs survive the expectation.
+Expanding $X^4$, a product of four signs has mean 1 when its indices pair up and 0 otherwise, which gives exactly $3(\sum_iw_i^2)^2 - 2\sum_iw_i^4$, so dropping the negative term gives the inequality.
 
 Markov's inequality (@thm-conc-markov) says that a variable that cannot be negative is rarely far *above* its mean, and the attack needs the opposite. A variable that is 0 most of the time and huge once in a while is often far below its mean. But its second moment is then enormous next to its squared mean, and the next lemma shows that a small ratio of the two is all that can go wrong.
 
@@ -196,8 +196,8 @@ The plan is to find the variance of each coordinate of $\hat x - d$, then to ask
 1. *The error is normal.* Given $A$, the error $A^+e$ is a linear map of a normal vector, so it is normal. A linear map $G$ turns covariance $\sigma^2I$ into $\sigma^2GG^\top$, so the covariance is $\sigma^2A^+(A^+)^\top = \sigma^2(A^\top A)^{-1}$.
 2. *Compute the average Gram matrix.* $A^\top A$ is the sum of $f_jf_j^\top$ over the queries. For a random subset, $f_i^2 = f_i$ has mean $\frac12$, and two different memberships are independent, so $\mathbb E[f_if_k] = \frac14$ for $i \ne k$. Hence
 $$\mathbb E[A^\top A] = \frac m4(I + \mathbf 1\mathbf 1^\top).$$
-3. *Invert it.* Multiplying out shows that $(I + \mathbf 1\mathbf 1^\top)^{-1} = I - \frac{1}{n + 1}\mathbf 1\mathbf 1^\top$ ([Exercise 4](../../book-exercises/part02-attacks/09-reconstruction.md#sec-sol-recon-4)). Its diagonal is $\frac{n}{n + 1} \approx 1$, so the mean of $A^\top A$ alone would give a variance of about $4\sigma^2/m$.
-4. *Correct for finite $m$.* The inverse of a fluctuating matrix is on average larger than the inverse of its mean, as $\mathbb E[1/Z] \ge 1/\mathbb E[Z]$ for a positive number $Z$. The hypothesis, with $\Sigma = \mathbb E[ff^\top]$, replaces $m$ by $m - n - 1$, so the variance is
+3. *Invert it.* Multiplying out shows that $(I + \mathbf 1\mathbf 1^\top)^{-1} = I - \frac{1}{n + 1}\mathbf 1\mathbf 1^\top$. Its diagonal is $\frac{n}{n + 1} \approx 1$, so inverting the mean of $A^\top A$ would give a variance of about $4\sigma^2/m$, which step 4 corrects.
+4. *Correct for finite $m$.* The inverse of a fluctuating matrix is on average larger than the inverse of its mean, as $\mathbb E[1/Z] \ge 1/\mathbb E[Z]$ for a positive number $Z$. The hypothesis says that the mean of $(A^\top A)^{-1}$ is $\Sigma^{-1}/(m - n - 1)$, while step 2 gave $\mathbb E[A^\top A] = m\Sigma$, so $m$ is replaced by $m - n - 1$ and the variance is
 $$4\sigma^2\cdot\frac{n}{n + 1}\cdot\frac{1}{m - n - 1} \approx \frac{4\sigma^2}{m - n}.$$
 5. *Find when a bit goes wrong.* A 0 rounds to 1 when its error exceeds $\frac12$, and a 1 rounds to 0 when its error is below $-\frac12$, so only one tail counts. The error has standard deviation $2\sigma/\sqrt{m - n}$, so a bit goes wrong with probability $\Phi\big(-\sqrt{m - n}/(4\sigma)\big)$. The symmetry $1 - \Phi(-t) = \Phi(t)$ gives @eq-recon-ls-random.
 :::
@@ -281,7 +281,7 @@ In the running example the sampling curator with $q = \frac12$ keeps 250 of the 
 
 For the information bound, take $n = 1000$ and at most 5% wrong bits. Then $h(0.05) = 0.2864$, so each person still needs $0.7136$ bits. An exact answer carries at most $\log_21001 \approx 9.97$ bits, so any attack needs at least 72 queries, from the bound 71.6. Rounding every count to a multiple of 10 leaves at most 102 values and raises the bound to 106.9, and multiples of 32 give 141.5.
 
-Against unlimited queries, independent noise loses. A curator with $\sigma = 2\sqrt n$ lets least squares recover only 0.5875 of the bits at $m = 4n$ (@tbl-recon-ls), but $106.1n$ queries recover 90% ([Exercise 5](../../book-exercises/part02-attacks/09-reconstruction.md#sec-sol-recon-5)).
+A curator with $\sigma = 2\sqrt n$ lets least squares recover only 0.5875 of the bits at $m = 4n$ (@tbl-recon-ls), but by @eq-recon-ls-random $106.1n$ queries recover 90%.
 :::
 
 ## Attacking a deployed query system {#sec-recon-diffix}
@@ -304,13 +304,13 @@ The proof of @prp-recon-ls-random used the inclusion probability $\frac12$ only 
 
 1. *The average Gram matrix of one query.* A query with rate $\rho$ has $\mathbb E[f_i^2] = \rho$ and $\mathbb E[f_if_k] = \rho^2$ for $i \ne k$, so $\mathbb E[ff^\top] = \rho(1 - \rho)I + \rho^2\mathbf 1\mathbf 1^\top$.
 2. *Add up the queries.* Summing gives $\mathbb E[A^\top A] = m\big(vI + \overline{\rho^2}\,\mathbf 1\mathbf 1^\top\big)$, where $\overline{\rho^2}$ is the average of $\rho_j^2$.
-3. *Invert it.* As in [Exercise 4](../../book-exercises/part02-attacks/09-reconstruction.md#sec-sol-recon-4), the all-ones part changes each diagonal entry of the inverse by a fraction below $\frac1n$, so each is about $1/(mv)$.
+3. *Invert it.* As in step 3 of @prp-recon-ls-random, the all-ones part changes each diagonal entry of the inverse by a fraction below $\frac1n$, as the factor $\frac{n}{n + 1}$ did there, so each is about $1/(mv)$.
 4. *Correct for finite $m$ and finish.* As in steps 4 and 5 of @prp-recon-ls-random, the inverse-Wishart mean replaces $m$ by $m - n - 1$, which gives the variance $\sigma^2/\big(v(m - n - 1)\big)$, and a bit goes wrong when its error passes $\frac12$.
 :::
 
 A digit of $p\,i$ raised to a power is a fixed function of $i$, not a coin, so independence is a modelling assumption that the example checks. Diffix's noise was not small by this chapter's standard, because each attack query also had conditions on a range of identifiers and on the status, for a total standard deviation of 4. For a range of 73 records that is $0.47\sqrt n$, and what defeated it was the number of queries. The noise did not grow with $m$, so 3,500 distinct queries averaged it away, and sticky noise did not help because the attack never repeats a query.
 
-Restricting the query language did not help either, because any short formula that splits the records independently of their secrets serves as a random query. To stop this attack, the noise would have to grow with the number of queries. Keeping least squares down to 75% of the bits with 3,500 queries takes a standard deviation of about 19.5, 4.9 times what Diffix added, and ten times as many queries need about $\sqrt{10}$ times as much noise ([Exercise 10](../../book-exercises/part02-attacks/09-reconstruction.md#sec-sol-recon-10)). The privacy definition of [Part 3](../part03-dp-foundations/01-definition.md) makes that growth automatic, because it charges every answer against a fixed privacy budget.
+Restricting the query language did not help either, because any short formula that splits the records independently of their secrets serves as a random query. Keeping least squares down to 75% of the 73 bits with 3,500 queries takes a standard deviation of about 19.5, 4.9 times what Diffix added, and the noise must keep growing like $\sqrt m$. The privacy definition of [Part 3](../part03-dp-foundations/01-definition.md) makes that growth automatic, because it charges every answer against a fixed total allowance of privacy loss.
 
 ::: {#exm-recon-diffix}
 Cohen and Nissim asked the 3,500 queries about the loans of a public banking dataset in each of four ranges of identifiers, holding between 73 and 142 loans, and that variant of the linear program reconstructed all four ranges perfectly. The script repeats the experiment on synthetic data with least squares. It gives 73 distinct identifiers a fair secret bit each and answers all 3,500 queries with Gaussian noise of standard deviation 4. Averaging $\rho(1 - \rho)$ over the queries gives $v = 0.2016$. Over 50 runs the attack recovered every bit in 49, an average of 0.02 wrong bits per run, while @eq-recon-diffix predicts 0.036. With 142 records it was perfect in 45 of 50 runs, with 0.10 wrong bits per run against 0.077 predicted. So the digit predicates are close enough to coin flips, and even with noise of $2\sqrt n = 17.1$ the prediction for 3,500 queries is 0.779 of the bits (@fig-recon-diffix).
@@ -354,7 +354,7 @@ The plan is to enumerate the age lists that fit the sex statistics, then to disc
 No single table determines the block, only their intersection, and real tables cross-classify many variables, so the same people appear in thousands of cells. The Census Bureau's own reconstruction of the 2010 Census rebuilt a record for each of the 308,745,538 people counted, and about 46% matched a real person exactly on block, sex, age, race and ethnicity (Abowd 2021). The Bureau then based its method for the 2020 Census on the privacy definition of [Part 3](../part03-dp-foundations/01-definition.md).
 
 ::: {#exm-recon-census}
-To test whether withholding one number helps, @fig-recon-census repeats the search with each of the twelve medians and means withheld in turn. Eight leave the block uniquely determined, because the rest of the table implies the missing number or pins the block down without it ([Exercise 8](../../book-exercises/part02-attacks/09-reconstruction.md#sec-sol-recon-8)), and @tbl-recon-census-withheld lists the other four.
+To test whether withholding one number helps, @fig-recon-census repeats the search with each of the twelve medians and means withheld in turn. Eight leave the block uniquely determined, because the rest of the table pins it down, and @tbl-recon-census-withheld lists the other four.
 
 | Withheld | Consistent blocks | Distinct sex/race/marital patterns | Share with the true pattern |
 | --- | --- | --- | --- |
@@ -426,5 +426,3 @@ uv run python code/part02-attacks/reconstruction.py
 - Garfinkel, Abowd & Martindale, "Understanding Database Reconstruction Attacks on Public Data" (CACM 2019). The seven-person block reconstructed with a solver; the model for @sec-recon-census.
 - Abowd, declaration in *State of Alabama v. US Department of Commerce* (2021), Appendix B. The Census Bureau's reconstruction and re-identification experiment on the 2010 Census.
 - Vershynin, *High-Dimensional Probability* (2018), ch. 4. Singular values of random matrices, used in the worst-case least-squares bound. Muirhead, *Aspects of Multivariate Statistical Theory* (1982), ch. 3, for the inverse-Wishart mean.
-
-**Practice.** Exercises for this chapter, each with a worked solution, are in [the exercise book](../../book-exercises/part02-attacks/09-reconstruction.md).

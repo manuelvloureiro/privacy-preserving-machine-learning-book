@@ -17,13 +17,6 @@ pages = [
 legacy = [
 ]
 
-[books.book-exercises]
-pages = [
-  { glob = "index.md", skeleton = "preface" },
-  { glob = "part*/[0-9][0-9]-*.md", skeleton = "exercise-page" },
-]
-legacy = []
-
 [books.book-practitioner]
 pages = [
   { glob = "index.md", skeleton = "preface" },
@@ -63,7 +56,7 @@ tables_captioned = true
 max_words = 2000
 
 # A full-edition chapter: an opening without a heading, one ## per topic made of numbered
-# environments and prose, then Code, Summary and References, and the pointer to the exercise book.
+# environments and prose, then Code, Summary and References.
 [skeletons.full-chapter]
 opening = true
 tail = ["Code", "Summary", "References"]
@@ -80,8 +73,6 @@ summary_table = "tbl-{prefix}-summary"
 max_words = 8000
 max_section_words = 2500
 warn_below_words = 3500
-last_line = '^\*\*Practice\.\*\* Exercises for this chapter, each with a worked solution, are in \[the exercise book\]\(\.\./\.\./book-exercises/(?P<page>[^)]+)\.md\)\.$'
-last_line_page = true
 
 # The first four appendices derive the core formulas from scratch (AGENTS.md, Appendices of derivations).
 [skeletons.core-appendix]
@@ -95,14 +86,6 @@ tail = ["Code", "References"]
 required_h3_per_section = ["What the chapter uses", "The idea", "Derivation", "Checking it"]
 optional_h3 = ["What it does not cover"]
 section_ids = "sec"
-tables_captioned = true
-
-# An exercise page: one ## per exercise, numbered from 1, each a quoted statement and a collapsed solution.
-[skeletons.exercise-page]
-title_prefix = "# Exercises: "
-exercise_sections = "sec-sol-{prefix}-{n}"
-exercise_quote = '^> \*\*Exercise {n}\.\*\*'
-solution_div = '^::: \{\.callout-tip collapse="true" title="Solution"\}'
 tables_captioned = true
 
 # The practitioner edition has three kinds of page (AGENTS.md); they share what is forbidden and the pointer.

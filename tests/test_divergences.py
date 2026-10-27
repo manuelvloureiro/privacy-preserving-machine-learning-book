@@ -40,9 +40,6 @@ def test_divergences_matches_section(tmp_path: Path) -> None:
         # Forward and reverse KL
         "forward KL fit: mu=0.00 sigma=2.06  KL(p‖q)=0.724  KL(q‖p)=2.097",
         "reverse KL fit: mu=2.00 sigma=0.50  KL(p‖q)=15.307  KL(q‖p)=0.693",
-        # Exercises
-        "KL(N(0,1)‖N(0,4)) = 0.3181",
-        "KL(Bern(0.6)‖Bern(0.5)) = 0.02014; flips needed before Pinsker allows TV >= 0.8: 64",
     ):
         assert expected in out
     assert {f.name for f in tmp_path.iterdir()} == {

@@ -88,7 +88,7 @@ Real tables are not uniform, so real anonymizers search for a generalization tha
 Given a table and a criterion that a class must meet, such as having at least $k$ records, **Mondrian** starts with the whole table as one box. It splits a box at the median of the quasi-identifier whose values in the box span the largest share of their full range, as long as both halves still meet the criterion. It stops when no split is allowed. Each final box is a class, published as a range per quasi-identifier.
 :::
 
-Because Mondrian splits until a half would fail the criterion, its classes stay close to size $k$, and [Exercise 5](../../book-exercises/part02-attacks/08-syntactic-anonymity.md#sec-sol-anon-5) shows that with no tied values they have between $k$ and $2k - 1$ records.
+Because Mondrian splits until a half would fail the criterion, its classes stay close to size $k$. With no tied values they have between $k$ and $2k - 1$ records, because a box of $2k$ or more records splits at its median into two halves of at least $k$.
 
 ::: {#exm-anon-mondrian}
 In the hospital table of $n = 10{,}000$ patients, age runs from 0 to 89, the ZIP code takes 800 values with a few areas far more common than the rest, and sex has two values. The diagnosis depends on age. Asthma peaks in childhood, fractures around 18 and depression around 40, while diabetes, hypertension and cancer come later in life. Flu is equally common at every age, and HIV is rare (1.0% of records). The exact linkage success of 0.933 means, by @eq-link-success, that the patients fall into $0.933 \times 10{,}000 = 9{,}330$ distinct combinations, so most are alone in theirs. @tbl-anon-k gives the result of Mondrian with k-anonymity as the criterion.
@@ -174,7 +174,7 @@ $$r'_1 \le r_1 < c\,(r_\ell + \dots + r_m) \le c\,R.$$
 $$\frac{cR}{cR + R} = \frac{c}{1 + c}.$$
 :::
 
-l-diversity rules out certainty but still allows high likelihood. The bound $c/(1 + c)$ is $\frac12$ at $c = 1$, $\frac23$ at $c = 2$ and $\frac34$ at $c = 3$, so even recursive diversity lets the adversary be fairly sure. Distinct $\ell$-diversity only says that the adversary must rule out $\ell - 1$ values to be certain, while one value can still hold all but $\ell - 1$ of the records. Entropy $\ell$-diversity does not limit the top value's share directly either. An entropy 3-diverse class over 8 values can have one value in 73% of its records, because the other 27% spread over seven values add enough entropy ([Exercise 2](../../book-exercises/part02-attacks/08-syntactic-anonymity.md#sec-sol-anon-2)).
+l-diversity rules out certainty but still allows high likelihood. The bound $c/(1 + c)$ is $\frac12$ at $c = 1$, $\frac23$ at $c = 2$ and $\frac34$ at $c = 3$, so even recursive diversity lets the adversary be fairly sure. Distinct $\ell$-diversity only says that the adversary must rule out $\ell - 1$ values to be certain, while one value can still hold all but $\ell - 1$ of the records. Entropy $\ell$-diversity does not limit the top value's share directly either. An entropy 3-diverse class over 8 values can have one value in 73% of its records, because the other 27% spread evenly over seven values give entropy $-0.73\log_2 0.73 - 0.27\log_2\frac{0.27}{7} = 1.60$ bits, above $\log_2 3 = 1.58$.
 
 The adversary's knowledge is assumed, not bounded. The proof allows $\ell - 2$ ruled-out values and no more, and the count is tight. A class with exactly $\ell$ values loses all but one of them when $\ell - 1$ are ruled out, and the last one then has posterior 1 whatever $c$ is. An adversary who knows something softer, such as "probably not flu", is not covered either.
 
@@ -255,7 +255,7 @@ $$\mathrm{EMD}(P_E, P) = \frac{1}{m - 1}\sum_{i=1}^{m-1}\Big\lvert\sum_{j \le i}
 3. *A plan that does no more.* A plan that only moves mass between neighbours, and never in both directions across the same gap, moves exactly the net amount across each gap. So the least cost is $1/(m - 1)$ times the sum, over the $m - 1$ gaps, of the absolute net mass that crosses each one, which is @eq-anon-emd.
 :::
 
-The choice of distance is a choice of what counts as similar. EMD with a ground distance from a hierarchy of diagnoses treats gastritis and gastric ulcer as close, so a class full of stomach diseases is far from the table and fails the definition. On salaries, a class bunched at the low end is farther from a uniform table than a class spread across the range, as [Exercise 3](../../book-exercises/part02-attacks/08-syntactic-anonymity.md#sec-sol-anon-3) computes.
+The choice of distance is a choice of what counts as similar. EMD with a ground distance that puts diagnoses of the same organ close together treats gastritis and gastric ulcer as close, so a class full of stomach diseases is far from the table and fails the definition. On salary bands, if the table is spread evenly, a class bunched at the low end is farther from it than a class spread across the range.
 
 ::: {#exm-anon-t}
 In @tbl-anon-toy, the table's distribution is $\frac49$ heart disease, $\frac39$ cancer and $\frac29$ flu. Both distributions sum to 1, so the excesses and shortfalls are equal, and the half-sum of absolute differences is the total excess of the class over the table. Alice's class is all heart disease, an excess of $1 - \frac49 = \frac59 = 0.556$. The second class is $\frac13 = \frac39$ of each value, an excess of $\frac39 - \frac29 = \frac19 = 0.111$ on flu only. Bob's class, $\frac69$ cancer and $\frac39$ flu, has excesses $\frac39$ and $\frac19$, together $\frac49 = 0.444$. So the release is $t$-close only for $t \ge 0.556$.
@@ -396,5 +396,3 @@ uv run python code/part02-attacks/syntactic_anonymity.py
 - Aggarwal, "On k-Anonymity and the Curse of Dimensionality" (VLDB, 2005): why high-dimensional data cannot be k-anonymized without destroying it.
 - Prasser, Kohlmayer and colleagues, the ARX data anonymization tool (arx.deidentifier.org): an open implementation of these criteria and many more, with risk models and utility measures.
 - Article 29 Working Party, "Opinion 05/2014 on Anonymisation Techniques": how European regulators judge these techniques against singling out, linkability and inference, the three attacks of this chapter.
-
-**Practice.** Exercises for this chapter, each with a worked solution, are in [the exercise book](../../book-exercises/part02-attacks/08-syntactic-anonymity.md).

@@ -30,7 +30,7 @@ If $M$ is $f$-DP, then $M$ is $\max(f, f^{-1})$-DP. If $K$ is a randomized map t
 :::
 
 ::: {.proof}
-1. *Swap the roles.* Since $D' \sim D$ is also a neighbouring pair, $T(Q, P) \ge f$. A test $\phi$ of $P$ against $Q$ with errors $(\mathrm{FPR}, \mathrm{FNR})$ gives the opposite test $1 - \phi$ of $Q$ against $P$, whose errors are $(\mathrm{FNR}, \mathrm{FPR})$. So $T(Q, P)$ is the inverse of $T(P, Q)$, as [Exercise 2](../../book-exercises/part01-prerequisites/04-hypothesis-testing.md#sec-sol-ht-2) of Part 1 shows.
+1. *Swap the roles.* Since $D' \sim D$ is also a neighbouring pair, $T(Q, P) \ge f$. A test $\phi$ of $P$ against $Q$ with errors $(\mathrm{FPR}, \mathrm{FNR})$ gives the opposite test $1 - \phi$ of $Q$ against $P$, whose errors are $(\mathrm{FNR}, \mathrm{FPR})$. So $T(Q, P)$ is the inverse of $T(P, Q)$.
 2. *Reflect.* A curve lies above $f$ when its achievable error pairs sit inside the region above $f$, and reflecting both regions across the diagonal keeps that inclusion. So $T(Q, P) \ge f$ turns into $T(P, Q) \ge f^{-1}$, and with $T(P, Q) \ge f$ this gives $\max(f, f^{-1})$. That maximum keeps all four properties of a trade-off function.
 3. *Post-processing.* A test $\phi$ on the processed output is the test $y \mapsto \mathbb E[\phi(K(y))]$ on the raw output, with the same two errors. So the curve after processing is no lower than before (Dong et al., Lemma 2.9).
 :::
@@ -218,7 +218,7 @@ Curves of the $(\varepsilon, \delta)$ family, by contrast, leave that family und
 
 : Two independent runs of randomized response with $\varepsilon = 1$. {#tbl-gdp-rr2}
 
-The best tests add outcomes in decreasing order of $Q/P$, each raising $\mathrm{FPR}$ by its $P$ and lowering $\mathrm{FNR}$ by its $Q$. So $f_{1,0}\otimes f_{1,0}$ is the polygon through $(0, 1)$, $(0.0723, 0.4656)$, $(0.2689, 0.2689)$, $(0.4656, 0.0723)$ and $(1, 0)$, with three slopes, $-e^2$, $-1$ and $-e^{-2}$. An $f_{\varepsilon,\delta}$ curve has only two, so no single pair describes it. Each segment lies on a line of one such curve: the steep ones on $f_{2,0}$, and the middle one on the line $1 - 0.4621 - \mathrm{FPR}$ of $f_{0,0.4621}$. So the polygon is the supremum of these two curves, with $0.4621 = \tanh(1/2)$ ([Exercise 3](../../book-exercises/part04-privacy-accounting/04-gaussian-dp.md#sec-sol-gdp-3)).
+The best tests add outcomes in decreasing order of $Q/P$, each raising $\mathrm{FPR}$ by its $P$ and lowering $\mathrm{FNR}$ by its $Q$. So $f_{1,0}\otimes f_{1,0}$ is the polygon through $(0, 1)$, $(0.0723, 0.4656)$, $(0.2689, 0.2689)$, $(0.4656, 0.0723)$ and $(1, 0)$, with three slopes, $-e^2$, $-1$ and $-e^{-2}$. An $f_{\varepsilon,\delta}$ curve has only two, so no single pair describes it. Each segment lies on a line of one such curve: the two outer ones on $f_{2,0}$, and the middle one on the line $1 - 0.4621 - \mathrm{FPR}$ of $f_{0,0.4621}$. So the polygon is the supremum of these two curves, with $0.4621 = \tanh(1/2)$.
 
 Composing points instead of curves loses. Four 1-GDP releases are 2-GDP, $\varepsilon = 9.9973$ at $\delta = 10^{-5}$. Giving each release a quarter of the $\delta$ budget turns it into the point $(4.6902, 2.5\times10^{-6})$ of 1-GDP, and adding the points gives $\varepsilon = 18.7607$ at the same total $\delta$, almost twice as large; Part 3's @fig-comp-gaussian shows the loss for many steps.
 :::
@@ -442,5 +442,3 @@ uv run python code/part04-privacy-accounting/gaussian_dp.py
 - Balle & Wang, "Improving the Gaussian Mechanism for Differential Privacy" (ICML 2018): Theorem 8 is the exact profile @eq-gdp-delta of the Gaussian mechanism.
 - Gopi, Lee & Wutschitz, "Numerical Composition of Differential Privacy" (NeurIPS 2021): the PRV accountant, and examples where the GDP CLT under-reports $\varepsilon$.
 - Murtagh & Vadhan, "The Complexity of Computing the Optimal Composition of Differential Privacy" (TCC 2016): why accountants discretize.
-
-**Practice.** Exercises for this chapter, each with a worked solution, are in [the exercise book](../../book-exercises/part04-privacy-accounting/04-gaussian-dp.md).

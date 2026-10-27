@@ -170,7 +170,7 @@ The plan is to check the decomposition, write the tree as an encoder and decoder
 5. *Streaming.* Each node can be released once its last step has arrived, and $\hat S_t$ uses only completed nodes. With the rows of $R$ ordered by completion time, the factors are streaming, so @thm-mfac-privacy applies to adaptive training.
 :::
 
-The tree sums at most $\log_2t + 1$ noise terms for the $t$-th prefix instead of $t$, each somewhat larger because every step is hidden in $H$ nodes. That trade is a large win for long runs but not for short ones, and [Exercise 1](../../book-exercises/part05-dp-ml/04-matrix-mechanisms.md#sec-sol-mfac-1) finds that the tree first wins at $T = 28$.
+The tree sums at most $\log_2t + 1$ noise terms for the $t$-th prefix instead of $t$, each somewhat larger because every step is hidden in $H$ nodes. That trade is a large win for long runs but not for short ones: the tree first wins at $T = 28$.
 
 The tree is not the end. Its error jumps around, since $t = 127 = 1111111_2$ uses seven nodes and $t = 128$ uses one (@fig-mfac-errors, left), and every step pays for being in top-level nodes that few prefixes use. Honaker (2015) combined all nodes with weights to reduce the variance, but that estimator uses nodes completed after step $t$, so it cannot be used during training. The square-root factorization of the next section has smaller error everywhere.
 
@@ -243,7 +243,7 @@ where $V$ is the diagonal matrix of a positive vector $v$ that is a fixed point 
 :::
 <!-- proof: cited -->
 
-The proof is Denisov et al. (2022, Theorem 3.2), who iterate the fixed-point map to find $v$, and @sec-apx-mat-frobenius in the appendices gives it in full. A lower-triangular $R$ with $R^\top R = X$ comes from a Cholesky factorization of $X$ with rows and columns reversed, and [Exercise 3](../../book-exercises/part05-dp-ml/04-matrix-mechanisms.md#sec-sol-mfac-3) solves $T = 2$ by hand.
+The proof is Denisov et al. (2022, Theorem 3.2), who iterate the fixed-point map to find $v$, and @sec-apx-mat-frobenius in the appendices gives it in full. A lower-triangular $R$ with $R^\top R = X$ comes from a Cholesky factorization of $X$ with rows and columns reversed.
 
 The script's iteration converges in 155 steps at $T = 100$, to a root-mean-square error of 2.24 against 2.37 for the square root, and in 193 steps at $T = 256$, to 2.52 against 2.67. Each iteration costs cubic time, so the square root, free and nearly as good, is the usual default for long runs. @fig-mfac-errors shows the errors across one run and against the horizon, and @fig-mfac-matrices shows that the square root and the optimal factors look alike at $T = 16$.
 
@@ -400,5 +400,3 @@ uv run python code/part05-dp-ml/matrix_mechanisms.py
 - Choquette-Choo, Ganesh, McKenna, McMahan, Rush, Thakurta & Xu, "(Amplified) Banded Matrix Factorizations: A Unified Approach to Private Training" (NeurIPS 2023). Banded encoders, min-separation, and amplification for matrix mechanisms.
 - Honaker, "Efficient Use of Differentially Private Binary Trees" (2015). The variance-optimal, but not streaming, estimator from a tree.
 - Xu, Zhang, Andrew, Choquette-Choo, Kairouz, McMahan, Rosenstock & Zhang, "Federated Learning of Gboard Language Models with Differential Privacy" (ACL 2023, industry track). DP-FTRL in a production federated system.
-
-**Practice.** Exercises for this chapter, each with a worked solution, are in [the exercise book](../../book-exercises/part05-dp-ml/04-matrix-mechanisms.md).

@@ -1,6 +1,6 @@
 # NOTATION.md
 
-One nomenclature for all four books and the study notes: the symbol for each concept, how it is typeset, and the words and spelling used for it. A reader who moves from the course to the full edition, or from a chapter to its exercises, should never have to relearn what $D$, $q$ or $\theta$ means. For how to write content, see [AGENTS.md](AGENTS.md); for readable prose, [PROSE.md](PROSE.md), whose rule 18 (notation earns its place) applies on top of this file.
+One nomenclature for all the books and the study notes: the symbol for each concept, how it is typeset, and the words and spelling used for it. A reader who moves from the course to the full edition, or from a chapter to its appendix, should never have to relearn what $D$, $q$ or $\theta$ means. For how to write content, see [AGENTS.md](AGENTS.md); for readable prose, [PROSE.md](PROSE.md), whose rule 18 (notation earns its place) applies on top of this file.
 
 `make notation-check` enforces the part of this file that a pattern can check: `tools/notation.py` reads the forbidden spellings and the pairs of meanings that must not meet on a page from `notation.toml`. The rest, such as which letter names a concept, is checked by the writer and the reviewer against the tables below.
 
@@ -10,7 +10,7 @@ One nomenclature for all four books and the study notes: the symbol for each con
 2. **Reserved symbols keep their meaning everywhere.** $\varepsilon$, $\delta$, $M$, $D$, $D'$, $\sim$, $\Delta$, $\mathrm{Lap}$, $\mathcal N$, $\Pr$, $\mathbb E$, $q$ (sampling rate; see the densities row for the one exception), $C$ (clipping norm), $\eta$ (learning rate) and $\theta$ (parameters) never take another meaning on any page.
 3. **Other symbols in the tables** may be reused for something else only on a page where their concept does not appear, and the page names the other meaning in words where it first uses it. The overloads below are the only exceptions, because both meanings are fixed in the literature. The first six must not meet on a page, and `make notation-check` fails on a page that uses both meanings of one of them; the rest may, and the page says which meaning it means.
 4. **Local letters are free.** Indices ($i$, $j$, $t$), constants ($c$, $c'$), dummy variables and the quantities of one derivation are chosen by the page and named in words where they first appear (PROSE.md rule 4).
-5. **The neighbouring relation is stated, not implied.** The symbol is always $D \sim D'$. Every page that uses it says which relation it means, in words: add/remove one record (the default of the full edition, the practitioner edition and the exercise book) or replace one record (the default of the course). The relation is a definition, so changing the symbol never changes it.
+5. **The neighbouring relation is stated, not implied.** The symbol is always $D \sim D'$. Every page that uses it says which relation it means, in words: add/remove one record (the default of the full edition and the practitioner edition) or replace one record (the default of the course). The relation is a definition, so changing the symbol never changes it.
 6. **Each book's notation tables follow this file.** The notation table of a part introduction, a course chapter or a note lists the symbols of this file that it uses, with the same meanings.
 
 ### Overloads that must not meet on a page

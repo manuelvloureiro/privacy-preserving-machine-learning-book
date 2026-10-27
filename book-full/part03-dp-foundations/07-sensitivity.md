@@ -91,7 +91,7 @@ $S^*_{f,\beta}$ is a $\beta$-smooth upper bound on $\mathrm{LS}_f$, and every $\
 3. *Smallest.* Let $S$ be any $\beta$-smooth upper bound and $D''$ a dataset at distance $k$ from $D$. Walking from $D''$ to $D$ in $k$ steps, $S$ falls by at most a factor $e^{-\beta}$ per step, so $S(D) \ge e^{-\beta k}S(D'') \ge e^{-\beta k}\mathrm{LS}_f(D'')$. Maximizing over $D''$ gives $S(D) \ge S^*_{f,\beta}(D)$.
 :::
 
-The smooth sensitivity is positive even where the local sensitivity is 0. On the degenerate pair of @prp-sens-leak it is already $100e^{-\beta}$ at $D$, the discounted local sensitivity of its neighbour $D'$ ([Exercise 7](../../book-exercises/part03-dp-foundations/07-sensitivity.md#sec-sol-sens-7)).
+The smooth sensitivity is positive even where the local sensitivity is 0. On the degenerate pair of @prp-sens-leak it is already $100e^{-\beta}$ at $D$, the discounted local sensitivity of its neighbour $D'$.
 
 You cannot enumerate all datasets, but all those at distance $k$ get the same discount, so you need only the largest local sensitivity within each distance (a closer dataset counted again gets a smaller weight, which changes nothing):
 $$S^*_{f,\beta}(D) = \max_{k = 0, \dots, n} e^{-k\beta}A^{(k)}(D), \qquad A^{(k)}(D) = \max_{D'':\ d(D, D'') \le k}\mathrm{LS}_f(D'').$$ {#eq-sens-smooth-by-k}
@@ -160,7 +160,7 @@ for every $w$, however far in the tail; that is what the power-law tail buys. Fo
 6. *Add up.* The loss is at most $\beta + \gamma\alpha + \gamma\beta \le \varepsilon$ at every $y$, which is pure $\varepsilon$-DP.
 :::
 
-Nissim, Raskhodnikova & Smith (2007, Lemma 2.7) take $\alpha = \beta = \varepsilon/(2(\gamma + 1))$, which for the Cauchy gives the release $f(D) + \frac{6}{\varepsilon}S^*_{f,\varepsilon/6}(D)\,Z$ with loss bound $0.8333\,\varepsilon$; [Exercise 2](../../book-exercises/part03-dp-foundations/07-sensitivity.md#sec-sol-sens-2) sharpens the sliding constant and divides the noise scale by three. For Laplace noise the dilation term grows with the draw, so the condition gains a term that charges for draws above $\ln(1/\delta)$.
+Nissim, Raskhodnikova & Smith (2007, Lemma 2.7) take $\alpha = \beta = \varepsilon/(2(\gamma + 1))$, which for the Cauchy gives the release $f(D) + \frac{6}{\varepsilon}S^*_{f,\varepsilon/6}(D)\,Z$ and, by @eq-sens-cauchy-cond, a loss of at most $0.8333\,\varepsilon$. For Laplace noise the dilation term grows with the draw, so the condition gains a term that charges for draws above $\ln(1/\delta)$.
 
 ::: {#thm-sens-laplace name="Approximate DP with Laplace noise"}
 Let $Z \sim \mathrm{Lap}(1)$, with density $\frac12e^{-|z|}$, let $S$ be a $\beta$-smooth upper bound on $\mathrm{LS}_f$, let $\delta \in (0, 1)$, and let
@@ -225,7 +225,7 @@ When the data are stable the noise scale is set by the proposal, so it reveals n
 The proposal must not depend on the data. Setting $b$ to twice the observed local sensitivity makes the noise scale a function of the data again, and the leak of @sec-sens-local returns.
 
 ::: {#exm-sens-ptr}
-On the 1,001 ages, propose $b = 1$ year. The first $k$ with $A^{(k)} > 1$ is 21, so $\operatorname{dist}_1(D) = 21$, and the test passes with probability $1 - \frac12e^{-(21 - 13.82)} = 0.999621$. The release then has median absolute error $\ln 2 = 0.693$ years, at a total budget of 2. On 101 ages $\operatorname{dist}_1 = 1$, and the pass probability is $\frac12e^{-(13.82 - 1)} = 1.36\times10^{-6}$. @fig-sens-methods-vs-n (right) shows it switching from 0 to 1 between $n = 500$ and $n = 1000$; [Exercise 4](../../book-exercises/part03-dp-foundations/07-sensitivity.md#sec-sol-sens-4) sizes the proposal for a given pass probability.
+On the 1,001 ages, propose $b = 1$ year. The first $k$ with $A^{(k)} > 1$ is 21, so $\operatorname{dist}_1(D) = 21$, and the test passes with probability $1 - \frac12e^{-(21 - 13.82)} = 0.999621$. The release then has median absolute error $\ln 2 = 0.693$ years, at a total budget of 2. On 101 ages $\operatorname{dist}_1 = 1$, and the pass probability is $\frac12e^{-(13.82 - 1)} = 1.36\times10^{-6}$. @fig-sens-methods-vs-n (right) shows it switching from 0 to 1 between $n = 500$ and $n = 1000$.
 :::
 
 ![Left: median absolute noise of each release of the median age with $\varepsilon = 1$, averaged over 10 synthetic datasets per $n$; the dotted line is the local sensitivity. Right: the probability that propose-test-release with $b = 1$ answers.](figures/sens_methods_vs_n.svg){#fig-sens-methods-vs-n}
@@ -267,7 +267,7 @@ $$\mathrm{len}_{\mathrm{med}}(D, y) = \begin{cases} m - i & \text{if } i < m,\\ 
 
 There is no noise scale to leak. Where the data are dense, the outputs a few steps from the median are also a short distance from it, so the error is a few gaps times a factor that grows with $1/\varepsilon$. Asi & Duchi (2020) show that, up to logarithmic factors, no $\varepsilon$-DP mechanism does much better on a dataset and its close neighbours, so the method is near-optimal dataset by dataset.
 
-It has two limits. The outer gaps $(0, x_1)$ and $(x_n, \Lambda)$ can be long and are $m$ steps away, which is negligible for a thousand points but not for eleven. And the count must be computed: closed forms like @eq-sens-inverse-median are known for medians, quantiles and a few other statistics, and [Exercise 8](../../book-exercises/part03-dp-foundations/07-sensitivity.md#sec-sol-sens-8) extends it to any quantile.
+It has two limits. The outer gaps $(0, x_1)$ and $(x_n, \Lambda)$ can be long and are $m$ steps away, which is negligible for a thousand points but not for eleven. And the count must be computed: closed forms like @eq-sens-inverse-median are known for medians, quantiles and a few other statistics.
 
 ::: {#exm-sens-inverse}
 Take the walkthrough dataset $D = (1, 3, 4, 6, 9)$ on $[0, 10]$ with $\varepsilon = 1$. @tbl-sens-inverse lists its six gaps, their counts from @eq-sens-inverse-median, and their probabilities, each its length times $e^{-\mathrm{len}/2}$ over the total. The two gaps next to the median are one change away and together get probability $0.1477 + 0.2955 = 0.4432$.
@@ -317,7 +317,7 @@ is a stability score for the mode.
 The release is exact, and the cost of privacy is the chance of a refusal, which depends on the lead and not on the number of possible values. The mode must lead by about $2\ln(1/\delta)/\varepsilon$ records, whether there are ten categories or a billion. Under pure DP, the packing lower bound of [Lower bounds](10-lower-bounds.md) needs a lead of about $\ln N/\varepsilon$ to choose among $N$ values, so this is how approximate DP gets around it. An exact release next to a flip happens with probability $\delta/2$, and that is what $\delta$ pays for.
 
 ::: {#exm-sens-mode}
-The median is not discrete, so take a mode, with $\varepsilon = 1$ and $\delta = 10^{-6}$ (threshold 13.82). Leads of 10, 30 and 40 records give scores 4, 14 and 19, and the release answers with probability $2.73\times10^{-5}$, 0.5842 and 0.9972. So a lead of 35 is needed for probability 0.95, whatever the number of categories. When a neighbour adds or removes a record instead, the lead needed halves ([Exercise 9](../../book-exercises/part03-dp-foundations/07-sensitivity.md#sec-sol-sens-9)).
+The median is not discrete, so take a mode, with $\varepsilon = 1$ and $\delta = 10^{-6}$ (threshold 13.82). Leads of 10, 30 and 40 records give scores 4, 14 and 19, and the release answers with probability $2.73\times10^{-5}$, 0.5842 and 0.9972. So a lead of 35 is needed for probability 0.95, whatever the number of categories. When a neighbour adds or removes a record instead, one change moves the lead by 1 rather than 2, so the lead needed halves.
 :::
 
 ## Subsample-and-aggregate {#sec-sens-saa}
@@ -340,7 +340,7 @@ The privacy part bounds the sensitivity of the average; the error comes from squ
 4. *Error.* The released value minus $\theta$ is the bias $\mathbb E[a] - \theta$, plus the mean-zero average of the $a_j - \mathbb E[a]$, with variance $\operatorname{Var}(a)/B$, plus the Laplace noise, with variance $2(R/(B\varepsilon))^2$. The cross terms of the square each contain an independent mean-zero factor and average to zero, which leaves @eq-sens-saa-error.
 :::
 
-The noise falls like $1/B$, while the sampling term hardly moves, because a block estimate has about $B$ times the variance of $f$ on all records and averaging divides by $B$ again. The bias of $f$ on small blocks grows with $B$, so the best $B$ balances bias and noise ([Exercise 5](../../book-exercises/part03-dp-foundations/07-sensitivity.md#sec-sol-sens-5) finds it in closed form). The partition must not depend on the values, or one record could reshuffle many records between blocks.
+The noise falls like $1/B$, while the sampling term hardly moves, because a block estimate has about $B$ times the variance of $f$ on all records and averaging divides by $B$ again. The bias of $f$ on small blocks grows with $B$, so the best $B$ balances bias and noise. The partition must not depend on the values, or one record could reshuffle many records between blocks.
 
 The proof never looks inside $f$, so the method suits trained models, as in private aggregation of teacher ensembles (Papernot et al. 2017). But the range $R$ is still a global bound, and a loose $R$ means large noise. Smith (2011) shows that for asymptotically normal estimators a version of the method loses nothing in the leading-order error.
 
@@ -388,7 +388,7 @@ The privacy part is one line, the error splits as in @eq-sens-saa-error, and the
 5. *Set the sum to zero* and divide by 2, which is @eq-sens-clip-opt.
 :::
 
-The bias does not shrink with $n$, but the noise does, so the best $C$ grows with $n$ and moves into the tail ([Exercise 6](../../book-exercises/part03-dp-foundations/07-sensitivity.md#sec-sol-sens-6) solves @eq-sens-clip-opt for an exponential tail). Clipping from above always underestimates. Clipping to an interval around a centre cuts both sides, and the two cuts cancel for a symmetric distribution, which is why [Private mean estimation](11-mean-estimation.md) first estimates the centre privately.
+The bias does not shrink with $n$, but the noise does, so the best $C$ grows with $n$ and moves into the tail. Clipping from above always underestimates. Clipping to an interval around a centre cuts both sides, and the two cuts cancel for a symmetric distribution, which is why [Private mean estimation](11-mean-estimation.md) first estimates the centre privately.
 
 Choosing $C$ is itself a data-dependent decision. Setting it to the observed maximum or the empirical 99th percentile brings back the leak of @sec-sens-local. Choose $C$ from domain knowledge, or spend part of the budget on a private quantile by inverse sensitivity (@sec-sens-inverse).
 
@@ -465,5 +465,3 @@ uv run python code/part03-dp-foundations/sensitivity.py
 - Bun & Steinke, "Average-Case Averages: Private Algorithms for Smooth Sensitivity and Mean Estimation" (NeurIPS 2019): better noise distributions for smooth sensitivity, under concentrated DP
 - Amin, Kulesza, Muñoz Medina & Vassilvitskii, "Bounding User Contributions: A Bias-Variance Trade-off in Differential Privacy" (ICML 2019): the clipping trade-off when users contribute many records
 - Papernot, Abadi, Erlingsson, Goodfellow & Talwar, "Semi-supervised Knowledge Transfer for Deep Learning from Private Training Data" (ICLR 2017): subsample-and-aggregate for model training
-
-**Practice.** Exercises for this chapter, each with a worked solution, are in [the exercise book](../../book-exercises/part03-dp-foundations/07-sensitivity.md).

@@ -75,7 +75,7 @@ $$\mathbb E_Q[\phi^*] - \mathbb E_Q[\phi] \ge c\big(\mathbb E_P[\phi^*] - \mathb
 
 The optimal test looks at $x$ only through $\Lambda(x)$, and everything else about $x$ is noise. When $\Lambda$ increases with a simple statistic, such as the word count or the biomarker, the optimal test is a plain threshold on the statistic. A calibrated classifier score is such a statistic, by Bayes' rule (@sec-ht-bayes), which is why thresholding it is right.
 
-For $n$ independent observations the ratio of the sample is the product of the individual ratios, and at a fixed false positive rate the best type II error decays like $e^{-n\,D_{\mathrm{KL}}(P\|Q)}$, with the Kullback–Leibler (KL) divergence of [Divergences](03-divergences.md) as the rate. This Chernoff–Stein lemma is derived in @sec-apx-tail-cramer-stein of the appendices and computed for two normals in [Exercise 8](../../book-exercises/part01-prerequisites/04-hypothesis-testing.md#sec-sol-ht-8).
+How fast does the error fall with more data? For $n$ independent observations the ratio of the sample is the product of the individual ratios, and at a fixed false positive rate the best type II error decays like $e^{-n\,D_{\mathrm{KL}}(P\|Q)}$, with the Kullback–Leibler (KL) divergence of [Divergences](03-divergences.md) as the rate. @sec-apx-tail-cramer-stein derives this Chernoff–Stein lemma.
 
 ::: {#exm-ht-np-spam}
 Take the spam example at budget $\alpha = 0.25$, a size no threshold has. A cut-off between 1.5 and 4 rejects only the count 3, with size 0.1, which fits. Just below 1.5 the count 2 joins and the size is 0.3, which does not, so $c = 1.5$. The test spends the remaining 0.15 on the tie set $\{2\}$, whose ham mass is 0.2, so it rejects the count 2 with probability $\gamma = 0.75$. Its power is $0.4 + 0.75 \times 0.3 = 0.625$. Randomizing matters only for discrete data like these, since for a continuous score a threshold alone can hit any size.
@@ -137,7 +137,7 @@ $$1 - \beta_\phi \le \Pr_Q[p = 0] + K\alpha + \mathbb E_P\big[\Lambda\,\mathbf 1
 7. *Let the budget shrink.* The bound holds for every test within budget, so with step 5 it gives $T(\alpha) \ge T(0) - K\alpha - \mathbb E_P[\Lambda\,\mathbf 1[\Lambda > K]]$. The average of $\Lambda$ is finite by @lem-ht-change-of-measure, so its part from $\Lambda > K$ vanishes as $K$ grows. Choosing $K$ large, then $\alpha$ small, and using $T(\alpha) \le T(0)$ from step 1, $T(\alpha)$ tends to $T(0)$.
 :::
 
-Conversely, every function with these four properties is the trade-off function of some pair (@sec-apx-comp-canonical in the appendices derives it step by step). A pair is **harder to distinguish** than another if its curve is higher everywhere. The hardest curve is $1 - \alpha$, for $P = Q$, and the easiest is $T \equiv 0$, for distributions that never produce the same outcome. The curve starts below 1 when $Q$ has mass where $P$ has none ([Exercise 6](../../book-exercises/part01-prerequisites/04-hypothesis-testing.md#sec-sol-ht-6)), and swapping $P$ and $Q$ reflects it across the line $\beta = \alpha$ ([Exercise 2](../../book-exercises/part01-prerequisites/04-hypothesis-testing.md#sec-sol-ht-2)).
+Conversely, every function with these four properties is the trade-off function of some pair (@sec-apx-comp-canonical derives it). A pair is **harder to distinguish** than another if its curve is higher everywhere. The hardest curve is $1 - \alpha$, for $P = Q$, and the easiest is $T \equiv 0$, for distributions that never produce the same outcome. The curve starts below 1 when $Q$ has mass where $P$ has none, and swapping $P$ and $Q$ reflects it across the line $\beta = \alpha$, because the test $1 - \phi$ for the swapped pair has the errors of $\phi$ in the other order.
 
 The curves of the next sections differ in how fast they fall, and one rule explains their shapes. The slope of the curve is minus the exchange rate of @sec-ht-np, the likelihood ratio of the outcomes the test is currently adding.
 
@@ -187,7 +187,7 @@ $$\mu = \frac{h\sqrt n}{\sigma}.$$
 2. The sample mean is $\mathcal N(0, \sigma^2/n)$ against $\mathcal N(h, \sigma^2/n)$, a shift of $h$ in units of $\sigma/\sqrt n$, and @thm-ht-gaussian applies.
 :::
 
-So distinguishability grows like $\sqrt n$, the rate at which a sample mean concentrates. Near $\alpha = 0$ the curve is vertical, because by @prp-ht-slope its slope is $-\Lambda(\tau)$, which grows without bound as the threshold moves out, so the first sliver of budget buys power at an unbounded rate. The curve is also its own reflection across the line $\beta = \alpha$ ([Exercise 1](../../book-exercises/part01-prerequisites/04-hypothesis-testing.md#sec-sol-ht-1)).
+So distinguishability grows like $\sqrt n$. Near $\alpha = 0$ the curve is vertical, because by @prp-ht-slope its slope is $-\Lambda(\tau)$, which grows without bound as the threshold moves out. Swapping $P$ and $Q$ gives a shift pair at the same distance $\mu$, so the curve is also its own reflection across the line $\beta = \alpha$.
 
 ::: {#exm-ht-drift}
 A monitoring job averages $n = 100$ readings from a sensor with noise $\sigma$ and must detect a drift of $h = 0.2\sigma$ in the mean. By @cor-ht-averaging the shift is $\mu = 0.2 \times 10 = 2$, the biomarker's, and @tbl-ht-gaussian evaluates the curve there and at $\mu = 1$. At $\alpha = 0.05$ the threshold is $\Phi^{-1}(0.95) = 1.6449$, and $\beta = \Phi(-0.3551) = 0.3612$, so the job catches the drift with probability 0.6388. A simulation with 1,000,000 draws per hypothesis gives $\hat\alpha = 0.0503$ and $\hat\beta = 0.3617$. If false alarms must be rare, the power at $\alpha = 10^{-3}$ drops to 0.1378.
@@ -201,7 +201,9 @@ A monitoring job averages $n = 100$ readings from a sensor with noise $\sigma$ a
 
 : The Gaussian trade-off curve at two shifts and two levels. {#tbl-ht-gaussian}
 
-Turned around, the curve says how many readings a target needs. [Exercise 4](../../book-exercises/part01-prerequisites/04-hypothesis-testing.md#sec-sol-ht-4) solves for $n$ and finds that power 0.9 at $\alpha = 0.01$, for a drift of $h = 0.25\sigma$, takes 209 readings.
+Turned around, the curve says how many readings a target needs. Power 0.9 at $\alpha = 0.01$ needs
+$$\mu \ge \Phi^{-1}(0.99) - \Phi^{-1}(0.1) = 2.3263 + 1.2816,$$
+and for a drift of $h = 0.25\sigma$, $\mu = 0.25\sqrt n$ reaches this at 209 readings.
 :::
 
 ![The Gaussian trade-off curve $\Phi(\Phi^{-1}(1 - \alpha) - \mu)$ for $\mu = 0, 0.5, 1, 2, 3$. Crosses are simulated errors of threshold tests at $\mu = 1$.](figures/hypothesis_testing_gaussian_tradeoff.svg){#fig-ht-gaussian-tradeoff}
@@ -273,7 +275,7 @@ For $\mathcal N(0, 1)$ against $\mathcal N(\mu, 1)$, $\mathrm{TV} = 2\Phi(\mu/2)
 3. *Laplace, the middle.* There the gap is $1 - \alpha - e^{-\kappa}/(4\alpha)$, whose derivative vanishes at $\alpha = \frac12e^{-\kappa/2}$. At that point $e^{-\kappa}/(4\alpha) = \frac12e^{-\kappa/2}$ too, so the gap is $1 - e^{-\kappa/2}$.
 :::
 
-[Exercise 3](../../book-exercises/part01-prerequisites/04-hypothesis-testing.md#sec-sol-ht-3) checks the Laplace value by integrating $\frac12\lvert q - p\rvert$ directly. TV measures the problem at one point of the curve and says nothing about the ends, and @tbl-ht-laplace-vs-gaussian is the warning: two pairs with the same TV differ by a factor of 36 in power at $\alpha = 10^{-6}$. If false alarms must be very rare, the whole curve is the right summary.
+TV measures one point of the curve and says nothing about its ends, as @tbl-ht-laplace-vs-gaussian showed, so if false alarms must be very rare, the whole curve is the right summary.
 
 ::: {#exm-ht-tv}
 In the spam example half the sum of the differences $\lvert q - p\rvert$ in @tbl-ht-spam is $\mathrm{TV} = 0.40$, and rejecting the counts where spam is more likely, $\{2, 3\}$, has advantage $1 - 0.3 - 0.3 = 0.4$ (@tbl-ht-spam-tests). For the Gaussian pair at $\mu = 1$, @cor-ht-tv-pairs gives 0.3829 at $\alpha = 0.3085$, and so does a grid search over 100,001 values of $\alpha$. For the Laplace pair at $\kappa = 1$ both give 0.3935 at $\alpha = 0.3033$.
@@ -317,7 +319,7 @@ Detector A has positives that score $\mathcal N(1, 1)$, so $\mathrm{AUC} = \Phi(
 
 ![ROC curves of two detectors with the same AUC of 0.760. Left, linear axes: the curves cross and enclose equal areas. Right, log axes: at FPR $= 10^{-3}$ detector B has 12 times the TPR of detector A.](figures/hypothesis_testing_auc_low_fpr.svg){#fig-ht-auc-low-fpr}
 
-The AUC hides this because it weights all FPRs equally, and FPRs up to $10^{-3}$ are a tenth of a percent of the axis. A few of B's spread-out positives score far above every negative, and a strict threshold catches exactly those. So report the TPR at a fixed low FPR chosen by the application, and plot ROC curves on log–log axes. [Exercise 5](../../book-exercises/part01-prerequisites/04-hypothesis-testing.md#sec-sol-ht-5) has an extreme case, a detector with AUC 0.525 that catches 5% of positives at FPR $10^{-3}$.
+The AUC hides this because it weights all FPRs equally, and FPRs up to $10^{-3}$ are a tenth of a percent of the axis. A few of B's spread-out positives score far above every negative, and a strict threshold catches exactly those. So report the TPR at a fixed low FPR chosen by the application, and plot ROC curves on log–log axes. An extreme case is a detector with AUC 0.525 that catches 5% of positives at FPR $10^{-3}$.
 
 A's threshold is optimal, but B's is not: with unequal variances its log likelihood ratio is quadratic in the score, so the optimal test of @thm-ht-np also flags very *low* scores.
 
@@ -338,7 +340,7 @@ $$(1 - \pi)\alpha_\phi + \pi\beta_\phi = \pi + \sum_x\phi(x)\big((1 - \pi)p(x) -
 3. *Minimize term by term.* Each $\phi(x)$ appears in one term, so the minimum sets $\phi(x) = 1$ where the bracket is negative, that is where $\Lambda(x) > (1 - \pi)/\pi$, and 0 where it is positive.
 :::
 
-With equal priors the smallest error is $\frac12(1 - \mathrm{TV})$ by @thm-ht-tv ([Exercise 7](../../book-exercises/part01-prerequisites/04-hypothesis-testing.md#sec-sol-ht-7)), which is 0.3085 for the Gaussian pair at $\mu = 1$. The theorem also applies to coarser evidence: if all you know is that a test fired, the likelihood ratio of that evidence is $(1 - \beta)/\alpha$, the power over the false positive rate.
+With equal priors the error is $\frac12(\alpha_\phi + \beta_\phi)$, one half minus half the advantage, so its smallest value is $\frac12(1 - \mathrm{TV})$ by @thm-ht-tv, which is 0.3085 for the Gaussian pair at $\mu = 1$. The theorem also applies to coarser evidence: if all you know is that a test fired, the likelihood ratio of that evidence is $(1 - \beta)/\alpha$, the power over the false positive rate.
 
 ::: {#exm-ht-prevalence}
 Use the biomarker test with $\mu = 2$ from @tbl-ht-gaussian in a population where 1% are ill, so the prior odds are $1/99$. To get the probability of illness after a positive result, multiply the prior odds by the likelihood ratio of a positive, then turn the odds $o$ into a probability $o/(1 + o)$.
@@ -370,7 +372,7 @@ The interval is random, because it depends on the count, and the claim is about 
 3. *Combine the two ends.* The lower end misses with probability at most $\alpha/2$ in the same way, and by the union bound the interval misses with probability at most $\alpha$.
 :::
 
-The interval is exact, since it uses the binomial itself, and conservative, since its coverage may exceed $1 - \alpha$. For a zero count, a one-sided upper bound at level 0.95 solves $(1 - u)^n = 0.05$. Since $\ln(1 - u) \approx -u$ for small $u$, this gives $u \approx \ln(20)/n \approx 3/n$, the **rule of three**. With 3,000 negatives and no false positive, $u = 9.981\times10^{-4}$, and [Exercise 9](../../book-exercises/part01-prerequisites/04-hypothesis-testing.md#sec-sol-ht-9) shows that certifying an FPR below $10^{-3}$ takes 2,995 clean negatives.
+The interval is exact, since it uses the binomial itself, and conservative, since its coverage may exceed $1 - \alpha$. For a zero count, a one-sided upper bound at level 0.95, which puts all of the 0.05 on the upper side, solves $(1 - u)^n = 0.05$. Since $\ln(1 - u) \approx -u$ for small $u$, this gives $u \approx \ln(20)/n \approx 3/n$, the **rule of three**. With 3,000 negatives and no false positive, $u = 9.981\times10^{-4}$, and certifying an FPR below $10^{-3}$ takes 2,995 clean negatives.
 
 The interval's width relative to the rate is set mainly by the expected count $np$, since a binomial count of $k$ fluctuates by about $\sqrt k$. Ten false positives leave the rate uncertain by a factor of two, and a hundred, at $n = 100{,}000$, by about 20%: $[0.00081, 0.00122]$ around $10^{-3}$. So measuring an FPR near $p$ to within 20% takes about $100/p$ negatives. A threshold chosen on the same data is uncertain in the same way, so choose thresholds on one split and measure rates on another.
 
@@ -442,5 +444,3 @@ uv run python code/part01-prerequisites/hypothesis_testing.py
 - Cover & Thomas, *Elements of Information Theory* (2nd ed., 2006), §11.7–11.9: Neyman–Pearson from the information-theory side, the Chernoff–Stein lemma and Chernoff information.
 - Fawcett, "An introduction to ROC analysis" (Pattern Recognition Letters, 2006): ROC curves (the trade-off function turned upside down), AUC as a ranking probability, and the convex hull of a classifier's ROC, which is the convexity property proved here.
 - Clopper & Pearson, "The use of confidence or fiducial limits illustrated in the case of the binomial" (Biometrika, 1934), and Brown, Cai & DasGupta, "Interval Estimation for a Binomial Proportion" (Statistical Science, 2001): the exact interval, and why the Wald interval fails.
-
-**Practice.** Exercises for this chapter, each with a worked solution, are in [the exercise book](../../book-exercises/part01-prerequisites/04-hypothesis-testing.md).

@@ -88,5 +88,3 @@ The other ten derive the results that the chapters cite to a paper, sketch, or t
 - L. [Subsampling, shuffling and iteration](appendix-derivations/12-amplification.md) · [code](../code/appendix-derivations/apx_amplification.py)
 - M. [Private learning and tuning](appendix-derivations/13-private-learning.md) · [code](../code/appendix-derivations/apx_learning.py)
 - N. [Auditing, reconstruction and adaptive analysis](appendix-derivations/14-auditing-adaptivity.md) · [code](../code/appendix-derivations/apx_auditing.py)
-
-The exercise book (a separate website, [book-exercises/](../book-exercises/)) has every chapter's exercises and worked solutions, one page per chapter: [Part 1](../book-exercises/part01-prerequisites/), [Part 2](../book-exercises/part02-attacks/), [Part 3](../book-exercises/part03-dp-foundations/), [Part 4](../book-exercises/part04-privacy-accounting/), [Part 5](../book-exercises/part05-dp-ml/).

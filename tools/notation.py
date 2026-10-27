@@ -9,7 +9,7 @@ The rules are notation.toml at the repository's root: forbidden spellings, each 
 math, in the prose, in the prose outside headings, link text and captions, or in the whole page
 (for a phrase that names a symbol, such as "sampling rate $\\gamma$"), and pairs of meanings
 of one symbol that must not meet on a page. A page is any .md or .qmd file of a book's folder or of
-a study note, so a book's README and the exercise pages are checked too. Code blocks, inline code
+a study note, so a book's README is checked too. Code blocks, inline code
 and HTML comments are never checked: code follows Python's names, not the book's.
 """
 
@@ -23,7 +23,7 @@ from pathlib import Path
 from typing import Any, cast
 
 ROOT = Path(__file__).resolve().parent.parent
-BOOKS = ["book-full", "book-exercises", "book-practitioner", "book-course", "book-opendp", "notes"]
+BOOKS = ["book-full", "book-practitioner", "book-course", "book-opendp", "notes"]
 GENERATED = {"glossary.md", "term-index.md"}
 ASYMPTOTIC = re.compile(r"(?:\\tilde\s*)?(?:O|\\Theta|\\Omega|o|\\omega)\s*\($")
 

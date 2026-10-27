@@ -134,7 +134,7 @@ and the denominator equals $\omega + (1 - \omega)\pi$.
 6. *The simple bound.* The miss probability is at most $\omega/\pi$ exactly when $\pi(1 - \pi) \le \omega(1 - \pi) + \pi$, which holds because $\pi(1 - \pi) \le \pi$.
 :::
 
-This is why the disaster of a fixed $k$ disappears. With $f(x) = x^k$ the ratio for the worst outcome is a $k$-th power, while here it is a product of three bounded ratios. The event "every run was bad" is now mostly the event "the coin stopped early", which does not depend on the data. The factor 3 is attained in the limit, by an outcome with something above it and something below it (@exm-hpt-stopping). On randomized response the good outcome has nothing above it, so one factor cannot move and the cost tends to $2\varepsilon$ ([Exercise 2](../../book-exercises/part05-dp-ml/03-hyperparameter-tuning.md#sec-sol-hpt-2) derives it).
+This is why the disaster of a fixed $k$ disappears. With $f(x) = x^k$ the ratio for the worst outcome is a $k$-th power, while here it is a product of three bounded ratios. The event "every run was bad" is now mostly the event "the coin stopped early", which does not depend on the data. The factor 3 is attained in the limit, by an outcome with something above it and something below it (@exm-hpt-stopping). On randomized response the good outcome has nothing above it, so one factor cannot move and the cost tends to $2\varepsilon$.
 
 The utility guarantee is about quantiles, and it costs runs. @eq-hpt-lt-utility does not promise the best candidate, only a release in the top $\pi$ fraction of one run's outcomes with probability at least $1 - \omega/\pi$. To land in the top $1/m$ of a grid of $m$ with probability 0.9, set $\pi = 1/m$ and $\omega/\pi = 0.1$, which gives $\omega = 0.1/m$, a mean of $10m$ runs.
 
@@ -195,7 +195,7 @@ $$(1 - s)\big[(\alpha - 1)e^{\hat\varepsilon} - \alpha\big] + (\alpha - 1)\hat\d
 3. *The condition removes the first term.* The condition $e^{\hat\varepsilon} \le 1 + \frac{1}{\alpha - 1}$ is the same as $(\alpha - 1)e^{\hat\varepsilon} \le \alpha$, so the first term is not positive and the bracket is at most $(\alpha - 1)\hat\delta$. Dividing by $\alpha - 1$, and adding $D_\alpha(Q\|Q') \le \varepsilon(\alpha)$ in @eq-hpt-generic, gives @eq-hpt-poisson.
 :::
 
-The Poisson bound pays $\mathbb E[K]\hat\delta$ for the chance of many runs. That is linear in the expected number of runs, but multiplied by the run's $\hat\delta$ at a small $\hat\varepsilon$, so it is small only when one run is very private. On randomized response with $\varepsilon = 0.5$ and mean 10, the run has $\hat\delta = 0$ at $\hat\varepsilon = 0.5$, so @eq-hpt-poisson applies at the order where $e^{0.5} = 1 + 1/(\alpha - 1)$, which is $\alpha = 2.5415$. There the exact divergence is 0.4421, the bound 1.7654 and composition of 10 runs 2.7165; [Exercise 4](../../book-exercises/part05-dp-ml/03-hyperparameter-tuning.md#sec-sol-hpt-4) works out the pure-DP case.
+The Poisson bound pays $\mathbb E[K]\hat\delta$ for the chance of many runs. That is linear in the expected number of runs, but multiplied by the run's $\hat\delta$ at a small $\hat\varepsilon$, so it is small only when one run is very private. On randomized response with $\varepsilon = 0.5$ and mean 10, the run has $\hat\delta = 0$ at $\hat\varepsilon = 0.5$, so @eq-hpt-poisson applies at the order where $e^{0.5} = 1 + 1/(\alpha - 1)$, which is $\alpha = 2.5415$. There the exact divergence is 0.4421, the bound 1.7654 and composition of 10 runs 2.7165.
 
 A bound that stays a constant multiple of one run, whatever the run's $\hat\delta$, needs another distribution for $K$, from a family that contains the geometric distribution.
 
@@ -396,5 +396,3 @@ uv run python code/part05-dp-ml/hyperparameter_tuning.py
 - Papernot, Thakurta, Song, Chien & Erlingsson, "Tempered Sigmoid Activations for Deep Learning with Differential Privacy" (arXiv:2007.14191, 2020). Architecture choices that are best without privacy are not best with it, so tuning cannot simply be done non-privately.
 - Ponomareva et al., "How to DP-fy ML: A Practical Guide to Machine Learning with Differential Privacy" (JAIR 2023). What to tune, how, and what to report.
 - Bergstra & Bengio, "Random Search for Hyper-Parameter Optimization" (JMLR 2012). Why random search, which the random-$K$ theorems require, is a sound tuning method in its own right.
-
-**Practice.** Exercises for this chapter, each with a worked solution, are in [the exercise book](../../book-exercises/part05-dp-ml/03-hyperparameter-tuning.md).

@@ -92,7 +92,7 @@ The proof has four links: the shadow pairs look like the real game, cross-entrop
 4. *Neyman–Pearson.* The [Neyman–Pearson lemma](../part01-prerequisites/04-hypothesis-testing.md#sec-ht-np) says that a threshold on the likelihood ratio has the highest TPR at its FPR among all tests that see the same observation.
 :::
 
-The attack model is **optimal for the wrong question.** It sees $(y, \phi)$ and not which record produced it, so it cannot know that $\phi = 2$ is high for one record and low for another. When members tend to have the higher $\phi$ within each class, it is the loss attack with a threshold for each class ([Exercise 7](../../book-exercises/part02-attacks/02-membership-inference.md#sec-sol-mia-7)).
+The attack model is **optimal for the wrong question.** Seeing $(y, \phi)$ and not which record produced it, it cannot know that $\phi = 2$ is high for one record and low for another. When members tend to have the higher $\phi$ within each class, $h$ rises with $\phi$ there, so a threshold on $h$ is a threshold on $\phi$ and, by @lem-mia-margin, on the loss: the loss attack with a threshold for each class.
 
 What shadow models really buy is **calibration.** The attacker picks the threshold at which the desired fraction of its own shadow non-members pass, and trusts that real non-members behave the same way. Salem et al. (2019) found that even one shadow model, or shadow data from another distribution, often works for this. Calibration is the job that shadow models keep in @sec-mia-lira.
 
@@ -140,7 +140,7 @@ The bell-curve shape is justified because, by @lem-mia-margin, $\phi_z$ is linea
 
 Offline LiRA is a weaker test, because without IN models it cannot write down $q_z$. It only asks whether $\phi_z$ lies unusually far above its OUT values, which is the direction in which training on $z$ moves it. The two scores can be compared exactly in the simplest case, where the IN and OUT fits have the same standard deviation $\sigma_z$. Write $t_z$ for the offline score, the output measured in units of $\sigma_z$ from the OUT mean. Then $t_z$ is standard normal under OUT, and under IN it is normal with variance 1 and mean the **separation**
 $$s_z = \frac{\mu_{\mathrm{in}, z} - \mu_{\mathrm{out}, z}}{\sigma_z}.$$
-Substituting the two normal densities into @eq-mia-lira-online gives $\ln\Lambda_z = s_zt_z - s_z^2/2$, as [Exercise 2](../../book-exercises/part02-attacks/02-membership-inference.md#sec-sol-mia-2) shows. For one record $s_z$ is a fixed positive number, so both scores rank that record's outputs alike. Across records they differ, because online LiRA weights each $t_z$ by $s_z$, while offline LiRA treats every $t_z$ the same.
+Measured in $t_z$, the OUT density is proportional to $e^{-t_z^2/2}$ and the IN density to $e^{-(t_z - s_z)^2/2}$, with the same constant, which cancels in @eq-mia-lira-online. Expanding the square leaves $\ln\Lambda_z = s_zt_z - s_z^2/2$. For one record $s_z$ is a fixed positive number, so both scores rank that record's outputs alike. Across records they differ, because online LiRA weights each $t_z$ by $s_z$, while offline LiRA treats every $t_z$ the same.
 
 How much each record can be caught at a given FPR is then a question about two unit-variance Gaussians. Write $\Phi$ for the standard normal distribution function, so that $\Phi^{-1}(1 - \alpha)$ is the point a standard normal exceeds with probability $\alpha$. @thm-ht-gaussian in [Hypothesis testing](../part01-prerequisites/04-hypothesis-testing.md#sec-ht-gaussian) shows that when an observation is $\mathcal N(0, 1)$ in one world and $\mathcal N(s, 1)$ in the other, the most members any test can catch at FPR $\alpha$ is
 $$\mathrm{TPR}(\alpha) = 1 - \Phi\big(\Phi^{-1}(1 - \alpha) - s\big).$$ {#eq-mia-gauss-tpr}
@@ -257,7 +257,7 @@ Which records have a large self-influence? If the rest of the data already predi
 
 **Leakage is concentrated.** The loss attack's advantage reflects the *average* self-influence, while the low-FPR end of the ROC curve is governed by the *largest* ones, because a strict threshold is passed only by the records with the largest separations. So a model with a small generalization gap can still expose a few records completely. Memorizing them can even be what makes it accurate: Feldman (2020) shows that on long-tailed data, a rare subpopulation seen once in training must be memorized for good test accuracy.
 
-**Removing the outliers does not fix it.** Carlini et al. (2022b) removed the most exposed records and retrained, and the next layer of records became exposed, which they call the privacy onion effect. Exposure is relative to the rest of the dataset, because a record's OUT distribution depends on what the other records predict about it, and [Exercise 6](../../book-exercises/part02-attacks/02-membership-inference.md#sec-sol-mia-6) reproduces this on the running example. A guarantee that protects every record, the subject of [Part 3](../part03-dp-foundations/01-definition.md), has to bound the self-influence of the worst record, not the average.
+**Removing the outliers does not fix it.** Carlini et al. (2022b) removed the most exposed records and retrained, and the next layer of records became exposed, which they call the privacy onion effect. Exposure is relative to the rest of the dataset, because a record's OUT distribution depends on what the other records predict about it. A guarantee that protects every record, the subject of [Part 3](../part03-dp-foundations/01-definition.md), has to bound the self-influence of the worst record, not the average.
 
 ::: {#exm-mia-outliers}
 @tbl-mia-outliers splits the running example by kind of point.
@@ -352,5 +352,3 @@ uv run python code/part02-attacks/membership_inference.py
 - Zarifzadeh, Liu, Backes & Shokri, "Low-Cost High-Power Membership Inference Attacks" (ICML 2024). Comparing the target with population records gives strong attacks with few reference models.
 - Feldman, "Does Learning Require Memorization? A Short Tale about a Long Tail" (STOC 2020). Why accurate models on long-tailed data must memorize rare examples.
 - Carlini, Jagielski, Zhang, Papernot, Terzis & Tramèr, "The Privacy Onion Effect: Memorization is Relative" (NeurIPS 2022). Removing the most exposed records exposes the next layer.
-
-**Practice.** Exercises for this chapter, each with a worked solution, are in [the exercise book](../../book-exercises/part02-attacks/02-membership-inference.md).

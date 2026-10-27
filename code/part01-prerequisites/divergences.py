@@ -149,10 +149,6 @@ def kl_from_hockey_sticks(p: Dist, q: Dist, steps: int = 200_000) -> float:
     return first + second
 
 
-def binary_kl(a: float, b: float) -> float:
-    return kl([a, 1 - a], [b, 1 - b])
-
-
 # --- Shifted Gaussians: P = N(0, σ²), Q = N(s, σ²), μ = s/σ ----------------------------------
 
 
@@ -484,14 +480,6 @@ def print_table(rng: np.random.Generator) -> None:
     )
     print(
         f"  reverse KL fit: mu={rev[0]:.2f} sigma={rev[1]:.2f}  KL(p‖q)={forward_kl(*rev):.3f}  KL(q‖p)={reverse_kl(*rev):.3f}"
-    )
-
-    print("[Exercises]")
-    print(f"  KL(N(0,1)‖N(0,4)) = {math.log(2) + 1 / 8 - 0.5:.4f}")
-    coin = binary_kl(0.6, 0.5)
-    print(
-        f"  KL(Bern(0.6)‖Bern(0.5)) = {coin:.5f}; flips needed before Pinsker allows TV >= 0.8: "
-        f"{math.ceil(2 * 0.8**2 / coin)}"
     )
 
 

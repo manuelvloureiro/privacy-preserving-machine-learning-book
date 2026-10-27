@@ -389,7 +389,7 @@ The curve $\gamma \mapsto E_\gamma$ starts at TV and reaches zero at the largest
 ![$E_\gamma$ against $\ln\gamma$ for the die, a Laplace pair and a Gaussian pair.](figures/divergences_hockey_stick.svg){#fig-div-hockey-stick}
 
 ::: {#exm-div-rejection}
-On the die, only the six has $r > \gamma$ for $1 \le \gamma < 3$, so $E_\gamma = 0.5 - \gamma/6$ falls linearly to zero at $\gamma = 3$, the largest ratio. In rejection sampling of the loaded die from fair rolls, an envelope $2q$ leaves the mass $E_2(P\|Q) = \frac16$ of the six uncovered, and the sampled six comes up 40% of the time instead of 50%. [Exercise 4](../../book-exercises/part01-prerequisites/03-divergences.md#sec-sol-div-4) shows that the error in TV is never more than $E_\gamma$.
+On the die, only the six has $r > \gamma$ for $1 \le \gamma < 3$, so $E_\gamma = 0.5 - \gamma/6$ falls linearly to zero at $\gamma = 3$, the largest ratio. In rejection sampling of the loaded die from fair rolls, an envelope $2q$ leaves the mass $E_2(P\|Q) = \frac16$ of the six uncovered, and the sampled six comes up 40% of the time instead of 50%. The error in TV is never more than $E_\gamma$.
 :::
 
 ## f-divergences {#sec-div-f}
@@ -558,7 +558,7 @@ $$\Big(\sum_x\sqrt{pq}\Big)^2 \le \sum_x\min(p, q) \cdot \sum_x\max(p, q).$$
 3. *Express in KL.* Since $\sqrt{pq} = p\,e^{-L/2}$, the sum is $\mathbb E_P[e^{-L/2}]$, and $e^{-y/2}$ is convex, so @lem-div-jensen puts it above $e^{-D_{\mathrm{KL}}/2}$. Squaring and using step 2 gives $e^{-D_{\mathrm{KL}}} \le 1 - \mathrm{TV}^2$.
 :::
 
-Pinsker's inequality is tight for two nearly fair coins ([Exercise 6](../../book-exercises/part01-prerequisites/03-divergences.md#sec-sol-div-6)), passes 1 at KL $= 2$, and loses to Bretagnolle–Huber once KL is above 1.59 (@fig-div-pinsker). Neither can be reversed: if $Q$ puts a tiny mass where $P$ puts none, TV is tiny but $D_{\mathrm{KL}}(Q\|P)$ is infinite.
+Pinsker's inequality is tight for two nearly fair coins, passes 1 at KL $= 2$, and loses to Bretagnolle–Huber once KL is above 1.59 (@fig-div-pinsker). Neither can be reversed: if $Q$ puts a tiny mass where $P$ puts none, TV is tiny but $D_{\mathrm{KL}}(Q\|P)$ is infinite.
 
 ![Total variation against KL, with the two bounds.](figures/divergences_pinsker.svg){#fig-div-pinsker}
 
@@ -621,5 +621,3 @@ uv run python code/part01-prerequisites/divergences.py
 - Bishop, *Pattern Recognition and Machine Learning* (2006), §10.1: forward against reverse KL in variational inference.
 - Liese & Vajda, "On Divergences and Informations in Statistics and Information Theory" (IEEE Transactions on Information Theory, 2006): f-divergences and their representation through the curves $E_\gamma$.
 - Nowozin, Cseke & Tomioka, "f-GAN: Training Generative Neural Samplers using Variational Divergence Minimization" (NeurIPS 2016): f-divergences estimated from samples with neural networks.
-
-**Practice.** Exercises for this chapter, each with a worked solution, are in [the exercise book](../../book-exercises/part01-prerequisites/03-divergences.md).

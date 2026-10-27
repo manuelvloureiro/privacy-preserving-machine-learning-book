@@ -1,6 +1,6 @@
 # Preface {.unnumbered}
 
-This is the full edition of *Privacy-Preserving Machine Learning*: every result is derived step by step. Two companions share its parts and chapter files: the [exercise book](../book-exercises/index.md), with a worked solution for every exercise, and the [practitioner edition](../book-practitioner/index.md), which states the same results without proofs and shows how to use them with real libraries. A separate [course in differential privacy](../book-course/index.md) teaches the subject one topic per chapter, with complete proofs and little else.
+This is the full edition of *Privacy-Preserving Machine Learning*: every result is derived step by step. If differential privacy is new to you, read the [course in differential privacy](../book-course/index.md) first: it teaches the definition and its core algorithms one topic per chapter, with complete proofs and little else, and this book then goes deeper and wider. The [practitioner edition](../book-practitioner/index.md) shares this book's parts and chapter files, states the same results without proofs and shows how to use them with real libraries; read it next if you build or review private systems.
 
 The figures and the numbers quoted in the text are produced by each chapter's script, in the repository's `code/` directory, one folder per part.
 
@@ -14,4 +14,4 @@ The book has five parts, each building on the ones before it.
 4. **Privacy accounting** tracks the guarantee through many steps of training, as accurately as possible.
 5. **Differential privacy in machine learning** trains models with the guarantee: where the noise goes, how the knobs of noisy, clipped gradient descent trade privacy for accuracy, what else spends the budget, who pays for the noise, which $\varepsilon$ to choose, and how to audit the result.
 
-The appendices hold a glossary of acronyms and an index. The exercises, with a worked solution for each, are in the exercise book, a companion website, and each chapter ends with a link to its page there.
+The appendices derive, in plain steps, the results a chapter cites or sketches, and the book ends with a glossary of acronyms and an index.

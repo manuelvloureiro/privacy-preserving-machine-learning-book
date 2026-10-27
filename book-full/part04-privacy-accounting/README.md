@@ -26,8 +26,6 @@ Each script prints the numbers its chapter quotes, except values the text attrib
 uv run python code/part04-privacy-accounting/<script>.py
 ```
 
-Every chapter's exercises, each with a worked solution, are in the exercise book, [book-exercises/part04-privacy-accounting/](../../book-exercises/part04-privacy-accounting/), one file per chapter. The exercise book is its own website, and `code/part04-privacy-accounting/solutions_<script>.py` prints the numbers they quote.
-
 ## Suggested order
 
 1. Chapters 29 → 28. Everything else uses the RDP curve and its conversion.
@@ -57,12 +55,6 @@ Every chapter's exercises, each with a worked solution, are in the exercise book
 - Ponomareva et al., "How to DP-fy ML: A Practical Guide to Machine Learning with Differential Privacy" (JAIR 2023); NIST SP 800-226, *Guidelines for Evaluating Differential Privacy Guarantees* (2025) → chapter 37
 
 Each chapter ends with its own references, with what each is good for.
-
-## Exercise
-
-Write an RDP accountant for the Poisson-subsampled Gaussian and check it against Google's `dp_accounting` within 1%. Then, for DP-SGD with $q = 0.01$, $\sigma = 1$ and up to 10,000 steps, plot $\varepsilon$ at $\delta = 10^{-5}$ from four accountants: RDP with Mironov's conversion, RDP with the improved conversion, the GDP central-limit approximation, and PLD, alongside advanced composition applied per step.
-
-The accountant is built in [Amplification by subsampling](05-subsampling.md). The four-way comparison is worked in [Choosing an accountant](09-choosing-an-accountant.md). The check against `dp_accounting` is left to you, since the library is not a dependency of this repository.
 
 ## Exit check
 

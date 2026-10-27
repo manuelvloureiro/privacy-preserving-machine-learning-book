@@ -52,9 +52,6 @@ def test_selection_matches_section(tmp_path: Path) -> None:
         "sign test, m=40: Pr_D=0.7399  Pr_D'=0.1832  ln ratio=1.40",
         "sign test, m=160: Pr_D=0.9151  Pr_D'=0.0659  ln ratio=2.63",
         "check, m=2, Pr_D[⊥⊥⊤⊤]: exact=0.0669  simulated=0.0671",
-        # Exercises
-        "k=3: ln ratio=1.3106  k=1000: 1.9977",
-        "gap bound=15.22",
         # AboveThreshold tightness and Sparse
         "m=10: max |ln ratio|=0.994011",
         "m=20: max |ln ratio|=0.999981",

@@ -61,7 +61,7 @@ def test_hypothesis_testing_matches_section(tmp_path: Path) -> None:
         "n needed for 1e-3: 2995",
         "reps=2000] 0.9720",
         "FP=10  FPR CI=[0.00048, 0.00184]  TP=1350  TPR=0.1350  TPR CI=[0.1284, 0.1419]",
-        # Exercises
+        # More checks
         "n=10: 0.2740  n=100: 0.3796  n=1000: 0.4537",
         "T(0)=0.8  TV=0.2",
     ):

@@ -25,8 +25,6 @@ Each script prints the numbers its chapter quotes and regenerates the chapter's 
 uv run python code/part01-prerequisites/<script>.py
 ```
 
-Every chapter's exercises, each with a worked solution, are in the exercise book, [book-exercises/part01-prerequisites/](../../book-exercises/part01-prerequisites/), one file per chapter. The exercise book is its own website, and `code/part01-prerequisites/solutions_<script>.py` prints the numbers they quote.
-
 ## Suggested order
 
 1. Chapters 1 → 2 → 3 → 4, in order. Each uses the previous one: distributions give the moment generating functions that concentration needs, concentration bounds tails, divergences summarize how different two distributions are, and hypothesis testing says what an observer can do with that difference.
@@ -47,13 +45,6 @@ Every chapter's exercises, each with a worked solution, are in the exercise book
 - Boneh & Shoup, *A Graduate Course in Applied Cryptography*, ch. 2–3 → chapter 8
 
 Each chapter ends with its own references, with what each is good for.
-
-## Exercises
-
-1. Derive the Chernoff bound for a sum of Bernoullis: worked step by step in [Concentration inequalities](02-concentration.md), section "The Chernoff method".
-2. Compute the KL and Rényi divergence between two Gaussians with equal variance by hand: worked two ways in [Divergences](03-divergences.md), section "Two Gaussians with equal variance, by hand".
-
-Try both before reading the solutions. Every chapter also has its own exercises in the exercise book, most with check values.
 
 ## Exit check
 

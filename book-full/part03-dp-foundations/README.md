@@ -28,8 +28,6 @@ Each script prints the numbers its chapter quotes and regenerates the chapter's 
 uv run python code/part03-dp-foundations/<script>.py
 ```
 
-Every chapter's exercises, each with a worked solution, are in the exercise book, [book-exercises/part03-dp-foundations/](../../book-exercises/part03-dp-foundations/), one file per chapter. The exercise book is its own website, and `code/part03-dp-foundations/solutions_<script>.py` prints the numbers they quote.
-
 ## Core readings
 
 - Dwork & Roth (2014), ch. 1–3 → chapters 18–22; ch. 4 → chapter 23; ch. 8 → chapter 27
@@ -50,10 +48,6 @@ Every chapter's exercises, each with a worked solution, are in the exercise book
 - Kifer & Machanavajjhala, "No Free Lunch in Data Privacy" (SIGMOD 2011) → chapter 18
 
 Each chapter ends with its own references, with what each is good for.
-
-## Exercise
-
-Implement Laplace, Gaussian (classic and analytic calibration), exponential and sparse vector from scratch; then plot $\varepsilon$ after $k$-fold composition of the Gaussian mechanism under basic, advanced and optimal composition. The mechanisms are implemented in [laplace_gaussian.py](../../code/part03-dp-foundations/laplace_gaussian.py) and [selection.py](../../code/part03-dp-foundations/selection.py), and the composition plot is in [Advanced and optimal composition](04-composition.md). Try them yourself before reading the scripts.
 
 ## Exit check
 

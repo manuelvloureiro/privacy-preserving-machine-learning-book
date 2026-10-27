@@ -197,7 +197,7 @@ At $\pi_1 = \frac12$ this is $\frac12$, so the uniform input makes the output un
 
 @fig-min-bsc (left) shows the information as a function of the input prior, a hump that peaks at the uniform input for every $p$. Away from the peak you lose a lot. At $p = 0.11$ and $\pi_1 = 0.2$, the output is 1 with probability 0.266, so the channel carries only $h(0.266) - h(0.11) = 0.3358$ bits, against 0.5001 at the uniform input. The right panel shows that the capacity is zero at $p = \frac12$, where the output is a fair coin whatever the input. It is symmetric about $\frac12$, because a receiver can flip every output of a channel that almost always flips.
 
-For channels without this symmetry, the maximum over priors has no closed form. The **Blahut–Arimoto** algorithm computes it numerically, by alternately improving the prior and the posterior over inputs given each output. The script uses it to check @eq-min-bsc-capacity, and [Exercise 4](../../book-exercises/part01-prerequisites/05-information-theory.md#sec-sol-min-4) finds a channel whose best input is not uniform.
+For channels without this symmetry, the maximum over priors has no closed form. The **Blahut–Arimoto** algorithm computes it numerically, by alternately choosing the best posterior over inputs for the current prior and the best prior for that posterior, which never lowers the information. The script uses it to check @eq-min-bsc-capacity.
 
 ![Left: mutual information of a binary symmetric channel as a function of the input prior, for several flip probabilities; every curve peaks at $\pi_1 = \frac12$. Right: the capacity $1 - h(p)$ against $p$, with the min-capacity of @sec-min-capacity for comparison.](figures/information_theory_bsc.svg){#fig-min-bsc}
 
@@ -288,7 +288,7 @@ $$\max_x\pi(x)K[x, y] \le V(X)\max_x K[x, y].$$
 
 A leakage of 1 bit means that the observation doubles the chance of a correct first guess. That is a statement an engineer can act on, and it is why min-entropy is the usual measure in quantitative information flow, the field that studies what a program's outputs reveal about its secret inputs. The min-capacity bounds the leakage for every prior with one number computed from the channel alone. For $\mathrm{BSC}(p)$ both column maxima are $\max(p, 1 - p)$, which at $p = 0.11$ gives 0.8319 bits against a Shannon capacity of 0.5001 (@fig-min-bsc, right).
 
-An alternative would average $H_\infty(X \mid Y = y)$ over the observations. Smith's value takes the logarithm of the averaged vulnerability instead, so by Jensen's inequality it is never larger, as [Exercise 6](../../book-exercises/part01-prerequisites/05-information-theory.md#sec-sol-min-6) proves, and only Smith's is the logarithm of an actual success probability.
+A natural alternative would average the min-entropy $H_\infty(X \mid Y = y)$ left after each observation. Smith's value takes minus the logarithm of the averaged vulnerability instead, and because $-\log_2$ is convex, Jensen's inequality makes Smith's value never larger than the alternative. Only Smith's is the logarithm of an actual success probability.
 
 ::: {#exm-min-guess}
 In the spam table, the column maxima are $\frac34$ and $\frac18$, so by @eq-min-posterior-vulnerability, $V(X \mid Y) = \frac78$. That is exactly $V(X)$, so the leakage is 0. The keyword carries 0.2936 bits of Shannon information, yet a guesser who must name the label says "ham" whatever it sees and gains nothing.
@@ -394,7 +394,9 @@ $$H(X \mid \hat X) \le h(P_e) + P_e\log_2(k - 1).$$
 6. *Weaken.* Using $h(P_e) \le 1$ and $\log_2(k - 1) \le \log_2 k$ gives $H(X \mid Y) \le 1 + P_e\log_2 k$, and solving for $P_e$ gives @eq-min-fano-weak.
 :::
 
-The right side of @eq-min-fano increases with $P_e$ on $[0, (k - 1)/k]$, from a perfect estimator to blind guessing, so the **Fano bound**, the smallest $P_e$ that satisfies it, can be found by bisection. The bound is tight when step 3 is, that is when the true value after a wrong guess is uniform over the other values. The $k$-ary **symmetric channel** keeps its input with probability $1 - p$ and otherwise outputs one of the other symbols uniformly. It has exactly this structure, and [Exercise 7](../../book-exercises/part01-prerequisites/05-information-theory.md#sec-sol-min-7) shows that Fano's inequality is an equality for it (@fig-min-fano, left).
+The right side of @eq-min-fano increases with $P_e$ on $[0, (k - 1)/k]$, the range from a perfect estimator to blind guessing, because its derivative is positive there:
+$$\frac{\mathrm d}{\mathrm dP_e}\Big(h(P_e) + P_e\log_2(k - 1)\Big) = \log_2\frac{(1 - P_e)(k - 1)}{P_e} > 0.$$
+So the **Fano bound**, the smallest $P_e$ that satisfies it, can be found by bisection. The bound is tight when step 3 is, that is when the true value after a wrong guess is uniform over the other values. The $k$-ary **symmetric channel** keeps its input with probability $1 - p$ and otherwise outputs one of the other symbols uniformly. It has exactly this structure, and Fano's inequality is an equality for it (@fig-min-fano, left).
 
 If errors go to a few wrong values, the bound is loose, because little uncertainty is left after a wrong guess. The **shift channel** outputs $x + 1 \bmod k$ instead of $x$ with probability $p$, and given the output the input is one of only two values. With uniform $X$, $k = 8$ and $p = 0.2$, both channels have MAP error 0.2000. The Fano bound matches it for the symmetric channel but is only 0.0954 for the shift channel (@fig-min-fano, right). The weak form @eq-min-fano-weak gives 0.0945 for the symmetric channel and 0 for the shift channel, whose $H(X \mid Y)$ is below 1.
 
@@ -427,7 +429,7 @@ The bound fades as $n\kappa$ approaches $\log_2 k$, the number of bits needed to
 ::: {#exm-min-classification}
 A label is uniform over $k = 8$ classes, so it has 3 bits of entropy, and the features carry at most 1 bit about it. Then $H(X \mid Y) \ge 2$ bits, so every classifier, however it is trained, errs at least as often as the $P_e$ that solves $h(P_e) + P_e\log_2 7 = 2$, which is 0.3730. The weak form gives $(2 - 1)/3 = 0.3333$.
 
-For estimation, take $k = 1024$ candidates, so $\log_2 k = 10$ bits, within $\kappa = 0.01$ bits of each other. Then $n = 100$ samples leave $P_e \ge 1 - (1 + 1)/10 = 0.8000$, and even 400 samples leave $P_e \ge 1 - (4 + 1)/10 = 0.5000$. [Exercise 8](../../book-exercises/part01-prerequisites/05-information-theory.md#sec-sol-min-8) finds how many samples the bound needs before it allows a small error.
+For estimation, take $k = 1024$ candidates, so $\log_2 k = 10$ bits, within $\kappa = 0.01$ bits of each other. Then $n = 100$ samples leave $P_e \ge 1 - (1 + 1)/10 = 0.8000$, and even 400 samples leave $P_e \ge 1 - (4 + 1)/10 = 0.5000$.
 :::
 
 ## Code {#sec-min-code}
@@ -481,5 +483,3 @@ uv run python code/part01-prerequisites/information_theory.py
 - Alvim, Chatzikokolakis, McIver, Morgan, Palamidessi & Smith, *The Science of Quantitative Information Flow* (2020): the full theory of vulnerability, leakage and capacity, including gain functions that generalize the one-guess adversary.
 - Wainwright, *High-Dimensional Statistics* (2019), ch. 15: minimax lower bounds, including Fano's method, worked through for many estimation problems.
 - Yu, "Assouad, Fano, and Le Cam" (1997): the three classical lower-bound methods side by side.
-
-**Practice.** Exercises for this chapter, each with a worked solution, are in [the exercise book](../../book-exercises/part01-prerequisites/05-information-theory.md).

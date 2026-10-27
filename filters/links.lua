@@ -1,13 +1,13 @@
--- Links that leave this book. The repository holds five books side by side (book-full/,
--- book-exercises/, book-practitioner/, book-course/, book-opendp/) next to code/ and tests/, and a page links to them by
+-- Links that leave this book. The repository holds four books side by side (book-full/,
+-- book-practitioner/, book-course/, book-opendp/) next to code/ and tests/, and a page links to them by
 -- relative path from its source file, so the links also work when browsing the repository.
 --
 -- * A link to code/ or tests/ points to the file on GitHub, since neither folder is part of the
 --   published site and a relative path leads nowhere from a PDF.
 -- * The websites render to _book/<book>/, mirroring the source tree one level down, so a link to
 --   another book only swaps ".md" for ".html".
--- * PDF only: a link to another book keeps its text, followed by where to find it: "Exercise 3
---   shows ..." becomes "Exercise 3 in the exercise book shows ...". A part page (the
+-- * PDF only: a link to another book keeps its text, followed by where to find it: "the
+--   accountant chapter shows ..." becomes "the accountant chapter in the practitioner edition shows ...". A part page (the
 --   00-introduction.md of a partNN-* folder) becomes \part{...}, which Quarto gives no label,
 --   so a link to it keeps its text and loses the link.
 
@@ -17,7 +17,6 @@ local repository = "https://github.com/manuelvloureiro/privacy-preserving-machin
 
 local where = {
   ["book-full"] = "in the full edition",
-  ["book-exercises"] = "in the exercise book",
   ["book-practitioner"] = "in the practitioner edition",
   ["book-course"] = "in the course",
   ["book-opendp"] = "in the OpenDP book",

@@ -116,7 +116,7 @@ In the running example, features have $\|x\| \le 1$ and labels $y \in \{-1, +1\}
 
 By the chain rule the gradient is $-\operatorname{sig}(-m)\,y\,x$, of length at most 1, so the loss is 1-Lipschitz by part (a) of @prp-opt-constants. The Hessian is $\operatorname{sig}(m)(1 - \operatorname{sig}(m))\,xx^\top$. Here $xx^\top$ has eigenvalue $\|x\|^2 \le 1$ along $x$ and 0 across it, and the factor in front, $p(1 - p)$ with $p$ in $(0, 1)$, is at most $\frac14$. So the loss is convex and $\frac14$-smooth by part (c), but not strongly convex.
 
-For $x = (0.6, 0.8)$ and $y = +1$, the loss, gradient norm and curvature are 0.6931, 0.5000 and 0.2500 at $\theta = 0$, but 0.0067, 0.0067 and 0.0066 at $\theta = (3, 4)$, where the margin is 5. Confidently classified records add almost no curvature, and at the minimizer most records are classified confidently. So on the running dataset, with features drawn on the unit sphere and labels from a logistic model, the smallest eigenvalue of $\nabla^2\mathcal L(\theta^*)$ is only 0.0233. A ridge term $\frac\lambda2\|\theta\|^2$ makes the loss $\lambda$-strongly convex, and its gradient is then at most $1 + \lambda R$ on a ball $\|\theta\| \le R$ ([Exercise 1](../../book-exercises/part01-prerequisites/06-optimization.md#sec-sol-opt-1)).
+For $x = (0.6, 0.8)$ and $y = +1$, the loss, gradient norm and curvature are 0.6931, 0.5000 and 0.2500 at $\theta = 0$, but 0.0067, 0.0067 and 0.0066 at $\theta = (3, 4)$, where the margin is 5. Confidently classified records add almost no curvature, and at the minimizer most records are classified confidently. So on the running dataset, with features drawn on the unit sphere and labels from a logistic model, the Hessian of the average loss at $\theta^*$ has smallest eigenvalue only 0.0233.
 :::
 
 ## Gradient descent and SGD {#sec-opt-gd}
@@ -281,7 +281,7 @@ $$\mathbb E[\mathcal L(\theta_t) - \mathcal L^*] \le \Big(\frac{1}{2\eta_t} - \f
 4. *Weighted schedule.* With $\eta_t = 2/(\lambda(t + 1))$ the coefficients are $\frac{\lambda(t - 1)}{4}$ and $\frac{\lambda(t + 1)}{4}$. Multiply the inequality of step 2 by $t$, and the distance terms become $\frac\lambda4[(t - 1)t\,\mathbb E a_t - t(t + 1)\mathbb E a_{t+1}]$ and telescope in the same way. The noise term becomes $\frac{t}{t + 1}\cdot\frac{G^2}{\lambda} \le \frac{G^2}{\lambda}$, so no harmonic sum appears and the total is at most $TG^2/\lambda$. Dividing by $\sum_t t = T(T + 1)/2$ and applying Jensen with the weights $2t/(T(T + 1))$, which also average to a convex combination, gives (b).
 :::
 
-The harmonic sum of step 3 is where the $\ln T$ comes from: the early iterates, taken with huge steps, are bad, and the uniform average gives them full weight (Lacoste-Julien, Schmidt and Bach 2012 weight them less). The bound is divided by $\lambda$, so with a weak regularizer it beats $RG/\sqrt T$ only after many steps. It is not an artefact of the proof: [Exercise 3](../../book-exercises/part01-prerequisites/06-optimization.md#sec-sol-opt-3) gives a quadratic with gradient noise of variance $\sigma^2$ on which the error is exactly $\sigma^2/(2\lambda T)$.
+The harmonic sum of step 3 is where the $\ln T$ comes from: the early iterates, taken with huge steps, are bad, and the uniform average gives them full weight. The bound is divided by $\lambda$, so with a weak regularizer it beats $RG/\sqrt T$ only after many steps. The $1/(\lambda T)$ rate is not an artefact of the proof. On the risk $\frac\lambda2\|\theta\|^2$ with gradient noise of variance $\sigma^2$, the last iterate of schedule (a) is minus the average noise divided by $\lambda$, and its error is exactly $\sigma^2/(2\lambda T)$.
 
 The constant $G$ depends on the set $\mathcal W$, since a strongly convex risk has unbounded gradients on $\mathbb R^d$. For $\ell + \frac\lambda2\|\theta\|^2$ with $\ell$ $L$-Lipschitz, the gradient on the ball of radius $R$ is at most $L + \lambda R$.
 
@@ -310,7 +310,7 @@ Once a record that deviates one way is drawn, the rest deviate on average slight
 $$\frac{1}{B^2}\Big[B\sigma_1^2 - B(B - 1)\frac{\sigma_1^2}{n - 1}\Big] = \frac{\sigma_1^2}{B}\cdot\frac{n - B}{n - 1}.$$
 :::
 
-The factor $\frac{n - B}{n - 1}$ is 1 for $B = 1$ and 0 for $B = n$, when the batch is the whole dataset. For the three records of @sec-opt-sgd-convex at $\theta = 4$, $\sigma_1^2 = 14/3$, and over the three possible batches of two the batch average has variance $7/6$, half of $7/3$ ([Exercise 5](../../book-exercises/part01-prerequisites/06-optimization.md#sec-sol-opt-5) enumerates them).
+The factor $\frac{n - B}{n - 1}$ is 1 for $B = 1$ and 0 for $B = n$. For the three records of @sec-opt-sgd-convex at $\theta = 4$, $\sigma_1^2 = 14/3$, and over the three possible batches of two the batch average has variance $7/6$, half of the $\sigma_1^2/2 = 7/3$ of drawing with replacement.
 
 Noise added on top of the sampling, independent and with mean zero, simply adds its mean squared size to the mean squared length of the gradient.
 
@@ -323,7 +323,7 @@ In the setting of @thm-opt-sgd-convex with an $L$-Lipschitz loss, let each per-r
 2. *Substitute.* Put $G^2 = L^2 + \sigma^2$ into @eq-opt-sgd-convex and choose $\eta$ as in step 8 of that proof.
 :::
 
-So noisier gradients call for smaller steps and longer runs. Setting the bound $R\sqrt{L^2 + \sigma^2}/\sqrt T$ equal to a target error and solving for $T$, the steps needed grow in proportion to $L^2 + \sigma^2$, so noise of size $\sigma = 3L$ multiplies them by 10. A batch of $B$ costs $B$ gradient evaluations to divide the variance by $B$, so it pays off only through parallelism, and [Exercise 6](../../book-exercises/part01-prerequisites/06-optimization.md#sec-sol-opt-6) shows that beyond a certain size they waste computation.
+So noisier gradients call for smaller steps and longer runs. Setting the bound $R\sqrt{L^2 + \sigma^2}/\sqrt T$ equal to a target error and solving for $T$, the steps needed grow in proportion to $L^2 + \sigma^2$, so noise of size $\sigma = 3L$ multiplies them by 10. A batch of $B$ costs $B$ gradient evaluations to divide the variance by $B$, so it pays off only through parallelism.
 
 ::: {#exm-opt-noise}
 At the logistic minimizer of the running example, $\sigma_1^2 = 0.1722$. The script measures the variance of the average gradient over 4,000 batches of each size from 1 to 500, and @eq-opt-minibatch matches it within the Monte Carlo error (@fig-opt-minibatch-variance). At $B = 500 = n/2$, for example, it measures $3.47\times10^{-4}$ with replacement against $3.44\times10^{-4}$ predicted. Without replacement it measures $1.74\times10^{-4}$ against $1.72\times10^{-4}$, half as much.
@@ -374,7 +374,7 @@ This is the argument of Ghadimi and Lan (2013). Without noise the rate is of ord
 A small gradient is all you get. A stationary point can be a local minimum, a saddle point or a flat region far from anything good, and nothing bounds $\mathcal L(\theta_T) - \mathcal L^*$. Without convexity there is no tangent inequality (@lem-opt-tangent) to turn the progress into a gap in function value.
 
 ::: {#exm-opt-sigmoid}
-The **sigmoid loss** $\operatorname{sig}(-m)$, with the margin $m$ of @exm-opt-logistic, is a smooth stand-in for the 0–1 loss, which counts misclassified records. It is not convex, since $\operatorname{sig}$ curves both ways. Its Hessian is $\operatorname{sig}''(-m)\,xx^\top$, so its smoothness constant is the largest $|\operatorname{sig}''|$, $\beta = \frac{1}{6\sqrt3} = 0.0962$ ([Exercise 4](../../book-exercises/part01-prerequisites/06-optimization.md#sec-sol-opt-4)). The loss lies in $(0, 1)$ and equals $\frac12$ at $\theta_1 = 0$, so $\Gamma \le \frac12$. Every gradient has length at most $\max\operatorname{sig}' = \frac14$, and a variance is at most the mean squared length, so $\sigma^2 \le \frac1{16}$.
+The **sigmoid loss** $\operatorname{sig}(-m)$, with the margin $m$ of @exm-opt-logistic, is a smooth stand-in for the 0–1 loss, which counts misclassified records. It is not convex, since $\operatorname{sig}$ curves both ways. The margin is linear in $\theta$, so its Hessian is $\operatorname{sig}''(-m)\,xx^\top$, and its smoothness constant is the largest $|\operatorname{sig}''|$, reached where $\operatorname{sig} = (3 \pm \sqrt3)/6$, which is $\beta = \frac{1}{6\sqrt3} = 0.0962$. The loss lies in $(0, 1)$ and equals $\frac12$ at $\theta_1 = 0$, so $\Gamma \le \frac12$. Every gradient has length at most $\max\operatorname{sig}' = \frac14$, and a variance is at most the mean squared length, so $\sigma^2 \le \frac1{16}$.
 
 On the logistic data, with $2\Gamma = 1$, the step of the theorem at $T = 100$ is $\sqrt{1/(0.0962 \times 0.0625 \times 100)} = 1.289$, well below $1/\beta = 10.4$. @tbl-opt-nonconvex averages 5 runs.
 
@@ -418,7 +418,7 @@ $$\|\theta' - \theta\| \le \frac{\|\nabla\mathcal L_\lambda(\theta'; D)\|}{\lamb
 
 The move shrinks like $1/n$, because one record carries weight $1/n$. Each loss is $L$-Lipschitz, so the trained model's loss on any record changes by at most $\frac{2L^2}{\lambda n}$, a bound called **uniform stability**, which the next chapter turns into a generalization bound.
 
-The bound is loose in two places. It uses only the regularizer's curvature, while real data add their own, and it uses the worst case $2L$ for the gradient difference. [Exercise 7](../../book-exercises/part01-prerequisites/06-optimization.md#sec-sol-opt-7) sharpens both and measures them on the running example.
+The bound is loose in two places. It uses only the regularizer's curvature, while real data add their own, and it uses the worst case $2L$ for the gradient difference.
 
 ::: {#exm-opt-erm}
 The script solves regularized logistic regression exactly with Newton's method, replaces one random record with a fresh one drawn the same way, solves again, and records the largest move over 20 replacements. The bound is $2/(\lambda n)$, for example $2/(0.1 \times 1{,}000) = 0.02$ (@tbl-opt-erm).
@@ -449,7 +449,7 @@ Let $\ell(\theta; z) = |\theta - z|$, which is convex and 1-Lipschitz, and let $
 2. *Before and after.* In $D$ the majority is 0, so the minimizer is 0. After the replacement the majority is 1, a move of 1 whatever $n$ is.
 :::
 
-With $\frac\lambda2\theta^2$ added, @eq-opt-erm-sensitivity caps the move at $2/(\lambda n)$, and [Exercise 8](../../book-exercises/part01-prerequisites/06-optimization.md#sec-sol-opt-8) finds the actual move, half of that.
+With $\frac\lambda2\theta^2$ added, @eq-opt-erm-sensitivity caps the move at $2/(\lambda n)$, with subgradients in place of gradients. The actual move is half of that, $1/(\lambda n)$, where the new subgradient $-1/n + \lambda\theta$ vanishes.
 
 For a non-convex loss even a regularizer may not help. With labels $z \in \{-1, +1\}$, the double-well loss $\frac14(\theta^2 - 1)^2 - z\theta$ has the risk $\frac14(\theta^2 - 1)^2 - \bar z\theta$: two valleys near $\pm1$, tilted towards the sign of the mean label $\bar z$. With 11 records, six labelled $+1$, replacing one $+1$ by $-1$ flips that sign and moves the minimizer from $1.0427$ to $-1.0427$ (@fig-opt-nonconvex-jump), and with 1,001 records the move is still 2.0010. A ridge term fixes this only if it makes the objective convex, as step 3 of the proof of @thm-opt-erm-sensitivity needs. A fixed number of SGD steps from a fixed start, by contrast, changes continuously with the data, so for non-convex models one studies the influence of a record on the *algorithm*.
 
@@ -510,5 +510,3 @@ uv run python code/part01-prerequisites/optimization.py
 - Lacoste-Julien, Schmidt & Bach, "A Simpler Approach to Obtaining an O(1/t) Convergence Rate for the Projected Stochastic Subgradient Method" (2012); Rakhlin, Shamir & Sridharan, "Making Gradient Descent Optimal for Strongly Convex Stochastic Optimization" (ICML 2012): averaging schemes without the $\ln T$.
 - Bottou, Curtis & Nocedal, "Optimization Methods for Large-Scale Machine Learning" (SIAM Review 2018): noise, learning rates and batch sizes in practice.
 - Bousquet & Elisseeff, "Stability and Generalization" (JMLR 2002): the stability of regularized ERM and what it implies.
-
-**Practice.** Exercises for this chapter, each with a worked solution, are in [the exercise book](../../book-exercises/part01-prerequisites/06-optimization.md).

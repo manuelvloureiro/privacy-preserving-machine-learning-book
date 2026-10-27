@@ -55,13 +55,7 @@ class Skeleton:
     max_words: int = 0
     max_section_words: int = 0
     warn_below_words: int = 0
-    last_line: str = ""
-    last_line_page: bool = False
     last_line_any: list[str] = field(default_factory=list[str])
-    title_prefix: str = ""
-    exercise_sections: str = ""
-    exercise_quote: str = ""
-    solution_div: str = ""
     required_h3_per_section: list[str] = field(default_factory=list[str])
     optional_h3: list[str] = field(default_factory=list[str])
 
@@ -208,12 +202,9 @@ def matches(heading: str, patterns: list[str]) -> bool:
 
 
 def prefix_of(page: Page, skel: Skeleton) -> str | None:
-    """The chapter's label prefix: the segment after sec- (or sec-sol-) in the first ## id."""
+    """The chapter's label prefix: the segment after sec- in the first ## id."""
     for h in page.headings:
         if h.level == 2 and h.id and h.id.startswith("sec-"):
-            if skel.exercise_sections:
-                m = re.match(r"sec-sol-(.+)-\d+$", h.id)
-                return m.group(1) if m else None
             parts = h.id.split("-")
             if len(parts) >= 2:
                 return parts[1]
@@ -240,8 +231,6 @@ def check_headings(page: Page, skel: Skeleton, prefix: str | None) -> list[Findi
     titles = [h for h in page.headings if h.level == 1]
     if skel.single_title and len(titles) != 1:
         out.append(Finding(page.path, titles[1].line if len(titles) > 1 else 1, "a page has exactly one # title"))
-    elif skel.title_prefix and not titles[0].text.startswith(skel.title_prefix.removeprefix("# ")):
-        out.append(Finding(page.path, titles[0].line, f"the title starts with {skel.title_prefix!r}"))
     h2 = [h for h in page.headings if h.level == 2]
     if skel.opening and titles and h2:
         body = page.words(titles[0].line, h2[0].line - 1)
@@ -265,7 +254,7 @@ def check_headings(page: Page, skel: Skeleton, prefix: str | None) -> list[Findi
                         f'"## {h.text}" needs an id {{#{skel.section_ids}-{prefix or "<prefix>"}-...}}',
                     )
                 )
-            elif skel.section_ids and prefix and h.id and prefix_in(h.id, skel) != prefix:
+            elif skel.section_ids and prefix and h.id and prefix_in(h.id) != prefix:
                 out.append(Finding(page.path, h.line, f"id {h.id} does not use the chapter's prefix {prefix!r}"))
         elif h.level == 3 and matches(h.text, skel.forbidden_h3):
             out.append(Finding(page.path, h.line, f'forbidden heading "### {h.text}" ({skel.name})'))
@@ -296,10 +285,7 @@ def check_headings(page: Page, skel: Skeleton, prefix: str | None) -> list[Findi
     return out
 
 
-def prefix_in(label: str, skel: Skeleton) -> str:
-    if skel.exercise_sections:
-        m = re.match(r"sec-sol-(.+)-\d+$", label)
-        return m.group(1) if m else ""
+def prefix_in(label: str) -> str:
     parts = label.split("-")
     return parts[1] if len(parts) >= 2 else ""
 
@@ -308,7 +294,7 @@ def check_labels(page: Page, skel: Skeleton, prefix: str | None) -> list[Finding
     out: list[Finding] = []
     if skel.labels_use_prefix and prefix:
         for label, line in page.labels:
-            if prefix_in(label, skel) != prefix:
+            if prefix_in(label) != prefix:
                 out.append(Finding(page.path, line, f"label {label} does not use the chapter's prefix {prefix!r}"))
     if skel.forbid_bold_results:
         for line in page.bold_results:
@@ -388,44 +374,12 @@ def check_budget(page: Page, skel: Skeleton) -> list[Finding]:
 
 def check_tail(page: Page, skel: Skeleton, rel: str) -> list[Finding]:
     out: list[Finding] = []
-    if skel.last_line:
-        m = re.match(skel.last_line, page.last_line)
-        if not m:
-            out.append(
-                Finding(page.path, len(page.lines), "the last line is the pointer AGENTS.md gives this kind of page")
-            )
-        elif skel.last_line_page and "page" in m.groupdict() and m.group("page") != rel.removesuffix(".md"):
-            out.append(
-                Finding(
-                    page.path,
-                    len(page.lines),
-                    f"the pointer names {m.group('page')}, not this page {rel.removesuffix('.md')}",
-                )
-            )
     if skel.last_line_any and not any(re.match(p, page.last_line) for p in skel.last_line_any):
         out.append(
             Finding(
                 page.path, len(page.lines), "the last line is one of the pointers AGENTS.md gives this kind of page"
             )
         )
-    return out
-
-
-def check_exercises(page: Page, skel: Skeleton, prefix: str | None) -> list[Finding]:
-    out: list[Finding] = []
-    if not skel.exercise_sections or not prefix:
-        return out
-    for n, (h, start, end) in enumerate(page.sections(), 1):
-        want = skel.exercise_sections.format(prefix=prefix, n=n)
-        if h.id != want:
-            out.append(Finding(page.path, h.line, f"exercise {n} has id {h.id}, not {want}"))
-        body = [line for line in page.lines[start:end] if line.strip()]
-        if skel.exercise_quote and not (body and re.match(skel.exercise_quote.format(n=n), body[0])):
-            out.append(
-                Finding(page.path, h.line, f"exercise {n} opens with the quoted statement `> **Exercise {n}.**`")
-            )
-        if skel.solution_div and not any(re.match(skel.solution_div, line) for line in body):
-            out.append(Finding(page.path, h.line, f"exercise {n} has no collapsed Solution callout"))
     return out
 
 
@@ -439,7 +393,6 @@ def check_page(path: Path, rel: str, skel: Skeleton) -> list[Finding]:
         + check_tables(page, skel, prefix)
         + check_budget(page, skel)
         + check_tail(page, skel, rel)
-        + check_exercises(page, skel, prefix)
     )
     return sorted(findings, key=lambda f: f.line)
 

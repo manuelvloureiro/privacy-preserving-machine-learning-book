@@ -38,7 +38,7 @@ Take $D = (\text{Alice: smoker}, \text{Bob: non-smoker}, \text{Carol: smoker})$.
 
 ## Pure and approximate differential privacy {#sec-dpdef-definition}
 
-"The output distribution barely changes" needs a measure. An average such as the Kullback–Leibler divergence can hide one rare output with an enormous loss. A difference such as the total variation (TV) distance adds up along a chain of $n$ replacements, so no single tolerance is both useful and private ([Exercise 8](../../book-exercises/part03-dp-foundations/01-definition.md#sec-sol-dpdef-8)). Differential privacy therefore bounds a ratio, in the worst case over every pair and every event, and allows a small difference only on top. @sec-apx-cal-dp in the appendices derives the definition's forms from scratch.
+"The output distribution barely changes" needs a measure. An average such as the Kullback–Leibler divergence can hide one rare output with an enormous loss. A difference such as the total variation (TV) distance fails another way. Any two datasets of $n$ records are $n$ replacements apart, so a tolerance $\tau$ per replacement bounds their outputs' difference by $n\tau$, and a useful output needs $n\tau$ near 1. But $\tau$ near $1/n$ already allows publishing a random record in full (@sec-dpdef-small-delta). Differential privacy therefore bounds a ratio, in the worst case over every pair and every event, and allows a small difference only on top. @sec-apx-cal-dp in the appendices derives the definition's forms from scratch.
 
 Write $M$ for a **mechanism**, a randomized algorithm that maps a dataset to a random output in a set $\mathcal Y$. The probability that the output lands in an event $S \subseteq \mathcal Y$ is taken over the mechanism's own coins.
 
@@ -48,7 +48,7 @@ $$\Pr[M(D) \in S] \le e^\varepsilon\,\Pr[M(D') \in S] + \delta.$$ {#eq-dpdef-def
 Because the neighbouring relation is symmetric, the inequality also holds with $D$ and $D'$ swapped. The case $\delta = 0$ is **pure DP**, written **$\varepsilon$-DP**. The case $\delta > 0$ is **approximate DP** (Dwork, Kenthapadi, McSherry, Mironov & Naor, 2006).
 :::
 
-The definition bounds events because an adversary's decision rule, "say $D'$ when the output is in $S$", is an event. The dataset is fixed and the randomness is the mechanism's own, so privacy comes only from added noise. A deterministic algorithm that is not constant fails the definition for every $\delta < 1$ ([Exercise 9](../../book-exercises/part03-dp-foundations/01-definition.md#sec-sol-dpdef-9)), so rounding or suppressing small cells gives no guarantee by itself.
+The definition bounds events because an adversary's decision rule, "say $D'$ when the output is in $S$", is an event. The dataset is fixed and the randomness is the mechanism's own, so privacy comes only from added noise. A deterministic algorithm that is not constant fails the definition for every $\delta < 1$. Somewhere along a chain of neighbours its output changes, and the event "the output equals its value on $D$" then has probability 1 on $D$ and 0 on $D'$. So rounding or suppressing small cells gives no guarantee by itself.
 
 The privacy loss of the opening checks the definition output by output.
 
@@ -100,7 +100,7 @@ Walking the path from $D'$ back to $D$ gives the other order.
 3. *The counterexample for the converse.* Let $M$ output the number of records. It is $0$-DP under replace, because datasets of the same size give the same output. Under add/remove, the event $\{n + 1\}$ has probability 1 on a dataset of $n + 1$ records and 0 on its neighbour, and no finite $e^\varepsilon$ times 0 reaches 1.
 :::
 
-The factor 2 is reached when one replacement changes two counts, as changing Alice's answer does in the survey's histogram (smokers, non-smokers). With Laplace noise of scale $1/\varepsilon$ in each bin, the script finds largest losses of 1.0000 under add/remove and 2.0000 under replace at $\varepsilon = 1$. For approximate DP the same path gives $(2\varepsilon, (1 + e^\varepsilon)\delta)$ ([Exercise 2](../../book-exercises/part03-dp-foundations/01-definition.md#sec-sol-dpdef-2)).
+The factor 2 is reached when one replacement changes two counts, as changing Alice's answer does in the survey's histogram (smokers, non-smokers). With Laplace noise of scale $1/\varepsilon$ in each bin, the script finds largest losses of 1.0000 under add/remove and 2.0000 under replace at $\varepsilon = 1$. For approximate DP the same path gives $(2\varepsilon, (1 + e^\varepsilon)\delta)$, because the second step multiplies the first step's $\delta$ by $e^\varepsilon$.
 
 ::: {#exm-dpdef-survey-ratio}
 In the survey, take the true bits $(1, 0, 1)$ for Alice, Bob and Carol and the replace neighbour $(0, 0, 1)$. The script checks all 256 events of the 8 report vectors. The largest ratio over events is 3.0000, the same as over single outcomes, as @prp-dpdef-pointwise says. Every replace pair gives the same, so the survey is $\ln 3$-DP under replace and no better, and @thm-dpdef-rr shows why only Alice's coins matter.
@@ -191,7 +191,7 @@ A mechanism has a curve, not a pair: it is $(\varepsilon, \delta(\varepsilon))$-
 ![The smallest $\delta$ against $\varepsilon$ for randomized response at $\ln 3$, the Laplace count of scale 1 and the Gaussian count with $\sigma = 2$. Only the Gaussian curve never reaches 0. Dashed: its loose tail $\Pr[L > \varepsilon]$.](figures/dpdef_delta_curves.svg){#fig-dpdef-delta-curves}
 
 ::: {#exm-dpdef-curves}
-For each mechanism, add up the excess mass where the likelihood ratio exceeds $e^\varepsilon$. For the survey only the report with ratio 3 counts, which gives $\delta(\varepsilon) = (3 - e^\varepsilon)_+/4$ ([Exercise 3](../../book-exercises/part03-dp-foundations/01-definition.md#sec-sol-dpdef-3)), so $\delta(0.5) = 0.3378$ and $\delta(1) = 0.0704$. For the Laplace count, the closed form of @sec-div-hockey gives $\delta(0.5) = 0.2212$ and $\delta(1) = 0$.
+For each mechanism, add up the excess mass where the likelihood ratio exceeds $e^\varepsilon$. For the survey only the report with ratio 3 counts, which gives $\delta(\varepsilon) = (3 - e^\varepsilon)_+/4$, so $\delta(0.5) = 0.3378$ and $\delta(1) = 0.0704$. For the Laplace count of scale 1, the closed form of @sec-div-hockey gives $\delta(0.5) = 0.2212$ and $\delta(1) = 0$.
 
 For the Gaussian count, whose true value moves by 1 between neighbours, write $\mu = 1/\sigma = 0.5$ for that shift in units of the noise. The privacy loss is normal with variance $\mu^2$ and mean $\mu^2/2$ under $M(D)$, $-\mu^2/2$ under $M(D')$ (@sec-div-gauss). By step 2 of the proof, $\delta(\varepsilon)$ is the $P$-probability of $\{L > \varepsilon\}$ minus $e^\varepsilon$ times its $Q$-probability, and standardizing the loss with the standard normal distribution function $\Phi$ gives
 $$\delta(\varepsilon) = \Phi\Big(\frac\mu2 - \frac\varepsilon\mu\Big) - e^\varepsilon\,\Phi\Big(-\frac\mu2 - \frac\varepsilon\mu\Big).$$
@@ -268,7 +268,7 @@ and $\Pr[\text{correct}] = \frac12 + \frac12\mathrm{Adv}$ gives the second bound
 5. *Tightness and random datasets.* Against randomized response, the test "say $D'$ on report 0" has $\alpha = \beta = 1/(1 + e^\varepsilon)$, the crossing point, so it attains the bound. A bound that holds for each fixed pair also holds for an average over random pairs.
 :::
 
-Small $\varepsilon$ is strong and large $\varepsilon$ promises little. At $\varepsilon = 0.1$ the best attacker is right with probability at most 0.525, while at $\varepsilon = 5$ it may be right 99.3% of the time. The older bound $e^\varepsilon - 1$ (Yeom et al., 2018) is about twice as large and says nothing once $e^\varepsilon \ge 2$. A count with Laplace noise of scale $1/\varepsilon$ has best advantage $1 - e^{-\varepsilon/2}$, from @sec-div-hockey, which stays below $\tanh(\varepsilon/2)$ (@fig-dpdef-advantage; [Exercise 7](../../book-exercises/part03-dp-foundations/01-definition.md#sec-sol-dpdef-7) measures the gap).
+At $\varepsilon = 0.1$ the best attacker is right with probability at most 0.525, while at $\varepsilon = 5$ it may be right 99.3% of the time. The older bound $e^\varepsilon - 1$ (Yeom et al., 2018) is about twice as large and says nothing once $e^\varepsilon \ge 2$. A count with Laplace noise of scale $1/\varepsilon$ has best advantage $1 - e^{-\varepsilon/2}$, from @sec-div-hockey, which stays below $\tanh(\varepsilon/2)$ (@fig-dpdef-advantage).
 
 ![The largest membership advantage under $\varepsilon$-DP (black), the looser bound $e^\varepsilon - 1$ (dotted) and the exact best advantage against the Laplace count (orange). Markers: 100,000 simulated games with the likelihood-ratio adversary.](figures/dpdef_advantage.svg){#fig-dpdef-advantage}
 
@@ -357,7 +357,7 @@ $$(1 - \delta)^n = e^{n\ln(1 - \delta)} \approx e^{-n\delta}.$$
 
 So $\delta$ is a per-person budget for catastrophe. Pick it well below $1/n$, with $n$ the number of people rather than records. A common choice is $\delta = 1/n^{1.5}$, and fixed values need checking: Abadi et al. (2016) used $\delta = 10^{-5}$ for 60,000 training examples, so $n\delta = 0.6$.
 
-One pair $(\varepsilon, \delta)$ can describe mechanisms that fail in very different ways (@fig-dpdef-delta-shapes). The Gaussian count with $\sigma = 2$ is $(1, 6.830\times10^{-3})$-DP, and its loss exceeds 3 with probability $4.462\times10^{-9}$. Publishing a person's bit with probability $6.830\times10^{-3}$, and otherwise running randomized response at $\varepsilon = 1$, gives the same pair, with the whole $\delta$ on outputs of infinite loss ([Exercise 10](../../book-exercises/part03-dp-foundations/01-definition.md#sec-sol-dpdef-10)). From the pair alone, @eq-dpdef-bad-set at level 3 allows
+One pair $(\varepsilon, \delta)$ can describe mechanisms that fail in very different ways (@fig-dpdef-delta-shapes). The Gaussian count with $\sigma = 2$ is $(1, 6.830\times10^{-3})$-DP, and its loss exceeds 3 with probability $4.462\times10^{-9}$. Publishing a person's bit with probability $6.830\times10^{-3}$, and otherwise running randomized response at $\varepsilon = 1$, gives the same pair, with the whole $\delta$ on outputs of infinite loss. From the pair alone, @eq-dpdef-bad-set at level 3 allows
 $$\Pr[L > 3] \le \frac{6.830\times10^{-3}}{1 - e^{1 - 3}} = 7.899\times10^{-3},$$
 and the catastrophic mechanism comes close to it. So read a quoted pair pessimistically unless you know the whole curve $\delta(\varepsilon)$.
 
@@ -431,7 +431,7 @@ uv run python code/part03-dp-foundations/definition.py
 | --- | --- |
 | Histogram, Laplace noise $1/\varepsilon$ per bin, $\varepsilon = 1$ | Largest loss 1.0000 (add/remove), 2.0000 (replace) |
 | Disjoint uniform distributions, $m = 1000$ | Pointwise $\delta$ 0.0010; event $\delta$ 1.0000 |
-| Additive-only definition, $n = 1000$ (Exercise 8) | TV 0.1000, accuracy 0.5500; exposure 0.6323 |
+| Additive-only definition, $n = 1000$ | TV 0.1000, accuracy 0.5500; exposure 0.6323 |
 | Randomized response, 3 people, 256 events | Event ratio 3.0000 = outcome ratio; hockey-stick at $\gamma = 2$ 0.2500 |
 | Survey, $n = 1000$, $\varepsilon = \ln 3 = 1.0986$ | sd 0.0274, simulated 0.0278 (mean 0.2996); central 0.00129 |
 | $\delta(0.5)$, $\delta(1)$ | Randomized response 0.3378, 0.0704; Laplace 0.2212, 0; Gaussian @tbl-dpdef-gauss |
@@ -486,5 +486,3 @@ uv run python code/part03-dp-foundations/definition.py
 - Kosinski, Stillwell & Graepel, "Private Traits and Attributes Are Predictable from Digital Records of Human Behavior" (PNAS, 2013); Duhigg, "How Companies Learn Your Secrets" (New York Times Magazine, 2012). Inferences from public or volunteered data, the "not a violation" side of @tbl-dpdef-violation.
 - Narayanan & Shmatikov, "Robust De-anonymization of Large Sparse Datasets" (IEEE S&P 2008); Carlini, Liu, Erlingsson, Kos & Song, "The Secret Sharer" (USENIX Security 2019). Two failures that depend on a person's own record.
 - Nissenbaum, "Privacy as Contextual Integrity" (Washington Law Review, 2004). Norms of information flow, which cover far more than DP.
-
-**Practice.** Exercises for this chapter, each with a worked solution, are in [the exercise book](../../book-exercises/part03-dp-foundations/01-definition.md).

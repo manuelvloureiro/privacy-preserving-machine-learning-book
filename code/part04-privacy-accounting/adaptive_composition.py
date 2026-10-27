@@ -672,27 +672,6 @@ def print_table(rng: np.random.Generator) -> None:
         f"  typical records ever excluded: {ever_typ:.1%}  "
         f"median final spend typical={float(np.median(cum[~pop.hard, -1])):.3f}  of B={budget:.3f}"
     )
-    print("[Exercises: check values]")
-    p34 = rr_keep_probability(math.log(3))
-    stopped = [(p34 * p34, (1 - p34) ** 2), (p34 * (1 - p34), (1 - p34) * p34), (1 - p34, p34)]
-    print(f"  Ex1: D_2 of the run that stops after a 0: {math.log(sum(pp * pp / qq for pp, qq in stopped)):.4f}")
-    print(f"  Ex3: worst fixed-time crossing at delta=0.05: {normal_cdf(-math.sqrt(2 * math.log(1 / 0.05))):.5f}")
-    half = gaussian_individual_rdp(alpha_star, [0.5] * K0, SIGMA, 1.0)
-    print(
-        f"  Ex4: half-norm spend={half:.4f}  eps={rdp_to_dp(half, alpha_star, DELTA):.3f}  "
-        f"steps={math.floor(budget / gaussian_individual_rdp(alpha_star, [0.5], SIGMA, 1.0) + 1e-9)}"
-    )
-
-    def unit_rho(a: float) -> float:
-        return a
-
-    few = [1.5, 2.0, 3.0, 4.0, 6.0, 8.0, 12.0, 16.0, 32.0, 64.0]
-    a_quarter = best_dp(lambda a: a / 4, DELTA)[1]
-    print(
-        f"  Ex5: fixed={best_dp(unit_rho, DELTA)[0]:.3f}  Ville grid={ville_odometer(unit_rho, DELTA):.3f}  "
-        f"Ville ten orders={ville_odometer(unit_rho, DELTA, few):.3f}  "
-        f"Ville single order={ville_odometer(unit_rho, DELTA, [a_quarter]):.3f}"
-    )
     print(
         f"  per-step worst case alpha*/(2 sigma^2)={alpha_star / (2 * SIGMA**2):.4f}  "
         f"check gaussian_individual_rdp(alpha*, [1]*k0)={gaussian_individual_rdp(alpha_star, [1.0] * K0, SIGMA, 1.0):.3f}"

@@ -610,13 +610,6 @@ def print_table(rng: np.random.Generator) -> None:
         + " ".join(f"{x:.4f}" for x in a_sim)
     )
 
-    print("[Exercises]")
-    print(
-        f"  non-monotone EM with e^(eps u), k=3: ln ratio={non_monotone_ratio(3, eps):.4f}  "
-        f"k=1000: {non_monotone_ratio(1000, eps):.4f}"
-    )
-    print(f"  median by EM, k=101, eps=1, t=ln 20: gap bound={em_gap_threshold(101, eps, math.log(20)):.2f}")
-
     print("[AboveThreshold tightness, more digits]")
     for mm in (10, 20, 40):
         print(f"  m={mm}: max |ln ratio|={above_threshold_max_log_ratio(mm, eps):.6f}")
@@ -662,13 +655,6 @@ def print_table(rng: np.random.Generator) -> None:
         f"  eps=1, range B=1000 instead of 10: E|output - median|={median_expected_abs_error(norms, 1.0, 1000.0):.4f}  "
         f"bound={median_rank_bound(norms, 1.0, math.log(20), 1000.0):.1f}"
     )
-
-
-def non_monotone_ratio(k: int, eps: float) -> float:
-    """ln Pr[1 | D]/Pr[1 | D'] for weights e^{εu} on u(D) = (1, 0, ..., 0), u(D') = (0, 1, ..., 1)."""
-    p = em_probabilities([1.0] + [0.0] * (k - 1), eps, monotone=True)
-    q = em_probabilities([0.0] + [1.0] * (k - 1), eps, monotone=True)
-    return float(np.log(p[0] / q[0]))
 
 
 # --- Figures ------------------------------------------------------------------------------------

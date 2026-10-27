@@ -501,19 +501,6 @@ def print_table(rng: np.random.Generator) -> None:
         f"optimal={per_step_epsilon(1.0, 1000, 1e-5, 'optimal'):.5f}"
     )
 
-    print("[Exercises]")
-    print(f"  ex1 eps=1: tanh form={rr_mean_loss(1.0):.4f}  DRV={drv_mean_bound(1.0):.4f}  eps^2/2=0.5000")
-    print(
-        f"  ex2 crossover eps=0.1 delta'=1e-5: formula k > {2 * math.log(1e5) / (1 - math.expm1(0.1)) ** 2:.1f}  "
-        f"search k={advanced_crossover(0.1, 1e-5)}"
-    )
-    rp, rq = rr_pair(math.log(3))
-    p2, q2 = product_pair(rp, rq, 2)
-    print(
-        f"  ex3 k=2 eps=ln3: delta(0)={hockey_stick(p2, q2, 0):.4f}  delta(ln3)={hockey_stick(p2, q2, math.log(3)):.4f}  "
-        f"delta(2ln3)={hockey_stick(p2, q2, 2 * math.log(3)):.4f}"
-    )
-
 
 # --- Figures --------------------------------------------------------------------------------
 

@@ -36,7 +36,7 @@ the gamma density with shape $d$ and scale $s$. At a given length every directio
 3. *Moments.* A gamma variable with shape $d$ and scale $s$ has mean $ds$ and variance $ds^2$. The second moment is the variance plus the squared mean, $ds^2 + d^2s^2 = d(d + 1)s^2$.
 :::
 
-A Gaussian vector's squared length has mean $d\sigma^2$, against $d(d + 1)s^2$ here, so in high dimension the pure-DP noise is longer by a factor that grows with $d$. [Exercise 4](../../book-exercises/part05-dp-ml/01-dp-erm.md#sec-sol-dperm-4) finds the dimension where the two cross.
+A Gaussian vector's squared length has mean $d\sigma^2$, against $d(d + 1)s^2$ here, so in high dimension the pure-DP noise is longer by a factor that grows with $d$.
 
 ::: {#thm-dperm-output name="Output perturbation"}
 Let each loss $\ell(\cdot; z)$ be convex and differentiable, with gradients of length at most $L$, let $\lambda > 0$, and let neighbours replace one record. Release
@@ -126,7 +126,7 @@ The same argument with $D$ and $D'$ exchanged bounds $\det(A)/\det(A')$, the Jac
 7. *When $\varepsilon' \le 0$.* The Jacobian factor alone would then exceed $\varepsilon$, and a larger ridge shrinks it. With $\lambda + \lambda_+$ in place of $\lambda$, $a = e^{\varepsilon/4} - 1$, so the Jacobian takes $2\ln(1 + a) = \varepsilon/2$ and the noise gets the other half.
 :::
 
-The analysis is safe but not tight. The noise factor reaches $e^{\varepsilon'}$ only if both records have full-length gradients in opposite directions. A logistic gradient has full length only at a very negative margin, and two records whose gradients point in opposite directions have margins of opposite sign, so at most one of them can. The Jacobian bound charges both records the full curvature $c$, but the record that arrives raises the determinant while the one that leaves lowers it, so $\ln(1 + a)$ suffices, half the charge ([Exercise 6](../../book-exercises/part05-dp-ml/01-dp-erm.md#sec-sol-dperm-6)).
+The analysis is safe but not tight. The noise factor reaches $e^{\varepsilon'}$ only if both records have full-length gradients in opposite directions. A logistic gradient has full length only at a very negative margin, and two records whose gradients point in opposite directions have margins of opposite sign, so at most one of them can. The Jacobian bound charges both records the full curvature $c$, but the record that arrives raises the determinant while the one that leaves lowers it, so $\ln(1 + a)$ suffices, half the charge.
 
 The method needs exact minimization, which no computer delivers, and even rounding can leak ([Discrete mechanisms](../part03-dp-foundations/08-discrete-mechanisms.md)). It also needs twice-differentiable losses, so a support vector machine's hinge loss must be smoothed first. Iyengar et al. (2019) tolerate inexact solvers by adding a little output noise.
 
@@ -382,5 +382,3 @@ uv run python code/part05-dp-ml/dp_erm.py
 - Iyengar, Near, Song, Thakkar, Thakurta & Wang, "Towards Practical Differentially Private Convex Optimization" (IEEE S&P 2019). Approximate minima perturbation, an objective perturbation that tolerates inexact solvers, and a benchmark of all three methods.
 - Balle & Wang, "Improving the Gaussian Mechanism for Differential Privacy: Analytical Calibration and Optimal Denoising" (ICML 2018). The exact calibration @eq-dperm-gauss-delta.
 - Dong, Roth & Su, "Gaussian Differential Privacy" (JRSS-B 2022). The composition of Gaussian mechanisms used in @sec-dperm-gradient.
-
-**Practice.** Exercises for this chapter, each with a worked solution, are in [the exercise book](../../book-exercises/part05-dp-ml/01-dp-erm.md).

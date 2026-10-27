@@ -143,7 +143,7 @@ $$\mathrm{TV}(Q_0^n, Q_1^n) \le a(e^{\varepsilon_0} - 1)\sqrt{n/2}.$$
 Randomized response is optimal up to a constant, since dividing @eq-trust-rr-sd by @eq-trust-lower leaves $\sqrt2\,e^{\varepsilon_0/2}/(1 - 2\beta)$. The contraction is loose by a constant. For one report at $\varepsilon_0 = 1$, comparing $\mathrm{Bern}(0.5)$ with $\mathrm{Bern}(0.6)$, the exact KL is 0.00429 and @eq-trust-kl-contraction gives 0.02952. Duchi, Jordan & Wainwright (2018) apply the contraction to many local problems. Bounds of the same order hold even when each randomizer may depend on earlier reports.
 
 ::: {#exm-trust-gap}
-At $\varepsilon = 1$ and $n = 1{,}000$ (@fig-trust-rr-gap), randomized response has standard deviation $3.03\times10^{-2}$ and the lower bound at $\beta = 0.1$ is $1.04\times10^{-2}$. Their ratio 2.91 is the constant $\sqrt2\,e^{1/2}/(1 - 2\beta) = 1.4142 \times 1.6487/0.8$. The central Laplace mechanism gives $\sqrt2/1000 = 1.41\times10^{-3}$, 21 times less. That ratio is $0.678\sqrt n$, so it is 215 at $n = 100{,}000$ and 2146 at $n = 10^7$. For a standard deviation of 0.001, randomized response needs 920,674 people and the central mechanism 1,415 ([Exercise 3](../../book-exercises/part03-dp-foundations/09-trust-models.md#sec-sol-trust-3)). So local DP suits only the frequent items of very large populations.
+At $\varepsilon = 1$ and $n = 1{,}000$ (@fig-trust-rr-gap), randomized response has standard deviation $3.03\times10^{-2}$ and the lower bound at $\beta = 0.1$ is $1.04\times10^{-2}$. Their ratio 2.91 is the constant $\sqrt2\,e^{1/2}/(1 - 2\beta) = 1.4142 \times 1.6487/0.8$. The central Laplace mechanism gives $\sqrt2/1000 = 1.41\times10^{-3}$, 21 times less. That ratio, $e^{1/2}/((e - 1)\sqrt n)$ divided by $\sqrt2/n$, is $0.678\sqrt n$, so it is 215 at $n = 100{,}000$ and 2146 at $n = 10^7$. For a standard deviation of 0.001, randomized response needs 920,674 people and the central mechanism 1,415. So local DP suits only the frequent items of very large populations.
 :::
 
 ![Standard deviation of an estimated fraction at $\varepsilon = 1$. Randomized response (line, simulated dots) falls like $1/\sqrt n$, a constant above the local lower bound; the central Laplace mechanism falls like $1/n$.](figures/trust_rr_gap.svg){#fig-trust-rr-gap}
@@ -183,7 +183,7 @@ The plan is to check both privacy levels, then put each scheme's $p$ and $q$ int
 4. *Crossover.* The two variances share a denominator, so compare $e^{\varepsilon_0} + k - 2$ with $4e^{\varepsilon_0}$.
 :::
 
-$k$-ary randomized response reports the truth with probability about $e^{\varepsilon_0}/k$, so its variance grows linearly in $k$ (@fig-trust-frequency-oracles). Unary encoding pays $\varepsilon_0$ once for two bits, so its variance does not depend on $k$, at the price of a $k$-bit report. The optimized choice rarely invents a 1, which matters because almost all bits are 0, and [Exercise 2](../../book-exercises/part03-dp-foundations/09-trust-models.md#sec-sol-trust-2) shows $p = \frac12$ is best. Every entry of @tbl-trust-oracles is still divided by $n$, so the gap of @thm-trust-lower remains.
+$k$-ary randomized response reports the truth with probability about $e^{\varepsilon_0}/k$, so its variance grows linearly in $k$ (@fig-trust-frequency-oracles). Unary encoding pays $\varepsilon_0$ once for two bits, so its variance does not depend on $k$, at the price of a $k$-bit report. The optimized choice rarely invents a 1, which matters because almost all bits are 0. Every entry of @tbl-trust-oracles is still divided by $n$, so the gap of @thm-trust-lower remains.
 
 | $k$ | $k$-ary randomized response | Symmetric unary | Optimized unary |
 | --- | --- | --- | --- |
@@ -304,7 +304,7 @@ $$\varepsilon_\infty = 2H\ln\frac{1 - \phi/2}{\phi/2}.$$ {#eq-trust-rappor}
 2. *RAPPOR.* A 1 is reported as 1 with probability $1 - \phi/2$ and a 0 with probability $\phi/2$. Two values' filters differ in at most $2H$ bits, and the others cancel.
 :::
 
-Each new value costs another $\varepsilon_\infty$. RAPPOR's homepage collection used $H = 2$ and $\phi = 0.75$, giving $\varepsilon_\infty = 4\ln(5/3) = 2.043$. A fixed response would let the collector link a sender's reports across days, like a cookie, so RAPPOR re-randomizes it before each report, and one report is then $\varepsilon_1$-DP with $\varepsilon_1 = 0.5343$ ([Exercise 9](../../book-exercises/part03-dp-foundations/09-trust-models.md#sec-sol-trust-9)).
+Each new value costs another $\varepsilon_\infty$. RAPPOR's homepage collection used $H = 2$ and $\phi = 0.75$, giving $\varepsilon_\infty = 4\ln(5/3) = 2.043$. A fixed response would let the collector link a sender's reports across days, like a cookie, so RAPPOR re-randomizes it before each report, and with the deployment's re-randomization probabilities one report is then $\varepsilon_1$-DP with $\varepsilon_1 = 0.5343$.
 
 A value that drifts, such as minutes, would need a new response every day. Ding, Kulkarni & Yekhanin (2017) instead draw, once, a bit $b_0$ by @eq-trust-onebit at $x = 0$, a bit $b_m$ at $x = m$ and an offset $\alpha$ uniform on $[0, m)$. In round $t$ the person sends $b_m$ if $x_t + \alpha \ge m$ and $b_0$ otherwise, so that the random offset picks $b_m$ with probability $x_t/m$. **Output perturbation** then flips each sent bit with a small probability $\kappa$, to blur the days on which the sent bit switches.
 
@@ -385,7 +385,7 @@ The factor before the bracket of @eq-trust-fmt is $\tanh(\varepsilon_0/2)$. For 
 
 ![Central $\varepsilon$ at $\delta = 10^{-6}$ after shuffling, against $n$: closed form (lines), numeric bound (dots), exact binary randomized response (crosses). Dotted lines mark $\varepsilon_0$.](figures/trust_shuffle_bound.svg){#fig-trust-shuffle-bound}
 
-The amplification lasts only while the shuffler does its job, because a shuffler that colludes with the analyst leaves only $\varepsilon_0$. Fake senders hide nobody, so only honest senders count in $n$ ([Exercise 5](../../book-exercises/part03-dp-foundations/09-trust-models.md#sec-sol-trust-5)).
+The amplification lasts only while the shuffler does its job, because a shuffler that colludes with the analyst leaves only $\varepsilon_0$. Fake senders hide nobody, so only honest senders count in $n$.
 
 ## Distributed noise {#sec-trust-distributed}
 
@@ -405,7 +405,7 @@ Let $n$ clients hold vectors $x_i$ whose sum $f(D)$ has $\ell_2$ sensitivity $\D
 
 Secure aggregation adds integers modulo a large number, because only on a finite set can shares be uniformly random. **Skellam noise** (Agarwal, Kairouz & Liu 2021) fits. $\mathrm{Sk}(\mu)$ is the difference of two independent $\mathrm{Poisson}(\mu)$ variables, with variance $2\mu$. Sums of independent Poisson variables are Poisson, because their moment generating functions multiply ([Distributions](../part01-prerequisites/01-distributions.md#sec-dist-mgf)), so $n$ shares $\mathrm{Sk}(\mu/n)$ add to exactly $\mathrm{Sk}(\mu)$. Its privacy is close to a Gaussian's of the same variance, which this chapter uses as the approximation. The distributed discrete Gaussian (Kairouz, Liu & Steinke 2021) is the alternative.
 
-Distributed noise gives central Gaussian accuracy without a curator, as long as enough clients are honest (@fig-trust-collusion). If at most a fraction $\rho$ may collude or drop out, each client adds variance $\sigma^2/(n(1 - \rho))$, so the honest ones alone supply $\sigma^2$ ([Exercise 7](../../book-exercises/part03-dp-foundations/09-trust-models.md#sec-sol-trust-7)). Malicious inputs are another problem, since secure aggregation does not check them.
+Distributed noise gives central Gaussian accuracy without a curator, as long as enough clients are honest (@fig-trust-collusion). If at most a fraction $\rho$ may collude or drop out, each client adds variance $\sigma^2/(n(1 - \rho))$, so the honest ones alone supply $\sigma^2$. Malicious inputs are another problem, since secure aggregation does not check them.
 
 ::: {#exm-trust-clients}
 A server aggregates the app's histogram through 100 clients at $(\varepsilon, \delta) = (1, 10^{-6})$. A user who changes value moves one count down and another up, so $\Delta_2 f = \sqrt2$. The analytic calibration of @cor-lg-calibration gives total noise $\sigma = 5.975$, so each client adds standard deviation $5.975/\sqrt{100} = 0.597$. With 80%, 50% or 10% of the clients honest, $\varepsilon$ rises to 1.128, 1.455 or 3.525. The script also checks that 100 Skellam shares of total variance 25 sum to mean 0.004 and variance 25.15, and that sharing $(3, -2)$, $(5, 7)$ and $(0, 1)$ modulo $2^{20}$ reveals $(8, 6)$.
@@ -480,5 +480,3 @@ uv run python code/part03-dp-foundations/trust_models.py
 - Feldman, McMillan & Talwar, "Hiding Among the Clones: A Simple and Nearly Optimal Analysis of Privacy Amplification by Shuffling" (FOCS 2021): the closed form used here, the clone reduction and its numerical version.
 - Bonawitz et al., "Practical Secure Aggregation for Privacy-Preserving Machine Learning" (CCS 2017): the secure aggregation protocol used in federated learning.
 - Kairouz, Liu & Steinke, "The Distributed Discrete Gaussian Mechanism for Federated Learning with Secure Aggregation" (ICML 2021) and Agarwal, Kairouz & Liu, "The Skellam Mechanism for Differentially Private Federated Learning" (NeurIPS 2021): integer noise that survives secure aggregation.
-
-**Practice.** Exercises for this chapter, each with a worked solution, are in [the exercise book](../../book-exercises/part03-dp-foundations/09-trust-models.md).

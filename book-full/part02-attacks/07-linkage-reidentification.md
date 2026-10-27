@@ -28,7 +28,7 @@ the number of distinct quasi-identifier combinations divided by the number of re
 3. *Average over the target.* The target lands in class $j$ with probability $k_j/n$, so the success is $\sum_j\frac{k_j}{n}\cdot\frac{1}{k_j} = \frac Jn$.
 :::
 
-For this adversary, uniqueness is the whole story: each unique record is a sure win, so the fraction of unique records is a lower bound on the success. Conversely, if every class has at least $k$ records, then $J \le n/k$ and the success is at most $1/k$ ([Exercise 1](../../book-exercises/part02-attacks/07-linkage-reidentification.md#sec-sol-link-1)), the idea that [Syntactic anonymity](08-syntactic-anonymity.md) studies.
+Each unique record is a sure win, so the fraction of unique records is a lower bound on the success. Conversely, if every class has at least $k$ records, then $n$ records fill at most $n/k$ classes, so $J \le n/k$ and the success is at most $1/k$, the idea that [Syntactic anonymity](08-syntactic-anonymity.md) studies.
 
 The game assumes the adversary knows that the target is in the release, as an insurer with a list of patients might. Otherwise a unique match may belong to someone who is not in $R$, and whether that doubt protects anyone is the question of @sec-link-sampling.
 
@@ -89,7 +89,7 @@ The synthetic census has no identifiers to hash, so this example is a real relea
 
 Vijay Pandurangan then inverted all the pseudonyms, as part 1 of @prp-link-hash predicts. Licence numbers have six digits, or seven starting with 5, about 2 million possibilities or 20.9 bits, and medallion numbers about 22 million or 24.4 bits. He hashed every possibility in minutes. The script repeats the attack in miniature: it hashes all $10^6$ six-digit numbers, 19.9 bits' worth, and recovers five secret identifiers.
 
-Passengers had no pseudonym, yet each trip is itself a record of rare details, of the kind @sec-link-sparse studies. A pickup minute (one of 525,600 in the year) carries 19.0 bits and a pickup square of 100 metres (one of 78,000) carries 16.3 bits, together at most 35.3 bits, more than the 27.4 bits that single out one trip among 173 million ([Exercise 8](../../book-exercises/part02-attacks/07-linkage-reidentification.md#sec-sol-link-8)). Anthony Tockar showed this in 2014 by matching photographs of celebrities getting into taxis to their trips and tips. And by part 2 of @prp-link-hash, a passenger who finds their own trip and knows who drove it learns the driver's pseudonym, and with it the year's trips and income.
+Passengers had no pseudonym, yet each trip is itself a record of rare details, of the kind @sec-link-sparse studies. A pickup minute (one of 525,600 in the year) carries 19.0 bits and a pickup square of 100 metres (one of 78,000) carries 16.3 bits, together at most 35.3 bits, more than the 27.4 bits that single out one trip among 173 million. Anthony Tockar showed this in 2014 with photographs of celebrities entering taxis. And by part 2 of @prp-link-hash, a passenger who finds their own trip and knows who drove it learns the driver's pseudonym, and with it the year's trips and income.
 :::
 
 ## How many people are unique {#sec-link-unique}
@@ -142,7 +142,7 @@ $$\frac{\mathbb E[U]}{n} \approx e^{-n/K} = \exp\big(-2^{\log_2n - b}\big).$$ {#
 3. *Write the exponent in bits.* The average occupancy is $n/K = 2^{\log_2n}/2^b = 2^{\log_2n - b}$.
 :::
 
-For uniform cells, then, the fraction unique depends only on $b - \log_2n$, the bits beyond those needed to name one person, and the curve is the same for a town and for the planet (@fig-link-uniqueness, right). Half the people are unique once $b$ exceeds $\log_2n$ by 0.53 bits, 90% at 3.25 bits more and 99% at 6.64 bits more ([Exercise 2](../../book-exercises/part02-attacks/07-linkage-reidentification.md#sec-sol-link-2) solves for these).
+For uniform cells, then, the fraction unique depends only on $b - \log_2n$, the bits beyond those needed to name one person, and the curve is the same for a town and for the planet (@fig-link-uniqueness, right). Setting $\exp(-2^{\log_2 n - b})$ equal to a fraction $f$ and solving gives $b - \log_2 n = -\log_2\ln(1/f)$, so half the people are unique once $b$ exceeds $\log_2n$ by 0.53 bits, 90% at 3.25 bits more and 99% at 6.64 bits more.
 
 Real attributes are skewed, and skew usually lowers uniqueness, because many people crowd into a few common cells while many rare cells stay empty. This is not a theorem: with far fewer cells than people, a uniform spread leaves nobody unique, while a few rare cells would hold some uniques.
 
@@ -192,7 +192,7 @@ $$\Pr\Big[\Big|\frac Un - \frac{\mathbb E[U]}{n}\Big| \ge \gamma\Big] \le 2e^{-n
 3. *Apply McDiarmid.* With $d_i = 2/n$ for all $n$ people, $\sum_id_i^2 = 4/n$, so each tail is at most $\exp(-2\gamma^2 n/4) = e^{-n\gamma^2/2}$. The two tails give the factor 2.
 :::
 
-Setting the right side equal to a failure probability $\beta$ says that the fraction unique is within $\sqrt{2\ln(2/\beta)/n}$ of its expectation with probability $1 - \beta$. The bound is loose, because it charges every person the worst case, while most moves change $U$ by 0 or 1 ([Exercise 4](../../book-exercises/part02-attacks/07-linkage-reidentification.md#sec-sol-link-4) computes the exact variance).
+Setting the right side equal to a failure probability $\beta$ says that the fraction unique is within $\sqrt{2\ln(2/\beta)/n}$ of its expectation with probability $1 - \beta$. The bound is loose, because it charges every person the worst case, while most moves change $U$ by 0 or 1.
 
 ::: {#exm-link-census}
 The running example has $n = 10{,}000$ people with eight independent attributes shaped like real ones, with region and occupation skewed so that a few values are large. @tbl-link-census reveals them one at a time, and compares the exact fraction unique of @eq-link-unique with 20 simulated populations, the floor of @eq-link-collision, the entropy rule and the uniform value $e^{-n/K}$.
@@ -248,7 +248,7 @@ $$\ln\frac{P_1(r)}{P_0(r)} = \sum_i\Big[a_i\ln\frac{1 - \rho}{s_i} + (1 - a_i)\l
 5. *Bayes' rule.* If $t$ is the target, record $t$'s pattern follows $P_1$ and every other record's follows $P_0$, so all the patterns together have probability $P_1(t)\prod_{j \ne t}P_0(j)$. The prior is the same for every $t$, so the posterior of $t$ is proportional to this. Dividing by $\prod_jP_0(j)$, which does not depend on $t$, leaves $\mathrm{LR}(t) = P_1(t)/P_0(t)$, and normalizing gives @eq-link-posterior.
 :::
 
-For rare items these weights grow like $\ln(1/s_i)$, as the Narayanan–Shmatikov weights grow as the support shrinks, and @exm-link-netflix compares the two. For one record, "target or unrelated" is a hypothesis test, and by the Neyman–Pearson lemma, @thm-ht-np, thresholding the likelihood ratio is the most powerful test. [Exercise 5](../../book-exercises/part02-attacks/07-linkage-reidentification.md#sec-sol-link-5) extends the posterior to an adversary who is unsure that the target is in the release at all.
+For rare items these weights are about $\ln(1/s_i)$. They and the Narayanan–Shmatikov weights both grow as an item gets rarer, at different rates, and @exm-link-netflix compares the two. For one record, "target or unrelated" is a hypothesis test, and by the Neyman–Pearson lemma, @thm-ht-np, thresholding the likelihood ratio is the most powerful test.
 
 Because the score adds up evidence, noise costs little: with a wrong item the target loses one term, while unrelated records rarely gain one. What decides success is the bits, and each item contributes its **surprisal** $\log_2(1/s_i)$, the bits that single out an event of probability $s_i$.
 
@@ -428,5 +428,3 @@ uv run python code/part02-attacks/linkage.py
 - Barth-Jones, "The 'Re-Identification' of Governor William Weld's Medical Information: A Critical Re-Examination of Health Data Identification Risks and Privacy Protections, Then and Now" (2012): what the Massachusetts story does and does not show about ordinary people.
 - Ohm, "Broken Promises of Privacy: Responding to the Surprising Failure of Anonymization" (UCLA Law Review, 2010): the legal side, with the Massachusetts, search-log and Netflix cases.
 - Dwork, McSherry, Nissim & Smith, "Calibrating Noise to Sensitivity in Private Data Analysis" (2006): where the response to these attacks starts. The next part introduces differential privacy, a guarantee that holds whatever auxiliary information the adversary has. The next chapter first looks at the definitions that came before it.
-
-**Practice.** Exercises for this chapter, each with a worked solution, are in [the exercise book](../../book-exercises/part02-attacks/07-linkage-reidentification.md).

@@ -36,7 +36,7 @@ Every chapter that can compute it reports the same number: the $\varepsilon$ at 
 
 **Order.** Read chapters 29 and 30 first: every later chapter uses the RDP curve and its conversion. Chapter 30 ends by reading the curve as a constraint on tests, and chapter 32 develops that trade-off view in full, so read it next. Chapters 33 and 34 form the practical core and should be read in order. Chapter 31 can be read any time after chapter 30, except its section on subsampling, which uses one formula from chapter 33; read it before chapter 36, which uses its conversion. Chapter 35 needs chapter 33. Chapter 36 needs chapters 31 and 33. Chapter 37 closes the part and uses all the others, so read it last.
 
-**Structure of a chapter.** The chapters have the shape of the earlier parts. Each opens with the question it answers and the running example below, then gives one section per topic, whose definitions, theorems and worked examples are numbered, each theorem followed by its proof. A Code section, a Summary table of the chapter's results and References close it. The exercises, each with a worked solution, are in the exercise book, a companion website, and the last line of each chapter links to them.
+**Structure of a chapter.** The chapters have the shape of the earlier parts. Each opens with the question it answers and the running example below, then gives one section per topic, whose definitions, theorems and worked examples are numbered, each theorem followed by its proof. A Code section, a Summary table of the chapter's results and References close it.
 
 **Run the code.** Each chapter has a script in `code/` that prints every number its text quotes, except values attributed to an external library or paper, and regenerates its figures, for example
 
@@ -44,7 +44,7 @@ Every chapter that can compute it reports the same number: the $\varepsilon$ at 
 uv run python code/part04-privacy-accounting/renyi_dp.py
 ```
 
-None of the scripts uses an accounting library. Each accountant is implemented from its definition in a few dozen lines of NumPy, so you can read exactly what it computes. As an exercise, compare them with Google's `dp_accounting` or Opacus.
+None of the scripts uses an accounting library. Each accountant is implemented from its definition in a few dozen lines of NumPy, so you can read exactly what it computes.
 
 ## Notation
 

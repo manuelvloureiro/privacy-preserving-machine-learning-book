@@ -4,10 +4,10 @@
     uv run python tools/terms.py candidates      # suggest index terms not yet in terms.toml
     uv run python tools/terms.py check           # exit 1 on any acronym or index problem
     uv run python tools/terms.py build           # write glossary.md, term-index.md, _terms.json
-    uv run python tools/terms.py check --book book-exercises            # another book, or notes/<name>
+    uv run python tools/terms.py check --book book-course               # another book, or notes/<name>
     uv run python tools/terms.py build --book _build/full-pdf --profile pdf   # into a staged copy
 
-The book's files are read from book-full/ unless --book names another book (book-exercises/,
+The book's files are read from book-full/ unless --book names another book (book-course/,
 book-practitioner/) or a staged copy of one; build writes its three files into that copy. The make
 targets build from staged copies in _build/, so generated files never land among the sources.
 --profile picks the Quarto profile (_quarto-<profile>.yml) whose appendices count as part of the

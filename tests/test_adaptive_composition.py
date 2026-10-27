@@ -105,11 +105,6 @@ def test_adaptive_composition_matches_section(tmp_path: Path) -> None:
         "hard records first excluded: median step 111  earliest 101",
         "typical records ever excluded: 0.0%  median final spend typical=0.778  of B=2.900",
         "per-step worst case alpha*/(2 sigma^2)=0.0290",
-        # Exercise check values
-        "Ex1: D_2 of the run that stops after a 0: 1.6740",
-        "Ex3: worst fixed-time crossing at delta=0.05: 0.00719",
-        "Ex4: half-norm spend=0.7250  eps=3.124  steps=400",
-        "Ex5: fixed=7.786  Ville grid=9.137  Ville ten orders=8.605  Ville single order=9.493",
     ):
         assert expected in out, expected
     assert {f.name for f in tmp_path.iterdir()} == {

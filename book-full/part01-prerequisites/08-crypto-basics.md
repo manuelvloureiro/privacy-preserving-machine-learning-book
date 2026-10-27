@@ -156,7 +156,9 @@ Let $P_0$ be a fair coin and $P_1$ the running example's coin, with heads probab
 
 : Advantage in telling $Q$ flips of a $0.51$-coin from $Q$ fair flips (seed 0, 200,000 simulated games per entry). {#tbl-crypto-coin-hybrid}
 
-Majority vote's 0.082 is simulation noise. Both counts of heads have a standard deviation of about $\sqrt Q/2$, and their means differ by $Q\xi$, so they are close to bell curves whose centres are $2\xi\sqrt Q$ standard deviations apart. So the best advantage is about $2\Phi(\xi\sqrt Q) - 1$, with $\Phi$ the standard normal distribution function, and it grows like $\xi\sqrt Q$ rather than $\xi Q$ ([Exercise 2](../../book-exercises/part01-prerequisites/08-crypto-basics.md#sec-sol-crypto-2)). Majority vote stalls near $\frac12$, because its threshold sits at the centre of the fair curve, which the fair count still exceeds half the time ([Exercise 3](../../book-exercises/part01-prerequisites/08-crypto-basics.md#sec-sol-crypto-3)).
+Majority vote's 0.082, above the best possible 0.080, is simulation noise. Both counts of heads have a standard deviation of about $\sqrt Q/2$, and their means differ by $Q\xi$, so they are close to bell curves whose centres are $2\xi\sqrt Q$ standard deviations apart. Two normal curves whose centres are $\delta$ standard deviations apart have TV distance $2\Phi(\delta/2) - 1$, with $\Phi$ the standard normal distribution function, so the best advantage is about
+$$2\Phi(\xi\sqrt Q) - 1,$$
+which grows like $\xi\sqrt Q$ rather than $\xi Q$. Majority vote stalls near $\frac12$, because its threshold sits at the centre of the fair count's curve, so on fair flips it still says 1 about half the time.
 :::
 
 ![Advantage of telling $Q$ flips of a coin with bias $\frac12 + 0.01$ from fair flips: majority vote (simulation), the best possible distinguisher (exact TV distance), and the hybrid bound $Q\xi$.](figures/crypto_basics_hybrid.svg){#fig-crypto-hybrid}
@@ -217,7 +219,7 @@ $$\mathrm{Adv}_{\mathrm{PRF}}(\mathcal A) \le nQ\cdot\mathrm{Adv}_{\mathrm{PRG}}
 The proof is in Goldreich (2001, §3.6), and Appendix @sec-apx-crypto-ggm derives it step by step. It makes the tree random one level at a time, and each of the $n$ levels costs at most $Q$ times the PRG advantage by @thm-crypto-hybrid.
 
 ::: {#exm-crypto-ggm}
-On the 2-bit input $10$, the tree computes $G_1(K)$ and then outputs its left half $G_0(G_1(K))$. For 128-bit inputs, one evaluation walks 128 levels and costs 128 generator calls. [Exercise 6](../../book-exercises/part01-prerequisites/08-crypto-basics.md#sec-sol-crypto-6) builds the tree from SHA-256 and works out what the factor $nQ$ costs in bits.
+On the 2-bit input $10$, the tree computes $G_1(K)$ and then outputs the left half of $G$ applied to that node, $G_0(G_1(K))$. For 128-bit inputs, one evaluation walks 128 levels and costs 128 generator calls.
 :::
 
 ## The birthday bound {#sec-crypto-birthday}
@@ -337,7 +339,7 @@ If a scheme with key set $\mathcal K$ and message set $\mathcal M$ has perfect s
 2. *Fewer keys break secrecy.* If $|\mathcal K| < |\mathcal M|$, some message never produces $y$ while another does, so their ciphertext distributions differ.
 :::
 
-The pad must also never be reused, because XOR-ing two ciphertexts under one pad cancels it and reveals $m_1 \oplus m_2$. [Exercise 5](../../book-exercises/part01-prerequisites/08-crypto-basics.md#sec-sol-crypto-5) shows how English text then gives away both messages.
+The pad must also never be reused, because XOR-ing two ciphertexts under one pad cancels it and reveals $m_1 \oplus m_2$. English text is so redundant that both messages can be pulled apart from $m_1 \oplus m_2$.
 
 ::: {#exm-crypto-otp}
 @tbl-crypto-otp shows the pad on 2-bit messages. Each message reaches every ciphertext under exactly one key.
@@ -582,5 +584,3 @@ uv run python code/part01-prerequisites/crypto_basics.py
 - Regev, "On Lattices, Learning with Errors, Random Linear Codes, and Cryptography" (STOC 2005; JACM 2009): LWE, its quantum hardness reduction, and the original encryption scheme
 - Peikert, "A Decade of Lattice Cryptography" (2016): survey of LWE, its variants and reductions
 - Lyubashevsky, Peikert & Regev, "On Ideal Lattices and Learning with Errors over Rings" (EUROCRYPT 2010): ring-LWE
-
-**Practice.** Exercises for this chapter, each with a worked solution, are in [the exercise book](../../book-exercises/part01-prerequisites/08-crypto-basics.md).

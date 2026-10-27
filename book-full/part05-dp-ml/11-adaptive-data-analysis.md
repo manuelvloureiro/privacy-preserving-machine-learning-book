@@ -38,7 +38,7 @@ $$\max_j\big|a_j - q_j(\mathcal D)\big| \ge 1 - \frac nN = 1 - \frac{n}{k - 1}.$
 4. *The error.* The last answer exceeds its population value by at least $1 - n/N$, which is @eq-ada-point.
 :::
 
-The bound holds for every sample, and it stays above $\frac12$ until $n \ge (k - 1)/2$. So with exact answers $n$ must grow linearly in $k$, against $\ln k$ for fixed queries. Each point query is harmless, but together they reveal the sample, and a later query exploits it. That is the general shape of adaptive overfitting. [Exercise 1](../../book-exercises/part05-dp-ml/11-adaptive-data-analysis.md#sec-sol-ada-1) computes the last query's average population value exactly.
+The bound holds for every sample, and it stays above $\frac12$ until $n \ge (k - 1)/2$. So with exact answers $n$ must grow linearly in $k$, against $\ln k$ for fixed queries. Each point query is harmless, but together they reveal the sample, and a later query exploits it.
 
 ::: {#exm-ada-point}
 With $n = 1{,}000$ records on $N = 2{,}000$ values, the 2,000 point queries are all within 0.0035 of their population values in one run of the chapter's script. The last query has empirical value 1 and population value 0.3905, against an expected $1 - (1 - 1/2{,}000)^{1{,}000} = 0.3935$. So its error is about 0.61, while @eq-ada-fixed would bound the average largest error of 2,001 fixed queries by 0.0644. With $N = 10{,}000$ values the error is about 0.90.
@@ -50,7 +50,7 @@ Real analysts leak more slowly than this attack, but they leak. In Freedman's pa
 The holdout labels are $n$ fair coins, independent of everything else, so no submission can beat an accuracy of $\frac12$ on new data. The attacker submits $k$ random labellings of the holdout records and reads each one's exact accuracy. It keeps the labellings that scored above $\frac12$, and submits their majority vote on each record.
 :::
 
-Each kept labelling agrees with the holdout labels slightly more often than chance, and the vote adds these small agreements up. A normal approximation, derived in [Exercise 6](../../book-exercises/part05-dp-ml/11-adaptive-data-analysis.md#sec-sol-ada-6), predicts the size of the effect. The vote's reported accuracy exceeds its true accuracy of $\frac12$ by about
+Each kept labelling agrees with the holdout labels slightly more often than chance, and the vote adds these small agreements up. A normal approximation predicts that the vote's reported accuracy exceeds its true accuracy of $\frac12$ by about
 $$\frac{\sqrt{k/(2n)}}{\pi}.$$
 So the overfitting grows like $\sqrt{k/n}$, while the bound @eq-ada-fixed for fixed queries grows only like $\sqrt{\ln k/n}$.
 
@@ -85,7 +85,7 @@ Fixing the earlier parts and the analyst's own coins fixes query $j$, while part
 $$\mathbb E\Big[\max_{j\le k}\big|q_j(D_j) - q_j(\mathcal D)\big|\Big] \le \sqrt{\frac{k\ln(2k)}{2n}}.$$ {#eq-ada-split}
 In the same way, Hoeffding's inequality and the union bound make all errors below $\alpha$ with probability $1 - \beta$ once $n \ge k\ln(2k/\beta)/(2\alpha^2)$. The data needed grows linearly in $k$.
 
-Splitting buys validity by using each record once, as if it collected fresh data for every query, so it suits analyses with few rounds of adaptivity. If the queries come in $r$ rounds, and each round is fixed before its answers are seen, one part per round suffices, and the bound becomes $\sqrt{r\ln(2k)/(2n)}$ ([Exercise 5](../../book-exercises/part05-dp-ml/11-adaptive-data-analysis.md#sec-sol-ada-5)). A final test set, used once after all decisions are made, is the extreme case $r = 1$.
+Splitting buys validity by using each record once, as if it collected fresh data for every query, so it suits analyses with few rounds of adaptivity. If the queries come in $r$ rounds, and each round is fixed before its answers are seen, one part per round suffices, and the bound becomes $\sqrt{r\ln(2k)/(2n)}$. A final test set, used once after all decisions are made, is the extreme case $r = 1$.
 
 When every query is adaptive, though, the cost is steep. At $\alpha = 0.05$ and $k = 1{,}000$, the bound @eq-ada-split needs 1,520,181 records, against 1,521 for the bound @eq-ada-fixed on average if the queries were fixed in advance.
 
@@ -125,13 +125,13 @@ In words, the population value of a query chosen from $D$ equals the value on $x
 3. *DP compares the two choices.* Hold $D$ and $x_i'$ fixed. Then $D \sim D^{(i)}$, and $f(q) = q(x_i)$ is a function of the output of $W$ with values in $[0, 1]$. So @eq-ada-avg, with $\mathbb E_W$ averaging over the coins of $W$, gives
 $$\mathbb E_W\big[q_{W(D)}(x_i)\big] \le e^\varepsilon\,\mathbb E_W\big[q_{W(D^{(i)})}(x_i)\big] + \delta,$$
 and averaging over $D$ and $x_i'$ keeps the inequality.
-4. *Combine.* Averaging step 3 over $i$ turns its left side into $\mathbb E[q_W(D)]$ by step 1, and its right side into $e^\varepsilon\,\mathbb E[q_W(\mathcal D)] + \delta$ by step 2. That is the first bound. Subtracting $\mathbb E[q_W(\mathcal D)]$ from both sides leaves $(e^\varepsilon - 1)\,\mathbb E[q_W(\mathcal D)] + \delta$, which is at most $e^\varepsilon - 1 + \delta$ because a query's value is at most 1.
-5. *The other direction.* The replace-one relation is symmetric, so steps 3 and 4 hold with $D$ and $D^{(i)}$ exchanged, which gives the second bound ([Exercise 2](../../book-exercises/part05-dp-ml/11-adaptive-data-analysis.md#sec-sol-ada-2) writes out its steps). The two directions together give @eq-ada-lemma.
+4. *Combine.* Averaging step 3 over $i$ turns its left side into $\mathbb E[f_W(D)]$ by step 1, and its right side into $e^\varepsilon\,\mathbb E[f_W(\mathcal D)] + \delta$ by step 2. That is the first bound. Subtracting $\mathbb E[f_W(\mathcal D)]$ from both sides leaves $(e^\varepsilon - 1)\,\mathbb E[f_W(\mathcal D)] + \delta$, which is at most $e^\varepsilon - 1 + \delta$ because a query's value is at most 1.
+5. *The other direction.* The replace-one relation is symmetric, so steps 3 and 4 hold with $D$ and $D^{(i)}$ exchanged, which gives the second bound. The two directions together give @eq-ada-lemma.
 :::
 
 Steps 1 and 2 together are Part 1's identity for the expected gap (@thm-stability-identity), with the chosen query in place of a trained model: the gap is an average over records of how much the chosen query's value on a record changes when that record is replaced. Part 1 bounded each term by **uniform stability**, the largest change in one fixed algorithm's loss when one record is replaced, while DP bounds it through the distribution of the output. Uniform stability does not survive the analyst. Keeping the best of several nearly tied queries is a choice that one record can flip, and then the chosen query's value on that record jumps, much as for the 1-nearest-neighbour rule of @prp-stability-nn. DP survives post-processing and adaptive composition, so every query the analyst builds from private answers is chosen privately, which is all the lemma needs.
 
-For small $\varepsilon$, $e^\varepsilon - 1$ is about $\varepsilon$, so the lemma's cost is linear in $\varepsilon$, and that is the right order in general. Take a sample of one record, a fair bit, and let $W$ release the bit with probability $e^\varepsilon/(1 + e^\varepsilon)$ and its flip otherwise. If $W$ then outputs the query "is the record equal to the released bit?", that query's empirical value exceeds its population value by about $\varepsilon/4$ on average ([Exercise 2](../../book-exercises/part05-dp-ml/11-adaptive-data-analysis.md#sec-sol-ada-2)). Because the cost grows with $\varepsilon$, a guarantee to within 0.05 needs $\varepsilon$ around 0.05 or below.
+For small $\varepsilon$, $e^\varepsilon - 1$ is about $\varepsilon$, so the lemma's cost is linear in $\varepsilon$, and that is the right order in general. Take a sample of one record, a fair bit, and let $W$ release the bit with probability $e^\varepsilon/(1 + e^\varepsilon)$ and its flip otherwise. If $W$ then outputs the query "is the record equal to the released bit?", that query's empirical value exceeds its population value by about $\varepsilon/4$ on average. Because the cost grows with $\varepsilon$, a guarantee to within 0.05 needs $\varepsilon$ around 0.05 or below.
 
 The theorem turns the lemma into accuracy for every answer of a private mechanism. Its idea is to let a private algorithm pick the query with the worst error. The lemma then says that this worst query cannot be much further from the population than from the sample.
 
@@ -152,7 +152,7 @@ $$\mathbb E\big[q_W(\mathcal D) - a_W\big] = \mathbb E\big[q_W(\mathcal D) - q_W
 
 For small $\varepsilon$, $e^\varepsilon - 1$ is close to $\varepsilon$, so privacy at level $\varepsilon$ costs about $\varepsilon$ in accuracy. The theorem holds only on average, and @sec-ada-gauss cites versions with high probability.
 
-Step 1 of the proof is its least obvious move, and @tbl-ada-complement shows it on two queries. The largest absolute error, 0.12, is on $q_1$, whose answer is too high, so among $q_1$ and $q_2$ alone the largest signed error would be 0.05. The complement $1 - q_1$ carries the error 0.12 with a positive sign, and $W$ picks it ([Exercise 3](../../book-exercises/part05-dp-ml/11-adaptive-data-analysis.md#sec-sol-ada-3)).
+Step 1 of the proof is its least obvious move, and @tbl-ada-complement shows it on two queries. The largest absolute error, 0.12, is on $f_1$, whose answer is too high, so among $f_1$ and $f_2$ alone the largest signed error would be 0.05. The complement $1 - f_1$ carries the error 0.12 with a positive sign, and $W$ picks it.
 
 | Query | Answer $a$ | Population value $q(\mathcal D)$ | Signed error $q(\mathcal D) - a$ |
 | --- | --- | --- | --- |
@@ -386,5 +386,3 @@ uv run python code/part05-dp-ml/adaptive_data_analysis.py
 - Recht, Roelofs, Schmidt & Shankar, "Do ImageNet Classifiers Generalize to ImageNet?" (ICML 2019), and Roelofs, Shankar, Recht, Fridovich-Keil, Hardt, Miller & Schmidt, "A Meta-Analysis of Overfitting in Machine Learning" (NeurIPS 2019). How much adaptive overfitting happens in practice.
 - Kamath, *CS 860: Algorithms for Private Data Analysis*, University of Waterloo (2020), lectures 16A and 16B. The point-query attack, the three regimes of @tbl-ada-rates and the proof of the expectation transfer theorem, following notes by Nikolov and Steinke.
 - Dwork & Roth, *The Algorithmic Foundations of Differential Privacy* (2014), §3.6. The sparse vector technique behind Thresholdout.
-
-**Practice.** Exercises for this chapter, each with a worked solution, are in [the exercise book](../../book-exercises/part05-dp-ml/11-adaptive-data-analysis.md).

@@ -36,7 +36,7 @@ Two models recur. The first is **regularized logistic regression** in $d = 10$ d
 
 **Order.** Read chapters 38 and 39 first, in order: every later chapter uses DP-SGD. Chapters 40 and 41 change how the algorithm is run, and can be read in either order. Chapters 42 to 45 are independent of each other. Chapter 46 uses the vocabulary of all the earlier ones, and chapter 47 should come after the others, because it checks what the others claim. Chapter 48 can be read at any point after chapter 40, whose hyperparameter search is its motivating example. It needs DP-SGD only for that example.
 
-**Structure of a chapter.** The chapters have the shape of the earlier parts. Each opens with the question it answers and its running example, then gives one section per topic, whose definitions, theorems and worked examples are numbered, each theorem followed by its proof. A Code section, a Summary table of the chapter's results and References close it. The exercises, each with a worked solution, are in the exercise book, a companion website, and the last line of each chapter links to them.
+**Structure of a chapter.** The chapters have the shape of the earlier parts. Each opens with the question it answers and its running example, then gives one section per topic, whose definitions, theorems and worked examples are numbered, each theorem followed by its proof. A Code section, a Summary table of the chapter's results and References close it.
 
 **Run the code.** Each chapter has a script in `code/` that prints every number its text quotes, except values attributed to a paper, and regenerates its figures, for example
 

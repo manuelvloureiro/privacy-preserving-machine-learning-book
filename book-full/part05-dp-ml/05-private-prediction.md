@@ -247,7 +247,7 @@ The plan is to split the sum of @eq-pate-renyi into the likely output and the re
 4. *Collect, and pass to $\tilde\beta$.* Adding the two parts and taking $\frac{1}{\alpha - 1}\ln$ gives @eq-pate-dd-pure with the true $\beta$. The right side increases in $\beta$ for every $\beta < e^{-\varepsilon_0}$, because it is convex in $\beta$ with a non-negative slope at 0 (Appendix @sec-apx-learn-pate proves both). So the largest value over all $\beta \le \tilde\beta$ is at $\tilde\beta$.
 :::
 
-For small $\beta$ the bound is about $\beta$ times a constant, so an answer costs in proportion to the chance that the noise overturns it ([Exercise 4](../../book-exercises/part05-dp-ml/05-private-prediction.md#sec-sol-pate-4)). GNMax has a Gaussian form of the same bound. GNMax is not pure DP, so its proof bounds the unlikely outputs with Rényi divergences at two higher orders $\alpha_1$ and $\alpha_2$ instead of a ratio, but the bracket keeps the two parts of @eq-pate-dd-pure: the likely output, weighted by $1 - \tilde\beta$, and the rest, weighted by $\tilde\beta$.
+For small $\beta$ the bound is about $\beta$ times a constant, so an answer costs in proportion to the chance that the noise overturns it. GNMax has a Gaussian form of the same bound. Because GNMax is not pure DP, the proof bounds the unlikely outputs with Rényi divergences at two higher orders $\alpha_1$ and $\alpha_2$ instead of a ratio, but the bracket keeps the two parts of @eq-pate-dd-pure: the likely output, weighted by $1 - \tilde\beta$, and the rest, weighted by $\tilde\beta$.
 
 ::: {#thm-pate-dd-gauss name="The data-dependent bound, Gaussian form"}
 Let $M$ be GNMax with noise $\sigma$, and $\tilde\beta$ the bound of @eq-pate-qtilde on the actual dataset $D$. Set $\alpha_2 = \sigma\sqrt{\ln(1/\tilde\beta)}$, $\alpha_1 = \alpha_2 + 1$, $\varepsilon_1 = \alpha_1/\sigma^2$ and $\varepsilon_2 = \alpha_2/\sigma^2$. If $\alpha \le \alpha_1$, $\alpha_2 > 1$ and $\tilde\beta \le e^{(\alpha_2 - 1)\varepsilon_2}\big/\big(\frac{\alpha_1}{\alpha_1 - 1}\cdot\frac{\alpha_2}{\alpha_2 - 1}\big)^{\alpha_2}$, then for every neighbour $D'$ (Papernot et al. 2018, Theorem 6, with the orders of their Proposition 10)
@@ -263,7 +263,7 @@ It follows the plan of @thm-pate-dd-pure, and its proof is in Papernot et al. (2
 
 ![The RDP cost at order 8 of one GNMax answer with $\sigma = 40$ against the gap, log scale: data-independent, the bound of @eq-pate-dd-gauss, and the exact cost on two labels (dashed).](figures/pate_dd_cost.svg){#fig-pate-dd-cost}
 
-The data-dependent $\varepsilon$ is itself private information, since one record changes one teacher, whose votes can change on *every* query ([Exercise 6](../../book-exercises/part05-dp-ml/05-private-prediction.md#sec-sol-pate-6)). Papernot et al. (2018, Appendix B) therefore release it with noise scaled to its **smooth sensitivity** ([Beyond global sensitivity](../part03-dp-foundations/07-sensitivity.md#sec-sens-smooth)), and pay for that release. On MNIST their data-dependent $\varepsilon = 2.00$ becomes $2.52 \pm 0.385$ once sanitized (their Table 2). Unsanitized, a data-dependent $\varepsilon$ is a measurement, not a guarantee.
+The data-dependent $\varepsilon$ is itself private information, since one record changes one teacher, whose votes can change on *every* query. Papernot et al. (2018, Appendix B) therefore release it with noise scaled to its **smooth sensitivity** ([Beyond global sensitivity](../part03-dp-foundations/07-sensitivity.md#sec-sens-smooth)), and pay for that release. On MNIST their data-dependent $\varepsilon = 2.00$ becomes $2.52 \pm 0.385$ once sanitized (their Table 2). Unsanitized, a data-dependent $\varepsilon$ is a measurement, not a guarantee.
 
 A query with strong consensus is cheap under this analysis and more likely to be labelled right, so a noisy check of the top count can pick out the queries worth answering.
 
@@ -481,5 +481,3 @@ uv run python code/part05-dp-ml/private_prediction.py
 - Dwork & Feldman, "Privacy-preserving Prediction" (COLT 2018). Private prediction as a learning problem in its own right, with sample-complexity bounds for answering predictions privately.
 - Mironov, "Rényi Differential Privacy" (CSF 2017). The Gaussian mechanism's RDP and composition used throughout.
 - Balle, Barthe, Gaboardi, Hsu & Sato, "Hypothesis Testing Interpretations and Rényi Differential Privacy" (AISTATS 2020). The conversion of @eq-pate-convert.
-
-**Practice.** Exercises for this chapter, each with a worked solution, are in [the exercise book](../../book-exercises/part05-dp-ml/05-private-prediction.md).

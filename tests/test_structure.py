@@ -10,7 +10,6 @@ import structure
 
 CONFIG = structure.load_config()
 CHAPTER = CONFIG.skeletons["full-chapter"]
-EXERCISES = CONFIG.skeletons["exercise-page"]
 
 GOOD_CHAPTER = """# The Laplace mechanism
 
@@ -57,29 +56,6 @@ The script checks every number above. Run `uv run python code/part03-dp-foundati
 ## References {#sec-lg-references}
 
 - Dwork et al., *Calibrating noise to sensitivity*, 2006.
-
-**Practice.** Exercises for this chapter, each with a worked solution, are in [the exercise book](../../book-exercises/part03-dp-foundations/03-laplace-gaussian.md).
-"""
-
-GOOD_EXERCISES = """# Exercises: The Laplace mechanism
-
-Exercises for [The Laplace mechanism](../../book-full/part03-dp-foundations/03-laplace-gaussian.md).
-
-## Tightness {#sec-sol-lg-1}
-
-> **Exercise 1.** Show that the bound is tight.
-
-::: {.callout-tip collapse="true" title="Solution"}
-1. Take the event $y \\le 0$.
-:::
-
-## A histogram {#sec-sol-lg-2}
-
-> **Exercise 2.** Calibrate a histogram.
-
-::: {.callout-tip collapse="true" title="Solution"}
-1. The sensitivity is 1.
-:::
 """
 
 
@@ -136,24 +112,11 @@ def test_the_budget_and_the_tail_order_are_checked(tmp_path: Path) -> None:
     assert any("ends with the sections" in m for m in errors(tmp_path, swapped, CHAPTER))
 
 
-def test_the_pointer_names_the_page_itself(tmp_path: Path) -> None:
-    found = errors(tmp_path, GOOD_CHAPTER, CHAPTER, rel="part03-dp-foundations/04-composition.md")
-    assert any("pointer names" in m for m in found)
-
-
 def test_display_math_starting_with_a_bar_is_not_a_table(tmp_path: Path) -> None:
     text = GOOD_CHAPTER.replace(
         "For the count,", "The error obeys\n$$\n|M(D) - f(D)| \\le b \\ln(1/\\beta).\n$$\nFor the count,"
     )
     assert errors(tmp_path, text, CHAPTER) == []
-
-
-def test_an_exercise_page_numbers_its_exercises_from_one(tmp_path: Path) -> None:
-    assert errors(tmp_path, GOOD_EXERCISES, EXERCISES) == []
-    skipped = GOOD_EXERCISES.replace("{#sec-sol-lg-2}", "{#sec-sol-lg-3}")
-    assert any("exercise 2 has id sec-sol-lg-3" in m for m in errors(tmp_path, skipped, EXERCISES))
-    hyphenated = GOOD_EXERCISES.replace("sec-sol-lg-", "sec-sol-crypto-basics-")
-    assert errors(tmp_path, hyphenated, EXERCISES) == []
 
 
 def test_every_page_of_every_book_has_a_skeleton() -> None:

@@ -28,8 +28,6 @@ Each script prints the numbers its chapter quotes, except values the text attrib
 uv run python code/part05-dp-ml/<script>.py
 ```
 
-Every chapter's exercises, each with a worked solution, are in the exercise book, [book-exercises/part05-dp-ml/](../../book-exercises/part05-dp-ml/), one file per chapter. The exercise book is its own website, and `code/part05-dp-ml/solutions_<script>.py` prints the numbers they quote.
-
 ## Suggested order
 
 1. Chapters 38 → 39. Every later chapter uses DP-SGD.
@@ -63,12 +61,6 @@ Every chapter's exercises, each with a worked solution, are in the exercise book
 - Blum & Hardt, "The Ladder" (ICML 2015); Bassily et al., "Algorithmic Stability for Adaptive Data Analysis" (STOC 2016) → chapter 48
 
 Each chapter ends with its own references, with what each is good for.
-
-## Exercise
-
-Implement DP-SGD from scratch in PyTorch (per-example clipping via `torch.func.vmap`), match Opacus on CIFAR-10 at $\varepsilon = 8$, then audit both models with your LiRA pipeline from Part 2 using inserted canaries.
-
-DP-SGD is implemented from scratch in NumPy, with ghost clipping, in [DP-SGD](02-dp-sgd.md), on a small network whose experiments run in seconds. The audits with inserted canaries are in [Auditing private training](10-auditing.md). The CIFAR-10 run, the comparison with Opacus and the PyTorch implementation are left to you, since PyTorch and Opacus are not dependencies of this repository.
 
 ## Exit check
 

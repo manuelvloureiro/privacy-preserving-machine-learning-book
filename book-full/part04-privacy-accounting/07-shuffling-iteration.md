@@ -36,7 +36,7 @@ and the two values of $\Pr[B = 0]$ from step 3 give @eq-shuf-rr-pair.
 
 The pair assumes that the other users all hold 0. If $m$ of them hold 1, a guarantee must hold for the worst $m$. The chapter's script (@sec-shuf-code) scans every $m$ at $n = 1000$, and $m \le 30$ at $n = 10^4$ and $10^5$. The pair $m = 0$ is the worst or within $10^{-4}$ of the worst found, so the chapter calls its $\varepsilon$ exact.
 
-Shuffling never lowers the pure-DP level. At the count $y = 0$ the ratio $P(0)/Q(0)$ is $e^{\varepsilon_0}$ for every $n$, and only the probability of that outcome shrinks ([Exercise 1](../../book-exercises/part04-privacy-accounting/07-shuffling-iteration.md#sec-sol-shuf-1)). So shuffling amplifies by moving the bad outcomes into $\delta$.
+Shuffling never lowers the pure-DP level. At the count $y = 0$ the ratio $P(0)/Q(0)$ is $e^{\varepsilon_0}$ for every $n$, and only the probability of that outcome shrinks. So shuffling amplifies by moving the bad outcomes into $\delta$.
 
 How does the privacy improve with the number of users? The count is a sum of many independent bits, so it is close to normal. Two normals with the same variance are as hard to tell apart as two unit-variance normals a distance $\mu$ apart, where $\mu$ is their mean difference in standard deviations. Such a pair satisfies Gaussian differential privacy (GDP) of [f-DP and Gaussian DP](04-gaussian-dp.md) with parameter $\mu$, written **$\mu$-GDP**, and its exact $\delta(\varepsilon)$ is the curve of @thm-lg-analytic. The next result computes the two moments that set $\mu$.
 
@@ -226,7 +226,7 @@ The even schedule loses nothing when the maps after step $t$ are translations an
 
 The bound is exact in the worst case, when step $t$ maps every point to one point and erases the noise added before it. For typical runs it is loose, because that earlier noise also hides the shift, and a map that strictly shrinks distances shrinks the shift for free. Read as a Gaussian pair, the bound gives the record at step $t$ the parameter $\mu = s/(\sigma\sqrt{n - t + 1})$. @fig-shuf-positions compares it with the exact $\mu$ of a one-dimensional run of 100 steps with $s/\sigma = 1$, computed in @sec-shuf-quadratic. When each step shrinks distances by the factor 0.95, the exact $\mu$ at $t = 50$ is 0.0240, against the bound's $1/\sqrt{51} = 0.1400$.
 
-Early records are safe and late ones are not. A uniformly random stopping time spreads this out, and Theorem 26 of Feldman et al. then gives every record $2\ln n$ times the guarantee of the first (@sec-apx-amp-stopping derives a version). Several passes need @thm-shuf-chain with several shifts ([Exercise 4](../../book-exercises/part04-privacy-accounting/07-shuffling-iteration.md#sec-sol-shuf-4)), and Altschuler & Talwar (2022) combine iteration with subsampling.
+Early records are safe and late ones are not. A uniformly random stopping time spreads this out, and Theorem 26 of Feldman et al. then gives every record $2\ln n$ times the guarantee of the first (@sec-apx-amp-stopping derives a version). Several passes need @thm-shuf-chain with several shifts, and Altschuler & Talwar (2022) combine iteration with subsampling.
 
 | Step | 1 | 2 | 3 | 4 | Total |
 | --- | --- | --- | --- | --- | --- |
@@ -312,7 +312,7 @@ $$\theta_T = c^T\theta_0 + \sum_{k=1}^{T}c^{T-k}(b_k + \xi_k).$$
 6. *All iterates.* Releasing every iterate composes $T - t + 1$ Gaussian steps, each $s/\sigma$-GDP given the past. GDP composes by adding squares ([f-DP and Gaussian DP](04-gaussian-dp.md)), which gives $\sqrt{T - t + 1}\,s/\sigma$. For $c = 1$ every power of $c$ is 1, and step 4 gives $(T - t + 1)s/(\sigma\sqrt T)$, which for $t = 1$ is $\sqrt T s/\sigma$.
 :::
 
-Contraction is what forgets. With $c < 1$, the offset of step $k$ reaches the end damped by $c^{T-k}$ while fresh noise keeps arriving, so the signal saturates at $s/(1 - c)$ and the noise at $\sigma/\sqrt{1 - c^2}$. With $c = 1$ the signal grows like $T$ and $\mu$ like $\sqrt T$ (@fig-shuf-hidden, left). The plateau arrives after a few multiples of $1/(1 - c)$ steps ([Exercise 5](../../book-exercises/part04-privacy-accounting/07-shuffling-iteration.md#sec-sol-shuf-5)). With $c = 0.99$, $\mu$ is 9.6101 at $T = 100$ and 14.1061 at $T = 1000$, against the limit $\sqrt{199} = 14.1067$. On a $\lambda$-strongly convex, $\beta$-smooth loss with $\eta = 1/\beta$, that is the condition number $\beta/\lambda$.
+Contraction is what forgets. With $c < 1$, the offset of step $k$ reaches the end damped by $c^{T-k}$ while fresh noise keeps arriving, so the signal saturates at $s/(1 - c)$ and the noise at $\sigma/\sqrt{1 - c^2}$. With $c = 1$ the signal grows like $T$ and $\mu$ like $\sqrt T$ (@fig-shuf-hidden, left). The plateau arrives after a few multiples of $1/(1 - c)$ steps. With $c = 0.99$, $\mu$ is 9.6101 at $T = 100$ and 14.1061 at $T = 1000$, against the limit $\sqrt{199} = 14.1067$. On a $\lambda$-strongly convex, $\beta$-smooth loss with $\eta = 1/\beta$, that is the condition number $\beta/\lambda$.
 
 Chourasia, Ye & Shokri (2021, Corollary 1) bound the RDP of the last iterate of full-batch noisy GD on smooth strongly convex losses. In the notation of this section its limit is $\frac{2\alpha s^2}{(1 - c)\sigma^2}$. The exact limiting RDP is $\alpha\mu^2/2$ with the limit of @eq-shuf-last-iterate, so the ratio of exact to bound is $\frac{1 + c}{4}$. At $c = 0.99$, $\alpha = 2$ and $s/\sigma = 1$ that is 199.0000 against 400.0000, so the bound is within a factor of about 2.
 
@@ -376,5 +376,3 @@ uv run python code/part04-privacy-accounting/shuffling_iteration.py
 - Ye & Shokri, "Differentially Private Learning Needs Hidden State (Or Much Faster Convergence)" (NeurIPS 2022; arXiv:2203.05363). Extends the converging bound to mini-batch noisy SGD with shuffle-and-partition and sampling without replacement.
 - Nasr, Song, Thakurta, Papernot & Carlini, "Adversary Instantiation: Lower Bounds for Differentially Private Machine Learning" (IEEE S&P 2021; arXiv:2101.04535). Attacks that match the DP-SGD bound for strong adversaries and fall short when the adversary sees only the final model.
 - Annamalai, "It's Our Loss: No Privacy Amplification for Hidden State DP-SGD With Non-Convex Loss" (ACM Workshop on Artificial Intelligence and Security, AISec 2024; arXiv:2407.06496). A non-convex loss for which the last iterate leaks as much as all iterates.
-
-**Practice.** Exercises for this chapter, each with a worked solution, are in [the exercise book](../../book-exercises/part04-privacy-accounting/07-shuffling-iteration.md).
