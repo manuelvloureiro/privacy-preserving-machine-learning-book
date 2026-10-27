@@ -82,7 +82,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <link href="../site_libs/quarto-html/quarto-syntax-highlighting-bf27225e3a48a9273f3daa8f8e829971.css" rel="stylesheet" id="quarto-text-highlighting-styles">
 <script src="../site_libs/bootstrap/bootstrap.min.js"></script>
 <link href="../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
-<link href="../site_libs/bootstrap/bootstrap-78f503ea39f784e8964cd205807fbe37.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
+<link href="../site_libs/bootstrap/bootstrap-c76bce1ab0818eb3e57b6c28e4057b54.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
 <script id="quarto-search-options" type="application/json">{
   "location": "sidebar",
   "copy-button": false,
@@ -680,9 +680,9 @@ window.Quarto = {
 </header>
 
 
-<p>Someone hands you a die that is either fair or loaded so that a six comes up half the time, and you may roll it as often as you like. How much does one roll tell you, on average, about which die you hold? How strongly can a single roll point the wrong way? How often can the best guess from one roll be right? Each answer is a <strong>divergence</strong>, a number that is zero when two distributions, call them <span class="math inline">\(P\)</span> and <span class="math inline">\(Q\)</span>, are equal and grows as they become easier to tell apart. The same questions measure how far a fitted model is from the truth and how many samples an A/B test needs.</p>
-<p>One idea organizes the answers. To decide which distribution produced an outcome <span class="math inline">\(x\)</span>, compare how likely <span class="math inline">\(x\)</span> is under each. Write <span class="math inline">\(p\)</span> and <span class="math inline">\(q\)</span> for the probabilities, or densities, of <span class="math inline">\(P\)</span> and <span class="math inline">\(Q\)</span>. Their quotient is the <strong>likelihood ratio</strong> <span class="math inline">\(r(x) = p(x)/q(x)\)</span>. Its logarithm <span class="math inline">\(L(x) = \ln r(x)\)</span> is the <strong>evidence</strong> for <span class="math inline">\(P\)</span>, in nats, and it adds over independent observations. Every divergence is a summary of <span class="math inline">\(r\)</span>. The Kullback–Leibler (KL) divergence averages the evidence over draws from <span class="math inline">\(P\)</span>, the max-divergence takes its largest value, and the total variation (TV) distance measures the mass of <span class="math inline">\(p\)</span> above <span class="math inline">\(q\)</span>. Processing data, such as binning it, can only average likelihood ratios together, so no divergence grows under processing, and this <strong>data-processing inequality</strong> is what later parts use most.</p>
-<p>The running example is the die, with <span class="math inline">\(P\)</span> loaded and <span class="math inline">\(Q\)</span> fair (<a href="#tbl-div-die" class="quarto-xref">Table&nbsp;<span>3.1</span></a>). A six is three times more likely under <span class="math inline">\(P\)</span>, evidence of <span class="math inline">\(\ln 3 = 1.10\)</span> nats for “loaded”. Any other roll gives <span class="math inline">\(\ln 0.6 = -0.51\)</span> nats, weak evidence for “fair”. Two continuous pairs recur, a normal and a Laplace density each against a shifted copy, whose evidence is unbounded and bounded (<a href="../part01-prerequisites/01-distributions.html">Probability distributions</a>). Sums <span class="math inline">\(\sum_x\)</span> are integrals for densities, and <a href="#tbl-div-symbols" class="quarto-xref">Table&nbsp;<span>3.2</span></a> lists the symbols.</p>
+<p>Someone hands you a die that is either fair or loaded so that a six comes up half the time, and you may roll it as often as you like. How much does one roll tell you, on average, about which die you hold? How strongly can a single roll point the wrong way? How often can the best guess from one roll be right? Each answer is a <strong>divergence</strong>, a number that is zero when two distributions, call them <span class="math inline">\(P\)</span> and <span class="math inline">\(Q\)</span>, are equal and grows as they become easier to tell apart.</p>
+<p>One idea organizes the answers. To decide which distribution produced an outcome <span class="math inline">\(x\)</span>, compare how likely <span class="math inline">\(x\)</span> is under each. Write <span class="math inline">\(p\)</span> and <span class="math inline">\(q\)</span> for the probabilities, or densities, of <span class="math inline">\(P\)</span> and <span class="math inline">\(Q\)</span>. Their quotient is the <strong>likelihood ratio</strong> <span class="math inline">\(r(x) = p(x)/q(x)\)</span>, and its logarithm <span class="math inline">\(L(x) = \ln r(x)\)</span> is the <strong>evidence</strong> for <span class="math inline">\(P\)</span>, in nats, which adds over independent observations. Every divergence is a summary of <span class="math inline">\(r\)</span>. For example, the Kullback–Leibler (KL) divergence averages the evidence over draws from <span class="math inline">\(P\)</span>, and the max-divergence takes its largest value. The total variation (TV) distance measures the mass of <span class="math inline">\(p\)</span> above <span class="math inline">\(q\)</span>. Processing data, such as binning it, can only average likelihood ratios together, so no divergence grows under processing. This <strong>data-processing inequality</strong> is what later parts use most.</p>
+<p>The running example is the die, with <span class="math inline">\(P\)</span> loaded and <span class="math inline">\(Q\)</span> fair (<a href="#tbl-div-die" class="quarto-xref">Table&nbsp;<span>3.1</span></a>). A six is three times more likely under <span class="math inline">\(P\)</span>, which is evidence of <span class="math inline">\(\ln 3 = 1.10\)</span> nats for “loaded”. Any other roll gives <span class="math inline">\(\ln 0.6 = -0.51\)</span> nats, weak evidence for “fair”. Two continuous pairs recur, a normal and a Laplace density each against a shifted copy, whose evidence is unbounded and bounded (<a href="../part01-prerequisites/01-distributions.html">Probability distributions</a>). Sums <span class="math inline">\(\sum_x\)</span> are integrals for densities, and <a href="#tbl-div-symbols" class="quarto-xref">Table&nbsp;<span>3.2</span></a> lists the symbols.</p>
 <div id="tbl-div-die" class="quarto-float quarto-figure quarto-figure-center anchored">
 <figure class="quarto-float quarto-float-tbl figure">
 <figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl" id="tbl-div-die-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
@@ -772,7 +772,7 @@ Table&nbsp;3.2: The symbols of this chapter.
 </div>
 <section id="sec-div-kl" class="level2" data-number="3.1">
 <h2 data-number="3.1" class="anchored" data-anchor-id="sec-div-kl"><span class="header-section-number">3.1</span> KL divergence</h2>
-<p>Add up the evidence of <span class="math inline">\(n\)</span> rolls of the die. With the loaded die the sum climbs, with the fair die it falls, and each family of runs drifts along a straight line (<a href="#fig-div-evidence-walk" class="quarto-xref">Figure&nbsp;<span>3.1</span></a>). This section names its slope, the average evidence per roll, and proves the two facts every later use rests on: it is never negative, and it adds over independent observations.</p>
+<p>Add up the evidence of <span class="math inline">\(n\)</span> rolls of the die. With the loaded die the sum climbs, with the fair die it falls, and each family of runs drifts along a straight line (<a href="#fig-div-evidence-walk" class="quarto-xref">Figure&nbsp;<span>3.1</span></a>). This section names the slope, the average evidence per roll, and proves the two facts that every later use needs: it is never negative, and it adds over independent observations.</p>
 <div id="fig-div-evidence-walk" class="quarto-float quarto-figure quarto-figure-center anchored">
 <figure class="quarto-float quarto-float-fig figure">
 <div aria-describedby="fig-div-evidence-walk-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
@@ -786,7 +786,7 @@ Figure&nbsp;3.1: Cumulative evidence for “loaded” over 60 rolls of the loade
 <div id="def-div-kl" class="theorem definition">
 <p><span class="theorem-title"><strong>Definition 3.1 (Kullback–Leibler divergence)</strong></span> The <strong>KL divergence</strong> of <span class="math inline">\(P\)</span> from <span class="math inline">\(Q\)</span> is the average evidence for <span class="math inline">\(P\)</span> that one observation gives when it comes from <span class="math inline">\(P\)</span>: <span id="eq-auto-03divergences-1"><span class="math display">\[D_{\mathrm{KL}}(P\|Q) = \mathbb E_P[L] = \sum_x p(x)\ln\frac{p(x)}{q(x)}. \tag{3.1}\]</span></span> It is infinite when <span class="math inline">\(P\)</span> puts mass where <span class="math inline">\(Q\)</span> puts none.</p>
 </div>
-<p>That data from <span class="math inline">\(P\)</span> cannot favour <span class="math inline">\(Q\)</span> on average sounds obvious, but the proof needs a tool that compares a function of an average with the average of the function. A function <span class="math inline">\(f\)</span> is <strong>convex</strong> when its graph bends upward, so that every chord lies above it, and <strong>strictly convex</strong> when the graph has no straight pieces. The next proof uses Jensen’s inequality at step 2, and later sections use it again.</p>
+<p>That data from <span class="math inline">\(P\)</span> cannot favour <span class="math inline">\(Q\)</span> on average sounds obvious, but the proof needs a tool that compares a function of an average with the average of the function. A function <span class="math inline">\(f\)</span> is <strong>convex</strong> when its graph bends upward, so that every chord lies above it, and <strong>strictly convex</strong> when the graph has no straight pieces. Step 2 of the next proof uses Jensen’s inequality, and later sections use it again.</p>
 <div id="lem-div-jensen" class="theorem lemma">
 <p><span class="theorem-title"><strong>Lemma 3.1 (Jensen’s inequality)</strong></span> Let <span class="math inline">\(f\)</span> be convex and let <span class="math inline">\(X\)</span> be a random variable with a finite average. Then <span id="eq-auto-03divergences-2"><span class="math display">\[f(\mathbb E[X]) \le \mathbb E[f(X)]. \tag{3.2}\]</span></span> If <span class="math inline">\(f\)</span> is strictly convex, equality holds only when <span class="math inline">\(X\)</span> is constant. For a concave <span class="math inline">\(f\)</span>, whose graph bends downward, the inequality is reversed.</p>
 </div>
@@ -798,7 +798,7 @@ Figure&nbsp;3.1: Cumulative evidence for “loaded” over 60 rolls of the loade
 <li><em>Equality.</em> A strictly convex graph touches the tangent only at <span class="math inline">\(\mathbb E[X]\)</span>, so equality forces <span class="math inline">\(X = \mathbb E[X]\)</span> with probability 1. A concave function is minus a convex one, which flips the inequality.</li>
 </ol>
 </div>
-<p>For the die’s two ratios, 0.6 and 3 each with probability <span class="math inline">\(\frac12\)</span> under <span class="math inline">\(P\)</span>, and <span class="math inline">\(f(x) = x^2\)</span>, the average is 1.8 and the two sides are <span class="math inline">\(1.8^2 = 3.24\)</span> and <span class="math inline">\(\frac12(0.36 + 9) = 4.68\)</span>.</p>
+<p>For example, the die’s two ratios, 0.6 and 3, each have probability <span class="math inline">\(\frac12\)</span> under <span class="math inline">\(P\)</span>, so their average is 1.8. With <span class="math inline">\(f(x) = x^2\)</span> the two sides are <span class="math inline">\(1.8^2 = 3.24\)</span> and <span class="math inline">\(\frac12(0.36 + 9) = 4.68\)</span>.</p>
 <div id="thm-div-kl" class="theorem">
 <p><span class="theorem-title"><strong>Theorem 3.1 (Gibbs’ inequality and additivity)</strong></span> For any two distributions, <span class="math inline">\(D_{\mathrm{KL}}(P\|Q) \ge 0\)</span>, with equality only if <span class="math inline">\(P = Q\)</span>. Write <span class="math inline">\(P_1 \times P_2\)</span> for the distribution of a pair drawn independently from <span class="math inline">\(P_1\)</span> and <span class="math inline">\(P_2\)</span>. Then <span id="eq-div-kl-additive"><span class="math display">\[D_{\mathrm{KL}}(P_1 \times P_2\,\|\,Q_1 \times Q_2) = D_{\mathrm{KL}}(P_1\|Q_1) + D_{\mathrm{KL}}(P_2\|Q_2), \tag{3.3}\]</span></span> so <span class="math inline">\(n\)</span> independent samples carry <span class="math inline">\(n\)</span> times the KL divergence of one.</p>
 </div>
@@ -812,7 +812,7 @@ Figure&nbsp;3.1: Cumulative evidence for “loaded” over 60 rolls of the loade
 <li><em>Additivity.</em> Under a product distribution the probability of a pair is the product of the probabilities, so the evidence of a pair is the sum <span class="math inline">\(L_1(x_1) + L_2(x_2)\)</span>. Averages are linear, and the average of <span class="math inline">\(L_i(X_i)\)</span> involves only <span class="math inline">\(P_i\)</span>, so it is <span class="math inline">\(D_{\mathrm{KL}}(P_i\|Q_i)\)</span>.</li>
 </ol>
 </div>
-<p>KL also measures a model’s fit. For a model <span class="math inline">\(q_\theta\)</span> with parameter <span class="math inline">\(\theta\)</span>, only the term <span class="math inline">\(-\mathbb E_P[\ln q_\theta(X)]\)</span> of <span class="math inline">\(D_{\mathrm{KL}}(P\|Q_\theta)\)</span> depends on <span class="math inline">\(\theta\)</span>, so minimizing this forward KL is maximum likelihood. Because KL averages under its first argument, the forward fit must cover every region the data visit, while the reverse divergence <span class="math inline">\(D_{\mathrm{KL}}(Q_\theta\|P)\)</span> of variational inference may lock onto one mode (<a href="#fig-div-forward-reverse" class="quarto-xref">Figure&nbsp;<span>3.2</span></a>).</p>
+<p>KL also measures a model’s fit. For a model <span class="math inline">\(q_\theta\)</span> with parameter <span class="math inline">\(\theta\)</span>, only the term <span class="math inline">\(-\mathbb E_P[\ln q_\theta(X)]\)</span> of <span class="math inline">\(D_{\mathrm{KL}}(P\|Q_\theta)\)</span> depends on <span class="math inline">\(\theta\)</span>, so minimizing this forward KL is maximum likelihood. KL averages under its first argument, so the forward fit must cover every region the data visit. The reverse divergence <span class="math inline">\(D_{\mathrm{KL}}(Q_\theta\|P)\)</span> of variational inference may lock onto one mode instead (<a href="#fig-div-forward-reverse" class="quarto-xref">Figure&nbsp;<span>3.2</span></a>).</p>
 <div id="fig-div-forward-reverse" class="quarto-float quarto-figure quarto-figure-center anchored">
 <figure class="quarto-float quarto-float-fig figure">
 <div aria-describedby="fig-div-forward-reverse-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
@@ -824,12 +824,12 @@ Figure&nbsp;3.2: One Gaussian fitted to two bumps by forward and by reverse KL.
 </figure>
 </div>
 <div id="exm-div-kl-die" class="theorem example">
-<p><span class="theorem-title"><strong>Example 3.1</strong></span> Under <span class="math inline">\(P\)</span> the five non-sixes together have probability 0.5 and evidence <span class="math inline">\(\ln 0.6\)</span> each, and the six has probability 0.5 and evidence <span class="math inline">\(\ln 3\)</span>, so <span id="eq-auto-03divergences-4"><span class="math display">\[D_{\mathrm{KL}}(P\|Q) = 0.5\ln 0.6 + 0.5\ln 3 = 0.5\ln 1.8 = 0.2939. \tag{3.5}\]</span></span> In the other direction the fair die weights the non-sixes <span class="math inline">\(\frac56\)</span> and the six <span class="math inline">\(\frac16\)</span>, and the evidence is for “fair”: <span id="eq-auto-03divergences-5"><span class="math display">\[D_{\mathrm{KL}}(Q\|P) = \tfrac56\ln\tfrac{1}{0.6} + \tfrac16\ln\tfrac13 = 0.4257 - 0.1831 = 0.2426. \tag{3.6}\]</span></span> A loaded die gives itself away faster than a fair one proves its innocence, because its sixes carry strong evidence. In general, telling two distributions apart takes a number of observations of order <span class="math inline">\(1/D_{\mathrm{KL}}\)</span>, which <a href="#sec-div-pinsker" class="quarto-xref"><span>Section 3.9</span></a> makes precise.</p>
+<p><span class="theorem-title"><strong>Example 3.1</strong></span> Under <span class="math inline">\(P\)</span> the five non-sixes together have probability 0.5 and evidence <span class="math inline">\(\ln 0.6\)</span> each, and the six has probability 0.5 and evidence <span class="math inline">\(\ln 3\)</span>, so <span id="eq-auto-03divergences-4"><span class="math display">\[D_{\mathrm{KL}}(P\|Q) = 0.5\ln 0.6 + 0.5\ln 3 = 0.5\ln 1.8 = 0.2939. \tag{3.5}\]</span></span> In the other direction the fair die weights the non-sixes <span class="math inline">\(\frac56\)</span> and the six <span class="math inline">\(\frac16\)</span>, and the evidence is for “fair”: <span id="eq-auto-03divergences-5"><span class="math display">\[D_{\mathrm{KL}}(Q\|P) = \tfrac56\ln\tfrac{1}{0.6} + \tfrac16\ln\tfrac13 = 0.4257 - 0.1831 = 0.2426. \tag{3.6}\]</span></span> A loaded die gives itself away faster than a fair one proves its innocence, because its sixes carry strong evidence. In general, telling two distributions apart takes a number of observations of order <span class="math inline">\(1/D_{\mathrm{KL}}\)</span>, as <a href="#sec-div-pinsker" class="quarto-xref"><span>Section 3.9</span></a> shows.</p>
 </div>
 </section>
 <section id="sec-div-renyi" class="level2" data-number="3.2">
 <h2 data-number="3.2" class="anchored" data-anchor-id="sec-div-renyi"><span class="header-section-number">3.2</span> Rényi divergence</h2>
-<p>KL is an average, so it cannot say how often the evidence is large, and later parts need that. Since <span class="math inline">\(e^{D_{\mathrm{KL}}}\)</span> is the geometric mean of <span class="math inline">\(r\)</span> under <span class="math inline">\(P\)</span>, other means can weight large ratios more. The <strong>power mean</strong> with exponent <span class="math inline">\(\lambda\)</span> raises each value to the power <span class="math inline">\(\lambda\)</span>, averages, and undoes the power: <span id="eq-auto-03divergences-6"><span class="math display">\[m_\lambda = \big(\mathbb E_P[r^\lambda]\big)^{1/\lambda}. \tag{3.7}\]</span></span> Exponent <span class="math inline">\(-1\)</span> gives the harmonic mean, the limit 0 the geometric mean, 1 the arithmetic mean, and <span class="math inline">\(\lambda \to \infty\)</span> the largest value (<a href="#tbl-div-power-means" class="quarto-xref">Table&nbsp;<span>3.3</span></a>). The Rényi divergence takes the logarithm of the power mean with exponent <span class="math inline">\(\alpha - 1\)</span>, so its <strong>order</strong> <span class="math inline">\(\alpha\)</span> is a dial from the typical evidence to the worst case.</p>
+<p>KL is an average, so it cannot say how often the evidence is large, and later parts need that. Since <span class="math inline">\(e^{D_{\mathrm{KL}}}\)</span> is the geometric mean of <span class="math inline">\(r\)</span> under <span class="math inline">\(P\)</span>, other means can give large ratios more weight. The <strong>power mean</strong> with exponent <span class="math inline">\(\lambda\)</span> raises each value to the power <span class="math inline">\(\lambda\)</span>, averages, and undoes the power: <span id="eq-auto-03divergences-6"><span class="math display">\[m_\lambda = \big(\mathbb E_P[r^\lambda]\big)^{1/\lambda}. \tag{3.7}\]</span></span> Exponent <span class="math inline">\(-1\)</span> gives the harmonic mean, the limit 0 the geometric mean, 1 the arithmetic mean, and <span class="math inline">\(\lambda \to \infty\)</span> the largest value (<a href="#tbl-div-power-means" class="quarto-xref">Table&nbsp;<span>3.3</span></a>). The Rényi divergence is the logarithm of the power mean with exponent <span class="math inline">\(\alpha - 1\)</span>, so its <strong>order</strong> <span class="math inline">\(\alpha\)</span> is a dial from the typical evidence to the worst case.</p>
 <div id="tbl-div-power-means" class="quarto-float quarto-figure quarto-figure-center anchored">
 <figure class="quarto-float quarto-float-tbl figure">
 <figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl" id="tbl-div-power-means-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
@@ -884,14 +884,14 @@ Table&nbsp;3.3: Means of the die’s likelihood ratio under <span class="math in
 <div id="def-div-renyi" class="theorem definition">
 <p><span class="theorem-title"><strong>Definition 3.2 (Rényi divergence)</strong></span> For an order <span class="math inline">\(\alpha \in (0, 1) \cup (1, \infty)\)</span>, the <strong>Rényi divergence</strong> of <span class="math inline">\(P\)</span> from <span class="math inline">\(Q\)</span> is <span id="eq-auto-03divergences-7"><span class="math display">\[D_\alpha(P\|Q) = \frac{1}{\alpha - 1}\ln\sum_x p(x)^\alpha q(x)^{1 - \alpha}. \tag{3.8}\]</span></span> The <strong>max-divergence</strong> is <span class="math inline">\(D_\infty(P\|Q) = \ln\max_x r(x)\)</span>, an essential supremum for densities, and <span class="math inline">\(D_1\)</span> is defined as <span class="math inline">\(D_{\mathrm{KL}}\)</span>, which <a href="#thm-div-renyi" class="quarto-xref">Theorem&nbsp;<span>3.2</span></a> shows is the limit at order 1.</p>
 </div>
-<p>The forms used below move an average under <span class="math inline">\(Q\)</span> to one under <span class="math inline">\(P\)</span>: an outcome three times as likely under <span class="math inline">\(P\)</span> must count three times as much.</p>
+<p>The forms below move an average under <span class="math inline">\(Q\)</span> to one under <span class="math inline">\(P\)</span>. An outcome three times as likely under <span class="math inline">\(P\)</span> must count three times as much.</p>
 <div id="lem-div-change-of-measure" class="theorem lemma">
 <p><span class="theorem-title"><strong>Lemma 3.2 (Change of measure)</strong></span> Suppose <span class="math inline">\(Q\)</span> gives positive probability to every outcome that <span class="math inline">\(P\)</span> does. Then for any function <span class="math inline">\(g\)</span>, <span id="eq-auto-03divergences-8"><span class="math display">\[\mathbb E_P[g(X)] = \mathbb E_Q[r(X)\,g(X)]. \tag{3.9}\]</span></span> In particular <span class="math inline">\(\mathbb E_Q[r] = 1\)</span>, and <span class="math inline">\(\Pr_P[A] = \mathbb E_Q[r\,\mathbf 1[A]]\)</span> for every event <span class="math inline">\(A\)</span>, with <span class="math inline">\(\mathbf 1[A]\)</span> equal to 1 on <span class="math inline">\(A\)</span> and 0 elsewhere.</p>
 </div>
 <div class="proof">
 <p><span class="proof-title"><em>Proof</em>. </span>Multiply and divide each term of <span class="math inline">\(\sum_x p(x)g(x)\)</span> by <span class="math inline">\(q(x)\)</span>. The special cases take <span class="math inline">\(g = 1\)</span> and <span class="math inline">\(g = \mathbf 1[A]\)</span>.</p>
 </div>
-<p>A second form links the divergence to the Chernoff method of <a href="../part01-prerequisites/02-concentration.html">Concentration inequalities</a>, which bounds tails through the logarithm of a moment generating function. For the evidence under <span class="math inline">\(P\)</span> that logarithm, the cumulant generating function of <a href="../part01-prerequisites/01-distributions.html">Probability distributions</a>, is <span id="eq-auto-03divergences-9"><span class="math display">\[K_L(\lambda) = \ln\mathbb E_P\big[e^{\lambda L}\big]. \tag{3.10}\]</span></span></p>
+<p>A second form links the divergence to the Chernoff method of <a href="../part01-prerequisites/02-concentration.html">Concentration inequalities</a>, which bounds tails through the logarithm of a moment generating function. For the evidence under <span class="math inline">\(P\)</span>, that logarithm is <span id="eq-auto-03divergences-9"><span class="math display">\[K_L(\lambda) = \ln\mathbb E_P\big[e^{\lambda L}\big]. \tag{3.10}\]</span></span></p>
 <div id="prp-div-renyi-forms" class="theorem proposition">
 <p><span class="theorem-title"><strong>Proposition 3.1 (Three forms of the Rényi divergence)</strong></span> For every order <span class="math inline">\(\alpha \in (0, 1) \cup (1, \infty)\)</span>, <span id="eq-auto-03divergences-10"><span class="math display">\[D_\alpha(P\|Q) = \frac{1}{\alpha - 1}\ln\mathbb E_Q\big[r^\alpha\big] = \frac{1}{\alpha - 1}\ln\mathbb E_P\big[r^{\alpha - 1}\big]. \tag{3.11}\]</span></span> So the divergence is the logarithm of a power mean, and a chord slope of <span class="math inline">\(K_L\)</span>: <span id="eq-div-renyi-power"><span class="math display">\[D_\alpha(P\|Q) = \ln m_{\alpha - 1}, \tag{3.12}\]</span></span> <span id="eq-div-renyi-psi"><span class="math display">\[D_\alpha(P\|Q) = \frac{K_L(\alpha - 1)}{\alpha - 1}. \tag{3.13}\]</span></span></p>
 </div>
@@ -903,7 +903,7 @@ Table&nbsp;3.3: Means of the die’s likelihood ratio under <span class="math in
 <li>Since <span class="math inline">\(r^{\alpha - 1} = e^{(\alpha - 1)L}\)</span>, the logarithm of <span class="math inline">\(\mathbb E_P[r^{\alpha - 1}]\)</span> is <span class="math inline">\(K_L(\alpha - 1)\)</span>, which gives <a href="#eq-div-renyi-psi" class="quarto-xref">Equation&nbsp;<span>3.13</span></a>.</li>
 </ol>
 </div>
-<p>The behaviour of the family therefore follows from the shape of <span class="math inline">\(K_L\)</span>, and the limit at order 1 needs its slope at 0.</p>
+<p>So the behaviour of the family follows from the shape of <span class="math inline">\(K_L\)</span>, and the limit at order 1 needs its slope at 0.</p>
 <div id="lem-div-psi" class="theorem lemma">
 <p><span class="theorem-title"><strong>Lemma 3.3 (Shape of the log moment generating function)</strong></span> If <span class="math inline">\(K_L\)</span> is finite near 0, then <span class="math inline">\(K_L(0) = 0\)</span>, <span class="math inline">\(K_L'(0) = D_{\mathrm{KL}}(P\|Q)\)</span>, and <span class="math inline">\(K_L\)</span> is convex.</p>
 </div>
@@ -961,7 +961,7 @@ Figure&nbsp;3.4: The tilted weights <span class="math inline">\(p^\alpha q^{1 - 
 </figcaption>
 </figure>
 </div>
-<p>The family can also bound how often a sample from <span class="math inline">\(Q\)</span> looks like strong evidence for <span class="math inline">\(P\)</span>. The tool is Markov’s inequality, which says that a quantity that cannot be negative exceeds a level with probability at most its average divided by that level.</p>
+<p>The family also bounds how often a sample from <span class="math inline">\(Q\)</span> looks like strong evidence for <span class="math inline">\(P\)</span>. The tool is Markov’s inequality: a quantity that cannot be negative exceeds a level with probability at most its average divided by that level.</p>
 <div id="prp-div-renyi-tail" class="theorem proposition">
 <p><span class="theorem-title"><strong>Proposition 3.2 (Tail of the evidence)</strong></span> For every evidence level <span class="math inline">\(c\)</span> and every order <span class="math inline">\(\alpha &gt; 0\)</span>, <span id="eq-div-renyi-tail"><span class="math display">\[\Pr_Q[L \ge c] \le \exp\big(-\alpha c + (\alpha - 1)D_\alpha(P\|Q)\big). \tag{3.18}\]</span></span></p>
 </div>
@@ -1026,35 +1026,35 @@ Table&nbsp;3.4: Rényi divergences between the loaded and the fair die.
 </div>
 </figure>
 </div>
-<p>At order 2, <span class="math inline">\(r\)</span> is 0.6 with probability <span class="math inline">\(\frac56\)</span> and 3 with probability <span class="math inline">\(\frac16\)</span> under the fair die, so <span class="math inline">\(D_2(P\|Q) = \ln(\frac56 \times 0.36 + \frac16 \times 9) = \ln 1.8 = 0.5878\)</span>. Each row increases, as monotonicity requires, and the entries at order 0.5 agree, as skew symmetry requires.</p>
+<p>At order 2, <span class="math inline">\(r\)</span> is 0.6 with probability <span class="math inline">\(\frac56\)</span> and 3 with probability <span class="math inline">\(\frac16\)</span> under the fair die, so <span class="math inline">\(D_2(P\|Q) = \ln(\frac56 \times 0.36 + \frac16 \times 9) = \ln 1.8 = 0.5878\)</span>. Each row increases, as monotonicity requires, and the two entries at order 0.5 agree, as skew symmetry requires.</p>
 </div>
 </section>
 <section id="sec-div-gauss" class="level2" data-number="3.3">
 <h2 data-number="3.3" class="anchored" data-anchor-id="sec-div-gauss"><span class="header-section-number">3.3</span> Two Gaussians with equal variance</h2>
-<p>The most common pair in practice is a distribution and a shifted copy of it, such as a feature before and after a drift. For two normals with equal variance every divergence has a closed form in the shift measured in standard deviations: KL is half its square, each Rényi divergence is <span class="math inline">\(\alpha\)</span> times the KL, and the max-divergence is infinite, because the evidence is a line with no top.</p>
+<p>The most common pair in practice is a distribution and a shifted copy of it, such as a feature before and after a drift. For two normals with equal variance every divergence has a closed form in the shift measured in standard deviations. KL is half its square, each Rényi divergence is <span class="math inline">\(\alpha\)</span> times the KL, and the max-divergence is infinite, because the evidence is a line with no top.</p>
 <div id="prp-div-gauss" class="theorem proposition">
 <p><span class="theorem-title"><strong>Proposition 3.3 (Divergences of two shifted normals)</strong></span> Let <span class="math inline">\(P = \mathcal N(0, \sigma^2)\)</span> and <span class="math inline">\(Q = \mathcal N(s, \sigma^2)\)</span>, and write <span class="math inline">\(\mu = s/\sigma\)</span> for the shift in standard deviations. Then for every order <span class="math inline">\(\alpha\)</span>, <span id="eq-div-gauss-renyi"><span class="math display">\[D_{\mathrm{KL}}(P\|Q) = \frac{\mu^2}{2}, \qquad D_\alpha(P\|Q) = \frac{\alpha\mu^2}{2}, \qquad D_\infty(P\|Q) = \infty. \tag{3.19}\]</span></span> The same holds for any two means a distance <span class="math inline">\(s\)</span> apart, since shifting both changes nothing.</p>
 </div>
 <div class="proof">
-<p><span class="proof-title"><em>Proof</em>. </span>The plan is to compute the evidence, average it for KL, and complete the square in the Rényi integral.</p>
+<p><span class="proof-title"><em>Proof</em>. </span>The plan is to take the evidence from <a href="../part01-prerequisites/01-distributions.html">Probability distributions</a>, average it for KL, and complete the square in the Rényi integral.</p>
 <ol type="1">
-<li><em>The evidence.</em> The normal density with mean <span class="math inline">\(m\)</span> is <span class="math inline">\(\frac{1}{\sigma\sqrt{2\pi}}e^{-(x - m)^2/(2\sigma^2)}\)</span>. The constants cancel in the ratio, and expanding <span class="math inline">\((x - s)^2\)</span> cancels the <span class="math inline">\(x^2\)</span> terms: <span id="eq-auto-03divergences-15"><span class="math display">\[L(x) = \frac{(x - s)^2 - x^2}{2\sigma^2} = \frac{s^2 - 2sx}{2\sigma^2}. \tag{3.20}\]</span></span></li>
+<li><em>The evidence.</em> By <a href="01-distributions.html#thm-dist-shift" class="quarto-xref">Theorem&nbsp;<span>1.5</span></a>, the evidence of <span class="math inline">\(\mathcal N(0, \sigma^2)\)</span> against its copy shifted by <span class="math inline">\(s\)</span> is the line <span id="eq-auto-03divergences-15"><span class="math display">\[L(x) = \frac{s^2 - 2sx}{2\sigma^2}. \tag{3.20}\]</span></span></li>
 <li><em>KL.</em> The evidence is linear in <span class="math inline">\(x\)</span>, so its average under <span class="math inline">\(P\)</span> is its value at the mean 0, which is <span class="math inline">\(s^2/(2\sigma^2) = \mu^2/2\)</span>.</li>
 <li><em>Constants.</em> The factors <span class="math inline">\(\frac{1}{\sigma\sqrt{2\pi}}\)</span> raised to the powers <span class="math inline">\(\alpha\)</span> and <span class="math inline">\(1 - \alpha\)</span> multiply back to one such factor. What remains of <span class="math inline">\(p^\alpha q^{1 - \alpha}\)</span> is <span class="math inline">\(\exp(-B(x)/(2\sigma^2))\)</span>, with <span class="math inline">\(B(x) = \alpha x^2 + (1 - \alpha)(x - s)^2\)</span>.</li>
 <li><em>Complete the square</em> around <span class="math inline">\((1 - \alpha)s\)</span>. The constant left over is <span class="math inline">\((1 - \alpha)s^2 - (1 - \alpha)^2s^2\)</span>, so <span id="eq-auto-03divergences-16"><span class="math display">\[B(x) = \big(x - (1 - \alpha)s\big)^2 + \alpha(1 - \alpha)s^2. \tag{3.21}\]</span></span></li>
 <li><em>Integrate.</em> The squared term, with the factor <span class="math inline">\(\frac{1}{\sigma\sqrt{2\pi}}\)</span>, is the density of <span class="math inline">\(\mathcal N((1 - \alpha)s, \sigma^2)\)</span> and integrates to 1, so <span id="eq-auto-03divergences-17"><span class="math display">\[\int p^\alpha q^{1 - \alpha}\,\mathrm dx = \exp\Big(-\frac{\alpha(1 - \alpha)s^2}{2\sigma^2}\Big). \tag{3.22}\]</span></span></li>
 <li><em>Divide.</em> Taking the logarithm and dividing by <span class="math inline">\(\alpha - 1\)</span> gives <span class="math inline">\(\alpha s^2/(2\sigma^2)\)</span>, since <span class="math inline">\(-\alpha(1 - \alpha)/(\alpha - 1) = \alpha\)</span>.</li>
-<li><em>Max-divergence.</em> The line <span class="math inline">\(L\)</span> has a non-zero slope, so it is unbounded above.</li>
+<li><em>Max-divergence.</em> The line <span class="math inline">\(L\)</span> has the non-zero slope <span class="math inline">\(-s/\sigma^2\)</span>, so it is unbounded above.</li>
 </ol>
 </div>
-<p>Doubling the noise is the same as halving the shift. By additivity, independent coordinates with shifts <span class="math inline">\(s_i\)</span> give <span class="math inline">\(\alpha\sum_i s_i^2/(2\sigma^2)\)</span>, which depends only on the length of the shift vector (<a href="../appendix-derivations/05-probability.html#sec-apx-prob-convolution" class="quarto-xref"><span>Section E.1</span></a> in the appendices proves the rotation invariance behind this). Every finite order is finite while the worst case is infinite, because large ratios exist but are rare, and <a href="#eq-div-renyi-tail" class="quarto-xref">Equation&nbsp;<span>3.18</span></a> measures how rare.</p>
+<p>Doubling the noise is the same as halving the shift. By additivity, independent coordinates with shifts <span class="math inline">\(s_i\)</span> give <span class="math inline">\(\alpha\sum_i s_i^2/(2\sigma^2)\)</span>, which depends only on the length of the shift vector. Every finite order is finite while the worst case is infinite, because large ratios exist but are rare, and <a href="#eq-div-renyi-tail" class="quarto-xref">Equation&nbsp;<span>3.18</span></a> measures how rare.</p>
 <div id="exm-div-gauss-tail" class="theorem example">
 <p><span class="theorem-title"><strong>Example 3.3</strong></span> Take <span class="math inline">\(\mu = 1\)</span>, so <span class="math inline">\(D_{\mathrm{KL}} = 0.5\)</span> and <span class="math inline">\(D_\alpha = \alpha/2\)</span>. How often does a draw from <span class="math inline">\(Q\)</span> give at least <span class="math inline">\(c = 2\)</span> nats of evidence for <span class="math inline">\(P\)</span>? The evidence decreases in <span class="math inline">\(x\)</span>, so <span class="math inline">\(L \ge c\)</span> exactly when <span class="math inline">\(x \le \frac s2 - \frac{c\sigma^2}{s}\)</span>. Under <span class="math inline">\(Q\)</span>, <span class="math inline">\(x = s + \sigma Z\)</span> with <span class="math inline">\(Z\)</span> standard normal. Write <span class="math inline">\(\Phi\)</span> for the standard normal cumulative distribution function, so that <span class="math inline">\(\Phi(z)\)</span> is the probability that <span class="math inline">\(Z \le z\)</span>. Then <span id="eq-auto-03divergences-18"><span class="math display">\[\Pr_Q[L \ge c] = \Phi\Big(-\frac\mu2 - \frac c\mu\Big) = \Phi(-2.5) = 0.0062. \tag{3.23}\]</span></span> At order 1, <a href="#eq-div-renyi-tail" class="quarto-xref">Equation&nbsp;<span>3.18</span></a> gives Markov’s bound <span class="math inline">\(e^{-2} = 0.1353\)</span>. With <span class="math inline">\(D_\alpha = \alpha\mu^2/2\)</span> the exponent of the bound is the parabola <span class="math inline">\(-\alpha c + \alpha(\alpha - 1)\mu^2/2\)</span>, smallest at <span class="math inline">\(\alpha = c/\mu^2 + \frac12 = 2.5\)</span>. There it equals <span class="math inline">\(-3.125\)</span>, so the bound is <span class="math inline">\(e^{-3.125} = 0.0439\)</span>, 7 times the exact value against 22 times for Markov’s.</p>
 </div>
 </section>
 <section id="sec-div-laplace" class="level2" data-number="3.4">
 <h2 data-number="3.4" class="anchored" data-anchor-id="sec-div-laplace"><span class="header-section-number">3.4</span> Two Laplace distributions with shifted location</h2>
-<p>The Laplace distribution, with density <span class="math inline">\(\frac{1}{2b}e^{-|x - m|/b}\)</span> for centre <span class="math inline">\(m\)</span> and scale <span class="math inline">\(b\)</span>, is the other standard noise model. Its evidence against a shifted copy is bounded, so this section computes the whole Rényi family to see what a bounded ratio changes. The max-divergence turns out to be the shift in units of the scale, and KL slightly less.</p>
+<p>The Laplace distribution, with density <span class="math inline">\(\frac{1}{2b}e^{-|x - m|/b}\)</span> for centre <span class="math inline">\(m\)</span> and scale <span class="math inline">\(b\)</span>, is the other standard noise model. Its evidence against a shifted copy is bounded, and computing the whole Rényi family shows what a bounded ratio changes. The max-divergence is the shift in units of the scale, and KL is slightly less.</p>
 <div id="prp-div-laplace" class="theorem proposition">
 <p><span class="theorem-title"><strong>Proposition 3.4 (Divergences of two shifted Laplace distributions)</strong></span> Let <span class="math inline">\(P = \mathrm{Lap}(0, b)\)</span> and <span class="math inline">\(Q = \mathrm{Lap}(s, b)\)</span> with <span class="math inline">\(s \ge 0\)</span>, and write <span class="math inline">\(t = s/b\)</span>. Then <span id="eq-auto-03divergences-19"><span class="math display">\[D_{\mathrm{KL}}(P\|Q) = t + e^{-t} - 1, \qquad D_\infty(P\|Q) = t, \tag{3.24}\]</span></span> and for every order <span class="math inline">\(\alpha \ne \frac12, 1\)</span>, <span id="eq-div-laplace-renyi"><span class="math display">\[D_\alpha(P\|Q) = \frac{1}{\alpha - 1}\ln\left(\frac{\alpha}{2\alpha - 1}e^{(\alpha - 1)t} + \frac{\alpha - 1}{2\alpha - 1}e^{-\alpha t}\right). \tag{3.25}\]</span></span> At <span class="math inline">\(\alpha = \frac12\)</span> the bracket is replaced by its limit <span class="math inline">\((1 + \frac t2)e^{-t/2}\)</span>.</p>
 </div>
@@ -1062,14 +1062,14 @@ Table&nbsp;3.4: Rényi divergences between the loaded and the fair die.
 <p><span class="proof-title"><em>Proof</em>. </span>The plan is to rescale, read the max-divergence off the evidence, average the evidence for KL, and integrate the Rényi sum piece by piece.</p>
 <ol type="1">
 <li><em>Rescale.</em> Dividing by <span class="math inline">\(b\)</span> is a bijection, which changes no divergence (apply <a href="#thm-div-dpi" class="quarto-xref">Theorem&nbsp;<span>3.5</span></a> to it and to its inverse), so take <span class="math inline">\(b = 1\)</span> and <span class="math inline">\(s = t\)</span>. The evidence is the difference of the exponents, <span class="math inline">\(L(x) = |x - t| - |x|\)</span>.</li>
-<li><em>Max-divergence.</em> Two numbers a distance <span class="math inline">\(t\)</span> apart have absolute values that differ by at most <span class="math inline">\(t\)</span>, by the triangle inequality, so <span class="math inline">\(L \le t\)</span>. For <span class="math inline">\(x \le 0\)</span> both <span class="math inline">\(x\)</span> and <span class="math inline">\(x - t\)</span> are negative, and <span class="math inline">\(L(x) = t\)</span> exactly.</li>
+<li><em>Max-divergence.</em> By <a href="01-distributions.html#thm-dist-shift" class="quarto-xref">Theorem&nbsp;<span>1.5</span></a>, the evidence of a Laplace density against its copy shifted by <span class="math inline">\(t\)</span> is at most <span class="math inline">\(t\)</span>, and it equals <span class="math inline">\(t\)</span> for every <span class="math inline">\(x \le 0\)</span>.</li>
 <li><em>KL, set up.</em> KL is <span class="math inline">\(\mathbb E[|X - t|] - \mathbb E[|X|]\)</span> with <span class="math inline">\(X \sim \mathrm{Lap}(0, 1)\)</span>, and the second average is 1, the mean of the exponential density of <span class="math inline">\(|X|\)</span>.</li>
 <li><em>KL, remove the absolute value.</em> Every number satisfies <span class="math inline">\(|y| = y + 2(-y)_+\)</span>. Put <span class="math inline">\(y = X - t\)</span> and use <span class="math inline">\(\mathbb E[X] = 0\)</span>: <span id="eq-auto-03divergences-20"><span class="math display">\[\mathbb E[|X - t|] = -t + 2\,\mathbb E[(t - X)_+]. \tag{3.26}\]</span></span></li>
 <li><em>KL, the positive part.</em> <span class="math inline">\((t - X)_+\)</span> is the length of the interval from <span class="math inline">\(X\)</span> up to <span class="math inline">\(t\)</span>, so its average integrates the distribution function, <span class="math inline">\(\frac12e^x\)</span> below 0 and <span class="math inline">\(1 - \frac12e^{-x}\)</span> above, over <span class="math inline">\(x &lt; t\)</span>: <span id="eq-auto-03divergences-21"><span class="math display">\[\mathbb E[(t - X)_+] = \int_{-\infty}^0\tfrac12e^x\,\mathrm dx + \int_0^t\big(1 - \tfrac12e^{-x}\big)\,\mathrm dx = t + \tfrac12e^{-t}. \tag{3.27}\]</span></span> So <span class="math inline">\(\mathbb E[|X - t|] = t + e^{-t}\)</span>, and subtracting 1 gives the KL.</li>
 <li><em>Rényi.</em> The integral <span class="math inline">\(I(\alpha) = \frac12\int\exp(-\alpha|x| - (1 - \alpha)|x - t|)\,\mathrm dx\)</span> has an exponent linear in <span class="math inline">\(x\)</span> on each of the pieces <span class="math inline">\(x &lt; 0\)</span>, <span class="math inline">\(0 \le x \le t\)</span> and <span class="math inline">\(x &gt; t\)</span>, which integrate to <span class="math inline">\(e^{-(1 - \alpha)t}\)</span>, <span class="math inline">\(\frac{e^{-\alpha t} - e^{-(1 - \alpha)t}}{1 - 2\alpha}\)</span> and <span class="math inline">\(e^{-\alpha t}\)</span>. Adding the pieces and halving, <span class="math inline">\(e^{-\alpha t}\)</span> gets the coefficient <span class="math inline">\(\frac12(1 + \frac{1}{1 - 2\alpha}) = \frac{\alpha - 1}{2\alpha - 1}\)</span>, and <span class="math inline">\(e^{(\alpha - 1)t}\)</span> gets <span class="math inline">\(\frac12(1 - \frac{1}{1 - 2\alpha}) = \frac{\alpha}{2\alpha - 1}\)</span>. Then <span class="math inline">\(\frac{1}{\alpha - 1}\ln I(\alpha)\)</span> is <a href="#eq-div-laplace-renyi" class="quarto-xref">Equation&nbsp;<span>3.25</span></a>.</li>
 </ol>
 </div>
-<p>The worst case is not rare here: the evidence equals <span class="math inline">\(t\)</span> on all of <span class="math inline">\(x \le 0\)</span>, which has probability <span class="math inline">\(\frac12\)</span> under <span class="math inline">\(P\)</span>. Against a Gaussian pair of the same variance <span class="math inline">\(2b^2\)</span>, the Laplace pair is further apart at low orders, but the Gaussian <span class="math inline">\(D_\alpha\)</span> grows linearly while the Laplace one levels off at <span class="math inline">\(t\)</span>, and at <span class="math inline">\(t = 1\)</span> they cross at order 2.98 (<a href="#fig-div-gauss-laplace-renyi" class="quarto-xref">Figure&nbsp;<span>3.5</span></a>).</p>
+<p>The worst case is not rare here, because the evidence equals <span class="math inline">\(t\)</span> on all of <span class="math inline">\(x \le 0\)</span>, which has probability <span class="math inline">\(\frac12\)</span> under <span class="math inline">\(P\)</span>. Compare a Gaussian pair of the same variance <span class="math inline">\(2b^2\)</span>. The Laplace pair is further apart at low orders, but the Gaussian <span class="math inline">\(D_\alpha\)</span> grows linearly while the Laplace one levels off at <span class="math inline">\(t\)</span>, and at <span class="math inline">\(t = 1\)</span> they cross at order 2.98 (<a href="#fig-div-gauss-laplace-renyi" class="quarto-xref">Figure&nbsp;<span>3.5</span></a>).</p>
 <div id="fig-div-gauss-laplace-renyi" class="quarto-float quarto-figure quarto-figure-center anchored">
 <figure class="quarto-float quarto-float-fig figure">
 <div aria-describedby="fig-div-gauss-laplace-renyi-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
@@ -1134,11 +1134,11 @@ Table&nbsp;3.5: Rényi divergences of a Laplace pair and a Gaussian pair with th
 </section>
 <section id="sec-div-tv" class="level2" data-number="3.5">
 <h2 data-number="3.5" class="anchored" data-anchor-id="sec-div-tv"><span class="header-section-number">3.5</span> Total variation</h2>
-<p>KL and Rényi divergences are convenient to compute, but total variation answers the operational questions. It says how well the best possible test tells <span class="math inline">\(P\)</span> from <span class="math inline">\(Q\)</span> with one observation, and how far any bounded statistic can move when <span class="math inline">\(Q\)</span> is replaced by <span class="math inline">\(P\)</span>.</p>
+<p>KL and Rényi divergences are convenient to compute, but total variation answers the practical questions. It says how well the best possible test tells <span class="math inline">\(P\)</span> from <span class="math inline">\(Q\)</span> with one observation, and how far any bounded statistic can move when <span class="math inline">\(Q\)</span> is replaced by <span class="math inline">\(P\)</span>.</p>
 <div id="def-div-tv" class="theorem definition">
 <p><span class="theorem-title"><strong>Definition 3.3 (Total variation distance)</strong></span> The <strong>total variation distance</strong> is the largest difference between the probabilities that <span class="math inline">\(P\)</span> and <span class="math inline">\(Q\)</span> give to one event: <span id="eq-auto-03divergences-22"><span class="math display">\[\mathrm{TV}(P, Q) = \max_A\big|\Pr_P[A] - \Pr_Q[A]\big|. \tag{3.28}\]</span></span></p>
 </div>
-<p>The hockey-stick divergence of <a href="#sec-div-hockey" class="quarto-xref"><span>Section 3.6</span></a> asks the same question with a weight on <span class="math inline">\(Q\)</span>. Which event, or which soft event that includes each outcome with some probability, makes <span class="math inline">\(\Pr_P[A] - \gamma\Pr_Q[A]\)</span> largest? The next lemma answers it once for both sections.</p>
+<p>The hockey-stick divergence of <a href="#sec-div-hockey" class="quarto-xref"><span>Section 3.6</span></a> asks the same question with a weight <span class="math inline">\(\gamma\)</span> on <span class="math inline">\(Q\)</span>. Which event, or which soft event that includes each outcome with some probability, makes <span class="math inline">\(\Pr_P[A] - \gamma\Pr_Q[A]\)</span> largest? The next lemma answers it once for both sections.</p>
 <div id="lem-div-best-event" class="theorem lemma">
 <p><span class="theorem-title"><strong>Lemma 3.4 (The best event)</strong></span> Let <span class="math inline">\(\gamma \ge 0\)</span>. The largest value of <span class="math inline">\(\Pr_P[A] - \gamma\Pr_Q[A]\)</span> over events <span class="math inline">\(A\)</span> is <span id="eq-auto-03divergences-23"><span class="math display">\[\max_A\big[\Pr_P[A] - \gamma\Pr_Q[A]\big] = \sum_x\big(p(x) - \gamma q(x)\big)_+, \tag{3.29}\]</span></span> reached at <span class="math inline">\(A^* = \{x : r(x) &gt; \gamma\}\)</span>. A soft event, which includes each outcome <span class="math inline">\(x\)</span> with probability <span class="math inline">\(\phi(x) \in [0, 1]\)</span>, does no better: <span class="math inline">\(\sum_x\phi(x)(p(x) - \gamma q(x))\)</span> is at most the same sum.</p>
 </div>
@@ -1167,7 +1167,7 @@ Table&nbsp;3.5: Rényi divergences of a Laplace pair and a Gaussian pair with th
 <li><em>Metric.</em> The half-sum is half the <span class="math inline">\(\ell_1\)</span> distance between two probability tables, which has the three properties and is at most 1.</li>
 </ol>
 </div>
-<p>So no classifier beats <span class="math inline">\(\frac12 + \frac12\mathrm{TV}\)</span> accuracy from one draw, and a data shift of TV 0.01 moves any fixed classifier’s accuracy by at most 0.01. TV is not additive, so for <span class="math inline">\(n\)</span> samples you compute KL and convert it with <a href="#sec-div-pinsker" class="quarto-xref"><span>Section 3.9</span></a>.</p>
+<p>So no classifier beats <span class="math inline">\(\frac12 + \frac12\mathrm{TV}\)</span> accuracy from one draw, and a data shift of TV 0.01 moves the accuracy of any fixed classifier by at most 0.01. TV is not additive, so for <span class="math inline">\(n\)</span> samples you compute KL and convert it with <a href="#sec-div-pinsker" class="quarto-xref"><span>Section 3.9</span></a>.</p>
 <div id="exm-div-tv" class="theorem example">
 <p><span class="theorem-title"><strong>Example 3.5</strong></span> On the die only the six has <span class="math inline">\(p &gt; q\)</span>, so <span class="math inline">\(\mathrm{TV} = 0.5 - \frac16 = \frac13\)</span>. The best test says “loaded” exactly when it sees a six, and it is right with probability <span class="math inline">\(\frac23\)</span>. For the Gaussian pair the curves cross at the midpoint <span class="math inline">\(s/2\)</span>, so the best event is <span class="math inline">\(\{x &lt; s/2\}\)</span>. It has probability <span class="math inline">\(\Phi(\frac\mu2)\)</span> under <span class="math inline">\(P\)</span> and <span class="math inline">\(\Phi(-\frac\mu2) = 1 - \Phi(\frac\mu2)\)</span> under <span class="math inline">\(Q\)</span>, so <span id="eq-auto-03divergences-24"><span class="math display">\[\mathrm{TV} = 2\Phi\Big(\frac\mu2\Big) - 1. \tag{3.32}\]</span></span> At <span class="math inline">\(\mu = 1\)</span> this is 0.3829, and the best test is right with probability <span class="math inline">\(\Phi(0.5) = 0.6915\)</span> (<a href="#fig-div-tv-gaussians" class="quarto-xref">Figure&nbsp;<span>3.6</span></a>, left). At <span class="math inline">\(\mu = 0.1\)</span> it is only 0.0399.</p>
 </div>
@@ -1177,7 +1177,7 @@ Table&nbsp;3.5: Rényi divergences of a Laplace pair and a Gaussian pair with th
 <img src="figures/divergences_tv_gaussians.svg" class="img-fluid figure-img">
 </div>
 <figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-div-tv-gaussians-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-Figure&nbsp;3.6: Left: the total variation of a Gaussian pair, shaded. Right: the best accuracy for <span class="math inline">\(n\)</span> samples (<a href="#exm-div-pinsker-samples" class="quarto-xref">Example&nbsp;<span>3.10</span></a>).
+Figure&nbsp;3.6: Left: the total variation of a Gaussian pair, shaded. Right: the best accuracy for <span class="math inline">\(n\)</span> samples (<a href="#exm-div-pinsker-samples" class="quarto-xref">Example&nbsp;<span>3.9</span></a>).
 </figcaption>
 </figure>
 </div>
@@ -1216,7 +1216,7 @@ Figure&nbsp;3.7: The mass of <span class="math inline">\(\mathcal N(0, 1)\)</spa
 <li><em>Priors.</em> Guessing “<span class="math inline">\(P\)</span>” on <span class="math inline">\(A\)</span> errs when a draw from <span class="math inline">\(P\)</span> falls outside <span class="math inline">\(A\)</span> or one from <span class="math inline">\(Q\)</span> falls inside it. Factoring out <span class="math inline">\(\pi\)</span>, the error is <span id="eq-auto-03divergences-26"><span class="math display">\[\pi(1 - \Pr_P[A]) + (1 - \pi)\Pr_Q[A] = \pi - \pi\big[\Pr_P[A] - \gamma\Pr_Q[A]\big], \tag{3.34}\]</span></span> which is smallest when the bracket is largest, that is equal to <span class="math inline">\(E_\gamma\)</span>.</li>
 </ol>
 </div>
-<p>Always guessing <span class="math inline">\(Q\)</span> errs with probability <span class="math inline">\(\pi\)</span>, and one observation removes a fraction <span class="math inline">\(E_\gamma\)</span> of that error. For the shifted pairs, property 3 gives the whole curve in closed form, and later parts use exactly these two curves.</p>
+<p>Always guessing <span class="math inline">\(Q\)</span> errs with probability <span class="math inline">\(\pi\)</span>, and one observation removes a fraction <span class="math inline">\(E_\gamma\)</span> of that error. For the shifted pairs, property 3 gives the whole curve in closed form.</p>
 <div id="prp-div-hockey-pairs" class="theorem proposition">
 <p><span class="theorem-title"><strong>Proposition 3.6 (Hockey-stick divergence of the shifted pairs)</strong></span> Let <span class="math inline">\(\gamma \ge 1\)</span> and <span class="math inline">\(c = \ln\gamma\)</span>. For the normal pair of <a href="#prp-div-gauss" class="quarto-xref">Proposition&nbsp;<span>3.3</span></a>, <span id="eq-auto-03divergences-27"><span class="math display">\[E_\gamma(P\|Q) = \Phi\Big(\frac\mu2 - \frac c\mu\Big) - \gamma\,\Phi\Big(-\frac\mu2 - \frac c\mu\Big), \tag{3.35}\]</span></span> which is positive for every <span class="math inline">\(\gamma\)</span>. For the Laplace pair of <a href="#prp-div-laplace" class="quarto-xref">Proposition&nbsp;<span>3.4</span></a>, <span class="math inline">\(E_\gamma = 0\)</span> for <span class="math inline">\(\gamma &gt; e^t\)</span>, and <span id="eq-auto-03divergences-28"><span class="math display">\[E_\gamma(P\|Q) = 1 - e^{-(t - c)/2} \quad\text{for } 1 \le \gamma \le e^t. \tag{3.36}\]</span></span></p>
 </div>
@@ -1241,7 +1241,8 @@ Figure&nbsp;3.8: <span class="math inline">\(E_\gamma\)</span> against <span cla
 </figure>
 </div>
 <div id="exm-div-rejection" class="theorem example">
-<p><span class="theorem-title"><strong>Example 3.6</strong></span> On the die, only the six has <span class="math inline">\(r &gt; \gamma\)</span> for <span class="math inline">\(1 \le \gamma &lt; 3\)</span>, so <span class="math inline">\(E_\gamma = 0.5 - \gamma/6\)</span> falls linearly to zero at <span class="math inline">\(\gamma = 3\)</span>, the largest ratio. In rejection sampling of the loaded die from fair rolls, an envelope <span class="math inline">\(2q\)</span> leaves the mass <span class="math inline">\(E_2(P\|Q) = \frac16\)</span> of the six uncovered, and the sampled six comes up 40% of the time instead of 50%. The error in TV is never more than <span class="math inline">\(E_\gamma\)</span>.</p>
+<p><span class="theorem-title"><strong>Example 3.6</strong></span> On the die, only the six has <span class="math inline">\(r &gt; \gamma\)</span> for <span class="math inline">\(1 \le \gamma &lt; 3\)</span>, so <span class="math inline">\(E_\gamma = 0.5 - \gamma/6\)</span> falls linearly to zero at <span class="math inline">\(\gamma = 3\)</span>, the largest ratio. Rejection sampling proposes a fair roll <span class="math inline">\(x\)</span> and accepts it with probability <span class="math inline">\(\min(1, p(x)/(\gamma q(x)))\)</span>, so it accepts each outcome with mass <span class="math inline">\(\min(p, \gamma q)\)</span>. With the envelope <span class="math inline">\(2q\)</span>, the six gets <span class="math inline">\(\frac13\)</span> instead of <span class="math inline">\(\frac12\)</span>, which leaves the mass <span class="math inline">\(E_2(P\|Q) = \frac16\)</span> uncovered. The accepted masses add to <span class="math inline">\(1 - E_2 = \frac56\)</span>, so the sampled six comes up <span class="math inline">\(\frac13 / \frac56 = 40\%\)</span> of the time instead of 50%.</p>
+<p>The error in TV is never more than <span class="math inline">\(E_\gamma\)</span>. The sampled distribution is <span class="math inline">\(\min(p, \gamma q)/(1 - E_\gamma)\)</span>, which is at least <span class="math inline">\(\min(p, \gamma q)\)</span> at every outcome. So by <a href="#thm-div-tv" class="quarto-xref">Theorem&nbsp;<span>3.3</span></a> its TV from <span class="math inline">\(P\)</span> is at most <span class="math inline">\(\sum_x(p - \min(p, \gamma q)) = \sum_x(p - \gamma q)_+\)</span>, which is <span class="math inline">\(E_\gamma\)</span> by <a href="#prp-div-hockey" class="quarto-xref">Proposition&nbsp;<span>3.5</span></a>. On the die the TV is <span class="math inline">\(0.5 - 0.4 = 0.1\)</span>, below <span class="math inline">\(E_2 = \frac16\)</span>.</p>
 </div>
 </section>
 <section id="sec-div-f" class="level2" data-number="3.7">
@@ -1315,7 +1316,7 @@ Table&nbsp;3.6: Common f-divergences, their generators, and their values for the
 <li><em>Orders below 1.</em> Now <span class="math inline">\(u^\alpha\)</span> is concave, so <span class="math inline">\(1 - u^\alpha\)</span> is convex, with <span class="math inline">\(D_f = 1 - \mathbb E_Q[r^\alpha]\)</span>. The logarithm decreases in <span class="math inline">\(D_f\)</span> and <span class="math inline">\(\frac{1}{\alpha - 1}\)</span> is negative, so the second formula increases in <span class="math inline">\(D_f\)</span>.</li>
 </ol>
 </div>
-<p>A convex function is a sum of hockey-stick shapes weighted by its curvature, so every f-divergence is a weighted sum of the curves <span class="math inline">\(E_\gamma\)</span>, which therefore carry all the information about a pair.</p>
+<p>The curves <span class="math inline">\(E_\gamma\)</span> carry all the information about a pair, because a convex function is a sum of hockey-stick shapes weighted by its curvature. So every f-divergence is a weighted sum of the curves <span class="math inline">\(E_\gamma\)</span>.</p>
 <div id="thm-div-f-hockey" class="theorem">
 <p><span class="theorem-title"><strong>Theorem 3.4 (f-divergences from the hockey-stick curves)</strong></span> If the generator <span class="math inline">\(f\)</span> is twice differentiable, then <span id="eq-div-f-from-hockey"><span class="math display">\[D_f(P\|Q) = \int_1^\infty f''(\gamma)\,E_\gamma(P\|Q)\,\mathrm d\gamma + \int_0^1\gamma f''(\gamma)\,E_{1/\gamma}(Q\|P)\,\mathrm d\gamma. \tag{3.39}\]</span></span></p>
 </div>
@@ -1328,7 +1329,7 @@ Table&nbsp;3.6: Common f-divergences, their generators, and their values for the
 <li><em>The two integrals.</em> <span class="math inline">\(\mathbb E_Q[(r - \gamma)_+] = E_\gamma(P\|Q)\)</span> by <a href="#prp-div-hockey" class="quarto-xref">Proposition&nbsp;<span>3.5</span></a>. Also <span class="math inline">\(\mathbb E_Q[(\gamma - r)_+] = \sum_x(\gamma q - p)_+ = \gamma\sum_x(q - p/\gamma)_+\)</span>, which is <span class="math inline">\(\gamma E_{1/\gamma}(Q\|P)\)</span>.</li>
 </ol>
 </div>
-<p>Each generator weights the ratio differently (<a href="#fig-div-f-generators" class="quarto-xref">Figure&nbsp;<span>3.9</span></a>); the quadratic one of <span class="math inline">\(\chi^2\)</span> lets large ratios dominate. An f-divergence can also be estimated from samples alone, through a variational form that a generative adversarial network (GAN) fits with a neural network, as in the f-GAN of Nowozin, Cseke &amp; Tomioka (2016).</p>
+<p>Each generator weights the ratio differently (<a href="#fig-div-f-generators" class="quarto-xref">Figure&nbsp;<span>3.9</span></a>), and the quadratic one of <span class="math inline">\(\chi^2\)</span> lets large ratios dominate.</p>
 <div id="fig-div-f-generators" class="quarto-float quarto-figure quarto-figure-center anchored">
 <figure class="quarto-float quarto-float-fig figure">
 <div aria-describedby="fig-div-f-generators-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
@@ -1342,7 +1343,7 @@ Figure&nbsp;3.9: The generators of six f-divergences.
 </section>
 <section id="sec-div-dpi" class="level2" data-number="3.8">
 <h2 data-number="3.8" class="anchored" data-anchor-id="sec-div-dpi"><span class="header-section-number">3.8</span> The data-processing inequality</h2>
-<p>You rarely look at raw data. You bin it, compute features, or pass it through a randomized algorithm, and the data-processing inequality says that none of this can make two distributions easier to tell apart. When processing maps several inputs to one output, the output’s likelihood ratio is an average of theirs. Every f-divergence is a convex summary of the ratios, and by Jensen averaging first can only make it smaller.</p>
+<p>You rarely look at raw data. You bin it, compute features, or pass it through a randomized algorithm, and the data-processing inequality says that none of this can make two distributions easier to tell apart. When processing maps several inputs to one output, the output’s likelihood ratio is an average of theirs. Every f-divergence is a convex summary of the ratios, so by Jensen, averaging first can only make it smaller.</p>
 <div id="def-div-channel" class="theorem definition">
 <p><span class="theorem-title"><strong>Definition 3.6 (Channel)</strong></span> A <strong>channel</strong> <span class="math inline">\(K\)</span> maps each input <span class="math inline">\(x\)</span> to a distribution <span class="math inline">\(K(\cdot \mid x)\)</span> over outputs <span class="math inline">\(y\)</span>. Feeding <span class="math inline">\(X \sim P\)</span> through it gives the output distribution <span class="math inline">\(PK(y) = \sum_x p(x)K(y\mid x)\)</span>, and likewise <span class="math inline">\(QK\)</span>.</p>
 </div>
@@ -1359,7 +1360,7 @@ Figure&nbsp;3.9: The generators of six f-divergences.
 <li><em>Equality.</em> If <span class="math inline">\(r(x)\)</span> is a function of <span class="math inline">\(y\)</span>, then <span class="math inline">\(r(X)\)</span> is constant given <span class="math inline">\(Y = y\)</span>, and step 2 is an equality.</li>
 </ol>
 </div>
-<p>The channel may use its own randomness, as long as it is the same whether the input came from <span class="math inline">\(P\)</span> or <span class="math inline">\(Q\)</span>. The coarsest processing reports only whether an event happened, and this gives a lower bound on KL from any single event.</p>
+<p>The channel may use its own randomness, as long as it is the same whether the input came from <span class="math inline">\(P\)</span> or <span class="math inline">\(Q\)</span>. The coarsest processing reports only whether an event happened, and it gives a lower bound on KL from any single event.</p>
 <div id="cor-div-dpi-event" class="theorem corollary">
 <p><span class="theorem-title"><strong>Corollary 3.1 (KL bounds every event)</strong></span> For every event <span class="math inline">\(A\)</span>, write <span class="math inline">\(p_A = \Pr_P[A]\)</span> and <span class="math inline">\(q_A = \Pr_Q[A]\)</span>. Then <span id="eq-auto-03divergences-34"><span class="math display">\[D_{\mathrm{KL}}(P\|Q) \ge \mathrm{kl}(p_A\|q_A) = p_A\ln\frac{p_A}{q_A} + (1 - p_A)\ln\frac{1 - p_A}{1 - q_A}, \tag{3.43}\]</span></span> where the <strong>binary KL</strong> <span class="math inline">\(\mathrm{kl}\)</span> is the KL divergence between coins with heads probabilities <span class="math inline">\(p_A\)</span> and <span class="math inline">\(q_A\)</span>.</p>
 </div>
@@ -1418,66 +1419,10 @@ Table&nbsp;3.7: Processing the die roll into its parity averages the likelihood 
 </div>
 <p>The twos and fours dilute the six’s evidence, and the KL drops from 0.2939 to <span class="math inline">\(0.7\ln 1.4 + 0.3\ln 0.6 = 0.0823\)</span>. Reporting only whether the roll is a six loses nothing. The ratio depends only on that bit, so the bit is sufficient, and its KL is <span class="math inline">\(\mathrm{kl}(0.5\|\frac16) = 0.5\ln 3 + 0.5\ln 0.6 = 0.2939\)</span>.</p>
 </div>
-<p>Different divergences can lose different amounts. Round draws of <span class="math inline">\(\mathcal N(0, 1)\)</span> and <span class="math inline">\(\mathcal N(1, 1)\)</span> into bins of width <span class="math inline">\(w\)</span> with an edge at <span class="math inline">\(\frac12\)</span>, which flattens the evidence into steps (<a href="#fig-div-dpi-staircase" class="quarto-xref">Figure&nbsp;<span>3.10</span></a>).</p>
-<div id="fig-div-dpi-staircase" class="quarto-float quarto-figure quarto-figure-center anchored">
-<figure class="quarto-float quarto-float-fig figure">
-<div aria-describedby="fig-div-dpi-staircase-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-<img src="figures/divergences_dpi_staircase.svg" class="img-fluid figure-img">
-</div>
-<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-div-dpi-staircase-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-Figure&nbsp;3.10: The evidence of a Gaussian pair, raw and after binning.
-</figcaption>
-</figure>
-</div>
-<div id="exm-div-binning" class="theorem example">
-<p><span class="theorem-title"><strong>Example 3.9</strong></span> <a href="#tbl-div-binning" class="quarto-xref">Table&nbsp;<span>3.8</span></a> gives the KL after binning.</p>
-<div id="tbl-div-binning" class="quarto-float quarto-figure quarto-figure-center anchored">
-<figure class="quarto-float quarto-float-tbl figure">
-<figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl" id="tbl-div-binning-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-Table&nbsp;3.8: KL between <span class="math inline">\(\mathcal N(0, 1)\)</span> and <span class="math inline">\(\mathcal N(1, 1)\)</span> after rounding <span class="math inline">\(x\)</span> into bins.
-</figcaption>
-<div aria-describedby="tbl-div-binning-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-<table class="caption-top table">
-<thead>
-<tr class="header">
-<th>Bin width <span class="math inline">\(w\)</span></th>
-<th>0.5</th>
-<th>1</th>
-<th>2</th>
-<th>one bit: <span class="math inline">\(x &lt; \frac12\)</span>?</th>
-<th>raw</th>
-</tr>
-</thead>
-<tbody>
-<tr class="odd">
-<td>KL after binning</td>
-<td>0.4898</td>
-<td>0.4618</td>
-<td>0.3781</td>
-<td>0.3090</td>
-<td>0.5</td>
-</tr>
-</tbody>
-</table>
-</div>
-</figure>
-</div>
-<p>The single bit at the midpoint keeps 62% of the KL (<a href="#fig-div-dpi-binning" class="quarto-xref">Figure&nbsp;<span>3.11</span></a>), but it is the best event of <a href="#thm-div-tv" class="quarto-xref">Theorem&nbsp;<span>3.3</span></a>, so it keeps all of the TV.</p>
-</div>
-<div id="fig-div-dpi-binning" class="quarto-float quarto-figure quarto-figure-center anchored">
-<figure class="quarto-float quarto-float-fig figure">
-<div aria-describedby="fig-div-dpi-binning-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-<img src="figures/divergences_dpi_binning.svg" class="img-fluid figure-img">
-</div>
-<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-div-dpi-binning-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-Figure&nbsp;3.11: KL after binning, against the bin width.
-</figcaption>
-</figure>
-</div>
 </section>
 <section id="sec-div-pinsker" class="level2" data-number="3.9">
 <h2 data-number="3.9" class="anchored" data-anchor-id="sec-div-pinsker"><span class="header-section-number">3.9</span> Pinsker’s inequality</h2>
-<p>KL adds up over samples, while TV is what you want, the accuracy of the best test. Pinsker’s inequality converts the first into a bound on the second, with a square root because, for nearby distributions, TV grows linearly in the difference and KL quadratically.</p>
+<p>KL adds up over samples, while TV is what you want, the accuracy of the best test. Pinsker’s inequality turns the first into a bound on the second. It has a square root because, for nearby distributions, TV grows linearly in the difference and KL quadratically.</p>
 <div id="thm-div-pinsker" class="theorem">
 <p><span class="theorem-title"><strong>Theorem 3.6 (Pinsker’s inequality)</strong></span> For any two distributions, <span id="eq-div-pinsker"><span class="math display">\[\mathrm{TV}(P, Q) \le \sqrt{\tfrac12D_{\mathrm{KL}}(P\|Q)}. \tag{3.44}\]</span></span></p>
 </div>
@@ -1502,23 +1447,24 @@ Figure&nbsp;3.11: KL after binning, against the bin width.
 <li><em>Express in KL.</em> Since <span class="math inline">\(\sqrt{pq} = p\,e^{-L/2}\)</span>, the sum is <span class="math inline">\(\mathbb E_P[e^{-L/2}]\)</span>, and <span class="math inline">\(e^{-y/2}\)</span> is convex, so <a href="#lem-div-jensen" class="quarto-xref">Lemma&nbsp;<span>3.1</span></a> puts it above <span class="math inline">\(e^{-D_{\mathrm{KL}}/2}\)</span>. Squaring and using step 2 gives <span class="math inline">\(e^{-D_{\mathrm{KL}}} \le 1 - \mathrm{TV}^2\)</span>.</li>
 </ol>
 </div>
-<p>Pinsker’s inequality is tight for two nearly fair coins, passes 1 at KL <span class="math inline">\(= 2\)</span>, and loses to Bretagnolle–Huber once KL is above 1.59 (<a href="#fig-div-pinsker" class="quarto-xref">Figure&nbsp;<span>3.12</span></a>). Neither can be reversed: if <span class="math inline">\(Q\)</span> puts a tiny mass where <span class="math inline">\(P\)</span> puts none, TV is tiny but <span class="math inline">\(D_{\mathrm{KL}}(Q\|P)\)</span> is infinite.</p>
+<p>Pinsker’s inequality is tight for two nearly fair coins. With heads probabilities <span class="math inline">\(\frac12 + \varepsilon\)</span> and <span class="math inline">\(\frac12\)</span>, the TV is <span class="math inline">\(\varepsilon\)</span>. To second order in <span class="math inline">\(p_A - q_A\)</span>, the binary KL is <span class="math inline">\((p_A - q_A)^2/(2q_A(1 - q_A))\)</span>, because its first two derivatives in <span class="math inline">\(p_A\)</span> at <span class="math inline">\(p_A = q_A\)</span> are 0 and <span class="math inline">\(1/(q_A(1 - q_A))\)</span>. At <span class="math inline">\(q_A = \frac12\)</span> that is <span class="math inline">\(2\varepsilon^2\)</span>. So Pinsker’s bound is <span class="math inline">\(\varepsilon\)</span> up to higher-order terms.</p>
+<p>Pinsker’s bound passes 1 at KL <span class="math inline">\(= 2\)</span>, and it loses to Bretagnolle–Huber once KL is above 1.59 (<a href="#fig-div-pinsker" class="quarto-xref">Figure&nbsp;<span>3.10</span></a>). Neither can be reversed. If <span class="math inline">\(Q\)</span> puts a tiny mass where <span class="math inline">\(P\)</span> puts none, TV is tiny but <span class="math inline">\(D_{\mathrm{KL}}(Q\|P)\)</span> is infinite.</p>
 <div id="fig-div-pinsker" class="quarto-float quarto-figure quarto-figure-center anchored">
 <figure class="quarto-float quarto-float-fig figure">
 <div aria-describedby="fig-div-pinsker-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
 <img src="figures/divergences_pinsker.svg" class="img-fluid figure-img">
 </div>
 <figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-div-pinsker-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-Figure&nbsp;3.12: Total variation against KL, with the two bounds.
+Figure&nbsp;3.10: Total variation against KL, with the two bounds.
 </figcaption>
 </figure>
 </div>
 <div id="exm-div-pinsker-samples" class="theorem example">
-<p><span class="theorem-title"><strong>Example 3.10</strong></span> How many samples tell <span class="math inline">\(\mathcal N(0, 1)\)</span> from <span class="math inline">\(\mathcal N(0.1, 1)\)</span>, where one sample has TV 0.0399 and KL 0.005? By additivity <span class="math inline">\(n\)</span> samples have KL <span class="math inline">\(0.005\,n\)</span>, which Pinsker turns into a cap on TV and, by <a href="#eq-div-tv-test" class="quarto-xref">Equation&nbsp;<span>3.31</span></a>, on accuracy. The exact TV is known too, because the evidence of <span class="math inline">\(n\)</span> samples depends only on their mean, a Gaussian pair with shift <span class="math inline">\(0.1\sqrt n\)</span> (<a href="#tbl-div-pinsker" class="quarto-xref">Table&nbsp;<span>3.9</span></a>).</p>
+<p><span class="theorem-title"><strong>Example 3.9</strong></span> How many samples tell <span class="math inline">\(\mathcal N(0, 1)\)</span> from <span class="math inline">\(\mathcal N(0.1, 1)\)</span>, where one sample has TV 0.0399 and KL 0.005? By additivity <span class="math inline">\(n\)</span> samples have KL <span class="math inline">\(0.005\,n\)</span>, which Pinsker turns into a cap on TV and, by <a href="#eq-div-tv-test" class="quarto-xref">Equation&nbsp;<span>3.31</span></a>, on accuracy. The exact TV is also known, because the evidence of <span class="math inline">\(n\)</span> samples depends only on their mean, which gives a Gaussian pair with shift <span class="math inline">\(0.1\sqrt n\)</span> (<a href="#tbl-div-pinsker" class="quarto-xref">Table&nbsp;<span>3.8</span></a>).</p>
 <div id="tbl-div-pinsker" class="quarto-float quarto-figure quarto-figure-center anchored">
 <figure class="quarto-float quarto-float-tbl figure">
 <figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl" id="tbl-div-pinsker-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-Table&nbsp;3.9: <span class="math inline">\(n\)</span> samples of <span class="math inline">\(\mathcal N(0, 1)\)</span> against <span class="math inline">\(\mathcal N(0.1, 1)\)</span>: exact TV, best accuracy (simulated over 20,000 trials), and the two bounds on TV.
+Table&nbsp;3.8: <span class="math inline">\(n\)</span> samples of <span class="math inline">\(\mathcal N(0, 1)\)</span> against <span class="math inline">\(\mathcal N(0.1, 1)\)</span>: exact TV, best accuracy (simulated over 20,000 trials), and the two bounds on TV.
 </figcaption>
 <div aria-describedby="tbl-div-pinsker-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
 <table class="caption-top table">
@@ -1562,7 +1508,7 @@ Table&nbsp;3.9: <span class="math inline">\(n\)</span> samples of <span class="m
 </div>
 </figure>
 </div>
-<p>Any test needs <span class="math inline">\(n\)</span> of order <span class="math inline">\(1/D_{\mathrm{KL}}\)</span>. At <span class="math inline">\(n = 100\)</span> Pinsker’s bound overstates TV by 31%, and at <span class="math inline">\(n = 400\)</span> it is vacuous while Bretagnolle–Huber is not.</p>
+<p>So any test needs <span class="math inline">\(n\)</span> of order <span class="math inline">\(1/D_{\mathrm{KL}}\)</span>. At <span class="math inline">\(n = 100\)</span> Pinsker’s bound overstates TV by 31%, and at <span class="math inline">\(n = 400\)</span> it is vacuous while Bretagnolle–Huber is not.</p>
 </div>
 </section>
 <section id="sec-div-code" class="level2" data-number="3.10">
@@ -1572,7 +1518,7 @@ Table&nbsp;3.9: <span class="math inline">\(n\)</span> samples of <span class="m
 <div id="tbl-div-code" class="quarto-float quarto-figure quarto-figure-center anchored">
 <figure class="quarto-float quarto-float-tbl figure">
 <figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl" id="tbl-div-code-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-Table&nbsp;3.10: The script’s output with the default seed.
+Table&nbsp;3.9: The script’s output with the default seed.
 </figcaption>
 <div aria-describedby="tbl-div-code-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
 <table class="caption-top table">
@@ -1615,7 +1561,7 @@ Table&nbsp;3.10: The script’s output with the default seed.
 <div id="tbl-div-summary" class="quarto-float quarto-figure quarto-figure-center anchored">
 <figure class="quarto-float quarto-float-tbl figure">
 <figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl" id="tbl-div-summary-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-Table&nbsp;3.11: The results of this chapter, and where each is used.
+Table&nbsp;3.10: The results of this chapter, and where each is used.
 </figcaption>
 <div aria-describedby="tbl-div-summary-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
 <table class="caption-top table">
@@ -1702,7 +1648,6 @@ Table&nbsp;3.11: The results of this chapter, and where each is used.
 <li>Tsybakov, <em>Introduction to Nonparametric Estimation</em> (2009), §2.4: Pinsker, Bretagnolle–Huber and other inequalities between divergences.</li>
 <li>Bishop, <em>Pattern Recognition and Machine Learning</em> (2006), §10.1: forward against reverse KL in variational inference.</li>
 <li>Liese &amp; Vajda, “On Divergences and Informations in Statistics and Information Theory” (IEEE Transactions on Information Theory, 2006): f-divergences and their representation through the curves <span class="math inline">\(E_\gamma\)</span>.</li>
-<li>Nowozin, Cseke &amp; Tomioka, “f-GAN: Training Generative Neural Samplers using Variational Divergence Minimization” (NeurIPS 2016): f-divergences estimated from samples with neural networks.</li>
 </ul>
 
 
