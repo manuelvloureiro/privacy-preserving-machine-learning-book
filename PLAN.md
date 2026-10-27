@@ -20,7 +20,8 @@ Status on 2026-10-27. Work items, largest saving first within each step. Word co
   - 11's comp-fdp keeps the adaptive proof that the chapter points to, and 05's prob-convolution is only trimmed.
   - The layout is trimmed, and no heading changed.
   - The stale text in 10, 11 and 12 is fixed.
-  - Step 2.1 (retiring core appendices 01–04) waits on the author.
+  - Step 2.1 is dropped: the author keeps core appendices 01–04 (2026-10-27). They got the same paragraph rewrite instead (37k → 34k words).
+- Decisions by the author (2026-10-27): the full edition stays complete, with no topic cut to reach 80% of its length. The course proves `thm-ac-simulation` for every δ, not only δ = 0.
 
 ## The reading order
 
@@ -44,7 +45,7 @@ About 90 sentences stated a result and pointed to an exercise for its proof or c
 
 ## Step 2. The full edition's appendices (about 37k of 143k words)
 
-1. **Retire core appendices 01–04 (about 31k words).**
+1. **Retire core appendices 01–04 (about 31k words).** Dropped: the author keeps them (2026-10-27).
    - Since the conversion, these re-derive step for step what the chapters prove:
      - Laplace, the classic and exact Gaussian, the exponential mechanism, randomized response and sensitivity: `thm-lg-*`, `thm-sel-em`, `thm-dpdef-*`.
      - Basic, advanced, Gaussian and RDP composition: `thm-dpprop-basic`, `thm-comp-advanced`, `thm-gdp-composition`, `thm-rdp-composition`.
