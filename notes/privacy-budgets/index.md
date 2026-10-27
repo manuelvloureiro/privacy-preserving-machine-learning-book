@@ -565,7 +565,7 @@ Each of the four definitions has now been budgeted to the same reference. This s
 
 :::
 
-The four definitions side by side. The last row is the standard deviation of the noise on each of 100 counts for the release to meet (ε, δ) = (1, 10⁻⁶).
+The four definitions side by side. The last row is the standard deviation of the noise on each of 100 counts for the release to meet $(\varepsilon, \delta) = (1, 10^{-6})$.
 
 :::
 
