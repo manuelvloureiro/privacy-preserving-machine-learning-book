@@ -519,6 +519,10 @@ Each of the four definitions has now been budgeted to the same reference. This s
 \begin{landscape}
 ```
 
+::: {#tbl-side}
+
+::: {.content-visible when-format="html"}
+
 | | Pure DP | Approximate DP | CDP | zCDP |
 |:---|:---|:---|:---|:---|
 | What it bounds | the loss at every output | the gap between $P(S)$ and $e^\varepsilon Q(S)$ on every set $S$ | the mean of the loss and its spread | every exponential moment of the loss |
@@ -530,7 +534,40 @@ Each of the four definitions has now been budgeted to the same reference. This s
 | Post-processing | preserved | preserved | not preserved | preserved |
 | Noise per count, $k = 100$ | 141.42 (Laplace) | 412.36 (basic), 243.80 (advanced), 42.25 (exact) | 53.50 (Gaussian), 75.66 (Laplace) | 53.50 (Gaussian), 75.66 (Laplace) |
 
-: The four definitions side by side. The last row is the standard deviation of the noise on each of 100 counts for the release to meet (ε, δ) = (1, 10⁻⁶). {#tbl-side}
+:::
+
+::: {.content-visible when-format="pdf"}
+
+```{=latex}
+{\small\renewcommand{\arraystretch}{1.5}
+\begin{tabularx}{\linewidth}{|>{\raggedright\arraybackslash}p{3.3cm}|>{\raggedright\arraybackslash}X|>{\raggedright\arraybackslash}X|>{\raggedright\arraybackslash}X|>{\raggedright\arraybackslash}X|}
+\hline
+ & \textbf{Pure DP} & \textbf{Approximate DP} & \textbf{CDP} & \textbf{zCDP} \\
+\hline\hline
+\textbf{What it bounds} & the loss at every output & the gap between $P(S)$ and $e^{\varepsilon} Q(S)$ on every set $S$ & the mean of the loss and its spread & every exponential moment of the loss \\
+\hline
+\textbf{Parameters} & $\varepsilon$ & $\varepsilon$, $\delta$ & $\mu$, $\tau$ & $\rho$ \\
+\hline
+\textbf{Natural mechanism} & Laplace & Gaussian & Gaussian & Gaussian; Laplace too\newline{\footnotesize\textcolor{gray}{(Proposition~\ref{prp-zcdp-pure})}} \\
+\hline
+\textbf{Composition} & the $\varepsilon$'s add;\newline $\delta$ stays 0 & basic: the $\varepsilon$'s and the $\delta$'s add\newline advanced: $\varepsilon$ grows like $\sqrt k$; the $\delta$'s add, plus $\delta'$ & the $\mu$'s add and the $\tau^2$'s add;\newline $\delta$ is chosen once, at conversion & the $\rho$'s add;\newline $\delta$ is chosen once, at conversion \\
+\hline
+\textbf{$k$ equal steps}, in the reference's unit & $(k\varepsilon_0,\ 0)$ & Table~\ref{tbl-approx-comp} & Equation~\ref{eq-cdp-k} & Equation~\ref{eq-zcdp-k} \\
+\hline
+\textbf{Budget for} $(1, 10^{-6})$ & $\varepsilon = 1$ & the reference itself, split by a composition rule & $\mu = 0.01747$, $\tau = 0.18692$\newline (Gaussian counts) & $\rho = 0.01747$ \\
+\hline
+\textbf{Post-processing} & preserved & preserved & not preserved & preserved \\
+\hline
+\textbf{Noise per count}, $k = 100$ & 141.42 (Laplace) & 412.36 (basic)\newline 243.80 (advanced)\newline 42.25 (exact) & 53.50 (Gaussian)\newline 75.66 (Laplace) & 53.50 (Gaussian)\newline 75.66 (Laplace) \\
+\hline
+\end{tabularx}}
+```
+
+:::
+
+The four definitions side by side. The last row is the standard deviation of the noise on each of 100 counts for the release to meet (ε, δ) = (1, 10⁻⁶).
+
+:::
 
 ```{=latex}
 \clearpage
