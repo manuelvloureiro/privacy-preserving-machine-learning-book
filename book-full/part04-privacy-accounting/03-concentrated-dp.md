@@ -1,21 +1,21 @@
 # Concentrated differential privacy
 
-[The first chapter of this part](01-renyi-dp.md) describes a mechanism by a whole curve. Take two neighbouring datasets $D \sim D'$, which differ by adding or removing one record. At each order $\alpha > 1$, the **Rényi differential privacy (RDP) curve** $\varepsilon(\alpha)$ is the largest Rényi divergence $D_\alpha$ between the output distributions $M(D)$ and $M(D')$ over all such pairs. For the Gaussian mechanism, which adds normal noise of standard deviation $\sigma$ to a query that one record moves by at most 1, the curve is the line $\alpha/(2\sigma^2)$, fixed by its slope. This chapter asks when one number can stand for the whole curve, and what that number buys.
+When can one number stand for a whole curve of Rényi divergences, and what does that number buy? Take two neighbouring datasets $D \sim D'$, which differ by one added or removed record. At each order $\alpha > 1$, the **Rényi differential privacy (RDP) curve** $\varepsilon(\alpha)$ is the largest Rényi divergence $D_\alpha$ between the output distributions $M(D)$ and $M(D')$ over all such pairs. For the Gaussian mechanism, which adds normal noise of standard deviation $\sigma$ to a query that one record moves by at most 1, the curve is the line $\alpha/(2\sigma^2)$, so its slope alone fixes it.
 
-The answer is **zero-concentrated differential privacy (zCDP)**, the most widely used form of concentrated differential privacy (CDP). A mechanism is $\rho$-zCDP when its RDP curve lies under the line $\rho\alpha$. RDP curves add under composition, and lines through the origin add to a line, so composition adds the parameters. Every section asks how well a line fits the curve. It fits the Gaussian exactly. A pure differential privacy (DP) mechanism has a curve that flattens at $\varepsilon$, because no Rényi divergence exceeds its largest log-ratio of probabilities, so a line fits it only near $\alpha = 1$. For the subsampled Gaussian of differentially private stochastic gradient descent (SGD), DP-SGD for short, the line fits so badly that zCDP throws away everything subsampling gained. **Truncated CDP** repairs this by asking for the line only on small orders.
+The number is the slope of a line above the curve, which is **zero-concentrated differential privacy (zCDP)**, the most widely used form of concentrated differential privacy (CDP). A mechanism is $\rho$-zCDP when its RDP curve lies under the line $\rho\alpha$. RDP curves add under composition, and lines through the origin add to a line, so composition adds the parameters. So each section asks how well a line fits the curve. It fits the Gaussian exactly, while a pure differential privacy (DP) mechanism has a curve that flattens at $\varepsilon$, so a line fits it only near $\alpha = 1$. The private form of stochastic gradient descent (SGD), DP-SGD, runs a subsampled Gaussian at each step. For it the line fits so badly that zCDP loses all that subsampling gained. **Truncated CDP** repairs this, because it asks for the line only on small orders.
 
-Two running examples carry the chapter. The first is one Gaussian step with $\sigma = 1$, which is $0.5$-zCDP; at $\delta = 10^{-5}$ its exact $\varepsilon$ is $4.377$, and zCDP reports $4.728$. The second is a DP-SGD run of $T = 10{,}000$ steps, each on a random sample that includes each record with probability $q = 0.01$, with $\sigma = 1$. At the same $\delta$, RDP accounting puts that run at $\varepsilon = 6.719$, while zCDP reports $5475.8$.
+Two running examples carry the chapter. The first is one Gaussian step with $\sigma = 1$, which is $0.5$-zCDP. At $\delta = 10^{-5}$ its exact $\varepsilon$ is $4.377$, and zCDP reports $4.728$. The second is a DP-SGD run of $T = 10{,}000$ steps with $\sigma = 1$, each on a random sample that includes each record with probability $q = 0.01$. At the same $\delta$, RDP accounting puts that run at $\varepsilon = 6.719$, while zCDP reports $5475.8$.
 
 ## The definition of zCDP {#sec-cdp-definition}
 
-You add Gaussian noise to a count, a mean or a gradient, again and again, and you want one number that says how much privacy you have spent so far. Bun and Steinke (2016) turned the Gaussian's straight RDP curve into a definition: describe a mechanism by the slope of a line that lies above its RDP curve.
+You add Gaussian noise to a count, a mean or a gradient, again and again, and you want one number that says how much privacy you have spent so far. Bun and Steinke (2016) made the Gaussian's straight RDP curve into a definition: describe a mechanism by the slope of a line that lies above its RDP curve.
 
 ::: {#def-cdp-zcdp name="Zero-concentrated differential privacy"}
 A mechanism $M$ is **$\rho$-zCDP** if, for all neighbouring datasets $D \sim D'$ and all orders $\alpha > 1$,
 $$D_\alpha\big(M(D)\,\|\,M(D')\big) \le \rho\alpha.$$ {#eq-cdp-def}
 :::
 
-The name comes from what the definition says about the privacy loss: it is concentrated around its mean like a normal variable, and "zero" says the line has no intercept. Fix a neighbouring pair and write $P = M(D)$ and $Q = M(D')$, with $P(y)$ and $Q(y)$ their probabilities or densities at an output $y$. Capital letters are used because $q$ is the sampling rate later in this chapter. The **privacy loss** $L(y) = \ln(P(y)/Q(y))$ says how much more likely $y$ is under $D$ than under $D'$, and drawing $y$ from $P$ makes it a random variable $L$. [Divergences](../part01-prerequisites/03-divergences.md) shows that the Rényi divergence is a rescaled logarithm of the moment generating function (MGF) of this loss (@eq-div-renyi-psi):
+The name says what the definition does to the privacy loss: it keeps the loss concentrated around its mean like a normal variable, and "zero" says that the line has no intercept. Fix a neighbouring pair and write $P = M(D)$ and $Q = M(D')$, with $P(y)$ and $Q(y)$ their probabilities or densities at an output $y$. The letters are capitals because $q$ is the sampling rate later in this chapter. The **privacy loss** $L(y) = \ln(P(y)/Q(y))$ says how much likelier $y$ is under $D$ than under $D'$, and with $y$ drawn from $P$ it is a random variable $L$. By @eq-div-renyi-psi of [Divergences](../part01-prerequisites/03-divergences.md), the Rényi divergence is a rescaled logarithm of the moment generating function (MGF) of this loss:
 $$(\alpha - 1)D_\alpha(P\|Q) = \ln\mathbb E_P\big[e^{(\alpha - 1)L}\big].$$ {#eq-cdp-psi}
 So zCDP bounds every exponential moment of the loss, and exponential moments control how often the loss is large.
 
@@ -28,32 +28,30 @@ $$\Pr[L > \rho + t] \le e^{-t^2/(4\rho)} \quad\text{for all } t > 0.$$ {#eq-cdp-
 
 ::: {.proof}
 1. *The moment form.* Multiply @eq-cdp-def by $\alpha - 1$, which is positive, so the inequality keeps its direction. By @eq-cdp-psi the left side becomes $\ln\mathbb E[e^{(\alpha - 1)L}]$, which gives @eq-cdp-mgf.
-2. *A tail bound at each order.* The positive variable $e^{(\alpha - 1)L}$ is large exactly when $L$ is, so the Chernoff bound (@thm-conc-chernoff) applies Markov's inequality to it. For any level $\tau$, it gives
-$$\Pr[L > \tau] \le \mathbb E\big[e^{(\alpha - 1)L}\big]e^{-(\alpha - 1)\tau},$$
-which @eq-cdp-mgf bounds by $e^{(\alpha - 1)(\alpha\rho - \tau)}$.
+2. *A tail bound at each order.* Step 4 of the proof of @thm-rdp-conversion applies the Chernoff bound to the loss and gives $\Pr[L > \tau] \le e^{(\alpha - 1)(\varepsilon(\alpha) - \tau)}$ for any level $\tau$. With $\varepsilon(\alpha) = \rho\alpha$, this is $e^{(\alpha - 1)(\alpha\rho - \tau)}$.
 3. *The best order.* Use the order that gives the smallest bound. Put $\tau = \rho + t$ and write $\lambda = \alpha - 1$, so that $\alpha\rho - \tau = \lambda\rho - t$. The exponent becomes $\lambda^2\rho - \lambda t$, a parabola in $\lambda$ whose smallest value, at $\lambda = t/(2\rho)$, is $-t^2/(4\rho)$.
 :::
 
-Three properties make the definition useful, and each is inherited from a property of the Rényi divergence.
+Three properties make the definition useful, and each comes from a property of the Rényi divergence.
 
 ::: {#thm-cdp-gaussian name="The Gaussian mechanism, composition and post-processing"}
 1. The Gaussian mechanism, which adds $\mathcal N(0, \sigma^2 I_d)$ noise to a query $f$ with $\ell_2$ sensitivity $\Delta_2 f$, is $\rho$-zCDP with $\rho = (\Delta_2 f)^2/(2\sigma^2)$. With the part's noise multiplier, which measures $\sigma$ in units of the sensitivity, $\rho = 1/(2\sigma^2)$.
-2. If $M_1$ is $\rho_1$-zCDP and $M_2$ is $\rho_2$-zCDP, possibly chosen after seeing the output of $M_1$, the pair is $(\rho_1 + \rho_2)$-zCDP.
+2. If $M_1$ is $\rho_1$-zCDP and $M_2$ is $\rho_2$-zCDP, possibly chosen after the output of $M_1$, the pair is $(\rho_1 + \rho_2)$-zCDP.
 3. Any function of the output of a $\rho$-zCDP mechanism is $\rho$-zCDP.
 :::
 
 ::: {.proof}
-1. *The Gaussian.* For two normal distributions with the same variance $\sigma^2$, $D_\alpha$ is $\alpha$ times the squared distance between the means, divided by $2\sigma^2$ (@eq-div-gauss-renyi). This holds in any dimension, because rotating the coordinates so that the means differ along one axis leaves the other axes identical under both, and identical independent coordinates add nothing (additivity in @thm-div-renyi). On neighbours the distance is at most $\Delta_2 f$, which gives the claimed $\rho$.
+1. *The Gaussian.* For two normal distributions with the same variance $\sigma^2$, $D_\alpha$ is $\alpha$ times the squared distance between the means, divided by $2\sigma^2$ (@eq-div-gauss-renyi). This holds in any dimension, because a rotation that puts the difference of the means on one axis leaves the other axes identical under both, and identical independent coordinates add nothing (additivity in @thm-div-renyi). On neighbours the distance is at most $\Delta_2 f$, which gives the claimed $\rho$.
 2. *Composition.* The RDP curves of an adaptive composition add ([Rényi DP](01-renyi-dp.md#sec-rdp-composition)), so the pair's curve is at most $\rho_1\alpha + \rho_2\alpha$, a line of slope $\rho_1 + \rho_2$.
 3. *Post-processing.* The Rényi divergence obeys the data-processing inequality (@thm-div-dpi), so passing the output through any function cannot raise the curve.
 :::
 
-For the Gaussian the definition holds with equality in every moment. Its privacy loss is normal with mean $\rho$ and variance $2\rho$ (@lem-lg-gaussian-loss), and the logarithm of the MGF of that normal at $\lambda = \alpha - 1$ is $\lambda\rho + \lambda^2\rho = (\alpha - 1)\alpha\rho$. So a $\rho$-zCDP mechanism is one whose privacy loss is, in every exponential moment, no worse than $\mathcal N(\rho, 2\rho)$. For other mechanisms the smallest valid $\rho$ is the largest ratio $\varepsilon(\alpha)/\alpha$, the rest of the curve is forgotten, and the later sections measure that cost.
+For the Gaussian the definition holds with equality in every moment. Its privacy loss is normal with mean $\rho$ and variance $2\rho$ (@lem-lg-gaussian-loss), and the logarithm of the MGF of that normal at $\lambda = \alpha - 1$ is $\lambda\rho + \lambda^2\rho = (\alpha - 1)\alpha\rho$. So a $\rho$-zCDP mechanism is one whose privacy loss is, in every exponential moment, no worse than $\mathcal N(\rho, 2\rho)$. For other mechanisms the smallest valid $\rho$ is the largest ratio $\varepsilon(\alpha)/\alpha$, so the rest of the curve is lost, and the later sections measure that cost.
 
-The tail bound @eq-cdp-tail is loose only by a polynomial factor. For the Gaussian the exact tail is a standard normal tail at $z = t/\sqrt{2\rho}$, while the bound is $e^{-z^2/2}$. The Mills ratio of [Concentration](../part01-prerequisites/02-concentration.md) says that a normal tail at $z$ is about $e^{-z^2/2}/(z\sqrt{2\pi})$, so the exact tail divided by the bound is about $1/(z\sqrt{2\pi}) = \sqrt{\rho/\pi}/t$.
+The tail bound @eq-cdp-tail is loose only by a polynomial factor. For the Gaussian the exact tail is a standard normal tail at $z = t/\sqrt{2\rho}$, while the bound is $e^{-z^2/2}$, and by the Mills ratio of [Concentration](../part01-prerequisites/02-concentration.md), a normal tail at $z$ is about $e^{-z^2/2}/(z\sqrt{2\pi})$, so the exact tail divided by the bound is about $1/(z\sqrt{2\pi}) = \sqrt{\rho/\pi}/t$.
 
 ::: {#exm-cdp-gaussian}
-One Gaussian step with $\sigma = 1$ is $0.5$-zCDP, and ten of them are $5$-zCDP. A million simulated privacy losses (seed 0) have mean $0.4990$ and variance $1.0013$, against $\rho = 0.5$ and $2\rho = 1$. Their $\ln\mathbb E[e^L]$ is $1.0000$, against $(\alpha - 1)\alpha\rho = 1$ at $\alpha = 2$. @tbl-cdp-tail compares the tail with its bound. At $t = 4$ their ratio is $0.094$, against $\sqrt{0.5/\pi}/4 = 0.100$ from the Mills ratio.
+One Gaussian step with $\sigma = 1$ is $0.5$-zCDP, and ten of them are $5$-zCDP. A million simulated privacy losses (seed 0) have mean $0.4990$ and variance $1.0013$, against $\rho = 0.5$ and $2\rho = 1$. Their $\ln\mathbb E[e^L]$ is $1.0000$, against $(\alpha - 1)\alpha\rho = 1$ at $\alpha = 2$. @tbl-cdp-tail compares the tail with its bound, and at $t = 4$ their ratio, $0.094$, is close to the Mills estimate $\sqrt{0.5/\pi}/4 = 0.100$.
 
 | $t$ | Exact $\Pr[L > \rho + t]$ | Simulated | zCDP bound $e^{-t^2/(4\rho)}$ |
 | --- | --- | --- | --- |
@@ -69,11 +67,11 @@ One Gaussian step with $\sigma = 1$ is $0.5$-zCDP, and ten of them are $5$-zCDP.
 
 ## Pure DP implies zCDP {#sec-cdp-pure}
 
-A real pipeline mixes Gaussian steps with $\varepsilon$-DP ones, such as a Laplace count, a randomized-response survey bit or an exponential-mechanism selection. To put them in one budget, you need their $\rho$. The privacy loss of such a mechanism lies in $[-\varepsilon, \varepsilon]$, and a bounded variable has Gaussian-like tails, so $\rho$ should be of order $\varepsilon^2$. The question is the constant.
+A real pipeline mixes Gaussian steps with $\varepsilon$-DP ones, such as a Laplace count, a randomized-response survey bit or an exponential-mechanism selection, and to put them in one budget you need their $\rho$. The privacy loss of such a mechanism lies in $[-\varepsilon, \varepsilon]$, and a bounded variable has Gaussian-like tails, so $\rho$ should be of order $\varepsilon^2$. The question is the constant.
 
-The tool is Hoeffding's lemma from [Concentration](../part01-prerequisites/02-concentration.md) (@lem-conc-hoeffding). A variable $X$ confined to an interval of length $w$ has an MGF no larger than that of a normal variable with the same mean and variance $w^2/4$:
+The tool is Hoeffding's lemma (@lem-conc-hoeffding) from [Concentration](../part01-prerequisites/02-concentration.md). A variable $X$ confined to an interval of length $w$ has an MGF no larger than that of a normal variable with the same mean and variance $w^2/4$:
 $$\ln\mathbb E\big[e^{\lambda X}\big] \le \lambda\mathbb E[X] + \frac{\lambda^2w^2}{8} \quad\text{for every real } \lambda.$$
-Applied once to bound the mean of the loss and once to bound its exponential moments, it gives the constant $\frac12$.
+The lemma, used once to bound the mean of the loss and once to bound its exponential moments, gives the constant $\frac12$.
 
 ::: {#thm-cdp-pure name="Pure DP implies zCDP"}
 If $M$ is $\varepsilon$-DP, then $M$ is $(\varepsilon^2/2)$-zCDP (Bun & Steinke 2016, Proposition 1.4), and its RDP curve lies under both the line and the cap $\varepsilon$:
@@ -89,11 +87,11 @@ $$\ln\mathbb E_P\big[e^{-L}\big] \le -\mathbb E_P[L] + \frac{\varepsilon^2}{2}.$
 The left side is 0, because $e^{-L} = Q(Y)/P(Y)$ averages to 1 under $P$ when the supports agree (@lem-div-change-of-measure). So $\mathbb E_P[L] \le \varepsilon^2/2$.
 3. *The exponential moments.* Apply the lemma again, now to $L$ itself with $\lambda = \alpha - 1$:
 $$\ln\mathbb E_P\big[e^{(\alpha - 1)L}\big] \le (\alpha - 1)\mathbb E_P[L] + \frac{(\alpha - 1)^2\varepsilon^2}{2}.$$
-4. *Combine.* Putting the mean bound of step 2 into step 3 bounds the right side by $(\alpha - 1)\varepsilon^2/2 + (\alpha - 1)^2\varepsilon^2/2 = (\alpha - 1)\alpha\,\varepsilon^2/2$. By @eq-cdp-psi, that is $D_\alpha \le \alpha\varepsilon^2/2$.
+4. *Combine.* With the mean bound of step 2, the right side of step 3 is at most $(\alpha - 1)\varepsilon^2/2 + (\alpha - 1)^2\varepsilon^2/2 = (\alpha - 1)\alpha\,\varepsilon^2/2$. By @eq-cdp-psi, that is $D_\alpha \le \alpha\varepsilon^2/2$.
 5. *The cap.* $D_\alpha$ is non-decreasing in $\alpha$ and tends to the max-divergence $D_\infty$, the largest log-ratio of probabilities over events (@thm-div-renyi). $\varepsilon$-DP bounds that log-ratio by $\varepsilon$.
 :::
 
-Hoeffding treats the loss as an arbitrary bounded variable. A sharper route uses the fact that **randomized response**, which reports a bit truthfully with probability $e^\varepsilon/(1 + e^\varepsilon)$ and flips it otherwise, is the worst $\varepsilon$-DP mechanism: every other one is a post-processing of it. Its MGF is a ratio of hyperbolic cosines, and step 3 of the proof below bounds it with one inequality: $\ln\cosh x$ is a concave function of $x^2$, so it lies below its tangent.
+Hoeffding treats the loss as an arbitrary bounded variable, so a sharper constant must use more structure. **Randomized response**, which reports a bit truthfully with probability $e^\varepsilon/(1 + e^\varepsilon)$ and flips it otherwise, is the worst $\varepsilon$-DP mechanism, because every other one is a post-processing of it. Its MGF is a ratio of hyperbolic cosines, and step 3 of the proof below bounds it with one inequality: $\ln\cosh x$ is a concave function of $x^2$, so it lies below its tangent.
 
 ::: {#lem-cdp-lncosh name="A tangent bound for ln cosh"}
 For every $a > 0$ and every real $x$,
@@ -116,9 +114,9 @@ No smaller $\rho$ holds for randomized response. More generally, the exact RDP c
 The plan is to reduce every $\varepsilon$-DP pair to randomized response, compute its MGF exactly, bound it with @lem-cdp-lncosh, and show that the bound is reached as $\alpha \to 1$.
 
 1. *Reduce to randomized response.* Let $P^\star$ and $Q^\star$ be the output distributions of randomized response on the bits 0 and 1. Every $\varepsilon$-DP pair is a post-processing of them: there is a channel $K$ with $P = P^\star K$ and $Q = Q^\star K$ (@thm-comp-worst with $\delta = 0$). By the data-processing inequality (@thm-div-dpi), $D_\alpha(P\|Q) \le D_\alpha(P^\star\|Q^\star)$ at every order, which is the last claim.
-2. *The MGF of randomized response.* Under $P^\star$ the truthful answer has probability $p = e^\varepsilon/(1 + e^\varepsilon)$ and likelihood ratio $p/(1 - p) = e^\varepsilon$. So the loss is $+\varepsilon$ with probability $p$ and $-\varepsilon$ otherwise. With $\lambda = \alpha - 1$, averaging $e^{\lambda L}$ over the two values gives
+2. *The MGF of randomized response.* Under $P^\star$ the truthful answer has probability $p = e^\varepsilon/(1 + e^\varepsilon)$ and likelihood ratio $p/(1 - p) = e^\varepsilon$. So the loss is $+\varepsilon$ with probability $p$ and $-\varepsilon$ otherwise. With $\lambda = \alpha - 1$, the average of $e^{\lambda L}$ over the two values is
 $$\mathbb E\big[e^{\lambda L}\big] = \frac{e^{(\lambda + 1)\varepsilon} + e^{-\lambda\varepsilon}}{1 + e^\varepsilon}.$$
-Factoring $e^{\varepsilon/2}$ out of the numerator and the denominator turns each into twice a hyperbolic cosine:
+If you take the factor $e^{\varepsilon/2}$ out of the numerator and the denominator, each becomes twice a hyperbolic cosine:
 $$\mathbb E\big[e^{\lambda L}\big] = \frac{\cosh\big((\lambda + \frac12)\varepsilon\big)}{\cosh(\varepsilon/2)}.$$
 3. *Bound it.* Take $x = (\lambda + \frac12)\varepsilon$ and $a = \varepsilon/2$ in @lem-cdp-lncosh. Then $x^2 - a^2 = \varepsilon^2\lambda(\lambda + 1)$ and $\tanh(a)/(2a) = \tanh(\varepsilon/2)/\varepsilon$, so
 $$\ln\mathbb E\big[e^{\lambda L}\big] \le (\alpha - 1)\alpha\,\varepsilon\tanh(\varepsilon/2).$$
@@ -126,13 +124,13 @@ By @eq-cdp-psi and step 1, this gives @eq-cdp-pure-sharp.
 4. *No smaller $\rho$.* As $\alpha \to 1$, any RDP curve tends to the Kullback–Leibler (KL) divergence, the mean loss (@thm-div-renyi). For randomized response that mean is $\varepsilon(2p - 1) = \varepsilon(e^\varepsilon - 1)/(e^\varepsilon + 1) = \varepsilon\tanh(\varepsilon/2)$. So $\varepsilon(\alpha)/\alpha$ tends to $\varepsilon\tanh(\varepsilon/2)$, and any smaller slope fails near $\alpha = 1$.
 :::
 
-Since $\tanh x \le x$, the sharp constant is below $\varepsilon^2/2$, and the two agree as $\varepsilon \to 0$. At $\varepsilon = 0.5$ the sharp $\rho$ is $0.1225$ against $0.1250$, and at $\varepsilon = 1$ it is $0.4621$ against $0.5000$. Mechanisms other than randomized response can need less: the Laplace mechanism needs $0.3679$ at $\varepsilon = 1$.
+Since $\tanh x \le x$, the sharp constant is below $\varepsilon^2/2$, and the two agree as $\varepsilon \to 0$. At $\varepsilon = 0.5$ the sharp $\rho$ is $0.1225$ against $0.1250$, and at $\varepsilon = 1$ it is $0.4621$ against $0.5000$.
 
-Any line fits poorly far from $\alpha = 1$, because the true curve flattens at the cap (@fig-cdp-rr-line). At $\varepsilon = 1$ the line $\alpha\varepsilon^2/2$ crosses the cap at $\alpha = 2$, and at $\varepsilon = 3$ its slope $4.5$ puts it above the cap at every order. Since every $\varepsilon$-DP pair is a post-processing of randomized response, an RDP accountant can instead charge a pure-DP step the curve of randomized response, while a zCDP accountant can keep only a line. For large $\varepsilon$, as in local DP, account the mechanism by its curve or by $\varepsilon$, not by a $\rho$.
+But any line fits poorly far from $\alpha = 1$, because the true curve flattens at the cap (@fig-cdp-rr-line). At $\varepsilon = 1$ the line $\alpha\varepsilon^2/2$ crosses the cap at $\alpha = 2$, and at $\varepsilon = 3$ its slope $4.5$ puts it above the cap at every order. An RDP accountant can charge a pure-DP step the curve of randomized response, because every $\varepsilon$-DP pair is a post-processing of it, while a zCDP accountant can keep only a line. So for large $\varepsilon$, as in local DP, account the mechanism by its curve or by $\varepsilon$, not by a $\rho$.
 
 ![The RDP curve of randomized response (black) against the zCDP line $\alpha\varepsilon^2/2$ (dashed), the sharp zCDP line $\alpha\varepsilon\tanh(\varepsilon/2)$ (dash-dotted) and the pure-DP cap $\varepsilon$ (dotted), for $\varepsilon = 1$ (left) and $\varepsilon = 3$ (right). The grey line is the KL divergence $\varepsilon\tanh(\varepsilon/2)$, the curve's value at $\alpha \to 1$.](figures/concentrated_dp_rr_line.svg){#fig-cdp-rr-line}
 
-The exponential mechanism, which selects one candidate and favours those with higher scores, costs four times less than $\varepsilon^2/2$. Its privacy loss on a neighbouring pair lies in an interval of length $\varepsilon$, not $2\varepsilon$, which is the **bounded-range** property of Durfee and Rogers (2019). Hoeffding's lemma then pays a quarter of the variance term.
+The exponential mechanism, which selects one candidate and favours those with higher scores, costs four times less than $\varepsilon^2/2$. The reason is that its privacy loss on a neighbouring pair lies in an interval of length $\varepsilon$, not $2\varepsilon$, which is the **bounded-range** property of Durfee and Rogers (2019). So Hoeffding's lemma pays a quarter of the variance term.
 
 ::: {#prp-cdp-exp name="Bounded-range mechanisms"}
 If, for every neighbouring pair taken in either order, the privacy loss of $M$ lies in an interval of length $\varepsilon$, then $M$ is $(\varepsilon^2/8)$-zCDP. An $\varepsilon$-DP exponential mechanism has this property, so it is $(\varepsilon^2/8)$-zCDP (Cesar & Rogers 2021).
@@ -145,7 +143,7 @@ If, for every neighbouring pair taken in either order, the privacy loss of $M$ l
 :::
 
 ::: {#exm-cdp-rr}
-Randomized response at $\varepsilon = 1$ reports the truth with probability $e/(1 + e) = 0.7311$. @tbl-cdp-rr compares its exact curve with the bounds. The third column puts the sharp mean bound $\varepsilon\tanh(1/2) = 0.4621$, which holds for every $\varepsilon$-DP pair (@thm-comp-tanh-mean), into step 4 of the Hoeffding proof in place of $\varepsilon^2/2$. That line starts lower but keeps the slope $0.5$, which comes from Hoeffding's variance term, so it sits $0.5 - 0.4621 = 0.0379$ below the zCDP line at every order.
+Randomized response at $\varepsilon = 1$ reports the truth with probability $e/(1 + e) = 0.7311$, and @tbl-cdp-rr compares its exact curve with the bounds. The third column puts the sharp mean bound $\varepsilon\tanh(1/2) = 0.4621$, which holds for every $\varepsilon$-DP pair (@thm-comp-tanh-mean), into step 4 of the Hoeffding proof in place of $\varepsilon^2/2$. That line starts lower but keeps the slope $0.5$ of Hoeffding's variance term, so it sits $0.5 - 0.4621 = 0.0379$ below the zCDP line at every order.
 
 | $\alpha$ | Exact $\varepsilon(\alpha)$ | $\varepsilon\tanh(\varepsilon/2) + (\alpha-1)\varepsilon^2/2$ | $\alpha\varepsilon^2/2$ | $\min(\varepsilon, \alpha\varepsilon^2/2)$ |
 | --- | --- | --- | --- | --- |
@@ -157,12 +155,12 @@ Randomized response at $\varepsilon = 1$ reports the truth with probability $e/(
 
 : Randomized response at $\varepsilon = 1$: the exact RDP curve against the Hoeffding bound with the sharp mean, the zCDP line and the line capped at $\varepsilon$. {#tbl-cdp-rr}
 
-Up to $\alpha = 2$ the zCDP line is within 36% of the exact value ($1.0000/0.7353 = 1.360$). At $\alpha = 50$ it is 25 times too large ($25.0000/0.9936 = 25.2$), while the cap is within 1% ($1.0000/0.9936 = 1.0064$).
+Up to $\alpha = 2$ the zCDP line is within 36% of the exact value. At $\alpha = 50$ it is 25 times too large, while the cap is within 1%.
 :::
 
 ## From zCDP to (ε, δ) {#sec-cdp-conversion}
 
-Whatever you account in, you report $(\varepsilon, \delta)$. Mironov's conversion turns an RDP curve into such a guarantee ([From Rényi DP to (ε, δ) and to tests](02-rdp-conversions.md#sec-conv-mironov)). At each order $\alpha$, a mechanism with curve value $\varepsilon(\alpha)$ is $(\varepsilon(\alpha) + \ln(1/\delta)/(\alpha - 1), \delta)$-DP, and you take the best order. The [improved conversion](02-rdp-conversions.md#sec-conv-improved) of the same chapter avoids part of the slack of Markov's inequality, and subtracts $\ln(\alpha)/(\alpha - 1) - \ln(1 - 1/\alpha)$ from this. For a $\rho$-zCDP mechanism the curve is the line $\rho\alpha$, so the best order can be found by hand. @sec-apx-conv-zcdp in the appendices derives the result from scratch, with worked numbers.
+Whatever you account in, you report $(\varepsilon, \delta)$. Mironov's conversion (@thm-rdp-conversion) says that at each order $\alpha$, a mechanism with curve value $\varepsilon(\alpha)$ is $(\varepsilon(\alpha) + \ln(1/\delta)/(\alpha - 1), \delta)$-DP, and you take the best order. The [improved conversion](02-rdp-conversions.md#sec-conv-improved) avoids part of the slack of Markov's inequality, and subtracts $\ln(\alpha)/(\alpha - 1) - \ln(1 - 1/\alpha)$ from this. For a $\rho$-zCDP mechanism the curve is the line $\rho\alpha$, so you can find the best order by hand. @sec-apx-conv-zcdp in the appendices derives the result from scratch, with worked numbers.
 
 ::: {#thm-cdp-conversion name="From zCDP to (ε, δ)"}
 A $\rho$-zCDP mechanism is $(\varepsilon, \delta)$-DP for every $\delta \in (0, 1)$ with
@@ -175,24 +173,20 @@ $$\varepsilon = \min_{\alpha > 1}\left[\rho\alpha + \frac{\ln(1/\delta)}{\alpha 
 ::: {.proof}
 Write $\ell = \ln(1/\delta)$.
 
-1. *Plug in the line.* Mironov's conversion with $\varepsilon(\alpha) = \rho\alpha$ says that every $\alpha > 1$ gives a valid $\varepsilon$:
-$$g(\alpha) = \rho\alpha + \frac{\ell}{\alpha - 1}.$$
-The first term grows with the order and the second shrinks, so the best order lies in between.
-2. *Minimize.* The derivative $\rho - \ell/(\alpha - 1)^2$ is zero at $\alpha - 1 = \sqrt{\ell/\rho}$. Both terms of $g$ are convex for $\alpha > 1$, so this stationary point is the minimum.
-3. *Evaluate.* At $\alpha^*$ the first term is $\rho + \sqrt{\rho\ell}$ and the second is $\ell/\sqrt{\ell/\rho} = \sqrt{\rho\ell}$, and their sum is @eq-cdp-simple.
-4. *The improved form.* Putting $\varepsilon(\alpha) = \rho\alpha$ into the improved conversion gives the bracket of @eq-cdp-improved at each order, and every order is valid.
+1. *The simple form.* The line $\rho\alpha$ is the Gaussian curve $\alpha/(2\sigma^2)$ with $\sigma = 1/\sqrt{2\rho}$. So @cor-rdp-gauss-opt, the best order of @thm-rdp-conversion for that curve, applies: its $\alpha^* = 1 + \sigma\sqrt{2\ell}$ becomes $1 + \sqrt{\ell/\rho}$, and its $\varepsilon = \frac{1}{2\sigma^2} + \frac{\sqrt{2\ell}}{\sigma}$ becomes $\rho + 2\sqrt{\rho\ell}$, which is @eq-cdp-simple.
+2. *The improved form.* With $\varepsilon(\alpha) = \rho\alpha$, the improved conversion gives the bracket of @eq-cdp-improved at each order, and every order is valid.
 :::
 
-For calibration you need the reverse: the largest $\rho$ whose conversion stays within a target $\varepsilon$ at a given $\delta$. The simple $\varepsilon$ grows with $\rho$, and solving @eq-cdp-simple for $\rho$ shows that the target is met by every
+For calibration you need the reverse: the largest $\rho$ whose conversion stays within a target $\varepsilon$ at a given $\delta$. The simple $\varepsilon$ grows with $\rho$, so you can solve @eq-cdp-simple for $\rho$. With $x = \sqrt\rho$ and $\ell = \ln(1/\delta)$, it reads $\varepsilon = x^2 + 2x\sqrt\ell = (x + \sqrt\ell)^2 - \ell$, so $\varepsilon$ stays within the target exactly when $x \le \sqrt{\varepsilon + \ell} - \sqrt\ell$, that is when
 $$\rho \le \Big(\sqrt{\varepsilon + \ln(1/\delta)} - \sqrt{\ln(1/\delta)}\Big)^2.$$ {#eq-cdp-inverse}
-Keep budgets in $\rho$ and convert once, at the end: $\varepsilon$ grows like the square root of $\rho$, so adding the $\varepsilon$'s of two halves of a budget overstates the whole.
+Keep budgets in $\rho$ and convert once, at the end. The reason is that $\varepsilon$ grows like the square root of $\rho$, so the sum of the $\varepsilon$'s of two halves of a budget overstates the whole.
 
-How much do the conversions lose? The Gaussian answers this, because the zCDP line is exact for it, so any gap is the price of the conversion alone. After dividing by $\sigma$, a $\rho$-zCDP Gaussian mechanism is the pair $\mathcal N(0, 1)$ against $\mathcal N(\mu, 1)$ with $\mu = \sqrt{2\rho}$, and @thm-lg-analytic gives its exact smallest $\delta$ at each $\varepsilon$ (@eq-lg-analytic). At $\rho = 0.5$ the simple formula is 21% too large ($5.299/4.377 = 1.210$), and the improved conversion 8% ($4.728/4.377 = 1.080$), and both gaps shrink as $\rho$ grows (@fig-cdp-conversion). The part's accountants minimize over a fixed list of orders, `ORDERS`, and the improved conversion on that list agrees with a fine grid to within $0.001$ for $\rho \le 1$.
+The Gaussian measures how much the conversions lose, because the zCDP line is exact for it, so any gap is the price of the conversion alone. In units of $\sigma$, a $\rho$-zCDP Gaussian mechanism is the pair $\mathcal N(0, 1)$ against $\mathcal N(\mu, 1)$ with $\mu = \sqrt{2\rho}$, and @thm-lg-analytic gives its exact smallest $\delta$ at each $\varepsilon$ (@eq-lg-analytic). At $\rho = 0.5$ the simple formula is 21% too large ($5.299/4.377 = 1.210$), and the improved conversion 8% ($4.728/4.377 = 1.080$), and both gaps shrink as $\rho$ grows (@fig-cdp-conversion). The part's accountants minimize over the fixed list of orders `ORDERS`, and the improved conversion on that list agrees with a fine grid to within $0.001$ for $\rho \le 1$.
 
 ![Left: $\varepsilon$ at $\delta = 10^{-5}$ for a $\rho$-zCDP mechanism, from the simple formula @eq-cdp-simple, the improved conversion @eq-cdp-improved, and the exact value for the Gaussian mechanism with $\mu = \sqrt{2\rho}$. Right: each conversion divided by the exact Gaussian value.](figures/concentrated_dp_conversion.svg){#fig-cdp-conversion}
 
 ::: {#exm-cdp-conversion}
-$k$ Gaussian steps with $\sigma = 1$ are $(k/2)$-zCDP, since each costs $\frac12$ and composition adds. @tbl-cdp-conversion converts a range of $\rho$ at $\delta = 10^{-5}$, where $\ln(1/\delta) = 11.5129$. The row $\rho = 0.5$ is the single step of the running example. Its best order for the simple formula is $\alpha^* = 1 + \sqrt{11.5129/0.5} = 5.799$, and the simple $\varepsilon$ is $0.5 + 2\sqrt{0.5 \times 11.5129} = 5.299$. The row $\rho = 5$ is ten steps, and $\rho = 50$ a hundred.
+$k$ Gaussian steps with $\sigma = 1$ are $(k/2)$-zCDP, since each costs $\frac12$ and composition adds. @tbl-cdp-conversion converts a range of $\rho$ at $\delta = 10^{-5}$, where $\ln(1/\delta) = 11.5129$. The row $\rho = 0.5$ is the single step of the running example, with best order $\alpha^* = 1 + \sqrt{11.5129/0.5} = 5.799$ and simple $\varepsilon = 0.5 + 2\sqrt{0.5 \times 11.5129} = 5.299$. The row $\rho = 5$ is ten steps, and $\rho = 50$ a hundred.
 
 | $\rho$ | $\mu = \sqrt{2\rho}$ | Simple @eq-cdp-simple | Improved, fine grid | Improved, `ORDERS` | Exact Gaussian |
 | --- | --- | --- | --- | --- | --- |
@@ -205,14 +199,14 @@ $k$ Gaussian steps with $\sigma = 1$ are $(k/2)$-zCDP, since each costs $\frac12
 
 : $\varepsilon$ at $\delta = 10^{-5}$ for $\rho$-zCDP: simple formula, improved conversion on a fine grid of orders and on the part's `ORDERS`, and the exact $\varepsilon$ of the Gaussian mechanism with the same $\rho$. {#tbl-cdp-conversion}
 
-To make a single Gaussian step $(1, 10^{-5})$-DP through @eq-cdp-inverse, take $\rho = (\sqrt{12.5129} - \sqrt{11.5129})^2 = 0.02082$, that is $\sigma = 1/\sqrt{2\rho} = 4.901$.
+To make a single Gaussian step $(1, 10^{-5})$-DP by @eq-cdp-inverse, take $\rho = (\sqrt{12.5129} - \sqrt{11.5129})^2 = 0.02082$, that is $\sigma = 1/\sqrt{2\rho} = 4.901$.
 :::
 
 ## Group privacy {#sec-cdp-group}
 
-A household or a user with many records contributes several records at once. Group privacy asks how the guarantee degrades for datasets joined by a chain of $m$ neighbouring steps, writing $m$ because $k$ counts composed mechanisms. For pure DP the answer is $m\varepsilon$ (@thm-dpprop-group). For RDP the chain needs a triangle inequality, which the Rényi divergence lacks at a fixed order, so Mironov's group bound gives up orders: for a group of $2^c$, a curve value $\varepsilon$ at order $\alpha$ becomes $3^c\varepsilon$ at order $\alpha/2^c$ ([Rényi DP](01-renyi-dp.md#sec-rdp-properties)). zCDP constrains every order at once, so it can pay for the chain with higher orders.
+A household or a user with many records contributes several records at once. Group privacy asks how the guarantee degrades for datasets joined by a chain of $m$ neighbouring steps, where $m$ is used because $k$ counts composed mechanisms. For pure DP the answer is $m\varepsilon$ (@thm-dpprop-group). For RDP the chain needs a triangle inequality, which the Rényi divergence lacks at a fixed order, so Mironov's group bound gives up orders: for a group of $2^c$, a curve value $\varepsilon$ at order $\alpha$ becomes $3^c\varepsilon$ at order $\alpha/2^c$ ([Rényi DP](01-renyi-dp.md#sec-rdp-properties)). zCDP constrains every order at once, so it can pay for the chain with higher orders.
 
-The proof walks along the chain one record at a time. Each step must pass from $P$ to $Q$ through an intermediate distribution $R$, and the tool is a triangle-like inequality that pays for the detour with higher orders on the two legs (Bun & Steinke 2016, Lemma 5.2).
+The proof walks along the chain one record at a time. Each step passes from $P$ to $Q$ through an intermediate distribution $R$, and a triangle-like inequality pays for the detour with higher orders on the two legs (Bun & Steinke 2016, Lemma 5.2).
 
 ::: {#lem-cdp-triangle name="A triangle-like inequality for Rényi divergence"}
 For distributions $P$, $Q$, $R$, every order $\alpha > 1$ and every $m > 1$,
@@ -220,14 +214,14 @@ $$D_\alpha(P\|Q) \le \frac{m\alpha}{m\alpha - 1}D_{\frac{m\alpha - 1}{m - 1}}(P\
 :::
 
 ::: {.proof}
-The plan is to write the sum that defines $D_\alpha(P\|Q)$ as an average under $R$ of a product of two ratios, split the product with Hölder's inequality, and recognize each factor as a Rényi divergence of one leg.
+The plan is the one of @lem-rdp-weak-triangle with other exponents: write the sum that defines $D_\alpha(P\|Q)$ as an average under $R$ of a product of two ratios, split the product with Hölder's inequality, and recognize each factor as a Rényi divergence of one leg.
 
-1. *Insert $R$.* Assume $R$ is positive wherever $P$ or $Q$ is, since otherwise the right side is infinite. Multiplying out one term shows $R \cdot P^\alpha R^{-\alpha} \cdot R^{\alpha - 1}Q^{1 - \alpha} = P^\alpha Q^{1 - \alpha}$. So the sum that defines the divergence is an average under $R$ (@lem-div-change-of-measure), with the ratios evaluated at an output drawn from $R$:
+1. *Insert $R$.* Assume $R$ is positive wherever $P$ or $Q$ is, since otherwise the right side is infinite. The powers of $R$ cancel in $R \cdot P^\alpha R^{-\alpha} \cdot R^{\alpha - 1}Q^{1 - \alpha} = P^\alpha Q^{1 - \alpha}$. So the sum that defines the divergence is an average under $R$ (@lem-div-change-of-measure), with the ratios evaluated at an output drawn from $R$:
 $$e^{(\alpha - 1)D_\alpha(P\|Q)} = \sum_y P(y)^\alpha Q(y)^{1 - \alpha} = \mathbb E_R\big[(P/R)^\alpha(R/Q)^{\alpha - 1}\big].$$
 2. *Split with Hölder.* Hölder's inequality bounds the average of a product of two positive variables $X_1$ and $X_2$ by a product of power means, for exponents $u$ and $v$ with $\frac1u + \frac1v = 1$:
 $$\mathbb E[X_1X_2] \le (\mathbb E[X_1^u])^{1/u}(\mathbb E[X_2^v])^{1/v}.$$ The second average will be a divergence of order $v(\alpha - 1) + 1$, so choose $v = \frac{m\alpha - 1}{\alpha - 1}$ to make that order $m\alpha$, and the matching $u = \frac{m\alpha - 1}{\alpha(m - 1)}$. Then
 $$\mathbb E_R\big[(P/R)^\alpha(R/Q)^{\alpha - 1}\big] \le \big(\mathbb E_R[(P/R)^{u\alpha}]\big)^{1/u}\big(\mathbb E_R[(R/Q)^{v(\alpha - 1)}]\big)^{1/v}.$$
-3. *Recognize two divergences.* Write $\alpha_1 = u\alpha = \frac{m\alpha - 1}{m - 1}$ and $\alpha_2 = v(\alpha - 1) + 1 = m\alpha$. Multiplying out as in step 1, the first average is $\sum_y R^{1 - \alpha_1}P^{\alpha_1} = e^{(\alpha_1 - 1)D_{\alpha_1}(P\|R)}$, and the second is $\sum_y R^{\alpha_2}Q^{1 - \alpha_2} = e^{(\alpha_2 - 1)D_{\alpha_2}(R\|Q)}$.
+3. *Recognize two divergences.* Write $\alpha_1 = u\alpha = \frac{m\alpha - 1}{m - 1}$ and $\alpha_2 = v(\alpha - 1) + 1 = m\alpha$. As in step 1, the first average is $\sum_y R^{1 - \alpha_1}P^{\alpha_1} = e^{(\alpha_1 - 1)D_{\alpha_1}(P\|R)}$, and the second is $\sum_y R^{\alpha_2}Q^{1 - \alpha_2} = e^{(\alpha_2 - 1)D_{\alpha_2}(R\|Q)}$.
 4. *Take logarithms and divide by $\alpha - 1$.* The second leg contributes $D_{m\alpha}(R\|Q)$, since $(\alpha_2 - 1)/v = \alpha - 1$. The first contributes $D_{\alpha_1}(P\|R)$ times $\frac{\alpha_1 - 1}{u(\alpha - 1)}$. Since $\alpha_1 - 1 = \frac{m(\alpha - 1)}{m - 1}$, that coefficient is $\frac{m\alpha}{m\alpha - 1}$, which gives @eq-cdp-triangle.
 :::
 
@@ -246,12 +240,12 @@ The proof is by induction on $m$, and the case $m = 1$ is the definition.
 4. *Tightness.* For the Gaussian mechanism a group of $m$ shifts the mean by $m\Delta_2 f$, so @eq-div-gauss-renyi gives exactly $\alpha m^2(\Delta_2 f)^2/(2\sigma^2) = m^2\rho\alpha$.
 :::
 
-The bound is quadratic in $m$, which matches pure DP: with $\rho \approx \varepsilon^2/2$, the group's $m^2\rho$ is about $(m\varepsilon)^2/2$. The RDP route multiplies $\varepsilon$ by $3^c$ while dividing the order by $2^c$, so its slope is $6^c\rho$ instead of $m^2\rho = 4^c\rho$ (@tbl-cdp-group). The induction can raise the order at each step only because zCDP controls every order; a bound known only up to some order would run out.
+The bound is quadratic in $m$, which matches pure DP: with $\rho \approx \varepsilon^2/2$, the group's $m^2\rho$ is about $(m\varepsilon)^2/2$. The RDP route multiplies $\varepsilon$ by $3^c$ and divides the order by $2^c$, so its slope is $6^c\rho$ instead of $m^2\rho = 4^c\rho$ (@tbl-cdp-group). The induction can raise the order at each step only because zCDP controls every order, and a bound known only up to some order would run out.
 
 Strong group privacy is also a weakness. Bun and Steinke use it to prove lower bounds on the sample size of zCDP algorithms as strong as those for pure DP. These rule out **stability-based** algorithms, which release an exact answer when the data are far from any dataset where it would change, and @sec-cdp-approx weakens the definition to escape them.
 
 ::: {#exm-cdp-group}
-@tbl-cdp-group takes the Gaussian mechanism with $\sigma = 1$ ($\rho = 0.5$) and groups of size $m$. The RDP route starts from a high order, 64, where $\varepsilon(64) = 0.5 \times 64 = 32$. For $m = 2^c$ it gives order $64/2^c$, $\varepsilon = 3^c \times 32$ and slope $6^c \times 0.5$. The triangle-like inequality is an equality along the chain of normals with means 0, 1 and 2, where both sides of @eq-cdp-triangle are 6 at $\alpha = 3$ and $m = 2$.
+@tbl-cdp-group takes the Gaussian mechanism with $\sigma = 1$ ($\rho = 0.5$) and groups of size $m$. The RDP route starts from order 64, where $\varepsilon(64) = 32$, and for $m = 2^c$ it gives order $64/2^c$ and $\varepsilon = 3^c \times 32$. The triangle-like inequality can be an equality: along the chain of normals with means 0, 1 and 2, the script finds that both sides of @eq-cdp-triangle are 6 at $\alpha = 3$ and $m = 2$.
 
 | Group size $m$ | zCDP $m^2\rho$ | $\varepsilon$ at $10^{-5}$ (improved) | Exact Gaussian, shift $m$ | RDP route: order, $\varepsilon$, slope |
 | --- | --- | --- | --- | --- |
@@ -266,7 +260,7 @@ Strong group privacy is also a weakness. Bun and Steinke use it to prove lower b
 
 ## Approximate zCDP {#sec-cdp-approx}
 
-Some useful mechanisms are $(\varepsilon, \delta)$-DP but not zCDP at all. Propose-test-release and stability-based histograms are of this kind: they fail with probability about $\delta$. The lower bounds of @sec-cdp-group rule them out of zCDP, yet you still want them in one budget with Gaussian steps. Bun and Steinke's answer is to let zCDP fail on an event of small probability.
+Some useful mechanisms, such as propose-test-release and stability-based histograms, fail with probability about $\delta$, so they are $(\varepsilon, \delta)$-DP but not zCDP. You still want them in one budget with Gaussian steps. So Bun and Steinke let zCDP fail on an event of small probability.
 
 ::: {#def-cdp-approx name="Approximate zCDP"}
 A mechanism $M$ is **$\delta$-approximately $\rho$-zCDP** if, for all neighbours $D \sim D'$, there are events $E$ and $E'$ of probability at least $1 - \delta$, for the runs on $D$ and on $D'$, such that for every $\alpha > 1$
@@ -285,28 +279,28 @@ Three properties make it a ledger with two columns, $\rho$ and the probability $
 ::: {.proof}
 The first two parts have short reasons. For the third, the usual conversion applies on the good event, and the bad event can add at most its probability.
 
-1. *Absorbing $(\varepsilon, \delta)$-DP.* Any $(\varepsilon, \delta)$-DP pair behaves, with probability $1 - \delta$, like an $\varepsilon$-DP pair, which @thm-cdp-pure turns into $\varepsilon^2/2$. @sec-apx-mech-zcdp in the appendices derives the decomposition and the composition of mixed pipelines.
+1. *Take in $(\varepsilon, \delta)$-DP.* Any $(\varepsilon, \delta)$-DP pair behaves, with probability $1 - \delta$, like an $\varepsilon$-DP pair, which @thm-cdp-pure turns into $\varepsilon^2/2$. @sec-apx-mech-zcdp in the appendices derives the decomposition and the composition of mixed pipelines.
 2. *Composition.* The conditioned mechanisms compose as zCDP (@thm-cdp-gaussian), and both good events hold with probability at least $(1 - \delta_1)(1 - \delta_2) = 1 - (\delta_1 + \delta_2 - \delta_1\delta_2)$.
 3. *Split on the event.* Let $\Pr[E], \Pr[E'] \ge 1 - \delta_a$, fix a set $S$ of outputs, and write $P_E(S) = \Pr[M(D) \in S \mid E]$. The probability of $S$ outside $E$ is at most 1, so
 $$\Pr[M(D) \in S] \le P_E(S)\Pr[E] + 1 - \Pr[E] = 1 - \Pr[E](1 - P_E(S)).$$
 This bound shrinks as $\Pr[E]$ grows, so it is at most its value $P_E(S)(1 - \delta_a) + \delta_a$ at the smallest allowed $\Pr[E]$.
 4. *Use the conditional zCDP.* The conditioned pair is $\rho$-zCDP, so $P_E(S) \le e^\varepsilon\Pr[M(D') \in S \mid E'] + \delta'$.
-5. *Remove the conditioning on $D'$.* Dropping the outputs outside $E'$ can only lower a probability, so $\Pr[M(D') \in S] \ge (1 - \delta_a)\Pr[M(D') \in S \mid E']$.
-6. *Combine.* Putting step 4 into step 3 and using step 5 gives
+5. *Remove the conditioning on $D'$.* If you drop the outputs outside $E'$, a probability can only fall, so $\Pr[M(D') \in S] \ge (1 - \delta_a)\Pr[M(D') \in S \mid E']$.
+6. *Combine.* Put step 4 into step 3 and use step 5:
 $$\Pr[M(D) \in S] \le e^\varepsilon\Pr[M(D') \in S] + (1 - \delta_a)\delta' + \delta_a.$$
 :::
 
-The $\rho$ column composes like zCDP, so after conversion $\varepsilon$ grows like the square root of the number of steps, while the $\delta_a$ column adds up like $\delta$ in basic composition. The ledger is worth keeping only when some steps are genuinely $(\varepsilon, \delta)$-DP and not zCDP.
+The $\rho$ column composes like zCDP, so after conversion $\varepsilon$ grows like the square root of the number of steps, while the $\delta_a$ column adds up like $\delta$ in basic composition. So the ledger is worth keeping only when some steps are $(\varepsilon, \delta)$-DP and not zCDP.
 
 ::: {#exm-cdp-pipeline}
-A pipeline runs 10 stability-based steps, each $(0.5, 10^{-7})$-DP, and 10 Gaussian steps with $\sigma = 1$. Each stability step enters the $\rho$ column as $0.5^2/2 = 0.125$ and the $\delta_a$ column as $10^{-7}$. The totals are $\rho = 10 \times 0.125 + 10 \times 0.5 = 6.25$ and $\delta_a = 1 - (1 - 10^{-7})^{10} = 1.0000 \times 10^{-6}$. The improved conversion at $\delta' = 10^{-5} - \delta_a$ gives $\varepsilon = 22.100$, with total $\delta_a + (1 - \delta_a)\delta' \le 10^{-5}$. Without the ledger you would convert the Gaussians alone to $\varepsilon = 19.119$ at the remaining $\delta = 10^{-5} - 10^{-6} = 9 \times 10^{-6}$ and add the stability steps by basic composition, for $19.119 + 5 = 24.119$. The ledger saves about 2, because each $\varepsilon = 0.5$ step costs $\varepsilon^2/2$ in $\rho$, not $\varepsilon$.
+A pipeline runs 10 stability-based steps, each $(0.5, 10^{-7})$-DP, and 10 Gaussian steps with $\sigma = 1$. Each stability step enters the $\rho$ column as $0.5^2/2 = 0.125$ and the $\delta_a$ column as $10^{-7}$. The totals are $\rho = 10 \times 0.125 + 10 \times 0.5 = 6.25$ and $\delta_a = 1 - (1 - 10^{-7})^{10} = 1.0000 \times 10^{-6}$. The improved conversion at $\delta' = 10^{-5} - \delta_a$ gives $\varepsilon = 22.100$, with total $\delta_a + (1 - \delta_a)\delta' \le 10^{-5}$. Without the ledger you would convert the Gaussians alone to $\varepsilon = 19.119$ at the remaining $\delta = 9 \times 10^{-6}$ and add the stability steps by basic composition, for $19.119 + 5 = 24.119$. The ledger saves about 2, because each $\varepsilon = 0.5$ step costs $\varepsilon^2/2$ in $\rho$, not $\varepsilon$.
 :::
 
 ## Subsampling, and truncated CDP {#sec-cdp-tcdp}
 
-DP-SGD, the running example of this part, runs each step on a Poisson sample of the data, in which each record is used independently with probability $q$, the sampling rate. Subsampling makes a step much more private than the Gaussian it contains, because a record is usually not in the batch. This section asks whether zCDP sees that gain, and what to do when it does not.
+DP-SGD runs each step on a Poisson sample of the data, in which each record is used independently with probability $q$, the sampling rate. Subsampling makes a step much more private than the Gaussian it contains, because a record is usually not in the batch. Does zCDP see that gain, and what can you do when it does not?
 
-Take add/remove neighbours, sensitivity 1 and noise multiplier $\sigma$, in one dimension, which is enough because only the shift along the record's direction carries evidence. Without the record the step outputs $Q = \mathcal N(0, \sigma^2)$. With it, the record is in the sample with probability $q$, shifting the mean by 1, so the output is the mixture $P = (1 - q)\mathcal N(0, \sigma^2) + q\,\mathcal N(1, \sigma^2)$. The RDP curve is $D_\alpha(P\|Q)$, because the other order is never larger ([Amplification by subsampling](05-subsampling.md), @eq-sub-rdp; @sec-apx-amp-direction). On integer orders it has a closed form. The divergence averages a product of $\alpha$ likelihood ratios, as if the step ran $\alpha$ times, and the term $j$ below collects the runs in which the record was sampled $j$ times.
+Take add/remove neighbours, sensitivity 1 and noise multiplier $\sigma$, in one dimension, which is enough because only the shift along the record's direction carries evidence. Without the record the step outputs $Q = \mathcal N(0, \sigma^2)$. With it, the record is in the sample with probability $q$ and then shifts the mean by 1, so the output is the mixture $P = (1 - q)\mathcal N(0, \sigma^2) + q\,\mathcal N(1, \sigma^2)$. The RDP curve is $D_\alpha(P\|Q)$, because the other order is never larger ([Amplification by subsampling](05-subsampling.md), @eq-sub-rdp; @sec-apx-amp-direction). On integer orders it has a closed form. The divergence averages a product of $\alpha$ likelihood ratios, as if the step ran $\alpha$ times, and the term $j$ below collects the runs in which the record was sampled $j$ times.
 
 ::: {#lem-cdp-sg name="The subsampled Gaussian on integer orders"}
 For every integer $\alpha \ge 2$, the curve is a binomial sum:
@@ -315,7 +309,7 @@ $$\varepsilon(\alpha) = \frac{1}{\alpha - 1}\ln A_\alpha, \qquad A_\alpha = \sum
 :::
 
 ::: {.proof}
-1. *Write the ratio.* Let $r$ be the likelihood ratio of $\mathcal N(1, \sigma^2)$ to $Q$. Then $P/Q = 1 - q + q\,r$, and writing the divergence as an average under $Q$ of the ratio to the power $\alpha$ (@prp-div-renyi-forms) gives $A_\alpha = e^{(\alpha - 1)D_\alpha(P\|Q)} = \mathbb E_Q[(1 - q + q\,r)^\alpha]$.
+1. *Write the ratio.* Let $r$ be the likelihood ratio of $\mathcal N(1, \sigma^2)$ to $Q$. Then $P/Q = 1 - q + q\,r$, and the divergence as an average under $Q$ of the ratio to the power $\alpha$ (@prp-div-renyi-forms) gives $A_\alpha = e^{(\alpha - 1)D_\alpha(P\|Q)} = \mathbb E_Q[(1 - q + q\,r)^\alpha]$.
 2. *Expand.* For integer $\alpha$, the binomial theorem expands the power into the terms $\binom\alpha j(1 - q)^{\alpha - j}q^j\,\mathbb E_Q[r^j]$.
 3. *Each moment.* By the same form of @prp-div-renyi-forms, $\mathbb E_Q[r^j] = e^{(j - 1)D_j}$ for the two normals, and @eq-div-gauss-renyi gives $D_j = j/(2\sigma^2)$, so the moment is $e^{(j^2 - j)/(2\sigma^2)}$.
 :::
@@ -328,17 +322,17 @@ $$\varepsilon(\alpha) \ge \frac{\alpha}{2\sigma^2} + \frac{\alpha\ln q}{\alpha -
 ::: {.proof}
 Write $\rho_0 = 1/(2\sigma^2)$ for the slope without subsampling. The plan is to show that $\rho_0$ is enough, because subsampling never hurts, and that nothing smaller is enough, because at large orders subsampling stops helping.
 
-1. *Upper bound, by convexity.* The ratio $1 - q + q\,r$ is an average of 1 and $r$, and $x \mapsto x^\alpha$ is convex, so the $\alpha$-th power of that average is at most $(1 - q) + q\,r^\alpha$. Averaging under $Q$, with $\mathbb E_Q[r^\alpha] = e^{(\alpha - 1)\alpha\rho_0}$ from the Gaussian curve, gives
+1. *Upper bound, by convexity.* The ratio $1 - q + q\,r$ is an average of 1 and $r$, and $x \mapsto x^\alpha$ is convex, so the $\alpha$-th power of that average is at most $(1 - q) + q\,r^\alpha$. The average under $Q$, with $\mathbb E_Q[r^\alpha] = e^{(\alpha - 1)\alpha\rho_0}$ from the Gaussian curve, gives
 $$A_\alpha \le 1 - q + q\,e^{(\alpha - 1)\alpha\rho_0}.$$
 An average of 1 and a number at least 1 is at most that number, so $A_\alpha \le e^{(\alpha - 1)\alpha\rho_0}$, that is $D_\alpha(P\|Q) \le \rho_0\alpha$.
-2. *The other order.* zCDP needs both orders of the pair, so $D_\alpha(Q\|P)$ needs the same bound. The sum $\sum_y V(y)(U(y)/V(y))^\alpha$ is jointly convex in the pair of distributions $(U, V)$: its value at a mixture of pairs is at most the mixture of its values (@sec-apx-tail-perspective proves it). Writing $(Q, P)$ as the mixture $(1 - q)(Q, Q) + q\,(Q, \mathcal N(1, \sigma^2))$, and using the Gaussian curve for the second pair, gives the same bound.
-3. *Lower bound, by one term.* Every term of @eq-cdp-sg is positive, so keeping only $j = \alpha$, the runs in which the record was always sampled, gives $A_\alpha \ge q^\alpha e^{(\alpha^2 - \alpha)\rho_0}$. Taking logarithms and dividing by $\alpha - 1$ gives @eq-cdp-sg-lower.
-4. *Let the order grow.* Dividing @eq-cdp-sg-lower by $\alpha$ gives $\varepsilon(\alpha)/\alpha \ge \rho_0 + \ln q/(\alpha - 1)$, which tends to $\rho_0$, because the penalty for a rarely sampled record, $\ln q/(\alpha - 1)$, vanishes as the order grows. So a line above the whole curve needs $\rho \ge \rho_0$, and step 1 shows that $\rho_0$ suffices.
+2. *The other order.* zCDP needs both orders of the pair, so $D_\alpha(Q\|P)$ needs the same bound. The sum $\sum_y V(y)(U(y)/V(y))^\alpha$ is jointly convex in the pair of distributions $(U, V)$: its value at a mixture of pairs is at most the mixture of its values (@sec-apx-tail-perspective proves it). So write $(Q, P)$ as the mixture $(1 - q)(Q, Q) + q\,(Q, \mathcal N(1, \sigma^2))$, and the Gaussian curve for the second pair gives the same bound.
+3. *Lower bound, by one term.* Every term of @eq-cdp-sg is positive, so the term $j = \alpha$ alone, the runs in which the record was always sampled, gives $A_\alpha \ge q^\alpha e^{(\alpha^2 - \alpha)\rho_0}$. Its logarithm, divided by $\alpha - 1$, gives @eq-cdp-sg-lower.
+4. *Let the order grow.* Divide @eq-cdp-sg-lower by $\alpha$ to get $\varepsilon(\alpha)/\alpha \ge \rho_0 + \ln q/(\alpha - 1)$, which tends to $\rho_0$, because the penalty for a rarely sampled record, $\ln q/(\alpha - 1)$, vanishes as the order grows. So a line above the whole curve needs $\rho \ge \rho_0$, and step 1 shows that $\rho_0$ suffices.
 :::
 
-The curve bends, and a line cannot (@fig-cdp-subsampled). For $q = 0.01$ and $\sigma = 1$, the curve up to $\alpha = 8$ is tiny and almost linear, with slope close to $q^2(e^{1/\sigma^2} - 1)/2 = 8.5914 \times 10^{-5}$. Expanding $(1 + q(r - 1))^\alpha$ in powers of $q$ instead, the linear term averages to 0, so $A_\alpha - 1$ starts with $\binom\alpha2 q^2(e^{1/\sigma^2} - 1)$, and dividing its logarithm by $\alpha - 1$ gives that slope. Between $\alpha = 8$ and $\alpha = 16$ the curve jumps by more than three orders of magnitude, and beyond that it follows @eq-cdp-sg-lower, which turns positive at $\alpha = 1 + 2\sigma^2\ln(1/q) = 10.21$. A line above the whole curve needs the slope $\rho_0 = 0.5$. A line that only has to clear the curve up to $\alpha = 8$ can have slope $1.1171 \times 10^{-4}$, which is $4476$ times smaller.
+The curve bends, and a line cannot (@fig-cdp-subsampled). For $q = 0.01$ and $\sigma = 1$, the curve up to $\alpha = 8$ is tiny and almost linear, with slope close to $q^2(e^{1/\sigma^2} - 1)/2 = 8.5914 \times 10^{-5}$. That slope comes from an expansion of $(1 + q(r - 1))^\alpha$ in powers of $q$. The linear term averages to 0, so $A_\alpha - 1$ starts with $\binom\alpha2 q^2(e^{1/\sigma^2} - 1)$, and its logarithm divided by $\alpha - 1$ gives the slope. Between $\alpha = 8$ and $\alpha = 16$ the curve jumps by more than three orders of magnitude, and beyond that it follows @eq-cdp-sg-lower, which turns positive at $\alpha = 1 + 2\sigma^2\ln(1/q) = 10.21$. A line above the whole curve needs the slope $\rho_0 = 0.5$, but a line that only has to clear the curve up to $\alpha = 8$ can have slope $1.1171 \times 10^{-4}$, which is $4476$ times smaller.
 
-Only the small orders matter for DP-SGD. After $T$ steps the curve $T\varepsilon(\alpha)$ stays small up to the bend, while the conversion's term $\ln(1/\delta)/(\alpha - 1)$ falls with the order, so Mironov's and the improved conversion both pick an order just below the bend, $\alpha = 4$ on the integer orders of `ORDERS`. The large orders that set the zCDP slope are never used.
+Only the small orders matter for DP-SGD. After $T$ steps the curve $T\varepsilon(\alpha)$ stays small up to the bend, while the conversion's term $\ln(1/\delta)/(\alpha - 1)$ falls with the order. So both conversions pick an order just below the bend, $\alpha = 4$ on the integer orders of `ORDERS`, and the large orders that set the zCDP slope are never used.
 
 ![The RDP curve of one Poisson-subsampled Gaussian step with $q = 0.01$, $\sigma = 1$, on integer orders (black), against the best zCDP line $\rho\alpha$ with $\rho = 1/(2\sigma^2) = 0.5$ (red dashed), which is the unsubsampled Gaussian's line $\alpha/2$, and the tCDP line on orders up to $\omega = 8$ (blue). Both axes are logarithmic.](figures/concentrated_dp_subsampled.svg){#fig-cdp-subsampled}
 
@@ -348,7 +342,7 @@ $$D_\alpha\big(M(D)\,\|\,M(D')\big) \le \rho\alpha$$
 (Bun, Dwork, Rothblum & Steinke 2018, Definition 1). Plain zCDP is the case $\omega = \infty$.
 :::
 
-Composition and conversion work as for zCDP, on the covered orders.
+Composition and conversion work as for zCDP, on the orders below the cut-off.
 
 ::: {#prp-cdp-tcdp name="Composition and conversion of tCDP"}
 A $(\rho_1, \omega_1)$-tCDP step followed by a $(\rho_2, \omega_2)$-tCDP step is $(\rho_1 + \rho_2, \min(\omega_1, \omega_2))$-tCDP (their Lemma 2). A $(\rho, \omega)$-tCDP mechanism is $(\varepsilon, \delta)$-DP with
@@ -362,14 +356,14 @@ $$\varepsilon = \begin{cases}\rho + 2\sqrt{\rho\ln(1/\delta)} & \text{if } \ln(1
 3. *Constrained minimum.* As in @thm-cdp-conversion, the conversion is the convex function $g(\alpha) = \rho\alpha + \ln(1/\delta)/(\alpha - 1)$. If its minimizer $\alpha^* = 1 + \sqrt{\ln(1/\delta)/\rho}$ is at most $\omega$, which is the first condition, it gives @eq-cdp-simple. Otherwise $g$ decreases on all of $(1, \omega]$, since a convex function decreases before its minimizer, and the best order is $\omega$.
 :::
 
-Unlike zCDP, tCDP is amplified by subsampling, provided the cut-off stays below about $\ln(1/q)/\rho$. The theorem uses sampling of a fixed size, not the Poisson sampling of DP-SGD, so it is a guide rather than an accountant here.
+Unlike zCDP, tCDP gains from subsampling, if the cut-off stays below about $\ln(1/q)/\rho$. The theorem uses sampling of a fixed size, not the Poisson sampling of DP-SGD, so here it is a guide and not an accountant.
 
 ::: {#thm-cdp-tcdp-amp name="Subsampling amplifies tCDP"}
 Let $\rho, q \in (0, 0.1]$ with $\ln(1/q) \ge 3\rho(2 + \log_2(1/\rho))$, and let $M$ be $(\rho, \omega')$-tCDP with $\omega' \ge \ln(1/q)/(2\rho) \ge 3$. Running $M$ on a uniformly random subset of a fraction $q$ of the records, of fixed size and without replacement, is $(13q^2\rho, \omega)$-tCDP with $\omega = \ln(1/q)/(4\rho)$ (Bun, Dwork, Rothblum & Steinke 2018, Theorem 11).
 :::
 <!-- proof: cited -->
 
-The proof, in Section 3 of that paper, expands the Rényi sum of the two mixtures in powers of $q$. The second-order term carries the factor $q^2$, and the higher terms can be controlled only up to orders of about $\ln(1/q)/\rho$, which is where the cut-off comes from. Because the theorem covers every tCDP mechanism, its constant 13 is generous: with $\sigma = \sqrt5$ and $q = 0.01$ its $\rho$ is about 11 times what the subsampled curve needs.
+The proof, in Section 3 of that paper, expands the Rényi sum of the two mixtures in powers of $q$. The second-order term carries the factor $q^2$, and the higher terms stay under control only up to orders of about $\ln(1/q)/\rho$, which is where the cut-off comes from. The theorem covers every tCDP mechanism, so its constant 13 is generous for the subsampled Gaussian.
 
 ::: {#exm-cdp-dpsgd}
 @tbl-cdp-sg lists the per-step curve of the running DP-SGD example, $q = 0.01$ and $\sigma = 1$, on integer orders, which is what @eq-cdp-sg computes.
@@ -387,9 +381,9 @@ The proof, in Section 3 of that paper, expands the Rényi sum of the two mixture
 
 : The RDP curve of one DP-SGD step ($q = 0.01$, $\sigma = 1$) on integer orders: its value, its slope from the origin, the lower bound @eq-cdp-sg-lower, and the Gaussian without subsampling. {#tbl-cdp-sg}
 
-The steepest ratio on the integer orders of `ORDERS` is $0.4910$, at $\alpha = 512$, but zCDP needs the line at every order, and the ratio tends to $0.5$. So zCDP must charge $\rho = 0.5$ per step, as without subsampling. After $10{,}000$ steps $\rho = 5000$, and @eq-cdp-simple gives $\varepsilon = 5000 + 2\sqrt{5000 \times 11.5129} = 5479.9$ at $\delta = 10^{-5}$, or $5475.8$ with the improved conversion. RDP accounting on the integer orders of `ORDERS` puts the same run at $\varepsilon = 7.469$ with Mironov's conversion and $6.719$ with the improved one, and fractional orders do slightly better (@tbl-sub-dpsgd).
+The steepest ratio on the integer orders of `ORDERS` is $0.4910$, at $\alpha = 512$, but zCDP needs the line at every order, and the ratio tends to $0.5$. So zCDP must charge $\rho = 0.5$ per step, as without subsampling. After $10{,}000$ steps $\rho = 5000$, and @eq-cdp-simple gives $\varepsilon = 5000 + 2\sqrt{5000 \times 11.5129} = 5479.9$ at $\delta = 10^{-5}$, or $5475.8$ with the improved conversion. RDP accounting on the integer orders of `ORDERS` puts the same run at $7.469$ with Mironov's conversion and $6.719$ with the improved one (@tbl-sub-dpsgd).
 
-@tbl-cdp-tcdp takes the per-step slope on integer orders up to $\omega$, composes $10{,}000$ steps by adding the slopes, and converts with @eq-cdp-tcdp-conv.
+@tbl-cdp-tcdp takes the per-step slope on integer orders up to $\omega$, adds it over $10{,}000$ steps, and converts with @eq-cdp-tcdp-conv.
 
 | $\omega$ | $\rho$ per step | $\rho$ after $10^4$ steps | $\varepsilon$ at $10^{-5}$ |
 | --- | --- | --- | --- |
@@ -404,7 +398,7 @@ The steepest ratio on the integer orders of `ORDERS` is $0.4910$, at $\alpha = 5
 
 : tCDP accounting of the running example, $q = 0.01$, $\sigma = 1$, $T = 10{,}000$, $\delta = 10^{-5}$, for several truncation points $\omega$. Slopes are taken on integer orders up to $\omega$. {#tbl-cdp-tcdp}
 
-The best integer choice, $\omega = 4$, reproduces RDP with Mironov's conversion, $7.469$. There $\ln(1/\delta) = 11.51$ exceeds $(\omega - 1)^2\rho = 9 \times 0.9079 = 8.17$, so the second branch of @eq-cdp-tcdp-conv applies; the first would give $7.374$ but needs the order $4.561$, beyond $\omega$. A smaller $\omega$ forbids the orders the conversion needs, and once $\omega$ passes the bend near $\alpha = 10$, tCDP collapses towards zCDP.
+The best integer choice, $\omega = 4$, gives the same $7.469$ as RDP with Mironov's conversion. There $\ln(1/\delta) = 11.51$ exceeds $(\omega - 1)^2\rho = 9 \times 0.9079 = 8.17$, so the second branch of @eq-cdp-tcdp-conv applies. The first branch would give $7.374$, but it needs the order $4.561$, beyond $\omega$. A smaller $\omega$ forbids the orders that the conversion needs, and once $\omega$ passes the bend near $\alpha = 10$, tCDP collapses towards zCDP.
 :::
 
 ## Code {#sec-cdp-code}
@@ -452,8 +446,7 @@ uv run python code/part04-privacy-accounting/concentrated_dp.py
 
 ## References {#sec-cdp-references}
 
-- Bun & Steinke, "Concentrated Differential Privacy: Simplifications, Extensions, and Lower Bounds" (TCC 2016; arXiv:1605.02065). The source for this chapter: the definition (1.1), the Gaussian (1.6), pure DP to zCDP (1.4, proved as 3.3), conversion (1.3, 3.5, 3.6), group privacy (1.9, 5.3), approximate zCDP (1.12, Section 8), and the lower bounds. Read Sections 1–3 first.
-- Dwork & Rothblum, "Concentrated Differential Privacy" (2016, arXiv:1603.01887). The original two-parameter definition and its motivation from advanced composition.
+- Bun & Steinke, "Concentrated Differential Privacy: Simplifications, Extensions, and Lower Bounds" (TCC 2016; arXiv:1605.02065). The source for this chapter: the definition (1.1), the Gaussian (1.6), pure DP to zCDP (1.4, proved as 3.3), conversion (1.3, 3.5, 3.6), group privacy (1.9, 5.3), approximate zCDP (1.12, Section 8), and the lower bounds.
 - Bun, Dwork, Rothblum & Steinke, "Composable and Versatile Privacy via Truncated CDP" (STOC 2018). Truncated CDP: definition, composition, conversion (Lemma 6), amplification by subsampling (Theorem 11) and the sinh-normal mechanism.
 - Canonne, Kamath & Steinke, "The Discrete Gaussian for Differential Privacy" (NeurIPS 2020). The discrete Gaussian and its zCDP guarantee, and the improved conversion from RDP and zCDP to $(\varepsilon, \delta)$ (Proposition 12, Corollary 13), with a numerically stable way to compute it.
 - Cesar & Rogers, "Bounding, Concentrating, and Truncating: Unifying Privacy Loss Composition for Data Analytics" (Algorithmic Learning Theory 2021). Composition of pure DP, bounded-range (exponential mechanism) and CDP steps in one analysis, including the $\varepsilon^2/8$ bound for bounded-range mechanisms.
