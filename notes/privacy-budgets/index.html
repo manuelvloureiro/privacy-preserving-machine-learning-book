@@ -845,11 +845,11 @@ Table&nbsp;5: The four definitions side by side in formulas: each row answers on
 <td style="text-align: left;"><span class="math inline">\(\mathbb E_P[e^{\lambda L}] \le e^{\lambda(\lambda + 1)\rho}\)</span> for every <span class="math inline">\(\lambda &gt; 0\)</span> (<a href="#lem-renyi-loss" class="quarto-xref">Lemma&nbsp;1</a>)</td>
 </tr>
 <tr class="odd">
-<td style="text-align: left;">Laplace mechanism, scale <span class="math inline">\(b\)</span></td>
-<td style="text-align: left;"><span class="math inline">\(\varepsilon = \Delta_1 f/b\)</span> (<a href="#thm-laplace" class="quarto-xref">Theorem&nbsp;1</a>)</td>
-<td style="text-align: left;"><span class="math inline">\((\Delta_1 f/b,\ 0)\)</span></td>
-<td style="text-align: left;"><span class="math inline">\((\varepsilon\tanh(\varepsilon/2),\ \varepsilon)\)</span> with <span class="math inline">\(\varepsilon = \Delta_1 f/b\)</span> (<a href="#prp-cdp-pure" class="quarto-xref">Proposition&nbsp;4</a>)</td>
-<td style="text-align: left;"><span class="math inline">\(\rho = \varepsilon^2/2\)</span> with <span class="math inline">\(\varepsilon = \Delta_1 f/b\)</span> (<a href="#prp-zcdp-pure" class="quarto-xref">Proposition&nbsp;6</a>)</td>
+<td style="text-align: left;">Laplace mechanism, scale <span class="math inline">\(b\)</span>, with <span class="math inline">\(\varepsilon = \Delta_1 f/b\)</span></td>
+<td style="text-align: left;"><span class="math inline">\(\varepsilon\)</span>-DP (<a href="#thm-laplace" class="quarto-xref">Theorem&nbsp;1</a>)</td>
+<td style="text-align: left;"><span class="math inline">\((\varepsilon,\ 0)\)</span></td>
+<td style="text-align: left;"><span class="math inline">\((\varepsilon\tanh(\varepsilon/2),\ \varepsilon)\)</span> (<a href="#prp-cdp-pure" class="quarto-xref">Proposition&nbsp;4</a>)</td>
+<td style="text-align: left;"><span class="math inline">\(\rho = \varepsilon^2/2\)</span> (<a href="#prp-zcdp-pure" class="quarto-xref">Proposition&nbsp;6</a>)</td>
 </tr>
 <tr class="even">
 <td style="text-align: left;">Gaussian mechanism, <span class="math inline">\(s = \Delta_2 f/\sigma\)</span></td>
@@ -861,28 +861,35 @@ Table&nbsp;5: The four definitions side by side in formulas: each row answers on
 <tr class="odd">
 <td style="text-align: left;">Composition of steps <span class="math inline">\(i = 1, \dots, k\)</span></td>
 <td style="text-align: left;"><span class="math inline">\(\varepsilon = \sum_i \varepsilon_i\)</span> (<a href="#thm-pure-comp" class="quarto-xref">Theorem&nbsp;2</a>)</td>
-<td style="text-align: left;">basic: <span class="math inline">\((\sum_i \varepsilon_i,\ \sum_i \delta_i)\)</span> (<a href="#thm-basic-comp" class="quarto-xref">Theorem&nbsp;4</a>); advanced: <a href="#thm-adv-comp" class="quarto-xref">Theorem&nbsp;5</a></td>
+<td style="text-align: left;">basic: <span class="math inline">\(\varepsilon = \sum_i \varepsilon_i\)</span>, <span class="math inline">\(\delta = \sum_i \delta_i\)</span> (<a href="#thm-basic-comp" class="quarto-xref">Theorem&nbsp;4</a>); advanced: <a href="#thm-adv-comp" class="quarto-xref">Theorem&nbsp;5</a></td>
 <td style="text-align: left;"><span class="math inline">\(\mu = \sum_i \mu_i\)</span>, <span class="math inline">\(\tau^2 = \sum_i \tau_i^2\)</span> (<a href="#thm-cdp-comp" class="quarto-xref">Theorem&nbsp;6</a>)</td>
 <td style="text-align: left;"><span class="math inline">\(\rho = \sum_i \rho_i\)</span> (<a href="#thm-zcdp-comp" class="quarto-xref">Theorem&nbsp;8</a>)</td>
 </tr>
 <tr class="even">
+<td style="text-align: left;"><span class="math inline">\(k\)</span> equal steps, as <span class="math inline">\((\varepsilon, \delta)\)</span></td>
+<td style="text-align: left;"><span class="math inline">\((k\varepsilon_0,\ 0)\)</span></td>
+<td style="text-align: left;">basic: <span class="math inline">\((k\varepsilon_0,\ k\delta_0)\)</span> (<a href="#tbl-approx-comp" class="quarto-xref">Table&nbsp;3</a>)</td>
+<td style="text-align: left;"><span class="math inline">\((k\mu_0 + \sqrt k\,\tau_0\sqrt{2\ln(1/\delta)},\ \delta)\)</span> (<a href="#eq-cdp-k" class="quarto-xref">Equation&nbsp;13</a>)</td>
+<td style="text-align: left;"><span class="math inline">\((k\rho_0 + 2\sqrt{k\rho_0\ln(1/\delta)},\ \delta)\)</span> (<a href="#eq-zcdp-k" class="quarto-xref">Equation&nbsp;22</a>)</td>
+</tr>
+<tr class="odd">
 <td style="text-align: left;">Conversion to <span class="math inline">\((\varepsilon, \delta)\)</span>-DP</td>
 <td style="text-align: left;"><span class="math inline">\((\varepsilon, 0)\)</span></td>
 <td style="text-align: left;">none needed</td>
 <td style="text-align: left;"><span class="math inline">\(\varepsilon = \mu + \tau\sqrt{2\ln(1/\delta)}\)</span> (<a href="#thm-cdp-conv" class="quarto-xref">Theorem&nbsp;7</a>)</td>
 <td style="text-align: left;"><span class="math inline">\(\varepsilon = \rho + 2\sqrt{\rho\ln(1/\delta)}\)</span> (<a href="#thm-zcdp-conv" class="quarto-xref">Theorem&nbsp;10</a>)</td>
 </tr>
-<tr class="odd">
+<tr class="even">
 <td style="text-align: left;">Budget of one of <span class="math inline">\(k\)</span> equal counts, for a total <span class="math inline">\((\varepsilon, \delta)\)</span></td>
 <td style="text-align: left;"><span class="math inline">\(\varepsilon_0 = \varepsilon/k\)</span></td>
-<td style="text-align: left;">basic: <span class="math inline">\((\varepsilon/k,\ \delta/k)\)</span></td>
+<td style="text-align: left;">basic: <span class="math inline">\(\varepsilon_0 = \varepsilon/k\)</span>, <span class="math inline">\(\delta_0 = \delta/k\)</span></td>
 <td style="text-align: left;">Gaussian: <span class="math inline">\(\tau_0 = \big(\sqrt{2\ln(1/\delta) + 2\varepsilon} - \sqrt{2\ln(1/\delta)}\big)/\sqrt k\)</span>, <span class="math inline">\(\mu_0 = \tau_0^2/2\)</span></td>
 <td style="text-align: left;"><span class="math inline">\(\rho_0 = \big(\sqrt{\ln(1/\delta) + \varepsilon} - \sqrt{\ln(1/\delta)}\big)^2/k\)</span> (<a href="#eq-rho-budget" class="quarto-xref">Equation&nbsp;23</a>)</td>
 </tr>
-<tr class="even">
+<tr class="odd">
 <td style="text-align: left;">Noise on one count (<span class="math inline">\(\Delta = 1\)</span>)</td>
 <td style="text-align: left;">Laplace, <span class="math inline">\(b = 1/\varepsilon_0\)</span></td>
-<td style="text-align: left;">Gaussian, <span class="math inline">\(\sigma = 1/s_0\)</span>, with <span class="math inline">\(s_0\)</span> the largest ratio that meets <span class="math inline">\((\varepsilon/k, \delta/k)\)</span></td>
+<td style="text-align: left;">Gaussian, <span class="math inline">\(\sigma = 1/s_0\)</span>, with <span class="math inline">\(s_0\)</span> the largest ratio that meets <span class="math inline">\((\varepsilon_0, \delta_0)\)</span></td>
 <td style="text-align: left;">Gaussian, <span class="math inline">\(\sigma = 1/\tau_0\)</span></td>
 <td style="text-align: left;">Gaussian, <span class="math inline">\(\sigma = 1/\sqrt{2\rho_0}\)</span>; Laplace, <span class="math inline">\(b = 1/\sqrt{2\rho_0}\)</span></td>
 </tr>
