@@ -1,18 +1,18 @@
 # Sparse Vector
 
-Queries often arrive one at a time, and each must be answered before the next is seen. Under differential privacy (DP), answering each of them with its own noise makes the error grow polynomially with the number of queries. Often the analyst only needs to know which queries exceed a threshold, and few of them do. This chapter shows that the cost then depends on the number of large queries and only logarithmically on the total. The tool is the sparse vector technique. Its privacy proof is short but delicate, because it rests on adding noise to the threshold as well as to the queries. At the end, the technique turns private multiplicative weights into an algorithm that answers queries as they arrive.
+Queries often arrive one at a time, and each must be answered before the next is seen. Under differential privacy (DP), answering each of them with its own noise makes the error grow polynomially with the number of queries. But often the analyst only needs to know which queries exceed a threshold, and few of them do. This chapter shows, with the sparse vector technique, that the cost then depends on the number of large queries and only logarithmically on the total. Its privacy proof rests on noise on the threshold as well as on the queries. At the end, the technique turns private multiplicative weights into an algorithm that answers queries as they arrive.
 
 ## Answering queries online {#sec-svt-online}
 
-The setting is a stream of queries $f_1, f_2, \dots, f_k \colon \mathcal X^n \to \mathbb R$, each with sensitivity at most $1$. Here two datasets $D$ and $D'$ are neighbours, written $D \sim D'$, when they differ in one record, which is the replace-one relation. Sensitivity at most $1$ means that $|f_i(D) - f_i(D')| \le 1$ for every such pair. Counting queries, which count the records with some property, are the typical example. Query $f_i$ arrives at step $i$ and must be answered before $f_{i+1}$ is revealed.
+The setting is a stream of queries $f_1, f_2, \dots, f_k \colon \mathcal X^n \to \mathbb R$, each with sensitivity at most $1$. Two datasets $D$ and $D'$ are neighbours, written $D \sim D'$, when they differ by the replacement of one record. Sensitivity at most $1$ means that $|f_i(D) - f_i(D')| \le 1$ for every such pair. Counting queries, which count the records with some property, are the typical example. Query $f_i$ arrives at step $i$ and must be answered before $f_{i+1}$ is revealed.
 
-The [Laplace mechanism](../part02-dp-basics/02-laplace-mechanism.md) answers each query with noise from the Laplace distribution $\mathrm{Lap}(b)$ of scale $b$, whose density at $z$ is $e^{-|z|/b}/(2b)$. For a sensitivity-$1$ query it is $\varepsilon$-DP when $b = 1/\varepsilon$. Its tails are $\Pr[|\mathrm{Lap}(b)| \ge tb] = e^{-t}$. Under pure DP with a total budget $\varepsilon$, basic composition forces the scale $k/\varepsilon$ on each of $k$ answers, so the error is of order $k/\varepsilon$. Under approximate DP, the [advanced composition theorem](../part02-dp-basics/04-advanced-composition.md) brings this down to order $\sqrt{k\ln(1/\delta)}/\varepsilon$. Both are polynomial in $k$, and in the worst case no algorithm that answers every query can do much better.
+The [Laplace mechanism](../part02-dp-basics/02-laplace-mechanism.md) answers each query with noise from the Laplace distribution $\mathrm{Lap}(b)$ of scale $b$, whose density at $z$ is $e^{-|z|/b}/(2b)$. For a sensitivity-$1$ query it is $\varepsilon$-DP when $b = 1/\varepsilon$, and its tails are $\Pr[|\mathrm{Lap}(b)| \ge tb] = e^{-t}$. Under pure DP with a total budget $\varepsilon$, basic composition forces the scale $k/\varepsilon$ on each of $k$ answers, so the error is of order $k/\varepsilon$. Under approximate DP, the [advanced composition theorem](../part02-dp-basics/04-advanced-composition.md) brings this down to order $\sqrt{k\ln(1/\delta)}/\varepsilon$. Both are polynomial in $k$, and in the worst case no algorithm that answers every query can do much better.
 
 A weaker question has a cheaper answer: which queries are large? If all $k$ queries were known in advance, the [exponential mechanism](../part02-dp-basics/05-exponential-mechanism.md) with score $f_i(D)$ would pick a query whose value is within $2(\ln k + t)/\varepsilon$ of the largest, except with probability $e^{-t}$. Repeating it $c$ times with budget $\varepsilon/c$ each finds $c$ large queries with error of order $c\ln k/\varepsilon$, or $\sqrt{c\ln(1/\delta)}\ln k/\varepsilon$ with advanced composition. That is logarithmic in $k$, but it needs the whole list. Online, the first query cannot be compared with queries not yet seen, so the question becomes absolute.
 
 > Given a public threshold $\tau$, report the first $c$ queries in the stream with $f_i(D) \ge \tau$, and stop.
 
-The idea is to run the Laplace mechanism on each query and report only whether the noisy value exceeds the threshold. The essential detail is to compare it with a noisy threshold $\hat\tau$, not with $\tau$. Getting the details exactly right is notoriously hard, and several published variants are not private.
+The idea is to run the Laplace mechanism on each query and report only whether the noisy value exceeds a noisy threshold $\hat\tau$, not $\tau$ itself. The details matter, because several published variants are not private.
 
 ## AboveThreshold {#sec-svt-above}
 
@@ -29,7 +29,7 @@ All noise draws are independent.
 
 Nothing in the algorithm depends on the number of queries, so the stream may even be infinite, and the privacy guarantee does not change. The accuracy guarantee does, because more noise draws mean a larger largest one.
 
-The queries may be fixed in advance or chosen by an analyst who sees the earlier answers. Before the algorithm halts every answer is $\bot$, so in the second case each query is still a fixed function of the analyst's own coins, which do not depend on the dataset. The proof below applies to the stream fixed by each value of those coins, and averaging the inequality over the coins keeps it.
+The queries can be fixed in advance, or an analyst who sees the earlier answers can choose them. Before the algorithm halts every answer is $\bot$, so in the second case each query is still a fixed function of the analyst's own coins, which do not depend on the dataset. The proof below applies to the stream fixed by each value of those coins, and averaging the inequality over the coins keeps it.
 
 ::: {#thm-svt-above-privacy}
 AboveThreshold is $\varepsilon$-DP.
@@ -80,7 +80,7 @@ a_i = \top \implies f_i(D) \ge \tau - \alpha \qquad\text{and}\qquad a_i = \bot \
 $$
 :::
 
-In words, a $\top$ is never given to a query clearly below the threshold, and a $\bot$ is never given to a query clearly above it. AboveThreshold meets this definition with a slack $\alpha$ that grows only with the logarithm of the number of queries. The theorem also asks that every query before the last be clearly below the threshold, so that the algorithm does not halt early.
+In words, no query more than $\alpha$ below the threshold gets a $\top$, and no query more than $\alpha$ above it gets a $\bot$. AboveThreshold meets this definition with a slack $\alpha$ that grows only with the logarithm of the number of queries. The theorem also asks that every query before the last be at least $\alpha$ below the threshold, so that the algorithm does not halt early.
 
 ::: {#thm-svt-above-accuracy name="Accuracy of AboveThreshold"}
 Let $\beta \in (0,1)$, and let $f_1, \dots, f_k$ be a stream with $f_i(D) \le \tau - \alpha$ for every $i < k$, where
@@ -100,7 +100,7 @@ Then AboveThreshold is $(\alpha,\beta)$-accurate on $D$, and with probability at
 5. With @eq-svt-above-alpha, $ke^{-\varepsilon\alpha/8} = k\cdot\frac{1}{k}\cdot\frac{\beta}{2} = \beta/2$. Also $e^{-\varepsilon\alpha/4} = (\beta/(2k))^2 \le \beta/2$. So $\Pr[G] \ge 1-\beta$.
 :::
 
-The error grows only logarithmically in $k$, like the exponential mechanism's, but the queries can arrive online. A stream of a million queries shows how large the gain is.
+The error grows only logarithmically in $k$, like that of the exponential mechanism, but the queries can arrive online.
 
 ::: {#exm-svt-numbers}
 Take $k = 10^6$ counting queries, $\varepsilon = 1$ and $\beta = 0.05$. Then @eq-svt-above-alpha gives $\alpha = 8(\ln 10^6 + \ln 40) = 8(13.82 + 3.69) = 140.0$. On a dataset of $n = 10^5$ records, a query is placed correctly unless its count lies within $140$ of the threshold. Answering every query with the Laplace mechanism and basic composition would instead add noise of scale $10^6$, ten times the size of the dataset.
@@ -157,11 +157,11 @@ $$ {#eq-svt-sparse-alpha}
 5. Substituting the two values of $b$ into $4b\ln(2k/\beta)$ gives @eq-svt-sparse-alpha, because $4\sqrt{32} = \sqrt{512}$.
 :::
 
-With $c = 1$ and $\delta = 0$ this is @thm-svt-above-accuracy again. The error is polynomial in the number $c$ of large queries, which every algorithm must pay in some form, and logarithmic in the total number $k$. So sparse vector can scan a very long stream, as long as few of its queries are large.
+With $c = 1$ and $\delta = 0$ this is @thm-svt-above-accuracy again. The error is polynomial in the number $c$ of large queries and logarithmic in the total number $k$. So sparse vector can scan a very long stream, as long as few of its queries are large.
 
 ## Numeric sparse vector {#sec-svt-numeric}
 
-Sparse vector already pays in proportion to the number $c$ of large queries. Releasing a noisy value for each of those $c$ queries takes $c$ more Laplace mechanisms, which costs the same order of budget. So sparse vector can also release the values of the large queries, at the cost of a constant factor.
+Sparse vector already pays in proportion to the number $c$ of large queries. A noisy value for each of those $c$ queries takes $c$ more Laplace mechanisms, which cost the same order of budget. So sparse vector can also release the values of the large queries for a constant factor.
 
 ::: {#def-svt-numeric name="Numeric sparse vector"}
 Run sparse vector with $\delta = 0$ and budget $\varepsilon/2$, so $b = 4c/\varepsilon$. Whenever it would output $\top$ for query $f_i$, output instead $a_i = f_i(D) + \mathrm{Lap}(2c/\varepsilon)$, with fresh noise.
@@ -189,13 +189,11 @@ The fresh noise in the released value matters. Releasing $f_i(D) + \nu_i$, the v
 
 ## Online private multiplicative weights {#sec-svt-online-pmw}
 
-The [previous chapter](01-multiplicative-weights.md) built private multiplicative weights for a fixed set of linear queries $q \colon \mathcal X \to [0,1]$, with $q(D) = \frac1n\sum_i q(x_i)$. Its key steps were the following. For a distribution $p$ on $\mathcal X$, write $\langle q, p\rangle = \sum_x q(x)p(x)$ for the average of $q$ under $p$. The histogram $p_D$ of the dataset, the fraction of records equal to each $x$, satisfies $q(D) = \langle q, p_D\rangle$. Multiplicative weights over the experts $\mathcal X$ with learning rate $\eta$ and losses $s_tq^t$, where $s_t$ is the sign of the error $\langle q^t, p^t\rangle - q^t(D)$, has total error at most $\eta U + \ln|\mathcal X|/\eta$ after $U$ updates. And the offline algorithm used the exponential mechanism to find a query with a large error.
+The [previous chapter](01-multiplicative-weights.md) built private multiplicative weights for a fixed set of linear queries $q \colon \mathcal X \to [0,1]$, with $q(D) = \frac1n\sum_i q(x_i)$. This section uses four of its facts. For a distribution $p$ on $\mathcal X$, write $\langle q, p\rangle = \sum_x q(x)p(x)$ for the average of $q$ under $p$. The histogram $p_D$ of the dataset, the fraction of records equal to each $x$, satisfies $q(D) = \langle q, p_D\rangle$. Multiplicative weights over the experts $\mathcal X$ with learning rate $\eta$ and losses $s_tq^t$, where $s_t$ is the sign of the error $\langle q^t, p^t\rangle - q^t(D)$, has total error at most $\eta U + \ln|\mathcal X|/\eta$ after $U$ updates. And the offline algorithm used the exponential mechanism to find a query with a large error.
 
-Online, the queries arrive one at a time, and the exponential mechanism cannot be used. Sparse vector replaces it. The algorithm keeps a distribution $\hat p$ and answers each query from it while it is accurate. When sparse vector reports a large error, the algorithm answers with a noisy true value and updates $\hat p$.
+Online, the exponential mechanism cannot be used, because the queries arrive one at a time, so sparse vector replaces it. The algorithm keeps a distribution $\hat p$ and answers each query from it while it is accurate. When sparse vector reports a large error, the algorithm answers with a noisy true value and updates $\hat p$.
 
-These queries have sensitivity $1/n$, not $1$. Running sparse vector on $f_i/\Delta$ with threshold $\tau/\Delta$ handles sensitivity $\Delta$: it is the same algorithm with every noise scale multiplied by $\Delta$, so it has the same privacy and $\Delta$ times the accuracy $\alpha$.
-
-The algorithm runs this rescaled sparse vector on the errors of $\hat p$, with threshold $\alpha/2$. Its count $c$ of large errors is set to the bound on the number of updates from the previous chapter, and $\varepsilon_0$ is the budget of each of the $2c$ mechanisms it may run.
+These queries have sensitivity $1/n$, not $1$. Sparse vector on $f_i/\Delta$ with threshold $\tau/\Delta$ handles sensitivity $\Delta$. It is the same algorithm with every noise scale multiplied by $\Delta$, so it has the same privacy and $\Delta$ times the accuracy $\alpha$. The algorithm runs this rescaled sparse vector on the errors of $\hat p$, with threshold $\alpha/2$. Its count $c$ of large errors is set to the bound on the number of updates from the previous chapter, and $\varepsilon_0$ is the budget of each of the $2c$ mechanisms it may run.
 
 ::: {#def-svt-online-pmw name="Online private multiplicative weights"}
 The inputs are a dataset $D\in\mathcal X^n$, a stream of linear queries $f_1, f_2, \dots$, an accuracy $\alpha \in (0,1]$, and $\varepsilon \in (0,1]$ and $\delta\in(0,1/2]$. Set
@@ -254,7 +252,7 @@ $$
 n = O\!\left(\frac{\sqrt{\ln|\mathcal X|\,\ln(1/\delta)}\;\ln\frac{k + \ln|\mathcal X|/\alpha^2}{\beta}}{\alpha^2\varepsilon}\right)
 $$
 
-records. This matches the offline algorithm, with the length $k$ of the stream in place of the number $|\mathcal Q|$ of queries. Sparse vector thus turns an algorithm that searches with the exponential mechanism into one that answers queries as they arrive.
+records. This matches the offline algorithm, with the length $k$ of the stream in place of the number $|\mathcal Q|$ of queries.
 
 ## Summary {#sec-svt-summary}
 
@@ -274,5 +272,5 @@ records. This matches the offline algorithm, with the length $k$ of the stream i
 
 - Cynthia Dwork, Moni Naor, Omer Reingold, Guy N. Rothblum and Salil Vadhan, "On the Complexity of Differentially Private Data Release: Efficient Algorithms and Hardness Results", 2009. The first use of the sparse vector idea.
 - Aaron Roth and Tim Roughgarden, "Interactive Privacy via the Median Mechanism", 2010, and Moritz Hardt and Guy N. Rothblum, "A Multiplicative Weights Mechanism for Privacy-Preserving Data Analysis", 2010. Online query answering with sparse vector, including online private multiplicative weights.
-- Cynthia Dwork and Aaron Roth, *The Algorithmic Foundations of Differential Privacy*, 2014. Section 3.6 presents AboveThreshold, sparse vector and its numeric variant in the form used here, and Section 4.2 the online multiplicative weights mechanism.
+- Cynthia Dwork and Aaron Roth, *The Algorithmic Foundations of Differential Privacy*, 2014. AboveThreshold, sparse vector and its numeric variant in the form used here (Section 3.6), and the online multiplicative weights mechanism (Section 4.2).
 - Min Lyu, Dong Su and Ninghui Li, "Understanding the Sparse Vector Technique for Differential Privacy", 2017. A survey of published variants, several of them not private, including those that reuse the threshold or release the compared noisy values.

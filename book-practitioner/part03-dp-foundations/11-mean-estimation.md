@@ -2,24 +2,24 @@
 
 ## Why this matters
 
-The mean is the statistic that private machine learning computes most often. Each step of private stochastic gradient descent averages clipped per-example gradients, and even a survey share is a mean of 0/1 answers. The planning questions are how many records a private estimate needs, and how to choose a clipping range without looking at the data.
+Private machine learning computes the mean more often than any other statistic. Each step of private gradient descent averages clipped per-example gradients, and a survey share is a mean of 0/1 answers. Before you release a mean, you must know how many records it needs, and how to choose a clipping range without a look at the data.
 
-Differential privacy (DP) must hold for every dataset, including datasets your assumptions say cannot happen ([The definition of differential privacy](01-definition.md)). So an assumption such as "the records are normal" may make a mechanism more accurate, but it must never enter the privacy argument. Every mechanism below therefore clips each record to a range, which caps one record's influence whatever the data are. Its noise grows with the width of that range, and a narrow range must not be read off the data. So spend a small part of the budget finding where the data are, then clip there and spend the rest on the mean.
+Differential privacy (DP) must hold for every dataset, also for datasets that your assumptions exclude ([The definition of differential privacy](01-definition.md)). So an assumption such as "the records are normal" can make a mechanism more accurate, but never enters the privacy argument. For this reason, every mechanism below clips each record to a range. The noise grows with the width of that range, and you must not read a narrow range off the data. So spend a small part of the budget to find where the data are, then clip there.
 
 ## Bounded data: privacy adds a lower-order term {#sec-mean-bounded}
 
-Throughout the chapter, datasets have a fixed size $n$, and neighbours differ in one replaced record. An estimate is judged by its **root-mean-square error** (RMSE), the typical distance between the estimate and the mean of the population the records came from.
+In this chapter, datasets have a fixed size $n$, and neighbours differ in one replaced record. The measure of an estimate is its **root-mean-square error** (RMSE), the typical distance from the estimate to the mean of the population.
 
 Start with records in a known interval of width $w$, such as yes/no answers coded 0 and 1, and write $\sigma^2$ for the variance of a record. Release the average plus Laplace noise with scale $w/(n\varepsilon)$, which is $\varepsilon$-DP because one record moves the average by at most $w/n$ ([The Laplace and Gaussian mechanisms](03-laplace-gaussian.md)). Laplace noise has variance twice its scale squared, and it is independent of the sampling error, so the two variances add:
 $$\mathrm{RMSE} = \sqrt{\frac{\sigma^2}{n} + \frac{2w^2}{n^2\varepsilon^2}}.$$
-To plan a study, set the RMSE equal to a target error $\alpha$ and solve for $n$, as the snippet in the Code section does. The number of records needed is at most
+To plan a study, set the RMSE equal to a target error $\alpha$ and solve for $n$, as the snippet in the Code section does. The number of records that you need is at most
 $$\frac{\sigma^2}{\alpha^2} + \frac{\sqrt2\,w}{\alpha\varepsilon}.$$
 
-So sampling needs about $\sigma^2/\alpha^2$ records whatever you do, and privacy adds at most about $w/(\alpha\varepsilon)$ more. For a yes/no survey of a population that is half yes, the worst case for sampling, an RMSE of 0.05 needs 100 people. Privacy at $\varepsilon = 1$ raises that to 108. The privacy term grows only like $1/\alpha$, against $1/\alpha^2$ for sampling, so it matters most at a coarse target and a small $\varepsilon$. It also grows with the width $w$, so the rest of the chapter is about narrowing the range.
+So sampling alone needs about $\sigma^2/\alpha^2$ records, and privacy adds at most about $w/(\alpha\varepsilon)$ more. Take a yes/no survey of a population that is half yes, the worst case for sampling. An RMSE of 0.05 then needs 100 people, and privacy at $\varepsilon = 1$ raises that to 108. The privacy term grows only like $1/\alpha$, against $1/\alpha^2$ for sampling, so it matters most at a coarse target and a small $\varepsilon$. It also grows with the width $w$, and the rest of the chapter makes the range narrower.
 
-Libraries make you state the range. In diffprivlib, `tools.mean(x, epsilon=..., bounds=(lower, upper))` clips to the bounds and adds noise. Without `bounds`, it computes them from the observed minimum and maximum, which leaks them, and raises a `PrivacyLeakWarning`. OpenDP likewise needs clamping bounds, its word for clipping bounds ([Release statistics with a library](12-release-statistics.md)).
+Libraries ask you for the range. In diffprivlib, `tools.mean(x, epsilon=..., bounds=(lower, upper))` clips to the bounds and adds noise. Without `bounds`, it takes the observed minimum and maximum, which leaks them, and raises a `PrivacyLeakWarning`.
 
-Bounds that are too tight fail in another way, because they clip real records. The script [practitioner_adult_statistics.py](../../code/part03-dp-foundations/practitioner_adult_statistics.py) releases the mean hours worked per week by the 48,842 people of the Adult census data at $\varepsilon = 1$, once with loose bounds and once with tight ones.
+Bounds that are too tight cause a different problem, because they clip real records. The script [practitioner_adult_statistics.py](../../code/part03-dp-foundations/practitioner_adult_statistics.py) releases the mean weekly hours of work of the 48,842 people in the Adult census data at $\varepsilon = 1$, with loose and with tight bounds.
 
 ```{.python excerpt="adult-mean-bounds"}
 hours = adult["hours-per-week"].to_numpy()
@@ -31,7 +31,7 @@ print(f"bounds (1, 99): {loose:.3f}  bounds (20, 60): {tight:.3f}")
 print(f"bias of (20, 60): {clipped - hours.mean():+.3f}")
 ```
 
-Its seed-0 run, `uv run python code/part03-dp-foundations/practitioner_adult_statistics.py`, prints these lines, the last two from code next to the excerpt.
+Its seed-0 run, `uv run python code/part03-dp-foundations/practitioner_adult_statistics.py`, prints these lines. The last two come from code next to the excerpt.
 
 ```text
 true mean hours: 40.422
@@ -41,37 +41,39 @@ people outside (20, 60): 8.7%
 noise scale (1, 99): 0.0020  (20, 60): 0.0008
 ```
 
-The tight bounds shrink the noise scale from 0.0020 to 0.0008 hours. But they clip the 8.7% of people outside them, which moves the mean by 0.061 hours, far more than the noise they save. No budget removes that bias, so report the error in three parts: sampling, clipping bias and noise. Choose the bounds from the schema or public data, and check the share they clip on data you may look at.
+The tight bounds decrease the noise scale from 0.0020 to 0.0008 hours. But they clip the 8.7% of people outside them, and this moves the mean by 0.061 hours, much more than the noise they save. No budget removes that bias, so report the error in three parts, which are sampling, clipping bias and noise. Choose the bounds from the schema or public data, and measure the share that they clip on data that you may look at.
 
-The formulas also treat $n$ as public, which holds only because neighbours replace a record. If the size is itself private, divide a noisy sum by a noisy count, with the budget split between the two.
+The formulas also treat $n$ as public, which is true only because neighbours replace a record. If the size is private, divide a noisy sum by a noisy count, and split the budget between the two.
 
 ## The cost of an unknown range {#sec-mean-coarse}
 
-Now let the records be normal with variance 1, and suppose you know only that their mean lies within some distance $R$ of zero. Normal records rarely stray far from their mean, so write $\tau$ for a distance from the mean that holds them all, except with a small failure probability $\beta$. For 1,000 records at $\beta = 0.05$, it is 4.604.
+Now let the records be normal with variance 1, with a mean that you know only to be within a distance $R$ of zero. Write $\tau$ for a distance from the mean that holds all the records, except with a small failure probability $\beta$. For 1,000 records at $\beta = 0.05$, $\tau$ is 4.604.
 
-The **naive estimator** clips every record to the widest place the data could be, $R + \tau$ on either side of zero, and adds Laplace noise for that width. So its error grows in step with $R$. With 1,000 records at $\varepsilon = 1$, its RMSE reaches 2828.44 when $R$ is a million. Yet [Lower bounds](10-lower-bounds.md) shows that an unknown range need cost only about $\ln R/\varepsilon$ extra records.
+The **naive estimator** clips every record to the widest range where the data can be, $R + \tau$ on each side of zero. It then adds Laplace noise for that width, so its error grows in proportion to $R$. With 1,000 records at $\varepsilon = 1$, its RMSE is 2828.44 when $R$ is a million. But [Lower bounds](10-lower-bounds.md) shows that an unknown range needs only about $\ln R/\varepsilon$ more records.
 
-**Coarse then fine** (Karwa & Vadhan 2018) comes close to that floor in two steps. The coarse step cuts the range into bins of width $2\tau$ and picks the fullest bin with the [exponential mechanism](05-selection.md), spending a part $\varepsilon_1$ of the budget. The records it needs grow only with the logarithm of the number of bins. The fine step clips every record to the chosen bin and its two neighbours, since the data can straddle two bins. It releases their average with Laplace noise for that window. It spends the rest of the budget, so by [composition](02-properties.md) the two steps together are $\varepsilon$-DP.
+**Coarse then fine** (Karwa & Vadhan 2018) comes close to that floor in two steps. The coarse step cuts the range into bins of width $2\tau$. It then uses a part $\varepsilon_1$ of the budget to pick the fullest bin with the [exponential mechanism](05-selection.md). The records it needs grow only with the logarithm of the number of bins. The data can be across two bins, so the fine step clips every record to the chosen bin and its two neighbours. It releases the average with Laplace noise for that window and the rest of the budget, so by [composition](02-properties.md) the two steps are $\varepsilon$-DP.
 
-With a quarter of the budget on the coarse step, the same 1,000 records give an RMSE of 0.0609 for every $R$ from 10 to a million. The fine step has only three quarters of the budget and a window three bins wide, though, so for small ranges the naive estimator wins, here up to $R = 13.81$. Beyond that, use coarse then fine, or locate the data with a private quantile such as diffprivlib's `tools.quantile`. Under approximate DP, with its slack $\delta$, a stability-based histogram does the coarse step with about $\ln(1/\delta)/\varepsilon$ records whatever the number of bins, so $R$ drops out ([Beyond global sensitivity](07-sensitivity.md)).
+With a quarter of the budget on the coarse step, the same 1,000 records give an RMSE of 0.0609 for every $R$ from 10 to a million. But the fine step has only three quarters of the budget and a window three bins wide. So for small ranges the naive estimator is better, here up to $R = 13.81$. For larger ranges, use coarse then fine, or find the data with a private quantile such as diffprivlib's `tools.quantile`. Under approximate DP, with its slack $\delta$, a stability-based histogram does the coarse step with about $\ln(1/\delta)/\varepsilon$ records, so $R$ goes away ([Beyond global sensitivity](07-sensitivity.md)).
 
-Two things go wrong. A budget split, bin width or $\beta$ chosen after looking at the data leaks it. And a coarse step with too few records can pick an empty bin and clip everything to the wrong place.
+Two things go wrong. A budget split, bin width or $\beta$ that you choose after a look at the data leaks it. And a coarse step with too few records can pick an empty bin and clip all records to the wrong place.
 
 ## Many dimensions: clip the norm {#sec-mean-multi}
 
-Vectors in $d$ dimensions, such as embeddings or gradients, follow the same recipe with a different measure of size. Clip each record's $\ell_2$ norm, its length, to a radius $C$, so that one replaced record moves the average by at most $2C/n$. Then add Gaussian noise calibrated to that sensitivity ([The Laplace and Gaussian mechanisms](03-laplace-gaussian.md)). This is exactly the step of private gradient descent, and [private training](../part05-dp-ml/02-dp-sgd.md) gives the rules for choosing the clipping norm there. With unit variance per coordinate, records lie about $\sqrt d$ from their mean, so the radius must grow like $\sqrt d$. Noise at that scale in every coordinate then grows like $d$ in total, against $\sqrt d$ for the sampling error. So in high dimension privacy is the larger cost, and the [fingerprinting lower bound](10-lower-bounds.md) shows that no mechanism avoids it.
+Vectors in $d$ dimensions, such as embeddings or gradients, use the same recipe with a different measure of size. Here the size is the $\ell_2$ norm, or length. Clip each record to a radius $C$, so that one replaced record moves the average by at most $2C/n$. Then add Gaussian noise for that sensitivity ([The Laplace and Gaussian mechanisms](03-laplace-gaussian.md)). This is the step of private gradient descent, and [private training](../part05-dp-ml/02-dp-sgd.md) tells how to choose its clipping norm.
 
-When you do not know where the mean is, the range problem returns, and a grid of bins would pay for the range once per dimension. The **shrinking balls** of CoinPress (Biswas, Dong, Kamath & Ullman 2020) avoid the grid: each round clips to a ball around a noisy guess of the mean and then shrinks it, so fix the number of rounds and their budget split in advance.
+The radius sets the cost. With unit variance per coordinate, records are about $\sqrt d$ from their mean, so the radius must grow like $\sqrt d$. The noise in all coordinates then grows like $d$ in total, against $\sqrt d$ for the sampling error. So in high dimension privacy is the larger cost, and the [fingerprinting lower bound](10-lower-bounds.md) shows that no mechanism avoids it.
+
+If you do not know where the mean is, a grid of bins pays for the range once per dimension. The **shrinking balls** of CoinPress (Biswas, Dong, Kamath & Ullman 2020) need no grid. Each round clips to a ball around a noisy guess of the mean, then makes the ball smaller. Fix the number of rounds and their budget split before the run.
 
 ## Heavy tails: clip into the data {#sec-mean-heavy}
 
-Incomes, session lengths and per-example gradient norms have heavy tails. When all you know is that the variance is at most $\sigma^2$, a range wide enough to touch no record is enormous. So clip into the data on purpose, and accept a bias.
+Incomes, session lengths and per-example gradient norms have heavy tails. If you know only that the variance is at most $\sigma^2$, a range that clips no record is very wide. So clip into the data on purpose, and accept a bias.
 
-Now let $\tau$ be a clipping half-width: clip every record to within $\tau$ of a centre near the mean, found by a coarse step. Only the rare records beyond $\tau$ move, so with the centre at the mean the bias is at most $\sigma^2/\tau$, while the noise grows in proportion to $\tau$. The bound on the total error is smallest at
+Now let $\tau$ be a clipping half-width. A coarse step finds a centre near the mean, and you clip every record to within $\tau$ of it. Only the rare records beyond $\tau$ move, so with the centre at the mean the bias is at most $\sigma^2/\tau$. But the noise grows in proportion to $\tau$. The bound on the total error is smallest at
 $$\tau_b = \sigma\sqrt{\frac{n\varepsilon}{2\sqrt2}},$$
-which uses only $n$, $\varepsilon$ and the variance bound. There, an error $\alpha$ needs about $\sigma^2/\alpha^2 + 8\sqrt2\,\sigma^2/(\alpha^2\varepsilon)$ records. So privacy is no longer a lower-order cost, since both terms grow like $1/\alpha^2$. No $\varepsilon$-DP mechanism does better for every distribution with that variance, though a bound on a higher moment lowers the cost.
+which uses only $n$, $\varepsilon$ and the variance bound. At this width, an error $\alpha$ needs about $\sigma^2/\alpha^2 + 8\sqrt2\,\sigma^2/(\alpha^2\varepsilon)$ records. Both terms grow like $1/\alpha^2$, so privacy now costs as much as sampling.
 
-@tbl-mean-heavy shows the trade-off on Pareto records, a heavy-tailed distribution scaled to variance 1. Its first width clips no record except with probability 0.05, and its noise dominates. The worst-case width $\tau_b$ cuts the error to 0.0607, and the best width for this distribution does better still.
+@tbl-mean-heavy shows the trade-off on Pareto records, a heavy-tailed distribution scaled to variance 1. The first width clips a record only with probability 0.05, and noise is most of its error. The worst-case width $\tau_b$ decreases the error to 0.0607, and the best width for this distribution is better again.
 
 | Clipping half-width $\tau$ | Bias | Sampling sd | Noise sd | RMSE |
 | --- | --- | --- | --- | --- |
@@ -81,11 +83,11 @@ which uses only $n$, $\varepsilon$ and the variance bound. There, an error $\alp
 
 : Clipped private means of Pareto records with variance 1, 1,000 records, $\varepsilon = 1$, for three clipping half-widths. {#tbl-mean-heavy}
 
-So treat $\tau_b$ as a safe default, not as the best width. A narrower range usually does better, but choose it without looking at the records, from domain knowledge or with a private quantile ([Beyond global sensitivity](07-sensitivity.md)).
+So use $\tau_b$ as a safe default, not as the best width. A narrower range is usually better, but choose it from domain knowledge or with a private quantile, never from a look at the records ([Beyond global sensitivity](07-sensitivity.md)).
 
 ## Code
 
-The snippet computes the records a bounded mean needs, checks its noise with OpenDP, and computes the default clipping width for heavy tails. Setting the RMSE equal to $\alpha$ and multiplying by $n^2$ gives a quadratic in $n$, whose positive root the first function rounds up.
+The snippet computes the records that a bounded mean needs, checks its noise with OpenDP, and computes the default clipping width for heavy tails. The RMSE equal to $\alpha$, times $n^2$, is a quadratic in $n$, and the first function rounds its positive root up.
 
 ```python
 from math import ceil, sqrt
@@ -110,7 +112,7 @@ print(f"{dp.laplacian_scale_to_accuracy(1.0 / (n * 1.0), alpha=0.05):.4f}")  # 0
 print(f"{heavy_tail_width(1000, 1.0, 1.0):.2f}")  # 18.80
 ```
 
-OpenDP states accuracy as a half-width that the noise stays within with a chosen probability. Its `laplacian_scale_to_accuracy` turns the scale $w/(n\varepsilon)$ at the planned 108 records into that half-width at 95%.
+OpenDP gives accuracy as a half-width that holds the noise with a chosen probability. So `laplacian_scale_to_accuracy` changes the noise scale $w/(n\varepsilon)$ of a range of width $w$ at the planned 108 records into the half-width at 95%.
 
 ## Cheat sheet
 

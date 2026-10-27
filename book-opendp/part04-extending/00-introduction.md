@@ -1,8 +1,8 @@
 # Extending the library
 
-The framework is open. Anything with a stability map or a privacy map can be a transformation or a measurement, whether OpenDP wrote it or you did. This part uses that openness. Its thread is that a plugin is only as private as its map. So the work of writing one is the proof, and the library's job is to make everything around the proof safe, from chaining to accounting.
+The framework is open. Anything with a stability map or a privacy map can be a transformation or a measurement, whether OpenDP wrote it or you did. The thread of this part is that a plugin is only as private as its map. So writing one means proving its map, and the library makes the rest safe, from chaining to accounting.
 
-[Plugins](13-plugins.md) writes a transformation and a measurement in Python and registers constructors so that they work from the Context API. It then follows the documentation's two larger examples, a Theil-Sen regression and a private choice of grouping columns. [Statistical modelling](14-statistical-modelling.md) fits the two models that ship with the library. One is a differentially private linear regression, and the other a differentially private principal component analysis. The chapter reads what each guarantees. [Limitations and troubleshooting](15-limitations-and-troubleshooting.md) says what OpenDP does not promise, from floating-point arithmetic to side channels. It explains the feature flags that gate the less vetted parts, and it decodes the error messages you will meet most often.
+[Plugins](13-plugins.md) writes a transformation and a measurement in Python and registers constructors for the Context API. Then it follows the documentation's two larger examples, a Theil-Sen regression and a private choice of grouping columns. [Statistical modelling](14-statistical-modelling.md) fits the two models that come with the library, a differentially private linear regression and a differentially private principal component analysis, and reads what each guarantees. [Limitations and troubleshooting](15-limitations-and-troubleshooting.md) says what OpenDP does not promise, from floating-point arithmetic to side channels. It also explains the feature flags and the common error messages.
 
 | Chapter | Question it answers |
 | --- | --- |
@@ -12,4 +12,4 @@ The framework is open. Anything with a stability map or a privacy map can be a t
 
 : The chapters of this part and the questions they answer. {#tbl-p4-chapters}
 
-By the end of this part you will be able to extend OpenDP with a mechanism of your own and fit its built-in models. You will also be able to say which parts of a deployment the library covers and which parts remain yours.
+At the end of this part you can add a mechanism of your own, fit the built-in models, and say which parts of a deployment stay yours.

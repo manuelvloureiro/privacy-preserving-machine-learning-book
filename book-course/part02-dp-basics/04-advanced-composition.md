@@ -1,16 +1,16 @@
 # Advanced Composition
 
-Running $k$ private analyses on the same data costs privacy, and basic composition says the cost adds up: $k$ mechanisms that are each $(\varepsilon,\delta)$-differentially private are together $(k\varepsilon, k\delta)$-differentially private. This chapter shows that the privacy parameter grows much more slowly, about as $\varepsilon\sqrt{k}$, if you accept a small extra $\delta'$. The proof has two steps. The first reduces any pair of private output distributions to one simple pair with four outcomes. The second analyses $k$ copies of that pair with Hoeffding's inequality.
+When you run $k$ private analyses on the same data, basic composition says that their privacy costs add up. This chapter shows that the total cost grows much more slowly, about as $\sqrt{k}$, if you accept a small extra failure probability. The proof turns each step into one simple pair of outputs with four outcomes. Then it bounds $k$ copies of that pair with Hoeffding's inequality.
 
 ## The theorem {#sec-ac-theorem}
 
-Write $D \sim D'$ for neighbouring datasets, which differ in one record (the replace-one relation). The chapter on [approximate differential privacy](03-approximate-dp.md) relaxed the definition of differential privacy (DP) by an additive term. A mechanism $M$ is **$(\varepsilon,\delta)$-DP** if, for all neighbours $D \sim D'$ and all events $S$,
+Write $D \sim D'$ for neighbouring datasets, which differ in one record (the replace-one relation). Recall from [the approximate differential privacy (DP) chapter](03-approximate-dp.md) that a mechanism $M$ is **$(\varepsilon,\delta)$-DP** if, for all neighbours $D \sim D'$ and all events $S$,
 
 $$
 \Pr[M(D)\in S] \le e^{\varepsilon}\Pr[M(D')\in S] + \delta .
 $$
 
-The proofs below compare two output distributions at a time, so it helps to name that condition for a pair of random variables.
+The proofs below compare two output distributions at a time, so the next definition names this condition for a pair of random variables.
 
 ::: {#def-ac-indist name="Indistinguishable pair"}
 Let $\varepsilon, \delta \ge 0$. Two random variables $A$ and $B$ with values in the same space are **$(\varepsilon,\delta)$-indistinguishable** if, for every event $S$,
@@ -22,11 +22,7 @@ $$
 
 So $M$ is $(\varepsilon,\delta)$-DP exactly when $M(D)$ and $M(D')$ are $(\varepsilon,\delta)$-indistinguishable for every pair of neighbours.
 
-The theorem is about analyses run one after another on the same data, where each analysis may be chosen in the light of the answers so far. The next definition makes this precise.
-
-::: {#def-ac-adaptive name="Adaptive composition"}
-Let $M_1, \dots, M_k$ be mechanisms, where $M_j$ takes the dataset $D$ and the earlier outputs $y_{<j} = (y_1,\dots,y_{j-1})$ and returns $y_j$. Their **adaptive composition** $M$ runs them in order on the same $D$, with $y_j$ drawn from $M_j(D; y_{<j})$ with fresh coins, and outputs the whole transcript $(y_1,\dots,y_k)$.
-:::
+The theorem is about the adaptive composition of @def-lap-adaptive: mechanisms $M_1, \dots, M_k$ run in order on the same $D$, where $M_j(D; y_{<j})$ may depend on the earlier outputs $y_{<j} = (y_1,\dots,y_{j-1})$, and the composition outputs the whole transcript $(y_1,\dots,y_k)$.
 
 Basic composition, proved in the two previous chapters, says that if each $M_j(\,\cdot\,; y_{<j})$ is $(\varepsilon,\delta)$-DP for every fixed $y_{<j}$, then $M$ is $(k\varepsilon, k\delta)$-DP. The theorem of this chapter improves the first parameter. Throughout, every output space is countable, so that probabilities are sums over outcomes.
 
@@ -39,9 +35,9 @@ $$ {#eq-ac-advanced}
 :::
 <!-- proof: in @sec-ac-binary -->
 
-The first term of $\tilde\varepsilon$ is the important one, and it grows as $\varepsilon\sqrt k$ instead of $k\varepsilon$. The second term is small when $\varepsilon$ is small. Its factor is $(e^\varepsilon-1)/(e^\varepsilon+1) = \tanh(\varepsilon/2)$, and $\tanh x \le x$ for $x \ge 0$, so the second term is at most $k\varepsilon^2/2$. That is also at most $k\varepsilon(e^\varepsilon - 1)$, because $e^\varepsilon - 1 \ge \varepsilon$, so the theorem implies the weaker form with $k\varepsilon(e^\varepsilon-1)$ that [the previous chapter](03-approximate-dp.md) quoted. The extra slack $\delta'$ is a free parameter. A larger $\delta'$ makes $\ln(1/\delta')$ smaller and so lowers $\tilde\varepsilon$, which means the theorem trades a bigger $\delta$ for a smaller $\varepsilon$.
+The first term of $\tilde\varepsilon$ is the important one, and it grows as $\varepsilon\sqrt k$ instead of $k\varepsilon$. The second term is small when $\varepsilon$ is small. Its factor is $(e^\varepsilon-1)/(e^\varepsilon+1) = \tanh(\varepsilon/2)$, and $\tanh x \le x$ for $x \ge 0$, so the term is at most $k\varepsilon^2/2$. That is also at most $k\varepsilon(e^\varepsilon - 1)$, because $e^\varepsilon - 1 \ge \varepsilon$, so the theorem implies the weaker form that [the previous chapter](03-approximate-dp.md) quoted. The extra slack $\delta'$ is a free parameter, and a larger $\delta'$ lowers $\tilde\varepsilon$, so the theorem trades a bigger $\delta$ for a smaller $\varepsilon$.
 
-The proof of @thm-ac-advanced is in @sec-ac-binary. Before it, @exm-ac-numbers and @fig-ac-composition say how much the theorem gains, and @cor-ac-budget turns it into a rule for splitting a privacy budget.
+The proof is in @sec-ac-binary. Before it, @exm-ac-numbers and @fig-ac-composition say how much the theorem gains.
 
 ::: {#exm-ac-numbers}
 Take $\varepsilon = 0.1$ and $\delta' = 10^{-6}$, so that $\ln(1/\delta') = 13.8155$ and $\tanh(0.05) = 0.04996$. For $k = 100$ mechanisms, basic composition gives $10$. Advanced composition gives $0.1\sqrt{200 \times 13.8155} + 100 \times 0.1 \times 0.04996 = 5.257 + 0.500 = 5.756$. For $k = 1{,}000$, basic composition gives $100$ and advanced composition gives $16.623 + 4.996 = 21.618$. Advanced composition is the smaller of the two from $k = 31$ on.
@@ -49,9 +45,9 @@ Take $\varepsilon = 0.1$ and $\delta' = 10^{-6}$, so that $\ln(1/\delta') = 13.8
 
 ![The total privacy parameter of $k$ mechanisms that are each $0.1$-DP, at $\delta' = 10^{-6}$. The solid line is basic composition, the dashed line is @eq-ac-advanced, and the dotted line is the exact smallest $\tilde\varepsilon$ for $k$ independent randomized responses, which is the worst case for pure DP by @sec-ac-reduction. Advanced composition overtakes basic composition at $k = 31$ and is within 21% of the exact value for every $k$ from $100$ to $10{,}000$.](figures/ac-composition.svg){#fig-ac-composition}
 
-The exact curve in @fig-ac-composition shows that @thm-ac-advanced is close to the truth, within 7% of it at $k = 10{,}000$. So growth as $\varepsilon\sqrt{k\ln(1/\delta')}$ is how privacy really degrades, not an artefact of the proof. Kairouz, Oh and Viswanath (2015) computed the exact optimal $\tilde\varepsilon$ for every $k$, $\varepsilon$, $\delta$ and $\delta'$. Their formula is tighter but harder to use, while @eq-ac-advanced is a good general-purpose bound.
+The exact curve in @fig-ac-composition shows that @thm-ac-advanced is close to the truth, within 7% of it at $k = 10{,}000$. So growth as $\varepsilon\sqrt{k\ln(1/\delta')}$ is how privacy really degrades, not an artefact of the proof. Kairouz, Oh and Viswanath (2015) computed the exact optimal $\tilde\varepsilon$, which is tighter but harder to use.
 
-When you have a total budget $\varepsilon_{\mathrm{total}}$ to spend on $k$ analyses, you can invert @eq-ac-advanced. The next corollary gives a simple choice that always works.
+With a total budget $\varepsilon_{\mathrm{total}}$ for $k$ analyses, you can invert @eq-ac-advanced. The next corollary gives a simple choice that always works.
 
 ::: {#cor-ac-budget}
 Let $\varepsilon_{\mathrm{total}} \in (0,1]$ and $\delta' \in (0, 1/2]$. If each of $k$ adaptively composed mechanisms is $(\varepsilon,\delta)$-DP with
@@ -71,7 +67,7 @@ then the composition is $(\varepsilon_{\mathrm{total}}, k\delta + \delta')$-DP.
 4. Adding the two terms gives $\tilde\varepsilon \le \varepsilon_{\mathrm{total}}$. A mechanism that is $(\tilde\varepsilon,\tilde\delta)$-DP is also $(\varepsilon_{\mathrm{total}},\tilde\delta)$-DP for every $\varepsilon_{\mathrm{total}} \ge \tilde\varepsilon$.
 :::
 
-The corollary is conservative by about a factor of $2$. With $\varepsilon_{\mathrm{total}} = 1$, $k = 1{,}000$ and $\delta' = 10^{-6}$, it allows $\varepsilon = 0.00301$ per mechanism, and @eq-ac-advanced then gives a total of only $0.5045$. Solving @eq-ac-advanced numerically allows $\varepsilon = 0.00591$, almost twice as much. Basic composition with that same $\varepsilon$ would give a total of $5.911$.
+The corollary is conservative by about a factor of $2$. With $\varepsilon_{\mathrm{total}} = 1$, $k = 1{,}000$ and $\delta' = 10^{-6}$, it allows $\varepsilon = 0.00301$ per mechanism, for which @eq-ac-advanced gives a total of only $0.5045$. Solving @eq-ac-advanced numerically allows $\varepsilon = 0.00591$, almost twice as much, and basic composition with that $\varepsilon$ would give a total of $5.911$.
 
 The gain matters most when the number of analyses grows with the problem, as in the next example.
 
@@ -91,7 +87,7 @@ The error now grows as $d$ instead of $d^{3/2}$, which is the order the Gaussian
 
 ## Reduction to four outcomes {#sec-ac-reduction}
 
-A pair of output distributions $M_j(D)$ and $M_j(D')$ can be complicated. The first step of the proof replaces every such pair by one fixed pair, the simplest pair that is $(\varepsilon,\delta)$-indistinguishable. It has two ordinary outcomes, $0$ and $1$, on which the probabilities differ by the factor $e^\varepsilon$. It also has two catastrophic outcomes, each with probability $\delta$, which reveal which distribution the sample came from.
+A pair of output distributions $M_j(D)$ and $M_j(D')$ can be complicated. The first step of the proof replaces every such pair by the simplest $(\varepsilon,\delta)$-indistinguishable pair. It has two ordinary outcomes, $0$ and $1$, whose probabilities differ by the factor $e^\varepsilon$, and two catastrophic outcomes, each with probability $\delta$, which reveal which distribution the sample came from.
 
 ::: {#def-ac-uv name="The four-outcome pair"}
 For $\varepsilon \ge 0$ and $\delta \in [0,1)$, let $U$ and $V$ take values in $\{0, 1, \text{I am } U, \text{I am } V\}$ with
@@ -104,7 +100,7 @@ $$
 $$
 :::
 
-For $\delta = 0$ this is randomized response with truth probability $e^\varepsilon/(1+e^\varepsilon)$, from [the first chapter of this part](01-randomized-response.md), where $U$ is the report of a person whose bit is $0$ and $V$ that of a person whose bit is $1$. The first thing to check is that the pair meets the condition it stands for.
+For $\delta = 0$ this is randomized response with truth probability $e^\varepsilon/(1+e^\varepsilon)$, from [the first chapter of this part](01-randomized-response.md). Here $U$ is the report of a person whose bit is $0$ and $V$ that of a person whose bit is $1$. The first check is that the pair meets the condition it stands for.
 
 ::: {#lem-ac-uv}
 The pair $U, V$ is $(\varepsilon,\delta)$-indistinguishable.
@@ -117,7 +113,7 @@ The pair $U, V$ is $(\varepsilon,\delta)$-indistinguishable.
 3. Swapping the labels $0 \leftrightarrow 1$ and "I am $U$" $\leftrightarrow$ "I am $V$" turns the distribution of $U$ into that of $V$ and back, so the same argument gives the other inequality.
 :::
 
-Indistinguishability survives any further processing, as privacy does. The proof is that of post-processing in [the approximate DP chapter](03-approximate-dp.md), written for a pair of random variables. Its first step extends the definition from events to functions with values in $[0,1]$, as that chapter does for mechanisms.
+Indistinguishability survives any further processing, as privacy does. The proof is that of post-processing in [the approximate DP chapter](03-approximate-dp.md), written for a pair of random variables.
 
 ::: {#lem-ac-post name="Post-processing"}
 Let $A, B$ be $(\varepsilon,\delta)$-indistinguishable, and let $F$ be a randomized map whose coins are independent of $A$ and $B$. Then $F(A)$ and $F(B)$ are $(\varepsilon,\delta)$-indistinguishable.
@@ -125,18 +121,18 @@ Let $A, B$ be $(\varepsilon,\delta)$-indistinguishable, and let $F$ be a randomi
 
 ::: {.proof}
 
-1. *Functions with values in $[0,1]$.* Let $g$ take values in $[0,1]$. Write its average as an integral of tail probabilities, $\mathbb E[g(A)] = \int_0^1 \Pr[g(A) > s]\,\mathrm d s$. Each tail is the probability of the event $\{a : g(a) > s\}$, so it is at most $e^\varepsilon \Pr[g(B) > s] + \delta$. Integrating over $s \in [0,1]$ gives $\mathbb E[g(A)] \le e^\varepsilon\,\mathbb E[g(B)] + \delta$.
+1. *Functions with values in $[0,1]$.* Let $g$ take values in $[0,1]$. The proof of @lem-adp-functions uses only the bound of the definition on events, so it applies to $A$ and $B$ unchanged and gives $\mathbb E[g(A)] \le e^\varepsilon\,\mathbb E[g(B)] + \delta$.
 2. *Post-processing.* Fix an event $S$ and let $g(a) = \Pr[F(a)\in S]$, a probability over the coins of $F$. Because those coins are independent of $A$, $\Pr[F(A)\in S] = \mathbb E[g(A)]$, and likewise for $B$.
 3. Step 1 applied to $g$ gives $\Pr[F(A)\in S] \le e^\varepsilon\Pr[F(B)\in S] + \delta$. The other direction is the same with $A$ and $B$ swapped.
 :::
 
-The four-outcome pair is the hardest pair to tell apart among all $(\varepsilon,\delta)$-indistinguishable pairs, in the following strong sense. Any such pair $A, B$ can be produced from $U, V$ by one randomized map.
+The four-outcome pair is the hardest $(\varepsilon,\delta)$-indistinguishable pair to tell apart, in a strong sense. One randomized map produces any other such pair $A, B$ from $U, V$.
 
 ::: {#thm-ac-simulation name="Simulation by the four-outcome pair"}
 Let $\varepsilon \ge 0$ and $\delta \in [0,1)$, and let $A, B$ be $(\varepsilon,\delta)$-indistinguishable random variables on a countable space. Then there is a randomized map $F$ such that $F(U)$ has the distribution of $A$ and $F(V)$ has the distribution of $B$.
 :::
 
-The map sends each of the four outcomes to a distribution on the space. The outcome "I am $U$" covers the excess of $A$ on outcomes $y$ that are more than $e^\varepsilon$ times as likely under $A$ as under $B$, and "I am $V$" covers the reverse excess. The outcome $0$ puts more weight on outcomes where $A$ is the more likely of the two, and $1$ more weight where $B$ is. For $\delta > 0$ these four distributions must be chosen with care. Kairouz, Oh and Viswanath (2015) prove the theorem by hypothesis testing. Indistinguishability says that every test between $A$ and $B$ has error rates that some test between $U$ and $V$ also has, and Blackwell's theorem on comparing statistical experiments turns that into a randomized map. We prove the case $\delta = 0$, which already gives the theorem for pure DP.
+The map sends each of the four outcomes to a distribution on the space. The outcome "I am $U$" covers the excess of $A$ on outcomes $y$ that are more than $e^\varepsilon$ times as likely under $A$ as under $B$, and "I am $V$" covers the reverse excess. The outcome $0$ puts more weight where $A$ is the more likely of the two, and $1$ where $B$ is. For $\delta > 0$ these four distributions need care. Kairouz, Oh and Viswanath (2015) prove that case with hypothesis tests and Blackwell's theorem on the comparison of statistical experiments. We prove the case $\delta = 0$, which already gives the theorem for pure DP.
 
 ::: {.proof}
 *Proof for $\delta = 0$.* Write $p(y) = \Pr[A = y]$ and $q(y) = \Pr[B = y]$.
@@ -173,19 +169,17 @@ Let $M$ be the adaptive composition of $M_1,\dots,M_k$ as in @thm-ac-advanced, a
 4. The same induction with $V_1,\dots,V_k$ gives the distribution of $M(D')$.
 :::
 
-The map $F^*$ depends on $D$ and $D'$, but that is harmless. Privacy is a statement about one pair of neighbours at a time, and @lem-ac-post applies to any map. So it remains to show that $(U_1,\dots,U_k)$ and $(V_1,\dots,V_k)$ are $(\tilde\varepsilon,\tilde\delta)$-indistinguishable.
+The map $F^*$ depends on $D$ and $D'$, but that is harmless, because privacy is a statement about one pair of neighbours at a time and @lem-ac-post applies to any map. So it remains to show that $(U_1,\dots,U_k)$ and $(V_1,\dots,V_k)$ are $(\tilde\varepsilon,\tilde\delta)$-indistinguishable.
 
 ## Composing the four-outcome pair {#sec-ac-binary}
 
-Write $\mathbf U = (U_1,\dots,U_k)$ and $\mathbf V = (V_1,\dots,V_k)$. As in [the approximate DP chapter](03-approximate-dp.md), the privacy loss of an outcome compares how likely it is under $\mathbf U$ and under $\mathbf V$. An outcome that is possible under $\mathbf U$ but impossible under $\mathbf V$ has infinite loss. For an outcome $z$ that is possible under $\mathbf V$, the **privacy loss** at $z$ is the log of the ratio of the two probabilities,
+Write $\mathbf U = (U_1,\dots,U_k)$ and $\mathbf V = (V_1,\dots,V_k)$. As in [the approximate DP chapter](03-approximate-dp.md), the privacy loss of an outcome compares how likely it is under $\mathbf U$ and under $\mathbf V$. An outcome that is possible under $\mathbf U$ but impossible under $\mathbf V$ has infinite loss, and for an outcome $z$ that is possible under $\mathbf V$, the **privacy loss** is
 
 $$
 L(z) = \ln\frac{\Pr[\mathbf U = z]}{\Pr[\mathbf V = z]} .
 $$
 
-The plan is to show that, for $z$ drawn from $\mathbf U$, the loss exceeds $\tilde\varepsilon$ only with small probability. Two kinds of outcome are bad. An outcome that contains "I am $U$" is impossible under $\mathbf V$, so its loss is infinite, and this happens with probability about $k\delta$. Among the other outcomes, the loss is a sum of $k$ independent terms, and Hoeffding's inequality bounds the chance that it strays far above its mean by $\delta'$.
-
-The first step computes the loss on the outcomes with no catastrophe, those in which every coordinate is $0$ or $1$.
+The plan is to show that, for $z$ drawn from $\mathbf U$, the loss rarely exceeds $\tilde\varepsilon$. Two kinds of outcome are bad. An outcome that contains "I am $U$" is impossible under $\mathbf V$, so its loss is infinite, which happens with probability about $k\delta$. On the other outcomes, the loss is a sum of $k$ independent terms, and Hoeffding's inequality bounds the chance that it strays far above its mean by $\delta'$. The first step computes the loss on the outcomes with no catastrophe, in which every coordinate is $0$ or $1$.
 
 ::: {#lem-ac-loss}
 For every $z \in \{0,1\}^k$, the privacy loss is $L(z) = \varepsilon\sum_{j=1}^k (1 - 2z_j)$.
@@ -197,7 +191,7 @@ For every $z \in \{0,1\}^k$, the privacy loss is $L(z) = \varepsilon\sum_{j=1}^k
 2. By @def-ac-uv, the ratio is $e^\varepsilon$ when $z_j = 0$ and $e^{-\varepsilon}$ when $z_j = 1$. In both cases its logarithm is $\varepsilon(1 - 2z_j)$.
 :::
 
-Conditioned on containing no catastrophic outcome, the coordinates of $\mathbf U$ are independent bits. The loss is then a sum of independent terms, each equal to $\varepsilon$ or $-\varepsilon$, and Hoeffding's inequality applies to it.
+Given no catastrophic outcome, the coordinates of $\mathbf U$ are independent bits, so the loss is a sum of independent terms, each $\varepsilon$ or $-\varepsilon$. Hoeffding's inequality bounds its tail.
 
 Take $k$ independent random variables $W_1,\dots,W_k$, each with values in an interval $[l, u]$ of length $u - l$. **Hoeffding's inequality** bounds the chance that their sum exceeds its mean by a margin $\tau \ge 0$ or more,
 
@@ -205,7 +199,7 @@ $$
 \Pr\left[\sum_{j=1}^k W_j \ge \sum_{j=1}^k \mathbb E[W_j] + \tau\right] \le \exp\left(-\frac{2\tau^2}{k(u-l)^2}\right) .
 $$ {#eq-ac-hoeffding}
 
-With the loss in hand and Hoeffding's inequality to bound its tail, the main estimate follows. It says that $k$ copies of the four-outcome pair are exactly as hard to tell apart as @thm-ac-advanced claims.
+With the loss and its tail bound, the main estimate follows: $k$ copies of the four-outcome pair are as hard to tell apart as @thm-ac-advanced claims.
 
 ::: {#prp-ac-binary}
 Let $\varepsilon \ge 0$, $\delta \in [0,1)$ and $\delta' \in (0,1)$. Then $\mathbf U$ and $\mathbf V$ are $(\tilde\varepsilon,\tilde\delta)$-indistinguishable, with $\tilde\varepsilon$ and $\tilde\delta$ as in @eq-ac-advanced.
@@ -241,7 +235,7 @@ Let $\varepsilon \ge 0$, $\delta \in [0,1)$ and $\delta' \in (0,1)$. Then $\math
 7. *The other direction.* Swapping the labels $0 \leftrightarrow 1$ and "I am $U$" $\leftrightarrow$ "I am $V$" in every coordinate maps $\mathbf U$ to $\mathbf V$ and back. The same argument then gives $\Pr[\mathbf V \in S] \le e^{\tilde\varepsilon}\Pr[\mathbf U \in S] + \tilde\delta$.
 :::
 
-The two terms of $\tilde\delta$ now have a meaning. The term $k\delta$ pays for a catastrophic outcome in some step, and $\delta'$ pays for an unusually long run of outcomes that favour $\mathbf U$. The proof of the theorem only puts the pieces together.
+So the term $k\delta$ of $\tilde\delta$ pays for a catastrophic outcome in some step, and $\delta'$ pays for an unusually long run of outcomes that favour $\mathbf U$. The proof of the theorem puts the pieces together.
 
 ::: {.proof}
 *Proof of @thm-ac-advanced.* Fix neighbours $D \sim D'$.
@@ -269,9 +263,9 @@ The two terms of $\tilde\delta$ now have a meaning. The term $k\delta$ pays for 
 
 ## References {#sec-ac-notes}
 
-- Cynthia Dwork, Guy N. Rothblum and Salil Vadhan, "Boosting and Differential Privacy", 2010. The advanced composition theorem, first proved there.
-- Peter Kairouz, Sewoong Oh and Pramod Viswanath, "The Composition Theorem for Differential Privacy", 2015. The simulation of every private pair by the four-outcome pair, by hypothesis testing, and the exact optimal composition.
-- Wassily Hoeffding, "Probability Inequalities for Sums of Bounded Random Variables", 1963. The tail bound used for the privacy loss.
-- Cynthia Dwork and Aaron Roth, *The Algorithmic Foundations of Differential Privacy*, 2014. Section 3.5 proves advanced composition with the privacy loss random variable, and Theorem 3.20 states it with $k\varepsilon(e^\varepsilon - 1)$ as the second term.
-- Salil Vadhan, "The Complexity of Differential Privacy", 2017. Section 2 presents basic and advanced composition.
-- Jack Murtagh and Salil Vadhan, "The Complexity of Computing the Optimal Composition of Differential Privacy", 2016. Shows that the exact optimal composition of mechanisms with different parameters is hard to compute, which is one reason the simpler bound @eq-ac-advanced is used in practice.
+- Cynthia Dwork, Guy N. Rothblum and Salil Vadhan, "Boosting and Differential Privacy", 2010. First proves the advanced composition theorem.
+- Peter Kairouz, Sewoong Oh and Pramod Viswanath, "The Composition Theorem for Differential Privacy", 2015. Proves the simulation by the four-outcome pair and finds the exact optimal composition.
+- Wassily Hoeffding, "Probability Inequalities for Sums of Bounded Random Variables", 1963. Gives the tail bound used for the privacy loss.
+- Cynthia Dwork and Aaron Roth, *The Algorithmic Foundations of Differential Privacy*, 2014. Proves advanced composition with the privacy loss in Section 3.5, with $k\varepsilon(e^\varepsilon - 1)$ as the second term.
+- Salil Vadhan, "The Complexity of Differential Privacy", 2017. Presents basic and advanced composition in Section 2.
+- Jack Murtagh and Salil Vadhan, "The Complexity of Computing the Optimal Composition of Differential Privacy", 2016. Shows that the exact optimal composition is hard to compute for mixed parameters.

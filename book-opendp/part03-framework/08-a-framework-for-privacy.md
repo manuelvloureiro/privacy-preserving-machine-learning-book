@@ -1,10 +1,8 @@
 # A framework to understand differential privacy
 
-Every query you released in the first two parts went through the Context API. It chose a noise scale, spent a share of the budget and refused the query that went over. This chapter opens that box. Underneath, OpenDP describes a private computation with two kinds of object. A transformation maps data to data, and it promises how far apart its outputs can be when its inputs are close. A measurement maps data to a random release, and it promises how far apart the distributions of its outputs can be. Each promise is a map from an input distance to an output distance. Differential privacy (DP) in OpenDP is the bookkeeping of such maps.
+Every query of the first two parts used the Context API, which chose a noise scale, spent a share of the budget and refused a query above it. Under that API, OpenDP describes a private computation with two kinds of object. A transformation maps data to data, and it promises how far apart its outputs can be when its inputs are close. A measurement maps data to a random release, and it promises how far apart the distributions of its releases can be. Each promise is a map from an input distance to an output distance, and differential privacy (DP) in OpenDP is the bookkeeping of such maps. At the end of the chapter, you can read the guarantee of any OpenDP object from its fields and its map.
 
-The chapter follows the documentation's Framework API pages. You will meet the two objects and their fields, then the supporting elements one at a time, with code for each. Domains say what the data may be. Metrics say how two datasets or two numbers are compared, and measures say how two distributions of releases are compared. The maps tie them together, and chaining a transformation with a measurement carries the guarantee from the data to the release. The chapter ends by redoing the first chapter's workflow with the framework API next to the Context API, which gives the same scales. By the end you will be able to read the guarantee of any OpenDP object off its fields and its map.
-
-The script [opendp_framework.py](../../code/part03-framework/opendp_framework.py) runs every step on OpenDP 0.16.0. The vector of the sum example is the `HWUSUAL` column of the Labour Force Survey (LFS) sample, collected to a list of integers. The workflow runs on the first chapter's hundred toy scores. The domains, metrics, measures, maps, scales and error bars the script prints are the same on every run. The released values are not, because OpenDP's noise cannot be seeded, so the page shows them in one block marked as one run.
+The script [opendp_framework.py](../../code/part03-framework/opendp_framework.py) runs every step on OpenDP 0.16.0. Its sum example uses the `HWUSUAL` column of the Labour Force Survey (LFS) sample as a list of integers, and its workflow uses the first chapter's hundred toy scores. The domains, metrics, measures, maps, scales and error bars are the same on every run. The released values change, because OpenDP's noise cannot be seeded, so the page shows them in one block marked as one run.
 
 ```bash
 uv run python code/part03-framework/opendp_framework.py
@@ -12,7 +10,7 @@ uv run python code/part03-framework/opendp_framework.py
 
 ## Two kinds of object {#sec-frame-objects}
 
-The first chapter built a Laplace measurement from a space and a constructor without saying what came back. The documentation's running example is the same mechanism with a scale of 5. It is built with `make_laplace`, which takes the domain and the metric as its first two arguments instead of through `>>`.
+The first chapter built a Laplace measurement without saying what came back. The documentation's example is the same mechanism with a scale of 5. It uses `make_laplace`, which takes the domain and the metric as its first two arguments instead of through `>>`.
 
 ```{.python excerpt="frame-laplace"}
 def laplace_measurement(scale: float) -> dp.Measurement:
@@ -34,13 +32,13 @@ laplace scale 5: output measure=MaxDivergence
 laplace scale 5: function=Function
 ```
 
-A transformation and a measurement share four fields. The `input_domain` is the set of values the function accepts, and the `output_domain` is the set it produces. The `function` is the computation itself, and the `input_metric` is the rule for the distance between two inputs. The two objects differ in their last two fields, because a **transformation** is deterministic while a **measurement** is randomized. A transformation's outputs are data again, so it has an `output_metric` and a **stability map**, which bounds the distance between two outputs given a bound on the distance between the inputs. A measurement's output is a draw from a distribution, so it has an `output_measure` and a **privacy map**, which bounds the distance between two output distributions in the same way.
+A transformation and a measurement share four fields. The `function` is the computation, it accepts the `input_domain` and produces the `output_domain`, and the `input_metric` gives the distance between two inputs. The last two fields differ, because a **transformation** is deterministic while a **measurement** is random. A transformation's output is data, so it has an `output_metric` and a **stability map**, which bounds the distance between two outputs from a bound on the distance between the inputs. A measurement's output is a random draw, so it has an `output_measure` and a **privacy map**, which bounds the distance between two output distributions.
 
-Read the Laplace measurement's fields in those terms. It accepts one finite float and compares two inputs by their absolute difference. It measures the gap between two output distributions by the max divergence, which is the quantity that $\varepsilon$ bounds. The documentation says that a transformation is (`d_in`, `d_out`)-stable when inputs at most `d_in` apart give outputs at most `d_out` apart. A measurement is (`d_in`, `d_out`)-differentially private when inputs at most `d_in` apart give output distributions at most `d_out` apart. Both sentences have the same shape, and that is the point of the framework. Every element of either object is one ingredient of that sentence, and the rest of the chapter takes them one at a time.
+So the Laplace measurement accepts one finite float, compares two inputs by their absolute difference, and compares two output distributions by the max divergence, which $\varepsilon$ bounds. The documentation states the two promises in one shape. A transformation is (`d_in`, `d_out`)-stable when inputs at most `d_in` apart give outputs at most `d_out` apart. A measurement is (`d_in`, `d_out`)-differentially private when the same inputs give output distributions at most `d_out` apart. The sections below take the parts of these sentences in turn.
 
 ## Functions {#sec-frame-functions}
 
-The function is the part you would have written anyway. A transformation or a measurement is called like a function, and `invoke` does the same thing under a name. The clamp below is built on the space of vectors of finite floats under the symmetric distance. Its bounds are 0 to 5, and it clips every element into them.
+The function is the part you would write anyway. You call a transformation or a measurement like a function, and `invoke` does the same. The clamp below works on vectors of finite floats under the symmetric distance, and it clips every element into the bounds 0 to 5.
 
 ```python
 import opendp.prelude as dp
@@ -54,11 +52,11 @@ print(clamp.invoke([10.0]))  # [5.0]
 print(type(clamp.function).__name__)  # Function
 ```
 
-The `function` field holds the computation as an object of its own, which the plugin chapter of the next part uses to wrap a Python function. Calling a transformation gives you exactly what the function computes, with no noise, so the result is not private. That is by design. A transformation prepares or aggregates the data inside the guarantee, and only a measurement may release anything. So a transformation has to be chained with a measurement before its output leaves the box. If you ever find yourself printing the output of a transformation, you have stepped outside the guarantee.
+The `function` field holds the computation as an object, which the plugin chapter of the next part uses to wrap a Python function. A transformation adds no noise, so its result is not private. This is by design: a transformation prepares the data inside the guarantee, and only a measurement may release anything. If you print the output of a transformation, you are outside the guarantee.
 
 ## Domains {#sec-frame-domains}
 
-A domain is a set of values, and the library uses it in two ways. The proof behind a map holds only for inputs in the domain, so the domain states the assumptions the map relies on. And when two objects are chained, the library checks that the first one's output domain equals the second one's input domain. That way every intermediate value is one the next function was proved on. The most common domain is `atom_domain`, which describes one value of a type `T`, and `vector_domain` lifts it to vectors of such values.
+A domain is a set of values, and the library uses it in two ways. The proof behind a map holds only for inputs in the domain, so the domain states what the map assumes. And when you chain two objects, the library checks that the output domain of the first equals the input domain of the second. The most common domain is `atom_domain`, one value of a type `T`, and `vector_domain` lifts it to vectors.
 
 ```python
 import opendp.prelude as dp
@@ -75,13 +73,13 @@ print(pairs)  # VectorDomain(AtomDomain(T=bool), size=2)
 print(pairs.member([True, True]), pairs.member([True, True, True]))  # True False
 ```
 
-The `member` method tests whether a value belongs to the domain, which is how you check an assumption by hand. Three arguments shape an atom domain. The type `T` is written in Python terms, where `float` means a 64-bit float and `int` a 32-bit integer. That is why the printed forms say `f64` and `i32`. The `nan` flag says whether a float may be NaN. The installed version prints the flag only when it is true, so `atom_domain(T=float)` allows NaN and `atom_domain(T=float, nan=False)` does not. A measurement that adds noise needs the second, because the absolute distance between two values is not defined when one of them is NaN.
+The `member` method tests whether a value is in the domain, so you can check an assumption by hand. The type `T` is written in Python terms, so `float` prints as `f64` and `int` as `i32`. The `nan` flag says whether a float may be NaN, and the installed version prints it only when it is true. So `atom_domain(T=float)` allows NaN and `atom_domain(T=float, nan=False)` does not. A measurement that adds noise needs the second, because the absolute distance to a NaN is not defined.
 
-The `bounds` restrict the values to an interval. A domain with bounds is what the sum transformation demands, because the sum of unbounded values has no finite sensitivity. A vector domain adds a `size`, which fixes the length of the vector. The mean transformation needs it, for the same reason that the first chapter's mean needed a resize.
+The `bounds` restrict the values to an interval, and the sum needs them, because a sum of unbounded values has no finite sensitivity. A vector domain can also have a `size`, which the mean needs, as the first chapter's resize showed.
 
 ## Metrics {#sec-frame-metrics}
 
-A metric is a rule for the distance between two members of a domain, and the framework never evaluates it. It only uses the metric to give `d_in` its meaning. Under the **symmetric distance**, two datasets are compared by the number of additions and removals that turn one into the other, counted with multiplicity. The function below computes it for two small vectors from the documentation's notebook, where the second lacks the first person's record.
+A metric is a rule for the distance between two members of a domain. The framework never computes it, and only uses it to give `d_in` its meaning. Under the **symmetric distance**, the distance between two datasets is the number of additions and removals that turn one into the other, counted with multiplicity. The function below computes it for two small vectors from the documentation's notebook, where the second lacks the first person's record.
 
 ```python
 from collections import Counter
@@ -102,15 +100,15 @@ print(dp.unit_of(contributions=1, ordered=True))  # (InsertDeleteDistance(), 1)
 print(dp.unit_of(changes=1))  # (ChangeOneDistance(), 1)
 ```
 
-Removing one record gives a distance of 1. Changing a 12 into a 10 gives 2, because a change is one removal and one addition. So under the symmetric distance, `d_in` is the largest number of records one person can add or remove. That is the privacy unit of the first chapter in the framework's words. Two datasets are **neighbouring**, written $D \sim D'$, when they are at most `d_in` apart under the input metric, and here that relation is add/remove. The symmetric distance is the metric behind `dp.unit_of(contributions=k)`. A person who answers the LFS at most 36 times is at most 36 away from a dataset without them.
+If you remove one record, the distance is 1. If you change a 12 into a 10, the distance is 2, because a change is one removal and one addition. So under the symmetric distance, `d_in` is the largest number of records that one person can add or remove, which is the privacy unit. Two datasets are **neighbouring**, written $D \sim D'$, when they are at most `d_in` apart under the input metric, here add/remove. This is the metric behind `dp.unit_of(contributions=k)`, so on the LFS, where a person has at most 36 rows ([the privacy unit](../part01-getting-started/02-the-data-and-the-context.md#sec-ctx-context)), `d_in` is 36.
 
-The **absolute distance** compares two numbers by the absolute value of their difference. It is the metric of an aggregate, so under it `d_in` is a **sensitivity**, the most an aggregate can change when one person's records change. You rarely supply a sensitivity yourself. It appears midway through a chain, as the output distance of an aggregation and the input distance of the noise. The full edition's [chapter on sensitivity](../../book-full/part03-dp-foundations/07-sensitivity.md) works out the sensitivities of the common aggregates.
+The **absolute distance** is the absolute value of the difference of two numbers. Under it, `d_in` is a **sensitivity**, the most an aggregate can change when one person's records change. So you rarely give a sensitivity yourself, because it appears in the middle of a chain, as the output distance of an aggregate. The full edition's [chapter on sensitivity](../../book-full/part03-dp-foundations/07-sensitivity.md) works out the common ones.
 
-The other dataset metrics are variations on the symmetric distance. The insert-delete distance counts additions and removals at specific positions, so it also protects the order of the records. The change-one distance counts replaced records in datasets of a fixed size, which is the replace-one relation that other books call bounded DP. The Hamming distance counts the positions at which two vectors of the same length differ, so it is the ordered version of change-one.
+The other dataset metrics change the symmetric distance in one way each. The insert-delete distance also protects the order of the records. The change-one distance counts replaced records in datasets of a fixed size, the replace-one relation of bounded DP. The Hamming distance is the ordered version of change-one.
 
 ## Measures {#sec-frame-measures}
 
-A measure is a rule for the distance between two probability distributions. It is what makes a measurement's `d_out` a privacy guarantee. The **max divergence** is the largest value, over every set of outputs, of the log of the ratio of the two probabilities of that set. Bounding it by $\varepsilon$ is pure differential privacy, which the full edition defines in [its chapter on the definition](../../book-full/part03-dp-foundations/01-definition.md). The library offers four measures, and `d_out` has a different form under each.
+A measure is a rule for the distance between two probability distributions, and it is what makes a measurement's `d_out` a privacy guarantee. The **max divergence** is the largest log ratio of the two probabilities of a set of outputs, over every such set. A bound of $\varepsilon$ on it is pure differential privacy, which the full edition defines in [its chapter on the definition](../../book-full/part03-dp-foundations/01-definition.md). The library has four measures, and `d_out` has a different form under each.
 
 ```python
 import opendp.prelude as dp
@@ -126,13 +124,13 @@ print(f"{profile.epsilon(delta=1e-7):.4f}")  # 5.6709
 print(dp.c.make_fix_delta(dp.c.make_zCDP_to_approxDP(gaussian), delta=1e-7).map(1.0))  # (5.6708588354687715, 1e-07)
 ```
 
-Under the max divergence, `d_out` is a single number, $\varepsilon$. Under the **zero-concentrated divergence**, `d_out` is the parameter $\rho$ of zero-concentrated differential privacy (zCDP). That measure bounds a family of Rényi divergences at once, and it is the native measure of the Gaussian mechanism. A Gaussian of scale 1 at sensitivity 1 costs $\rho = 0.5$, which is the sensitivity squared over twice the scale squared.
+Under the max divergence, `d_out` is one number, $\varepsilon$. Under the **zero-concentrated divergence**, `d_out` is the parameter $\rho$ of zero-concentrated differential privacy (zCDP), which bounds a family of Rényi divergences at once and is the native measure of the Gaussian mechanism. A Gaussian of scale 1 at sensitivity 1 costs $\rho = 0.5$, the sensitivity squared over twice the scale squared.
 
-The two smoothed measures carry approximate differential privacy, whose guarantee holds up to a slack $\delta$. Under the smoothed max divergence, `d_out` is a whole curve, a **privacy profile** that gives the smallest $\varepsilon$ for any $\delta$ you ask for, and the snippet asks it for $\delta = 10^{-7}$. Under the fixed smoothed max divergence, `d_out` is instead one pair of $\varepsilon$ and $\delta$. The installed version prints that measure as `Approximate(MaxDivergence)`, and the first chapter's `dp.loss_of(epsilon=1.0, delta=1e-7)` is a budget under it. The combinator `make_fix_delta` turns the curve into the pair by choosing the $\delta$. The conversions between the measures are the subject of [Combinators](11-combinators.md). Here the point is only that a measurement's `output_measure` tells you how to read its `d_out`.
+The two smoothed measures carry approximate DP, whose guarantee holds up to a slack $\delta$. Under the smoothed max divergence, `d_out` is a **privacy profile**, a curve that gives the smallest $\varepsilon$ for any $\delta$, here $10^{-7}$. Under the fixed smoothed max divergence, printed `Approximate(MaxDivergence)`, `d_out` is one pair of $\varepsilon$ and $\delta$, like the first chapter's `dp.loss_of(epsilon=1.0, delta=1e-7)`. The combinator `make_fix_delta` turns the curve into the pair. [Combinators](11-combinators.md) covers the conversions. Here, remember that a measurement's `output_measure` tells you how to read its `d_out`.
 
 ## Stability maps and privacy maps {#sec-frame-maps}
 
-A map is the function that turns an input distance into an output distance, and it is where the guarantee lives. For a measurement, `map(d_in)` returns the smallest `d_out` the library can prove. The measurement is then (`d_in`, `d_out`)-differentially private. For a transformation, the same call returns the smallest `d_out` for which it is (`d_in`, `d_out`)-stable. The `check` method compares the map's value with a `d_out` you propose and answers whether the guarantee fits inside it. The Laplace measurement of the first section is the running example, and the script reads its map at two sensitivities.
+A map turns an input distance into an output distance, and it holds the guarantee. For a measurement, the call `map(d_in)` returns the smallest `d_out` that the library can prove, so the measurement is (`d_in`, `d_out`)-differentially private. For a transformation, it returns the smallest `d_out` for which it is (`d_in`, `d_out`)-stable. The `check` method says whether the guarantee fits inside a `d_out` you propose. The script reads the map of the Laplace measurement at two sensitivities.
 
 ```{.python excerpt="frame-map"}
 epsilon_at_1 = laplace.map(d_in=1.0)  # the sensitivity over the scale: 1 / 5
@@ -146,9 +144,9 @@ laplace scale 5: map(1.0)=0.2 map(10.0)=2.0
 laplace scale 5: check(1.0, 0.2)=True check(1.0, 0.19)=False
 ```
 
-The Laplace mechanism's privacy map is the sensitivity divided by the scale, because the scale that gives $\varepsilon$ is the sensitivity over $\varepsilon$. So a sensitivity of 1 at scale 5 costs $\varepsilon = 0.2$. A sensitivity ten times larger costs ten times more. The check at $\varepsilon = 0.2$ passes and the check at 0.19 fails, which is all `check` ever does. It is also all the Context API does when it searches for a scale. It tries scales until `check` passes at the query's share of the budget. The full edition derives the map in [its chapter on the Laplace and Gaussian mechanisms](../../book-full/part03-dp-foundations/03-laplace-gaussian.md).
+The Laplace privacy map is the sensitivity divided by the scale. So a sensitivity of 1 at scale 5 costs $\varepsilon = 0.2$, and ten times the sensitivity costs ten times more. So the check at 0.2 passes and the check at 0.19 fails. The Context API uses only this comparison when it finds a scale: it tries scales until `check` passes at the query's share of the budget. The full edition derives the map in [its chapter on the Laplace and Gaussian mechanisms](../../book-full/part03-dp-foundations/03-laplace-gaussian.md).
 
-The value a map returns is an upper bound that the library can prove, not always the smallest true one, and the sum shows why that matters.
+A map returns an upper bound that the library can prove, which is not always the smallest true one, and the sum shows why this matters.
 
 ```python
 import opendp.prelude as dp
@@ -162,11 +160,11 @@ print(int_sum.map(d_in=2))  # 10
 print(int_sum.check(d_in=2, d_out=10), float_sum.check(d_in=2, d_out=10.0))  # True False
 ```
 
-A person who contributes two records of at most 5 can move the sum by 10, and the integer sum's stability map says exactly that. The float sum's map says a little more than 10. Adding floats rounds, and a proof that covers the rounding must give the rounding its share. That extra is tiny, but `check` is a comparison. So the float sum fails at a `d_out` of exactly 10 while the integer sum passes. The lesson is to let the maps produce the distances rather than typing in the number you know from theory. The workflow section shows the same lesson once more, for a scale.
+A person who adds two records of at most 5 can move the sum by 10, and the integer sum's map says exactly 10. The float sum's map says a little more, because adding floats rounds, and the proof adds a margin for the rounding. The margin is tiny, but `check` is a strict comparison, so the float sum fails at exactly 10. So let the maps give you the distances, and do not type in the number you know from theory.
 
 ## Chaining a transformation and a measurement {#sec-frame-chain}
 
-A chain is where the framework pays off. Suppose a transformation's output domain and output metric equal a measurement's input domain and input metric. Then the `>>` operator joins them into a new measurement. Its function applies the transformation and then the measurement. Its input domain and metric are the transformation's, and its output measure is the measurement's. Its privacy map is the measurement's map applied to the transformation's map. The script builds the documentation's chain of a clamp, a sum and Laplace noise on the LFS. The vector is the `HWUSUAL` column, the hours a respondent usually works per week. The nulls and the code 99 for "not applicable" are dropped, which leaves 1,496,192 whole numbers of hours from 0 to 80.
+When a transformation's output domain and metric equal a measurement's input domain and metric, the `>>` operator joins them into a new measurement. The new measurement applies the transformation and then the measurement. Its privacy map applies the measurement's map to the output of the transformation's map. The script builds the documentation's chain of a clamp, a sum and Laplace noise on `HWUSUAL`, the hours a respondent usually works per week. Without the nulls and the code 99 for "not applicable", that is 1,496,192 whole numbers of hours from 0 to 80.
 
 ```{.python excerpt="frame-chain"}
 clamp = dp.t.make_clamp(dp.vector_domain(dp.atom_domain(T=int)), dp.symmetric_distance(), bounds=HOURS_BOUNDS)
@@ -178,7 +176,7 @@ sum_sensitivity_36 = bounded_sum.map(d_in=CONTRIBUTIONS)  # 36 rows
 epsilon_at_scale_5 = noisy_sum.map(d_in=CONTRIBUTIONS)
 ```
 
-Each constructor takes the previous object's output space as its input space, so the domains match by construction. The clamp turns a vector of any integers into a vector of integers in the public bounds 0 to 80, and the sum accepts exactly that domain. The script prints the fields along the chain and the maps.
+Each constructor takes the output space of the object before it as its input space, so the domains match by construction: the clamp outputs integers in 0 to 80, which the sum accepts. The script prints the fields and the maps along the chain.
 
 ```text
 clamp: input domain=VectorDomain(AtomDomain(T=i32))
@@ -190,7 +188,7 @@ chain scale 5: input metric=SymmetricDistance()  output measure=MaxDivergence
 chain scale 5: map(36)=576.0
 ```
 
-Read the distances from left to right. The clamp is 1-stable, since clipping values changes no record's count, so 36 records in give 36 records out. The sum's stability map turns a dataset distance into a sensitivity. One record of at most 80 hours moves the sum by at most 80. A person with 36 records moves it by 36 times as much, which is the 2880 printed. The chain's privacy map is the Laplace map applied to that sensitivity, and at a scale of 5 it says $\varepsilon = 576$. That is no privacy at all. The scale was chosen for one float in the documentation's example, not for a sum over 36 records of 80 hours. The map tells you so before anything is released.
+Read the distances from left to right. The clamp is 1-stable, because clipping adds or removes no record, so 36 records in give 36 out. The sum's map turns that into a sensitivity: one record moves the sum by at most 80 hours, so 36 records move it by at most 2880. The Laplace map at a scale of 5 then gives $\varepsilon = 576$, which is no privacy at all. That scale was chosen for one float, and the map shows the problem before anything is released.
 
 ```{.python excerpt="frame-chain-scale"}
 sum_scale = dp.binary_search_param(
@@ -206,11 +204,11 @@ chain for epsilon 1 at d_in 36: scale=2880.0 map(36)=1.0
 chain for epsilon 1 at d_in 36: 95% accuracy=8,628.2 (0.01532% of the sum)
 ```
 
-The right scale comes from the map, not from arithmetic. The utility `binary_search_param` takes a function from a scale to a chain. It searches for the largest scale whose `check` passes at the given distances, and it returns 2880, the sensitivity over $\varepsilon = 1$. Here `then_laplace` replaces `make_laplace`, since a `then_` constructor takes its input space from the object before it in the chain. The sum is an integer, so the noise is discrete Laplace and the error bar comes from the discrete accuracy function. An error of about 8,600 hours on a sum of 56 million hours is tiny. Sums over large datasets are the easy case in differential privacy. The release itself is below, in the block of one run. [Transformations](09-transformations.md) works out the stability of each transformation the library offers, and [Measurements](10-measurements.md) does the same for the mechanisms.
+The utility `binary_search_param` gets the right scale from the map. It takes a function from a scale to a chain and finds the smallest scale whose `check` passes, here 2880, the sensitivity over $\varepsilon = 1$. The chain uses `then_laplace`, because a `then_` constructor takes its input space from the object before it. The sum is an integer, so the noise is discrete Laplace, with the discrete accuracy function. An error of about 8,600 hours on 56 million is tiny, because a sum over a large dataset is the easy case. [Transformations](09-transformations.md) and [Measurements](10-measurements.md) give the maps of the other pieces.
 
 ## The typical workflow in both APIs {#sec-frame-workflow}
 
-The Context API is a layer over the framework, so the first chapter's five steps can be written in either. The script does both on the same hundred toy scores as [A first release](../part01-getting-started/01-first-release.md), drawn by the same seeded generator. So the scales can be compared with the ones you saw there. The first two steps are the privacy unit and the budget. The framework states the first as a distance and a metric, and the second as a distance and a measure.
+The Context API is a layer over the framework, so you can write the first chapter's five steps in either API. The script does both on the hundred toy scores of [A first release](../part01-getting-started/01-first-release.md), from the same seed, so the scales are comparable. The framework states the privacy unit as a distance and a metric, and the budget as a distance and a measure.
 
 ```{.python excerpt="frame-unit-loss"}
 d_in = 1  # neighbouring datasets differ by at most one row...
@@ -226,7 +224,7 @@ loss: d_out=1.0 output measure=MaxDivergence  (Context API: (MaxDivergence, 1.0)
 input domain: VectorDomain(AtomDomain(nan=true, T=f64))
 ```
 
-The pairs that `dp.unit_of` and `dp.loss_of` returned in the first chapter are these same objects. The framework also asks for the input domain up front, which the context inferred from the list you handed it. The domain allows NaN because a list of floats may contain one. The third step, the public bounds and the imputed value, is identical in both. The fourth step is to mediate access, and here the framework shows what a context is made of.
+These are the same pairs that `dp.unit_of` and `dp.loss_of` returned in the first chapter. The framework also asks for the input domain, which the context found from your list, and it allows NaN because a list of floats can hold one. The public bounds and the imputed value are the same in both APIs. The fourth step mediates access, and it shows what a context is made of.
 
 ```{.python excerpt="frame-mediate"}
 compositor = dp.c.make_adaptive_composition(
@@ -245,7 +243,7 @@ queryable: type=Queryable
 context accountant: type=Measurement d_mids=[0.3333, 0.3333, 0.3333]
 ```
 
-An **adaptive composition** is itself a measurement. Its privacy map at `d_in` is the sum of the shares, because the budgets of sequential releases add up. That is the composition property that [the full edition's chapter on properties](../../book-full/part03-dp-foundations/02-properties.md) proves. Invoking the composition on the data does not release anything. It returns a **queryable**, an object that holds the data and answers measurements submitted to it, one share at a time. The composition is adaptive because each measurement may depend on the answers before it. The context's `accountant` field is this same object, and its `d_mids` are the same three shares. The fifth step submits the queries, and each is built by hand.
+An **adaptive composition** is itself a measurement, whose privacy map is the sum of the shares, because the budgets of sequential releases add up ([the full edition's chapter on properties](../../book-full/part03-dp-foundations/02-properties.md)). When you invoke it on the data, it releases nothing. It returns a **queryable**, which holds the data and answers the measurements you submit, one share each. It is adaptive because each measurement may depend on the earlier answers. A context's `accountant` field is this same object, with the same shares. The fifth step submits the queries, each built by hand.
 
 ```{.python excerpt="frame-count"}
 count = dp.t.make_count(input_domain, input_metric)
@@ -265,7 +263,7 @@ count scale: framework=3.0000 context=3.0000 equal=True
 count: 95% accuracy=9.4457
 ```
 
-The count is a transformation whose stability map gives the sensitivity 1, and the Laplace measurement after it needs a scale. You know from theory that the scale is the sensitivity over a third of $\varepsilon$, which is 3. Typing in 3.0 fails the check, because one over three in floating point lands one rounding step above the share. The binary search returns a scale one rounding step above 3, which passes. It is bit for bit the scale that `context.query().count().laplace().param()` returned in the first chapter, because the context runs the same search. Submitting the measurement to the queryable spends the first share and returns the noisy count. The mean follows the first chapter's recipe, with the released count fixing the size.
+The count's stability map gives the sensitivity 1, so from theory the Laplace scale is 1 over a third of $\varepsilon$, which is 3. But a typed 3.0 fails the check, because one over three in floating point is one rounding step above the share. The search returns a scale one rounding step above 3, which passes. It is bit for bit the scale that `context.query().count().laplace().param()` gave in the first chapter, because the context runs the same search. The queryable spends the first share on the count. The mean uses the released count as its size, as in the first chapter.
 
 ```{.python excerpt="frame-mean"}
 mean = (
@@ -288,7 +286,7 @@ mean at size 100: 95% accuracy=8.9872
 mean scale at the released count: equal=True
 ```
 
-Four transformations chain into one, from a vector of floats with NaN allowed to a single float. The stability of the whole is the maps of the parts composed. At the true size of 100, one row moves the mean by at most 1, so the scale is again 3. The context gives the same scale, both at the true size and at the released count. The scale of the mean changes with the released count, so the page quotes the one at the true size, which is a development-time number on a public toy. A third query takes the last share, and a fourth is refused.
+The four transformations chain into one, and its stability is the maps of the parts composed. At the true size of 100, one row moves the mean by at most 1, so the scale is again 3, the same as the context's. The page quotes the scale at the true size, because the scale at the released count changes from run to run. A third query takes the last share, and the queryable refuses a fourth.
 
 ```{.python excerpt="frame-refused"}
 try:
@@ -302,7 +300,7 @@ except dp.OpenDPException as err:
 fourth query: FailedFunction: out of queries
 ```
 
-The queryable raises the library's own exception, with the variant `FailedFunction` and the message "out of queries". The context wrapped the same refusal in a `ValueError` about an exhausted allowance. The queryable also refuses a single query whose map exceeds its share, before it touches the data. What the framework version makes plain is that a context is three objects you can build yourself, namely a space, an adaptive composition over that space, and a queryable. So [Utilities and the Context API inside](12-utilities-and-the-context-api.md) follows a query through the context to show where each is used. Finally the releases of one run, read against their error bars.
+The queryable raises the library's own exception, which the context wrapped in a `ValueError`. It also refuses a query whose map is more than its share, before it touches the data. So a context is three objects you can build yourself: a space, an adaptive composition over it, and a queryable. [Utilities and the Context API inside](12-utilities-and-the-context-api.md) shows where a query uses each. Here are the releases of one run.
 
 ```text
 released (one run):
@@ -313,7 +311,7 @@ released (one run):
   third query, a second count 104
 ```
 
-The Laplace draw at scale 5 landed within its bar of about 15, and the sum of hours within its bar of about 8,600. The count and the mean landed within theirs. The comparison with the truth is possible only because the LFS sample and the toy scores are public. On real data you would read the error bars, which cost nothing, and release once.
+Each release landed within its error bar. You can compare them with the truth only because the LFS sample and the toy scores are public. On real data, read the error bars, which cost nothing, and release once.
 
 ## Summary
 
@@ -332,7 +330,7 @@ The Laplace draw at scale 5 landed within its bar of about 15, and the sum of ho
 | `smoothed_max_divergence()`, fixed | Approximate DP; `d_out` is a privacy profile, or one $(\varepsilon, \delta)$ pair | `make_fix_delta` turns the curve into the pair |
 | `obj.map(d_in)`, `obj.check(d_in, d_out)` | The smallest provable `d_out`; whether a proposed one fits | Let the map produce the distance; a hand-typed 3.0 fails by one rounding step |
 | `trans >> meas` | A measurement whose map composes the two maps | Domains and metrics must match; `then_` constructors match them for you |
-| `binary_search_param` | The largest scale whose chain passes `check` | What the Context API runs for `param()` |
+| `binary_search_param` | The smallest scale whose chain passes `check` | What the Context API runs for `param()` |
 | `make_adaptive_composition` | A measurement whose invocation returns a queryable | A context is this, over a space, plus the queryable |
 
 : The objects and elements of the framework, what each does, and the rule of thumb that goes with it. {#tbl-frame-summary}

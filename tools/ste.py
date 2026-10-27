@@ -13,10 +13,13 @@ is a report that points at sentences to reconsider, never a gate.
 """
 
 import argparse
+import fcntl
 import json
 import re
 import subprocess
 import sys
+import tempfile
+import time
 import tomllib
 from collections import Counter
 from dataclasses import asdict, dataclass, field
@@ -53,7 +56,7 @@ def blocks_of(book: str, page: str) -> list[Block]:
     return out
 
 
-def glossary(cfg: dict[str, Any]) -> Path:
+def glossary(cfg: dict[str, Any], out: Path) -> Path:
     """A stelint override that allows the books' technical names, and its glossaries.yaml."""
     acronyms, index = terms.load_terms()
     phrases = [a.expansion for a in acronyms.values()] + list(index) + [a for v in index.values() for a in v]
@@ -76,10 +79,9 @@ def glossary(cfg: dict[str, Any]) -> Path:
             "data": dict.fromkeys(nouns, "__REMOVE__"),
         },
     ]
-    OUT.mkdir(parents=True, exist_ok=True)
-    (OUT / "books.jsonl").write_text("".join(json.dumps(e) + "\n" for e in entries))
-    (OUT / "glossaries.yaml").write_text("glossaries:\n  - path: books.jsonl\n    cardinality: 100\n")
-    return OUT / "glossaries.yaml"
+    (out / "books.jsonl").write_text("".join(json.dumps(e) + "\n" for e in entries))
+    (out / "glossaries.yaml").write_text("glossaries:\n  - path: books.jsonl\n    cardinality: 100\n")
+    return out / "glossaries.yaml"
 
 
 def attach(output: str, lines: dict[int, Block], cfg: dict[str, Any]) -> int:
@@ -108,6 +110,37 @@ def attach(output: str, lines: dict[int, Block], cfg: dict[str, Any]) -> int:
     return len(seen)
 
 
+class stelint_slot:
+    """Hold one of a few machine-wide slots while stelint runs.
+
+    Each stelint run loads spaCy, about 500 MB. Many agents check pages at once, and on a shared
+    machine an unbounded number of runs exhausts memory, so every run takes one of `slots` file
+    locks in _build/ste/ and waits while all of them are held.
+    """
+
+    def __init__(self, slots: int) -> None:
+        self.slots = max(1, slots)
+        self.handle: Any = None
+
+    def __enter__(self) -> None:
+        OUT.mkdir(parents=True, exist_ok=True)
+        while True:
+            for i in range(self.slots):
+                handle = (OUT / f"slot-{i}.lock").open("w")
+                try:
+                    fcntl.flock(handle, fcntl.LOCK_EX | fcntl.LOCK_NB)
+                except BlockingIOError:
+                    handle.close()
+                    continue
+                self.handle = handle
+                return
+            time.sleep(2)
+
+    def __exit__(self, *exc: object) -> None:
+        fcntl.flock(self.handle, fcntl.LOCK_UN)
+        self.handle.close()
+
+
 def lint(book: str, pages: list[str], cfg: dict[str, Any]) -> list[Block]:
     """Run stelint once over every page's prose and attach each issue to its paragraph."""
     blocks = [b for p in pages for b in blocks_of(book, p)]
@@ -116,20 +149,23 @@ def lint(book: str, pages: list[str], cfg: dict[str, Any]) -> list[Block]:
     for b in blocks:
         lines[len(text) + 1] = b
         text += [b.text, ""]
-    source = OUT / (book.replace("/", "-") + ".md")
+    # Each run works in its own folder, so that runs started at the same time do not share files.
     OUT.mkdir(parents=True, exist_ok=True)
+    out = Path(tempfile.mkdtemp(prefix=book.replace("/", "-") + "-", dir=OUT))
+    source = out / "prose.md"
     source.write_text("\n".join(text))
     runner = cast(list[str], cfg["runner"])
-    config_file = glossary(cfg)
+    config_file = glossary(cfg, out)
     # stelint 0.1.5 applies `--glossaries` only after its checks have imported the base lists, so it
     # runs in the glossary's folder, where it also finds glossaries.yaml at import time.
-    run = subprocess.run(
-        [*runner, "--glossaries", config_file.name, source.name],
-        capture_output=True,
-        text=True,
-        check=False,
-        cwd=OUT,
-    )
+    with stelint_slot(int(cfg.get("max_parallel", 2))):
+        run = subprocess.run(
+            [*runner, "--glossaries", config_file.name, source.name],
+            capture_output=True,
+            text=True,
+            check=False,
+            cwd=out,
+        )
     found = attach(run.stdout, lines, cfg)
     if "Traceback" in run.stderr or (run.returncode not in (0, 1) and not found):
         sys.exit(f"stelint failed:\n{run.stderr[-2000:]}")

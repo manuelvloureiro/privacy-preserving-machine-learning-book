@@ -2,7 +2,7 @@
 
 ## Why this matters
 
-A model trained with differential privacy (DP) is reported with a privacy level $\varepsilon$ and a small slack $\delta$. The procedure that computes $\varepsilon$ is an **accountant**, and the same run can get 6.24 or 24,379.55 depending on which one you use. @tbl-choose-main shows three, advanced composition, Rényi differential privacy (RDP) and the privacy loss distribution (PLD), on one run of private stochastic gradient descent (SGD), called DP-SGD. Each record joins each batch with probability $q = 0.01$, the sampling rate, and the noise multiplier $\sigma$, the noise as a multiple of the clipping norm, is 1.
+You report a model trained with differential privacy (DP) with a privacy level $\varepsilon$ and a small slack $\delta$. The code that computes $\varepsilon$ is an **accountant**, and the same run can get 6.24 from one accountant and 24,379.55 from another. @tbl-choose-main runs three accountants on one run of private stochastic gradient descent (SGD), called DP-SGD. They are advanced composition, Rényi differential privacy (RDP) and the privacy loss distribution (PLD). Each record joins each batch with probability $q = 0.01$, the sampling rate. The noise multiplier $\sigma$, the noise as a multiple of the clipping norm, is 1.
 
 | Steps | Advanced composition | RDP, improved | PLD upper | PLD lower |
 | --- | --- | --- | --- | --- |
@@ -11,11 +11,11 @@ A model trained with differential privacy (DP) is reported with a privacy level 
 
 : One DP-SGD run, $q = 0.01$ and $\sigma = 1$, under three accountants: $\varepsilon$ at $\delta = 10^{-5}$. The PLD columns round the privacy loss up and down to a grid of width $10^{-5}$, so they bracket the true value. {#tbl-choose-main}
 
-Only the PLD's lower column is a lower bound, so the true $\varepsilon$ lies between the two PLD columns. Advanced composition, which adds up each step's guarantee, is useless here, and RDP still overstates $\varepsilon$, by 14.6% on the shorter run and 7.6% on the longer one. Hence the chapter's rule. **Report the tightest upper bound whose assumptions hold for the code you ran, and give enough detail that someone else can recompute it.**
+The true $\varepsilon$ lies between the two PLD columns, because the lower PLD column is a lower bound. Advanced composition, which adds up the guarantees of the steps, is useless here. RDP is much closer, but it still overstates $\varepsilon$, by 14.6% on the shorter run and by 7.6% on the longer one. This gives the rule of the chapter. **Report the tightest upper bound whose assumptions hold for the code you ran, and give enough detail that someone else can recompute it.**
 
 ## Which accountant {#sec-choose-decision}
 
-An accountant is tight only when the summary it keeps of each step fits the mechanism, so the mechanism decides (@tbl-choose-decision).
+An accountant is tight only when its summary of each step fits the mechanism. So let the mechanism choose the accountant (@tbl-choose-decision).
 
 | Mechanism | Report with | Avoid |
 | --- | --- | --- |
@@ -29,41 +29,21 @@ An accountant is tight only when the summary it keeps of each step fits the mech
 
 : Which accountant to report for which mechanism. {#tbl-choose-decision}
 
-The GDP CLT is an approximation, not a bound. After 1,000 steps it gives 1.6177, below the PLD's certified lower value of 1.8232, a guarantee the run does not have. Opacus's `"gdp"` accountant is this CLT, so never report it; its default PRV accountant is safe.
+The GDP CLT is an approximation, not a bound. After 1,000 steps it gives 1.6177, which is below the certified lower value of the PLD, 1.8232. So it claims a guarantee that the run does not have. Opacus's `"gdp"` accountant is this CLT, so do not report it. The default PRV accountant of Opacus is safe.
 
 ## The inverse problem: noise for a target ε {#sec-choose-inverse}
 
-Usually you fix the target $\varepsilon$, batch size and epochs, and ask for the smallest $\sigma$ that meets them. A looser accountant overstates $\varepsilon$, so it asks for more noise. For a target of 3 on the 10,000-step run, RDP needs 1.662 and the PLD only 1.584. So calibrate with the accountant you will report, passing `accountant="prv"` to Opacus's `get_noise_multiplier`, whose default is `"rdp"` ([Calibrate and account a DP-SGD run](10-calibrate-dp-sgd.md)).
+Usually you fix the target $\varepsilon$, the batch size and the number of epochs, and you ask for the smallest $\sigma$ that meets them. A looser accountant overstates $\varepsilon$, so it asks for more noise. For a target of 3 on the 10,000-step run, RDP needs a noise multiplier of 1.662 and the PLD only 1.584. So calibrate with the accountant that you will report. Opacus's `get_noise_multiplier` uses `"rdp"` by default, so give it `accountant="prv"` ([Calibrate and account a DP-SGD run](10-calibrate-dp-sgd.md)).
 
 ## Choosing δ {#sec-choose-delta}
 
-Treat $\delta$ roughly as the chance that the guarantee fails for someone, possibly badly. On a dataset of $n$ people, publishing one random record in full meets a $\delta$ of about $1/n$ with $\varepsilon$ zero, yet exposes someone completely. So $\delta$ must sit well below $1/n$. This book follows Ponomareva et al. (2023) and chooses
-$$\delta \le \frac{1}{n^{1.1}}, \quad \text{rounded down to a power of ten.}$$ {#eq-choose-delta}
-Count $n$ in the unit the claim protects, which at the user level means users, not records.
+Choose $\delta$ by the rule of this book, which for $n$ people is at most $1/n^{1.1}$, rounded down to a power of ten ([How small δ must be](../part03-dp-foundations/01-definition.md#sec-dpdef-small-delta)). Count $n$ in the unit that the claim protects, which at the user level means users, not records. For example, run the 10,000 steps of @tbl-choose-main on 50,000 records. At $q = 0.01$, that is 100 epochs. For 50,000 records the rule gives $10^{-6}$, so the $10^{-5}$ of the table fails it. The US National Institute of Standards and Technology (NIST) recommends the stricter $1/n^2$, so report $\varepsilon$ there too.
 
-For example, run the 10,000 steps of @tbl-choose-main on 50,000 records, which at $q = 0.01$ is 100 epochs. Then $1/n^{1.1}$ is $6.8\times10^{-6}$, which rounds down to $10^{-6}$. The table's $10^{-5}$ is half of $1/n$, so it fails the rule. The US National Institute of Standards and Technology (NIST) recommends the stricter $1/n^2$, so report $\varepsilon$ there too.
-
-## The statement {#sec-choose-report}
-
-@tbl-choose-statement fills in the items that Ponomareva et al. (2023) and NIST ask for, for the run on 50,000 records.
-
-| Item | The run on 50,000 records |
-| --- | --- |
-| Setting | DP-SGD in the central model, covering every checkpoint and the final model |
-| Unit and neighbours | One record per person; neighbours add or remove one record |
-| Training | Poisson sampling at $q = 0.01$, 10,000 steps (100 epochs), clipping norm 1, noise multiplier 1 |
-| Accountant | PLD, upper value, on the grid $10^{-5}$, with the library's version |
-| Guarantee | $(6.96, 10^{-6})$ and, at $1/n^2$, $(9.06, 4.0\times10^{-10})$; the PLD's lower values, 6.8574 and 8.9378, show how far each could still fall |
-| Other data | No pretrained weights; no preprocessing fitted on private rows; validation rows held out and not protected |
-| Not covered | Nothing: hyperparameters were tuned on a public proxy dataset, so no tuning run touched the private data |
-
-: A filled privacy statement. {#tbl-choose-statement}
-
-Round an upper bound up, because a lower value is one the accountant has not certified. So the PLD's upper value at $10^{-6}$, 6.9574, becomes 6.96. And publish the value of the accountant you name: with `dp_accounting`'s PLD, which gives 6.9074 (@sec-choose-check), the claim is 6.91. [Calibrate and account a DP-SGD run](10-calibrate-dp-sgd.md#sec-calib-statement) prints such a statement from code.
+Publish the upper value of the accountant that you name, rounded up, because the accountant does not certify a lower value. [Write the statement](../part05-dp-ml/12-release-governance.md#sec-relgov-statement) shows the full privacy statement that carries these numbers.
 
 ## Matching the accountant to the code {#sec-choose-match}
 
-An accountant's number holds only if the code does what its theorem assumes. Many papers have reported the Poisson-sampling number while training with shuffled fixed-size batches, a different algorithm (Ponomareva et al. 2023). So check @tbl-choose-checklist against the code before you report.
+The number of an accountant holds only if the code does what its theorem assumes. Many papers reported the number for Poisson sampling but trained with shuffled batches of fixed size, a different algorithm (Ponomareva et al. 2023). So check the code against @tbl-choose-checklist before you report.
 
 | Item | The accountant assumes | Check in the code | If it does not match |
 | --- | --- | --- | --- |
@@ -75,46 +55,15 @@ An accountant's number holds only if the code does what its theorem assumes. Man
 
 : A checklist for matching the accountant to the training code. {#tbl-choose-checklist}
 
-The sampler costs the most. At $10^{-5}$, the 6.19 that `dp_accounting`'s PLD gives under Poisson sampling becomes 43.37 with fixed-size batches, and 91.82, for zero-out neighbours only, with shuffle and partition ([Subsampling](05-subsampling.md#sec-sub-dpsgd)).
+The sampler has the largest effect. Under Poisson sampling, the PLD of `dp_accounting` gives 6.19 at $\delta = 10^{-5}$, but batches of fixed size raise this to 43.37. Shuffle and partition raise it to 91.82, and that number holds only for zero-out neighbours ([Subsampling](05-subsampling.md#sec-sub-dpsgd)).
 
-## Reviewing someone else's claim {#sec-choose-review}
-
-A reviewer works in this order.
-
-1. Ask for the inputs of @tbl-choose-statement, and reject a claim that cannot be recomputed.
-2. Check $\delta$ against @eq-choose-delta, with $n$ counted in the claim's unit.
-3. Recompute $\varepsilon$ with a different library, and expect agreement within a few percent. A PLD accountant's `get_delta` at the claimed $\varepsilon$ gives the $\delta$ at which it holds. A claim well above your value is valid but loose.
-4. Read the training code against @tbl-choose-checklist, starting with the sampler.
-5. Ask what the claim leaves out, such as tuning runs, pretraining data and preprocessing fitted on the private rows.
-
-For example, a team claims $(2, 10^{-5})$-DP for a model trained on one million users with noise multiplier 0.65. Batches of 1,000 users make the sampling rate $q$ 0.001, and 10 epochs 10,000 steps, but the loader shuffles and takes fixed batches. This snippet does steps 2 and 3, then accounts for the loader as it ran.
-
-```python
-from math import floor, log10
-
-from dp_accounting import GaussianDpEvent, PoissonSampledDpEvent, SelfComposedDpEvent
-from dp_accounting.pld import PLDAccountant
-
-n, q, sigma, steps, epochs = 1_000_000, 0.001, 0.65, 10_000, 10  # the claim's parameters
-delta = 10.0 ** floor(log10(n**-1.1))  # the book's rule for one million users
-print(f"{delta:.0e}")  # 1e-07
-poisson = SelfComposedDpEvent(PoissonSampledDpEvent(q, GaussianDpEvent(sigma)), steps)
-pld = PLDAccountant(value_discretization_interval=1e-4).compose(poisson)
-print(f"{pld.get_epsilon(1e-5):.2f}")  # 1.72
-print(f"{pld.get_delta(2.0):.1e}")  # 3.0e-06
-print(f"{pld.get_epsilon(delta):.2f}")  # 2.84
-# What the loader ran: shuffle and partition, zero-out neighbours, no amplification
-shuffled = SelfComposedDpEvent(GaussianDpEvent(sigma), epochs)
-print(f"{PLDAccountant(value_discretization_interval=1e-4).compose(shuffled).get_epsilon(delta):.2f}")  # 36.45
-```
-
-The arithmetic holds up, since the claim's parameters give 1.72 at its $\delta$. But that $\delta$ is a hundred times the rule's $10^{-7}$, at which the run gives 2.84. And the loader voids both numbers, which assume Poisson sampling. What the code ran is certified only at 36.45, for zero-out neighbours, so the review asks for a Poisson loader and a $\delta$ of $10^{-7}$.
+A review of someone else's claim also uses this checklist, in the order that [Review someone else's claim](../part05-dp-ml/12-release-governance.md#sec-relgov-review) gives.
 
 ## Checking an accountant {#sec-choose-check}
 
-An accountant is code, so test it on known answers. With sampling rate $q = 1$, each step is a plain Gaussian mechanism, whose composition is exact ([f-DP and Gaussian DP](04-gaussian-dp.md)). Ten such steps at noise multiplier 1 are exactly $(17.8566, 10^{-5})$-DP, so an upper bound must lie above 17.8566 and a PLD bracket must contain it. Also, $\varepsilon$ must never fall as steps grow or rise as noise grows.
+An accountant is code, so test it on known answers. With sampling rate $q = 1$, each step is a plain Gaussian mechanism, and the composition of such steps is exact ([f-DP and Gaussian DP](04-gaussian-dp.md)). Ten such steps at noise multiplier 1 are exactly $(17.8566, 10^{-5})$-DP. So an upper bound must be above 17.8566, and a PLD bracket must contain it. Also, $\varepsilon$ must not decrease when you add steps, and it must not increase when you add noise.
 
-Then compare two maintained libraries, with pinned versions. This snippet recomputes @tbl-choose-main with Google's `dp_accounting`.
+Then compare two maintained libraries at pinned versions. This snippet recomputes @tbl-choose-main with Google's `dp_accounting`.
 
 ```python
 import dp_accounting
@@ -129,18 +78,18 @@ print(f"{pld.get_epsilon(1e-5):.4f} {rdp.get_epsilon(1e-5):.4f}")  # 6.1877 6.71
 print(f"{pld.get_epsilon(1e-6):.4f} {rdp.get_epsilon(1e-6):.4f}")  # 6.9074 7.4869
 ```
 
-Each PLD value lies inside the table's bracket, and each RDP value sits just above the table's, which also tries fractional orders. When libraries disagree, look for three causes. RDP values that differ by an amount depending only on the order, 0.3612 at order 10, come from different conversions ([RDP conversions](02-rdp-conversions.md)). PLD brackets that do not overlap mean a bug. And a factor of two often means different neighbouring relations.
+Each PLD value is inside the bracket of the table. Each RDP value is just above the value in the table, because the table also tries fractional orders. When libraries disagree, look for three causes. If two RDP values differ by an amount that depends only on the order, such as 0.3612 at order 10, the libraries use different conversions ([RDP conversions](02-rdp-conversions.md)). If two PLD brackets do not overlap, one library has a bug. A factor of two often comes from different neighbouring relations.
 
 ## Cheat sheet
 
 | Question | Default | Check |
 | --- | --- | --- |
 | Accountant for DP-SGD | PLD or PRV, upper value | RDP lies above it; never report the CLT |
-| $\delta$ | $1/n^{1.1}$ rounded down, $n$ counted in the claim's unit | Also report $\varepsilon$ at $1/n^2$ |
+| $\delta$ | The rule of [How small δ must be](../part03-dp-foundations/01-definition.md#sec-dpdef-small-delta), $n$ counted in the claim's unit | Also report $\varepsilon$ at $1/n^2$ |
 | Fixed-size batches | Poisson accountant at $\sigma/2$ (add/remove); replace-one: see [Subsampling](05-subsampling.md#sec-sub-schemes) | Poisson batch sizes vary from step to step |
 | Shuffle and partition | One Gaussian step per epoch, zero-out neighbours | Better, switch to Opacus's Poisson loader |
 
-: Reporting and reviewing an $\varepsilon$ claim. {#tbl-choose-cheat}
+: Choosing and checking an accountant. {#tbl-choose-cheat}
 
 ## References
 

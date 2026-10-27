@@ -1,12 +1,6 @@
 # Private Learning and Statistics
 
-The earlier parts released statistics of a fixed dataset under differential privacy (DP). This part turns to the goals of machine learning and statistics: fitting models, and learning about the population from which the data was drawn.
-
-It opens by asking what privacy should protect. A trained model can predict a person's sensitive label, and the prediction can feel like a leak even when nothing about that person's record was used. [The first chapter](01-privacy-violations.md) separates the inferences the definition is designed to allow from those it rules out. It proves that a private learner can still find a rule that holds in the population, and that it cannot memorize a secret held in one person's records.
-
-The next two chapters train models privately. [Private empirical risk minimization](02-private-erm.md) handles convex losses, and adds noise to the output of a solver, to its objective or to each gradient step. Noisy stochastic gradient descent comes with proofs of both privacy and accuracy. [Private deep learning](03-private-deep-learning.md) carries that algorithm over to neural networks by clipping gradients. It replaces composition with a tighter accounting based on the moments of the privacy loss, and it presents a second route, a private vote among models trained on disjoint parts of the data.
-
-The last two chapters study the population. [Private mean estimation](04-mean-estimation.md) asks how many samples a private algorithm needs to estimate the mean of a distribution, from bounded data to unbounded Gaussians and heavy-tailed data. [Adaptive data analysis](05-adaptive-data-analysis.md) shows that reusing one dataset for questions chosen in sequence makes the answers overfit the sample. Answering through a private mechanism prevents this, because a private algorithm cannot find a question on which the sample and the population disagree.
+The earlier parts released statistics of a fixed dataset under differential privacy (DP). This part turns to the goals of machine learning and statistics, which are to fit models and to learn about the population that the data comes from. It starts with the question of what privacy must protect, because a model can predict a person's sensitive label without any use of that person's record. Then it trains convex models and neural networks privately, and finds how many samples a private estimate of a population mean needs. Last, it shows that a private mechanism lets one dataset answer adaptively chosen questions without overfitting. @tbl-p4-chapters gives the question of each chapter.
 
 | Chapter | Question it answers |
 | --- | --- |

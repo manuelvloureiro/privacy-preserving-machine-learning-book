@@ -1,10 +1,10 @@
 # Transformations
 
-Every query of the previous parts began with the data and ended with noise, and in between stood a chain of steps that cast, imputed, clamped, resized and aggregated. In OpenDP each of those steps is a **transformation**, a function from data to data that comes with a promise about how much its output can change when its input changes. [A framework to understand differential privacy](08-a-framework-for-privacy.md) introduced that promise as the stability map. This chapter builds the transformations themselves, from the preprocessing steps to the sum, the mean and the scores behind a quantile, and shows how the promise travels down a chain.
+Every query of the previous parts started with the data and ended with noise, with a chain of steps between them that cast, imputed, clamped, resized and aggregated. In OpenDP each step is a **transformation**, a function from data to data. Its stability map bounds how much its output can change when its input changes ([A framework to understand differential privacy](08-a-framework-for-privacy.md)). This chapter builds the transformations, from preprocessing to the sum, the mean and the quantile scores, and shows how stability passes along a chain.
 
-The idea that holds the chapter together is that a chain is only as good as the match between its links. Each transformation has an input space and an output space, and the output space of one must be exactly the input space of the next. That match is what makes the stability of a chain the product of the stabilities of its parts. It is also why so many constructors exist, because each one takes the data one provable step closer to the shape an aggregator needs. By the end you will be able to build a sum, a mean or a median's scores from the framework alone and read off the sensitivity for your privacy unit. You will also recognize the error OpenDP raises when two spaces do not match.
+A chain works only when the output space of each step is exactly the input space of the next. Then the chain's stability map applies the maps of its steps in turn. At the end of the chapter, you can build a sum, a mean or a median's scores from the framework alone. You can also read the sensitivity for your privacy unit, and recognize the error that OpenDP raises when two spaces do not match.
 
-The script [opendp_transformations.py](../../code/part03-framework/opendp_transformations.py) runs every step on OpenDP 0.16.0 with the Labour Force Survey (LFS) sample. Its vector is the `HWUSUAL` column, the hours a respondent usually works, without its nulls and without the code 99 for "not applicable", cast to integers. The sensitivities, scales, accuracies, scores and true values it prints are the same on every run. The released values are not, because OpenDP's noise cannot be seeded, and neither is a float sum that truncates its input by a random sample. Those appear in one block marked as one run. The short snippets use toy vectors instead and print only what is deterministic.
+The script [opendp_transformations.py](../../code/part03-framework/opendp_transformations.py) runs every step on OpenDP 0.16.0 with the Labour Force Survey (LFS) sample. Its vector is the `HWUSUAL` column, the hours a respondent usually works, as integers, without its nulls and the code 99 for "not applicable". The sensitivities, scales, accuracies, scores and true values are the same on every run. The noisy releases change, because OpenDP's noise cannot be seeded, and so does a float sum that keeps a random sample of its input. They are in one block marked as one run.
 
 ```bash
 uv run python code/part03-framework/opendp_transformations.py
@@ -12,7 +12,7 @@ uv run python code/part03-framework/opendp_transformations.py
 
 ## Constructors and chains {#sec-trans-chains}
 
-Every constructor comes in two forms. The `make_` form takes the input space first, as a domain and a metric, and then the constructor's own arguments, so `make_clamp(input_domain, input_metric, bounds)` is the full call. The `then_` form leaves the space out. It returns a partial constructor, and the `>>` operator fills in the space from whatever stands to its left, either a space written as a tuple or a transformation whose output space is used. The two forms build the same object, and the snippet shows both.
+Every constructor has two forms. The `make_` form takes the input space first, as a domain and a metric, and then its own arguments, as in `make_clamp(input_domain, input_metric, bounds)`. The `then_` form leaves the space out. It returns a partial constructor, and `>>` fills in the space from the object to its left, which is a space written as a tuple or a transformation. The two forms build the same object.
 
 ```python
 import opendp.prelude as dp
@@ -29,17 +29,17 @@ print(chain.output_space)  # (AtomDomain(T=i32), AbsoluteDistance(i32))
 print(clamp.map(1), total.map(1), chain.map(1))  # 1 10 10
 ```
 
-Clamping changes the domain and not the metric. The input domain was the vectors of integers, and the output domain is the vectors of integers between 0 and 10. The metric is still the symmetric distance, which counts the rows you must add or remove to turn one vector into the other. The sum then takes that output space as its input space, which `make_sum(*clamp.output_space)` says literally, and its own output is a single integer under the absolute distance. Reading `output_space` after each step is the habit this chapter teaches, because the next constructor must accept exactly that space. When it does not, the chain refuses to build, as @sec-trans-reading shows.
+The clamp changes the domain and not the metric. Its output is vectors of integers between 0 and 10, still under the symmetric distance, the number of rows to add or remove to turn one vector into the other. The sum takes that output space as its input space, as `make_sum(*clamp.output_space)` says, and outputs one integer under the absolute distance. So read `output_space` after each step, because the next constructor must accept exactly that space (@sec-trans-reading).
 
-The number that `map` returns is the transformation's **stability**, the largest change in the output for inputs at most `d_in` apart, each change measured in its own metric. For the clamp it is 1, because one added row of the input is one added row of the output. For the sum it is 10, because one added row can add at most the larger bound to the total. For the chain it is the product of the two. When the last step of a chain is an aggregator, its stability is what differential privacy calls the sensitivity of the query, which [the full edition's chapter on sensitivity](../../book-full/part03-dp-foundations/07-sensitivity.md) derives for sums, means and histograms. That number is what a measurement needs to calibrate its noise.
+The number that `map` returns is the **stability**, the largest change in the output for inputs at most `d_in` apart. For the clamp it is 1, because one added row in gives one added row out. For the sum it is 10, the larger bound, and for the chain it is the sum's map applied to the clamp's. When a chain ends with an aggregator, its stability is the sensitivity of the query, the number a measurement needs to calibrate its noise. [The full edition's chapter on sensitivity](../../book-full/part03-dp-foundations/07-sensitivity.md) derives it for sums, means and histograms.
 
 ## Preprocessing {#sec-trans-preprocessing}
 
-Preprocessing turns the data into the domain an aggregator accepts, and every aggregator states that domain. The sum wants bounded values, for example, while the mean wants bounded values and a known size. The documentation lists the preprocessing constructors in the order you typically chain them, which is casting, imputing, clamping and resizing, and the subsections below keep that order. All but one of them work row by row, so one added row of the input is one added row of the output and the stability is 1. The exception is the resize.
+Preprocessing turns the data into the domain that an aggregator accepts: the sum needs bounded values, and the mean needs bounded values and a known size. The documentation lists the preprocessing constructors in the usual order of a chain, which is cast, impute, clamp and resize, and the subsections keep that order. All of them except the resize work row by row, so one added row in is one added row out, and the stability is 1.
 
 ### Casting and imputing
 
-Data read from a file arrive as strings, and `make_cast` turns a vector of strings into a vector of another type. A string that does not parse becomes a missing value, so the output domain is a vector of options, a type that holds either a value or nothing. No aggregator accepts options, for a reason the documentation states plainly. An aggregator that skipped the missing values would understate the sensitivity of the people with values, and one that propagated them would reveal whether anything was missing. So the missing values have to go first. `make_impute_constant` replaces each with a value of your choice, and `make_drop_null` removes the rows. `make_cast_default` folds the cast and the imputation into one step, with the type's default standing in, which is 0 for numbers.
+Data from a file are strings, and `make_cast` turns a vector of strings into a vector of another type. A string that does not parse becomes a missing value, so the output is a vector of options, which hold a value or nothing. No aggregator accepts options. If it skipped the missing values, it would understate the sensitivity, and if it kept them, it would show whether a value was missing. So remove them first. The step `make_impute_constant` puts in a value you choose, and `make_drop_null` drops the rows. The step `make_cast_default` casts and imputes the type's default, 0 for numbers.
 
 ```python
 import opendp.prelude as dp
@@ -60,13 +60,13 @@ print(uniform.output_domain)  # VectorDomain(AtomDomain(T=f64))
 print(cast.map(1), imputed.map(1), uniform.map(1))  # 1 1 1
 ```
 
-Floats carry their own missing value, the not-a-number value, and the domain says whether it is allowed. The plain `atom_domain(T=float)` allows it, which the `nan=true` in the printed domain records. `make_impute_constant` accepts that domain too, and `make_impute_uniform_float` replaces each missing float by a uniform draw from the bounds you pass, so that imputed values do not pile up at one point. Both output the domain without `nan`, which is the one the aggregators want. The stability of every step here is 1, as the last line shows. [Preparing microdata](../part02-tabular-data/06-preparing-microdata.md) does the same preparation on a whole table through Polars, inside the guarantee.
+Floats have their own missing value, NaN, which the plain `atom_domain(T=float)` allows, as the printed `nan=true` shows. The constructor `make_impute_constant` accepts that domain too. And `make_impute_uniform_float` replaces each NaN by a uniform draw from the bounds you give, so that imputed values do not collect at one point. Both output the domain without NaN that the aggregators need, with a stability of 1. [Preparing microdata](../part02-tabular-data/06-preparing-microdata.md) does the same on a whole table through Polars.
 
 ### Clamping and resizing
 
-Clamping pins every value into public bounds. A value below the lower bound becomes the lower bound, and a value above the upper becomes the upper. It changes nothing in between, so it costs no accuracy on data that already lie within the bounds, and it is what makes the sum's sensitivity finite. Without a bound, one person could move a sum by any amount, and no finite noise could hide them. The bounds must come from public knowledge, such as a codebook, never from looking at the data, because a bound read off the data leaks it.
+Clamping moves every value into public bounds: a value below the lower bound becomes the lower bound, and a value above the upper becomes the upper. So it costs no accuracy on data that are already in the bounds, and it makes the sum's sensitivity finite. Take the bounds from public knowledge, such as a codebook. Do not take them from the data, because a bound read from the data leaks it.
 
-Resizing is the step with a stability of 2. It takes a target size and makes every vector that size: a shorter vector is padded with a constant, and a longer one is cut down by a random sample. It exists because some aggregators, the mean and the variance among them, must know how many rows they divide by, and the number of rows is itself private. The resize writes a size into the domain, which from then on OpenDP treats as public, and that size can be a guess, a released count or public knowledge. The stability follows from one case. Add one row to an input that was shorter than the target. The output gains that row and loses one padded row, so two rows changed for one.
+Resizing has a stability of 2. It pads a vector shorter than the target size with a constant, and cuts a longer one down by a random sample. The mean and the variance need it, because they must know the number of rows they divide by, and that number is private. So the resize writes a size into the domain, which OpenDP then treats as public: a guess, a released count or public knowledge. For the stability, add one row to an input shorter than the target. The output gains that row and loses one padded row, so two rows change for one.
 
 ```python
 import opendp.prelude as dp
@@ -81,11 +81,11 @@ print(resize.output_domain)  # VectorDomain(AtomDomain(bounds=[0.0, 10.0], T=f64
 print(resize.map(1))  # 2
 ```
 
-The documentation's resize page shows by simulation what a wrong target does. A target below the true size throws rows away, which widens the spread of the mean that follows. A target above it pads with the constant, which pulls that mean toward it. Neither error appears in an error bar, because the size is treated as true. Nor can the resize warn you, since an error that depended on the true size would leak it. So spend a little budget on a count first, as the previous chapters did, because a count has a sensitivity of 1 and lands close to the truth.
+A wrong target biases the result, as the documentation's resize page shows. A target below the true size throws rows away, which widens the spread of the mean, and a target above it pulls the mean toward the constant. No error bar shows either error, because the size is treated as true, and the resize cannot warn you without leaking the true size. So spend a little budget on a count first, which lands close to the truth because its sensitivity is 1.
 
 ### Categories and bins
 
-Categorical data go through three constructors that map between values and indices. `make_find` replaces each value by its position in a category list, and a value outside the list becomes a missing index, so an imputation follows and gives it the next index. `make_find_bin` turns a number into the index of the bin it falls in, given the bin edges, and `make_index` goes the other way, from an index back to a label.
+Three constructors map between categorical values and indices. The first, `make_find`, replaces each value by its position in a list of categories. A value outside the list becomes a missing index, so an imputation follows and gives it the next index. The step `make_find_bin` turns a number into the index of its bin, from the bin edges, and `make_index` turns an index back into a label.
 
 ```python
 import opendp.prelude as dp
@@ -104,11 +104,11 @@ print(counts(["A", "B", "C", "A", "D"]))  # [2, 1, 1, 1]
 print(counts.output_metric, counts.map(1))  # L1Distance(i32) 1
 ```
 
-The aggregator that goes with them is `make_count_by_categories`. It counts how often each category occurs and appends a count of everything else, unless you turn that off with `null_category=False`. Its output is a vector of counts, so its output metric is a vector norm. The default is the $L_1$ distance, which chains with Laplace noise, and the `MO` argument switches it to the $L_2$ distance, which chains with Gaussian noise. Adding one row changes one count by one, so the stability is 1 in either norm.
+The aggregator for categories is `make_count_by_categories`, which counts each category and adds a count of all other values unless you set `null_category=False`. Its output is a vector of counts, so its output metric is a vector norm. The default $L_1$ distance goes with Laplace noise, and the $L_2$ distance, through the `MO` argument, goes with Gaussian noise. One added row changes one count by one, so the stability is 1 in either norm.
 
 ## The sum {#sec-trans-sum}
 
-The sum is the aggregator everything else is built on, and its documentation page is a study in where sensitivity comes from. Start with integers in public bounds and no known size.
+The sum is the base of the other aggregators, and its documentation page shows where sensitivity comes from. Start with integers in public bounds and no known size.
 
 ```python
 import opendp.prelude as dp
@@ -122,9 +122,9 @@ sized_total = sized >> dp.t.then_sum()
 print([sized_total.map(d) for d in range(5)])  # [0, 0, 20, 20, 40]
 ```
 
-Adding one row changes the sum by at most the larger of the two bounds in absolute value, here 10, and that is what `map(1)` reports. When the dataset's size is public, you write it into the domain and the sum uses a tighter bound. Two datasets of the same size cannot differ by one row. The nearest neighbours differ by one row replaced, which is one removal and one addition, a symmetric distance of 2. A replacement changes the sum by at most the width of the bounds, and that is `map(2)`. Odd distances round down, which gives the staircase in the last line. A distance of 1 maps to 0 because no two datasets of the same size are one row apart.
+One added row changes the sum by at most the larger bound in absolute value, here 10, which is `map(1)`. When the size is public, you write it into the domain, and the bound is tighter. Two datasets of the same size differ at least by one replaced row, which is one removal and one addition, a symmetric distance of 2. A replacement changes the sum by at most the width of the bounds, which is `map(2)`. Odd distances round down, so `map(1)` is 0 and the last line is a staircase.
 
-On the survey the same two calls read as follows. The vector is built once with Polars, and the chain clamps the hours into the codebook's bounds, 0 to 98, and sums them.
+On the survey, the script builds the vector once with Polars, and the chain clamps the hours into the codebook's bounds, 0 to 98, and sums them.
 
 ```{.python excerpt="trans-hours"}
 def hours_usually_worked(frame: pl.LazyFrame) -> list[int]:
@@ -147,9 +147,9 @@ int sum: value 56,315,594  map(1)=98  map(36)=3528
 sized int sum: map(36)=1764  map(35)=1666
 ```
 
-The privacy unit of this survey is one person, who appears at most 36 times, so every map on this page is read at an input distance of 36. Without a size the sensitivity is that many added rows of 98 hours each, which is 3,528 hours. With the size in the domain it is 18 replacements, which is half as much, and an odd distance of 35 rounds down to 17 replacements. The Polars filter that builds the vector runs outside OpenDP, as data preparation this chapter does not protect. [Preparing microdata](../part02-tabular-data/06-preparing-microdata.md) runs the same filter inside the guarantee, and [Essential statistics](../part02-tabular-data/03-essential-statistics.md) releases this sum through the Context API.
+Every map on this page is read at an input distance of 36, the most rows one person has ([the privacy unit](../part01-getting-started/02-the-data-and-the-context.md#sec-ctx-context)). Without a size, the sensitivity is 36 rows of 98 hours, which is 3,528 hours. With the size, it is half that, 18 replacements, and a distance of 35 rounds down to 17. But the Polars filter runs outside OpenDP, so the guarantee does not cover it. [Preparing microdata](../part02-tabular-data/06-preparing-microdata.md) runs it inside the guarantee, and [Essential statistics](../part02-tabular-data/03-essential-statistics.md) releases this sum through the Context API.
 
-Floats behave differently, for two reasons that the documentation's sum page sets out. The first is rounding. Adding floats rounds each partial sum to the nearest representable number. So two datasets at distance 2 can have sums that differ by a little more than the width of the bounds, and the stability map adds a term for it.
+Floats are different, for two reasons from the documentation's sum page. The first is rounding: each partial sum of floats rounds to the nearest float. So the sums of two datasets at distance 2 can differ by a little more than the width of the bounds, and the stability map adds a term for that.
 
 ```python
 import opendp.prelude as dp
@@ -165,9 +165,9 @@ print((negative >> dp.t.then_sum()).map(1))  # 10.00000009313226
 print(dp.t.make_bounded_float_checked_sum(size_limit=100, bounds=(-10.0, 0.0)).map(1))  # 10.00000000000295
 ```
 
-With a known size of a thousand rows the term is tiny, in the eleventh decimal place. The second reason appears when the size is unknown. Then the rounding error has no bound, so the float sum first truncates its input to at most $2^{20}$ rows, a little over a million, by a random sample. Truncation changes the sensitivity analysis, because a neighbouring dataset with one more row may have to drop a random row to stay within the limit. The sensitivity therefore becomes the largest of the magnitudes of the bounds and their width. That doubles it for bounds symmetric about zero, as the second line shows, and changes nothing for bounds of the same sign, as the third line shows. The specialized constructor `make_bounded_float_checked_sum` lets you set the size limit yourself, and a limit of 100 shrinks the rounding term from the eighth decimal place to the twelfth.
+With a known size of a thousand rows, the term is in the eleventh decimal place. The second reason applies when the size is unknown. Then the rounding error has no bound, so the float sum first keeps at most $2^{20}$ rows, a little over a million, by a random sample. A neighbour with one more row may then drop a different row, so the sensitivity becomes the largest of the magnitudes of the bounds and their width. That doubles it for bounds symmetric about zero (the second line) but not for bounds of one sign (the third). With `make_bounded_float_checked_sum` you set the size limit, and a limit of 100 shrinks the rounding term to the twelfth decimal place.
 
-The notebook's examples are too small to show why the limit matters. The hours vector has 1,496,192 values, more than $2^{20}$. A plain `then_sum` on it as floats keeps a random million of them and sums those. The result is about 70% of the true sum, as the one-run block at the end of the chapter shows. Nothing warns you. The privacy guarantee holds, because the sensitivity is right for the truncated computation, but the number answers a different question from the one you asked. The fix is a size limit above any size the data could have, from public knowledge, here four million rows, or the exact size in the domain when it is public.
+This limit matters on the survey, because the hours vector has 1,496,192 values, more than $2^{20}$. So a plain `then_sum` on them as floats sums a random million of them. The result is about 70% of the true sum, as the one-run block at the end shows, and nothing warns you. The guarantee holds for the truncated sum, but the number answers a different question. So set a size limit from public knowledge above any size the data can have, here four million rows. Or put the exact size in the domain when it is public.
 
 ```{.python excerpt="trans-float-sum"}
 def float_sum(size_limit: int | None = None) -> dp.Transformation:
@@ -184,7 +184,7 @@ float sum, size limit 2^20=1,048,576: map(36)=3528.0000009127
 float sum, size limit 4,000,000: value 56,315,594  map(36)=3528.0000038179
 ```
 
-Both sensitivities are 3,528 hours plus a rounding term, and the larger limit buys a larger term, in the sixth decimal place rather than the seventh. The term also depends on the summation algorithm, which the specialized constructors take as the `S` argument.
+Both sensitivities are 3,528 hours plus a rounding term, and the larger limit gives a larger term, in the sixth decimal place instead of the seventh. The term also depends on the summation algorithm, which the specialized constructors take as the `S` argument.
 
 ```python
 import opendp.prelude as dp
@@ -198,9 +198,9 @@ sequential = dp.t.make_sized_bounded_float_checked_sum(1_000_000, (0.0, 10.0), S
 print(f"{pairwise.map(0):.2e} {sequential.map(0):.2e}")  # 8.85e-08 4.44e-03
 ```
 
-The map at distance 0 isolates the rounding term, since two datasets with the same rows in a different order can already sum to different floats. The default is the pairwise sum, which adds the values as a balanced tree, so its term grows a little faster than the number of rows. The sequential sum adds the values one after another, and its term grows with the square of the number of rows. At a million rows the sequential term is 0.0044 against the pairwise 0.0000001. The reason to ask for the sequential analysis is a sum computed elsewhere, because database engines add floats in sequence, and a sensitivity claimed for their result must match how they add. Integer sums have no rounding term, which is one reason to cast hours to integers.
+The map at distance 0 isolates the rounding term, because the same rows in a different order can sum to different floats. The default pairwise sum adds the values as a balanced tree, so its term grows a little faster than the number of rows. The sequential sum adds them one after another, and its term grows with the square of the number of rows. Use the sequential analysis for a sum computed elsewhere, because database engines add floats in sequence. Integer sums have no rounding term, which is one reason to cast hours to integers.
 
-To release the integer sum, chain a Laplace measurement onto the chain. Its scale is the sensitivity over $\varepsilon$, which [the full edition's chapter on the Laplace and Gaussian mechanisms](../../book-full/part03-dp-foundations/03-laplace-gaussian.md) derives. Each of the three measurements on this page is calibrated to $\varepsilon = 0.5$ on its own, and composing them is the job of [Combinators](11-combinators.md). At that budget the scale is 7,056 hours. The error bar is about 21,000 hours on a total of 56 million, which is 0.04%.
+To release the integer sum, add a Laplace measurement with a scale equal to the sensitivity over $\varepsilon$ ([the full edition's chapter on the Laplace and Gaussian mechanisms](../../book-full/part03-dp-foundations/03-laplace-gaussian.md)). Each of the three measurements on this page uses $\varepsilon = 0.5$ on its own, and [Combinators](11-combinators.md) composes them. Here the scale is 7,056 hours, and the error bar is 0.04% of the total.
 
 ```text
 sum release: scale=7056  map(36)=0.5000  95% accuracy=21,138.4
@@ -208,7 +208,7 @@ sum release: scale=7056  map(36)=0.5000  95% accuracy=21,138.4
 
 ## The mean and the variance {#sec-trans-mean}
 
-The mean is a sum divided by a size, and `make_mean` divides by the size in its input domain, not by the length of the data it is given. So the domain must carry a size, and without one the constructor refuses.
+The mean is a sum divided by a size, and `make_mean` divides by the size in its input domain, not by the length of the data. So the domain must have a size, or the constructor refuses.
 
 ```text
 mean without a size: dataset size must be known. Either specify size in the input domain or use make_resize
@@ -225,9 +225,9 @@ print(mean([5.0]))  # 0.5
 print(mean.input_domain.member([5.0]))  # False
 ```
 
-With ten values between 0 and 10, replacing one value moves the mean by at most the width over the size, which is 1. That is `map(2)`, up to a rounding term. The second print is the warning the documentation attaches to the mean. The mean of a one-element list came out as 0.5, because the division is by the size the domain declares, and nothing checks the data. A transformation assumes its input is a member of its input domain, and `member` checks that.
+With ten values between 0 and 10, one replaced value moves the mean by at most the width over the size. So `map(2)` is 1, plus a rounding term. The second print shows the documentation's warning: the mean of a one-element list is 0.5, because the division uses the declared size and nothing checks the data. Each transformation assumes that its input is in its input domain, and `member` checks that.
 
-On the survey the size is not public, so the chain resizes first. The constant pads a vector that comes out short, and here it is the true median of 37 hours. A real release would resize to a released count, as [A first release](../part01-getting-started/01-first-release.md) did, or to a public total. The script resizes to the true size, which is allowed here because the data are public, so nothing is padded.
+On the survey the size is not public, so the chain resizes first, with the true median of 37 hours as the padding constant. A real release would resize to a released count, as in [A first release](../part01-getting-started/01-first-release.md), or to a public total. The script resizes to the true size, which it can do because the data are public, so nothing is padded.
 
 ```{.python excerpt="trans-mean"}
 def mean_chain(size: int, constant: float) -> dp.Transformation:
@@ -241,9 +241,9 @@ mean chain: value 37.6393  map(36)=0.0023580
 mean release: scale=0.0047160  map(36)=0.5000  95% accuracy=0.0141
 ```
 
-Read the map against the sized sum. The sized sum's map was 18 replacements of 98 hours, and dividing that by the size gives 0.0012. The mean's map is twice that, because the resize in front of it is 2-stable. The input distance of 36 becomes an output distance of 72, which the mean reads as twice as many replacements. That is the price of not knowing the size, and it is paid once per chain. At $\varepsilon = 0.5$ the Laplace scale is 0.0047 hours, and the error bar is 0.014 hours.
+Compare this map with the sized sum's. That map was 18 replacements of 98 hours, and divided by the size it is 0.0012. The mean's map is twice that, because the resize in front of it is 2-stable and turns the input distance of 36 into 72. That is the cost of an unknown size, paid once per chain. At $\varepsilon = 0.5$, the Laplace scale is 0.0047 hours and the error bar 0.014 hours.
 
-The documentation's mean page also shows the alternative, which it calls the plug-in approach: release a sum and a count separately and divide. The division is post-processing, so it costs nothing beyond the two releases, by the property that [the full edition's chapter on properties](../../book-full/part03-dp-foundations/02-properties.md) proves. The resize page compares the two by simulation and finds the resized mean tighter at the same budget, because its numerator and denominator agree on how many rows there are. The variance takes the same preprocessing and the same kind of map. On the resized chain `then_variance` gives 137.63 hours squared, with a stability of 0.2311 at distance 36, and a Laplace measurement would release it exactly as the mean.
+The documentation's mean page also shows the plug-in approach, which releases a sum and a count and then divides. The division is post-processing, so it costs no more budget ([the full edition's chapter on properties](../../book-full/part03-dp-foundations/02-properties.md)). But at the same budget the resized mean is tighter, because its numerator and denominator use the same number of rows. The variance uses the same preprocessing. On the resized chain, `then_variance` gives 137.63 hours squared, and its stability at distance 36 is 0.2311.
 
 ```text
 variance chain: value 137.6290  map(36)=0.2311
@@ -251,7 +251,7 @@ variance chain: value 137.6290  map(36)=0.2311
 
 ## Quantile scores {#sec-trans-quantiles}
 
-A quantile is not a sum, and noise alone cannot release it. The documentation's quantile page opens with the reason. Take a dataset in which half the values sit at the lower bound and half at the upper. Its median jumps from the middle of the range to the upper bound when one value is added, so the median's sensitivity is half the range, and Laplace noise at that scale would drown it. Instead OpenDP scores every candidate quantile by how far it is from the truth and lets a selection mechanism pick one. That is the exponential mechanism of [the full edition's chapter on selection](../../book-full/part03-dp-foundations/05-selection.md), and `make_quantile_score_candidates` computes the scores.
+Noise alone cannot release a quantile, and the documentation's quantile page shows why. Take a dataset with half its values at the lower bound and half at the upper. One added value moves its median from the middle of the range to the upper bound, so the sensitivity is half the range. Laplace noise of that size hides the median. So OpenDP scores every candidate by how far it is from the quantile and lets a selection mechanism pick one. This is the exponential mechanism of [the full edition's chapter on selection](../../book-full/part03-dp-foundations/05-selection.md), and `make_quantile_score_candidates` computes the scores.
 
 ```python
 import opendp.prelude as dp
@@ -265,9 +265,9 @@ quartile = space >> dp.t.then_quantile_score_candidates(candidates=[0, 25, 50, 7
 print(quartile([10, 20, 30, 40, 50, 60, 70, 80, 90]), quartile.map(1))  # [9, 1, 8, 19, 27] 3
 ```
 
-The score of a candidate for the median is the difference between the number of values below it and the number above it, in absolute value. In the snippet the candidate in the middle has four values on either side and scores zero, while the lowest candidate has all nine above it. The lowest score marks the best candidate, which is why the selection in the next chapter is told to pick the minimum. For another quantile the two counts get weights. The quarter quantile weights the values below by three and the values above by one, so that the score is zero where a quarter of the data lie below. Its stability rises to 3, because one added row can move a weighted count by that much. The output metric is the $L_\infty$ distance, since one row moves every candidate's score at once, and that is the metric the noisy max measurement expects.
+A candidate's score for the median is the absolute difference between the number of values below it and the number above it. In the snippet, the middle candidate has four values on each side and scores zero, while the lowest has all nine above it. So the lowest score is the best, and the selection picks the minimum. For another quantile, the two counts get weights. The quarter quantile weights the values below by three, so the score is zero where a quarter of the data are below, and its stability is 3. The output metric is the $L_\infty$ distance, the largest change of any score, because one row moves every score at once.
 
-On the survey the candidates are every whole number of hours from 0 to 98.
+On the survey, the candidates are the whole numbers of hours from 0 to 98.
 
 ```{.python excerpt="trans-median"}
 def median_scores() -> dp.Transformation:
@@ -286,17 +286,17 @@ median scores: lowest 15,190 at 37 hours, next 89,573 at 36  map(36)=36
 median release: scale=144  map(36)=0.5000  score gap=74,383  gap/scale=517
 ```
 
-The lowest score is at 37 hours, the true median. The next best candidate is one hour less and scores worse by 74,383. The scores' stability at distance 36 is 36. The measurement that turns scores into a quantile is the noisy max of [Measurements](10-measurements.md). It adds noise to every score and reports the index of the best one. Its privacy map under the max divergence is twice the stability over the scale, so a scale of 144 gives $\varepsilon = 0.5$. The released index names a candidate, which is post-processing. The gap between the two best scores is over five hundred times the scale, so the released median is 37 on essentially every run. The bundled `make_private_quantile` of the next chapter chains these same steps. Its scale is doubled before it reaches the noisy max for the median, so a private quantile at scale 72 is this chain at scale 144.
+The lowest score is at 37 hours, the true median, and the next candidate scores worse by 74,383. To release it, the noisy max of [Measurements](10-measurements.md) adds noise to every score and reports the index of the best one. Its privacy map under the max divergence is twice the stability over the scale. So the scores' stability of 36 at a scale of 144 gives $\varepsilon = 0.5$. The gap between the two best scores is over 500 times the scale, so the released median is 37 on almost every run. The `make_private_quantile` of the next chapter chains the same steps but doubles its scale for the median, so its scale 72 is this chain's 144.
 
 ## Reading a chain {#sec-trans-reading}
 
-Two methods read a chain's promise. `map` gives the stability, or the privacy loss once a measurement ends the chain, and `check` asks whether the promise at a given input distance stays within a bound. The sum chain's map at 36 is 3,528, so `check(36, 3528)` is true and `check(36, 3527)` is false. Both cost nothing and touch no data. The context of the first chapter runs `check` in a loop to find the largest scale that fits a budget, and [Utilities and the Context API inside](12-utilities-and-the-context-api.md) shows that search.
+Two methods read the promise of a chain. The `map` method gives the stability, or the privacy loss when a measurement ends the chain. And the `check` method asks whether the promise at an input distance is within a bound. The sum chain's map at 36 is 3,528, so `check(36, 3528)` is true and `check(36, 3527)` is false. Neither method touches the data, and the context runs `check` in a loop to find a scale ([Utilities and the Context API inside](12-utilities-and-the-context-api.md)).
 
 ```text
 int sum chain: check(36, 3528)=True  check(36, 3527)=False
 ```
 
-The other thing to read is a refusal. The rule every chain obeys is that the output space of one step is the input space of the next, and `>>` checks it when the chain is built. The sum below is built on the vectors bounded by 0 and 100, then chained after a clamp to 0 and 98.
+You must also read refusals. The `>>` operator checks, when it builds the chain, that the output space of each step is the input space of the next. Below, a sum built on vectors bounded by 0 and 100 follows a clamp to 0 and 98.
 
 ```{.python excerpt="trans-mismatch"}
 try:
@@ -312,7 +312,7 @@ mismatched chain: DomainMismatch: Intermediate domains don't match. See https://
     input_domain:  VectorDomain(AtomDomain(bounds=[0, 100], T=i32))
 ```
 
-The message names both spaces. The fix is to build the sum from the clamp's output space, as `make_sum(*clamped.output_space)`, or to use the `then_` form, which does so for you. A metric mismatch reads the same way: an ordered sum needs the insert-delete distance, so it refuses to follow a clamp under the symmetric distance, and `make_ordered_random` between the two converts the metric. The third kind of refusal is a constructor whose input domain lacks what it needs, as the mean showed for a missing size and the sum shows for missing bounds.
+The message names both spaces. To fix the chain, build the sum from the clamp's output space, as `make_sum(*clamped.output_space)`. The `then_` form does that for you. A metric mismatch is similar. An ordered sum needs the insert-delete distance, so it refuses to follow a clamp under the symmetric distance, and `make_ordered_random` between them converts the metric. The third refusal is a domain that lacks what the constructor needs, such as a size for the mean or bounds for the sum.
 
 ```python
 import opendp.prelude as dp
@@ -330,7 +330,7 @@ except dp.OpenDPException as err:
     print(err.message)  # `input_domain` must be bounded. Use `make_clamp` to bound data.
 ```
 
-Every refusal happens at construction, before any data are touched. Finally, the releases of one run, read against their error bars.
+Every refusal happens when the chain is built, before it touches any data. Here are the releases of one run, to read against their error bars.
 
 ```text
 released (one run):
@@ -340,7 +340,7 @@ released (one run):
   median 37  (true 37)
 ```
 
-The sum and the mean landed within their bars, as they should about 19 times in 20. The truncated float sum is not a noisy release but a wrong computation, short by 30% with no noise added, and no error bar covers it. The median is exact, as the gap between its scores said it would be.
+The sum and the mean landed within their bars, as they do about 19 times in 20. The truncated float sum is not noise but a wrong computation, 30% short, and no error bar covers it. The median is exact, as the gap between its scores predicted.
 
 ## Summary
 

@@ -1,8 +1,8 @@
 # Identifier truncation and bounds
 
-A person in the survey answers in several quarters, so one person owns several rows. [Grouping](04-grouping.md) handled that with a privacy unit of 36 contributions, the most quarters anyone could appear in over nine years, and every noise scale grew 36-fold with it. Hardly anyone appears that often. This chapter replaces the fixed number with the column that says which rows belong together, `PIDENT`, and lets each query decide how many of a person's rows it keeps. The guarantee then protects a person's whole record, and the noise is calibrated to what the query actually lets one person contribute.
+A person in the survey owns several rows, one per quarter answered. The chapters so far used the fixed unit of [the data and the context](../part01-getting-started/02-the-data-and-the-context.md#sec-ctx-context), up to 36 rows per person, so every noise scale grew 36-fold. But hardly anyone appears that often. This chapter uses the column that says which rows belong together, `PIDENT`, and lets each query decide how many of a person's rows it keeps. The guarantee still protects a person's whole record, but the noise fits what the query lets one person contribute.
 
-The chapter follows the documentation's page on identifier truncation and its user guide on truncation and bounds. You will declare a privacy unit with an identifier, then truncate rows per person and groups per person inside a query. You will then aggregate to one row per person before a statistic, and declare finer bounds in the unit when you must. By the end you will know which of these the library enforces and which it takes on trust, because each call is run in version 0.16.0 end to end.
+The chapter follows the documentation's page on identifier truncation and its user guide on truncation and bounds. At the end, you know how to bound a person's rows and groups in a query, and which bounds the library enforces and which it takes on trust.
 
 The script [opendp_identifier_truncation.py](../../code/part02-tabular-data/opendp_identifier_truncation.py) runs every query on the Labour Force Survey (LFS) sample with OpenDP 0.16.0. The scales, error bars, thresholds, error messages and facts about the data that it prints are the same on every run. The released values are not, because OpenDP's noise cannot be seeded, so the page shows them in one block marked as one run.
 
@@ -12,7 +12,7 @@ uv run python code/part02-tabular-data/opendp_identifier_truncation.py
 
 ## A privacy unit with an identifier {#sec-trunc-unit}
 
-The privacy unit says what the guarantee protects. In the chapters before this one it was a number of rows, and two datasets were neighbours when one was the other with that many rows added or removed. With an identifier, the unit is a value of a column instead. Two datasets are neighbours, written $D \sim D'$, when one is the other with every row of one `PIDENT` value added or removed. That is **user-level privacy**, the guarantee that hides a person's whole record rather than one row of it, which [the full edition's chapter on user-level privacy](../../book-full/part05-dp-ml/07-user-level.md) defines and analyses. OpenDP writes the unit as a metric on identifiers and a distance of one.
+Until now the privacy unit was a number of rows. With an identifier, it is a value of a column. Two datasets are neighbours, written $D \sim D'$, when one is the other with every row of one `PIDENT` value added or removed. That is **user-level privacy**, which hides a person's whole record and not only one row of it. [The full edition's chapter on user-level privacy](../../book-full/part05-dp-ml/07-user-level.md) defines and analyses it. OpenDP writes the unit as a metric on identifiers and a distance of one.
 
 ```python
 import opendp.prelude as dp
@@ -21,9 +21,9 @@ dp.enable_features("contrib")
 print(dp.unit_of(contributions=1, identifier="PIDENT"))  # (SymmetricIdDistance { identifier: col("PIDENT") }, 1)
 ```
 
-The argument `contributions=1` now counts identifiers, not rows. It says that a person appears under at most one value of `PIDENT`, which is a fact about how the survey assigns its identifiers, so it is public. The identifier may also be a Polars expression, as long as it is computed row by row. Nothing in the unit says how many rows a person owns, and that is the point. The old number 36 was a bound that had to hold for the whole dataset before any query ran. Under the new unit, each query states its own bound as a truncation that the library applies to the data, so the bound holds because the query made it hold.
+The argument `contributions=1` now counts identifiers, not rows: a person appears under at most one value of `PIDENT`, a public fact about the survey. The unit does not say how many rows a person owns. The old 36 had to hold for the whole dataset before any query ran. Now each query states its own bound as a truncation that the library applies, so the bound holds because the query makes it hold.
 
-The script first looks at what an identifier owns in this file. The data are public, so the look is harmless here. On real data these are exactly the facts you must not read off the data, because a bound read off the data leaks it. There you reason from the survey's design instead.
+The script first looks at what an identifier owns in this file. This look is harmless only because the data are public. On real data, reason from the design of the survey, because a bound read off the data leaks it.
 
 ```text
 identifiers: 1,682,306  rows: 3,811,932
@@ -32,9 +32,9 @@ identifiers with more than 10 rows: 195
 quarters per identifier: max 4  rows per identifier and quarter: max 8
 ```
 
-Half of the identifiers own two rows or fewer, and none owns more than 15. An identifier spans at most four quarters, and within one quarter it can own several rows, up to eight. So the documentation's worst case of 36 rows is far from this file. Even the truncation at ten rows that the next section applies touches only 195 identifiers.
+So the worst case of 36 rows is far from this file. An identifier spans at most four quarters, but it can own up to eight rows in one quarter.
 
-The context is the one the documentation builds, with the public bound on the number of rows from [Essential statistics](03-essential-statistics.md). It takes a privacy budget $\varepsilon$ of 1 and a slack $\delta$ of $10^{-8}$, split evenly over four queries. The slack is the small probability with which the guarantee may fail. The table per quarter later in the chapter needs it, because the library decides from the data which quarters to publish.
+The context is the one that the documentation builds, with the public bound on the number of rows of [the data and the context](../part01-getting-started/02-the-data-and-the-context.md#sec-ctx-margin). Its budget, split evenly over four queries, is a privacy budget $\varepsilon$ of 1 and a slack $\delta$ of $10^{-8}$. The slack is the small probability with which the guarantee can fail. The table per quarter needs the slack, because the library selects its quarters from the data.
 
 ```{.python excerpt="trunc-context"}
 def make_context(frame: pl.LazyFrame, privacy_unit: tuple[dp.Metric, Any]) -> dp.Context:
@@ -52,7 +52,7 @@ def make_context(frame: pl.LazyFrame, privacy_unit: tuple[dp.Metric, Any]) -> dp
 budget per query: epsilon=0.25 delta=2.5e-09
 ```
 
-A query on this context that does not truncate is refused. The library cannot bound how far one identifier's rows move a statistic, so it cannot calibrate the noise. The error it raises in version 0.16.0 is not the one you would hope for.
+The library refuses a query on this context that does not truncate, because it cannot bound how far one identifier's rows move a statistic. In version 0.16.0, the error message is not helpful.
 
 ```{.python excerpt="trunc-untruncated"}
 try:
@@ -66,11 +66,11 @@ except dp.OpenDPException as err:
 mean without truncation: A step in your query is not recognized at this time: "DF ["PIDENT", "YEAR", "QUARTER", "SEX", ...]; PROJECT */8 COLUMNS". ""If you would like to see this supported, please file an issue.
 ```
 
-The message blames the scan of the data rather than the missing truncation. When you see it on a context with an identifier, the first thing to check is whether every statistic sits behind a truncation.
+The message blames the scan of the data, not the missing truncation. If you see it on a context with an identifier, first make sure that every statistic comes after a truncation.
 
 ## Truncating each person's rows {#sec-trunc-rows}
 
-The documentation's first query is the mean of hours usually worked, `HWUSUAL`, over the rows where the value is not 99, which is the survey's code for "not applicable". The mean needs public bounds on the hours, 0 to 80, and a bound on the rows per person, which `truncate_per_group(10)` supplies. It keeps at most ten rows per identifier, chosen at random, and drops the rest before the aggregation sees them.
+The documentation's first query is the mean of `HWUSUAL`, the hours usually worked, without the code 99 for "not applicable". The mean needs public bounds on the hours, 0 to 80, and a bound on the rows per person. `truncate_per_group(10)` gives that bound: it keeps at most ten random rows per identifier before the aggregation.
 
 ```{.python excerpt="trunc-per-group"}
 mean_query = (
@@ -88,9 +88,9 @@ mean, 10 rows per identifier: HWUSUAL Sum, Integer Laplace, scale=6,400.0 95% ac
 mean, 10 rows per identifier: HWUSUAL Length, Integer Laplace, scale=80.0 95% accuracy=240.2
 ```
 
-A mean is released as a sum and a count, as [Essential statistics](03-essential-statistics.md) showed, and the query's share of the budget is split between the two, so each gets $\varepsilon/8$. One person now moves the count by at most ten rows, so the count's sensitivity is 10. Its Laplace scale is that sensitivity over $\varepsilon/8$, which is 80. Each row adds at most 80 hours to the sum, so the sum's sensitivity is ten times that. Its scale is 6,400. The sensitivity is the most one privacy unit can change a statistic, and truncation and clipping are the two ways of forcing it to be finite. [The full edition's chapter on sensitivity](../../book-full/part03-dp-foundations/07-sensitivity.md) derives what each of them does to the answer.
+A mean is released as a sum and a count, as in [Essential statistics](03-essential-statistics.md). The two split the query's share, so each gets $\varepsilon/8$. One person now moves the count by at most ten rows, so the count's sensitivity is 10, and its scale is 10 over $\varepsilon/8$. Each row adds at most 80 hours to the sum, so the sum's sensitivity and scale are 80 times larger. Truncation and clipping are the two ways to make a sensitivity finite, and [the full edition's chapter on sensitivity](../../book-full/part03-dp-foundations/07-sensitivity.md) derives what each does to the answer.
 
-Compare the unit of 36 contributions, which the script also builds. Under it the same mean gets scales of 23,040 and 288. That is the 36-fold increase the opening mentioned, and the truncation replaces it with a tenfold one. The price is bias, because the rows beyond the tenth are dropped and the mean is computed on what remains. On this file the price is nothing. Only 18 identifiers have more than ten rows left after the filter. The truncation drops 20 of their rows, out of about 1.5 million.
+Under the unit of 36 contributions, the same mean gets scales of 23,040 and 288. The price of the truncation is bias, because the mean leaves out the rows after the tenth. On this file the price is nothing: the truncation drops 20 rows of about 1.5 million.
 
 ```text
 rows with HWUSUAL not 99: 1,496,192 by 809,710 identifiers
@@ -98,7 +98,7 @@ identifiers with more than 10 such rows: 18  rows dropped: 20
 unit of 36 contributions, no identifier: scales 23,040.0, 288.0
 ```
 
-The `keep` argument says which rows survive. The default, `"sample"`, keeps a random ten, and the plan the library builds shows how. It numbers each identifier's rows in a shuffled order and keeps the numbers below ten. The documentation notes that `truncate_per_group(10)` is the same as writing that filter yourself. With `"first"` or `"last"` the numbering follows the file's order, which is cheaper but biased whenever that order means something, such as early or late quarters. A `SortBy` keeps the rows that sort first by an expression of your choice. The documentation sorts by `ILOSTAT`, the employment status, to prefer the rows where the person worked for pay. None of the choices changes the scales, because the bound of ten rows holds whichever rows are kept.
+The `keep` argument says which rows remain. The default, `"sample"`, keeps a random ten: its plan numbers each identifier's rows in a shuffled order and keeps the numbers below ten. With `"first"` or `"last"` the numbering follows the file's order, which is cheaper but biased when the order means something. A `SortBy` keeps the rows that sort first by an expression, such as `ILOSTAT`, the employment status. No choice changes the scales, because the bound of ten rows holds whichever rows remain.
 
 ```text
 truncate_per_group(10) plan: FILTER [(0.int_range([len().cast(Int64)]).shuffle().over([col("PIDENT")])) < (10)]
@@ -108,19 +108,19 @@ keep=SortBy(ILOSTAT): scales 6,400.0, 80.0
 ILOSTAT values among them: [1]
 ```
 
-The last line is a small lesson about this dataset. After the filter on `HWUSUAL`, every remaining row has `ILOSTAT` equal to 1, so the sort by employment status changes nothing here. It would matter on a query that keeps the other statuses.
+The last line shows that every row after the filter has `ILOSTAT` equal to 1, so here the sort changes nothing.
 
 ## Truncating the groups a person touches {#sec-trunc-groups}
 
-The second query is a table with one row per quarter, grouped by `QUARTER` and `YEAR`, with the number of responses and the sum of their hours. A person's rows now spread over groups, and the noise on a grouped table depends on two bounds. One is how many rows a person contributes to any one group, and the other is how many groups a person touches. The vector of counts can change by at most the first bound in each of at most the second number of groups. So its total sensitivity is the product of the two. The full edition's chapter on user-level privacy derives this in [its section on contribution bounding](../../book-full/part05-dp-ml/07-user-level.md#sec-ulvl-bounding).
+The second query is a table with one row per quarter, grouped by `QUARTER` and `YEAR`, with the number of responses and the sum of their hours. Now the noise depends on two bounds: the rows that a person adds to one group, and the number of groups that a person touches. The counts change by at most the first bound in each of at most the second number of groups. So the total sensitivity is the product of the two. The full edition derives this in [its section on contribution bounding](../../book-full/part05-dp-ml/07-user-level.md#sec-ulvl-bounding).
 
-So the query truncates twice. `truncate_per_group(1, by=quarterly)` keeps one row per identifier and quarter, and `truncate_num_groups(10, by=quarterly)` keeps at most ten quarters per identifier. Without the second truncation the query is refused, and this time the message says what is missing. It goes on to suggest the call that supplies it, `truncate_num_groups` with the grouping columns. The script leaves that part out of the printed line, because the order of the columns in the suggestion changes from run to run.
+So the query truncates twice. `truncate_per_group(1, by=quarterly)` keeps one row per identifier and quarter, and `truncate_num_groups(10, by=quarterly)` keeps at most ten quarters per identifier. Without the second truncation the library refuses the query, and this time the message says what is missing. (The script cuts the message's suggestion, whose column order changes from run to run.)
 
 ```text
 per quarter without truncate_num_groups: num_groups (None), total contributions (None), and per_group (Some(1)) are not sufficiently well-defined. This is likely due to a missing truncation earlier in the data pipeline.
 ```
 
-The query below is the documentation's, with one change. It passes `keep="first"` to the group truncation, for a reason the rest of this section explains.
+The query below is the documentation's, except for `keep="first"` in the group truncation, for a reason given below.
 
 ```{.python excerpt="trunc-num-groups"}
 quarter_query = (
@@ -140,9 +140,9 @@ per quarter, 10 quarters per identifier: len Frame Length, Integer Laplace, scal
 per quarter, 10 quarters per identifier: HWUSUAL Sum, Integer Laplace, scale=6,400.0 95% accuracy=19,173.2
 ```
 
-The scales are the ones of the mean, because one row in each of ten quarters is again ten rows per person. The table also has a threshold. The list of quarters is not given as public keys, so the library releases a quarter only if its noisy count exceeds 1,714. That is the private selection of keys that [Grouping](04-grouping.md) explained. Every quarter here has at least 27,228 responses, so all 36 appear.
+The scales are the ones of the mean, because one row in each of ten quarters is again ten rows per person. The query gives no public keys, so the library releases a quarter only if its noisy count is above the threshold, as in [Grouping](04-grouping.md). Every quarter has at least 27,228 responses, so all 36 appear.
 
-Now the two things to know about `truncate_num_groups` in version 0.16.0. The first concerns the default, `keep="sample"`. The query passes `summarize`, and `release` spends the query's share of the budget, but `collect` fails inside Polars.
+Version 0.16.0 has two problems with `truncate_num_groups`. With the default, `keep="sample"`, the query passes `summarize` and `release` spends its share, but `collect` fails inside Polars.
 
 ```{.python excerpt="trunc-sample"}
 sample_query = grouped_query(context, keep="sample")  # the same table, with the default keep
@@ -160,7 +160,7 @@ keep=sample: summarize scales 80.0, 6,400.0; collect: multiple fields with name 
 shares spent after the failed collect: 4 of 4
 ```
 
-The share is gone, because the budget is spent when the measurement is built, not when its output is read. You can catch the failure before spending anything, because the fault is in the Polars plan, and Polars checks a plan without touching data. Call `explain()` on the query, as the snippet below does on a toy frame with one identifier and three quarters, and the same error appears at no cost.
+The share is gone, because the budget is spent when the measurement is built. But Polars checks a plan without the data, so `explain()` before `release` shows the same error at no cost, as on this toy frame.
 
 ```python
 import opendp.prelude as dp
@@ -185,7 +185,7 @@ except pl.exceptions.DuplicateError as err:
     print(str(err).splitlines()[0])  # multiple fields with name 'QUARTER' found
 ```
 
-The second thing concerns `keep="first"` and `keep="last"`, which do run. The plan they build ranks each identifier's quarters and keeps the ranks below the number you asked for. Polars counts ranks from one, so nine ranks survive a request for ten, and the truncation keeps one group fewer than asked. The snippet shows the two numberings side by side on one identifier with three quarters.
+The second problem is with `keep="first"` and `keep="last"`, which run. Their plan keeps the ranks of an identifier's quarters below the number that you ask for. But Polars counts ranks from one, so the truncation keeps one group fewer than asked, as the two numberings show.
 
 ```python
 import polars as pl
@@ -199,7 +199,7 @@ numbered = toy.with_columns(
 print(numbered["index"].to_list(), numbered["rank"].to_list())  # [0, 1, 2] [1, 2, 3]
 ```
 
-On this file the request for ten quarters drops nothing, because no identifier spans more than four. The script therefore measures the effect at a smaller `k`, using the filter that the documentation gives as the equivalent of the call. A request for four keeps at most three quarters, and the 13,948 identifiers that have four lose one. A request for five keeps all four, at the scale and threshold of five.
+No identifier spans more than four quarters, so the script measures the effect at a smaller `k`. A request for four keeps at most three quarters, so the 13,948 identifiers with four quarters lose one. A request for five keeps all four, at the scale and threshold of five.
 
 ```text
 truncate_num_groups(10, keep=first) plan: FILTER [(col("QUARTER").as_struct([col("YEAR")]).rank().over([col("PIDENT")])) < (10)]
@@ -208,9 +208,9 @@ truncate_num_groups(4, keep=first): keeps at most 3 quarters, 1,227,948 identifi
 truncate_num_groups(5, keep=first): keeps at most 4 quarters, 1,241,896 identifier-quarters; scale 40.0 threshold 830
 ```
 
-So in version 0.16.0 you ask for one group more than you mean to keep, and you pay the noise of that larger number. The guarantee is not at risk either way, since the library calibrates to the number you asked for and keeps fewer. What is at risk is the estimate, because the dropped group is always the last in sort order, which here is the latest quarter of each person's year. [The practitioner edition's release workflow](../../book-practitioner/part03-dp-foundations/12-release-statistics.md), which bounds a customer's invoice lines, met both problems and avoided the call altogether.
+So in version 0.16.0, ask for one group more than you want to keep, and accept the noise of that larger number. The guarantee is safe either way, because the library calibrates to the number asked for. The estimate is not, because the dropped group is always the last in sort order. [The practitioner edition's release workflow](../../book-practitioner/part03-dp-foundations/12-release-statistics.md) avoids the call for these reasons.
 
-One more rule about truncations comes from the library itself. The truncations of a query must sit next to each other, and the group truncation must come last before the aggregation. The script moves the filter on `HWUSUAL` between the two truncations, and the query is refused with a message that names the truncation's own expression as unrecognized.
+Put the truncations of a query next to each other, with the group truncation last before the aggregation. With a filter between them, the library calls the truncation's own expression unrecognized.
 
 ```text
 a filter between the two truncations: Expr is not recognized at this time: dyn int: 0.int_range([len()]).shuffle().over([col("PIDENT"), col("QUARTER"), col("YEAR")]). If you would like to see this supported, please file an issue.
@@ -218,7 +218,7 @@ a filter between the two truncations: Expr is not recognized at this time: dyn i
 
 ## One row per person {#sec-trunc-person}
 
-For a mean there is a better move than keeping ten rows per person. Group by the identifier first, aggregate each person's rows to one row with any Polars expression, and take the private mean of those rows. The documentation calls the group-by the point where truncation begins, because after it no identifier owns more than one row.
+For a mean, there is a better method than ten rows per person. Group by the identifier first, aggregate each person's rows to one row with any Polars expression, and take the private mean of those rows. After the group-by, no identifier owns more than one row.
 
 ```{.python excerpt="trunc-per-person"}
 person_query = (
@@ -237,9 +237,9 @@ mean of one row per identifier: HWUSUAL Sum, Integer Laplace, scale=640.0 95% ac
 mean of one row per identifier: HWUSUAL Length, Integer Laplace, scale=8.0 95% accuracy=24.5
 ```
 
-The count's sensitivity is now 1 and the sum's is 80, so both scales are a tenth of what the truncation at ten gave. No row of anyone's is dropped. They are the scales a dataset with one row per person would get, however many rows a person really owns.
+The count's sensitivity is now 1 and the sum's is 80, so both scales are a tenth of the scales with ten rows. And no row is dropped.
 
-What changes is the question the statistic answers. The first query averaged over responses, so a person with four responses counted four times. This one averages each person's own average, so every person counts once. On this file the two differ, with 37.64 hours over responses against 37.24 over people. The cast to an integer in the documentation's query changes it a third time. It truncates each person's mean towards zero before the private mean sees it, which lowers the true value to 37.10. Noise is not the issue in any of these, since the error bar of the last query is about 0.0035 hours. The choice of what to average is.
+But the question changes. The first query averaged over responses, so a person with four responses counted four times. This one averages each person's own average, so every person counts once, which gives 37.24 hours against 37.64. The cast to an integer then truncates each person's mean towards zero, which lowers the true value to 37.10. With an error bar of about 0.0035 hours, the choice of what to average matters far more than the noise.
 
 ```text
 true mean of one row per identifier: 37.0970  (before the cast to int: 37.2359; all rows: 37.6393)
@@ -248,7 +248,7 @@ per-identifier mean error bar at the true size: 0.0035
 
 ## Bounds in the privacy unit {#sec-trunc-bounds}
 
-So far the unit held one number, and the query held every bound. The unit can hold finer knowledge, as a list of `dp.polars.Bound` objects. Each names the grouping it applies to, a bound on identifiers per group and a bound on the groups one person touches. The documentation's example imagines data merged from two sources that assigned identifiers separately. A person may then appear under two identifiers, which would double the noise, but never under two in the same quarter.
+The unit can also hold finer knowledge, as a list of `dp.polars.Bound` objects. Each names its grouping, a bound on identifiers per group and a bound on the groups that one person touches. The documentation's example is data merged from two sources that assigned identifiers separately. A person can then appear under two identifiers, which would double the noise, but never under two in the same quarter.
 
 ```{.python excerpt="trunc-bounds"}
 two_sources = dp.unit_of(
@@ -270,9 +270,9 @@ two identifiers, one per quarter, 5 quarters: HWUSUAL Sum, Integer Laplace, scal
 one identifier as a bound, 5 quarters: scales 40.0, 3,200.0
 ```
 
-The query keeps one row per identifier and quarter and five quarters per identifier. Two identifiers times five quarters is ten rows per person, so the scale is 80 again. The second bound tells the library that the two identifiers never meet in one quarter, which caps what one person adds to any single quarter at one row. It does not lower the count's scale, because the ten rows can still fall in ten different quarters. With a single identifier declared as a bound, the same query gets half the scale.
+The query keeps one row per identifier and quarter, and five quarters per identifier. Two identifiers times five quarters is ten rows per person, so the scale is 80 again. The second bound tells the library that the two identifiers never meet in one quarter, so one person adds at most one row to any quarter. It does not lower the count's scale, because the ten rows can still fall in ten different quarters. With a single identifier as the bound, the same query gets half the scale.
 
-A bound in the unit can also carry `num_groups`, the number of groups a person touches. Then the query needs no `truncate_num_groups`, and the script shows that a promise of ten quarters gives the same scale and threshold as the truncation at ten did. But the two are not the same kind of thing. The truncation is enforced, since the library drops the rows that would break it. The bound is a promise about the data that the library takes on trust. The script makes a promise that this file breaks, that no identifier spans more than three quarters, and the release goes through without a complaint.
+A bound in the unit can also have `num_groups`, the number of groups that a person touches. Then the query needs no `truncate_num_groups`, and a promise of ten quarters gives the same scale as the truncation at ten. But the library enforces a truncation, while it takes a bound on trust. The script makes a promise that this file breaks, that no identifier spans more than three quarters, and the release goes through with no complaint.
 
 ```{.python excerpt="trunc-promise"}
 promised = dp.unit_of(
@@ -301,11 +301,11 @@ num_groups=3 promised in the unit: HWUSUAL Sum, Integer Laplace, scale=1,920.0 9
 identifiers that break the promise of 3 quarters: 13,948
 ```
 
-The noise was calibrated for three quarters, and 13,948 identifiers have four. For those people the release can move further than the noise was built to hide. Their privacy loss then exceeds the $\varepsilon$ the context declared, and nothing in the output says so. This is the documentation's closing advice, and the chapter's. Truncate in the query, where the library enforces the bound. Declare a bound in the unit only when no truncation can express it, as with the two identifiers above, which no filter can recognize as one person. The same advice applies to clipping: clip the values in the query rather than declaring their range in the input domain. [Assessing utility and choosing the noise](07-utility-and-noise.md) returns to bounds per group when it switches to Gaussian noise, whose scale depends on them differently.
+The noise is calibrated for three quarters, but 13,948 identifiers have four. For those people the privacy loss is above the declared $\varepsilon$, and nothing in the output says so. So truncate in the query, where the library enforces the bound. Declare a bound in the unit only when no truncation can express it, as with the two identifiers above, which no filter can recognize as one person. The same advice applies to values: clip them in the query, and do not declare their range in the input domain. [Assessing utility and choosing the noise](07-utility-and-noise.md) returns to bounds per group with Gaussian noise, whose scale depends on them differently.
 
 ## The check against the truth {#sec-trunc-check}
 
-The data are public, so the script computes what each query would return without noise and compares. For the mean over ten rows per identifier, the script draws its own random ten with a seed. The truncated mean comes out at 37.6393 hours, and the truncation of 20 rows leaves it unchanged to four decimals. The quarters' true values use the first row of each identifier in each quarter. The released sums keep a random row instead, so for the hours the check is approximate, while for the counts it is exact.
+The data are public, so the script computes what each query would return without noise, with its own seeded random ten rows for the first mean. The quarters' true values use the first row of each identifier in each quarter, while the release keeps a random row. So the check is exact for the counts and approximate for the hours.
 
 ```text
 true mean, 10 rows per identifier: 37.6393  (1,496,172 rows)
@@ -316,7 +316,7 @@ true 2005Q3: rows 28,364  hours 1,070,826
 true 2005Q4: rows 28,681  hours 1,080,009
 ```
 
-The releases of one run follow, read against their error bars. The script derives an error bar for each mean from the bars of its sum and its count, since the mean is one divided by the other, and that bar holds whenever both of them hold.
+Here are the releases of one run. Each mean's error bar comes from the bars of its sum and its count, and holds whenever both hold.
 
 ```text
 released (one run):
@@ -331,7 +331,7 @@ released (one run):
   num_groups=3 promised: 36 quarters released; rows within four times their 95% accuracy: 36 of 36
 ```
 
-Every release landed within its bar, which on a run like this is what you should expect about 19 times in 20 for each value. The test behind the page checks the two means within three times their bars and the 36 quarters within four times theirs, so that a correct run almost never fails it. On real data you cannot run this comparison, so you run it on public or historical data while you develop, as here, and release the real data once.
+The means are within their bars, and so are the quarters' counts and all but one of their sums. A bar of 95% predicts about that many misses for 36 values. The test checks the two means within three times their bars and the 36 quarters within four times theirs, so a correct run almost never fails it.
 
 ## Summary
 

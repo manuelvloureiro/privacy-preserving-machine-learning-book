@@ -6,6 +6,11 @@ Status on 2026-10-27. Work items, largest saving first within each step. Word co
 
 - The exercise book is gone: `book-exercises/`, its 48 solution scripts and tests, `tools/xrefs.py`, `filters/xrefs.lua`, the Makefile target, the structure, prose and notation rules for exercise pages, and about 270 exercise pointers in the full edition (the last-line **Practice** link of every chapter and every inline `[Exercise N](…)`). AGENTS.md now says the books have no exercises.
 - The landing page (`site/index.html`) gives the reading order below, and the full edition's preface points to the course first.
+- Steps 4–7 for the practitioner edition, the course, the OpenDP book and five notes (2026-10-27), together with a paragraph rewrite of every page to PROSE.md rules 19–25:
+  - Step 4.1, 4.2 and 4.3 are done. `10-calibrate-dp-sgd` owns the Adult calibration, cross-check and statement. `13-train-dp-sgd` and `12-release-governance` link to it. `10-risk-assessment` is a decision page. `12-release-governance` is the one home of the statement and claim review (`#sec-relgov-statement`, `#sec-relgov-review`). The δ rule's one home is `01-definition#sec-dpdef-small-delta`. The stale link text is fixed.
+  - Step 5 is done. Each course property is proved once: the [0,1]-functions fact is `lem-rr-functions`, at its first use, and `lem-adp-functions` adds δ. There is one definition of adaptive composition (`def-lap-adaptive`), and the shuffle and mean-estimation lemmas cite their originals. History and asides are cut, references are one sentence each, and part pages are one paragraph plus the table.
+  - Step 6 is done. Chapter 03 owns the first count. The margin lives in chapter 02. "36 quarters" is a clause plus a link. The wrong pointers and the Context API recap are fixed.
+  - Step 7.2 (the trade-off note's tables) and 7.3 are done.
 
 ## The reading order
 
@@ -95,7 +100,7 @@ Delete the part `README.md` files. Readers never see them, and they repeat the p
    - The privacy statement and claim review go in `12-release-governance`; `09-choosing-an-accountant` keeps only choosing and matching an accountant.
    - The δ ≤ 1/n^1.1 rule gets one home, `01-definition#sec-dpdef-small-delta`, and a clause plus a link everywhere else.
    - Fix the stale link text "Report and review an ε claim" on six pages.
-4. **One running example for DP-SGD.** `02-dp-sgd` still uses the synthetic 10,000 records while the workflows use Adult.
+4. **One running example for DP-SGD.** `02-dp-sgd` still uses the synthetic 10,000 records while the workflows use Adult. *Not done:* only 02's budget table has an Adult counterpart. Its clipping, norm-drift, microbatching and fixed-batch numbers, and pages 06–09, would need new Adult runs in `code/`.
 5. **Part 1.**
    - Three of its eight pages have no incoming link, and 06-optimization is rate theory.
    - Keep `04-hypothesis-testing`, perhaps as a Part 2 page. Fold the few divergence facts into `01-definition` and `01-renyi-dp`, and link to the full edition's Part 1 for the rest.
@@ -129,7 +134,7 @@ Delete the part `README.md` files. Readers never see them, and they repeat the p
    - It refers to "the companion note" 10 times, which breaks the rule that notes stand alone.
    - Its results are still `RESULTS-*` placeholders.
    - Do this once the synthetic sweep has run.
-2. **Give the trade-off notes the section-map and symbol tables** the note rule requires, and make `skeletons.note` in `tools/structure.toml` enforce them.
+2. **Give the trade-off notes the section-map and symbol tables** the note rule requires, and make `skeletons.note` in `tools/structure.toml` enforce them. *The tables are done for `privacy-utility-tradeoff`.* The synthetic note and the enforcement wait for 7.1.
 3. **Trim the rest.**
    - dp-datasets §synthetic re-argues the AIM note's "why marginal generators win" (about 500 words). Its §choose depends on "the companion note".
    - python-privacy-libraries previews itself four times, and its "four duties" overlap its "five checks" (about 450 words).

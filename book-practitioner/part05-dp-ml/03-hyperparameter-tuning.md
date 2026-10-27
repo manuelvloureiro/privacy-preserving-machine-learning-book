@@ -8,21 +8,19 @@ Releasing only the best of a fixed number of runs can cost as much as releasing 
 
 ## The procedure and the report {#sec-hpt-practice}
 
-The cheapest tuning is the tuning you don't do on private data. Runs on public or proxy data cost nothing, and neither do published settings for similar tasks. Fix a large batch, the number of epochs and a small clipping norm in advance. With the clipping norm below the typical gradient norm, only its product with the learning rate matters, so often only that product needs a search
- ([DP-SGD](02-dp-sgd.md#sec-dpsgd-clipping)).
+The cheapest tuning is the tuning you don't do on private data. Runs on public or proxy data cost nothing, and neither do published settings for similar tasks. Fix a large batch, the number of epochs and a small clipping norm in advance. With the clipping norm below the typical gradient norm, only its product with the learning rate matters, so often only that product needs a search ([DP-SGD](02-dp-sgd.md#sec-dpsgd-clipping)).
 
-If you must tune on private data, fix the search before you touch the data. Write down the candidate set, the distribution of the number of runs (@sec-hpt-rdp), the score and the validation set. Trying "a few more" later, or restarting a disappointing search, makes the search depend on the data, which no accountant covers. The score must be private as well (@sec-hpt-select).
+If you must tune on private data, fix the search before you touch the data. Write down the candidate set, the distribution of the number of runs (@sec-hpt-rdp), the score, which must be private too (@sec-hpt-select), and the validation set. Trying "a few more" later, or restarting a disappointing search, makes the search depend on the data, which no accountant covers.
 
 Then account for the whole search. For two or three candidates, charge for every run (@sec-hpt-composition), and for more, use random search with a random number of runs (@sec-hpt-rdp). Either way, count every run that touched the private data, including crashed and debugging runs and evaluations for early stopping.
 
-Finally, log the candidate set, the drawn number of runs and each run's settings and score. Then report two numbers. The $\varepsilon$ of the released run says what the model alone would leak if its hyperparameters had been public. The $\varepsilon$ of the whole procedure is what the release guarantees. An [audit](10-auditing.md) cannot check it, because an audit tests only the released model. With the book's default slack for 30,000 records, $\delta = 10^{-5}$ ([Choosing ε](09-choosing-epsilon.md)), the Adult search of @sec-hpt-run reports as follows.
-
+Finally, log the candidate set, the drawn number of runs and each run's settings and score, and report two numbers. The $\varepsilon$ of the released run says what the model alone would leak if its hyperparameters had been public. The $\varepsilon$ of the whole procedure is what the release guarantees, and an [audit](10-auditing.md) cannot check it, because an audit tests only the released model. With the slack $\delta = 10^{-5}$ that the book's rule gives for 30,000 records ([How small δ must be](../part03-dp-foundations/01-definition.md#sec-dpdef-small-delta)), the Adult search of @sec-hpt-run reports as follows.
 
 > DP-SGD ran for 300 steps with Poisson sampling at rate 1/30. It clipped gradients to norm 1 and added noise with multiplier 1.256, so one run satisfies $(2.73, 10^{-5})$-DP. The learning rate was chosen by random search over $\{0.05, 0.1, 0.2, 0.5, 1, 2\}$. The number of runs was drawn from a Poisson distribution with mean 4, and each run was scored on 2,000 validation records treated as public. The whole procedure satisfies $(4.00, 10^{-5})$-DP for add/remove neighbours, datasets that differ by one record. It was computed with `dp_accounting` from the Rényi bound of Papernot & Steinke (2022).
 
 ## Paying for every run {#sec-hpt-composition}
 
-A common argument says that choosing among eight learning rates reveals at most three bits. It is wrong, because the release is a whole private run, picked because of how it came out. If each run says only "good" or "bad", the best is bad only when every run was bad. So a bad best reveals all of them, which in the worst case is as much as releasing every run. Even tuning without privacy and then training once privately leaks. The winning regularization weight can change when a few outliers are added, and so reveal whether they were in the data ([Membership inference](../part02-attacks/02-membership-inference.md)).
+A common argument says that choosing among eight learning rates reveals at most three bits. It is wrong, because the release is a whole private run, picked because of how it came out. If each run says only "good" or "bad", the best is bad only when every run was bad. So a bad best reveals all of them. Even tuning without privacy and then training once privately leaks. The winning regularization weight can change when you add a few outliers, and so reveal whether they were in the data ([Membership inference](../part02-attacks/02-membership-inference.md)).
 
 The safe answer is to charge for every run, because the best run is computed from all the runs' outputs ([Composition](../part03-dp-foundations/04-composition.md)). For DP-SGD, a grid of $k$ runs, each of $T$ steps, costs exactly as much as one run of $kT$ steps. One run of the synthetic running example of [DP-SGD](02-dp-sgd.md) costs $\varepsilon = 6.71$ at $\delta = 10^{-5}$. Ten such runs cost 27.23, about four times one run rather than ten, because the conversion to $\varepsilon$ pays its $\delta$ cost only once.
 
@@ -32,7 +30,7 @@ The way out is to draw the number of runs $K$ at random, independently of the da
 
 To use it, fix the candidate set and the distribution of $K$, either Poisson or a truncated negative binomial with a shape parameter $\nu$. That family includes the geometric distribution, $\nu = 1$, which is the **random stopping** of Liu & Talwar, and the logarithmic one, $\nu = 0$. Then draw $K$, run that many candidates drawn at random from the set, and release the best one by a private score. To get the cost from Google's `dp_accounting`, wrap the event of one run in a `RepeatAndSelectDpEvent`. Give it $\nu$ as its `shape` (infinite for Poisson), and compose it in an `RdpAccountant`.
 
-NumPy draws $K$ with `rng.poisson(mean)`, `rng.geometric(1 / mean)` or `rng.logseries(p)`. The last takes $p$ rather than a mean, so solve its mean $-p/((1 - p)\ln(1 - p))$ for $p$.
+NumPy draws $K$ with `rng.poisson(mean)`, `rng.geometric(1 / mean)` or `rng.logseries(p)`. The last takes $p$ rather than a mean, so solve its mean, $-p/((1 - p)\ln(1 - p))$, for $p$.
 
 | Expected runs | 10 | 100 | 1,000 |
 | --- | --- | --- | --- |
@@ -43,13 +41,13 @@ NumPy draws $K$ with `rng.poisson(mean)`, `rng.geometric(1 / mean)` or `rng.logs
 
 : The $\varepsilon$ at $\delta = 10^{-5}$ of a search over runs of the running example (one run: 6.71), from the full edition's chapter. {#tbl-hpt-overhead}
 
-@tbl-hpt-overhead shows how the choice plays out. The geometric and logarithmic searches barely grow from 10 to 1,000 runs, while composition grows almost linearly. A smaller $\nu$ gives a cheaper bound, but the search also stops after one run more often. The Poisson bound needs runs that are already very private, which a run at $\varepsilon = 6.71$ is not, so here it grows almost like composition. A random number of runs may also miss the best candidate. With eight candidates and a geometric number of runs with mean eight, it never tries the best one with probability 0.4667.
+In @tbl-hpt-overhead, the geometric and logarithmic searches barely grow from 10 to 1,000 runs, while composition grows almost linearly. A smaller $\nu$ gives a cheaper bound, but the search also stops after one run more often. The Poisson bound needs runs that are already very private, which a run at $\varepsilon = 6.71$ is not, so here it grows almost like composition. A random number of runs may also miss the best candidate. With eight candidates and a geometric number of runs with mean eight, it never tries the best one with probability 0.4667.
 
 The theorems have three conditions, and each is easy to break. First, each run must draw its candidate independently from a fixed distribution, as random search does. Bayesian optimization picks each candidate from earlier scores, so it is not covered and needs [adaptive composition](../part04-privacy-accounting/08-adaptive-composition.md). Second, the number of runs must be drawn independently of the data. Third, the score that ranks the runs must be private and counted in each run's cost.
 
 ## Selecting by a noisy validation score {#sec-hpt-select}
 
-Sometimes the candidates are fixed in advance, such as public pretrained checkpoints, and only the choice among them uses private data. That is a **selection** problem, which [Selection](../part03-dp-foundations/05-selection.md) solves with the exponential mechanism, a random choice weighted toward high scores. Score each candidate by its number of correct predictions, which one record changes by at most 1. An accuracy divides by a private set size. The mechanism's shortfall from the best count then grows only with the logarithm of the number of candidates.
+Sometimes the candidates are fixed in advance, such as public pretrained checkpoints, and only the choice among them uses private data. That is a **selection** problem, which [Selection](../part03-dp-foundations/05-selection.md) solves with the exponential mechanism, a random choice weighted toward high scores. Score each candidate by its number of correct predictions, which one record changes by at most 1, not by an accuracy, which divides by a private set size. The mechanism's shortfall from the best count then grows only with the logarithm of the number of candidates.
 
 For the random-number bounds, add Gaussian noise to each run's count of correct predictions, since an exact validation accuracy leaves the validation records unprotected. With noise of standard deviation 20, one noisy count costs $\varepsilon = 0.182$. If the validation set is disjoint from the training set, each record pays only one of the two costs. So the event for one run is the costlier of its training and its count, not their sum. Otherwise compose both into one event. On the running example the counts are the cheaper, so they add nothing to the total.
 
@@ -88,7 +86,7 @@ print(f"{epsilon(search):.2f}")  # 4.00
 print(f"{epsilon(naive_grid):.2f}")  # 9.84
 ```
 
-With seed 0, the search drew only two runs, both at the smallest learning rate, and its model reaches 0.828 on the test set. The run of [Train a model with DP-SGD](13-train-dp-sgd.md), tuned for free on public stand-in rows, reaches 0.846, so a search with few runs can miss.
+With seed 0, the search drew only two runs, both at the smallest learning rate. So its model reaches only 0.828 on the test set, against 0.846 for the run of [Train a model with DP-SGD](13-train-dp-sgd.md), tuned for free on public stand-in rows.
 
 ## Cheat sheet
 

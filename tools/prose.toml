@@ -105,6 +105,7 @@ ignore = [
   "ImperativeInDescription", "DescriptiveStatementFirst",
 ]
 sentence_words = 25  # rule 25: a descriptive sentence has at most 25 words
+max_parallel = 2    # stelint runs at once on the machine; each loads spaCy, about 500 MB
 # Technical names and verbs of the books beyond those in terms.toml (rule 25's first exception).
 technical_words = []
 # Nouns of the books that stelint's base list treats as verbs only.

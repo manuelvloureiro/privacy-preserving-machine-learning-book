@@ -1,14 +1,11 @@
 # Reconstruction Attacks
 
-The previous chapter's attacks were clever, but each exploited a particular release. This chapter asks a sharper question. When does answering counting questions about a dataset, each answer only slightly wrong, let an attacker rebuild almost the whole dataset? It does not yet define what it means for an algorithm to be private. It defines a failure so flagrant that nobody would call it private, and it shows that a wide class of algorithms fails in this way.
-
-The answers are quantitative. Exact statistics give the data away, as a census example shows. If a curator answers every possible counting query, it must make errors of order $n$, the number of people, to avoid reconstruction. If it answers only about $n$ random queries, errors of order $\sqrt n$ are needed. The last section shows the second attack breaking a deployed system.
-
+This chapter asks when answers to counting questions about a dataset, each only slightly wrong, let an attacker rebuild almost the whole dataset. It does not yet define privacy. Instead it defines a failure so flagrant that nobody would call it private, and shows that a wide class of algorithms fails in this way. If a curator answers every possible counting query, it must make errors of order $n$, the number of people, to stop the attack. If it answers only about $n$ random queries, errors of order $\sqrt n$ are needed.
 ## Reconstruction from exact statistics {#sec-rec-census}
 
-A census collects **microdata**, one record per person with fields such as age, sex and race, and publishes tables of aggregates for each small area, such as a city block. The tables give counts, medians and means for groups of residents. Cells about fewer than three people are suppressed, but suppression alone does not protect anyone, because tables overlap. Suppose a block has four residents of some group, and three of them are women. Then the group has exactly one man, and a published median age for the group's men would be his age.
+Exact statistics give the data away. A census collects **microdata**, one record per person with fields such as age, sex and race. It publishes tables of counts, medians and means for each small area, such as a city block. It suppresses cells about fewer than three people, but suppression alone protects nobody, because tables overlap. If three of a group's four residents are women, a published median age for its men is the age of its one man.
 
-Every published number is a constraint on the unknown microdata, and enough constraints leave only one possibility. The next example counts how many age combinations remain possible for three people after one line of a census table, which gives only their median and mean ages.
+Every published number is a constraint on the unknown microdata, and enough constraints leave only one possibility. The next example counts the age combinations that one line of a census table leaves for three people.
 
 ::: {#exm-rec-ages name="One line of a census table"}
 A block's table says that it has three men, with median age $35$ and mean age $47$. Call the youngest man's age $u_1$, the middle one's $u_2$ and the oldest one's $u_3$, so that $u_1 \le u_2 \le u_3$. Ages are whole numbers between $0$ and $125$.
@@ -18,15 +15,15 @@ A block's table says that it has three men, with median age $35$ and mean age $4
 3. The mean gives $u_1 + u_2 + u_3 = 141$, so $u_3 = 106 - u_1$. Each $u_1$ from $0$ to $35$ gives a $u_3$ between $71$ and $106$, and every such $u_3$ lies between $u_2$ and $125$. So exactly $36$ triples remain, from $(0, 35, 106)$ to $(35, 35, 71)$.
 :::
 
-One line of the table has cut the possibilities by a factor of almost $10{,}000$. The other lines, about the same people grouped differently, add further constraints. A reconstruction attack writes all of them down and searches for microdata that satisfies every one. This search is an integer program, which is hard to solve in the worst case. In practice, though, solvers for integer programs and for Boolean satisfiability handle such instances quickly. For a fictional block of seven people, Garfinkel, Abowd and Martindale found that the constraints of its full table have exactly one solution, which a solver finds in a fraction of a second.
+So one line of the table cuts the possibilities by a factor of almost $10{,}000$. The other lines group the same people differently and cut them further. A reconstruction attack searches for microdata that satisfies every constraint. This search is an integer program, which is hard in the worst case, but solvers handle such instances quickly. For a fictional block of seven people, Garfinkel, Abowd and Martindale found that the constraints of its full table have exactly one solution, which a solver finds in a fraction of a second.
 
-The attack scales. The United States Census Bureau ran it on its own published tables from the 2010 census. The reconstructed records matched the confidential ones exactly for 46% of the population, and for 71% if ages could be off by one year. Linking the reconstruction with commercial databases re-identified more than 50 million people by name. In response, the Bureau adopted differential privacy for the 2020 census.
+The attack scales. The United States Census Bureau ran it on its 2010 tables, and the rebuilt records matched the confidential ones exactly for 46% of the population. They matched for 71% if ages could be off by one year. A link of these records with commercial databases then gave the names of more than 50 million people. So the Bureau adopted differential privacy for the 2020 census.
 
 ## Subset queries and blatant non-privacy {#sec-rec-model}
 
-To analyse such attacks, strip the setting to its core. There are $n$ people. Each has public identifying attributes, such as a name and a postal code, and one secret bit, such as whether they have a disease. The secret bits form the vector $d = (d_1, \dots, d_n) \in \{0,1\}^n$. An analyst may ask how many of the people who satisfy a condition on the identifiers have secret bit $1$. A condition such as "the name is Alice, Bob or Eve" can single out any set of people. So a query is a subset $S \subseteq [n] = \{1, \dots, n\}$, which we identify with its indicator vector $S \in \{0,1\}^n$. Its entry $i$ is $1$ when person $i$ is in the set and $0$ otherwise.
+To analyse such attacks, strip the setting to its core. There are $n$ people. Each has public attributes that identify them, such as a name, and one secret bit, such as whether they have a disease. The secret bits form the vector $d = (d_1, \dots, d_n) \in \{0,1\}^n$. An analyst asks how many people who satisfy a condition on the identifiers have secret bit $1$. A condition such as "the name is Alice, Bob or Eve" can single out any set of people, so a query is a subset $S \subseteq [n] = \{1, \dots, n\}$. We identify it with its indicator vector $S \in \{0,1\}^n$, whose entry $i$ is $1$ when person $i$ is in the set and $0$ otherwise.
 
-A curator holds the secret bits and answers such queries. The definition assumes only one thing about it, a bound $E$ on how far each answer may be from the truth.
+A curator holds the secret bits and answers the queries. The definition assumes only a bound $E$ on how far each answer may be from the truth.
 
 ::: {#def-rec-curator name="Subset queries and a curator with error $E$"}
 Let $d \in \{0,1\}^n$ be the vector of secret bits. The true answer to a **subset query** $S \in \{0,1\}^n$ is the number of people in $S$ whose bit is $1$,
@@ -40,11 +37,9 @@ where $\langle S, d \rangle = \sum_i S_i d_i$ is the inner product of the indica
 A **curator with error $E$** answers each query $S$ with a response $r(S)$, a number within $E$ of the truth, $|r(S) - a(S)| \le E$. Within that bound, the curator may choose its answers in any way, depending on $d$ and on all the queries.
 :::
 
-The error is not assumed to be random. The curator may pick the most misleading answer within the allowed range, so every attack below works against random noise too. Some error is needed, since for each person $i$ the exact answer to the query $S = \{i\}$ is that person's secret bit.
+The error need not be random. The curator may pick the most misleading answer in the allowed range, so every attack below also works against random noise. Some error is necessary, because the exact answer to the query $S = \{i\}$ is the secret bit of person $i$.
 
-To measure how much an attacker learns, count the bits it gets wrong. The attacker outputs a guess $c \in \{0,1\}^n$ of the secret vector $d$. The **Hamming distance** $\operatorname{dist}(c, d) = |\{i : c_i \ne d_i\}|$ is the number of positions where the guess is wrong.
-
-The next definition names the clearest possible failure of privacy. Some attacker gets all but a vanishing fraction of the bits right, for every secret vector, except with a vanishing probability.
+To measure how much an attacker learns, count the bits it gets wrong. The attacker outputs a guess $c \in \{0,1\}^n$ of the secret vector $d$, and the **Hamming distance** $\operatorname{dist}(c, d) = |\{i : c_i \ne d_i\}|$ is the number of positions where the guess is wrong. The next definition names the clearest failure of privacy: for every secret vector, some attacker gets all but a vanishing fraction of the bits right, except with a vanishing probability.
 
 ::: {#def-rec-blatant name="Blatant non-privacy"}
 Consider a family of curators, one for each number of people $n$. The family is **blatantly non-private** if three things exist. The first is an attacker that interacts with the curator and outputs a guess $c \in \{0,1\}^n$. The second is a bound $g(n)$ on the number of wrong bits, with $g(n)/n \to 0$. The third is a failure probability $\beta(n)$, with $\beta(n) \to 0$. They must satisfy, for every $n$ and every secret vector $d \in \{0,1\}^n$,
@@ -54,11 +49,11 @@ $$
 $$
 :::
 
-An attacker that gets all but a vanishing fraction of the bits right, written $o(n)$ wrong bits, has learned the secret of almost everyone. Whatever privacy means, this is a violation of it.
+Such an attacker, with $o(n)$ wrong bits (a vanishing fraction of $n$), learns the secret of almost everyone. Whatever privacy means, this violates it.
 
 ## Asking every query {#sec-rec-exponential}
 
-The first attack ignores cost. It asks all $2^n$ subset queries and then outputs any candidate that agrees with every answer.
+The first attack ignores cost. It asks all $2^n$ subset queries and outputs any candidate that agrees with every answer.
 
 ::: {#thm-rec-exponential name="Reconstruction from all subset queries"}
 Let $E \ge 0$, and let a curator with error $E$ answer all $2^n$ subset queries, giving the answer $r(S)$ to the query $S$. An attacker that outputs any $c \in \{0,1\}^n$ satisfying
@@ -77,7 +72,7 @@ finds such a $c$, and every such $c$ differs from the secret vector $d$ in at mo
 4. The sets $I_0$ and $I_1$ partition $[n]$, so $\operatorname{dist}(c, d) \le 4E$.
 :::
 
-The attacker does not know $I_0$ and $I_1$, which is why it asks every query. The bound is already strong for large errors, and with errors that are a vanishing fraction of $n$ it meets @def-rec-blatant.
+The attacker does not know $I_0$ and $I_1$, which is why it asks every query. With errors that are a vanishing fraction of $n$, the bound meets @def-rec-blatant.
 
 ::: {#cor-rec-exponential}
 If $E = n/401$, the attacker of @thm-rec-exponential recovers more than 99% of the bits. If $E = E(n)$ with $E(n)/n \to 0$, the curator is blatantly non-private, with $g(n) = 4E(n)$ and $\beta(n) = 0$.
@@ -87,7 +82,7 @@ If $E = n/401$, the attacker of @thm-rec-exponential recovers more than 99% of t
 For the first claim, $4n/401 < n/100$, since $4 \times 100 < 401$. The second claim is @thm-rec-exponential with @def-rec-blatant, because the attacker never fails.
 :::
 
-Errors of order $n$ are the most a counting query can bear, since every answer lies between $0$ and $n$. The next result shows that this is also what it takes to resist the attack. With error $E$, no attacker can guarantee fewer than about $E/2$ wrong bits, however many queries it asks.
+Errors of order $n$ are the most a counting query can bear, since every answer lies between $0$ and $n$. The next result shows that error $E$ always hides about $E/2$ bits, however many queries the attacker asks.
 
 ::: {#prp-rec-limit name="Error $E$ hides $E/2$ bits"}
 Let $E \ge 1$ and $k = \min(\lfloor E \rfloor, n)$. For every attacker, which may ask any queries in any adaptive order, there are a vector $d \in \{0,1\}^n$ and a curator with error $E$ for which $\Pr[\operatorname{dist}(c, d) \ge k/2] \ge 1/2$.
@@ -100,13 +95,13 @@ Let $E \ge 1$ and $k = \min(\lfloor E \rfloor, n)$. For every attacker, which ma
 4. For every $c$, the triangle inequality gives $\operatorname{dist}(c, d) + \operatorname{dist}(c, d') \ge k$, so at least one of the two distances is at least $k/2$. Hence $\Pr[\operatorname{dist}(c,d) \ge k/2] + \Pr[\operatorname{dist}(c,d') \ge k/2] \ge 1$, and one of the two probabilities is at least $1/2$.
 :::
 
-So for the attacker who asks everything, the threshold between blatant non-privacy and safety is error of order $n$, and @thm-rec-exponential is tight up to a factor of $8$. But an attack with $2^n$ queries is not a practical threat once $n$ is more than a few dozen.
+So for the attacker who asks everything, safety needs error of order $n$, and @thm-rec-exponential is tight up to a factor of $8$. But an attack with $2^n$ queries is not a practical threat once $n$ is more than a few dozen.
 
 ## Random queries {#sec-rec-random}
 
-The second attack asks about $n$ queries, each a uniformly random subset of the people. It works against much smaller errors than the first, of order $\sqrt n$, which is still large compared with the error a useful statistic can tolerate.
+The second attack asks about $n$ queries, each a uniformly random subset of the people. It defeats errors of order $\sqrt n$, much smaller than the first attack can handle but still large next to the error a useful statistic can tolerate.
 
-The idea is to fix a wrong candidate $c$ and show that a random query is likely to expose it. If $c$ differs from $d$ in $k$ positions, the answers $\langle S, c \rangle$ and $\langle S, d \rangle$ differ by a sum of about $k/2$ random signs, which is typically of size $\sqrt k$. A curator with error $E$ can hide a difference of at most $2E$. So when $\sqrt k$ is much larger than $E$, a random query rules $c$ out with constant probability. To make "typically" precise, we need a lower bound on the size of a random sum, the opposite of a concentration inequality.
+The idea is to fix a wrong candidate $c$ and show that a random query is likely to expose it. If $c$ differs from $d$ in $k$ positions, the answers $\langle S, c \rangle$ and $\langle S, d \rangle$ differ by a sum of about $k/2$ random signs, which is typically of size $\sqrt k$. A curator with error $E$ can hide a difference of at most $2E$, so when $\sqrt k$ is much larger than $E$, a random query rules $c$ out with constant probability. To make "typically" precise, the proof needs a lower bound on the size of a random sum, the opposite of a concentration inequality.
 
 ::: {#lem-rec-anticoncentration name="A random subset sees a fixed vector"}
 Let $w \in \mathbb R^n$, with Euclidean length $\|w\|_2 = (\sum_i w_i^2)^{1/2}$. Let $S$ be a uniformly random subset of $[n]$, so that each $i$ is in $S$ independently with probability $1/2$. Then the sum $\langle S, w\rangle$ of the entries of $w$ in $S$ satisfies
@@ -137,7 +132,7 @@ Rearranging gives $\Pr[Y > s\,\mathbb E[Y]] \ge (1-s)^2\,\mathbb E[Y]^2/\mathbb 
 6. On the first of these events, $|\langle S, w\rangle| = \tfrac12|a + Z| \ge \tfrac12|Z| > \tfrac14\|w\|_2$.
 :::
 
-With the lemma, the union bound over all candidates gives the attack. The candidates are the $2^n$ vectors in $\{0,1\}^n$, so about $n$ queries suffice to rule out all the wrong ones at once.
+The lemma rules out one wrong candidate with constant probability per query. A union bound over the $2^n$ candidates in $\{0,1\}^n$ then shows that about $n$ queries rule out all the wrong ones at once.
 
 ::: {#thm-rec-random name="Reconstruction from random queries"}
 Let $E \ge 0$ and $\beta \in (0, 1)$, and let
@@ -172,7 +167,7 @@ With $\beta = 2^{-n}$, the bound on $m$ in @thm-rec-random is $\frac{32}{3}\cdot
 
 ### An efficient attack {#sec-rec-lp}
 
-The attacker of @thm-rec-random asks few queries but searches $2^n$ candidates. Relaxing the search to fractional vectors makes it a linear program, so the attack is called linear programming (LP) decoding. It looks for a vector of fractions $x \in [0,1]^n$ with $|\langle S_j, x\rangle - r_j| \le E$ for all $j$. A linear program with $n$ variables and $2m + 2n$ inequalities is solvable in time polynomial in $n$ and $m$. The attacker then rounds $x$ to the nearest bit vector. The analysis is the same as before, with one extra step, because a fractional candidate is not one of $2^n$ points. A fine grid replaces the set of candidates.
+The attacker of @thm-rec-random asks few queries but searches $2^n$ candidates. A search over fractional vectors is a linear program, so this attack is called linear programming (LP) decoding. It looks for $x \in [0,1]^n$ with $|\langle S_j, x\rangle - r_j| \le E$ for all $j$, which takes time polynomial in $n$ and $m$, and rounds $x$ to the nearest bit vector. The analysis is the same as before with one extra step: a fractional candidate is not one of $2^n$ points, so a fine grid replaces the set of candidates.
 
 ::: {#thm-rec-lp name="Reconstruction by linear programming"}
 Let $E > 0$, $\beta \in (0,1)$, $K = \lceil n/(2E) \rceil$, and
@@ -196,11 +191,11 @@ $$
 5. Outside that event, step 3 shows that $z'$ is not far, so $\|z'\|_2 \le 12E$ and $\|z\|_2 \le 13E$. Step 2 gives $\operatorname{dist}(c,d) \le 4 \cdot 169 E^2 = 676E^2$.
 :::
 
-For $1 \le E \le n$, the factor $\ln(2K+1)$ is at most $\ln(n+3)$, so the attack runs in polynomial time with $O(n \log n)$ queries, and it gets at most $676E^2$ bits wrong. Error $o(\sqrt n)$ is again blatantly non-private. The constants $64$ and $676$ are far from the truth. @fig-rec-attack shows the attack on simulated data, where it recovers almost every bit at errors that the theorem cannot handle.
+For $1 \le E \le n$, the factor $\ln(2K+1)$ is at most $\ln(n+3)$, so the attack runs in polynomial time with $O(n \log n)$ queries and gets at most $676E^2$ bits wrong. So error $o(\sqrt n)$ again lets an attacker recover all but a vanishing fraction of the bits. The constants $64$ and $676$ are far from the truth, as @fig-rec-attack shows: on simulated data the attack recovers almost every bit at errors the theorem cannot handle.
 
-![The linear-programming attack on simulated data. For each $n$, the attacker asks $m = 8n$ random subset queries. The curator adds to each true answer an error drawn uniformly from $[-E, E]$. The attacker finds a point of the feasible set of @thm-rec-lp, up to a violation of at most $0.01$, by projected gradient descent and rounds it. Each point averages $1600/n$ runs, and within a run all values of $E$ share the data, the queries and the uniform draws. The curves for different $n$ nearly coincide, so the error the attack tolerates grows like $\sqrt n$. For $n = 400$, a single run gets none of the bits wrong at $E = \sqrt n/2$ and 17% of them at $E = 2\sqrt n$.](figures/rec-attack.svg){#fig-rec-attack}
+![The linear-programming attack on simulated data, with $m = 8n$ random subset queries and an error drawn uniformly from $[-E, E]$ for each answer. The attacker finds a point of the feasible set of @thm-rec-lp, up to a violation of at most $0.01$, by projected gradient descent and rounds it. Each point averages $1600/n$ runs. The curves for different $n$ nearly coincide, so the error the attack tolerates grows like $\sqrt n$. For $n = 400$, a single run gets none of the bits wrong at $E = \sqrt n/2$ and 17% of them at $E = 2\sqrt n$.](figures/rec-attack.svg){#fig-rec-attack}
 
-A sharper analysis removes the logarithm. It bounds the smallest singular value of the random query matrix, which shows directly that every fractional $z$ with small answers on all $m$ queries is short. Then $O(n)$ queries suffice for the linear program too (Dwork and Roth, 2014, Section 8.1). A linear program that minimizes the total error instead of bounding each error even tolerates a constant fraction of answers with arbitrary error (Dwork, McSherry and Talwar, 2007). That proof needs bounds on random matrices that this book does not develop. The simpler, inefficient version of the tolerance to arbitrary answers follows from the argument above.
+Bounds on random matrices, which this course does not develop, show that $O(n)$ queries suffice for the linear program (Dwork and Roth, 2014, Section 8.1). They also show that a linear program that minimizes the total error tolerates a constant fraction of arbitrary answers (Dwork, McSherry and Talwar, 2007). The argument above gives an inefficient version of that tolerance.
 
 ::: {#prp-rec-robust name="Tolerating some arbitrary answers"}
 Let $E \ge 0$, let $\beta \in (0,1)$ be a failure probability, let $\rho \in [0, 3/128)$ be the fraction of answers that may be arbitrary, and let
@@ -219,25 +214,25 @@ The attacker draws $m$ random subsets as in @thm-rec-random. The curator answers
 4. Suppose this holds, and let $c$ be an output. The queries where $c$ is consistent and those answered with error at most $E$ each number at least $(1-\rho)m$, so at least $(1-2\rho)m$ queries are of both kinds. On each of them, the triangle inequality gives $|\langle S_j, c - d\rangle| \le 2E$, so $V_j = 0$. Hence $\sum_j V_j \le 2\rho m < 3m/64$, and $c$ is not far.
 :::
 
-These attacks are nearly tight. The chapters on [approximate differential privacy](../part02-dp-basics/03-approximate-dp.md) and [advanced composition](../part02-dp-basics/04-advanced-composition.md) show that a curator can answer about $n$ subset queries with error of order $\sqrt n$ and still meet the definition of differential privacy. The bound holds up to logarithmic factors and factors that depend on the privacy parameters. With $m$ queries, error of order $\sqrt m$ suffices. So the line between blatant non-privacy and a formal guarantee runs at error $\sqrt n$ for $n$ queries.
+These attacks are nearly tight. The chapters on [approximate differential privacy](../part02-dp-basics/03-approximate-dp.md) and [advanced composition](../part02-dp-basics/04-advanced-composition.md) show that a curator can answer $m$ subset queries with error of order $\sqrt m$ and still meet the definition of differential privacy, up to logarithmic factors and factors that depend on the privacy parameters. So for $n$ queries, the line between blatant non-privacy and a formal guarantee runs at error $\sqrt n$.
 
 ## Reconstruction in practice {#sec-rec-practice}
 
-The random-query attack looks theoretical, since it asks questions about arbitrary sets of people. A deployed system showed otherwise. The company Aircloak built Diffix, a query interface that let analysts ask an unlimited number of counting queries on sensitive data. It promised privacy with less error than differential privacy would add. From December 2017 to May 2018, Aircloak ran a bounty program with prizes of up to $5,000 for a successful attack.
+The random-query attack seems theoretical, because it asks about arbitrary sets of people, but it broke a deployed system. The company Aircloak built Diffix, an interface that let analysts ask an unlimited number of counting queries on sensitive data. It promised privacy with less error than differential privacy adds.
 
-Diffix answered counting queries, which include subset queries, but with defences against the attacks above. Each condition in a query added its own layer of Gaussian noise with standard deviation $1$, so the error of an answer had standard deviation equal to the square root of the number of conditions. The interface rejected queries that combined conditions with OR, and it suppressed small counts and altered extreme values. A random subset of $n$ people needs about $n/2$ conditions to describe person by person, and those conditions must be joined by OR. Both defences block that route.
+Diffix had defences against the attacks above. Each condition in a query added its own Gaussian noise with standard deviation $1$, so the error grew with the number of conditions. The interface also rejected conditions joined by OR, suppressed small counts and altered extreme values. A random subset of $n$ people needs about $n/2$ conditions joined by OR to describe person by person, so both defences block that route.
 
-Cohen and Nissim reversed the order of the attack. Instead of drawing a random set and then describing it, they drew a random description from a family of single conditions, each of which selects a set that looks random. Their conditions test a digit of an arithmetic expression in each person's numeric identifier, raised to a power. For example, take a multiplier $3$ and an exponent $1/2$, and keep a person when the second decimal digit of $(3 \cdot \text{identifier})^{1/2}$ is even. The person with identifier $7$ is kept, because $\sqrt{21} = 4.5825\ldots$ has second decimal digit $8$. One of the queries they sent kept a row when
+Cohen and Nissim reversed the order of the attack. Instead of a random set that they then had to describe, they drew a random single condition from a family whose sets look random. Each condition tests a digit of a power of each person's numeric identifier. One query they sent kept a row when
 
 $$
 \left\lfloor 100\,(2\cdot\text{identifier})^{0.7} + 0.5 \right\rfloor = \left\lfloor 100\,(2\cdot\text{identifier})^{0.7} \right\rfloor ,
 $$
 
-which holds exactly when the third decimal digit of $(2\cdot\text{identifier})^{0.7}$ is at most $4$. For identifier $2000$ that number is $332.232\ldots$, which is kept, and for $2001$ it is $332.348\ldots$, which is not. Of the $1{,}001$ identifiers from $2000$ to $3000$, the condition keeps $501$.
+which holds exactly when the third decimal digit of $(2\cdot\text{identifier})^{0.7}$ is at most $4$. Of the $1{,}001$ identifiers from $2000$ to $3000$, it keeps $501$, about half, as a random subset would.
 
-Each such query has a fixed, small number of conditions, so its error does not grow with the number of rows, and Diffix added noise of standard deviation $4$ to these queries. Cohen and Nissim targeted four ranges of identifiers that held between $73$ and $142$ rows, and they asked $3{,}500$ queries about each. Gaussian noise is not bounded, so they used the linear program that minimizes the total error, which tolerates a few answers with large error in the spirit of @prp-rec-robust. It recovered the secret attribute of every row in all four ranges. Aircloak then restricted the query language to block the attack.
+Each such query has few conditions, so its error does not grow with the number of rows. Diffix added noise of standard deviation $4$ to it. Cohen and Nissim targeted four ranges of identifiers with $73$ to $142$ rows each and asked $3{,}500$ queries about each range. Gaussian noise is not bounded, so they used the linear program that minimizes the total error, which tolerates a few large errors as @prp-rec-robust does. It recovered the secret attribute of every row in all four ranges.
 
-The theorems of this chapter do not apply to these queries as stated, because a fixed formula is not a random subset. Their proofs use the randomness of the queries only through @lem-rec-anticoncentration, by which each query exposes a fixed wrong candidate with constant probability. The digit tests behave that way on real identifiers, which is an empirical fact and not a theorem. That was enough to break the system.
+The theorems of this chapter do not apply to these queries as stated, because a fixed formula is not a random subset. But the proofs use the randomness of the queries only through @lem-rec-anticoncentration, by which each query exposes a fixed wrong candidate with constant probability. The digit tests behave that way on real identifiers, as an empirical fact and not a theorem.
 
 ## Summary {#sec-rec-summary}
 
@@ -256,10 +251,10 @@ The theorems of this chapter do not apply to these queries as stated, because a 
 
 ## References {#sec-rec-notes}
 
-- Simson Garfinkel, John M. Abowd and Christian Martindale, "Understanding Database Reconstruction Attacks on Public Data", 2019. Reconstruction of census blocks from published tables with a satisfiability solver.
-- John M. Abowd, "Staring Down the Database Reconstruction Theorem", 2019. The Census Bureau's reconstruction and re-identification experiment on the 2010 census.
-- Irit Dinur and Kobbi Nissim, "Revealing Information while Preserving Privacy", 2003. Blatant non-privacy, the attack with all subset queries and the efficient attack with random queries.
-- Cynthia Dwork, Frank McSherry and Kunal Talwar, "The Price of Privacy and the Limits of LP Decoding", 2007. The linear-programming attack with $O(n)$ queries, robust to a constant fraction of arbitrary answers.
-- Cynthia Dwork and Aaron Roth, *The Algorithmic Foundations of Differential Privacy*, 2014. Section 8.1 presents both reconstruction attacks.
-- Raymond Paley and Antoni Zygmund, "A Note on Analytic Functions in the Unit Circle", 1932. The inequality used in @lem-rec-anticoncentration.
-- Aloni Cohen and Kobbi Nissim, "Linear Program Reconstruction in Practice", 2020. The attack on Diffix with pseudo-random digit-test queries, and simulations of the attack.
+- Simson Garfinkel, John M. Abowd and Christian Martindale, "Understanding Database Reconstruction Attacks on Public Data", 2019. Reconstructs census blocks from published tables with a solver.
+- John M. Abowd, "Staring Down the Database Reconstruction Theorem", 2019. Reports the Census Bureau's reconstruction of the 2010 census.
+- Irit Dinur and Kobbi Nissim, "Revealing Information while Preserving Privacy", 2003. Defines blatant non-privacy and gives both attacks.
+- Cynthia Dwork, Frank McSherry and Kunal Talwar, "The Price of Privacy and the Limits of LP Decoding", 2007. Gives the LP attack with $O(n)$ queries that tolerates some arbitrary answers.
+- Cynthia Dwork and Aaron Roth, *The Algorithmic Foundations of Differential Privacy*, 2014. Presents both attacks in Section 8.1.
+- Raymond Paley and Antoni Zygmund, "A Note on Analytic Functions in the Unit Circle", 1932. Gives the inequality in @lem-rec-anticoncentration.
+- Aloni Cohen and Kobbi Nissim, "Linear Program Reconstruction in Practice", 2020. Breaks Diffix with digit-test queries.

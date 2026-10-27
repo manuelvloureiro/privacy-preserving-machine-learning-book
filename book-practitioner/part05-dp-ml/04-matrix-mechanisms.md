@@ -8,17 +8,17 @@ Stack the gradient sums of the steps as the rows of a matrix $x$. The prefix sum
 $$\hat S = L(Rx + z) = Ax + Lz.$$
 A record enters only through the column of $R$ for its step, so privacy depends on the longest column of the encoder, its sensitivity. Accuracy depends on the decoder, whose row $t$ carries the noise into the $t$-th prefix sum.
 
-The first such method ran the follow the regularized leader (FTRL) optimizer on sums from a binary tree. It is called DP-FTRL (Kairouz et al. 2021). Today's usual factorization is the **square-root factorization**, which uses the lower-triangular square root of $A$ for both factors. At equal privacy over one epoch of 100 steps, it leaves about a quarter of independent noise's standard deviation in the final sum.
+The first such method ran the follow the regularized leader (FTRL) optimizer on sums from a binary tree, and is called DP-FTRL (Kairouz et al. 2021). Today's usual choice is the **square-root factorization**, which uses the lower-triangular square root of $A$ for both factors. At equal privacy over one epoch of 100 steps, it leaves about a quarter of independent noise's standard deviation in the final sum.
 
 ## When you meet it {#sec-mfac-when}
 
-You meet matrix mechanisms when your pipeline cannot honestly claim Poisson sampling, the random batches that DP-SGD's accountant assumes. Fixed batches cut from a shuffled order fail it. So do data read in arrival order, and phones in federated learning that check in when they can. Accounting them as Poisson understates $\varepsilon$ ([Amplification by subsampling](../part04-privacy-accounting/05-subsampling.md#sec-sub-schemes)), while a matrix mechanism needs no sampling.
+You meet matrix mechanisms when your pipeline cannot honestly claim Poisson sampling, the random batches that DP-SGD's accountant assumes. Examples are fixed batches cut from a shuffled order, data read in arrival order, and phones in federated learning that check in when they can. Accounting them as Poisson understates $\varepsilon$ ([Amplification by subsampling](../part04-privacy-accounting/05-subsampling.md#sec-sub-schemes)), while a matrix mechanism needs no sampling.
 
-Without sampling, independent noise loses much accuracy, and correlated noise wins most of it back. On the full edition's synthetic task, trained in a fixed order for ten epochs at $\varepsilon = 2$, independent noise reaches a test accuracy of 0.8641. The banded square root of @sec-mfac-wrong reaches 0.9491, against 0.9493 for DP-SGD with Poisson sampling. So if you can implement Poisson sampling, use DP-SGD with Opacus. If you cannot, use a banded matrix mechanism, as Google did for its Gboard keyboard models (Xu et al. 2023).
+Without sampling, independent noise loses much accuracy, and correlated noise wins most of it back. On the full edition's synthetic task, trained in a fixed order for ten epochs at $\varepsilon = 2$, independent noise reaches a test accuracy of 0.8641. The banded square root of @sec-mfac-wrong reaches 0.9491, and DP-SGD with Poisson sampling 0.9493. So if you can implement Poisson sampling, use DP-SGD with Opacus. If you cannot, use a banded matrix mechanism, as Google did for its Gboard keyboard models (Xu et al. 2023).
 
 ## How to use it {#sec-mfac-use}
 
-Google's JAX Privacy implements banded matrix factorization. The block below was not run, since JAX is not in this book's environment. It cycles through 100 fixed groups of records, one per step, so each record takes part once every 100 steps.
+Google's JAX Privacy implements banded matrix factorization. The block below was not run, because JAX is not in this book's environment. It cycles through 100 fixed groups of records, one per step, so each record takes part once every 100 steps.
 
 ```text
 # jax-privacy==2.0.0 (not run)
@@ -35,13 +35,13 @@ config = BandMFExecutionPlanConfig.default(
 plan = config.plan       # calibrates the noise multiplier with dp_accounting
 ```
 
-The training loop draws each batch from `plan.batch_selection_strategy` and sums its clipped gradients with `plan.clipped_grad`. Then `plan.noise_addition_transform` adds the noise before the optimizer sees the sum. A `dp_accounting` accountant turns `plan.dp_event` into the $\varepsilon$ you report. The module is marked experimental, so pin the version.
+The training loop draws each batch from `plan.batch_selection_strategy`, sums its clipped gradients with `plan.clipped_grad`, and adds the noise with `plan.noise_addition_transform`. A `dp_accounting` accountant turns `plan.dp_event` into the $\varepsilon$ you report. The module is marked experimental, so pin the version.
 
 ## What goes wrong {#sec-mfac-wrong}
 
 The pitfalls come from records that take part more than once. Over $E$ epochs a record enters through $E$ columns of the encoder. The square root's columns for nearby steps are nonzero in the same rows, so they add up and the sensitivity grows faster than $\sqrt E$. **Banding** keeps a number $b$ of the encoder's diagonals, the main one and those just below it. It needs every two participations of a record to be at least $b$ steps apart, a condition called **$b$-min-separation**. The record's columns then share no rows, so the sensitivity is at most $\sqrt E$ times the longest column, as for independent noise.
 
-So the data order is part of the mechanism. Fix it before training, independently of the data, and keep the same permutation every epoch. A new shuffle each epoch can put a record at the end of one epoch and the start of the next, which breaks the banded bound.
+So the data order is part of the mechanism. Fix it before training, independently of the data, and keep the same permutation every epoch, because a new shuffle can put a record at the end of one epoch and the start of the next.
 
 The neighbouring relation changes the numbers too. The analysis here leaves a neighbour's slot empty, so a step moves by at most the clipping norm. If a neighbour replaces the record with another instead, every sensitivity doubles, so state the relation next to every $\varepsilon$.
 

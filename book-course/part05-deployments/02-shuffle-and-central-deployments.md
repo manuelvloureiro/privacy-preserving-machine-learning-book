@@ -1,32 +1,30 @@
 # The Shuffle Model and Central Deployments
 
-The local model of [the previous chapter](01-local-dp.md) asks no one to be trusted, and pays with an error $\sqrt n$ times larger than the central model's. This chapter first studies a middle ground for differential privacy (DP), the shuffle model, in which a party that only mixes messages lets each person add far less noise. It then turns to deployments in the central model, where a company holds the data and releases statistics or answers queries. These are an analytics service that answers queries from outside analysts, and two large public data releases.
-
-Each deployment brings a piece of theory with it. The shuffle model comes with amplification by shuffling and a counting protocol whose error does not grow with $n$. The query service comes with a sharper way to account for the exponential mechanism and a fast way to run it. The data releases come with zero-concentrated differential privacy and with a choice between protecting each action and protecting each person.
+The local model of [the previous chapter](01-local-dp.md) trusts no one, and pays with an error $\sqrt n$ times larger than the central model's. This chapter first studies a middle ground for differential privacy (DP), the shuffle model, in which a party that only mixes messages lets each person add far less noise. It then turns to the central model, where a company holds the data, and studies a query service for outside analysts and two public data releases.
 
 ## Encode, shuffle, analyze {#sec-shuf-prochlo}
 
-Google's Prochlo system started from a failure of local privacy. Its designers wanted to learn which applications call which system interfaces, so that rarely used interfaces could be retired and old ones tracked. With a thousand applications and a hundred interfaces there are $10^5$ pairs to count. By their estimate, a local protocol such as RAPPOR would need reports from about a trillion people to count them usefully, more people than exist.
+Google's Prochlo system started from a failure of local privacy. Its designers wanted to count which of a thousand applications call which of a hundred system interfaces, $10^5$ pairs in all. By their estimate, a local protocol such as RAPPOR would need reports from about a trillion people to count them usefully, more people than exist.
 
-Their architecture has three stages, **encode, shuffle, analyze**. Each person *encodes* their data on their own device, for instance with a local randomizer. A *shuffler* collects the encoded messages, strips their metadata such as arrival times and network addresses, and forwards them in a uniformly random order. The *analyst* sees only the shuffled batch and decodes statistics from it. The shuffler's only job is to break the link between a message and its sender.
+Their architecture has three stages, **encode, shuffle, analyze**. Each person *encodes* their data on their own device, for example with a local randomizer. A *shuffler* collects the encoded messages, removes their metadata such as arrival times and network addresses, and sends them on in a uniformly random order. The *analyst* sees only the shuffled batch and decodes statistics from it. So the shuffler has one job, which is to break the link between a message and its sender.
 
-Someone must run the shuffler, and the users must trust it not to reveal the order. Prochlo names three options: a trusted third party, a split of the work between several parties, or trusted hardware. It implements the last one, running the shuffle inside a trusted execution environment (TEE), an Intel SGX enclave, which is hardware designed so that even the machine's owner cannot see the computation inside. Trust then rests on the hardware vendor, and side-channel attacks such as Spectre have shown that such hardware can leak. Splitting the work is the idea of a mix network, in which several servers each shuffle and re-encrypt the batch, so that the order stays hidden unless all of them collude. In Prochlo's experiments on word frequencies, RAPPOR recovered less than $5\%$ as many distinct words as the shuffled system.
+The users must trust the shuffler not to reveal the order. Prochlo runs it inside trusted hardware, an Intel SGX enclave, so trust rests on the hardware vendor. Side-channel attacks such as Spectre have shown that such hardware can leak. Another choice is a mix network of several servers, each of which shuffles and re-encrypts the batch. Then the order stays hidden unless all of them collude.
 
 ## The shuffle model {#sec-shuf-model}
 
-Prochlo motivated a formal model that sits between the local and central ones. The trust barrier passes after the shuffler: the adversary sees the shuffled messages but not who sent which.
+Prochlo led to a formal model between the local and central ones. In it, the adversary sees the shuffled messages but not who sent which.
 
 ::: {#def-shuf-model name="Shuffle model"}
 A protocol in the **shuffle model** gives each person the same randomizer $R\colon \mathcal X \to \mathcal Y$. Person $i$ sends $Y_i = R(X_i)$, using randomness independent of everyone else's, and the **shuffler** outputs $(Y_{\pi(1)}, \dots, Y_{\pi(n)})$ for a permutation $\pi$ drawn uniformly at random. The protocol is **$(\varepsilon, \delta)$-DP in the shuffle model** if this shuffled output, as a mechanism on the dataset $D$, is $(\varepsilon,\delta)$-DP in the central sense.
 :::
 
-The shuffled output carries the same information as the multiset of messages, because the uniform order adds nothing. A local protocol is also a shuffle protocol with the same guarantee, since the shuffled output is a post-processing of the messages. The interesting protocols are those whose messages are *not* private one by one but become private once mixed.
+The uniform order adds no information, so the shuffled output carries the same information as the multiset of messages. A local protocol is also a shuffle protocol with the same guarantee, because the shuffled output is a post-processing of the messages. The interesting protocols are those whose messages are *not* private one by one but become private once mixed.
 
-The benchmark task is again a sum of bits. In the central model, a count plus Laplace noise of scale $1/\varepsilon$ has error of order $1/\varepsilon$. In the local model each person adds noise of that size, and the $n$ independent noises add up to a standard deviation of order $\sqrt n/\varepsilon$, which no local protocol can beat by [the previous chapter's lower bound](01-local-dp.md). The question is how close the shuffle model can get to $1/\varepsilon$.
+The benchmark task is again a sum of bits. In the central model, a count plus Laplace noise of scale $1/\varepsilon$ has error of order $1/\varepsilon$. In the local model each person adds noise of that size, so the $n$ independent noises add up to a standard deviation of order $\sqrt n/\varepsilon$, and by [the previous chapter's lower bound](01-local-dp.md) no local protocol does better. The question is how close the shuffle model can get to $1/\varepsilon$.
 
 ## Amplification by shuffling {#sec-shuf-amplification}
 
-The first answer is general. Shuffling makes any local randomizer more private, just as subsampling did in [an earlier chapter](../part04-learning-statistics/02-private-erm.md). Here is the result in the form in which it was first proved. If each person's message is $\varepsilon_0$-private on its own, the shuffled batch is private with a parameter smaller by a factor of order $\sqrt n$.
+The first answer holds for any local randomizer, because shuffling makes it more private, just as subsampling did in [an earlier chapter](../part04-learning-statistics/02-private-erm.md). In the form first proved, a message that is $\varepsilon_0$-private on its own gives a shuffled batch whose parameter is smaller by a factor of order $\sqrt n$.
 
 ::: {#thm-shuf-amplification name="Amplification by shuffling"}
 Let $n \ge 1000$, $\delta \in (0, \frac1{100})$, and let $R$ be an $\varepsilon_0$-local randomizer with $0 < \varepsilon_0 < \frac12$. Then the shuffled output of $R(X_1), \dots, R(X_n)$ is $(\varepsilon, \delta)$-DP with
@@ -37,13 +35,13 @@ $$
 :::
 <!-- proof: cited -->
 
-The proof is in the 2019 paper by Erlingsson and coauthors listed in the references (Theorem 7 and Corollary 9 there). It shuffles the records before randomizing them, which gives the same output distribution when everyone uses the same randomizer, and which also allows each randomizer to depend on the messages before it. The proof moves the one differing record to the front and swaps it into a uniformly random position, and then bounds how much each successive message reveals about that position.
+The proof is in Erlingsson and coauthors (2019, Theorem 7 and Corollary 9). When everyone uses the same randomizer, shuffling the records before randomizing them gives the same output distribution, and the proof works in that form. It moves the one differing record to the front, swaps it into a uniformly random position, and then bounds how much each later message reveals about that position.
 
-The gain is a factor of order $\sqrt n$, but it applies only to randomizers that are already very private. Few deployments want $\varepsilon_0 \le \frac12$ locally, because that is the regime where local accuracy is worst. The useful regime is $\varepsilon_0$ of order $\ln n$, which the theorem does not cover. A later analysis by Feldman, McMillan and Talwar (2021) does, and still yields a constant $\varepsilon$ there. It covers every $\varepsilon_0 \le \ln\big(n/(16\ln(2/\delta))\big)$, with $\varepsilon = O\big((1 - e^{-\varepsilon_0})\sqrt{e^{\varepsilon_0}\ln(1/\delta)/n}\big)$. Its proof splits each other person's randomizer into a mixture, in which with probability $e^{-\varepsilon_0}$ the message looks like a "clone" of what the differing person might have sent, and the count of clones hides that person. The next section carries out this idea in full for one simple randomizer.
+The theorem applies only to randomizers that are already very private, but few deployments want $\varepsilon_0 \le \frac12$, because local accuracy is worst there. Feldman, McMillan and Talwar (2021) cover the useful regime, $\varepsilon_0$ of order $\ln n$, where $\varepsilon$ is still a constant. For every $\varepsilon_0 \le \ln\big(n/(16\ln(2/\delta))\big)$, they give $\varepsilon = O\big((1 - e^{-\varepsilon_0})\sqrt{e^{\varepsilon_0}\ln(1/\delta)/n}\big)$. In their proof, the message of each other person is, with probability $e^{-\varepsilon_0}$, a "clone" of what the differing person might have sent, and the count of clones hides that person. The next section carries out this idea in full for one simple randomizer.
 
 ## Counting bits in the shuffle model {#sec-shuf-bits}
 
-For a sum of bits, a direct protocol reaches error of order $\sqrt{\ln(1/\delta)}/\varepsilon$, independent of $n$. Its randomizer is randomized response with a twist: almost everyone tells the truth.
+For a sum of bits, a direct protocol reaches error of order $\sqrt{\ln(1/\delta)}/\varepsilon$, which does not depend on $n$. Its randomizer is randomized response in which almost everyone tells the truth.
 
 ::: {#def-shuf-rr name="Shuffled randomized response"}
 Fix a coin probability $\nu \in (0,1]$. Person $i$, with bit $X_i$, sends $Y_i = X_i$ with probability $1 - \nu$, and otherwise sends a fresh fair coin. The analyst sees the shuffled reports, counts their ones as $Z = \sum_{i=1}^n Y_i$, and estimates the count $c = \sum_{i=1}^n X_i$ by
@@ -53,7 +51,7 @@ $$
 $$
 :::
 
-In the local model, $\nu$ would be a constant. Here it will be of order $\ln(1/\delta)/(\varepsilon^2 n)$, so only about $\ln(1/\delta)/\varepsilon^2$ people in total send coins. The coins of the others hide any one person, much as the clones above. Two lemmas prepare the proof, and both use $\tau = \tanh(\varepsilon/2)$, the number for which $(1+\tau)/(1-\tau) = e^\varepsilon$. The first says that the number of ones among $s$ fair coins hides whether one more bit, of any distribution, is added to it, as long as $s$ is large.
+In the local model $\nu$ would be a constant. Here it is of order $\ln(1/\delta)/(\varepsilon^2 n)$, so only about $\ln(1/\delta)/\varepsilon^2$ people in total send coins. These coins hide each single person, as the clones did above. Two lemmas prepare the proof, and both use $\tau = \tanh(\varepsilon/2)$, the number for which $(1+\tau)/(1-\tau) = e^\varepsilon$. The first says that, when $s$ is large, the number of ones among $s$ fair coins hides whether one more bit, of any distribution, is added to it.
 
 ::: {#lem-shuf-binomial}
 Let $\varepsilon > 0$, let $\tau = \tanh(\varepsilon/2)$, and let $s \ge 2/\tau$ be an integer. Let $N$ be binomial with $s$ trials and success probability $\frac12$, and let $B$ and $B'$ be Bernoulli variables independent of $N$, with any parameters. Then for every set $S$ of integers,
@@ -71,7 +69,7 @@ $$
 5. Split $S$ into $S \cap K$, bounded by step 3, and the rest, bounded by step 4.
 :::
 
-The second lemma ensures that enough people send coins. It is a lower tail for the binomial distribution, sharper than Hoeffding's inequality when the mean is small.
+The second lemma makes sure that enough people send coins. It is a lower tail bound for the binomial distribution, sharper than Hoeffding's inequality when the mean is small.
 
 ::: {#lem-shuf-chernoff}
 Let $N$ be binomial with mean $\mu$. Then
@@ -87,7 +85,7 @@ $$
 3. Take $a = \mu/2$ and $\lambda = \ln 2$. The exponent becomes $\mu\ln 2/2 - \mu/2$.
 :::
 
-The privacy theorem chooses the coin probability $\nu$ so that, by @lem-shuf-chernoff, enough people send coins with high probability. Those coins then hide the one person in question, by @lem-shuf-binomial.
+The privacy theorem chooses $\nu$ so that, by @lem-shuf-chernoff, enough people send coins with high probability. By @lem-shuf-binomial, those coins then hide the one person in question.
 
 ::: {#thm-shuf-rr-privacy name="Privacy of shuffled randomized response"}
 Let $\varepsilon > 0$, $\delta \in (0,1)$, $\tau = \tanh(\varepsilon/2)$ and $n \ge 1 + 16\ln(4/\delta)/\tau^2$, and set
@@ -136,7 +134,7 @@ For $\varepsilon \le 1$ and $\nu \le \frac12$, the right-hand side is at most $1
 4. The function $\tanh$ is concave on $[0,\infty)$, so $\tau \ge \tanh(\frac12)\,\varepsilon = 0.462\,\varepsilon$ for $\varepsilon \le 1$. With $1/(1-\nu) \le 2$, the constant is $8/0.462 < 18$.
 :::
 
-So the shuffled count has error $O(\sqrt{\ln(1/\delta)}/\varepsilon)$, which does not grow with $n$. It is within a factor $\sqrt{\ln(1/\delta)}$ of the central model and far from the local model's $\sqrt n/\varepsilon$, as @fig-shuf-counts shows. The example below compares the three models at one setting.
+So the shuffled count has error $O(\sqrt{\ln(1/\delta)}/\varepsilon)$, which does not grow with $n$. That is within a factor $\sqrt{\ln(1/\delta)}$ of the central model and far from the local model's $\sqrt n/\varepsilon$, as @fig-shuf-counts shows over $n$ and the example below shows at one setting.
 
 ::: {#exm-shuf-rr}
 Take $\varepsilon = 1$, $\delta = 10^{-6}$ and $n = 10^6$. Then $\tau = 0.4621$, and @eq-shuf-q gives $\nu = 0.001139$, so about $1{,}139$ people send coins. The standard deviation of $\tilde c$ is at most $23.9$. Local randomized response at the same $\varepsilon$ has standard deviation $\sqrt n\,e^{1/2}/(e - 1) = 959.5$, and central Laplace noise has $\sqrt 2 = 1.414$.
@@ -144,21 +142,22 @@ Take $\varepsilon = 1$, $\delta = 10^{-6}$ and $n = 10^6$. Then $\tau = 0.4621$,
 
 ![Error of three private counts of $n$ bits at $\varepsilon = 1$, as the 95th percentile of the absolute error over 2,000 simulated runs on data with half the bits equal to one. The local error grows as $\sqrt n$. The shuffled error, with $\nu$ from @eq-shuf-q and $\delta = 10^{-6}$, stays near 47, and the central Laplace error stays near 3.](figures/shuf-counts.svg){#fig-shuf-counts}
 
-The price is trust in the shuffler. Each message on its own is randomized response that keeps the true bit with probability $1 - \nu/2$, so it is only $\varepsilon_0$-locally private with $\varepsilon_0 = \ln((2-\nu)/\nu) = 7.47$ in the example. A shuffler that leaked the order would expose almost every bit. That $\varepsilon_0$ is below $\ln\big(n/(16\ln(2/\delta))\big) = 8.37$, so this protocol lies in the range that the clone analysis of the previous section covers. Prochlo's engineering, with its anonymization and mixing, is a practice already common in industry, and the shuffle model shows that, combined with a little local noise, it yields a formal guarantee close to the central one.
+The price is trust in the shuffler. Each message on its own is randomized response that keeps the true bit with probability $1 - \nu/2$, so it is only $\varepsilon_0$-locally private with $\varepsilon_0 = \ln((2-\nu)/\nu) = 7.47$ in the example. So a shuffler that leaked the order would expose almost every bit. This $\varepsilon_0$ is below $\ln\big(n/(16\ln(2/\delta))\big) = 8.37$, so the protocol lies in the range that the clone analysis of the previous section covers.
 
 ## A query service: LinkedIn {#sec-shuf-linkedin}
 
-LinkedIn's audience engagements service lets advertisers ask how members who match a target audience engage with content, such as which articles or topics they click on most. It runs in the central model: LinkedIn holds the data and answers each query with a private mechanism. Its design rests on research done for it, of which this section covers two pieces, a sharper analysis of the exponential mechanism and a fast way to run it.
+LinkedIn's audience engagements service lets advertisers ask how members in a target audience engage with content, such as which articles or topics they click on most. It runs in the central model, so LinkedIn holds the data and answers each query with a private mechanism. This section covers two results of the research for it, a sharper analysis of the exponential mechanism and a fast way to run it.
 
 ### Bounded range {#sec-shuf-br}
 
-Recall [the exponential mechanism](../part02-dp-basics/05-exponential-mechanism.md). Given a score $u(D, r)$ for each candidate $r$ in a countable set, whose value changes by at most $\Delta u$ between neighbours, it outputs $r$ with probability proportional to $\exp(\varepsilon u(D,r)/(2\Delta u))$, and it is $\varepsilon$-DP. Write
+Recall [the exponential mechanism](../part02-dp-basics/05-exponential-mechanism.md). It takes a score $u(D, r)$ for each candidate $r$ in a countable set, whose value changes by at most $\Delta u$ between neighbours. It outputs $r$ with probability proportional to $\exp(\varepsilon u(D,r)/(2\Delta u))$, and it is $\varepsilon$-DP. Write
+
 
 $$
 L(y) = \ln\frac{\Pr[M(D) = y]}{\Pr[M(D') = y]}
 $$
 
-for the privacy loss of output $y$ between neighbours $D$ and $D'$. Pure $\varepsilon$-DP says $|L(y)| \le \varepsilon$, an interval of width $2\varepsilon$. The exponential mechanism satisfies a stronger condition.
+for the privacy loss of output $y$ between neighbours $D$ and $D'$. Pure $\varepsilon$-DP says that $|L(y)| \le \varepsilon$, so the losses lie in an interval of width $2\varepsilon$. The exponential mechanism satisfies a stronger condition.
 
 ::: {#def-shuf-br name="Bounded range"}
 A mechanism $M$ with a countable output set is **$\varepsilon$-bounded range** if for all neighbours $D \sim D'$ and all outputs $y, y'$,
@@ -168,7 +167,7 @@ $$
 $$
 :::
 
-When the outputs have positive probability, this says $L(y) - L(y') \le \varepsilon$. So the privacy losses lie in an interval of width $\varepsilon$, wherever that interval sits. The next result shows that the two notions are within a factor of two of each other.
+When the outputs have positive probability, the definition says that $L(y) - L(y') \le \varepsilon$. So the privacy losses lie in an interval of width $\varepsilon$, which need not be centred at zero. The next result shows that the two notions are within a factor of two of each other.
 
 ::: {#prp-shuf-br-dp}
 An $\varepsilon$-bounded range mechanism is $\varepsilon$-DP. An $\varepsilon$-DP mechanism with a countable output set is $2\varepsilon$-bounded range.
@@ -181,7 +180,7 @@ An $\varepsilon$-bounded range mechanism is $\varepsilon$-DP. An $\varepsilon$-D
 4. *Converse.* If $|L| \le \varepsilon$ everywhere, then $L(y) - L(y') \le 2\varepsilon$.
 :::
 
-The general conversion loses that factor of two, but the exponential mechanism does not. Its privacy losses already lie in an interval of width $\varepsilon$.
+The general conversion loses a factor of two, but the exponential mechanism does not, because its privacy losses already lie in an interval of width $\varepsilon$.
 
 ::: {#prp-shuf-em-br}
 The exponential mechanism with parameter $\varepsilon$ is $\varepsilon$-bounded range.
@@ -193,7 +192,7 @@ The exponential mechanism with parameter $\varepsilon$ is $\varepsilon$-bounded 
 3. Each bracketed difference is at most $\Delta u$ in absolute value, so $L(r) - L(r') \le \varepsilon$.
 :::
 
-The factor of two matters when many selections are composed. Two lemmas make the composition precise. The first converts a tail bound on the privacy loss into a privacy guarantee. It holds for any output space, with $L$ the logarithm of the ratio of probability mass functions or of densities.
+The factor of two matters when many selections are composed, and two lemmas make the composition precise. The first turns a tail bound on the privacy loss into a privacy guarantee. It holds for any output space, with $L$ the logarithm of the ratio of mass functions or of densities.
 
 ::: {#lem-shuf-tail}
 Let $\varepsilon' \ge 0$ and $\delta \in [0,1]$. If for all neighbours $D \sim D'$ the loss satisfies $\Pr_{y \sim M(D)}[L(y) > \varepsilon'] \le \delta$, then $M$ is $(\varepsilon', \delta)$-DP.
@@ -203,7 +202,7 @@ Let $\varepsilon' \ge 0$ and $\delta \in [0,1]$. If for all neighbours $D \sim D
 Fix an event $S$ and let $G = \{y : L(y) \le \varepsilon'\}$. On $S \cap G$ the probability under $D$ is at most $e^{\varepsilon'}$ times that under $D'$, so $\Pr[M(D) \in S\cap G] \le e^{\varepsilon'}\Pr[M(D')\in S]$. The rest of $S$ has probability at most $\Pr[M(D) \notin G] \le \delta$ under $D$.
 :::
 
-The second lemma bounds the mean loss, using Hoeffding's lemma: a random variable $W$ in an interval of length $\ell$ satisfies $\mathbb E[e^{\lambda(W - \mathbb E W)}] \le e^{\lambda^2\ell^2/8}$ for every real $\lambda$. This is the step at the heart of the proof of Hoeffding's inequality.
+The second lemma bounds the mean loss. It uses Hoeffding's lemma, the key step in the proof of Hoeffding's inequality: a random variable $W$ in an interval of length $\ell$ satisfies $\mathbb E[e^{\lambda(W - \mathbb E W)}] \le e^{\lambda^2\ell^2/8}$ for every real $\lambda$.
 
 ::: {#lem-shuf-mean-loss}
 If $M$ is $\varepsilon$-bounded range and $D \sim D'$, then $\mathbb E_{y\sim M(D)}[L(y)] \le \varepsilon^2/8$.
@@ -214,7 +213,7 @@ If $M$ is $\varepsilon$-bounded range and $D \sim D'$, then $\mathbb E_{y\sim M(
 2. Hoeffding's lemma with $\lambda = 1$ gives $1 = \mathbb E[e^W] \le e^{\mathbb E W + \varepsilon^2/8}$, so $\mathbb E[L] = -\mathbb E[W] \le \varepsilon^2/8$.
 :::
 
-The two lemmas combine into a composition theorem. The total privacy loss of $k$ steps is a sum of $k$ losses, each with a small mean and a range of width $\varepsilon$. So the sum concentrates around $k\varepsilon^2/8$, and @lem-shuf-tail turns that concentration into a guarantee.
+The two lemmas combine into a composition theorem. The total privacy loss of $k$ steps is a sum of $k$ losses, each with mean at most $\varepsilon^2/8$ and a range of width $\varepsilon$. So the sum concentrates around $k\varepsilon^2/8$, and @lem-shuf-tail turns that concentration into a guarantee.
 
 ::: {#thm-shuf-br-composition name="Composition of bounded-range mechanisms"}
 Run $k$ mechanisms in sequence on the same dataset, where the $j$-th may be chosen as a function of the outputs of the first $j-1$, and each is $\varepsilon$-bounded range whatever those outputs are. For every $\delta \in (0,1)$, the sequence of outputs is $(\varepsilon', \delta)$-DP with
@@ -232,7 +231,7 @@ $$
 5. So $\Pr[L > \varepsilon'] \le \delta$ for every pair of neighbours, and @lem-shuf-tail finishes the proof.
 :::
 
-[Advanced composition](../part02-dp-basics/04-advanced-composition.md) gives $\varepsilon\sqrt{2k\ln(1/\delta)} + k\varepsilon\tanh(\varepsilon/2)$ for $k$ mechanisms that are only known to be $\varepsilon$-DP. The square-root term of @thm-shuf-br-composition is half as large. Its linear term $k\varepsilon^2/8$ is also smaller, about a quarter of $k\varepsilon\tanh(\varepsilon/2) \approx k\varepsilon^2/2$ for small $\varepsilon$. A numerical example shows the size of the gain.
+[Advanced composition](../part02-dp-basics/04-advanced-composition.md) gives $\varepsilon\sqrt{2k\ln(1/\delta)} + k\varepsilon\tanh(\varepsilon/2)$ for $k$ mechanisms that are known only to be $\varepsilon$-DP. The square-root term of @thm-shuf-br-composition is half as large. Its linear term $k\varepsilon^2/8$ is also about a quarter of $k\varepsilon\tanh(\varepsilon/2) \approx k\varepsilon^2/2$ for small $\varepsilon$.
 
 ::: {#exm-shuf-br}
 Compose $k = 100$ exponential mechanisms, each with $\varepsilon = 0.1$, at $\delta = 10^{-6}$. Basic composition gives $10.00$, advanced composition $5.76$, and @thm-shuf-br-composition gives $2.75$.
@@ -240,17 +239,17 @@ Compose $k = 100$ exponential mechanisms, each with $\varepsilon = 0.1$, at $\de
 
 ### Top-$k$ selection with Gumbel noise {#sec-shuf-gumbel}
 
-An advertiser usually wants the few most popular items in a histogram, such as the top topics among an audience, not every count. LinkedIn's algorithms split along two lines. The **domain** of items may be known in advance, or not. A person's **contribution** may be **$m$-restricted**, meaning each person adds one to at most $m$ counts, or unrestricted. Hires are $1$-restricted, since a hire adds one to one employer, but skills are not, since one person may list many.
+An advertiser usually wants the few most popular items in a histogram, such as the top topics among an audience, not every count. LinkedIn's algorithms depend on two things. The **domain** of items is known in advance or not. And a person's **contribution** is **$m$-restricted** when each person adds one to at most $m$ counts, and unrestricted otherwise. For example, hires are $1$-restricted, because a hire adds one to one employer, but skills are not, because one person can list many.
 
-With $m$-restricted contributions, replacing one person changes the vector of counts by at most $2m$ in $\ell_1$ norm. Laplace noise of scale $2m/\varepsilon$ on every count, followed by taking the top $k$, is then $\varepsilon$-DP. Its noise grows with $m$. For unrestricted contributions, a better route is to select with the exponential mechanism, whose score for an item is its count. A count changes by at most one between neighbours, however many counts a person touches. **Peeling** selects the top item, removes it, and repeats $k$ times. Each round is the exponential mechanism, so by @prp-shuf-em-br and @thm-shuf-br-composition its cost depends on $k$ and not on $m$.
+With $m$-restricted contributions, replacing one person changes the vector of counts by at most $2m$ in $\ell_1$ norm. So Laplace noise of scale $2m/\varepsilon$ on every count, followed by taking the top $k$, is $\varepsilon$-DP, but its noise grows with $m$. For unrestricted contributions it is better to select with the exponential mechanism, with the count of an item as its score. A count changes by at most one between neighbours, whatever the number of counts that a person touches. **Peeling** selects the top item, removes it, and repeats $k$ times. Each round is the exponential mechanism, so by @prp-shuf-em-br and @thm-shuf-br-composition its cost depends on $k$ and not on $m$.
 
-Sampling from the exponential mechanism needs its normalizing constant, and peeling needs it $k$ times. Adding noise of the right shape and taking a maximum avoids both. The right shape is the Gumbel distribution.
+Sampling from the exponential mechanism needs its normalizing constant, and peeling needs it $k$ times. Adding noise of the right shape and taking a maximum avoids both, and the right shape is the Gumbel distribution.
 
 ::: {#def-shuf-gumbel name="Gumbel distribution"}
 The **Gumbel distribution** with scale $b > 0$ has cumulative distribution function $\Pr[G \le g] = \exp(-e^{-g/b})$ for real $g$.
 :::
 
-The next theorem is the reason for this choice. Adding independent Gumbel noise to each score and taking the largest gives exactly the exponential mechanism's distribution, and taking the $k$ largest gives exactly peeling.
+Adding independent Gumbel noise to each score and taking the largest gives exactly the distribution of the exponential mechanism, and taking the $k$ largest gives exactly peeling.
 
 ::: {#thm-shuf-gumbel name="Gumbel-max trick"}
 Let $u_1, \dots, u_d$ be scores, let $G_1, \dots, G_d$ be independent Gumbel variables with scale $b$, and write $w_i = e^{u_i/b}$. Then
@@ -272,27 +271,26 @@ This proves the first claim.
 4. *Induction.* By step 3, the order of the remaining $E_j$ is a fresh exponential race among the remaining items. Step 2 applied to it shows that the next item is chosen with probability proportional to its $w_j$, and repeating gives the second claim.
 :::
 
-Counts change by at most one between neighbours, so take $b = 2/\varepsilon_0$. Then $w_i = e^{\varepsilon_0 u_i/2}$, and the first claim is the exponential mechanism with parameter $\varepsilon_0$. By the second claim, adding Gumbel noise once and reporting the $k$ largest noisy counts *is* peeling, so it inherits peeling's guarantee from @thm-shuf-br-composition. It draws $d$ noise values and selects the top $k$ once, in time of order $d$ plus the time to select the top $k$. Peeling would take time of order $kd$.
+Counts change by at most one between neighbours, so take $b = 2/\varepsilon_0$. Then $w_i = e^{\varepsilon_0 u_i/2}$, and the first claim is the exponential mechanism with parameter $\varepsilon_0$. By the second claim, adding Gumbel noise once and reporting the $k$ largest noisy counts *is* peeling, so it has the guarantee of peeling from @thm-shuf-br-composition. It draws $d$ noise values and selects the top $k$ once, in time of order $d$ plus the time of that selection. Peeling takes time of order $kd$.
 
 ### Queries from outside {#sec-shuf-outside}
 
-Unlike the deployments of the previous chapter, here outside analysts choose the queries, and they may be careless or malicious. Each advertiser has a privacy budget for its own queries. If two advertisers with budgets $\varepsilon$ each combined their answers, basic composition would only give $2\varepsilon$ about the members, and with many advertisers the guarantee would fade. The mechanisms alone cannot rule this out when each advertiser has its own budget. LinkedIn relies instead on a vetting process and on agreements in which advertisers undertake not to share results. The service also sets its parameters by modelling the attacks an analyst might mount, deliberately or by accident, and choosing $\varepsilon$ and the number of queries allowed per month so that those attacks fail. By that accounting, its monthly privacy loss is lower than the reported values for the local deployments of the previous chapter, though those systems protect very different data.
-
-LinkedIn used the same algorithms for its public labour market insights, which show which employers are hiring, which job titles are growing, and which skills new hires have, by region and industry. Hires by employer and by title are $1$-restricted counts, so Laplace noise suits them. Skills are unrestricted, so their top lists come from Gumbel noise and peeling.
+Here, unlike in the previous chapter, outside analysts choose the queries, and they can be careless or malicious. Each advertiser has a privacy budget for its own queries. Two advertisers with budget $\varepsilon$ each can combine their answers, and then basic composition gives only $2\varepsilon$ about the members. Many advertisers together would erase the guarantee. The mechanisms cannot rule this out, so LinkedIn relies on vetting and on agreements not to share results. It also chooses $\varepsilon$ and the monthly number of queries so that the attacks it models fail.
 
 ## Data releases {#sec-shuf-releases}
 
-The last two deployments do not answer queries. They publish a fixed dataset once, computed in the central model.
+The last two deployments do not answer queries. Each publishes a fixed dataset once, computed in the central model.
 
 ### Mobility reports {#sec-shuf-mobility}
 
-During the Covid-19 pandemic, Google published community mobility reports, built from the location history of users who had opted in. For each region and day, they gave the change in visits to six kinds of places, such as retail and recreation, grocery stores and pharmacies, parks, transit stations, workplaces and residences, relative to a baseline from before the pandemic. Weekly patterns are visible. Visits to workplaces fell on weekdays but hardly changed at weekends, when most people stay away from work anyway, and time at home rose. The counts behind these percentages are noised with Laplace noise to satisfy differential privacy. To bound each person's influence, a person counts at most once per category and place, and at most four such pairs per day. A person with more has four pairs kept at random and the rest dropped, which is the same idea as $m$-restricted contribution. Regions smaller than $3$ square kilometres, and metrics whose noisy count of people is below $100$, are discarded, and so are changes that the noise makes too uncertain.
+During the Covid-19 pandemic, Google published community mobility reports from the location history of users who opted in. For each region and day, they gave the change in visits to places such as parks, workplaces and residences, relative to a baseline from before the pandemic. The counts of visits get Laplace noise after a bound on what each person adds. A person counts at most once per category and place, and in at most four such pairs per day, kept at random. So the contributions are $m$-restricted, as in the counts of LinkedIn. The reports drop metrics whose noisy count of people is below $100$, and changes that the noise makes too uncertain.
 
 ### A URL dataset with zero-concentrated privacy {#sec-shuf-urls}
 
-Facebook and the academic organization Social Science One released a dataset on how users interact with web links shared on Facebook. It covers more than 38 million URLs, and researchers obtain access through a proposal process. The raw data are events, such as "a woman aged 35 to 44 in Germany shared this URL on this date". The release aggregates them by URL, month, country, age and gender, and publishes noisy counts of views, clicks, shares, likes and other reactions. A noisy count can be negative, a visible sign of the noise.
+Facebook and the academic organization Social Science One released a dataset on how users interact with web links shared on Facebook. It covers more than 38 million URLs, and researchers get access through a proposal process. The raw data are events, such as "a woman aged 35 to 44 in Germany shared this URL on this date". The release aggregates them by URL, month, country, age and gender, and publishes noisy counts of views, clicks, shares, likes and other reactions.
 
-The noise is Gaussian, and the guarantee is zero-concentrated differential privacy, a variant of differential privacy that suits Gaussian noise. It is stated with the Rényi divergence. For an order $\alpha > 1$ and two distributions $P$ and $Q$, write $p$ and $q$ for their densities, or their mass functions on a countable set. The **Rényi divergence** of order $\alpha$ is
+The noise is Gaussian, and the guarantee is zero-concentrated differential privacy, a variant of DP that suits Gaussian noise. It uses the Rényi divergence. For an order $\alpha > 1$ and two distributions $P$ and $Q$, write $p$ and $q$ for their densities, or their mass functions on a countable set. The **Rényi divergence** of order $\alpha$ is
+
 
 $$
 D_\alpha(P\,\|\,Q) = \frac{1}{\alpha - 1}\ln\int p(y)^\alpha q(y)^{1-\alpha}\,dy ,
@@ -308,31 +306,32 @@ D_\alpha\big(M(D)\,\|\,M(D')\big) \le \rho\,\alpha .
 $$
 :::
 
-It has one parameter, like pure privacy, but composes like advanced composition, as the next three results show. It lies between the two: an $\varepsilon$-DP mechanism is $(\varepsilon^2/2)$-zero-concentrated, and the converse direction holds with a $\delta$.
+It has one parameter, like pure DP, but composes like advanced composition, as the next three results show. It lies between the two, because an $\varepsilon$-DP mechanism is $(\varepsilon^2/2)$-zero-concentrated, and the converse holds with a $\delta$.
+
+The first two results follow from [private deep learning](../part04-learning-statistics/03-private-deep-learning.md), where @def-dpdl-moments defines the log-moment $\kappa_M(\lambda)$. It is the worst case over neighbours of the logarithm of the average $\lambda$-th power of the density ratio $p/q$ under $p$. For one pair of neighbours and $\alpha = \lambda + 1$, that logarithm is a multiple of the Rényi divergence of order $\alpha$, by its definition:
+
+$$
+\ln\int p^{\alpha}q^{1-\alpha}\,dy = (\alpha - 1)\,D_\alpha\big(M(D)\,\|\,M(D')\big).
+$$
+
+So a mechanism is $\rho$-zero-concentrated exactly when $\kappa_M(\lambda) \le \rho\lambda(\lambda+1)$ for every $\lambda > 0$.
 
 ::: {#lem-shuf-renyi-product}
-For product distributions, $D_\alpha(P_1\times P_2\,\|\,Q_1\times Q_2) = D_\alpha(P_1\,\|\,Q_1) + D_\alpha(P_2\,\|\,Q_2)$. So releasing the outputs of a $\rho_1$- and a $\rho_2$-zero-concentrated mechanism, run with independent coins, is $(\rho_1 + \rho_2)$-zero-concentrated.
+Let $M_1$ be $\rho_1$-zero-concentrated, and let $M_2(\cdot\,; y_1)$ be a mechanism chosen as a function of the output $y_1$ of $M_1$, which is $\rho_2$-zero-concentrated for every $y_1$. Then the mechanism that outputs $(y_1, y_2)$ is $(\rho_1 + \rho_2)$-zero-concentrated. In particular, this holds for two mechanisms run with independent coins.
 :::
 
 ::: {.proof}
-The integral of $p^\alpha q^{1-\alpha}$ over a product space factorizes into the two integrals, and the logarithm turns the product into a sum.
+By the equivalence above, $\kappa_{M_1}(\lambda) \le \rho_1\lambda(\lambda+1)$ and $\kappa_{M_2(\cdot;y_1)}(\lambda) \le \rho_2\lambda(\lambda+1)$ for every $y_1$ and every $\lambda > 0$. @lem-dpdl-compose adds the two bounds, so $\kappa_M(\lambda) \le (\rho_1 + \rho_2)\lambda(\lambda+1)$, which is the claim.
 :::
 
-The same additivity holds when the second mechanism is chosen after seeing the first output, as Bun and Steinke (2016) show. The second result gives the guarantee of the Gaussian mechanism, which is why the release uses it.
+The second result gives the guarantee of the Gaussian mechanism, which is why the release uses it.
 
 ::: {#prp-shuf-gaussian name="Gaussian mechanism"}
 Let $f\colon \mathcal X^n \to \mathbb R^d$ change by at most $\Delta_2 f$ in Euclidean norm between neighbours. Then $M(D) = f(D) + Z$, with $Z$ a vector of $d$ independent normal variables of mean $0$ and variance $\sigma^2$, is $(\Delta_2 f)^2/(2\sigma^2)$-zero-concentrated.
 :::
 
 ::: {.proof}
-1. In one dimension, let $p$ and $q$ be normal densities with means $a$ and $b$ and variance $\sigma^2$. Completing the square,
-
-$$
-\alpha(y-a)^2 + (1-\alpha)(y-b)^2 = \big(y - \alpha a - (1-\alpha)b\big)^2 + \alpha(1-\alpha)(a-b)^2 .
-$$
-
-2. The first term integrates against the normal density to one, so $\int p^\alpha q^{1-\alpha} = \exp\big(\alpha(\alpha-1)(a-b)^2/(2\sigma^2)\big)$, and $D_\alpha = \alpha(a-b)^2/(2\sigma^2)$.
-3. In $d$ dimensions the coordinates are independent, so by @lem-shuf-renyi-product the divergences add to $\alpha\|f(D) - f(D')\|_2^2/(2\sigma^2) \le \alpha(\Delta_2 f)^2/(2\sigma^2)$.
+@lem-dpdl-gaussian gives $\kappa_M(\lambda) = \lambda(\lambda+1)(\Delta_2 f)^2/(2\sigma^2)$ for every $\lambda > 0$, which by the equivalence above is $\rho$-zero-concentrated privacy with $\rho = (\Delta_2 f)^2/(2\sigma^2)$.
 :::
 
 The third result converts a zero-concentrated guarantee into an $(\varepsilon, \delta)$ guarantee, the form in which a release usually states its budget.
@@ -348,13 +347,13 @@ A $\rho$-zero-concentrated mechanism is $(\rho + 2\sqrt{\rho\ln(1/\delta)}, \del
 4. @lem-shuf-tail finishes the proof.
 :::
 
-The release's budget raises a question that recurs in deployments: what is a neighbour? **User-level** privacy hides everything one person did, and **action-level** privacy hides one action, such as one click. User-level privacy is the goal, but a few users act thousands of times, and hiding them would drown every count in noise. The release instead protects every action strongly enough that almost all users get a user-level guarantee too. A user whose actions number at most a high percentile of the activity distribution enjoys a stated user-level guarantee, and heavier users still have the action-level one.
+The budget of the release raises a question that recurs in deployments: what is a neighbour? **User-level** privacy hides everything one person did, and **action-level** privacy hides one action, such as one click. User-level privacy is the goal, but a few users act thousands of times, and hiding them would drown every count in noise. So the release protects each action strongly enough that a user with at most a high percentile of the activity distribution gets a stated user-level guarantee. Heavier users still have the action-level one.
 
 ::: {#exm-shuf-budget}
 Suppose each action adds one to a single cell, and the actions of one user fall in different cells. Replacing one action changes two counts by one each, a Euclidean change of $\sqrt 2$. Replacing all $k$ actions of a user changes at most $2k$ counts, a change of at most $\sqrt{2k}$. Then by @prp-shuf-gaussian, $k$ actions cost $k$ times the action-level $\rho$. To give users with at most $20$ actions $(0.5, 10^{-6})$-DP, solve $\rho + 2\sqrt{\rho\ln 10^6} = 0.5$ for $\rho = 0.00444$ at the user level. The action level is then $\rho = 0.000222$, which Gaussian noise of standard deviation $\sigma = \sqrt2/\sqrt{2\rho} = 67.1$ achieves. A single action alone is protected at $(0.111, 10^{-6})$-DP.
 :::
 
-Many other deployments exist. The largest is the US Census Bureau's use of differential privacy for the 2020 census, a system complex enough to need a separate treatment.
+The largest deployment, the US Census Bureau's use of DP for the 2020 census, is complex enough to need a separate treatment.
 
 ## Summary {#sec-shuf-summary}
 
@@ -375,16 +374,15 @@ Many other deployments exist. The largest is the US Census Bureau's use of diffe
 
 ## References {#sec-shuf-notes}
 
-- Andrea Bittau, Úlfar Erlingsson, Petros Maniatis, Ilya Mironov, Ananth Raghunathan, David Lie, Mitch Rudominer, Ushasree Kode, Julien Tinnes and Bernhard Seefeld, "Prochlo: Strong Privacy for Analytics in the Crowd", 2017. The encode, shuffle, analyse architecture and its implementation with hardware enclaves.
-- Albert Cheu, Adam Smith, Jonathan Ullman, David Zeber and Maxim Zhilyaev, "Distributed Differential Privacy via Shuffling", 2019. The shuffle model as defined here, a one-message protocol for sums of bits with error $O(\sqrt{\ln(1/\delta)}/\varepsilon)$, and a protocol with many one-bit messages for sums of numbers in $[0,1]$ with error $O(\ln(n/\delta)/\varepsilon)$. The constants in @thm-shuf-rr-privacy are this chapter's own.
-- Úlfar Erlingsson, Vitaly Feldman, Ilya Mironov, Ananth Raghunathan, Kunal Talwar and Abhradeep Thakurta, "Amplification by Shuffling: From Local to Central Differential Privacy via Anonymity", 2019. @thm-shuf-amplification.
+- Andrea Bittau, Úlfar Erlingsson, Petros Maniatis, Ilya Mironov, Ananth Raghunathan, David Lie, Mitch Rudominer, Ushasree Kode, Julien Tinnes and Bernhard Seefeld, "Prochlo: Strong Privacy for Analytics in the Crowd", 2017. The encode, shuffle, analyse architecture, built with hardware enclaves.
+- Albert Cheu, Adam Smith, Jonathan Ullman, David Zeber and Maxim Zhilyaev, "Distributed Differential Privacy via Shuffling", 2019. The shuffle model and the protocol for sums of bits, though the constants in @thm-shuf-rr-privacy are this chapter's own.
+- Úlfar Erlingsson, Vitaly Feldman, Ilya Mironov, Ananth Raghunathan, Kunal Talwar and Abhradeep Thakurta, "Amplification by Shuffling: From Local to Central Differential Privacy via Anonymity", 2019. The source of @thm-shuf-amplification.
 - Vitaly Feldman, Audra McMillan and Kunal Talwar, "Hiding Among the Clones: A Simple and Nearly Optimal Analysis of Privacy Amplification by Shuffling", 2021. Amplification for $\varepsilon_0$ up to about $\ln n$, by the clone decomposition.
-- Ryan Rogers, Subbu Subramaniam, Sean Peng, David Durfee, Seunghyun Lee, Santosh Kumar Kancha, Shraddha Sahay and Parvez Ahammad, "LinkedIn's Audience Engagements API: A Privacy Preserving Data Analytics System at Scale", 2020. The query service, its algorithms for known and unknown domains, and its choice of parameters.
-- David Durfee and Ryan Rogers, "Practical Differentially Private Top-$k$ Selection with Pay-what-you-get Composition", 2019. Bounded range, Gumbel-noise top-$k$ selection and its equivalence with peeling.
-- Jinshuo Dong, David Durfee and Ryan Rogers, "Optimal Differential Privacy Composition for Exponential Mechanisms", 2020. The optimal composition of bounded-range mechanisms, and efficiently computable bounds that improve slightly on @thm-shuf-br-composition.
-- Emil Julius Gumbel, *Statistical Theory of Extreme Values and Some Practical Applications*, 1954. The Gumbel distribution and its use for maxima.
-- Ryan Rogers, Adrian Rivera Cardoso, Koray Mancuhan, Akash Kaura, Nikhil Gahlawat, Neha Jain, Paul Ko and Parvez Ahammad, "A Members First Approach to Enabling LinkedIn's Labor Market Insights at Scale", 2020. The labour market release and its choice of algorithms.
+- Ryan Rogers, Subbu Subramaniam, Sean Peng, David Durfee, Seunghyun Lee, Santosh Kumar Kancha, Shraddha Sahay and Parvez Ahammad, "LinkedIn's Audience Engagements API: A Privacy Preserving Data Analytics System at Scale", 2020. The query service, its algorithms and its choice of parameters.
+- David Durfee and Ryan Rogers, "Practical Differentially Private Top-$k$ Selection with Pay-what-you-get Composition", 2019. Bounded range, and top-$k$ selection with Gumbel noise as peeling.
+- Jinshuo Dong, David Durfee and Ryan Rogers, "Optimal Differential Privacy Composition for Exponential Mechanisms", 2020. The optimal composition of bounded-range mechanisms, slightly better than @thm-shuf-br-composition.
+- Emil Julius Gumbel, *Statistical Theory of Extreme Values and Some Practical Applications*, 1954. The Gumbel distribution of maxima.
 - Ahmet Aktay and coauthors, "Google Covid-19 Community Mobility Reports: Anonymization Process Description", 2020. How the mobility reports bound contributions and add noise.
-- Solomon Messing, Christina DeGregorio, Bennett Hillenbrand, Gary King, Saurav Mahanti, Zagreb Mukerjee, Chaya Nayak, Nate Persily, Bogdan State and Arjun Wilkins, "Facebook Privacy-Protected Full URLs Data Set", 2020. The URL release, its Gaussian noise and its action-level and user-level budget, set so that the 99th percentile of users by activity gets the user-level guarantee.
-- Cynthia Dwork and Guy N. Rothblum, "Concentrated Differential Privacy", 2016, and Mark Bun and Thomas Steinke, "Concentrated Differential Privacy: Simplifications, Extensions, and Lower Bounds", 2016. Concentrated privacy, and its zero-concentrated form with @prp-shuf-gaussian, @prp-shuf-zcdp-dp and adaptive composition.
+- Solomon Messing, Christina DeGregorio, Bennett Hillenbrand, Gary King, Saurav Mahanti, Zagreb Mukerjee, Chaya Nayak, Nate Persily, Bogdan State and Arjun Wilkins, "Facebook Privacy-Protected Full URLs Data Set", 2020. The URL release, whose budget gives the 99th percentile of users by activity the user-level guarantee.
+- Cynthia Dwork and Guy N. Rothblum, "Concentrated Differential Privacy", 2016, and Mark Bun and Thomas Steinke, "Concentrated Differential Privacy: Simplifications, Extensions, and Lower Bounds", 2016. Concentrated privacy and its zero-concentrated form, with @prp-shuf-zcdp-dp and adaptive composition.
 - John M. Abowd and coauthors, "The 2020 Census Disclosure Avoidance System TopDown Algorithm", 2022. The census deployment.

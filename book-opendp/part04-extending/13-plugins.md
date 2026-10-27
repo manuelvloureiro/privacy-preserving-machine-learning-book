@@ -1,10 +1,10 @@
 # Plugins
 
-Suppose the mechanism you need is not in the library, such as a new estimator from a paper or a score that only makes sense for your data. The framework of the previous part was built for this case. A transformation is any function with a stability map, and a measurement is any function with a privacy map. So you can write both in Python and hand them to the library as **plugins**. From then on they chain, compose and run through a context like the built-in ones.
+Sometimes the mechanism you need is not in the library, such as a new estimator from a paper. The framework of the previous part allows for this, because a transformation is any function with a stability map and a measurement is any function with a privacy map. So you can write both in Python and give them to the library as **plugins**, which then chain, compose and run through a context like the built-in ones.
 
-The one idea of this chapter is that a plugin is exactly as private as its map, and the library cannot check the map. Every built-in constructor comes with a written proof of its map, and for a plugin that proof is yours. So each example below shows its calls and then says in a sentence why its map is right, or where the documentation leaves that open. You will write a measurement, a transformation, and your own domains, metrics and measures, then register a constructor for the Context API. The chapter ends with the documentation's two larger examples, a Theil-Sen regression and a private choice of grouping columns.
+The one idea of this chapter is that a plugin is exactly as private as its map, and the library cannot check the map. Every built-in constructor comes with a written proof of its map, but for a plugin that proof is yours. So each example below says why its map is right, or where the documentation leaves that open. You will write a measurement, a transformation and your own spaces, register a constructor for the Context API, and follow the documentation's Theil-Sen regression and private choice of grouping columns.
 
-The script [opendp_plugins.py](../../code/part04-extending/opendp_plugins.py) runs every step on OpenDP 0.16.0. Its regression runs on the documentation's toy data, a hundred points on a line with normal noise from a seeded generator. Its choice of grouping columns runs on the Labour Force Survey (LFS) sample. Every map, check, error message, score and candidate range on this page is the same on every run. The released values are not, because OpenDP's noise cannot be seeded, so they appear in one block marked as one run at the end.
+The script [opendp_plugins.py](../../code/part04-extending/opendp_plugins.py) runs every step on OpenDP 0.16.0. The regression uses the documentation's toy data, a hundred points on a line with seeded normal noise, and the choice of grouping columns uses the Labour Force Survey (LFS) sample. Every map, check, error message, score and candidate range on this page is the same on every run. OpenDP's noise cannot be seeded, so the released values appear in one block marked as one run at the end.
 
 ```bash
 uv run python code/part04-extending/opendp_plugins.py
@@ -12,15 +12,15 @@ uv run python code/part04-extending/opendp_plugins.py
 
 ## Trust and the honest-but-curious flag {#sec-plug-trust}
 
-The documentation gives two reasons for plugins. Differential privacy is a wide and growing field, so the library cannot ship every mechanism. And an idea is easier to try in Python than in Rust, so a plugin is how a contribution usually starts. Both reasons put a Python function at the heart of a guarantee, and that changes who is responsible for it.
+The documentation gives two reasons for plugins: the library cannot ship every mechanism, and an idea is easier to try in Python than in Rust. Either way a Python function is at the centre of a guarantee, so the library cannot read it. It cannot tell whether your privacy map is right, whether your function has side effects, or whether it raises an error only on some data.
 
-The library can inspect its own constructors, but it cannot read a Python function. So it cannot tell whether your privacy map is right, whether your function has side effects, or whether it raises only when the data make it. The constructors of this chapter therefore need a second feature flag next to `contrib`, named `honest-but-curious`, and the name is the trust model it describes. Whoever writes the plugin is honest, in that the map they write is one they have proved, and the library guards only against curiosity from everyone downstream. Without the flag a plugin constructor refuses to build.
+That is why plugin constructors need a second feature flag next to `contrib`, named `honest-but-curious` after its trust model. The author of the plugin is honest, because they have proved their map, and the library guards only against curiosity downstream. Without the flag a plugin constructor refuses to build.
 
 ```text
 without the flag: Attempted to use function that requires "contrib", "honest-but-curious", but not enabled
 ```
 
-Each constructor's docstring spells out the promise. Take any two inputs in the domain that are at most `d_in` apart under the input metric. Then the two output distributions must be at most `privacy_map(d_in)` apart under the output measure, the function must have no side effects, and the map must be pure. A wrong map breaks the guarantee silently, because everything downstream believes it. The context charges what the map reports, the composition adds up the maps, and the release goes out. The snippet is the extreme case, a measurement that returns its input and claims a privacy loss of zero.
+Each constructor's docstring states the promise. For any two inputs at most `d_in` apart under the input metric, the output distributions must be at most `privacy_map(d_in)` apart under the output measure. Also, the function must have no side effects, and the map must be pure. A wrong map breaks the guarantee silently, because the context charges what the map reports. The snippet shows the extreme case, a measurement that returns its input and claims a privacy loss of zero.
 
 ```python
 import opendp.prelude as dp
@@ -32,11 +32,11 @@ print(leak.map(1))  # 0.0
 print(leak([1, 2, 3]))  # [1, 2, 3]
 ```
 
-The library accepts it, and a context would release the raw data at no charge. Nothing in the rest of this chapter protects you from this. The flag records that the claim rests on your word, and the sentence that justifies each map below is the habit that makes the word worth something.
+The library accepts it, and a context would release the raw data at no charge. The flag records that the claim rests on your word, and the sentence that justifies each map below is what makes that word worth something.
 
 ## A measurement plugin {#sec-plug-measurement}
 
-The documentation's first example is deliberately useless, a measurement that ignores its input and returns a constant. It is useful here because its map is the easiest one to justify. The constructor `make_user_measurement` takes the five things that define a measurement in [A framework to understand differential privacy](../part03-framework/08-a-framework-for-privacy.md). They are an input domain, an input metric, an output measure, the function and the privacy map.
+The documentation's first example is a measurement that ignores its input and returns a constant, which is useless as a release but has the easiest map to justify. The constructor `make_user_measurement` takes the five parts of a measurement ([A framework to understand differential privacy](../part03-framework/08-a-framework-for-privacy.md)). They are an input domain, an input metric, an output measure, the function and the privacy map.
 
 ```{.python excerpt="plug-constant"}
 def make_base_constant(constant: str) -> dp.Measurement:
@@ -58,16 +58,16 @@ def make_base_constant(constant: str) -> dp.Measurement:
     )
 ```
 
-The input domain says the function takes one integer, and the input metric compares two inputs by their absolute difference. The output measure is the max divergence, the measure of pure differential privacy, so the map's value is an $\varepsilon$. The map returns zero at every distance, and that is correct because the output does not depend on the input, so two neighbouring inputs give the same output distribution. The last argument, `TO`, names the type the function returns. The script chains the result after a sum on a vector of bounded integers.
+The input space is one integer under the absolute difference. The output measure is the max divergence of pure differential privacy, so the map gives an $\varepsilon$. The map returns zero at every distance, which is correct because the output does not depend on the input. The last argument, `TO`, names the type that the function returns. The script chains the result after a sum of bounded integers.
 
 ```text
 constant: input=AtomDomain(T=i32) metric=AbsoluteDistance(i32) measure=MaxDivergence
 sum >> constant: map(1)=0.0 release=denied
 ```
 
-The chain works because the sum's output space, an integer under the absolute distance, is exactly the plugin's input space. The library checks that match, because domains and metrics are its own objects, but it does not check the map.
+The chain works because the output space of the sum, an integer under the absolute distance, is the input space of the plugin. The library checks that match, because domains and metrics are its own objects, but it does not check the map.
 
-A plugin with a real map shows what the justification looks like. The next constructor adds Laplace noise drawn by NumPy rather than by OpenDP. It takes its input space as its first two arguments, which is the convention the Context API will need later.
+The next constructor has a real map. It adds Laplace noise from NumPy instead of from OpenDP, and it takes its input space as its first two arguments, the convention that the Context API needs later.
 
 ```{.python excerpt="plug-laplace"}
 def make_numpy_laplace(input_domain: dp.Domain, input_metric: dp.Metric, scale: float) -> dp.Measurement:
@@ -85,7 +85,7 @@ def make_numpy_laplace(input_domain: dp.Domain, input_metric: dp.Metric, scale: 
     )
 ```
 
-The map is the sensitivity over the scale. Laplace noise of a given scale on a quantity that one person moves by at most the sensitivity costs exactly that ratio in $\varepsilon$. [The full edition's chapter on the Laplace and Gaussian mechanisms](../../book-full/part03-dp-foundations/03-laplace-gaussian.md) derives the bound. The built-in `then_laplace` at the same scale reports the same map, which is the check to run on any plugin with a built-in cousin.
+The map is the sensitivity over the scale, which is what Laplace noise costs in $\varepsilon$ ([the full edition's chapter on the Laplace and Gaussian mechanisms](../../book-full/part03-dp-foundations/03-laplace-gaussian.md) derives it). The built-in `then_laplace` at the same scale reports the same map, and that comparison is the check to run on any plugin with a built-in equivalent.
 
 ```text
 python laplace scale 2: map(1.0)=0.5 built-in map(1.0)=0.5
@@ -93,11 +93,11 @@ halved map, same noise: map(1.0)=0.25 check(1.0, 0.25)=True
 laplace scale 2: 95% accuracy=5.9915
 ```
 
-The second line is the same noise with a map that claims half the loss. The library accepts it, and `check` confirms a fit within a quarter of a unit of $\varepsilon$, which is false. A context would hand such a plugin a quarter and spend half. The third line is the error bar at scale 2, which the released value at the end of the page is read against. In production, prefer the Rust core, because NumPy's float sampling leaks a little through rounding and OpenDP's own samplers avoid that.
+The second line uses the same noise with a map that claims half the loss, as a test of what the library catches. The library accepts it, and `check` reports that it fits a budget of 0.25, which is false, so a context would give such a plugin a quarter and spend half. The third line is the 95% error bar of the noise at scale 2, for the release at the end of the page. In production, prefer the Rust core, because NumPy's float sampling leaks a little through rounding and OpenDP's own samplers prevent that.
 
 ## A transformation plugin {#sec-plug-transformation}
 
-A transformation plugin takes one more argument than a measurement, an output domain. Its map is a stability map, which bounds how far apart two outputs can be when the inputs are a given distance apart, as [Transformations](../part03-framework/09-transformations.md) introduced. The documentation's example repeats each record a fixed number of times.
+A transformation plugin takes one more argument than a measurement, an output domain. Its map is a stability map, which bounds the distance between two outputs when the inputs are a given distance apart ([Transformations](../part03-framework/09-transformations.md)). The documentation's example repeats each record a fixed number of times.
 
 ```{.python excerpt="plug-repeat"}
 def make_repeat(multiplicity: int) -> dp.Transformation:
@@ -119,7 +119,7 @@ def make_repeat(multiplicity: int) -> dp.Transformation:
     )
 ```
 
-Both metrics are the symmetric distance, the number of records added or removed between two datasets. The map multiplies that distance by the multiplicity. Every input record becomes `multiplicity` output records, so adding or removing one input record adds or removes that many output records. The output domain is a second claim you make. Every output must belong to it, or the function must fail in a way that does not depend on the data. Here the output is a vector of integers whenever the input is.
+Both metrics are the symmetric distance, the number of records added or removed. The map multiplies that distance by the multiplicity, because each input record becomes `multiplicity` output records. The output domain is a second claim. Every output must belong to it, or the function must fail in a way that does not depend on the data. Here it holds, because the output is a vector of integers whenever the input is.
 
 The documentation chains the plugin between built-in steps, a cast from strings and a clamp before a sum, and ends with Laplace noise.
 
@@ -130,9 +130,9 @@ cast >> repeat 2 >> clamp (1, 2) >> sum: map(1)=4 on ['0', '1', '2', '3'] = 12
 domain mismatch: DomainMismatch("Intermediate domains don't match
 ```
 
-The stability of a chain is the product of the stabilities of its links, as [Combinators](../part03-framework/11-combinators.md) explains. The cast and the clamp have stability 1, and the repeat has 2. The clamp bounds every value by 2, so one added input record, repeated twice, moves the sum by at most 4. Laplace noise of scale 1 then costs that much $\varepsilon$. The last line is what happens when the cast produces floats instead. The plugin's input domain is a vector of integers, and the library refuses the chain, because the spaces are its objects and it can compare them.
+The stability of a chain is the product of the stabilities of its links ([Combinators](../part03-framework/11-combinators.md)). The cast and the clamp have stability 1 and the repeat has 2. The clamp bounds every value by 2, so one added input record, repeated twice, moves the sum by at most 4. Laplace noise of scale 1 then costs an $\varepsilon$ of 4. In the last line the cast gives floats, and the library refuses the chain, because it can compare its own spaces.
 
-It cannot compare the function with the output domain, and that is the second way a transformation plugin goes wrong. The snippet declares that its output lies between 0 and 1 and then returns its input unchanged.
+The library cannot compare the function with the output domain, and that is the second way a transformation plugin goes wrong. The snippet declares that its output lies between 0 and 1 and then returns its input unchanged.
 
 ```python
 import opendp.prelude as dp
@@ -145,13 +145,13 @@ print(claim([5, 6]))  # [5, 6]
 print((claim >> dp.t.then_sum()).map(1))  # 1
 ```
 
-The sum after it trusts the bounds and reports a sensitivity of 1, while the real sum moves by the whole value of a record. A wrong output domain is a wrong map one step later, so a transformation plugin needs two justifications, one for each.
+The sum trusts the bounds and reports a sensitivity of 1, but the real sum moves by the whole value of a record. A wrong output domain becomes a wrong map one step later, so a transformation plugin needs a justification for each.
 
 ## Your own domains, metrics and measures {#sec-plug-spaces}
 
-Sometimes a plugin works on data the library has no domain for, such as a data frame or a graph, or compares neighbours by a metric it does not define. Three constructors let you name your own, and each carries its own promise.
+A plugin may work on data that the library has no domain for, such as a data frame, or compare neighbours by a metric that the library does not define. Three constructors let you define your own, and each carries a promise.
 
-A **user domain** is built from an identifier and a membership function. Two user domains are equal when their identifiers are equal, which is how the library decides whether two steps chain. So the identifier must name one set and nothing else, or two different domains would chain and break the stability of the chain. The membership function must return true only for members. A **user distance** is a metric that is nothing but a name, and giving it is a promise that the distance you have in mind is a pseudo-metric. It is zero from a point to itself, never negative and symmetric, and it obeys the triangle inequality. The snippet declares a domain of even integers and an edit distance on strings, and uses the distance in a transformation that measures a string's length.
+A **user domain** has an identifier and a membership function. The library treats two user domains as equal when their identifiers are equal, and uses that to decide whether two steps chain. So the identifier must name one set only. Otherwise two different domains chain, and the chain's stability no longer holds. The membership function must return true only for members. A **user distance** is a metric that is only a name. It promises that your distance is a pseudo-metric, which is zero from a point to itself, never negative, symmetric, and obeys the triangle inequality. The snippet declares a domain of even integers and an edit distance on strings, and measures the length of a string.
 
 ```python
 import opendp.prelude as dp
@@ -165,9 +165,9 @@ print(length("hello"), length.map(1))  # 5 1
 print((length >> dp.m.then_laplace(scale=1.0)).map(1))  # 1.0
 ```
 
-The stability map of the length is the identity, because one edit changes the length by at most one. The output metric is the absolute distance on integers, which is what the Laplace measurement wants. So the chain closes, and a scale of 1 costs an $\varepsilon$ of 1 per edit.
+The stability map of the length is the identity, because one edit changes the length by at most one. So the chain into Laplace noise closes, and a scale of 1 costs an $\varepsilon$ of 1 per edit.
 
-A **user divergence** is a privacy measure of your own. The one property a measure must have is that post-processing cannot increase it, since the promise that a release stays private under further computation rests on it. [The full edition's chapter on properties](../../book-full/part03-dp-foundations/02-properties.md) proves that for the max divergence. Two more constructors complete the set. The function `new_privacy_profile` turns a curve from $\varepsilon$ to the slack $\delta$ into a privacy profile the library can invert. And `new_function` wraps a Python post-processor, which [Combinators](../part03-framework/11-combinators.md) did behind the scenes for a bare function after `>>`. The post-processor must not read global state or raise on the data, because either would open a channel from the data to the caller that no map accounts for.
+A **user divergence** is a privacy measure of your own. Post-processing must not increase it, because a release must stay private under further computation. [The full edition's chapter on properties](../../book-full/part03-dp-foundations/02-properties.md) proves this for the max divergence. The function `new_privacy_profile` turns a curve from $\varepsilon$ to the slack $\delta$ into a privacy profile that the library can invert. And `new_function` wraps a Python post-processor, as [Combinators](../part03-framework/11-combinators.md) did for a bare function after `>>`. The post-processor must not read global state or raise an error that depends on the data, because either opens a channel from the data that no map accounts for.
 
 ```python
 import numpy as np
@@ -190,11 +190,11 @@ laplace = space >> dp.m.then_laplace(scale=1.0)
 print((laplace >> double).map(1.0))  # 1.0
 ```
 
-The measurement adds standard normal noise and reports its loss under the Rényi divergence of order 2. Its map is the squared sensitivity, because the Rényi divergence of order 2 between two unit Gaussians is the square of the distance between their centres. [The full edition's chapter on Rényi differential privacy](../../book-full/part04-privacy-accounting/01-renyi-dp.md) derives that. The map works, but the composition does not, because the combinators add up only the measures the library defines. So a plugin measure gets `map` and `check` and nothing more. The profile answers both ways, the slack at a given $\varepsilon$ and the smallest $\varepsilon$ at a given slack, and its curve must be decreasing. The post-processor leaves the Laplace measurement's map unchanged, which is the point of post-processing.
+The measurement adds standard normal noise. Under the Rényi divergence of order 2 its map is the squared sensitivity. The reason is that this divergence between two unit Gaussians is the squared distance between their centres ([the full edition's chapter on Rényi differential privacy](../../book-full/part04-privacy-accounting/01-renyi-dp.md)). The composition fails, because the combinators add only the measures that the library defines, so a plugin measure gets `map` and `check` and nothing more. The privacy profile answers in both directions, the slack at a given $\varepsilon$ and the $\varepsilon$ at a given slack, and its curve must decrease. The post-processor leaves the map of the Laplace measurement unchanged.
 
 ## Registering a constructor for the Context API {#sec-plug-register}
 
-A plugin built with the framework API is a loose measurement, and the lesson of [A first release](../part01-getting-started/01-first-release.md) was to put every query through a context. The function `dp.register` adds a constructor to the Context API, as a method of `context.query()`. Two rules govern it. The constructor's name must start with `make_`, and the method is the name without that prefix, unless you pass a `name`. And if its first two parameters are named `input_domain` and `input_metric`, the context fills them in. They come from the previous step's output space, or from its own input space for a first step. The documentation calls that partial application, and it is the convention that gives every built-in `make_` constructor its `then_` form.
+A plugin built with the framework API is a loose measurement, and [A first release](../part01-getting-started/01-first-release.md) showed why every query should go through a context. The function `dp.register` adds a constructor to the Context API as a method of `context.query()`. The constructor's name must start with `make_`, and the method has the name without that prefix, unless you pass a `name`. If its first two parameters are `input_domain` and `input_metric`, the context fills them in with the output space of the previous step. The documentation calls that partial application, and it gives every built-in `make_` constructor its `then_` form.
 
 ```{.python excerpt="plug-register"}
 def make_anything_constant(input_domain: dp.Domain, input_metric: dp.Metric, constant: str) -> dp.Measurement:
@@ -214,7 +214,7 @@ def make_anything_constant(input_domain: dp.Domain, input_metric: dp.Metric, con
 dp.register(make_anything_constant)  # from now on, context.query().anything_constant(...)
 ```
 
-The script builds the documentation's context over three integers, with a privacy unit of 36 contributions and a budget of $\varepsilon = 1$ split over two queries. Then it calls the plugin through it.
+The script builds the documentation's context over three integers, with a budget of $\varepsilon = 1$ split over two queries. Its privacy unit is the book's 36 contributions per person ([the data and the context](../part01-getting-started/02-the-data-and-the-context.md#sec-ctx-context)). Then the script calls the plugin through it.
 
 ```text
 anything_constant: map(36)=0.0 release=denied
@@ -224,11 +224,13 @@ register twice: 'anything_constant' is already registered in the Context API. Pl
 register without make_: constructor.__name__ must start with 'make_', found select_cols
 ```
 
-On the second line the plugin's map is zero, but the context charged the query its full share of the budget. A context splits the budget before it sees a query and only checks that each query fits within its share, as [Utilities and the Context API inside](../part03-framework/12-utilities-and-the-context-api.md) shows. A plugin that costs less than its share does not give the difference back. The third line uses the documentation's other style, `make_int_constant`, without the two leading parameters. It registers too, but its input space is fixed to integers under the absolute distance, so it works after a clamp and a sum but not elsewhere. The documentation recommends the first style, with the caution that a constructor accepting any space should check that the space suits its function. The last two lines are the errors `register` raises, for a name already taken and for a name without the prefix.
+On the second line the map of the plugin is zero, but the context charged the query its full share. The reason is that a context splits the budget before it sees a query ([Utilities and the Context API inside](../part03-framework/12-utilities-and-the-context-api.md)). So a cheap plugin does not give the difference back.
+
+The third line uses the documentation's other style, `make_int_constant`, without the two leading parameters. Its input space is fixed to integers, so it works only after a clamp and a sum. The documentation recommends the first style, but a constructor that accepts any space should check that the space suits its function. The last two lines are the errors of `register` for a name already taken and for a name without the prefix.
 
 ## A Theil-Sen regression {#sec-plug-theil-sen}
 
-The documentation's first larger example fits a line through noisy points. Least squares is a poor private estimator, because one far-away point can move the fitted line by any amount. The **Theil-Sen** estimator takes the median of the slopes through pairs of points instead, and a median is a quantile, which OpenDP already releases privately. The documentation's variant pairs the points at random and fits a line through each pair. It records where that line crosses two fixed vertical cuts, at a quarter and three quarters of the range of $x$. The medians of the crossings at each cut are two points on the fitted line, which give the slope and the intercept. The library ships a vetted version of this estimator, which [Statistical modelling](14-statistical-modelling.md) uses, so this one is for learning how plugins combine.
+The documentation's first larger example fits a line through noisy points. Least squares is a poor private estimator, because one far-away point can move the line by any amount. The **Theil-Sen** estimator takes the median of the slopes through pairs of points instead, and OpenDP already releases medians privately. The documentation's variant pairs the points at random and fits a line through each pair. It records where each line crosses two vertical cuts, at a quarter and three quarters of the range of $x$, and the medians at the cuts are two points on the fitted line. The library ships a vetted version of this estimator ([Statistical modelling](14-statistical-modelling.md)), so this one is for learning how plugins, your own transformations and measurements, combine.
 
 The first plugin is the pairing, a transformation from a two-column array to a two-column array of predictions.
 
@@ -266,7 +268,7 @@ def make_pairwise_predict(x_cuts: NDArray[np.float64], runs: int = 1) -> dp.Tran
     )
 ```
 
-The domains come from the library's NumPy extension, a two-dimensional array with two columns. The documentation states the map, the input distance times the number of runs, without an argument, so here is the one it relies on. Each record sits in exactly one pair, so adding or removing a record changes at most one prediction per run. Two things make that claim weaker than a built-in map. The pairing is random, so the claim is really about a coupling of two runs rather than about a function. And the function drops the last record when the count is odd, so removing one record can also change another's pair. This is the kind of gap the flag asks you to notice.
+The domains, from the library's NumPy extension, are arrays with two columns. The documentation states the map, the input distance times the number of runs, without its argument: each record sits in one pair, so it changes at most one prediction per run. That claim is weaker than a built-in map in two ways. The pairing is random, so the claim is about a coupling of two runs, not about a function. And the function drops the last record when the count is odd, so removing one record can change the pair of another. That is the kind of gap the flag asks you to notice.
 
 The second plugin selects one column of the predictions, and the library's quantile does the rest.
 
@@ -304,7 +306,7 @@ def make_private_medians(output_measure: dp.Measure, y_bounds: tuple[float, floa
     )
 ```
 
-Selecting a column keeps one row per row, so its stability is the input distance. The private quantile scores a hundred candidate values between the public bounds of $y$ and picks one by noisy max, as [Measurements](../part03-framework/10-measurements.md) showed. Its map is the input distance over the scale. The composition adds the two maps, by the basic composition rule of [the full edition's chapter on composition](../../book-full/part03-dp-foundations/04-composition.md). The third piece solves for the line, which is post-processing of two released numbers and costs nothing.
+Selecting a column keeps one row per row, so its stability is the input distance. The private quantile scores a hundred candidates between the public bounds of $y$ and picks one by noisy max ([Measurements](../part03-framework/10-measurements.md)), at a cost of the input distance over the scale. The composition adds the two costs ([the full edition's chapter on composition](../../book-full/part03-dp-foundations/04-composition.md)). Solving for the line is post-processing of two released numbers and costs nothing.
 
 ```{.python excerpt="plug-theil-sen"}
 def make_private_theil_sen(
@@ -333,15 +335,15 @@ cut -1.5: best candidate -2.3232 score 2; within the bound: -2.9293 to -1.5152 (
 cut 1.5: best candidate 4.3434 score 8; within the bound: 3.3333 to 6.3636 (16 candidates)
 ```
 
-The pairing has stability 1 and the two medians cost 2 together, so the whole estimator costs an $\varepsilon$ of 2 per record. The least-squares fit of the toy is close to the truth, and the exact medians of the fifty pairwise predictions are the numbers the private medians aim at.
+The pairing has stability 1 and the two medians cost 2 together, so the estimator costs an $\varepsilon$ of 2 per record. The exact medians of the fifty pairwise predictions are the values that the private medians aim at.
 
-The last three lines are the bound the released medians are read against. The private quantile adds exponential noise of scale 2 to each candidate's score and picks the best. The difference of two such draws is a Laplace draw of the same scale. So the chance that a worse candidate wins falls exponentially in its gap to the best, measured in scales. A union bound over the other 99 candidates gives the printed bound, which a losing candidate beats at most once in ten thousand runs. The candidates within the bound span about one and a half units of $y$ at the lower cut and about three at the upper cut. The predictions there are more spread out, so neighbouring candidates score alike.
+The last three lines give the bound for the released medians. The private quantile adds exponential noise of scale 2 to each score and picks the best. The difference of two such draws is a Laplace draw, so the chance that a worse candidate wins falls exponentially in its gap to the best. A union bound over the other 99 candidates gives the printed bound, which a losing candidate beats at most once in ten thousand runs.
 
 ## Choosing grouping columns privately {#sec-plug-grouping}
 
-The documentation's second larger example solves a problem you meet before any grouped release. You want to group the rows by some columns before releasing counts, but you may not look at the data to choose them. Some columns are too uniform, with most rows sharing a value, and some are too diverse, with most rows having their own. Grouping by too many columns leaves most groups too small to survive the thresholds of [Grouping](../part02-tabular-data/04-grouping.md). The example scores each candidate set by how many of its groups reach a public minimum of rows. It then picks a set with the **exponential mechanism**, which chooses a candidate with probability growing exponentially in its score. [The full edition's chapter on selection](../../book-full/part03-dp-foundations/05-selection.md) derives it.
+The documentation's second larger example solves a problem that comes before any grouped release. You want to choose grouping columns without looking at the data. Some columns are too uniform and others too diverse, and too many columns leave most groups too small to pass the thresholds of [Grouping](../part02-tabular-data/04-grouping.md). So the example scores each candidate set by how many of its groups reach a public minimum of rows. Then it picks a set with the **exponential mechanism**, which chooses a candidate with a probability that grows exponentially in its score ([the full edition's chapter on selection](../../book-full/part03-dp-foundations/05-selection.md)).
 
-The score is a transformation plugin, and it needs a user domain because the library has no domain for a whole data frame. The documentation scores a pandas frame, and the same score runs here on a Polars frame.
+The score is a transformation plugin on a user domain, because the library has no domain for a whole data frame. The documentation scores a pandas frame, and the same score runs here on a Polars frame.
 
 ```{.python excerpt="plug-score"}
 def score(frame: pl.DataFrame, columns: tuple[str, ...], min_rows: int) -> float:
@@ -374,9 +376,9 @@ def make_grouping_cols_score(
     )
 ```
 
-The output metric is the L-infinity distance, the largest change in any one score, because noisy max compares scores rather than summing them. The map is the identity on the input distance, and the reason is that one row belongs to one group of each candidate. Adding or removing it changes that group's size by one, so it moves each score by at most one, and `d_in` rows move each score by at most `d_in`.
+The output metric is the L-infinity distance, the largest change in any one score, because noisy max compares scores. The map is the identity, because one row belongs to one group of each candidate, so it moves each score by at most one.
 
-The documentation declares the metric monotonic, which halves the cost of noisy max. That is right when neighbours differ by one row added or one removed, since every score then moves the same way. Here the privacy unit is a person with up to 36 rows, and a neighbouring dataset can add some of them and remove others. The scores can then move both ways, so the script keeps the metric plain and pays the factor of two. [The full edition's chapter on sensitivity](../../book-full/part03-dp-foundations/07-sensitivity.md) is where these bounds come from.
+The documentation declares the metric monotonic, which halves the cost of noisy max. That is right when neighbours differ by one row added or one row removed, because every score then moves the same way. Here a person has up to 36 rows, and a neighbouring dataset can add some and remove others, so the scores can move both ways. So the script keeps the metric plain and pays the factor of two ([the full edition's chapter on sensitivity](../../book-full/part03-dp-foundations/07-sensitivity.md)).
 
 The measurement chains the scores into noisy max and names the chosen candidate, and it is registered so that a context can run it.
 
@@ -405,7 +407,7 @@ def frame_domain() -> dp.Domain:
     return dp.user_domain("PolarsDataFrameDomain", member=member)
 ```
 
-On the survey the candidates are every non-empty subset of six columns. Five are `SEX`, `ILOSTAT`, `YEAR`, `QUARTER` and `AGE`, and the sixth is the person identifier `PIDENT`. This sample codes age in seven bands. A group counts when it has at least 100 rows, a public choice standing in for the smallest group worth a noisy count. The context is built over the collected frame with the user domain passed as `domain`, a privacy unit of 36 contributions and a budget of $\varepsilon = 1$. The registered method is called with the scale left out, so that the context searches for it against the plugin's map.
+On the survey the candidates are every non-empty subset of six columns. Five are `SEX`, `ILOSTAT`, `YEAR`, `QUARTER` and `AGE`, in seven bands, and the sixth is the person identifier `PIDENT`. A group counts in a score when it has at least 100 rows, a public choice. The context is built over the collected frame, with the user domain passed as `domain`, the privacy unit of 36 contributions and a budget of $\varepsilon = 1$. The script leaves out the scale, so that the context searches for one against the map of the plugin.
 
 ```text
 LFS: 3,811,932 rows; candidate columns SEX, ILOSTAT, YEAR, QUARTER, AGE, PIDENT; 63 candidate sets
@@ -420,9 +422,9 @@ context query: param scale=72.0
 within 910 of the best: 10 candidates
 ```
 
-The scores are computed at development time, which is allowed because the survey is public, and they show the shape the documentation describes. The five columns without the identifier score best, with most of their groups above the minimum, and the next set scores about half of that. Every set that includes `PIDENT` scores zero, because no person has a hundred rows. The map of the selection is twice the sensitivity over the scale, so a scale of 72 costs an $\varepsilon$ of 1, and the context's search lands on that scale.
+The scores, computed at development time on this public survey, have the shape the documentation describes. The five columns without the identifier score best, and the next set scores about half of that. Every set with `PIDENT` scores zero, because no person has a hundred rows. The map is twice the sensitivity over the scale, so the search finds a scale of 72 for an $\varepsilon$ of 1.
 
-The bound follows the same reasoning as for the medians, with exponential noise at scale 72 and a union bound over 62 other candidates. A set that scores more than 910 below the best therefore wins at most once in ten thousand runs, and ten sets lie within that bound. The best beats the runner-up by 492, under seven noise scales, so it wins most runs, but any of the ten can appear. That spread is the price of the person-level unit on data with few, coarse columns. A person can move each score by 36, while the scores themselves are only in the hundreds. Raising the minimum group size lowers every score and brings the candidates closer together, until the choice is nearly random, and spending more budget is the only other lever.
+By the argument used for the medians, a set that scores more than 910 below the best wins at most once in ten thousand runs. Ten sets are within that bound. The best beats the runner-up by 492, under seven noise scales, so it wins most runs, but any of the ten can appear. That spread is the price of the person-level unit, because a person can move each score by 36 while the scores are only in the hundreds. A higher minimum group size lowers every score and makes the choice more random. A larger budget is the only other lever.
 
 ```text
 released (one run):
@@ -432,7 +434,7 @@ released (one run):
   grouping columns: SEX, ILOSTAT, YEAR, QUARTER, AGE
 ```
 
-The Python Laplace landed within its error bar, and the repeated sum within one of the truth. Both private medians fell inside their candidate ranges, so the slope and the intercept land near 2 and 1. The chosen grouping columns are the five that score best, and your run can differ in each of these.
+The Python Laplace landed within its error bar, and the repeated sum within one of the truth. Both private medians fell inside their candidate ranges, so the slope and the intercept are near 2 and 1, and the chosen columns are the five that score best. Your run can differ in each of these.
 
 ## Summary
 

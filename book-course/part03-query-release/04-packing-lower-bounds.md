@@ -1,8 +1,8 @@
 # Packing Lower Bounds
 
-Every chapter so far has given an algorithm and proved how much data it needs. This chapter asks the reverse question: could a cleverer algorithm need less? For pure differential privacy (DP), a short argument called packing answers it. If an algorithm is accurate, it must put its output in a different region for each of many datasets. If it is private, its output distribution barely moves between those datasets. Both can hold only when the dataset is large enough.
+Every chapter so far has given an algorithm and proved how much data it needs. This chapter asks whether a cleverer algorithm could need less. For pure differential privacy (DP), a short argument called packing answers it. An accurate algorithm must put its output in a different region for each of many datasets. But a private one barely moves its output distribution between them. Both can hold only when the dataset is large enough.
 
-The argument gives lower bounds that hold for every $\varepsilon$-DP algorithm, however it is built. Applied to one-way marginals and to histograms, it shows that the simple Laplace-noise algorithms are optimal up to a constant or a logarithmic factor, and that pure DP is strictly more expensive than approximate DP for these problems.
+The resulting lower bounds hold for every $\varepsilon$-DP algorithm, however it is built. On one-way marginals and histograms, they show that the simple Laplace-noise algorithms are optimal up to a constant or a logarithmic factor. They also show that pure DP costs strictly more than approximate DP there.
 
 ## Two problems and their upper bounds {#sec-pack-problems}
 
@@ -30,7 +30,7 @@ where $\mathbf 1[x_i = j]$ is $1$ if record $i$ equals $j$ and $0$ otherwise.
 
 For both problems, an answer $y$ is judged by its worst coordinate, the $\ell_\infty$ error $\max_j |y_j - f_j(D)|$. So an answer with error at most $\alpha$ gets every query right to within $\alpha$ at once.
 
-The upper bounds come from the [Laplace mechanism](../part02-dp-basics/02-laplace-mechanism.md). Suppose the vector of answers $f$ has $\ell_1$ sensitivity at most $\Delta_1 f$, which means that $\sum_j |f_j(D) - f_j(D')| \le \Delta_1 f$ for all neighbours $D \sim D'$, datasets that differ in one record (the replace-one relation). The Laplace mechanism releases $f(D) + (Z_1, \dots, Z_d)$, where the noise terms $Z_j$ are independent Laplace variables with scale $\Delta_1 f/\varepsilon$, and it is $\varepsilon$-DP. The analysis needs only the tail of a Laplace variable $Z$ with scale $b$, which for every $s \ge 0$ is
+The upper bounds come from the [Laplace mechanism](../part02-dp-basics/02-laplace-mechanism.md). Suppose the vector of answers $f$ has $\ell_1$ sensitivity at most $\Delta_1 f$, which means that $\sum_j |f_j(D) - f_j(D')| \le \Delta_1 f$ for all neighbours $D \sim D'$, datasets that differ in one record (the replace-one relation). The Laplace mechanism releases $f(D) + (Z_1, \dots, Z_d)$, where the noise terms $Z_j$ are independent Laplace variables with scale $\Delta_1 f/\varepsilon$, and it is $\varepsilon$-DP. The analysis needs only the tail of a Laplace variable $Z$ with scale $b$, for every $s \ge 0$,
 
 $$
 \Pr[|Z| \ge s] = e^{-s/b} .
@@ -62,7 +62,7 @@ Approximate DP does better on both problems. For the marginals, the Gaussian mec
 
 ## The packing argument {#sec-pack-argument}
 
-The name comes from packing rigid balls into a box. The balls cannot overlap, so only a limited number fit. Here the balls are regions of the output space, one for each of many datasets. Accuracy forces each dataset to send its output into its own region, and the regions do not overlap. Privacy forces every dataset to give every region some probability. The probabilities of disjoint regions add up to at most $1$, so only a limited number of datasets can be packed.
+The name comes from packing balls into a box, where only a limited number fit because the balls cannot overlap. Here the balls are regions of the output space that do not overlap, one for each of many datasets. Accuracy forces each dataset to send its output into its own region, and privacy forces every dataset to give every region some probability. The probabilities of disjoint regions add up to at most $1$, so only a limited number of datasets can be packed.
 
 The tool that connects datasets far apart is group privacy, from the [Laplace mechanism chapter](../part02-dp-basics/02-laplace-mechanism.md). The **Hamming distance** between two datasets in $\mathcal X^n$ is the number of records in which they differ. Group privacy says that an $\varepsilon$-DP mechanism $M$ is $t\varepsilon$-DP for datasets at Hamming distance at most $t$. So for such datasets $D$ and $D'$ and every event $S$,
 
@@ -101,7 +101,7 @@ So a private mode needs a number of records of order $\ln k/\varepsilon$. With $
 The proof used three things: many datasets, disjoint sets of correct answers, and group privacy across a bounded distance. The theorem below keeps exactly these. It also lets the datasets be close to one common centre $D$, at distance $t$ that may be much smaller than $n$, which the histogram bound will need.
 
 ::: {#thm-pack-packing name="Packing"}
-Let $D_1, \dots, D_m \in \mathcal X^n$ be datasets, each at Hamming distance at most $t$ from a fixed dataset $D \in \mathcal X^n$. Let $Y_1, \dots, Y_m$ be pairwise disjoint subsets of the output space $\mathcal Y$. If $M\colon \mathcal X^n \to \mathcal Y$ is $\varepsilon$-DP and, for some $p > 0$,
+Let $D_1, \dots, D_m \in \mathcal X^n$ be datasets, each at Hamming distance at most $t$ from a fixed dataset $D \in \mathcal X^n$. Let $S_1, \dots, S_m$ be pairwise disjoint subsets of the output space $\mathcal Y$. If $M\colon \mathcal X^n \to \mathcal Y$ is $\varepsilon$-DP and, for some $p > 0$,
 
 $$
 \Pr[M(D_\ell) \in S_\ell] \ge p \qquad \text{for every } \ell \in [m],
@@ -152,9 +152,7 @@ $$
 4. *Packing.* @thm-pack-packing with $m = 2^d$, $p = 1/2$ and $t = n$ gives $2^{-d} \ge \frac12 e^{-n\varepsilon}$. Taking logarithms, $n\varepsilon \ge d\ln 2 - \ln 2$.
 :::
 
-In two dimensions, the four sets $S_w$ are open unit squares centred at the corners $(0,0)$, $(0,1)$, $(1,0)$ and $(1,1)$, and each meets $[0,1]^2$ in the open quarter square at its corner. An answer in the quarter at $(0,0)$ is acceptable for $D_{(0,0)}$ and for no other dataset in the packing.
-
-So $n = \Omega(d/\varepsilon)$ records are necessary for error below $1/2$ under $\varepsilon$-DP, against the upper bound $d\ln(2d)/(\alpha\varepsilon)$ of @prp-pack-upper. Under approximate DP, $n$ of order $\sqrt d$ suffices. This gap of a factor $\sqrt d$ between pure and approximate DP is inherent. A matching lower bound of order $\sqrt d$ under approximate DP also holds, but packing cannot give it, because group privacy under $(\varepsilon,\delta)$-DP degrades too fast with $t$. That bound needs fingerprinting codes, a more delicate technique.
+So $n = \Omega(d/\varepsilon)$ records are necessary for error below $1/2$ under $\varepsilon$-DP, against the upper bound $d\ln(2d)/(\alpha\varepsilon)$ of @prp-pack-upper. Under approximate DP, $n$ of order $\sqrt d$ suffices, so pure DP costs a factor $\sqrt d$ more. A matching lower bound of order $\sqrt d$ under approximate DP also holds. Packing cannot give it, because group privacy under $(\varepsilon,\delta)$-DP degrades too fast with $t$, and the proof needs fingerprinting codes instead.
 
 The bound above does not depend on $\alpha$, because the packing uses corners of the cube, which are far apart. Datasets with only a few records changed have marginals closer together, and they give the factor $1/\alpha$.
 
@@ -209,10 +207,10 @@ $$ {#eq-pack-histograms}
 
 ![The packing behind @thm-pack-histograms, for $k = 5$, $n = 20$ and $\alpha = 0.1$. Each panel shows the normalized histogram of one dataset as bars and the band of answers within $\alpha$ of each count as a shaded box. Three of the five datasets are shown. Any two datasets have non-overlapping bands in at least one coordinate, so no answer is acceptable for both.](figures/pack-histograms.svg){#fig-pack-histograms}
 
-The choice of $t$ is what produces the factor $1/\alpha$. Moving the whole dataset, $t = n$, would also give disjoint regions, but the packing theorem would then bound only $n\varepsilon$, as in @prp-pack-mode. A block of only about $2\alpha n$ records is just enough to separate the answers, and group privacy pays $e^{t\varepsilon}$ for those $t$ records only. As for the marginals, numbers show how close this lower bound comes to the Laplace histogram.
+The choice of $t$ produces the factor $1/\alpha$. Moving the whole dataset, $t = n$, would also give disjoint regions, but then the packing theorem would bound only $n\varepsilon$, as in @prp-pack-mode. A block of about $2\alpha n$ records is just enough to separate the answers, and group privacy pays $e^{t\varepsilon}$ for those $t$ records only.
 
 ::: {#exm-pack-histograms}
-With $k = 10^6$ symbols, $\alpha = 0.01$ and $\varepsilon = 1$, @eq-pack-histograms says that $n \ge 607$ is necessary, and the Laplace histogram of @prp-pack-upper succeeds once $n \ge 2{,}902$. The ratio is $4.8$. As $k$ grows, it falls towards $4$, because the upper bound is $2\ln(2k)/(\alpha\varepsilon)$ and the lower bound is about $\ln k/(2\alpha\varepsilon)$. At $k = 10^{12}$ the ratio is $4.37$. The union bound in @prp-pack-upper is nearly tight. In simulation with $k = 10^4$ and $n = 1{,}981$, the value @eq-pack-upper gives for that $k$, the Laplace histogram met error $\alpha$ in $217$ of $400$ runs, $54\%$, against the $50\%$ that the bound guarantees.
+With $k = 10^6$ symbols, $\alpha = 0.01$ and $\varepsilon = 1$, @eq-pack-histograms says that $n \ge 607$ is necessary, and the Laplace histogram of @prp-pack-upper succeeds once $n \ge 2{,}902$. The ratio is $4.8$, and as $k$ grows it falls towards $4$, because the upper bound is $2\ln(2k)/(\alpha\varepsilon)$ and the lower bound is about $\ln k/(2\alpha\varepsilon)$. The union bound in @prp-pack-upper is nearly tight. In simulation with $k = 10^4$ and $n = 1{,}981$, the value @eq-pack-upper gives for that $k$, the Laplace histogram met error $\alpha$ in $217$ of $400$ runs, $54\%$, against the $50\%$ that the bound guarantees.
 :::
 
 So under pure DP the Laplace histogram is optimal up to a constant factor, and the $\ln k$ in its sample size cannot be removed. The stability-based histogram, which replaces $\ln k$ by $\ln(1/\delta)$, shows that this cost belongs to pure DP and not to the problem.
@@ -233,7 +231,7 @@ So under pure DP the Laplace histogram is optimal up to a constant factor, and t
 ## References {#sec-pack-notes}
 
 - Moritz Hardt and Kunal Talwar, "On the Geometry of Differential Privacy", 2010. Packing lower bounds for linear queries under pure DP, stated geometrically.
-- Amos Beimel, Hai Brenner, Shiva Prasad Kasiviswanathan and Kobbi Nissim, "Bounds on the Sample Complexity for Private Learning and Private Data Release", 2014. Packing arguments for the sample size of private learning and of releasing point functions, the histogram problem.
+- Amos Beimel, Hai Brenner, Shiva Prasad Kasiviswanathan and Kobbi Nissim, "Bounds on the Sample Complexity for Private Learning and Private Data Release", 2014. Packing arguments for private learning and for the release of point functions, which is the histogram problem.
 - Mark Bun, Jonathan Ullman and Salil Vadhan, "Fingerprinting Codes and the Price of Approximate Differential Privacy", 2014. The lower bound of order $\sqrt d$ for one-way marginals under approximate DP.
 - Thomas Steinke and Jonathan Ullman, "Between Pure and Approximate Differential Privacy", 2016. Tight bounds for one-way marginals across pure and approximate DP.
 - Salil Vadhan, "The Complexity of Differential Privacy", 2017. Section 5 presents packing lower bounds in the generality used here.

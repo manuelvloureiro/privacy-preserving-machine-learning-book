@@ -1,10 +1,10 @@
 # Getting started
 
-This part takes you from an empty Python environment to a context that holds a real dataset and a privacy budget. It assumes nothing about differential privacy. The one idea it teaches is simple to state. A differentially private release is a randomized computation whose noise is calibrated to how much one person can change the answer. OpenDP does that calibration for you, and it keeps count of what has been spent.
+This part takes you from an empty Python environment to a context that holds a real dataset and a privacy budget. It assumes nothing about differential privacy, and its one idea is this. A differentially private release is a randomized computation whose noise is calibrated to how much one person can change the answer. OpenDP does that calibration for you, and it keeps count of what you spend.
 
-The first chapter installs the library and releases a single noisy number. It does so first with the low-level framework, where you build the mechanism by hand, and then with the Context API, where you state the privacy unit and the budget and let the library find the noise. On the way it introduces the five steps of every analysis in OpenDP. You identify the privacy unit, set the budget, collect public information, mediate access to the data, and submit queries.
+The first chapter installs the library and releases one noisy number, first with a mechanism built by hand and then with the Context API. With the Context API, you state the privacy unit and the budget, and the library finds the noise. On the way, the chapter gives the five steps of every analysis in OpenDP.
 
-The second chapter brings in the dataset that runs through the book. It is the sample of the French Labour Force Survey (LFS) that the OpenDP documentation uses in its tutorials. The chapter shows how to load the data lazily with Polars and why a person who answers the survey in many quarters needs a privacy unit of many rows. It then explains how a context splits one budget over several queries, and what a margin is.
+The second chapter loads the dataset of the whole book, the French Labour Force Survey (LFS) sample of the OpenDP tutorials. Then it builds a context on it. A person who answers the survey in many quarters owns many rows, and the chapter explains why the privacy unit must cover all of them. It also shows how a context splits one budget over several queries, and what a margin is.
 
 | Chapter | Question it answers |
 | --- | --- |
@@ -13,4 +13,4 @@ The second chapter brings in the dataset that runs through the book. It is the s
 
 : The chapters of this part and the questions they answer. {#tbl-p1-chapters}
 
-By the end of this part you will be able to install OpenDP and explain the privacy unit and the budget of a release in a sentence each. You will also be able to build a context for a dataset in which one person owns many rows.
+At the end of this part, you can explain the privacy unit and the budget of a release in one sentence each. You can also build a context for a dataset in which one person owns many rows.

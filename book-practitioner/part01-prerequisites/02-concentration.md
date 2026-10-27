@@ -2,11 +2,11 @@
 
 ## What it is
 
-A concentration inequality bounds the chance that a random quantity lands more than some distance from its mean. Call that event a failure, its chance the **failure probability** $\beta$, and the distance the **width**. Fix $\beta$ and solve for the width to get an error bar, or fix the width and solve for the number of samples.
+A concentration inequality bounds the chance that a random quantity lands more than some distance from its mean. Call that event a failure, its chance the **failure probability** $\beta$, and the distance the **width**. With a fixed $\beta$, the bound gives an error bar, and with a fixed width, a sample size.
 
-**Markov's inequality** needs only the mean of a quantity that cannot be negative, and caps the chance of reaching a threshold at the mean divided by the threshold. **Chebyshev's inequality** adds the variance $\sigma^2$. With $\mu$ for the mean, the chance of landing at least a distance $t$ from it is at most
+**Markov's inequality** needs only the mean of a quantity that cannot be negative. It caps the chance to reach a threshold at the mean divided by the threshold. **Chebyshev's inequality** also uses the variance $\sigma^2$. Write $\mu$ for the mean. Then the chance that $X$ lands a distance $t$ or more from it is at most
 $$\Pr[|X - \mu| \ge t] \le \frac{\sigma^2}{t^2}.$$
-Setting this to $\beta$ gives the width $\sigma/\sqrt\beta$ for any distribution, but at a steep price. At one in a million it asks for 1,000 standard deviations, where a normal-shaped tail needs 5.3.
+Make this equal to $\beta$ to get the width $\sigma/\sqrt\beta$, which holds for every distribution at a high price. At one in a million, it asks for 1,000 standard deviations, where a normal tail needs 5.3.
 
 ## When you meet it
 
@@ -27,13 +27,13 @@ Pick the bound by what you know about the quantity (@tbl-conc-choose).
 
 : Which bound to use, and the two-sided width it gives. {#tbl-conc-choose}
 
-**Hoeffding's inequality** is the planning tool, because it needs only the range of the values. Solving its width for $n$ gives the sample size for a width $t$:
+**Hoeffding's inequality** is the planning tool, because it needs only the range of the values. Solve its width for $n$ to get the sample size for a width $t$:
 $$n \ge \frac{R^2\ln(2/\beta)}{2t^2}.$$
-Accuracy averages zeros and ones, so its range $R$ is 1, and measuring it to within one percentage point at 95% takes 18,445 test records.
+Accuracy averages zeros and ones, so $R = 1$, and a width of one percentage point at 95% needs 18,445 test records.
 
-For a small rate, Hoeffding is too wide, because it assumes the largest variance the range allows. For one false positive in 1,000 negatives, Hoeffding's one-sided 95% bound adds 0.039 to the measured rate. **Bernstein's inequality** uses the variance and adds only 0.0045, but a variance estimated from the same data makes it a heuristic. The exact **Clopper–Pearson** bound, from the binomial distribution, gives 0.0047, and 0.0030 with no errors.
+For a small rate, Hoeffding is too wide, because it takes the largest variance that the range allows. For one false positive in 1,000 negatives, its one-sided 95% bound adds 0.039 to the measured rate. **Bernstein's inequality** uses the variance and adds only 0.0045, but it is a heuristic with a variance from the same data. The exact **Clopper–Pearson** bound uses the binomial distribution itself and gives 0.0047, or 0.0030 with no errors.
 
-For noise of a known distribution, use its quantile: Laplace noise of scale 2 lies within 5.99 of zero 95% of the time. For many draws at once, the **union bound** caps the chance of any failure at the sum of the chances, so give each of $k$ draws $\beta/k$. The Laplace width grows only with $\ln(k/\beta)$, so a thousand draws widen 5.99 only to 19.81. The snippet prints these numbers, with the one-sided bound for $k$ errors in $n$ as `stats.beta.ppf(0.95, k + 1, n - k)`, and a two-sided interval for 10 errors in 10,000.
+For noise of a known distribution, use its quantile, so Laplace noise of scale 2 lies within 5.99 of zero 95% of the time. For many draws at once, the **union bound** says that the chance of one or more failures is at most the sum of the chances. So give each of $k$ draws $\beta/k$. The Laplace width grows only with $\ln(k/\beta)$, so for a thousand draws, 5.99 grows only to 19.81. The snippet prints these numbers, with the one-sided bound for $k$ errors in $n$ as `stats.beta.ppf(0.95, k + 1, n - k)`.
 
 ```python
 import math
@@ -47,16 +47,16 @@ print(f"{ci.low:.5f} {ci.high:.5f}")  # 0.00048 0.00184
 print(f"{stats.laplace(scale=2).isf(0.05 / 2):.2f} {stats.laplace(scale=2).isf(0.05 / 1000 / 2):.2f}")  # 5.99 19.81
 ```
 
-By the table's two Chernoff tails, a sampled batch whose size averages 600 strays more than a fifth from it with probability at most $2.4\times10^{-5}$.
+By the Chernoff tails, a sampled batch of average size 600 strays more than a fifth from it with probability at most $2.4\times10^{-5}$.
 
-**McDiarmid's inequality** extends Hoeffding's from means to any function of independent inputs that no single input moves much. If changing the $i$-th input moves the function by at most $c_i$, the chance of landing $t$ above its mean, or $t$ below, is at most
+**McDiarmid's inequality** extends Hoeffding's from means to other functions of independent inputs. Suppose a change to the $i$-th input moves the function by at most an amount $c_i$. Then the chance that it lands $t$ or more above its mean, or below, is at most
 $$\exp\Big(-\frac{2t^2}{\sum_i c_i^2}\Big).$$
-**Azuma's inequality** gives the same tail for a running total of steps that average zero given the past.
+**Azuma's inequality** gives the same tail for a running total of steps, each with average zero given the past.
 
 ## What goes wrong
 
-Hoeffding needs bounded values, so clip unbounded data and use the clipping range as $R$. The bounds for sums, means and rates also need independent values, so with several rows per person, count people. And a two-sided error bar must put $\beta/2$ on each side, not $\beta$.
+Hoeffding needs bounded values, so clip unbounded data. The range of the clipped values is then $R$. The bounds also need independent values, so count people, not rows. And a two-sided error bar must put $\beta/2$ on each side, not $\beta$.
 
-The normal approximation is not a tail bound. For a sum of ten Laplace draws of scale 1, it understates the chance of a total above 20 about ninefold. And picking the best of $m$ models on one validation set needs $\beta/m$ for each, because the winner is the one most likely to look too good.
+The normal approximation is not a tail bound. For a sum of ten Laplace draws of scale 1, it puts the chance of a total above 20 about nine times too low. And when you pick the best of $m$ models on one validation set, give each model $\beta/m$, because the winner is the one most likely to look too good.
 
 **Derivations.** Every result here except Bernstein's inequality is derived step by step in [the full edition's chapter](../../book-full/part01-prerequisites/02-concentration.md).

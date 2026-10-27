@@ -1,8 +1,8 @@
 # Beyond Global Sensitivity
 
-The Laplace mechanism adds noise scaled to the global sensitivity of a function, the largest change one record can cause on any pair of neighbouring datasets. For many functions that worst case is far from the dataset at hand, or it is infinite. This chapter asks whether the noise can be scaled to the dataset actually held instead, while keeping differential privacy (DP).
+The Laplace mechanism adds noise scaled to the global sensitivity of a function, the largest change one record can cause on any pair of neighbouring datasets. For many functions that worst case is far from the dataset at hand, or infinite. This chapter asks whether the noise can be scaled to the dataset actually held instead, while keeping differential privacy (DP).
 
-Done naively, it cannot, because the amount of noise then depends on the data and leaks it. Four techniques make the idea work. Propose-test-release checks privately that the dataset is far from any dataset where the function is sensitive. A stability argument built on it finds the most frequent element, and estimates every count of a histogram, with no dependence on the size of the domain. The last two techniques estimate a bound on the sensitivity privately, or smooth it, before using it. All four can be accurate on well-behaved datasets even when no algorithm is accurate on the worst one.
+Done naively, it cannot, because the amount of noise then depends on the data and leaks it. Four techniques make the idea work. Propose-test-release checks privately that the dataset is far from any dataset where the function is sensitive. A stability argument built on it finds the most frequent element and every count of a histogram, whatever the size of the domain. The last two techniques bound the sensitivity privately, or smooth it, before they use it.
 
 ## Local sensitivity {#sec-bgs-local}
 
@@ -40,11 +40,11 @@ The mechanism $M(D) = f(D) + \mathrm{Lap}(\mathrm{LS}_f(D)/\varepsilon)$, where 
 3. So the event $\{0\}$ has probability $1$ on $D$ and $0$ on $D'$, and no factor $e^{\varepsilon}$ with finite $\varepsilon$ can bound the first by the second.
 :::
 
-The failure is that $D$ has low local sensitivity while a neighbour has high local sensitivity, and the noise level tells them apart. The local sensitivity is itself a statistic of the data, and releasing it, even only through the scale of the noise, leaks information. The techniques below each account for the sensitivity of nearby datasets, not just of $D$.
+The failure is that $D$ has low local sensitivity while a neighbour has high local sensitivity, and the noise level tells them apart. So the local sensitivity is itself a statistic of the data, which leaks even through the scale of the noise. Each technique below accounts for the sensitivity of nearby datasets, not just of $D$.
 
 ## Propose-test-release {#sec-bgs-ptr}
 
-The first technique proposes a bound $b$ on the local sensitivity, tests privately that the bound holds at $D$ and at every dataset near $D$, and releases $f(D)$ with noise scaled to $b$ only if the test passes. The test measures how many records must change before the bound fails. The **Hamming distance** $d(D, D')$ between two datasets is the number of records in which they differ.
+The first technique proposes a bound $b$ on the local sensitivity and tests privately that the bound holds at $D$ and at every dataset near $D$. Only if the test passes does it release $f(D)$ with noise scaled to $b$. The test measures how many records must change before the bound fails. The **Hamming distance** $d(D, D')$ between two datasets is the number of records in which they differ.
 
 ::: {#def-bgs-distance name="Distance to instability"}
 For a proposed bound $b \ge 0$ on the local sensitivity $\mathrm{LS}_f$, the **distance to instability** of $D$ is
@@ -78,7 +78,7 @@ The mechanism takes a proposed bound $b > 0$ and privacy parameters $\varepsilon
 3. otherwise output $f(D) + Z_2$ with $Z_2 \sim \mathrm{Lap}(b/\varepsilon)$, independent of $Z_1$.
 :::
 
-The test spends one budget of $\varepsilon$, and the release spends another. The test can wrongly pass on a sensitive dataset, and $\delta$ pays for that. The release step is the naive mechanism of @prp-bgs-naive with the scale $b$ in place of $\mathrm{LS}_f(D)$. It is safe now because $b$ is fixed in advance, and the decision to use it depends on the data only through the private estimate $\hat\gamma$.
+The test spends one budget of $\varepsilon$, and the release spends another. The test can wrongly pass on a sensitive dataset, and $\delta$ pays for that. The release step is the naive mechanism of @prp-bgs-naive with the scale $b$ in place of $\mathrm{LS}_f(D)$. It is safe now because $b$ is fixed in advance. The decision to use it depends on the data only through the private estimate $\hat\gamma$.
 
 ::: {#thm-bgs-ptr}
 Propose-test-release is $(2\varepsilon, \delta)$-DP.
@@ -105,7 +105,7 @@ Each probability on the right is at most $e^{\varepsilon}$ times the same probab
 4. In both cases $\Pr[M(D) \in S] \le e^{2\varepsilon}\Pr[M(D') \in S] + \delta$. The pair was arbitrary, so this holds for every ordered pair of neighbours.
 :::
 
-The test passes with high probability on datasets far from instability. If $\gamma_b(D) \ge 2\ln(1/\delta)/\varepsilon$, then the output is $\bot$ only if $Z_1 \le -\ln(1/\delta)/\varepsilon$, which has probability $\delta/2$. The price is computation. Evaluating $\mathrm{LS}_f$ at one dataset takes up to $n(|\mathcal X| - 1)$ evaluations of $f$, one per neighbour, and $\gamma_b$ is a minimum over all $|\mathcal X|^n$ datasets. So the distance to instability has to be worked out by hand for each function. The median is the standard case where this can be done efficiently.
+The test passes with high probability on datasets far from instability, because if $\gamma_b(D) \ge 2\ln(1/\delta)/\varepsilon$, then the output is $\bot$ only if $Z_1 \le -\ln(1/\delta)/\varepsilon$, which has probability $\delta/2$. The price is computation, because $\gamma_b$ is a minimum over all $|\mathcal X|^n$ datasets. So the distance to instability has to be worked out by hand for each function, and the median is the standard case where this is efficient.
 
 ## Stability: the mode and the histogram {#sec-bgs-stability}
 
@@ -153,9 +153,9 @@ With typical parameters, the gap the theorem needs is a few dozen records.
 With $\varepsilon = 1$ and $\delta = 10^{-6}$, the threshold is $1 + \ln(10^6) = 14.82$. A gap of $2 + 4 \times 13.82 = 57.3$, so $58$ records, between the most frequent element and the runner-up is enough. The domain plays no part. It may be the set of all strings, which is infinite.
 :::
 
-The stable mode costs $\varepsilon$, not $2\varepsilon$, because the release step adds no noise and spends no budget. Its accuracy depends on the gap, not on the domain. Under pure DP no such bound is possible. The Laplace histogram has error of order $\ln|\mathcal X|/\varepsilon$, which is useless for an infinite domain. The [packing chapter](04-packing-lower-bounds.md) shows that an $\varepsilon$-DP algorithm that finds the mode of a dataset over $k$ elements needs at least $\ln(k/2)/\varepsilon$ records, even when all records are equal. The cost $\ln k$ of a large domain is replaced here by $\ln(1/\delta)$.
+The stable mode costs $\varepsilon$, not $2\varepsilon$, because the release step adds no noise and spends no budget. Its accuracy depends on the gap, not on the domain, and under pure DP no such bound is possible. The [packing chapter](04-packing-lower-bounds.md) shows that an $\varepsilon$-DP algorithm that finds the mode of a dataset over $k$ elements needs at least $\ln(k/2)/\varepsilon$ records, even when all records are equal. So approximate DP replaces the cost $\ln k$ of a large domain by $\ln(1/\delta)$.
 
-The same idea estimates every count at once. The algorithm adds noise only to the counts of elements that appear in the data, and it reports only those whose noisy count clears a threshold. An element that appears once in $D$ and not at all in a neighbour is the only danger, and the threshold hides it except with probability $\delta/2$.
+The same idea estimates every count at once. The algorithm adds noise only to the counts of elements that appear in the data. It reports only those whose noisy count clears a threshold. An element that appears once in $D$ and not at all in a neighbour is the only danger, and the threshold hides it except with probability $\delta/2$.
 
 ::: {#def-bgs-histogram name="Stability-based histogram"}
 Given $\varepsilon > 0$ and $\delta \in (0,1)$, let $\tau = 1 + 2\ln(1/\delta)/\varepsilon$. On input $D$, for each element $x$ whose count $c_x(D)$ of records is positive, draw an independent $Z_x \sim \mathrm{Lap}(2/\varepsilon)$ and set $\hat c_x = c_x(D) + Z_x$. Output the list of pairs $(x, \hat c_x)$ with $\hat c_x > \tau$. An element not on the list has estimate $\hat c_x = 0$.
@@ -189,7 +189,7 @@ $$
 6. On that event, take any element $x$. If it is listed, its error is $|Z_x|$. If it appears in $D$ but is not listed, then $c_x + Z_x \le \tau$, so its error is $c_x \le \tau + |Z_x|$. If it does not appear, both its count and its estimate are $0$. In every case the error is at most @eq-bgs-histogram.
 :::
 
-In the usual regime $\delta \le 1/n$, the bound @eq-bgs-histogram is at most $1 + (2/\varepsilon)\big(2\ln(1/\delta) + \ln(1/\beta)\big)$. Every count is then accurate to within a number of order $\ln(1/\delta)/\varepsilon$, with no dependence on the size of the domain. The Laplace histogram under pure DP pays $\ln|\mathcal X|$ instead, and the [packing chapter](04-packing-lower-bounds.md) shows that pure DP cannot avoid that cost.
+In the usual regime $\delta \le 1/n$, the bound @eq-bgs-histogram is at most $1 + (2/\varepsilon)\big(2\ln(1/\delta) + \ln(1/\beta)\big)$. So every count is accurate to within a number of order $\ln(1/\delta)/\varepsilon$, whatever the size of the domain. The Laplace histogram under pure DP pays $\ln|\mathcal X|$ instead, and by the [packing chapter](04-packing-lower-bounds.md) pure DP cannot avoid that cost.
 
 ## Privately bounding the local sensitivity {#sec-bgs-bounding}
 
@@ -221,7 +221,7 @@ $$
 $$
 :::
 
-Two quantities must be worked out by hand for each function: the local sensitivity at $D$, and a bound $\lambda$ on how fast it changes. The first takes up to $n(|\mathcal X| - 1)$ evaluations of $f$, one per neighbour, and can sometimes be computed even for an infinite domain. For some functions it is much faster, such as the mode, whose local sensitivity depends only on the two largest counts. The technique is simpler to run than propose-test-release, which needs the distance to instability, but it applies to fewer functions, because it needs the local sensitivity to change slowly everywhere.
+For each function, the local sensitivity at $D$ and a bound $\lambda$ on how fast it changes must be worked out by hand. The first takes up to $n(|\mathcal X| - 1)$ evaluations of $f$, one per neighbour. For some functions it is much faster, such as the mode, whose local sensitivity depends only on the two largest counts. The technique is simpler to run than propose-test-release, but it applies to fewer functions, because it needs the local sensitivity to change slowly everywhere.
 
 ## Smooth sensitivity {#sec-bgs-smooth}
 
@@ -278,7 +278,7 @@ by the two facts of step 2.
 4. *Bounding the exponents.* By @lem-bgs-smooth, $|f(D) - f(D')| \le \mathrm{LS}_f(D) \le S^*(D)$, so $|w| \le a = \varepsilon/2$. By the same lemma applied in both directions, $|\kappa| \le \varepsilon/2$. The densities therefore differ by a factor at most $e^{\varepsilon}$, and integrating over any event gives $\varepsilon$-DP.
 :::
 
-The Cauchy distribution has such heavy tails that it has no mean. Its tail is $\Pr[|Z| > z] = \frac2\pi\arctan(1/z) \le 2/(\pi z)$, so the error exceeds $4S^*(D)/(\pi\varepsilon\beta)$ with probability at most $\beta$, which grows as $1/\beta$ rather than as $\ln(1/\beta)$. Laplace or Gaussian noise scaled to the smooth sensitivity, with a smaller smoothing parameter, gives approximate DP with lighter tails. Laplace and Gaussian tails decay exponentially, which is where the logarithms in earlier error bounds come from. Computing $S_{f,s}$ means a maximum over all datasets, which is hard in general. For the median it takes polynomial time, and near-linear time with more care.
+The Cauchy distribution has such heavy tails that it has no mean. Its tail is $\Pr[|Z| > z] = \frac2\pi\arctan(1/z) \le 2/(\pi z)$, so the error exceeds $4S^*(D)/(\pi\varepsilon\beta)$ with probability at most $\beta$. That bound grows as $1/\beta$, while the exponential tails of Laplace or Gaussian noise give $\ln(1/\beta)$. Those two noises, scaled to the smooth sensitivity with a smaller smoothing parameter, give approximate DP with lighter tails. Computing $S_{f,s}$ means a maximum over all datasets, which is hard in general, but for the median it takes polynomial time.
 
 ## Summary {#sec-bgs-summary}
 
@@ -301,5 +301,5 @@ The Cauchy distribution has such heavy tails that it has no mean. Its tail is $\
 - Cynthia Dwork and Jing Lei, "Differential Privacy and Robust Statistics", 2009. The propose-test-release framework.
 - Abhradeep Thakurta and Adam Smith, "Differentially Private Feature Selection via Stability Arguments, and the Robustness of the Lasso", 2013. The distance-to-instability approach behind the stable mode.
 - Aleksandra Korolova, Krishnaram Kenthapadi, Nina Mishra and Alexandros Ntoulas, "Releasing Search Queries and Clicks Privately", 2009. Thresholded noisy counts over an unbounded domain, the idea of the stability-based histogram.
-- Cynthia Dwork and Aaron Roth, *The Algorithmic Foundations of Differential Privacy*, 2014. Chapter 7 covers propose-test-release and stability-based algorithms.
-- Salil Vadhan, "The Complexity of Differential Privacy", 2017. Section 3 treats local sensitivity, propose-test-release, the stability-based histogram (Theorem 3.5) and privately bounding the local sensitivity, with an example on graphs.
+- Cynthia Dwork and Aaron Roth, *The Algorithmic Foundations of Differential Privacy*, 2014. Propose-test-release and stability-based algorithms, in Chapter 7.
+- Salil Vadhan, "The Complexity of Differential Privacy", 2017. Section 3 treats local sensitivity, propose-test-release, the stability-based histogram (Theorem 3.5) and private bounds on the local sensitivity.

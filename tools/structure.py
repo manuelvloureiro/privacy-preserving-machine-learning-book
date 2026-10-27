@@ -434,6 +434,10 @@ def main() -> None:
     args = parser.parse_args()
     config = load_config()
     books = [cast(str, args.book)] if args.book else list(config.books)
+    # One study note, notes/<name>, as the other checks take it: its page in the notes group.
+    if args.book and args.book not in config.books and Path(args.book).parent.as_posix() in config.books:
+        books = [Path(args.book).parent.as_posix()]
+        args.page = f"{Path(args.book).name}/{args.page or 'index.md'}"
     rows: list[tuple[str, str, Skeleton | None, list[Finding], bool]] = []
     for book in books:
         legacy = config.books[book].legacy

@@ -1,12 +1,12 @@
 # Local Differential Privacy
 
-Almost every mechanism so far ran on a trusted curator who saw the raw data. This chapter drops that trust. Each person randomizes their own record before it leaves their device, so that no one, the curator included, ever sees it. We define this local model and show that, with $n$ people, it costs a factor of about $\sqrt n$ in accuracy on the simplest task, and that no noninteractive protocol can avoid the cost.
+Almost every mechanism so far ran on a trusted curator who saw the raw data. This chapter drops that trust, so that each person randomizes their own record before it leaves their device. We define this local model and show that, with $n$ people, it costs a factor of about $\sqrt n$ in accuracy on the simplest task. No noninteractive protocol can escape that cost.
 
-The rest of the chapter studies three large deployments of the local model, at Google, Apple and Microsoft. Each solves a problem the textbook protocol ignores. Google's protects people who answer the same question every day, Apple's finds values that no one knew to ask about, and Microsoft's sends numbers in a single bit and copes with values that drift.
+The rest of the chapter studies three large deployments of the local model, each of which solves a problem the textbook protocol ignores. Google's protects people who answer the same question every day, Apple's finds values that no one knew to ask about, and Microsoft's sends numbers in a single bit and copes with values that drift.
 
 ## The local model {#sec-ldp-model}
 
-In the central model of [the first chapter on the definition](../part02-dp-basics/01-randomized-response.md), people send their data to a curator, and the trust barrier sits at the curator's output. In the local model the barrier moves to each person. Anything that leaves a person's device may be seen by an adversary, and the curator is now just an analyst who receives messages.
+In the central model of [the first chapter on the definition](../part02-dp-basics/01-randomized-response.md), people send their data to a curator, and the trust barrier sits at the output of the curator. In the local model the barrier moves to each person. An adversary may see anything that leaves the device of a person, and the curator is now just an analyst who receives messages.
 
 ::: {#def-ldp-randomizer name="Local randomizer"}
 Let $\varepsilon \ge 0$. A randomized algorithm $R\colon \mathcal X \to \mathcal Y$ is an **$\varepsilon$-local randomizer** if for all inputs $x, x' \in \mathcal X$ and all events $S \subseteq \mathcal Y$,
@@ -22,7 +22,7 @@ This is the definition of differential privacy (DP) applied to a dataset with on
 A **noninteractive $\varepsilon$-local protocol** gives each person $i$ an $\varepsilon$-local randomizer $R_i$. Person $i$ sends $Y_i = R_i(X_i)$, using randomness independent of everyone else's, and the analyst outputs a function of the messages $(Y_1, \dots, Y_n)$.
 :::
 
-Local privacy implies central privacy, because the analyst's view is a vector of messages and only one of them depends on any one record.
+Local privacy implies central privacy, because the view of the analyst is a vector of messages and only one of them depends on any one record.
 
 ::: {#prp-ldp-central}
 The messages $(Y_1,\dots,Y_n)$ of a noninteractive $\varepsilon$-local protocol, viewed as the output of a mechanism on $D$, are $\varepsilon$-DP. So is any function of them that the analyst computes.
@@ -40,15 +40,13 @@ where the inequality applies @def-ldp-randomizer to each slice.
 3. The analyst's output is a post-processing of the messages, so it is $\varepsilon$-DP by the post-processing property of [the Laplace mechanism chapter](../part02-dp-basics/02-laplace-mechanism.md).
 :::
 
-Randomized response, with each person reporting their true bit with probability $e^\varepsilon/(1+e^\varepsilon)$, is an $\varepsilon$-local randomizer. That was the local protocol hiding inside the first private algorithm of this book.
+Randomized response, with each person reporting their true bit with probability $e^\varepsilon/(1+e^\varepsilon)$, is an $\varepsilon$-local randomizer. So the first private algorithm of this book was a local protocol.
 
-Protocols can also interact. In a **sequentially interactive** protocol the analyst addresses people one at a time. The randomizer given to person $i$ may depend on the messages of the people before them, but each person speaks only once. In a **fully interactive** protocol the analyst may return to a person many times. The requirement is then that all the messages a person ever sends, taken together, form an $\varepsilon$-local randomizer of their record.
-
-The power of interaction is only partly understood. For some problems a fully interactive protocol needs exponentially fewer people than any noninteractive one, while for others interaction does not help. Pure and approximate privacy are another puzzle, because no separation between them is known in the local model. For noninteractive protocols, an approximate protocol with a small enough $\delta$ can even be turned into a pure one at a constant-factor cost in $\varepsilon$.
+Protocols can also interact. In a **sequentially interactive** protocol the analyst addresses people one at a time, and the randomizer of person $i$ may depend on the messages before theirs, but each person speaks only once. In a **fully interactive** protocol the analyst may return to a person many times, and all the messages that person ever sends must together form an $\varepsilon$-local randomizer of their record. This chapter proves its bounds for noninteractive protocols only.
 
 ## Counting bits, central and local {#sec-ldp-bits}
 
-The cost of moving the barrier shows on the simplest task. Each person holds a bit $X_i \in \{0,1\}$, and the analyst wants the mean $\mu = \frac1n\sum_{i=1}^n X_i$. Write $\mathrm{Lap}(b)$ for the Laplace distribution with density $\frac{1}{2b}e^{-|z|/b}$. [The Laplace mechanism](../part02-dp-basics/02-laplace-mechanism.md) adds $\mathrm{Lap}(\Delta f/\varepsilon)$ noise to a query $f$ whose value changes by at most $\Delta f$ between neighbours, and it is $\varepsilon$-DP. A central curator, who sees the bits, can therefore add Laplace noise to their mean.
+The cost of moving the barrier shows on the simplest task, in which each person holds a bit $X_i \in \{0,1\}$, and the analyst wants the mean $\mu = \frac1n\sum_{i=1}^n X_i$. Write $\mathrm{Lap}(b)$ for the Laplace distribution with density $\frac{1}{2b}e^{-|z|/b}$. [The Laplace mechanism](../part02-dp-basics/02-laplace-mechanism.md) adds $\mathrm{Lap}(\Delta f/\varepsilon)$ noise to a query $f$ whose value changes by at most $\Delta f$ between neighbours, and it is $\varepsilon$-DP. So a central curator, who sees the bits, can add Laplace noise to their mean.
 
 ::: {#prp-ldp-central-bits}
 For every $\varepsilon > 0$ and $\beta \in (0,1)$, the central estimate $\hat\mu = \mu + \mathrm{Lap}(1/(\varepsilon n))$ is $\varepsilon$-DP, and with probability at least $1-\beta$,
@@ -63,7 +61,8 @@ $$
 2. The Laplace tail is $\Pr[|\mathrm{Lap}(b)| > t] = 2\int_t^\infty \frac{1}{2b}e^{-z/b}\,dz = e^{-t/b}$. Setting $b = 1/(\varepsilon n)$ and $t = b\ln(1/\beta)$ makes the tail equal to $\beta$.
 :::
 
-In the local model each person runs randomized response and sends $Y_i$, equal to $X_i$ with probability $e^\varepsilon/(1+e^\varepsilon)$ and to $1 - X_i$ otherwise. A report equals $1$ with probability $(1 + (e^\varepsilon - 1)X_i)/(e^\varepsilon+1)$, which is linear in $X_i$. Solving for $X_i$ gives the analyst's unbiased estimate
+In the local model each person runs randomized response and sends $Y_i$, equal to $X_i$ with probability $e^\varepsilon/(1+e^\varepsilon)$ and to $1 - X_i$ otherwise. A report equals $1$ with probability $(1 + (e^\varepsilon - 1)X_i)/(e^\varepsilon+1)$, which is linear in $X_i$. Solving for $X_i$ gives the unbiased estimate of the analyst,
+
 
 $$
 \hat\mu = \frac1n\sum_{i=1}^n \frac{(e^\varepsilon+1)\,Y_i - 1}{e^\varepsilon - 1}.
@@ -71,11 +70,12 @@ $$ {#eq-ldp-rr-estimator}
 
 This is the debiased estimator of [the randomized response chapter](../part02-dp-basics/01-randomized-response.md) with bias $2\kappa = (e^\varepsilon-1)/(e^\varepsilon+1)$, written in terms of $\varepsilon$. That chapter proved that, with probability at least $1-\beta$,
 
+
 $$
 |\hat\mu - \mu| \le \coth\!\left(\frac\varepsilon2\right)\sqrt{\frac{\ln(2/\beta)}{2n}}, \qquad \coth\!\left(\frac\varepsilon2\right) \ge \frac2\varepsilon .
 $$ {#eq-ldp-rr-error}
 
-The two bounds reach an error of $\alpha$ at different sizes. The central bound does so once $n \ge \ln(1/\beta)/(\varepsilon\alpha)$. The local bound does so once $n \ge \coth^2(\varepsilon/2)\ln(2/\beta)/(2\alpha^2)$, a threshold that is at least $2\ln(2/\beta)/(\varepsilon^2\alpha^2)$. So the local estimate needs quadratically more data in $1/\alpha$ and in $1/\varepsilon$, and @fig-ldp-gap shows the two error curves.
+The two bounds reach an error of $\alpha$ at different sizes. The central bound does so once $n \ge \ln(1/\beta)/(\varepsilon\alpha)$. The local bound does so once $n \ge \coth^2(\varepsilon/2)\ln(2/\beta)/(2\alpha^2)$, a threshold of at least $2\ln(2/\beta)/(\varepsilon^2\alpha^2)$. So the local estimate needs quadratically more data in $1/\alpha$ and in $1/\varepsilon$, as @fig-ldp-gap shows.
 
 ::: {#exm-ldp-sizes}
 Take $\varepsilon = 1$, $\alpha = 0.01$ and $\beta = 0.05$. The central estimate needs $n \ge \ln 20/0.01$, that is, $300$ people. The local one needs $n \ge \coth^2(0.5)\ln 40/(2 \times 10^{-4})$, that is, $86{,}370$ people, about $288$ times as many.
@@ -83,19 +83,20 @@ Take $\varepsilon = 1$, $\alpha = 0.01$ and $\beta = 0.05$. The central estimate
 
 ![Error of the mean of $n$ bits at $\varepsilon = 1$. Solid lines are the 95th percentile of the error over 2,000 simulated runs with $\mu = 0.3$, dashed lines the bounds of @prp-ldp-central-bits and @eq-ldp-rr-error with $\beta = 0.05$. The central error falls as $1/n$ and the local one as $1/\sqrt n$, so the gap widens with $n$.](figures/ldp-gap.svg){#fig-ldp-gap}
 
-This gap is why local privacy has been deployed only by companies with hundreds of millions of users. With a few thousand users, a local protocol returns mostly noise.
+This gap is why only companies with hundreds of millions of users have deployed local privacy. With a few thousand users, a local protocol returns mostly noise.
 
 ## The price is unavoidable {#sec-ldp-lower}
 
-The local estimator is not merely a poor choice. No noninteractive local protocol can do better than error of order $1/(\varepsilon\sqrt n)$, and the proof shows why. A local randomizer shrinks the difference between two input distributions by a factor that depends only on $\varepsilon$, and $n$ independent messages cannot recover more than $n$ such shrunken differences.
+The local estimator is not merely a poor choice, because no noninteractive local protocol can do better than error of order $1/(\varepsilon\sqrt n)$. The reason is that a local randomizer shrinks the difference between two input distributions by a factor that depends only on $\varepsilon$, and $n$ independent messages cannot recover more than $n$ such shrunken differences.
 
 Two distances between distributions $P$ and $Q$ on a countable set measure this. The **total variation distance** is $\mathrm{TV}(P,Q) = \frac12\sum_y |P(y) - Q(y)|$, the largest gap $P(S) - Q(S)$ over events $S$. The **chi-squared divergence** is
+
 
 $$
 \chi^2(P \,\|\, Q) = \sum_{y} \frac{(P(y) - Q(y))^2}{Q(y)},
 $$
 
-where a term in which both $P(y)$ and $Q(y)$ are zero is dropped, and a term in which $Q(y)$ is zero but $P(y)$ is not makes the divergence infinite. The lower bound needs two facts about these distances. Total variation is at most a constant times the square root of the chi-squared divergence, and the chi-squared divergence behaves simply on products, which is where the $n$ independent messages enter.
+where a term in which both $P(y)$ and $Q(y)$ are zero is dropped, and a term in which only $Q(y)$ is zero makes the divergence infinite. The lower bound needs two facts about these two distances. Total variation is at most a constant times the square root of the chi-squared divergence, and the chi-squared divergence behaves simply on products, which is where the $n$ independent messages enter.
 
 ::: {#lem-ldp-distances}
 For distributions on a countable set,
@@ -109,7 +110,7 @@ For distributions on a countable set,
 2. Expanding the square shows $1 + \chi^2(P\,\|\,Q) = \sum_y P(y)^2/Q(y)$. For a product, this sum factorizes as $\sum_{y_1} P_1(y_1)^2/Q_1(y_1) \cdot \sum_{y_2} P_2(y_2)^2/Q_2(y_2)$.
 :::
 
-The key step is a contraction. Feed a local randomizer an input drawn from $P_0$ or from $P_1$, and write $W_0$ and $W_1$ for the two resulting distributions of its message.
+The key step is a contraction. Feed a local randomizer an input drawn from $P_0$ or from $P_1$, and compare the two resulting distributions of its message.
 
 ::: {#lem-ldp-contraction}
 Let $R$ be an $\varepsilon$-local randomizer with a countable message set, and let $P_0, P_1$ be distributions on $\mathcal X$. Write $W_0$ and $W_1$ for the distributions of the message $R(x)$ when $x$ is drawn from $P_0$ and from $P_1$. Then
@@ -132,7 +133,7 @@ $$
 5. Summing over $y$ and using $\sum_y c_y \le \sum_y Q(y \mid x) = 1$ for any fixed $x$ gives the bound.
 :::
 
-Now let the data be random. If each $X_i$ is drawn independently from $\mathrm{Bern}(p)$, the Bernoulli distribution with mean $p$, an accurate estimate of the mean must tell $p = \frac12 - \alpha$ from $p = \frac12 + \alpha$.
+Now let the data be random. If each $X_i$ is drawn independently from $\mathrm{Bern}(p)$, the Bernoulli distribution with mean $p$, then an accurate estimate of the mean must tell $p = \frac12 - \alpha$ from $p = \frac12 + \alpha$.
 
 ::: {#thm-ldp-lower name="Lower bound for local counting"}
 Let $\alpha \in (0, \frac12]$, and let $X_1, \dots, X_n$ be independent draws from $\mathrm{Bern}(\frac12 + \alpha)$ or from $\mathrm{Bern}(\frac12 - \alpha)$. Write $P_+$ and $P_-$ for the two distributions of the messages of a noninteractive $\varepsilon$-local protocol with countable message sets. Then
@@ -156,25 +157,25 @@ $$
 5. For $\varepsilon \le 1$, convexity of $e^\varepsilon$ gives $e^\varepsilon - 1 \le (e-1)\varepsilon$, and $\ln 2/(4(e-1)^2) = 0.0587 > 1/18$.
 :::
 
-The theorem is about data drawn at random, but it also constrains estimates of the empirical mean on fixed data. Suppose a protocol is within $\alpha/2$ of the empirical mean with probability at least $7/8$ on every dataset. When $n \ge 2\ln(16)/\alpha^2$, Hoeffding's inequality puts the empirical mean of the sample strictly within $\alpha/2$ of $p$ with probability at least $7/8$. So the protocol is strictly within $\alpha$ of $p$ with probability at least $3/4$, and the theorem applies to it. This reduction says nothing about smaller $n$. A direct argument for fixed data, showing that a local protocol for constant $\varepsilon$ has error of order $\sqrt n$ on the sum of $n$ bits, is due to Chan, Shi and Song (2012).
+The theorem is about data drawn at random, but it also constrains estimates of the empirical mean on fixed data. Suppose a protocol is within $\alpha/2$ of the empirical mean with probability at least $7/8$ on every dataset. When $n \ge 2\ln(16)/\alpha^2$, Hoeffding's inequality puts the empirical mean strictly within $\alpha/2$ of $p$ with probability at least $7/8$. So the protocol is strictly within $\alpha$ of $p$ with probability at least $3/4$, and the theorem applies to it. This reduction says nothing about smaller $n$, and Chan, Shi and Song (2012) give a direct argument for fixed data.
 
-For $\varepsilon \le 1$, comparing with @eq-ldp-rr-error shows that randomized response is optimal up to a constant factor. The central estimate, which needs only about $1/(\varepsilon\alpha)$ people, is out of reach of every noninteractive local protocol.
+For $\varepsilon \le 1$, comparing the theorem with @eq-ldp-rr-error shows that randomized response is optimal up to a constant factor. The central estimate, which needs only about $1/(\varepsilon\alpha)$ people, is out of reach of every noninteractive local protocol.
 
 ## Repeated questions: RAPPOR {#sec-ldp-rappor}
 
-Google's first large deployment, RAPPOR, collected statistics from the Chrome browser. It met a problem that a one-off survey never has. The same question is asked of the same person every day, and fresh randomness each day leaks the answer.
+Google's first large deployment, RAPPOR, collected statistics from the Chrome browser. It met a problem that a one-off survey never has. The same question goes to the same person every day, and fresh randomness each day leaks the answer.
 
 ::: {#exm-ldp-averaging name="Averaging attack"}
 Take $\varepsilon = \ln 4$, so that randomized response tells the truth with probability $4/5$. A single "yes" from a person whose answer is "no" happens with probability $1/5$, which leaves good deniability. Now ask the same question on $50$ days with fresh coins, and suppose $40$ reports say "yes". If the answer is "no", this happens with probability $\binom{50}{40}(1/5)^{40}(4/5)^{10} = 1.21 \times 10^{-19}$. If it is "yes", it happens with probability $0.140$. The likelihood ratio is $4^{30} \approx 1.15 \times 10^{18}$, and the deniability is gone.
 :::
 
-The attack is composition at work. Basic composition, from [the Laplace mechanism chapter](../part02-dp-basics/02-laplace-mechanism.md), says that $k$ answers with fresh coins are $k\varepsilon$-DP, which here is $50\ln 4 = 69.3$. This bound is met exactly, because the all-"yes" outcome has likelihood ratio $4^{50}$. So the fix is to randomize once and repeat.
+The attack is composition at work. Basic composition, from [the Laplace mechanism chapter](../part02-dp-basics/02-laplace-mechanism.md), says that $k$ answers with fresh coins are $k\varepsilon$-DP, which here is $50\ln 4 = 69.3$. The attack meets this bound exactly, because the all-"yes" outcome has likelihood ratio $4^{50}$. So the fix is to randomize once and repeat.
 
 ::: {#def-ldp-memo name="Memoization"}
 A person who is asked a question for the first time runs their randomizer and stores the result. When asked the same question again, they send the stored result.
 :::
 
-Memoization keeps the privacy cost of a single answer, however often the question is asked.
+Memoization keeps the privacy cost of a single answer, however often the question comes.
 
 ::: {#prp-ldp-memo}
 If the stored result comes from an $\varepsilon$-local randomizer, then any number of memoized answers to the same question is $\varepsilon$-locally private.
@@ -184,9 +185,9 @@ If the stored result comes from an $\varepsilon$-local randomizer, then any numb
 The sequence of answers is a function of the single stored result, so the claim follows from post-processing.
 :::
 
-Memoization protects honest repetition, not an adversarial analyst. An analyst can ask for "your PIN" and then for "your PIN reversed", two questions with the same information that each get a fresh randomization.
+Memoization protects honest repetition, not repetition by an adversarial analyst. For example, an analyst can ask for "your PIN" and then for "your PIN reversed", two questions with the same information that each get a fresh randomization.
 
-RAPPOR handles values from any finite domain, not just bits. It first encodes a value as a bit vector.
+RAPPOR handles values from any finite domain, not just bits, so it first encodes a value as a bit vector.
 
 ::: {#def-ldp-bloom name="Bloom filter"}
 Fix a length $K$ and $h$ hash functions $H_1, \dots, H_h\colon \mathcal X \to \{1,\dots,K\}$. The Bloom filter of a value $v$ is the vector $B \in \{0,1\}^K$ with $B_j = 1$ exactly when $H_l(v) = j$ for some $l$.
@@ -195,13 +196,13 @@ Fix a length $K$ and $h$ hash functions $H_1, \dots, H_h\colon \mathcal X \to \{
 With $h = 1$ and no collisions the Bloom filter is a one-hot encoding of $v$. In general, $B$ has at most $h$ ones. RAPPOR then applies two layers of randomized response, bit by bit.
 
 ::: {#def-ldp-rappor name="RAPPOR"}
-Fix $\nu \in (0,1)$, the noise level of the permanent layer, and probabilities $p_0 < p_1$ in $(0,1)$, the chances of reporting a one in the instantaneous layer. Erlingsson and coauthors write these three parameters $f$, $p$ and $q$. A person with value $v$ and Bloom filter $B$ of length $K$, from @def-ldp-bloom, does the following.
+Fix $\nu \in (0,1)$, the noise level of the permanent layer, and probabilities $p_0 < p_1$ in $(0,1)$, the chances of reporting a one in the instantaneous layer. A person with value $v$ and Bloom filter $B$ of length $K$, from @def-ldp-bloom, does the following.
 
 1. **Permanent randomized response.** Once, they draw $B' \in \{0,1\}^K$ with independent coordinates, where $B'_j$ is $1$ with probability $\nu/2$, $0$ with probability $\nu/2$, and $B_j$ otherwise. They memoize $B'$.
 2. **Instantaneous randomized response.** Each time they report, they send a fresh $Y \in \{0,1\}^K$ with independent coordinates, where $Y_j = 1$ with probability $p_1$ if $B'_j = 1$ and with probability $p_0$ if $B'_j = 0$.
 :::
 
-The permanent layer carries the long-term guarantee. It holds against an analyst who sees every report the person ever sends, because all of them are computed from the one memoized vector.
+The permanent layer carries the long-term guarantee. It holds against an analyst who sees every report the person ever sends, because all of them come from the one memoized vector.
 
 ::: {#thm-ldp-permanent}
 Run RAPPOR with $h$ hash functions and permanent noise level $\nu$. As a function of the value $v$, the memoized vector $B'$ is an $\varepsilon_\infty$-local randomizer with
@@ -220,7 +221,7 @@ So is the whole sequence of reports $Y$, however long.
 4. The reports depend on $v$ only through $B'$, so they are a post-processing of it.
 :::
 
-The instantaneous layer gives a stronger guarantee for an analyst who sees one report. Combining the two layers, a reported bit is $1$ with probability $p_1^* = (1-\frac \nu2)p_1 + \frac \nu2 p_0$ when $B_j = 1$ and $p_0^* = \frac \nu2 p_1 + (1-\frac \nu2)p_0$ when $B_j = 0$. Then $p_1^* > p_0^*$, because $p_1^* - p_0^* = (1-\nu)(p_1-p_0)$.
+The instantaneous layer gives a stronger guarantee for an analyst who sees one report. With both layers, a reported bit is $1$ with probability $p_1^* = (1-\frac \nu2)p_1 + \frac \nu2 p_0$ when $B_j = 1$ and $p_0^* = \frac \nu2 p_1 + (1-\frac \nu2)p_0$ when $B_j = 0$. Then $p_1^* > p_0^*$, because $p_1^* - p_0^* = (1-\nu)(p_1-p_0)$.
 
 ::: {#thm-ldp-instant}
 Run RAPPOR with $h$ hash functions, and let $p_1^*$ and $p_0^*$ be the combined probabilities above. A single report $Y$, as a function of $v$, is an $\varepsilon_1$-local randomizer with
@@ -243,19 +244,21 @@ Typical parameters show how far apart the two guarantees can be.
 With $h = 2$, $\nu = 1/2$, $p_0 = 1/2$ and $p_1 = 3/4$, the long-term guarantee is $\varepsilon_\infty = 4\ln 3 = 4.39$. The combined probabilities are $p_1^* = 0.6875$ and $p_0^* = 0.5625$, so a single report has $\varepsilon_1 = 1.07$.
 :::
 
-The second layer has a further purpose that local privacy does not capture. A memoized $B'$ of a few hundred bits is almost surely unique, so seeing it twice links two reports to the same person, as a cookie would. Fresh noise on each report breaks that link for an analyst who sees few reports. An analyst who sees many reports can average the noise away and recover $B'$, and then still faces the $\varepsilon_\infty$ guarantee of @thm-ldp-permanent.
+The second layer has one more purpose, which local privacy does not capture. A memoized $B'$ of a few hundred bits is almost surely unique, so two reports that both reveal it link to the same person, as a cookie would. Fresh noise on each report breaks that link for an analyst who sees few reports. An analyst who sees many reports can average the noise away and recover $B'$, but then still faces the $\varepsilon_\infty$ guarantee of @thm-ldp-permanent.
 
-The analyst decodes the reports by debiasing the bit counts and fitting candidate values against them, in the spirit of @eq-ldp-rr-estimator. Memoization fails when the value drifts. If the question is a person's age in days, the answer changes daily, each new value needs a new $B'$, and $k$ distinct values cost $k\,\varepsilon_\infty$ by composition. Chrome used RAPPOR on an opt-in basis, for example to measure the distribution of browser home pages, where software that hijacks a browser shows up as an unexpected popular value, and to survey the processes running on users' machines.
+The analyst decodes the reports by debiasing the bit counts and fitting candidate values against them, in the spirit of @eq-ldp-rr-estimator. Memoization fails when the value drifts. For example, a person's age in days changes daily, each new value needs a new $B'$, and $k$ distinct values cost $k\,\varepsilon_\infty$ by composition.
 
 ## Values no one knew: Apple {#sec-ldp-apple}
 
-Apple deployed local privacy on its phones and computers. Around the randomizers, the system adds measures outside the model of differential privacy. It discards IP addresses, sends reports after a delay and only a random sample of them, encrypts them in transit with Transport Layer Security (TLS), and limits how many reports each use sends per day. Apple did not publish all its parameters at first. Independent researchers then measured them from the software of macOS and found that each report had $\varepsilon$ of $1$ or $2$, but that the budget allowed a privacy loss of up to $16$ per day, renewed every day.
+Apple deployed local privacy on its phones and computers. Around the randomizers it put measures outside the model of DP, for example it discards network addresses and limits the number of reports per day. Independent researchers later measured from the software of macOS that each report had $\varepsilon$ of $1$ or $2$, but that a day could spend up to $16$.
 
-Most of Apple's protocols build on a private count mean sketch, a hashed table for estimating frequencies in the spirit of the count sketch. A value is hashed into a short table by one of several hash functions, and the table is randomized before it is sent. A variant based on the Hadamard transform lets each device send a single bit. Communication matters on a phone, where a report should cost a few bytes at most, and the last section returns to it.
+Most of Apple's protocols build on a private count mean sketch, a hashed table that estimates frequencies. A device hashes its value into a short table with one of several hash functions, and randomizes the table before it sends it. A variant with the Hadamard transform lets each device send a single bit. That matters on a phone, where a report must cost a few bytes at most.
 
-The new problem Apple solved is **discovery**. Hashing maps a value to its encoding easily, but the encoding cannot be inverted. To estimate how often a word is typed, the analyst must already have the word in its dictionary and test its encoding against the reports. Slang and new words are exactly the values missing from any dictionary, and searching all strings is hopeless: there are $26^8 \approx 2.1 \times 10^{11}$ strings of eight letters.
+The new problem Apple solved is **discovery**. A hash maps a value to its encoding, but the encoding cannot be inverted. So to estimate how often a word is typed, the analyst must already have the word in its dictionary and test its encoding against the reports. Slang and new words are exactly the values that no dictionary holds, and a search of all strings is hopeless, since there are $26^8 \approx 2.1 \times 10^{11}$ strings of eight letters.
 
-The **sequence fragment puzzle** breaks a word into pieces short enough to enumerate. Fix a hash function $H$ from words to $\{0, \dots, 255\}$, an eight-bit hash. Take, for illustration, eight-letter words and fragments of two letters. A person with an eight-letter word $w$ picks one of the starting positions $j \in \{1, 3, 5, 7\}$ uniformly at random. They send $j$, which needs no protection, together with a private report of the pair $(w_j w_{j+1}, H(w))$: the two letters at position $j$ and the hash of the whole word, the *puzzle piece*. The pairs come from a set of $26^2 \times 256 = 173{,}056$ candidates, small enough for the analyst to estimate the frequency of every one, separately for each position. Sending the position in the clear costs no privacy, because the person chooses it at random, independently of the word.
+The **sequence fragment puzzle** breaks a word into pieces short enough to enumerate. Take, for illustration, eight-letter words and fragments of two letters, and fix an eight-bit hash function $H$ from words to $\{0, \dots, 255\}$. A person with an eight-letter word $w$ picks one of the starting positions $j \in \{1, 3, 5, 7\}$ uniformly at random. They send $j$ together with a private report of the *puzzle piece* $(w_j w_{j+1}, H(w))$, the two letters at position $j$ and the hash of the whole word. The pieces come from a set of $26^2 \times 256 = 173{,}056$ candidates, small enough for the analyst to estimate the frequency of every one at each position.
+
+The position needs no protection, because the person chooses it at random, independently of the word, as the next result shows.
 
 ::: {#prp-ldp-fragment}
 If the private report of the pair is an $\varepsilon$-local randomizer, then the whole message $(j, \text{report})$ is $\varepsilon$-locally private.
@@ -271,11 +274,11 @@ An example shows how the analyst puts the pieces back together.
 Suppose many people type "snowfall", and $H(\text{snowfall}) = 117$. Their messages are spread over $(1, \text{sn}, 117)$, $(3, \text{ow}, 117)$, $(5, \text{fa}, 117)$ and $(7, \text{ll}, 117)$. Each of the four pairs is frequent at its position. Pieces that share the hash $117$ are joined in order of position, giving the candidate "snowfall". A second round of ordinary frequency estimation over the discovered words then counts it, and it removes candidates that a hash collision assembled from different words.
 :::
 
-The method found abbreviations and slang that no dictionary held. It also found "lov", "th" and "kno", which are "love", "the" and "know" cut short. People had pressed by accident the leftmost suggestion above the keyboard, which holds the letters typed so far, instead of the final letter. Other uses were the frequency of each emoji, which differed between English and French keyboards, the websites on which users wanted media to play automatically, which websites used the most energy or memory, and which data types were most used in the health app.
+With this method Apple found abbreviations and slang that no dictionary held, and measured the frequency of each emoji, which differed between English and French keyboards.
 
 ## Numbers in one bit: Microsoft {#sec-ldp-microsoft}
 
-Microsoft collects usage telemetry from Windows, such as how long people spend in each application. The values are numbers in a range $[0, m]$, and the analyst wants their mean $\mu$. The Laplace mechanism works locally: person $i$ sends $Y_i = X_i + \mathrm{Lap}(m/\varepsilon)$, which is $\varepsilon$-local because the identity map on $[0,m]$ changes by at most $m$. The mean of the reports has error $\frac1n\sum_i \mathrm{Lap}(m/\varepsilon)$, with standard deviation exactly $\sqrt2\,m/(\varepsilon\sqrt n)$. This rate is optimal for local protocols, by @thm-ldp-lower applied to values in $\{0, m\}$, but each report is a real number of size about $m/\varepsilon$, so it costs many bits. A single bit suffices, sent with a probability that grows linearly with the value.
+Microsoft collects usage telemetry from Windows, such as how long people spend in each application. These values are numbers in a range $[0, m]$, and the analyst wants their mean $\mu$. The Laplace mechanism works locally. Person $i$ sends $Y_i = X_i + \mathrm{Lap}(m/\varepsilon)$, which is $\varepsilon$-local because the identity map on $[0,m]$ changes by at most $m$. The mean of the reports then has standard deviation exactly $\sqrt2\,m/(\varepsilon\sqrt n)$, which is optimal for local protocols by @thm-ldp-lower applied to values in $\{0, m\}$. But each report is a real number of size about $m/\varepsilon$, so it costs many bits, while a single bit sent with a probability that grows linearly with the value suffices.
 
 ::: {#def-ldp-onebit name="One-bit mean protocol"}
 Person $i$, with $X_i \in [0,m]$, sends a bit $Y_i$ with
@@ -291,7 +294,7 @@ $$
 $$
 :::
 
-At $X_i = 0$ and $X_i = m$ this is randomized response, and between them it interpolates linearly. The analyst's estimate inverts that linear relation, as @eq-ldp-rr-estimator did for bits, and the next theorem shows that it keeps the privacy and the accuracy of randomized response.
+At $X_i = 0$ and $X_i = m$ this is randomized response, and between them it interpolates linearly. The estimate of the analyst inverts that linear relation, as @eq-ldp-rr-estimator did for bits, and it keeps the privacy and the accuracy of randomized response.
 
 ::: {#thm-ldp-onebit}
 The one-bit protocol is $\varepsilon$-locally private, and $\hat\mu$ is unbiased. With probability at least $1-\beta$,
@@ -310,11 +313,11 @@ and the standard deviation of $\hat\mu$ is at most $m\coth(\varepsilon/2)/(2\sqr
 4. *Variance.* A bit has variance at most $1/4$, so $\operatorname{Var}(Z_i) \le m^2\coth^2(\varepsilon/2)/4$, and the average of $n$ independent terms has variance at most $m^2\coth^2(\varepsilon/2)/(4n)$.
 :::
 
-Since $\coth(\varepsilon/2)/2 \approx 1/\varepsilon$ for small $\varepsilon$, one bit loses nothing against the Laplace protocol's $\sqrt 2/\varepsilon$. At $\varepsilon = 1$ the one-bit standard deviation is at most $0.765$ times the Laplace one.
+Since $\coth(\varepsilon/2)/2 \approx 1/\varepsilon$ for small $\varepsilon$, one bit loses nothing against the $\sqrt 2/\varepsilon$ of the Laplace protocol. At $\varepsilon = 1$ the one-bit standard deviation is at most $0.765$ times the Laplace one.
 
 ### Memoization with drifting values {#sec-ldp-rounding}
 
-Daily usage is never exactly the same two days running, so memoization as in RAPPOR does not apply. Rounding to bins before memoizing poses a dilemma. Narrow bins change often and force new randomizations, while wide bins make each report wrong by up to half a bin. Randomized rounding solves the second problem. It rounds each value to $0$ or to $m$ at random, with probabilities chosen so that the rounded value is right on average, so two bins suffice without bias.
+Daily usage is never exactly the same two days running, so the memoization of RAPPOR does not apply. And rounding to bins before memoizing poses a dilemma. Narrow bins change often and force new randomizations, while wide bins make each report wrong by up to half a bin. Randomized rounding solves the second problem. It rounds each value to $0$ or to $m$ at random, with probabilities chosen so that the rounded value is right on average, so two bins suffice without bias.
 
 ::: {#def-ldp-rounding name="Memoized one-bit protocol"}
 Before any data arrive, person $i$ does three things, independently of their data and of each other.
@@ -336,9 +339,7 @@ For every $x \in [0,m]$, $\Pr[r_i(x) = m] = x/m$, so $\mathbb E[r_i(x)] = x$.
 The offset is uniform on $[0,m)$, so $\Pr[u_i \ge m - x] = \big(m - (m-x)\big)/m = x/m$.
 :::
 
-For integer values, an integer offset drawn uniformly from $\{0, \dots, m-1\}$ gives the same probability $x/m$ for every integer $x \in [0,m]$, since exactly $x$ offsets reach $m - x$ or more.
-
-Unbiased rounding, together with stored bits that are themselves outputs of the one-bit protocol, makes each day's bit look like a fresh run of that protocol.
+Unbiased rounding, together with stored bits that are themselves outputs of the one-bit protocol, makes the bit of each day look like a fresh run of that protocol.
 
 ::: {#thm-ldp-rounding}
 On each day, the bit sent by the memoized protocol has exactly the distribution of the one-bit protocol run on that day's value $x$. So each day's bit is $\varepsilon$-locally private, and the estimator of @def-ldp-onebit, applied to one day's bits, is unbiased with the error bound of @thm-ldp-onebit.
@@ -354,7 +355,7 @@ $$
 which is the probability in @def-ldp-onebit. Different people use independent coins, so the bits of one day are independent, as the error bound requires.
 :::
 
-Over many days, the bits depend on the data only through the sequence of rounded values. As long as a person's value stays on one side of their threshold $m - u_i$, they repeat one stored bit, and the analyst learns nothing new. A crossing shows in the reports only if the two stored bits differ, which happens with probability $(1 + e^{2\varepsilon})/(1+e^\varepsilon)^2$, or $0.607$ at $\varepsilon = 1$. Then the analyst learns the day on which the value crossed a threshold drawn uniformly at random. For the age-in-days question, this is all an observer ever sees, a run of $A_i(0)$ followed by a run of $A_i(m)$. This leak is not covered by an $\varepsilon$-local guarantee for arbitrary sequences of values, and the deployed protocol adds a further layer of randomness to the sent bits to blur the crossing points.
+Over many days, the bits depend on the data only through the sequence of rounded values. While the value of a person stays on one side of their threshold $m - u_i$, they repeat one stored bit, and the analyst learns nothing new. A crossing shows in the reports only if the two stored bits differ, which happens with probability $(1 + e^{2\varepsilon})/(1+e^\varepsilon)^2$, or $0.607$ at $\varepsilon = 1$. Then the analyst learns the day on which the value crossed a threshold drawn uniformly at random. No $\varepsilon$-local guarantee for arbitrary sequences of values covers this leak, so the deployed protocol adds a further layer of randomness to the sent bits to blur the crossing points.
 
 ## Summary {#sec-ldp-summary}
 
@@ -377,15 +378,11 @@ Over many days, the bits depend on the data only through the sequence of rounded
 ## References {#sec-ldp-notes}
 
 - Stanley L. Warner, "Randomized Response: A Survey Technique for Eliminating Evasive Answer Bias", 1965. The first local protocol.
-- Alexandre Evfimievski, Johannes Gehrke and Ramakrishnan Srikant, "Limiting Privacy Breaches in Privacy Preserving Data Mining", 2003. A ratio condition on a person's randomized data that anticipates the local definition.
-- Shiva Prasad Kasiviswanathan, Homin K. Lee, Kobbi Nissim, Sofya Raskhodnikova and Adam Smith, "What Can We Learn Privately?", 2008. The local model in the language of differential privacy, and a separation between interactive and noninteractive protocols.
-- T.-H. Hubert Chan, Elaine Shi and Dawn Song, "Optimal Lower Bound for Differentially Private Multi-party Aggregation", 2012. An $\Omega(\sqrt n)$ lower bound, for constant $\varepsilon$, on the error of a sum of bits in the local model, whatever the number of rounds.
-- John C. Duchi, Michael I. Jordan and Martin J. Wainwright, "Local Privacy and Statistical Minimax Rates", 2013. Contraction of divergences under local randomizers, the idea behind @lem-ldp-contraction, and optimal rates for local estimation, including means in $[0,m]$.
-- Mark Bun, Jelani Nelson and Uri Stemmer, "Heavy Hitters and the Structure of Local Privacy", 2018. Noninteractive approximate local protocols can be made pure.
-- Matthew Joseph, Jieming Mao, Seth Neel and Aaron Roth, "The Role of Interactivity in Local Differential Privacy", 2019. Separations and equivalences between the noninteractive, sequentially interactive and fully interactive models.
+- Shiva Prasad Kasiviswanathan, Homin K. Lee, Kobbi Nissim, Sofya Raskhodnikova and Adam Smith, "What Can We Learn Privately?", 2008. The local model in the language of DP, with its interactive and noninteractive forms.
+- T.-H. Hubert Chan, Elaine Shi and Dawn Song, "Optimal Lower Bound for Differentially Private Multi-party Aggregation", 2012. An $\Omega(\sqrt n)$ lower bound, for constant $\varepsilon$, on the error of a local sum of bits, whatever the number of rounds.
+- John C. Duchi, Michael I. Jordan and Martin J. Wainwright, "Local Privacy and Statistical Minimax Rates", 2013. Contraction of divergences under local randomizers, the idea behind @lem-ldp-contraction, and optimal local rates.
 - Burton H. Bloom, "Space/Time Trade-offs in Hash Coding with Allowable Errors", 1970. The Bloom filter.
-- Úlfar Erlingsson, Vasyl Pihur and Aleksandra Korolova, "RAPPOR: Randomized Aggregatable Privacy-Preserving Ordinal Response", 2014. Memoization, the two layers of randomized response, @thm-ldp-permanent and @thm-ldp-instant, and the Chrome measurements.
-- Moses Charikar, Kevin Chen and Martin Farach-Colton, "Finding Frequent Items in Data Streams", 2002. The count sketch, the frequency sketch that Apple's private sketches follow.
-- Differential Privacy Team, Apple, "Learning with Privacy at Scale", 2017. Apple's architecture, its count mean sketch protocols, the sequence fragment puzzle and its applications.
-- Jun Tang, Aleksandra Korolova, Xiaolong Bai, Xueqiang Wang and XiaoFeng Wang, "Privacy Loss in Apple's Implementation of Differential Privacy on macOS 10.12", 2017. An independent measurement of Apple's privacy parameters, including the daily loss of up to $16$.
-- Bolin Ding, Janardhan Kulkarni and Sergey Yekhanin, "Collecting Telemetry Data Privately", 2017. The one-bit mean protocol, memoization with randomized rounding, and the output perturbation added on top, deployed in Windows.
+- Úlfar Erlingsson, Vasyl Pihur and Aleksandra Korolova, "RAPPOR: Randomized Aggregatable Privacy-Preserving Ordinal Response", 2014. Memoization and the two layers of randomized response, with @thm-ldp-permanent and @thm-ldp-instant.
+- Differential Privacy Team, Apple, "Learning with Privacy at Scale", 2017. Apple's count mean sketch protocols and the sequence fragment puzzle.
+- Jun Tang, Aleksandra Korolova, Xiaolong Bai, Xueqiang Wang and XiaoFeng Wang, "Privacy Loss in Apple's Implementation of Differential Privacy on macOS 10.12", 2017. The measured privacy parameters of Apple, with a daily loss of up to $16$.
+- Bolin Ding, Janardhan Kulkarni and Sergey Yekhanin, "Collecting Telemetry Data Privately", 2017. The one-bit mean protocol and memoization with randomized rounding, as deployed in Windows.

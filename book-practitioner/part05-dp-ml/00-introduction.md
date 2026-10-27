@@ -8,5 +8,5 @@ Three pages are workflows, each a whole job done with real libraries on public d
 
 The other pages explain the decisions those jobs make, in the order a project meets them. A short page on [private empirical risk minimization](01-dp-erm.md) for convex models leads to [DP-SGD](02-dp-sgd.md). Then come [hyperparameter tuning](03-hyperparameter-tuning.md), the privacy unit in [User-level differential privacy](07-user-level.md) and the budget in [Choosing ε](09-choosing-epsilon.md). [Public data and private fine-tuning](06-public-data.md) explains why a public starting model helps so much. [Disparate impact](08-disparate-impact.md) and [Auditing private training](10-auditing.md) are the checks before release. Three reference pages cover rarer methods: [private prediction](05-private-prediction.md), [correlated noise across steps](04-matrix-mechanisms.md) and [adaptive data analysis](11-adaptive-data-analysis.md).
 
-Every number on these pages comes from a script you can run. At the end, you can train a private model, defend its settings and its $\varepsilon$, audit it, and write its release statement.
+Every number on these pages comes from a script you can run.
 

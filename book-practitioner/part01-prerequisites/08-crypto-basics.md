@@ -2,15 +2,15 @@
 
 ## What it is {#sec-crypto-what}
 
-A security claim is a statement about a guessing game. A challenger secretly picks one of two worlds, such as encrypting one of two messages, and an adversary sees the result and guesses which. Write $X$ and $Y$ for what it sees in the two worlds. If an adversary, written $\mathcal A$, answers 1 for the second, its **advantage** is the gap between how often it says 1 in each:
+A security claim is a statement about a guessing game. A challenger picks one of two worlds, such as which of two messages to encrypt, and an adversary sees the result and guesses the world. Write $X$ and $Y$ for what it sees in the two worlds. If an adversary, written $\mathcal A$, answers 1 for the second world, its **advantage** is the difference between how often it says 1 in each:
 $$\mathrm{Adv}_{\mathcal A}(X, Y) = \big|\Pr[\mathcal A(X) = 1] - \Pr[\mathcal A(Y) = 1]\big|.$$
-If the two worlds are equally likely, it wins with probability $\frac12 + \frac12\mathrm{Adv}_{\mathcal A}$, and no advantage exceeds the total variation distance between $X$ and $Y$ ([Divergences](03-divergences.md)).
+If the two worlds are equally likely, it wins with probability $\frac12 + \frac12\mathrm{Adv}_{\mathcal A}$. No advantage is more than the total variation distance between $X$ and $Y$ ([Divergences](03-divergences.md)).
 
-A scheme has **$\kappa$-bit security** when no attack beats trying keys, so an attacker who tries $t$ keys gets an advantage of at most about $t/2^\kappa$. For example, testing $10^{18}$ keys per second for a year breaks a 128-bit key with probability $9.3\times10^{-14}$.
+A scheme has **$\kappa$-bit security** when no attack beats a search through the keys, so an attacker who tries $t$ keys gets an advantage of at most about $t/2^\kappa$. For example, $10^{18}$ keys per second for a year break a 128-bit key with probability $9.3\times10^{-14}$.
 
 ## When you meet it {#sec-crypto-when}
 
-You meet these tools whenever a pipeline pseudonymizes identifiers, generates keys, encrypts data or splits a value among holders. @tbl-crypto-tools gives the construction for each job. Never implement your own.
+You meet these tools if a pipeline pseudonymizes identifiers, makes keys, encrypts data or splits a value among holders. @tbl-crypto-tools gives the construction for each job. Never write your own.
 
 | Job | Use | In Python | What goes wrong |
 | --- | --- | --- | --- |
@@ -24,11 +24,11 @@ You meet these tools whenever a pipeline pseudonymizes identifiers, generates ke
 
 ## How to use it {#sec-crypto-use}
 
-The **birthday bound** says that when a number $m$ of values are drawn uniformly from a number $N$ of possible values, the chance of a repeat is at most
+Draw a number $m$ of values uniformly from a number $N$ of possible values. The **birthday bound** says that the chance of a repeat is at most
 $$\Pr[\text{collision}] \le \frac{m(m-1)}{2N}.$$ {#eq-crypto-birthday}
-A repeat becomes as likely as not after about $1.18\sqrt N$ draws, so random $\kappa$-bit values start to collide after about $2^{\kappa/2}$.
+A repeat is as likely as not after about $1.18\sqrt N$ draws. So random $\kappa$-bit values start to collide after about $2^{\kappa/2}$.
 
-To split a secret among several holders, draw all shares but one uniformly modulo a prime $p$, and choose the last so that they add up to the secret. Adding two secrets' shares holder by holder gives shares of their sum, as the snippet shows for 42 and 100. Its birthday bounds then show why pseudonyms of 10 million identifiers keep 128 bits of the HMAC. At 64 bits, a collision has probability up to $2.7\times10^{-6}$.
+To split a secret among several holders, draw all shares but one uniformly modulo a prime $p$, and choose the last so that they add up to the secret. When each holder adds its shares of two secrets, it gets a share of their sum, as the snippet shows for 42 and 100. Its birthday bounds show why pseudonyms of 10 million identifiers keep 128 bits of the HMAC. At 64 bits, a collision has probability up to $2.7\times10^{-6}$.
 
 ```python
 import hashlib
@@ -57,16 +57,16 @@ nonce = secrets.token_bytes(12)             # 96 bits, fresh for every message
 ct = AESGCM(key).encrypt(nonce, data, aad)  # aad: authenticated, not encrypted
 ```
 
-HMAC is secure if SHA-256's compression function is a pseudorandom function. Encryption with AES assumes that AES is a pseudorandom permutation, and lattice schemes that learning with errors is hard. Secret sharing needs none, because a holder's shares are random numbers whatever the secret, which **simulation** makes precise.
+HMAC is secure if the compression function of SHA-256 is a pseudorandom function, and AES if AES is a pseudorandom permutation. Lattice schemes need learning with errors to be hard. Secret sharing needs no assumption, because a holder's shares are random numbers for every secret, which **simulation** makes precise.
 
-Homomorphic encryption hides each value behind a small random error modulo a number $Q$, and decryption works while the total error is below $Q/4$. Adding ciphertexts adds their errors, so with each error at most a bound $B$, a sum of $k$ ciphertexts is guaranteed to decrypt when $k < Q/(4B)$. A larger modulus buys a larger **noise budget**, at the cost of slower arithmetic.
+Homomorphic encryption hides each value behind a small random error modulo a number $Q$. Decryption works while the total error is below $Q/4$. A sum of ciphertexts adds their errors, so if each error is at most a bound $B$, a sum of $k$ ciphertexts decrypts when $k < Q/(4B)$. A larger modulus gives a larger **noise budget** and slower arithmetic.
 
 ## What goes wrong {#sec-crypto-wrong}
 
-A repeated nonce reveals the XOR of the two messages, so rotate keys before random nonces collide. With 96-bit nonces, the snippet's last line puts that chance at $1.2\times10^{-10}$ after $2^{32}$ messages.
+A repeated nonce shows the XOR of the two messages, so change keys before random nonces collide. With 96-bit nonces, the snippet's last line puts that chance at $1.2\times10^{-10}$ after $2^{32}$ messages.
 
-Shares must be reduced modulo $p$, or their range moves with the secret. An unreduced share equal to the secret plus a random number from 0 to 15 tells the secrets 0 and 7 apart with advantage $7/16$.
+Reduce shares modulo $p$, or their range moves with the secret. An unreduced share equal to the secret plus a random number from 0 to 15 tells the secrets 0 and 7 apart with advantage $7/16$.
 
-Finally, "no efficient adversary gets more than a negligible advantage" is an asymptotic claim and says nothing about the key length you use.
+"No efficient adversary gets more than a negligible advantage" is an asymptotic claim, which says nothing about the key length you use.
 
 **Derivations.** Every result here is derived step by step in [the full edition's chapter](../../book-full/part01-prerequisites/08-crypto-basics.md).
