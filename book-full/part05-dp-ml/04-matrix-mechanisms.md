@@ -1,10 +1,10 @@
 # DP-FTRL and matrix factorization
 
-Stochastic gradient descent (SGD) with differential privacy (DP), the DP-SGD of [the previous chapter](02-dp-sgd.md), owes much of its privacy to **Poisson sampling**. A record is in each batch only with probability $q$, and the accountant credits the run for that uncertainty. On the running example of this part, with $q = 0.01$, this amplification turns a noise multiplier of 1 into $\varepsilon = 6.71$ over 10,000 steps. But fixed batches, streaming pipelines and federated servers cannot honestly claim Poisson sampling, and [Amplification by subsampling](../part04-privacy-accounting/05-subsampling.md#sec-sub-schemes) shows that the Poisson accountant then understates $\varepsilon$. Without amplification, for $\varepsilon = 2$ over five passes, the noise multiplier grows from 0.928 to 4.458 and test accuracy falls from 0.9460 to 0.8941.
+Stochastic gradient descent (SGD) with differential privacy (DP), the DP-SGD of [the previous chapter](02-dp-sgd.md), owes much of its privacy to **Poisson sampling**. A record is in each batch only with probability $q$, and the accountant credits the run for that uncertainty. On the running example of this part, with $q = 0.01$, this amplification turns a noise multiplier of 1 into $\varepsilon = 6.71$ over 10,000 steps. But fixed batches, streaming pipelines and federated servers cannot honestly claim Poisson sampling, and the Poisson accountant then understates $\varepsilon$ ([Amplification by subsampling](../part04-privacy-accounting/05-subsampling.md#sec-sub-schemes)). Without amplification, for $\varepsilon = 2$ over five passes, the noise multiplier grows from 0.928 to 4.458 and test accuracy falls from 0.9460 to 0.8941.
 
-This chapter asks how to train privately without trusting random batches. The one idea is that training releases running sums of gradients, so noise added at one step may partly cancel the noise added before it. Releasing all running sums is described by a matrix $A$, and writing $A = LR$ splits the release into an encoder $R$, which sets the privacy, and a decoder $L$, which sets the error. The first such algorithm ran the follow the regularized leader (FTRL) optimizer on sums noised through a binary tree, and is called DP-FTRL. That tree, the square-root factorization and the best known mechanisms are all choices of $L$ and $R$.
+How can you train privately without random batches? The one idea is that training releases running sums of gradients, so noise added at one step can partly cancel the noise added before it. A matrix $A$ describes the release of all running sums, and a factorization $A = LR$ splits the release into an encoder $R$, which sets the privacy, and a decoder $L$, which sets the error. The first such algorithm ran the follow the regularized leader (FTRL) optimizer on sums noised through a binary tree, and is called DP-FTRL. That tree, the square-root factorization and the best known mechanisms are all choices of $L$ and $R$.
 
-The running example is the part's network from [DP-SGD](02-dp-sgd.md), with $d = 3{,}329$ weights, $n = 10{,}000$ records, clipping norm $C = 0.5$ and $\delta = 10^{-5}$. The fixed-order runs cut one public random permutation, drawn independently of the data, into 100 batches of 100, so each record takes part once per epoch, 100 steps apart. @tbl-mfac-symbols lists the symbols.
+The running example is the part's network from [DP-SGD](02-dp-sgd.md), with $d = 3{,}329$ weights, $n = 10{,}000$ records, clipping norm $C = 0.5$ and $\delta = 10^{-5}$. The fixed-order runs cut one public random permutation, drawn independently of the data, into 100 batches of 100. So each record takes part once per epoch, 100 steps apart. @tbl-mfac-symbols lists the symbols.
 
 | Symbol | Meaning |
 | --- | --- |
@@ -21,7 +21,7 @@ The running example is the part's network from [DP-SGD](02-dp-sgd.md), with $d =
 
 ## Training is a stream of prefix sums {#sec-mfac-prefix}
 
-What does a training run have to release, and what does privacy cost when nothing is sampled? The answer turns training into the private release of running sums, a classic problem with much better mechanisms than fresh noise on every step. The reason is that gradient descent adds up its steps. Write $B$ for the batch size and $\eta$ for the learning rate.
+What does a training run have to release, and what does privacy cost when nothing is sampled? Gradient descent adds up its steps, so training is the private release of running sums, a classic problem with much better mechanisms than fresh noise on every step. Write $B$ for the batch size and $\eta$ for the learning rate.
 
 ::: {#prp-mfac-prefix name="Training releases prefix sums"}
 Run gradient descent from $\theta_0$ with a constant learning rate $\eta$ and no momentum, $\theta_t = \theta_{t-1} - \frac\eta B\hat x_t$, where $\hat x_t$ is the possibly noisy clipped gradient sum of step $t$. Then
@@ -37,14 +37,14 @@ where the $x_t$ are stacked as the rows of the $T \times d$ matrix $x$, and row 
 3. *Post-processing.* Every model is a fixed function of the released prefix sums, and post-processing never weakens a guarantee (@thm-dpprop-post).
 :::
 
-Why release every prefix sum, and not only the last? Training is adaptive, since the gradient $x_t$ is computed at $\theta_{t-1}$, which depends on the earlier noisy prefix sums. So the intermediate models must be private too, and the workload is all $T$ rows of $A$, released one at a time as the stream arrives. With momentum or a learning-rate schedule the weights are still fixed linear combinations of the noisy gradients, with another lower-triangular matrix in place of $A$, which Denisov, McMahan, Rush, Smith & Thakurta (2022) factor too. This chapter keeps plain gradient descent.
+Why release every prefix sum, and not only the last? Training is adaptive, because the gradient $x_t$ is computed at $\theta_{t-1}$, which depends on the earlier noisy prefix sums. So the intermediate models must be private too, and the workload is all $T$ rows of $A$, released one at a time as the stream arrives. With momentum or a learning-rate schedule the weights are still fixed linear combinations of the noisy gradients, with another lower-triangular matrix in place of $A$, which Denisov, McMahan, Rush, Smith & Thakurta (2022) factor too. This chapter keeps plain gradient descent.
 
-Two facts from earlier chapters price every mechanism here. The first is about privacy. Release a matrix $f(D)$ plus independent normal noise of standard deviation $sC$ on every entry, and measure the change in $f$ between neighbours in the Frobenius norm, the length of the matrix read as one long vector. Then only the ratio $\mu$ of that change to $sC$ matters, and the release is $(\varepsilon, \delta)$-DP exactly when $\delta$ is at least the Gaussian privacy profile of @thm-lg-analytic at $\mu$. Such a release satisfies $\mu$-[Gaussian differential privacy](../part04-privacy-accounting/04-gaussian-dp.md#sec-gdp-gdp) (GDP). The profile grows with $\mu$, so each target allows a largest ratio $\mu(\varepsilon, \delta)$, and at $\delta = 10^{-5}$ these are $\mu(2, \delta) = 0.502$ and $\mu(8, \delta) = 1.666$.
+Two facts from earlier chapters price every mechanism here. The first is about privacy. Release a matrix $f(D)$ plus independent normal noise of standard deviation $sC$ on every entry. Measure the change in $f$ between neighbours in the Frobenius norm, the length of the matrix read as one long vector. Then only the ratio $\mu$ of that change to $sC$ matters. The release is $(\varepsilon, \delta)$-DP exactly when $\delta$ is at least the Gaussian privacy profile of @thm-lg-analytic at $\mu$, and it satisfies $\mu$-[Gaussian differential privacy](../part04-privacy-accounting/04-gaussian-dp.md#sec-gdp-gdp) (GDP). The profile grows with $\mu$, so each target allows a largest ratio $\mu(\varepsilon, \delta)$. At $\delta = 10^{-5}$ these are $\mu(2, \delta) = 0.502$ and $\mu(8, \delta) = 1.666$.
 
 The second fact is about error. A weighted sum of independent normals is normal, with variance the sum of the variances times the weights squared (@prp-dist-normal-sums). So if $z$ has independent entries of standard deviation $sC$ and $\ell$ is a fixed row vector, each coordinate of $\ell z$ is normal with variance
 $$s^2C^2\|\ell\|^2 = s^2C^2\sum_j\ell_j^2.$$ {#eq-mfac-linear}
 
-Neighbouring datasets $D \sim D'$ differ by adding or removing one record, whose slot in the public order is then empty in one stream. (Under replace-one neighbours, a contribution could change by $2C$, and every sensitivity would double.) The two obvious mechanisms put the noise at opposite ends, on each step's gradient sum or on each prefix sum.
+Neighbouring datasets $D \sim D'$ differ by one added or removed record, whose slot in the public order is then empty in one stream. Under replace-one neighbours, a contribution could change by $2C$, and every sensitivity would double. The two obvious mechanisms put the noise at opposite ends, on each step's gradient sum or on each prefix sum.
 
 ::: {#prp-mfac-naive name="The two naive mechanisms"}
 Let a record take part in one step $\tau$, fixed in advance, and add a vector of length at most $C$ to $x_\tau$. Then each of the following is $\mu$-GDP.
@@ -62,19 +62,19 @@ The plan is to find, for each mechanism, how far one record moves the noisy quan
 4. *Its error.* Each $\hat S_t$ carries one noise vector of that standard deviation.
 :::
 
-DP-SGD run in a fixed order without sampling is the first mechanism, so its model at step $t$ carries a random walk of $t$ noise vectors. Neither mechanism uses the structure of $A$, because the first ignores that the noise accumulates and the second that most of $S_t$ was already released in $S_{t-1}$.
+DP-SGD run in a fixed order without sampling is the first mechanism, so its model at step $t$ carries a random walk of $t$ noise vectors. Neither mechanism uses the structure of $A$. The first ignores that the noise accumulates, and the second ignores that most of $S_t$ was already released in $S_{t-1}$.
 
 ::: {#exm-mfac-one-epoch}
 Take one epoch, $T = 100$ steps, and normalize $\mu = 1$ and $C = 1$. Independent noise on each step gives the final prefix sum an error standard deviation of $\sqrt{100} = 10$. Averaged over the 100 prefix sums, its root-mean-square error is
 $$\sqrt{(1 + 2 + \dots + 100)/100} = \sqrt{50.5} = 7.11.$$
 Independent noise on each prefix sum has error 10 on every one.
 
-At $\varepsilon = 2$, $\mu = 0.502$, so the first mechanism needs a noise scale of $1/0.502 = 1.994$ per step, and its final prefix sum carries noise of standard deviation 19.94, both in units of $C$. DP-SGD with Poisson sampling at the same $\varepsilon$ needs only $\sigma = 0.827$, and its final prefix sum carries $0.827\sqrt{100} = 8.27$. Amplification buys a factor of 2.4 here, and correlated noise can beat even that without any sampling.
+At $\varepsilon = 2$, $\mu = 0.502$, so the first mechanism needs a noise scale of $1/0.502 = 1.994$ per step, and its final prefix sum carries noise of standard deviation 19.94, both in units of $C$. DP-SGD with Poisson sampling at the same $\varepsilon$ needs only $\sigma = 0.827$, and its final prefix sum carries $0.827\sqrt{100} = 8.27$. So amplification buys a factor of 2.4 here. @sec-mfac-run shows that correlated noise can beat even that without any sampling.
 :::
 
 ## The matrix mechanism {#sec-mfac-mechanism}
 
-The two naive mechanisms put the noise on the inputs or on the answers. The **matrix mechanism** of Li, Hay, Rastogi, Miklau & McGregor (2010) puts it in between, on a linear transformation of the inputs from which the answers can be recovered linearly. This section asks how private and how accurate such a release is, even on an adaptive stream, and how accurate any such release can be.
+The two naive mechanisms put the noise on the inputs or on the answers. The **matrix mechanism** of Li, Hay, Rastogi, Miklau & McGregor (2010) puts it in between, on a linear transformation of the inputs from which a linear map recovers the answers. How private and how accurate is such a release, even on an adaptive stream, and how accurate can any such release be?
 
 ::: {#def-mfac-mechanism name="Matrix mechanism"}
 A **factorization** of the prefix-sum matrix is a pair $A = LR$, with an **encoder** $R \in \mathbb R^{m \times T}$ and a **decoder** $L \in \mathbb R^{T \times m}$. Write $r_j$ for column $j$ of $R$ and $\ell_t$ for row $t$ of $L$. The matrix mechanism with noise scale $s$ releases
@@ -101,9 +101,9 @@ The plan is to compute how far one record moves the noisy encoding $Rx + z$, ext
 4. *Error.* The error is $\hat S_t - S_t = \ell_tz$, so @eq-mfac-linear gives standard deviation $sC\|\ell_t\|$. Substituting $s = \Delta_2 R/\mu$ from @eq-mfac-privacy gives @eq-mfac-error. Replacing $R$ by $cR$ and $L$ by $L/c$ multiplies $\Delta_2 R$ by $c$ and $\|\ell_t\|$ by $1/c$, so their product is unchanged.
 :::
 
-So privacy lives in the columns and error in the rows. Insisting on streaming factors costs nothing, because any factorization has a lower-triangular one with the same distribution of $\hat S$ (Denisov et al. 2022, Proposition 2.2), which @sec-apx-mat-streaming derives by Gram–Schmidt.
+So privacy lives in the columns and error in the rows. Streaming factors cost nothing, because any factorization has a lower-triangular one with the same distribution of $\hat S$ (Denisov et al. 2022, Proposition 2.2), which @sec-apx-mat-streaming derives by Gram–Schmidt.
 
-When $R$ is square and invertible, the mechanism is noisy SGD with correlated noise. Then $L = AR^{-1}$ and $\hat S = A(x + R^{-1}z)$, so the mechanism adds the noise $\zeta = R^{-1}z$ to the gradients and then sums. An implementation generates each $\zeta_t$ on the fly from the stored past noise.
+When $R$ is square and invertible, the mechanism is noisy SGD with correlated noise. Then $L = AR^{-1}$ and $\hat S = A(x + R^{-1}z)$, so the mechanism adds the noise $\zeta = R^{-1}z$ to the gradients and then sums. An implementation makes each $\zeta_t$ on the fly from the stored past noise.
 
 How small can the error be? The squared row lengths of $L$ add up to its squared Frobenius norm $\|L\|_F^2$, so the root-mean-square error over the $T$ prefix sums is
 $$\Big(\frac1T\sum_te_t^2\Big)^{1/2} = \frac{\Delta_2 R\,\|L\|_F}{\sqrt T}.$$
@@ -126,7 +126,7 @@ $$\operatorname{tr}(U^\top LR) \le \|L^\top U\|_F\,\|R\|_F.$$
 5. *The singular values.* The inverse $A^{-1}$ has 1 on the diagonal and $-1$ just below it. The eigenvalues of $(A^{-1})^\top A^{-1}$ are $4\sin^2\frac{(2k - 1)\pi}{4T + 2}$, because that product is the second-difference matrix with a 1 in its last diagonal entry, whose eigenvectors are sine waves; @sec-apx-mat-prefix derives them. The singular values of $A$ are the reciprocals of their square roots.
 :::
 
-Step 4 is tight only when all columns of $R$ are equally long, so unequal columns waste privacy on the short ones. The chapter's script (@sec-mfac-code) checks the closed form of the singular values against a numerical decomposition at $T = 256$, and they agree to $2.0 \times 10^{-13}$.
+Step 4 is tight only when all columns of $R$ are equally long, so unequal columns waste privacy on the short ones.
 
 ::: {#exm-mfac-gap}
 @tbl-mfac-single collects the error per unit of privacy for one participation. At $T = 100$ the naive mechanisms have root-mean-square errors 7.11 and 10, while @eq-mfac-lower says no factorization can go below 2.18. The other rows are derived in @sec-mfac-tree and @sec-mfac-sqrt.
@@ -142,12 +142,12 @@ Step 4 is tight only when all columns of $R$ are equally long, so unequal column
 
 : Error of each released prefix sum per unit of privacy ($\mu = 1$, $C = 1$), for one participation per record. The optimal factorization is normalized to columns of length 1 and was computed for $T \le 256$ only. {#tbl-mfac-single}
 
-Over a hundredfold longer run the independent-noise error grows tenfold, the tree's by a factor of 2 and the square root's by 1.6. At $T = 10{,}000$, independent noise is 18 times worse than the square root.
+Over a hundredfold longer run, the independent-noise error grows tenfold, the tree's by a factor of 2 and the square root's by 1.6. So at $T = 10{,}000$, independent noise is 18 times worse than the square root.
 :::
 
 ## Tree aggregation and DP-FTRL {#sec-mfac-tree}
 
-The first mechanism with error far below $\sqrt T$ was the **binary tree**, found independently by Dwork, Naor, Pitassi & Rothblum (2010) and by Chan, Shi & Song (2010) for counting events in a stream. Kairouz, McMahan, Song, Thakkar, Thakurta & Xu (2021) used it to release the prefix sums of gradients, with FTRL as the optimizer, and called the result **DP-FTRL**. This section asks how the tree works as a factorization and how good it is.
+The first mechanism with error far below $\sqrt T$ was the **binary tree**, which Dwork, Naor, Pitassi & Rothblum (2010) and Chan, Shi & Song (2010) found independently for counting events in a stream. Kairouz, McMahan, Song, Thakkar, Thakurta & Xu (2021) used it to release the prefix sums of gradients, with FTRL as the optimizer, and called the result **DP-FTRL**. How does the tree work as a factorization, and how good is it?
 
 ::: {#def-mfac-tree name="Binary tree mechanism"}
 Build a binary tree over the steps $1, \dots, T$. Level 0 has one node per step, and a node at level $l$ covers one of the blocks $1, \dots, 2^l$, then $2^l + 1, \dots, 2\cdot2^l$, and so on, of $2^l$ consecutive steps. There are $H = \lceil\log_2T\rceil + 1$ levels. The mechanism releases each node's sum of gradients plus independent noise, and estimates each prefix sum as
@@ -171,21 +171,21 @@ The plan is to check the decomposition, write the tree as an encoder and decoder
 5. *Streaming.* Each node can be released once its last step has arrived, and $\hat S_t$ uses only completed nodes. With the rows of $R$ ordered by completion time, the factors are streaming, so @thm-mfac-privacy applies to adaptive training.
 :::
 
-The tree sums at most $\log_2t + 1$ noise terms for the $t$-th prefix instead of $t$, each somewhat larger because every step is hidden in $H$ nodes. That trade is a large win for long runs but not for short ones: the tree first wins at $T = 28$.
+The tree sums at most $\log_2t + 1$ noise terms for the $t$-th prefix instead of $t$, but each is larger by the factor $\sqrt H$, because every step is hidden in $H$ nodes. That trade is a large win for long runs. For short runs $\sqrt H$ is not small next to $\sqrt t$, and the tree loses.
 
-The tree is not the end. Its error jumps around, since $t = 127 = 1111111_2$ uses seven nodes and $t = 128$ uses one (@fig-mfac-errors, left), and every step pays for being in top-level nodes that few prefixes use. Honaker (2015) combined all nodes with weights to reduce the variance, but that estimator uses nodes completed after step $t$, so it cannot be used during training. The square-root factorization of the next section has smaller error everywhere.
+The tree is not the end. Its error jumps around, because $t = 127 = 1111111_2$ uses seven nodes and $t = 128$ uses one (@fig-mfac-errors, left). Every step also pays for being in top-level nodes that few prefixes use. The square-root factorization of the next section has smaller error everywhere.
 
 ::: {#exm-mfac-tree}
 For $T = 100$ the tree has $H = 8$ levels, so $\Delta_2 R = \sqrt8 = 2.828$. The largest popcount up to 100 is 6, at $t = 63$, so the largest error per unit of privacy is $\sqrt8\sqrt6 = 6.93$. The root-mean-square error is 5.05 (@tbl-mfac-single). For $T = 10{,}000$ there are 15 levels and $\Delta_2 R = 3.873$. The maximum error is then 13.96 and the root-mean-square error 9.84, against 70.71 for independent noise.
 :::
 
-DP-FTRL runs FTRL, which by @eq-mfac-weights is gradient descent on noisy prefix sums, with the prefix sums released by the tree. Kairouz et al. (2021) also add momentum and restart the tree after a number of steps, and they report that DP-FTRL without amplification compares favourably with amplified DP-SGD. Xu et al. (2023) train production language models for the Gboard keyboard with it in federated learning, where devices cannot be Poisson-sampled.
+DP-FTRL runs FTRL, which by @eq-mfac-weights is gradient descent on noisy prefix sums, on the prefix sums that the tree releases. Kairouz et al. (2021) also add momentum and restart the tree after a number of steps. They report that DP-FTRL without amplification compares well with amplified DP-SGD. Xu et al. (2023) use it to train production language models for the Gboard keyboard in federated learning, where devices cannot be Poisson-sampled.
 
 ## The square-root factorization {#sec-mfac-sqrt}
 
-The tree has a tall, thin encoder and a sparse decoder. A symmetric choice is $L = R$, a matrix whose square is $A$. This section asks whether $A$ has a lower-triangular square root, what it looks like, and how close it comes to the best possible factorization.
+The tree has a tall, thin encoder and a sparse decoder. A symmetric choice is $L = R$, a matrix whose square is $A$. Does $A$ have a lower-triangular square root, what does it look like, and how close does it come to the best possible factorization?
 
-Power series find the square root. A lower-triangular **Toeplitz** matrix is constant along each diagonal, so it is fixed by its first column $(c_0, \dots, c_{T-1})$, identified with the series $c(u) = \sum_kc_ku^k$ in a formal variable $u$. The proof of the next theorem needs one fact, which turns a matrix equation into an equation between series.
+Power series find the square root. A lower-triangular **Toeplitz** matrix is constant along each diagonal, so its first column $(c_0, \dots, c_{T-1})$ fixes it. Identify that column with the series $c(u) = \sum_kc_ku^k$ in a formal variable $u$. The proof of the next theorem needs one fact, which turns a matrix equation into an equation between series.
 
 ::: {#lem-mfac-toeplitz name="Lower-triangular Toeplitz matrices multiply like power series"}
 The product of the lower-triangular Toeplitz matrices of two series $a(u)$ and $b(u)$ is the lower-triangular Toeplitz matrix of $a(u)b(u)$, truncated after $u^{T-1}$.
@@ -219,23 +219,23 @@ $$\sum_{k=1}^{T-1}\frac1{k + 1/4} \le \frac1{5/4} + \int_1^{T-1}\frac{\mathrm dv
 Multiplying both sums by $1/\pi$ and adding the $k = 0$ term, 1, gives @eq-mfac-sqrt-error.
 :::
 
-The noise added to step $t$'s gradient is $z_t - \frac12z_{t-1} - \frac18z_{t-2} - \dots$, fresh noise minus a decaying share of the noise already injected. Each step's noise is a little larger than independent noise, by the factor $\big(\sum_kh_k^2\big)^{1/2}$ at the same noise scale. The script sums 100,000 coefficients and finds $\sum_kh_k^2 = 1.2732 = 4/\pi$, so the factor tends to 1.128. But the negative coefficients pull the accumulated noise back toward zero, so the running sums no longer drift (@fig-mfac-noise-paths).
+The noise added to step $t$'s gradient is $z_t - \frac12z_{t-1} - \frac18z_{t-2} - \dots$, fresh noise minus a decaying share of the noise already added. At the same noise scale, each step's noise is a little larger than independent noise, by the factor $\big(\sum_kh_k^2\big)^{1/2}$. The script sums 100,000 coefficients and finds $\sum_kh_k^2 = 1.2732 = 4/\pi$, so the factor tends to 1.128. But the negative coefficients pull the accumulated noise back toward zero, so the running sums no longer drift (@fig-mfac-noise-paths).
 
-The square root is close to optimal. Against the lower bound of 2.18 at $T = 100$ and 3.63 at $T = 10{,}000$, its root-mean-square error is 2.37 and 3.84, within 9% and 6%, and @sec-apx-mat-prefix proves that the ratio tends to 1. Fichtenberger, Henzinger & Upadhyay (2023) and Henzinger, Upadhyay & Upadhyay (2023) bound its maximum and mean squared errors, and note that the factorization already appears in Bennett (1977). The closed form in Theorem 1 of the arXiv version of the first paper, $1 + \ln\frac{4T - 3}5/\pi$, omits the first term of the upper comparison in step 5, so it gives 2.392 against the true 2.531 at $T = 100$. A finer expansion, stated here without proof, gives $\sum_{k<T}c_k^2 \approx (\ln T + \gamma + 4\ln 2)/\pi$ with $\gamma$ Euler's constant, which is 2.532 at $T = 100$.
+The square root is close to optimal. Against the lower bound of 2.18 at $T = 100$ and 3.63 at $T = 10{,}000$, its root-mean-square error is 2.37 and 3.84, within 9% and 6%, and @sec-apx-mat-prefix proves that the ratio tends to 1. Fichtenberger, Henzinger & Upadhyay (2023) and Henzinger, Upadhyay & Upadhyay (2023) bound its maximum and mean squared errors. A finer expansion, which this chapter does not prove, gives $\sum_{k<T}c_k^2 \approx (\ln T + \gamma + 4\ln 2)/\pi$ with $\gamma$ Euler's constant, which is 2.532 at $T = 100$ against the exact 2.531.
 
-![Left: one coordinate of the noise added to each of the first 60 steps' gradients, independent (identity factorization) and square-root correlated, both calibrated to $\mu = 1$ for one participation. Right: the noise in the prefix sums over 1,000 steps, for independent noise, the binary tree and the square root, with bands of two standard deviations. Independent noise drifts like a random walk; the square root's stays within a narrow band.](figures/mfac_noise_paths.svg){#fig-mfac-noise-paths}
+![Left: one coordinate of the noise added to each of the first 60 steps' gradients, independent (identity factorization) and square-root correlated, both calibrated to $\mu = 1$ for one participation. Right: the noise in the prefix sums over 1,000 steps, for independent noise, the binary tree and the square root, with bands of two standard deviations. Independent noise drifts like a random walk, and the square root's stays within a narrow band.](figures/mfac_noise_paths.svg){#fig-mfac-noise-paths}
 
 ::: {#exm-mfac-sqrt}
 At $T = 4$ the coefficients are $c = (1, \frac12, \frac38, \frac5{16})$, so
 $$R = \begin{pmatrix}1 & & & \\ \frac12 & 1 & & \\ \frac38 & \frac12 & 1 & \\ \frac5{16} & \frac38 & \frac12 & 1\end{pmatrix}.$$
-Row 4 times column 1 of $R$ is $\frac5{16} + \frac38\cdot\frac12 + \frac12\cdot\frac38 + \frac5{16} = 1$, as $R^2 = A$ requires, and the script confirms $R^2 = A$ exactly. The first column has squared length
+Row 4 times column 1 of $R$ is $\frac5{16} + \frac38\cdot\frac12 + \frac12\cdot\frac38 + \frac5{16} = 1$, as $R^2 = A$ requires. The first column has squared length
 $$1 + \frac14 + \frac9{64} + \frac{25}{256} = \frac{381}{256} = 1.488,$$
 so $\Delta_2 R = 1.220$, and the last prefix sum has error 1.488 per unit of privacy, against $\sqrt4 = 2$ for independent noise. At $T = 100$ the same computation gives $\sum_kc_k^2 = 2.531$, so $\Delta_2 R = 1.591$. The final prefix sum's error is then 2.53, a quarter of independent noise's 10.
 :::
 
 ### The optimal factorization
 
-How much better than the square root can any factorization do? By scale invariance the best encoder may have columns of length at most 1, and it then minimizes $\|L\|_F$. Write $X = R^\top R$ for the inner products of the columns of $R$. For a given $X$ the best decoder, the least-squares solution of $LR = A$, gives $\|L\|_F^2 = \operatorname{tr}(A^\top AX^{-1})$, which is convex in $X$.
+How much better than the square root can any factorization do? By scale invariance the best encoder can have columns of length at most 1, and it then minimizes $\|L\|_F$. Write $X = R^\top R$ for the inner products of the columns of $R$. For a given $X$ the best decoder, the least-squares solution of $LR = A$, gives $\|L\|_F^2 = \operatorname{tr}(A^\top AX^{-1})$, which is convex in $X$.
 
 ::: {#thm-mfac-optimal name="The optimal factorization"}
 The problem of minimizing $\operatorname{tr}(A^\top AX^{-1})$ over positive definite $X$ with diagonal at most 1 has the solution
@@ -244,17 +244,17 @@ where $V$ is the diagonal matrix of a positive vector $v$ that is a fixed point 
 :::
 <!-- proof: cited -->
 
-The proof is Denisov et al. (2022, Theorem 3.2), who iterate the fixed-point map to find $v$, and @sec-apx-mat-frobenius in the appendices gives it in full. A lower-triangular $R$ with $R^\top R = X$ comes from a Cholesky factorization of $X$ with rows and columns reversed.
+The proof is Denisov et al. (2022, Theorem 3.2), who iterate the fixed-point map to find $v$, and @sec-apx-mat-frobenius in the appendices gives it in full. A lower-triangular $R$ with $R^\top R = X$ comes from a Cholesky factorization of $X$ with rows and columns reversed (Denisov et al. 2022).
 
 The script's iteration converges in 155 steps at $T = 100$, to a root-mean-square error of 2.24 against 2.37 for the square root, and in 193 steps at $T = 256$, to 2.52 against 2.67. Each iteration costs cubic time, so the square root, free and nearly as good, is the usual default for long runs. @fig-mfac-errors shows the errors across one run and against the horizon, and @fig-mfac-matrices shows that the square root and the optimal factors look alike at $T = 16$.
 
-![Left: standard deviation of the error of each released prefix sum $S_t$ for $T = 256$, one participation, at $\mu = 1$ and $C = 1$, for five factorizations. Right: the root-mean-square error over a run against its length $T$, with the trace-norm lower bound of @eq-mfac-lower dotted; the optimal factorization is computed up to $T = 256$.](figures/mfac_errors.svg){#fig-mfac-errors}
+![Left: standard deviation of the error of each released prefix sum $S_t$ for $T = 256$, one participation, at $\mu = 1$ and $C = 1$, for five factorizations. Right: the root-mean-square error over a run against its length $T$, with the trace-norm lower bound of @eq-mfac-lower dotted. The optimal factorization is computed up to $T = 256$.](figures/mfac_errors.svg){#fig-mfac-errors}
 
-![The encoder $R$ (top) and decoder $L$ (bottom) of three factorizations of the $16 \times 16$ prefix-sum matrix. The tree's encoder has one row per node (31 rows), and its decoder picks the nodes of each prefix. The square root uses the same matrix for both; the optimal factorization's encoder has columns of length exactly 1.](figures/mfac_matrices.svg){#fig-mfac-matrices}
+![The encoder $R$ (top) and decoder $L$ (bottom) of three factorizations of the $16 \times 16$ prefix-sum matrix. The tree's encoder has one row per node (31 rows), and its decoder picks the nodes of each prefix. The square root uses the same matrix for both, and the optimal factorization's encoder has columns of length exactly 1.](figures/mfac_matrices.svg){#fig-mfac-matrices}
 
 ## Several participations {#sec-mfac-epochs}
 
-So far each record took part in one step. Training usually makes several passes, and then a record's gradient enters $x$ at several steps, each time through a different column of $R$. This section asks how large the sensitivity is then, and how the factorization should change to keep it small. The answer depends on which steps a record can occupy and on how the columns of $R$ overlap.
+So far each record took part in one step. Training usually makes several passes, and then a record's gradient enters $x$ at several steps, each time through a different column of $R$. How large is the sensitivity then, and how should the factorization change to keep it small? The answer depends on which steps a record can occupy and on how the columns of $R$ overlap.
 
 ::: {#def-mfac-banded name="Participation pattern, separation and band"}
 A record's **participation pattern** is the set of steps $\tau_1 < \dots < \tau_k$ at which it contributes, with vectors $g_1, \dots, g_k$ of length at most $C$, possibly chosen adaptively. The pattern has **$b$-min-separation** if any two participations are at least $b$ steps apart. A lower-triangular encoder is **$b$-banded** if its nonzero entries lie on the main diagonal and the $b - 1$ diagonals below it, that is $R_{ij} = 0$ whenever $i - j \ge b$.
@@ -273,14 +273,14 @@ The plan is to expand the squared norm of the change into inner products, find t
 1. *The change in $Rx$.* Row $\tau_i$ of $x$ changes by $g_i$, so $Rx$ changes by $\sum_ir_{\tau_i}g_i^\top$, a sum of the column-times-row products of @thm-mfac-privacy.
 2. *Expand the norm.* The Frobenius inner product of two such products, $ab^\top$ and $a'b'^\top$, is $(a\cdot a')(b\cdot b')$. So
 $$\Big\|\sum_ir_{\tau_i}g_i^\top\Big\|_F^2 = \sum_{i,j}(r_{\tau_i}\cdot r_{\tau_j})(g_i\cdot g_j).$$
-3. *The worst contributions.* Each $g_i\cdot g_j$ lies in $[-C^2, C^2]$. The entries of $R^\top R$ are the inner products of columns, so if they are nonnegative, the sum is largest when every $g_i\cdot g_j = C^2$, that is when all $g_i$ are the same vector of length $C$. The sum is then $C^2\|\sum_ir_{\tau_i}\|^2$. The condition holds for the identity, the tree and the square root, because their $R$ has nonnegative entries. Adaptive choices of the $g_i$ cannot exceed this supremum, and Denisov et al. (2022, Theorem 2.1) state their adaptive result for exactly this sensitivity, and @sec-apx-mat-streaming in the appendices proves it for Gaussian noise and a lower-triangular $R$.
+3. *The worst contributions.* Each $g_i\cdot g_j$ lies in $[-C^2, C^2]$. The entries of $R^\top R$ are the inner products of columns, so if they are nonnegative, the sum is largest when every $g_i\cdot g_j = C^2$, that is when all $g_i$ are the same vector of length $C$. The sum is then $C^2\|\sum_ir_{\tau_i}\|^2$. The condition holds for the identity, the tree and the square root, because their $R$ has nonnegative entries. Adaptive choices of the $g_i$ cannot exceed this supremum. Denisov et al. (2022, Theorem 2.1) state their adaptive result for exactly this sensitivity, and @sec-apx-mat-streaming in the appendices proves it for Gaussian noise and a lower-triangular $R$.
 4. *Independent noise.* The columns of $I$ are orthonormal, so the squared length of a sum of $k$ of them is $k$.
 5. *Banded encoders.* Column $\tau$ of a $b$-banded $R$ is nonzero only in rows $\tau, \dots, \tau + b - 1$. Participations at least $b$ apart have columns with disjoint supports, so the cross terms of step 2 vanish whatever the $g_i$, leaving $\sum_i\|r_{\tau_i}\|^2\|g_i\|^2$.
 :::
 
-Correlated noise makes repeated participation more expensive. Under independent noise, $k$ participations cost $\sqrt k$, as Gaussian composition says. Under the square root, the columns of nearby steps overlap and point in similar directions, so a record's contributions pile up and the sensitivity grows faster than $\sqrt k$. Under the tree it is worse still, because a top node holds several participations of the same record. For the optimal factorization @eq-mfac-multi applies only if $X$ has no negative entries. Banding restores $\sqrt k$ by cutting the square root's encoder to its first $b$ diagonals, which removes the overlaps. Its decoder $L = AR^{-1}$ is less accurate for one participation, but with many the saving in sensitivity dominates. Choquette-Choo and coauthors (2023) optimize factorizations under a participation constraint and add amplification to banded ones.
+Correlated noise makes repeated participation more expensive. Under independent noise, $k$ participations cost $\sqrt k$, as Gaussian composition says. Under the square root, the columns of nearby steps overlap and point in similar directions. So a record's contributions pile up, and the sensitivity grows faster than $\sqrt k$. Under the tree it is worse still, because a top node holds several participations of the same record. For the optimal factorization, @eq-mfac-multi applies only if $X$ has no negative entries. Banding restores $\sqrt k$: it cuts the square root's encoder to its first $b$ diagonals, which removes the overlaps. Its decoder $L = AR^{-1}$ is less accurate for one participation, but with many the saving in sensitivity is larger. Choquette-Choo and coauthors (2023) optimize factorizations under a participation constraint, and add amplification to banded ones.
 
-So the data order is part of the mechanism. A fixed permutation repeated every epoch guarantees a separation of exactly $n/B$ steps, while reshuffling every epoch can put a record one step apart across an epoch boundary, which breaks the banded bound. The order must be fixed independently of the data, but it need not be random.
+So the data order is part of the mechanism. A fixed permutation repeated every epoch guarantees a separation of exactly $n/B$ steps. A new shuffle every epoch can put a record's two participations one step apart across an epoch boundary, which breaks the banded bound. The order must be fixed independently of the data, but it need not be random.
 
 ::: {#exm-mfac-epochs}
 @tbl-mfac-epochs takes the running example's order, with separation $b = 100$, so over $E$ epochs every record takes part $E$ times. The banded encoder keeps the first 100 coefficients of the square root. Each cell gives the sensitivity and then $e_T$ of @eq-mfac-error with that sensitivity.
@@ -295,12 +295,12 @@ So the data order is part of the mechanism. A fixed permutation repeated every e
 
 : Sensitivity (in units of $C$) and error of the final prefix sum per unit of privacy, for $E$ participations 100 steps apart, $T = 100E$. {#tbl-mfac-epochs}
 
-The banded sensitivity at 20 epochs is $\sqrt{20}\times1.591 = 7.115$, as step 5 of the proof of @thm-mfac-multi predicts. The full square root's is 17.191, more than twice as large, because its long columns overlap. Yet the final errors are close, 29.85 against 32.09, because the banded decoder is less accurate. Both are between a sixth and a seventh of independent noise's 200.
+The banded sensitivity at 20 epochs is $\sqrt{20}\times1.591 = 7.115$, as step 5 of the proof of @thm-mfac-multi predicts. The full square root's is 17.191, more than twice as large, because its long columns overlap. But the final errors are close, 29.85 against 32.09, because the banded decoder is less accurate. Both are between a sixth and a seventh of independent noise's 200.
 :::
 
 ## The running example: matrix mechanisms against DP-SGD {#sec-mfac-run}
 
-The previous sections compared mechanisms by the error in released sums. This section asks whether that ranking carries over to trained networks, and how mechanisms without sampling compare with DP-SGD with sampling at the same $\varepsilon$. The comparison needs one number per method computed before training, the noise its final model carries.
+The previous sections compared mechanisms by the error in released sums. Does that ranking carry over to trained networks, and how do mechanisms without sampling compare with DP-SGD with sampling at the same $\varepsilon$? The comparison needs one number per method, computed before training: the noise its final model carries.
 
 ::: {#prp-mfac-noise name="Noise at equal privacy"}
 Fix a target $(\varepsilon, \delta)$ and $E$ participations 100 steps apart, so $T = 100E$. A fixed-order mechanism with encoder $R$ and the multi-epoch sensitivity $\Delta_2 R$ of @thm-mfac-multi needs the noise scale
@@ -314,7 +314,7 @@ and its final prefix sum carries noise of standard deviation $s\|\ell_T\|$ per c
 3. *DP-SGD.* Its final prefix sum is a sum of $T$ independent noise vectors of standard deviation $\sigma$ in units of $C$, so by @eq-mfac-linear it carries $\sigma\sqrt T$.
 :::
 
-For DP-SGD, the Rényi differential privacy (RDP) accountant of [DP-SGD](02-dp-sgd.md) finds the smallest $\sigma$ for $q = 0.01$, $T$ steps and the target $\varepsilon$. Training then runs @eq-mfac-weights with each factorization's noise added to the gradients. For the square-root and banded encoders that noise is $R^{-1}z$, a convolution in time, and for the tree it is the difference of consecutive tree estimates.
+For DP-SGD, the Rényi differential privacy (RDP) accountant of [DP-SGD](02-dp-sgd.md) finds the smallest $\sigma$ for $q = 0.01$, $T$ steps and the target $\varepsilon$. Training then runs @eq-mfac-weights with each factorization's noise added to the gradients. For the square-root and banded encoders that noise is $R^{-1}z$, a convolution in time. For the tree it is the difference of consecutive tree estimates.
 
 ::: {#exm-mfac-run}
 @tbl-mfac-noise gives the noise each method needs for $\varepsilon = 2$ and 8 at $\delta = 10^{-5}$, and the noise its final prefix sum carries. @tbl-mfac-run gives the test accuracy at the better of two learning rates, 0.5 and 2, averaged over three runs.
@@ -328,7 +328,7 @@ For DP-SGD, the Rényi differential privacy (RDP) accountant of [DP-SGD](02-dp-s
 | 8, 5 | 0.573 | 1.342 | 5.369 | 3.049 | 2.135 | 12.81 / 30.01 / 13.15 / 5.32 / 5.14 |
 | 8, 10 | 0.616 | 1.898 | 9.716 | 5.495 | 3.020 | 19.48 / 60.02 / 23.80 / 9.93 / 9.42 |
 
-: Noise needed by each method at equal $\varepsilon$ ($\delta = 10^{-5}$, 100 steps per epoch) and the resulting noise in the final prefix sum, all in units of $C$. DP-SGD uses Poisson sampling with $q = 0.01$ and the RDP accountant; the others use a fixed order and exact Gaussian accounting. {#tbl-mfac-noise}
+: Noise needed by each method at equal $\varepsilon$ ($\delta = 10^{-5}$, 100 steps per epoch) and the resulting noise in the final prefix sum, all in units of $C$. DP-SGD uses Poisson sampling with $q = 0.01$ and the RDP accountant, and the others use a fixed order and exact Gaussian accounting. {#tbl-mfac-noise}
 
 | $\varepsilon$, epochs | DP-SGD (Poisson) | Independent | Tree | Square root | Banded square root |
 | --- | --- | --- | --- | --- | --- |
@@ -341,20 +341,20 @@ For DP-SGD, the Rényi differential privacy (RDP) accountant of [DP-SGD](02-dp-s
 
 : Test accuracy (mean ± standard deviation over three runs) at equal $\varepsilon$, $\delta = 10^{-5}$, batch 100, clipping norm 0.5, best of learning rates 0.5 and 2. Without noise, fixed-order training with clipping reaches 0.9420, 0.9580 and 0.9606 after 1, 5 and 10 epochs. {#tbl-mfac-run}
 
-At $\varepsilon = 2$, fixed-order SGD with independent noise loses 2.8 points to DP-SGD after one epoch and 8.5 points after ten. It gets worse with more epochs, because its noise scale grows like $\sqrt E$, from 1.994 to 6.305. The tree recovers between a quarter and a half of the gap, and the square-root encoders nearly all of it. At ten epochs the banded encoder reaches 0.9491, within 0.0002 of DP-SGD.
+At $\varepsilon = 2$, fixed-order SGD with independent noise loses 2.8 points to DP-SGD after one epoch and 8.5 points after ten. It gets worse with more epochs because its noise scale grows like $\sqrt E$, from 1.994 to 6.305. The tree recovers between a quarter and a half of the gap, and the square-root encoders nearly all of it. At ten epochs the banded encoder reaches 0.9491, within 0.0002 of DP-SGD.
 :::
 
-Matrix mechanisms can even beat amplified DP-SGD for short runs at large $\varepsilon$, where amplification gains little. At $\varepsilon = 8$ and one epoch, the square root's final prefix sum carries 1.52 against DP-SGD's 5.01, and it wins outright. DP-SGD keeps its lead at small $\varepsilon$ over many epochs, where its noise multiplier grows only from 0.827 to 1.03 while every fixed-order mechanism pays for ten participations, and only banding keeps up. In every row, the method with the least final-prefix noise is the most accurate or within the run-to-run spread of it.
+Matrix mechanisms can even beat amplified DP-SGD for short runs at large $\varepsilon$, where amplification gains little. At $\varepsilon = 8$ and one epoch, the square root's final prefix sum carries 1.52 against DP-SGD's 5.01, and it wins outright. DP-SGD keeps its lead at small $\varepsilon$ over many epochs. There its noise multiplier grows only from 0.827 to 1.03, while every fixed-order mechanism pays for ten participations, and only banding keeps up. In every row, the method with the least final-prefix noise is the most accurate, or within the run-to-run spread of it.
 
-The comparison is slightly tilted toward the fixed-order methods. DP-SGD is accounted with the RDP accountant, which overstates $\varepsilon$ and so gives it more noise than it needs ([Choosing an accountant](../part04-privacy-accounting/09-choosing-an-accountant.md)), while the others use the exact Gaussian curve. Choosing the learning rate by test accuracy is itself a leak ([Hyperparameter tuning](03-hyperparameter-tuning.md)), used here only to compare methods at their best. The runs are short, but the gaps of @tbl-mfac-epochs widen with more epochs. @fig-mfac-accuracy shows the same pattern across budgets at five epochs.
+The comparison is slightly tilted toward the fixed-order methods. DP-SGD uses the RDP accountant, which overstates $\varepsilon$ and so gives it more noise than it needs ([Choosing an accountant](../part04-privacy-accounting/09-choosing-an-accountant.md)), while the others use the exact Gaussian curve. A learning rate chosen by test accuracy is itself a leak ([Hyperparameter tuning](03-hyperparameter-tuning.md)), and this experiment does it only to compare methods at their best. The runs are short, but the gaps of @tbl-mfac-epochs widen with more epochs. @fig-mfac-accuracy shows the same pattern across budgets at five epochs.
 
-![Test accuracy of the running example after 5 epochs (500 steps of batch 100) at learning rate 1, against $\varepsilon$ at $\delta = 10^{-5}$, one run per point. DP-SGD uses Poisson sampling; the other four use a fixed data order and differ only in how their noise is correlated.](figures/mfac_accuracy.svg){#fig-mfac-accuracy}
+![Test accuracy of the running example after 5 epochs (500 steps of batch 100) at learning rate 1, against $\varepsilon$ at $\delta = 10^{-5}$, one run per point. DP-SGD uses Poisson sampling, and the other four use a fixed data order and differ only in how their noise is correlated.](figures/mfac_accuracy.svg){#fig-mfac-accuracy}
 
-A federated server cannot sample devices with a known rate, but if it can ensure that a device contributes at most once every $b$ rounds, the banded matrix mechanism gives a provable guarantee, and at the running example's scale it is as accurate as DP-SGD with sampling would be. The privacy unit there is a user, which [User-level differential privacy](07-user-level.md) treats.
+A federated server cannot sample devices with a known rate. But if it can make sure that a device contributes at most once every $b$ rounds, the banded matrix mechanism gives a provable guarantee. At the running example's scale it is as accurate as DP-SGD with sampling would be. The privacy unit there is a user, which [User-level differential privacy](07-user-level.md) treats.
 
 ## Code {#sec-mfac-code}
 
-The script [code/matrix_mechanisms.py](../../code/part05-dp-ml/matrix_mechanisms.py) builds the identity, prefix, tree, square-root and optimal factorizations and computes their sensitivities and errors. Its structured formulas agree with dense matrices at $T = 256$ to a relative difference of $3.3 \times 10^{-16}$. It also computes multi-epoch sensitivities and trains the running example with each mechanism's noise, against DP-SGD from [code/dp_sgd.py](../../code/part05-dp-ml/dp_sgd.py). From the repository root:
+The script [code/matrix_mechanisms.py](../../code/part05-dp-ml/matrix_mechanisms.py) builds the identity, prefix, tree, square-root and optimal factorizations and computes their sensitivities and errors. Its structured formulas agree with dense matrices at $T = 256$ to a relative difference of $3.3 \times 10^{-16}$. It also computes multi-epoch sensitivities, and trains the running example with each mechanism's noise, against DP-SGD from [code/dp_sgd.py](../../code/part05-dp-ml/dp_sgd.py). From the repository root:
 
 ```bash
 uv run python code/part05-dp-ml/matrix_mechanisms.py
@@ -394,10 +394,9 @@ uv run python code/part05-dp-ml/matrix_mechanisms.py
 
 - Dwork, Naor, Pitassi & Rothblum, "Differential Privacy Under Continual Observation" (STOC 2010), and Chan, Shi & Song, "Private and Continual Release of Statistics" (ACM Transactions on Information and System Security, 2011; conference version 2010). The binary tree for private running counts.
 - Li, Hay, Rastogi, Miklau & McGregor, "Optimizing Linear Counting Queries Under Differential Privacy" (PODS 2010); journal version Li, Miklau, Hay, McGregor & Rastogi, "The Matrix Mechanism" (VLDB Journal 2015). Factoring a query workload to choose where noise goes.
-- Kairouz, McMahan, Song, Thakkar, Thakurta & Xu, "Practical and Private (Deep) Learning without Sampling or Shuffling" (ICML 2021). DP-FTRL with tree aggregation; the comparison with amplified DP-SGD.
+- Kairouz, McMahan, Song, Thakkar, Thakurta & Xu, "Practical and Private (Deep) Learning without Sampling or Shuffling" (ICML 2021). DP-FTRL with tree aggregation, and its comparison with amplified DP-SGD.
 - Denisov, McMahan, Rush, Smith & Thakurta, "Improved Differential Privacy for SGD via Optimal Private Linear Operators on Adaptive Streams" (NeurIPS 2022). The matrix mechanism for adaptive streams (Theorem 2.1), lower-triangular factorizations, and the fixed point for the optimal factorization.
 - Fichtenberger, Henzinger & Upadhyay, "Constant Matters: Fine-grained Error Bound on Differentially Private Continual Observation" (ICML 2023), and Henzinger, Upadhyay & Upadhyay, "Almost Tight Error Bounds on Differentially Private Continual Counting" (SODA 2023). The square-root factorization and how close it is to optimal, for the maximum and the mean squared error.
 - Choquette-Choo, McMahan, Rush & Thakurta, "Multi-Epoch Matrix Factorization Mechanisms for Private Machine Learning" (ICML 2023). Sensitivity under several participations and factorizations optimized for it.
 - Choquette-Choo, Ganesh, McKenna, McMahan, Rush, Thakurta & Xu, "(Amplified) Banded Matrix Factorizations: A Unified Approach to Private Training" (NeurIPS 2023). Banded encoders, min-separation, and amplification for matrix mechanisms.
-- Honaker, "Efficient Use of Differentially Private Binary Trees" (2015). The variance-optimal, but not streaming, estimator from a tree.
 - Xu, Zhang, Andrew, Choquette-Choo, Kairouz, McMahan, Rosenstock & Zhang, "Federated Learning of Gboard Language Models with Differential Privacy" (ACL 2023, industry track). DP-FTRL in a production federated system.
