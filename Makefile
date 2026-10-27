@@ -1,9 +1,8 @@
 # Common tasks. Everything runs through uv, so `make setup` is the only install step.
 # Run `make` or `make help` for the list.
 #
-# The repository holds five Quarto books, which share code/, filters/, terms.toml and _common.yml:
+# The repository holds four Quarto books, which share code/, filters/, terms.toml and _common.yml:
 #   book-full/          the full edition, with every derivation (website and PDF)
-#   book-exercises/     the full edition's exercises with worked solutions (website only)
 #   book-practitioner/  the practitioner edition, without proofs (website and PDF)
 #   book-course/        the course: differential privacy one topic per chapter, every proof (website and PDF)
 #   book-opendp/        the OpenDP book: the library from its first release to synthetic data (website and PDF)
@@ -12,7 +11,7 @@
 
 OUT       := _book
 BUILD     := _build
-BOOKS     := book-full book-exercises book-practitioner book-course book-opendp
+BOOKS     := book-full book-practitioner book-course book-opendp
 NOTE_DIRS := $(patsubst %/,%,$(wildcard notes/*/))
 # The chapter scripts that draw figures. The practitioner workflows (practitioner_*.py) and the OpenDP book's
 # scripts (opendp_*.py) are slow, need the datasets in data/ and draw no figures, so their tests run them instead
@@ -40,7 +39,7 @@ TEX_PKGS  := svg imakeidx makeindex trimspaces catchfile transparent caption kom
              newcomputermodern dejavu
 
 .DEFAULT_GOAL := help
-.PHONY: help setup hooks tex-deps datasets test-fast figures figures-force full full-pdf exercises practitioner practitioner-pdf course course-pdf opendp opendp-pdf \
+.PHONY: help setup hooks tex-deps datasets test-fast figures figures-force full full-pdf practitioner practitioner-pdf course course-pdf opendp opendp-pdf \
         website pdf book notes note preview publish terms-check acronyms index-candidates prose ste prose-check notation notation-check \
         structure structure-check format test typecheck check all clean
 
@@ -147,18 +146,7 @@ course-pdf: ## Build the course's PDF
 opendp: ## Build the OpenDP book's website into _book/book-opendp/
 opendp-pdf: ## Build the OpenDP book's PDF
 
-# The exercise book cross-references the full edition's equations, so it needs the rendered full
-# edition: tools/xrefs.py reads its labels and numbers into _xrefs.json for filters/xrefs.lua.
-exercises: full ## Build the exercise book's website into _book/book-exercises/ (builds the full edition first)
-	$(call STAGE,book-exercises,exercises-website)
-	@uv run python tools/xrefs.py --site $(OUT)/book-full --book book-full \
-	  --skip-defined-in $(BUILD)/exercises-website --out $(BUILD)/exercises-website/_xrefs.json
-	$(call RENDER,exercises-website,html)
-	@mkdir -p $(OUT)/book-exercises
-	@rsync -a --delete $(BUILD)/exercises-website/_book/ $(OUT)/book-exercises/
-	@echo "Website: $(OUT)/book-exercises/index.html"
-
-website: full exercises practitioner course opendp ## Build every website into _book/
+website: full practitioner course opendp ## Build every website into _book/
 
 pdf: full-pdf practitioner-pdf course-pdf opendp-pdf ## Build every PDF into _book/
 
