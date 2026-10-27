@@ -50,6 +50,7 @@ The **backward signals** are the rates at which the loss changes with each hidde
 :::
 
 The activation $\sigma$ is either the ReLU $\max(a, 0)$, which passes positive values and replaces negative ones by 0, or the sigmoid $1/(1 + e^{-a})$, which squashes every value smoothly into $(0, 1)$.
+
 ::: {#exm-gradinv-images}
 The client's inputs are synthetic $8\times8$ grey-scale images, so $d = 64$. Each shows one of $K = 4$ shapes (a horizontal bar, a vertical bar, a diagonal and a square outline), shifted at random and with pixel noise. The network has $m = 32$ hidden units and is at its random initialization, as in the first round of training. The first layer has $64\cdot32$ weights and 32 biases, and the second has $32\cdot4$ weights and 4 biases, so the network has
 $$64\cdot32 + 32 + 32\cdot4 + 4 = 2{,}212$$

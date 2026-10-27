@@ -9,6 +9,7 @@ The running example is the hospital with $n = 500$ patients and an attacker who 
 ## Subset sums and the exponential attack {#sec-recon-exponential}
 
 Consider first the strongest attacker, who may ask every possible counting question. How large must the error be before even this attacker cannot pin the bits down?
+
 ::: {#def-recon-subset-sum name="Subset-sum queries and the curator"}
 The secret database is a bit vector $d = (d_1, \dots, d_n) \in \{0, 1\}^n$, one bit per person. A **subset-sum query** is a set $S \subseteq \{1, \dots, n\}$ of people, written as its indicator vector $f$, with $f_i = 1$ when person $i$ is in $S$. Its true answer is
 $$\sum_{i \in S}d_i = \langle f, d\rangle.$$
