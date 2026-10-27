@@ -72,6 +72,11 @@ def gaussian_s_for(eps: float, delta: float) -> float:
     return solve_increasing(lambda s: gaussian_delta(eps, s), delta)
 
 
+def gaussian_epsilon(s: float, delta: float) -> float:
+    """The smallest ε at which a Gaussian mechanism with ratio s is (ε, δ)-DP exactly (δ(ε) decreases with ε)."""
+    return solve_increasing(lambda e: -gaussian_delta(e, s), -delta, lo=0.0, hi=50.0)
+
+
 def advanced_epsilon(eps0: float, k: int, delta_prime: float) -> float:
     """Advanced composition of k (ε₀, δ₀)-DP mechanisms, as Dwork and Roth state it: ε₀√(2k ln(1/δ')) + kε₀(e^ε₀ - 1)."""
     return eps0 * math.sqrt(2.0 * k * log_inv(delta_prime)) + k * eps0 * math.expm1(eps0)
@@ -142,6 +147,23 @@ def gauss_concentrated(k: int) -> float:
 def gauss_exact(k: int) -> float:
     """Gaussian noise accounted exactly: k counts with noise σ are one Gaussian mechanism with s = √k/σ. Returns σ."""
     return math.sqrt(k) / gaussian_s_for(EPS, DELTA)
+
+
+def normalized_rows(k: int) -> list[tuple[str, float, float, float, float]]:
+    """For each accounting of k counts that meets the reference: the guarantee of one count in the reference's unit,
+    (ε₀, δ₀) with δ₀ = δ/k unless the count needs no δ, and the total that basic composition of those per-count
+    guarantees gives, (kε₀, kδ₀). The definition's own composition gives the reference itself, (1, 10⁻⁶)."""
+    delta0 = DELTA / k
+    rho0 = zcdp_rho_for(EPS, DELTA) / k
+    rows: list[tuple[str, float, float]] = [
+        ("Laplace, pure DP", pure_basic(k)[0], 0.0),
+        ("Laplace, zCDP", laplace_zcdp(k)[0], 0.0),
+        ("Gaussian, basic", EPS / k, delta0),
+        ("Gaussian, advanced", gauss_advanced(k)[1], gauss_advanced(k)[2]),
+        ("Gaussian, CDP or zCDP", zcdp_epsilon(rho0, delta0), delta0),
+        ("Gaussian, exact", gaussian_epsilon(1.0 / gauss_exact(k), delta0), delta0),
+    ]
+    return [(name, e0, d0, k * e0, k * d0) for name, e0, d0 in rows]
 
 
 def first_k_below(fn: Callable[[int], float], other: Callable[[int], float], k_max: int = 1000) -> int:
@@ -263,6 +285,10 @@ def print_table() -> None:
     adv: Callable[[int], float] = lambda k: gauss_advanced(k, grid=49)[3]
     print(f"  Gaussian advanced < Gaussian basic: k={first_k_below(adv, lambda k: gauss_basic(k)[1])}")
     print(f"  Gaussian advanced < Laplace basic: k={first_k_below(adv, basic_sd)}")
+
+    print(f"\nnormalized per count (k={K}) and basic composition of the per-count guarantees")
+    for name, e0, d0, et, dt in normalized_rows(K):
+        print(f"  {name}: eps0={e0:.5f} delta0={d0:.2e} -> total eps={et:.3f} delta={dt:.2e}")
 
     print("\nnoise sd per query for (1, 1e-6)")
     print("  k     pure-basic  lap-zCDP  gauss-basic  gauss-adv  gauss-zCDP  gauss-exact")

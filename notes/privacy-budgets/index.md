@@ -84,7 +84,7 @@ A budget written in one definition's unit says nothing to someone who uses anoth
 
 The value of $\delta$ follows a common rule: at most $1/n^{1.1}$ for $n$ people, rounded down to a power of ten. @sec-approx explains why $\delta$ must be smaller than $1/n$, and the exponent 1.1 makes it smaller by a factor that grows with $n$. For $n = 100{,}000$ people, $n^{1.1} = 10^{5.5}$, so $1/n^{1.1}$ is about $3.2 \times 10^{-6}$, which rounds down to $\delta = 10^{-6}$, ten times below $1/n$. The value $\varepsilon = 1$ is a common, moderate choice, and any other value would serve for the comparison. With it, the **reference** for the whole release is approximate DP with $(\varepsilon, \delta) = (1, 10^{-6})$.
 
-Budgeting under any definition then takes three steps. First, find the budget in the definition's own unit that converts to the reference. Second, split it across the queries with the definition's composition rule. Third, turn each query's share into a noise scale with the definition's mechanism.
+Budgeting under any definition then takes three steps. First, find the budget in the definition's own unit that converts to the reference. Second, split it across the queries with the definition's composition rule. Third, turn each query's share into a noise scale with the definition's mechanism. The second step is where the definitions differ most, so each Composition subsection does two things. It composes every parameter of its definition, not only $\varepsilon$. Then it states what $k$ equal steps give in the reference's unit, as a pair $(\varepsilon, \delta)$, so that the four composition rules can be compared on one scale.
 
 Each of the next four sections follows the same plan, under the same headings: why the definition was introduced, its definition, its mechanism, composition, budgeting to the reference, and its limits. The main text states every result and says in a sentence or two how its proof goes. The full proofs are in @sec-apx, and every number comes from the script [code/notes/privacy_budgets.py](../../code/notes/privacy_budgets.py), which the test [tests/test_notes_privacy_budgets.py](../../tests/test_notes_privacy_budgets.py) checks.
 
@@ -140,6 +140,14 @@ $$
 
 <!-- proof: in @sec-apx-comp -->
 @sec-apx-comp derives it as the case $\delta = 0$ of basic composition, @thm-basic-comp.
+
+Pure DP has a single parameter, but it can be read as approximate DP with $\delta = 0$ at every step, and composition keeps that second parameter at zero. In the reference's unit, $k$ equal steps of $\varepsilon_0$ therefore give
+
+$$
+(\varepsilon, \delta) = (k\varepsilon_0,\ 0).
+$$
+
+The same $k$ steps can also be read in the reference's unit in a second way, if the release is allowed to spend a $\delta$. @cor-pure-adv in @sec-zcdp shows that they are then $(k\varepsilon_0^2/2 + \varepsilon_0\sqrt{2k\ln(1/\delta)},\ \delta)$-DP for every $\delta$ between 0 and 1. That $\varepsilon$ grows like $\sqrt k$ instead of $k$, which is what the budgeting below uses for Laplace counts accounted in zCDP.
 
 ## Budgeting to the reference
 
@@ -245,6 +253,16 @@ Let $k$ statistics $f_1, \dots, f_k$, fixed in advance, each have $\ell_2$ sensi
 <!-- proof: in @sec-apx-mech -->
 The proof in @sec-apx-mech is the argument above. When the queries are chosen adaptively, the same bound still holds. That is the composition theorem of Gaussian differential privacy, a definition built on the Gaussian mechanism's privacy profile (Dong, Roth and Su, 2022), and it is cited here.
 
+All three rules compose both parameters, and all three already give their result in the reference's unit. @tbl-approx-comp sets them side by side for $k$ equal steps. Basic composition adds the $\varepsilon$'s and the $\delta$'s. Advanced composition makes $\varepsilon$ grow like $\sqrt k$, while the $\delta$'s still add and the extra slack $\delta'$ joins them. The exact rule for Gaussian counts has no per-step $\delta$ at all, because it composes the noise itself and computes one privacy profile for the whole release.
+
+| Rule | Each step | $\varepsilon$ of the total | $\delta$ of the total |
+|:---|:---|:---|:---|
+| Basic, @thm-basic-comp | $(\varepsilon_0, \delta_0)$-DP | $k\varepsilon_0$ | $k\delta_0$ |
+| Advanced, @thm-adv-comp | $(\varepsilon_0, \delta_0)$-DP | $\varepsilon_0\sqrt{2k\ln(1/\delta')} + k\varepsilon_0(e^{\varepsilon_0} - 1)$ | $k\delta_0 + \delta'$ |
+| Exact, @cor-gauss-k | Gaussian, ratio $s_0 = \Delta/\sigma$ | any $\varepsilon$ | the bound of @thm-gauss-exact at $\varepsilon$, with $s = \sqrt k\, s_0$ |
+
+: What k equal steps of approximate DP give in total, under each composition rule. Every rule composes both parameters. {#tbl-approx-comp}
+
 ## Budgeting to the reference
 
 Approximate DP's budget is the reference itself, $(1, 10^{-6})$. What remains is to split it, and each of the three composition rules splits it differently.
@@ -329,6 +347,14 @@ $$
 
 <!-- proof: in @sec-apx-conv -->
 @sec-apx-conv proves it from Markov's inequality applied to an exponential, which is the Chernoff bound.
+
+CDP has two parameters, and @thm-cdp-comp composes both: the means add, and the squared spreads add. Neither of them is a $\delta$, so CDP has no $\delta$ to compose. A $\delta$ enters only when the total is converted to the reference's unit, and it is chosen once, for the whole release, rather than spent step by step. In the reference's unit, $k$ equal steps of $(\mu_0, \tau_0)$ therefore give, for every $\delta$ between 0 and 1,
+
+$$
+(\varepsilon, \delta) = \Big(k\mu_0 + \sqrt k\,\tau_0\sqrt{2\ln(1/\delta)},\ \delta\Big).
+$$ {#eq-cdp-k}
+
+The first term grows like $k$, but $\mu_0$ is tiny; the second grows only like $\sqrt k$, because the spreads add in squares.
 
 ## Budgeting to the reference
 
@@ -453,6 +479,14 @@ $$
 <!-- proof: in @sec-apx-pure -->
 The proof in @sec-apx-pure chains the three results. Its second term is the same as in @thm-adv-comp, and its first term is about half as large, since $e^{\varepsilon_0} - 1$ is close to $\varepsilon_0$ for a small $\varepsilon_0$.
 
+zCDP has one parameter, and @thm-zcdp-comp composes it by adding. Like CDP, it has no $\delta$ to compose: a $\delta$ is chosen once, when the total is converted. In the reference's unit, $k$ equal steps of $\rho_0$ therefore give, for every $\delta$ between 0 and 1,
+
+$$
+(\varepsilon, \delta) = \Big(k\rho_0 + 2\sqrt{k\rho_0\ln(1/\delta)},\ \delta\Big).
+$$ {#eq-zcdp-k}
+
+For Gaussian steps, where $\mu_0 = \rho_0$ and $\tau_0^2 = 2\rho_0$, this is the same pair as @eq-cdp-k.
+
 ## Budgeting to the reference {#sec-zcdp-budget}
 
 The zCDP budget for the reference is the largest $\rho$ that @thm-zcdp-conv turns into $\varepsilon = 1$ at $\delta = 10^{-6}$. The conversion is a quadratic in $\sqrt\rho$, namely $(\sqrt\rho)^2 + 2\sqrt{\ln(1/\delta)}\,\sqrt\rho - \varepsilon = 0$, and its positive root gives
@@ -473,23 +507,70 @@ The conversion of @thm-zcdp-conv is not exact. The running example needs a stand
 
 # Trade-offs {#sec-tradeoffs}
 
-Each of the four definitions has now been budgeted to the same reference. This section sets the results side by side, says which guarantees imply which, shows how the cost of each accounting grows with the number of queries, and ends with when to use each.
+Each of the four definitions has now been budgeted to the same reference. This section sets the results side by side, compares the composition rules in one unit, says which guarantees imply which, shows how the cost of each accounting grows with the number of queries, and ends with when to use each.
 
 ## Side by side
 
-@tbl-side summarizes the four sections. Its last row is the answer to the running example's question: the noise each count needs so that 100 counts meet $(1, 10^{-6})$.
+@tbl-side summarizes the four sections in words, and @tbl-math gives the same comparison in formulas. In the PDF, each table has a landscape page of its own. The last row of @tbl-side is the answer to the running example's question: the noise each count needs so that 100 counts meet $(1, 10^{-6})$.
+
+@tbl-math restates every formula the four sections use, row by row, so that one row compares the four definitions on one question. Writing $s = \Delta_2 f/\sigma$ for the Gaussian mechanism and $b$ for the Laplace scale, the rows go from the definition through the two mechanisms and composition to the conversion and the budget. The last two rows are the budgeting recipe for $k$ counts that must meet the reference $(\varepsilon, \delta)$ in total.
+
+```{=latex}
+\begin{landscape}
+```
 
 | | Pure DP | Approximate DP | CDP | zCDP |
 |:---|:---|:---|:---|:---|
 | What it bounds | the loss at every output | the gap between $P(S)$ and $e^\varepsilon Q(S)$ on every set $S$ | the mean of the loss and its spread | every exponential moment of the loss |
 | Parameters | $\varepsilon$ | $\varepsilon$, $\delta$ | $\mu$, $\tau$ | $\rho$ |
 | Natural mechanism | Laplace | Gaussian | Gaussian | Gaussian, and Laplace through @prp-zcdp-pure |
-| Composition | the $\varepsilon$'s add | basic adds both; advanced grows like $\sqrt k$ at the cost of a $\delta'$ | the $\mu$'s add and the $\tau^2$'s add | the $\rho$'s add |
+| Composition | the $\varepsilon$'s add; $\delta$ stays 0 | basic adds the $\varepsilon$'s and the $\delta$'s; advanced makes $\varepsilon$ grow like $\sqrt k$ and adds the $\delta$'s plus $\delta'$ | the $\mu$'s add and the $\tau^2$'s add; $\delta$ is chosen once, at conversion | the $\rho$'s add; $\delta$ is chosen once, at conversion |
+| $k$ equal steps, in the reference's unit | $(k\varepsilon_0, 0)$ | @tbl-approx-comp | @eq-cdp-k | @eq-zcdp-k |
 | Budget for $(1, 10^{-6})$ | $\varepsilon = 1$ | the reference itself, split by a composition rule | $\mu = 0.01747$, $\tau = 0.18692$ (Gaussian counts) | $\rho = 0.01747$ |
 | Post-processing | preserved | preserved | not preserved | preserved |
 | Noise per count, $k = 100$ | 141.42 (Laplace) | 412.36 (basic), 243.80 (advanced), 42.25 (exact) | 53.50 (Gaussian), 75.66 (Laplace) | 53.50 (Gaussian), 75.66 (Laplace) |
 
 : The four definitions side by side. The last row is the standard deviation of the noise on each of 100 counts for the release to meet (ε, δ) = (1, 10⁻⁶). {#tbl-side}
+
+```{=latex}
+\clearpage
+```
+
+| | Pure DP | Approximate DP | CDP | zCDP |
+|:--------------|:-----------|:--------------|:--------------|:--------------|
+| Definition, for every ordered neighbouring pair | $P(S) \le e^{\varepsilon} Q(S)$ for every set $S$ | $P(S) \le e^{\varepsilon} Q(S) + \delta$ for every set $S$ | $\mathbb E_P[L] \le \mu$ and $\mathbb E_P[e^{\lambda(L - \mathbb E_P L)}] \le e^{\lambda^2\tau^2/2}$ for every real $\lambda$ | $D_\alpha(P\Vert Q) \le \alpha\rho$ for every $\alpha > 1$ |
+| The same, through the loss | $\lvert L \rvert \le \varepsilon$ (@prp-pure-loss) | $\Pr_P[L > \varepsilon] - e^{\varepsilon}\Pr_Q[L > \varepsilon] \le \delta$ (@prp-profile) | as in the definition | $\mathbb E_P[e^{\lambda L}] \le e^{\lambda(\lambda + 1)\rho}$ for every $\lambda > 0$ (@lem-renyi-loss) |
+| Laplace mechanism, scale $b$ | $\varepsilon = \Delta_1 f/b$ (@thm-laplace) | $(\Delta_1 f/b,\ 0)$ | $(\varepsilon\tanh(\varepsilon/2),\ \varepsilon)$ with $\varepsilon = \Delta_1 f/b$ (@prp-cdp-pure) | $\rho = \varepsilon^2/2$ with $\varepsilon = \Delta_1 f/b$ (@prp-zcdp-pure) |
+| Gaussian mechanism, $s = \Delta_2 f/\sigma$ | not pure DP for any $\varepsilon$ | $\delta = \Phi(s/2 - \varepsilon/s) - e^{\varepsilon}\Phi(-s/2 - \varepsilon/s)$ (@thm-gauss-exact) | $(s^2/2,\ s)$ (@prp-cdp-gauss) | $\rho = s^2/2$ (@prp-zcdp-gauss) |
+| Composition of steps $i = 1, \dots, k$ | $\varepsilon = \sum_i \varepsilon_i$ (@thm-pure-comp) | basic: $(\sum_i \varepsilon_i,\ \sum_i \delta_i)$ (@thm-basic-comp); advanced: @thm-adv-comp | $\mu = \sum_i \mu_i$, $\tau^2 = \sum_i \tau_i^2$ (@thm-cdp-comp) | $\rho = \sum_i \rho_i$ (@thm-zcdp-comp) |
+| Conversion to $(\varepsilon, \delta)$-DP | $(\varepsilon, 0)$ | none needed | $\varepsilon = \mu + \tau\sqrt{2\ln(1/\delta)}$ (@thm-cdp-conv) | $\varepsilon = \rho + 2\sqrt{\rho\ln(1/\delta)}$ (@thm-zcdp-conv) |
+| Budget of one of $k$ equal counts, for a total $(\varepsilon, \delta)$ | $\varepsilon_0 = \varepsilon/k$ | basic: $(\varepsilon/k,\ \delta/k)$ | Gaussian: $\tau_0 = \big(\sqrt{2\ln(1/\delta) + 2\varepsilon} - \sqrt{2\ln(1/\delta)}\big)/\sqrt k$, $\mu_0 = \tau_0^2/2$ | $\rho_0 = \big(\sqrt{\ln(1/\delta) + \varepsilon} - \sqrt{\ln(1/\delta)}\big)^2/k$ (@eq-rho-budget) |
+| Noise on one count ($\Delta = 1$) | Laplace, $b = 1/\varepsilon_0$ | Gaussian, $\sigma = 1/s_0$, with $s_0$ the largest ratio that meets $(\varepsilon/k, \delta/k)$ | Gaussian, $\sigma = 1/\tau_0$ | Gaussian, $\sigma = 1/\sqrt{2\rho_0}$; Laplace, $b = 1/\sqrt{2\rho_0}$ |
+
+: The four definitions side by side in formulas: each row answers one question for all four, and names the result that proves it. {#tbl-math}
+
+```{=latex}
+\end{landscape}
+```
+
+## Composition in one unit {#sec-tradeoffs-unit}
+
+Each definition composes its own parameters and converts to the reference's unit once, at the end. A natural shortcut would be to convert each query to the reference's unit first, as an $(\varepsilon_0, \delta_0)$ pair, and then add the pairs with basic composition, the one rule that works on any pairs. @tbl-normalized shows what that shortcut costs, using the noise each accounting chose for the running example. Each count's guarantee is written in the reference's unit, with $\delta_0 = \delta/100 = 10^{-8}$ whenever the count needs a $\delta$, so that the hundred $\delta_0$'s add up to the reference's $\delta$. The last two columns add up the hundred per-count pairs. The definition's own composition gives $(1, 10^{-6})$ in every row, since that is how the noise was chosen.
+
+| Noise and accounting | $\varepsilon_0$ of one count | $\delta_0$ of one count | $\varepsilon$, adding the pairs | $\delta$, adding the pairs |
+|:---|---:|---:|---:|---:|
+| Laplace, pure DP | 0.01000 | 0 | 1.000 | 0 |
+| Laplace, zCDP | 0.01869 | 0 | 1.869 | 0 |
+| Gaussian, basic composition | 0.01000 | $10^{-8}$ | 1.000 | $10^{-6}$ |
+| Gaussian, advanced composition | 0.01782 | $6.05 \times 10^{-9}$ | 1.782 | $6.05 \times 10^{-7}$ |
+| Gaussian, CDP or zCDP | 0.11363 | $10^{-8}$ | 11.363 | $10^{-6}$ |
+| Gaussian, exact | 0.10915 | $10^{-8}$ | 10.915 | $10^{-6}$ |
+
+: The running example's 100 counts, each count's guarantee written in the reference's unit, and the total from adding those pairs. The definitions' own composition gives (ε, δ) = (1, 10⁻⁶) in every row. {#tbl-normalized}
+
+The shortcut is harmless only where it is the definition's own rule, in the rows for pure DP and basic composition. Everywhere else it loses badly, and most for Gaussian noise. Converted on its own, one Gaussian count with $\sigma = 53.50$ is $(0.11363, 10^{-8})$-DP, and a hundred of them add up to $\varepsilon = 11.363$, eleven times the $\varepsilon = 1$ that the same noise really achieves. Even the exact per-count conversion gives 10.915.
+
+The reason is the cost of each conversion. Converting one step charges it for the rare large values of its loss, at a level set by its own small $\delta_0$, and adding a hundred such charges counts a hundred tails. Composing first lets the hundred losses partly cancel, so the total has a single tail, whose size grows like $\sqrt k$, and it is charged once. So the rule is to compose in the definition's own unit and convert to the reference only at the end.
 
 ## Which guarantee implies which
 

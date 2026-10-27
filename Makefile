@@ -35,7 +35,7 @@ CTAN      := https://ctan.math.illinois.edu/systems/texlive/tlnet
 TEX_PKGS  := svg imakeidx makeindex trimspaces catchfile transparent caption koma-script fontspec unicode-math \
              lualatex-math selnolig booktabs mdwtools footnotehyper xcolor framed fvextra upquote \
              microtype parskip xurl bookmark float tcolorbox pgf environ pdfcol tikzfill sidenotes \
-             marginnote changepage colortbl multirow wrapfig etoolbox fancyvrb amsmath amsfonts \
+             marginnote changepage pdflscape colortbl multirow wrapfig etoolbox fancyvrb amsmath amsfonts \
              tools geometry hyperref iftex luaotfload lm lm-math csquotes setspace \
              newcomputermodern dejavu
 
