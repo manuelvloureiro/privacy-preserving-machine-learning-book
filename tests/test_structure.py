@@ -105,6 +105,19 @@ def test_the_summary_holds_one_captioned_table_and_every_table_is_captioned(tmp_
     assert any("Summary" in m for m in found)
 
 
+def test_a_table_float_div_captions_the_tables_inside_it(tmp_path: Path) -> None:
+    table = "| Quantity | Value |\n| --- | --- |\n| scale | 1.0000 |\n"
+    plain = table + "\n: What the script prints. {#tbl-lg-code}\n"
+    floated = (
+        '::: {#tbl-lg-code}\n\n::: {.content-visible when-format="html"}\n\n' + table + "\n:::\n\n"
+        "What the script prints.\n\n:::\n"
+    )
+    assert plain in GOOD_CHAPTER
+    assert not any("caption" in m for m in errors(tmp_path, GOOD_CHAPTER.replace(plain, floated), CHAPTER))
+    unlabelled = floated.replace("{#tbl-lg-code}", "{.column-page}")
+    assert any("caption" in m for m in errors(tmp_path, GOOD_CHAPTER.replace(plain, unlabelled), CHAPTER))
+
+
 def test_the_budget_and_the_tail_order_are_checked(tmp_path: Path) -> None:
     long = GOOD_CHAPTER.replace("The question this chapter answers", "word " * 8001)
     assert any("over the budget" in m for m in errors(tmp_path, long, CHAPTER))

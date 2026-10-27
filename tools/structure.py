@@ -33,6 +33,9 @@ ENV_OPEN = re.compile(r"^:{3,}\s*\{#((def|thm|lem|prp|cor|exm)-[\w-]+)")
 PROOF_OPEN = re.compile(r"^:{3,}\s*\{\.proof")
 CITED = re.compile(r"<!--\s*proof:\s*\S[^>]*-->")  # <!-- proof: cited --> or <!-- proof: in @sec-x -->
 CAPTION = re.compile(r"^: .*\{#(tbl-[\w-]+)\}\s*$")
+# A Quarto table float, `::: {#tbl-x}` ... caption paragraph ... `:::`, captions the tables inside it.
+DIV_OPEN = re.compile(r"^:{3,}\s*\{(?:#([\w-]+))?")
+DIV_CLOSE = re.compile(r"^:{3,}\s*$")
 BOLD_RESULT = re.compile(r"^\*\*(Theorem|Lemma|Definition|Proposition|Corollary)\b")
 
 
@@ -160,7 +163,12 @@ def parse(path: Path) -> Page:
     labels: list[tuple[str, int]] = []
     bold: list[int] = []
     in_table = False
+    divs: list[str | None] = []  # the ids of the fenced divs open at this line
     for n, line in enumerate(lines, start=1):
+        if m := DIV_OPEN.match(line):
+            divs.append(m.group(1))
+        elif DIV_CLOSE.match(line) and divs:
+            divs.pop()
         if m := HEADING.match(line):
             raw = m.group(2)
             ident = HEADING_ID.search(raw)
@@ -173,7 +181,8 @@ def parse(path: Path) -> Page:
             envs.append(Env("proof", None, n))
         if line.startswith("|"):
             if not in_table:
-                tables.append(Table(n, None))
+                float_id = next((d for d in reversed(divs) if d and d.startswith("tbl-")), None)
+                tables.append(Table(n, float_id))
                 in_table = True
         elif in_table and line.strip():
             in_table = False

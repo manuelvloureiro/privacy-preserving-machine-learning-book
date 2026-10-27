@@ -536,18 +536,58 @@ Each of the four definitions has now been budgeted to the same reference. This s
 \clearpage
 ```
 
+::: {#tbl-math}
+
+::: {.content-visible when-format="html"}
+
 | | Pure DP | Approximate DP | CDP | zCDP |
 |:--------------|:-----------|:--------------|:--------------|:--------------|
 | Definition, for every ordered neighbouring pair | $P(S) \le e^{\varepsilon} Q(S)$ for every set $S$ | $P(S) \le e^{\varepsilon} Q(S) + \delta$ for every set $S$ | $\mathbb E_P[L] \le \mu$ and $\mathbb E_P[e^{\lambda(L - \mathbb E_P L)}] \le e^{\lambda^2\tau^2/2}$ for every real $\lambda$ | $D_\alpha(P\Vert Q) \le \alpha\rho$ for every $\alpha > 1$ |
 | The same, through the loss | $\lvert L \rvert \le \varepsilon$ (@prp-pure-loss) | $\Pr_P[L > \varepsilon] - e^{\varepsilon}\Pr_Q[L > \varepsilon] \le \delta$ (@prp-profile) | as in the definition | $\mathbb E_P[e^{\lambda L}] \le e^{\lambda(\lambda + 1)\rho}$ for every $\lambda > 0$ (@lem-renyi-loss) |
-| Laplace mechanism, scale $b$ | $\varepsilon = \Delta_1 f/b$ (@thm-laplace) | $(\Delta_1 f/b,\ 0)$ | $(\varepsilon\tanh(\varepsilon/2),\ \varepsilon)$ with $\varepsilon = \Delta_1 f/b$ (@prp-cdp-pure) | $\rho = \varepsilon^2/2$ with $\varepsilon = \Delta_1 f/b$ (@prp-zcdp-pure) |
+| Laplace mechanism, scale $b$, with $\varepsilon = \Delta_1 f/b$ | $\varepsilon$-DP (@thm-laplace) | $(\varepsilon,\ 0)$ | $(\varepsilon\tanh(\varepsilon/2),\ \varepsilon)$ (@prp-cdp-pure) | $\rho = \varepsilon^2/2$ (@prp-zcdp-pure) |
 | Gaussian mechanism, $s = \Delta_2 f/\sigma$ | not pure DP for any $\varepsilon$ | $\delta = \Phi(s/2 - \varepsilon/s) - e^{\varepsilon}\Phi(-s/2 - \varepsilon/s)$ (@thm-gauss-exact) | $(s^2/2,\ s)$ (@prp-cdp-gauss) | $\rho = s^2/2$ (@prp-zcdp-gauss) |
-| Composition of steps $i = 1, \dots, k$ | $\varepsilon = \sum_i \varepsilon_i$ (@thm-pure-comp) | basic: $(\sum_i \varepsilon_i,\ \sum_i \delta_i)$ (@thm-basic-comp); advanced: @thm-adv-comp | $\mu = \sum_i \mu_i$, $\tau^2 = \sum_i \tau_i^2$ (@thm-cdp-comp) | $\rho = \sum_i \rho_i$ (@thm-zcdp-comp) |
+| Composition of steps $i = 1, \dots, k$ | $\varepsilon = \sum_i \varepsilon_i$ (@thm-pure-comp) | basic: $\varepsilon = \sum_i \varepsilon_i$, $\delta = \sum_i \delta_i$ (@thm-basic-comp); advanced: @thm-adv-comp | $\mu = \sum_i \mu_i$, $\tau^2 = \sum_i \tau_i^2$ (@thm-cdp-comp) | $\rho = \sum_i \rho_i$ (@thm-zcdp-comp) |
+| $k$ equal steps, as $(\varepsilon, \delta)$ | $(k\varepsilon_0,\ 0)$ | basic: $(k\varepsilon_0,\ k\delta_0)$ (@tbl-approx-comp) | $(k\mu_0 + \sqrt k\,\tau_0\sqrt{2\ln(1/\delta)},\ \delta)$ (@eq-cdp-k) | $(k\rho_0 + 2\sqrt{k\rho_0\ln(1/\delta)},\ \delta)$ (@eq-zcdp-k) |
 | Conversion to $(\varepsilon, \delta)$-DP | $(\varepsilon, 0)$ | none needed | $\varepsilon = \mu + \tau\sqrt{2\ln(1/\delta)}$ (@thm-cdp-conv) | $\varepsilon = \rho + 2\sqrt{\rho\ln(1/\delta)}$ (@thm-zcdp-conv) |
-| Budget of one of $k$ equal counts, for a total $(\varepsilon, \delta)$ | $\varepsilon_0 = \varepsilon/k$ | basic: $(\varepsilon/k,\ \delta/k)$ | Gaussian: $\tau_0 = \big(\sqrt{2\ln(1/\delta) + 2\varepsilon} - \sqrt{2\ln(1/\delta)}\big)/\sqrt k$, $\mu_0 = \tau_0^2/2$ | $\rho_0 = \big(\sqrt{\ln(1/\delta) + \varepsilon} - \sqrt{\ln(1/\delta)}\big)^2/k$ (@eq-rho-budget) |
-| Noise on one count ($\Delta = 1$) | Laplace, $b = 1/\varepsilon_0$ | Gaussian, $\sigma = 1/s_0$, with $s_0$ the largest ratio that meets $(\varepsilon/k, \delta/k)$ | Gaussian, $\sigma = 1/\tau_0$ | Gaussian, $\sigma = 1/\sqrt{2\rho_0}$; Laplace, $b = 1/\sqrt{2\rho_0}$ |
+| Budget of one of $k$ equal counts, for a total $(\varepsilon, \delta)$ | $\varepsilon_0 = \varepsilon/k$ | basic: $\varepsilon_0 = \varepsilon/k$, $\delta_0 = \delta/k$ | Gaussian: $\tau_0 = \big(\sqrt{2\ln(1/\delta) + 2\varepsilon} - \sqrt{2\ln(1/\delta)}\big)/\sqrt k$, $\mu_0 = \tau_0^2/2$ | $\rho_0 = \big(\sqrt{\ln(1/\delta) + \varepsilon} - \sqrt{\ln(1/\delta)}\big)^2/k$ (@eq-rho-budget) |
+| Noise on one count ($\Delta = 1$) | Laplace, $b = 1/\varepsilon_0$ | Gaussian, $\sigma = 1/s_0$, with $s_0$ the largest ratio that meets $(\varepsilon_0, \delta_0)$ | Gaussian, $\sigma = 1/\tau_0$ | Gaussian, $\sigma = 1/\sqrt{2\rho_0}$; Laplace, $b = 1/\sqrt{2\rho_0}$ |
 
-: The four definitions side by side in formulas: each row answers one question for all four, and names the result that proves it. {#tbl-math}
+:::
+
+::: {.content-visible when-format="pdf"}
+
+```{=latex}
+{\small\renewcommand{\arraystretch}{1.5}
+\begin{tabularx}{\linewidth}{|>{\raggedright\arraybackslash}p{3.3cm}|>{\raggedright\arraybackslash}X|>{\raggedright\arraybackslash}X|>{\raggedright\arraybackslash}X|>{\raggedright\arraybackslash}X|}
+\hline
+ & \textbf{Pure DP} & \textbf{Approximate DP} & \textbf{CDP} & \textbf{zCDP} \\
+\hline\hline
+\textbf{Definition}, for every ordered neighbouring pair & $P(S) \le e^{\varepsilon} Q(S)$\newline for every set $S$ & $P(S) \le e^{\varepsilon} Q(S) + \delta$\newline for every set $S$ & $\mathbb E_P[L] \le \mu$, and for every real $\lambda$:\newline $\mathbb E_P\big[e^{\lambda(L - \mathbb E_P L)}\big] \le e^{\lambda^2\tau^2/2}$ & $D_\alpha(P\Vert Q) \le \alpha\rho$\newline for every $\alpha > 1$ \\
+\hline
+\textbf{The same, through the loss} $L$ & $\lvert L \rvert \le \varepsilon$\newline{\footnotesize\textcolor{gray}{(Proposition~\ref{prp-pure-loss})}} & $\Pr_P[L > \varepsilon]$\newline $\quad - e^{\varepsilon}\Pr_Q[L > \varepsilon] \le \delta$\newline{\footnotesize\textcolor{gray}{(Proposition~\ref{prp-profile})}} & as in the definition & $\mathbb E_P[e^{\lambda L}] \le e^{\lambda(\lambda + 1)\rho}$\newline for every $\lambda > 0$\newline{\footnotesize\textcolor{gray}{(Lemma~\ref{lem-renyi-loss})}} \\
+\hline
+\textbf{Laplace mechanism}, scale $b$,\newline with $\varepsilon = \Delta_1 f/b$ & $\varepsilon$-DP\newline{\footnotesize\textcolor{gray}{(Theorem~\ref{thm-laplace})}} & $(\varepsilon,\ 0)$-DP & $(\varepsilon\tanh(\varepsilon/2),\ \varepsilon)$-CDP\newline{\footnotesize\textcolor{gray}{(Proposition~\ref{prp-cdp-pure})}} & $(\varepsilon^2/2)$-zCDP\newline{\footnotesize\textcolor{gray}{(Proposition~\ref{prp-zcdp-pure})}} \\
+\hline
+\textbf{Gaussian mechanism},\newline $s = \Delta_2 f/\sigma$ & not pure DP for any $\varepsilon$ & $\delta = \Phi\big(\tfrac{s}{2} - \tfrac{\varepsilon}{s}\big) - e^{\varepsilon}\Phi\big(-\tfrac{s}{2} - \tfrac{\varepsilon}{s}\big)$\newline{\footnotesize\textcolor{gray}{(Theorem~\ref{thm-gauss-exact})}} & $(s^2/2,\ s)$-CDP\newline{\footnotesize\textcolor{gray}{(Proposition~\ref{prp-cdp-gauss})}} & $(s^2/2)$-zCDP\newline{\footnotesize\textcolor{gray}{(Proposition~\ref{prp-zcdp-gauss})}} \\
+\hline
+\textbf{Composition} of steps $i = 1, \dots, k$ & $\varepsilon = \sum_i \varepsilon_i$\newline{\footnotesize\textcolor{gray}{(Theorem~\ref{thm-pure-comp})}} & basic: $\varepsilon = \sum_i \varepsilon_i$, $\delta = \sum_i \delta_i$\newline{\footnotesize\textcolor{gray}{(Theorem~\ref{thm-basic-comp})}}\newline advanced: Theorem~\ref{thm-adv-comp} & $\mu = \sum_i \mu_i$, $\tau^2 = \sum_i \tau_i^2$\newline{\footnotesize\textcolor{gray}{(Theorem~\ref{thm-cdp-comp})}} & $\rho = \sum_i \rho_i$\newline{\footnotesize\textcolor{gray}{(Theorem~\ref{thm-zcdp-comp})}} \\
+\hline
+\textbf{$k$ equal steps}, as $(\varepsilon, \delta)$ & $(k\varepsilon_0,\ 0)$ & basic: $(k\varepsilon_0,\ k\delta_0)$\newline{\footnotesize\textcolor{gray}{(Table~\ref{tbl-approx-comp})}} & $\big(k\mu_0 + \sqrt k\,\tau_0\sqrt{2\ln(1/\delta)},\ \delta\big)$\newline{\footnotesize\textcolor{gray}{(Equation~\ref{eq-cdp-k})}} & $\big(k\rho_0 + 2\sqrt{k\rho_0\ln(1/\delta)},\ \delta\big)$\newline{\footnotesize\textcolor{gray}{(Equation~\ref{eq-zcdp-k})}} \\
+\hline
+\textbf{Conversion} to $(\varepsilon, \delta)$-DP & $(\varepsilon, 0)$ & none needed & $\varepsilon = \mu + \tau\sqrt{2\ln(1/\delta)}$\newline{\footnotesize\textcolor{gray}{(Theorem~\ref{thm-cdp-conv})}} & $\varepsilon = \rho + 2\sqrt{\rho\ln(1/\delta)}$\newline{\footnotesize\textcolor{gray}{(Theorem~\ref{thm-zcdp-conv})}} \\
+\hline
+\textbf{Budget of one count}, $k$ counts, total $(\varepsilon, \delta)$ & $\varepsilon_0 = \varepsilon/k$ & basic: $\varepsilon_0 = \varepsilon/k$, $\delta_0 = \delta/k$ & Gaussian: $\tau_0 = t/\sqrt k$ and $\mu_0 = \tau_0^2/2$, with\newline $t = \sqrt{2\ln(1/\delta) + 2\varepsilon}$\newline $\quad - \sqrt{2\ln(1/\delta)}$ & $\rho_0 = r^2/k$, with\newline $r = \sqrt{\ln(1/\delta) + \varepsilon}$\newline $\quad - \sqrt{\ln(1/\delta)}$\newline{\footnotesize\textcolor{gray}{(Equation~\ref{eq-rho-budget})}} \\
+\hline
+\textbf{Noise on one count} ($\Delta = 1$) & Laplace: $b = 1/\varepsilon_0$ & Gaussian: $\sigma = 1/s_0$, with $s_0$ the largest ratio that meets $(\varepsilon_0, \delta_0)$ & Gaussian: $\sigma = 1/\tau_0$ & Gaussian: $\sigma = 1/\sqrt{2\rho_0}$\newline Laplace: $b = 1/\sqrt{2\rho_0}$ \\
+\hline
+\end{tabularx}}
+```
+
+:::
+
+The four definitions side by side in formulas: each row answers one question for all four, and names the result that proves it.
+
+:::
 
 ```{=latex}
 \end{landscape}
