@@ -265,7 +265,7 @@ Concentrated DP takes the facts that make advanced composition work and turns th
 
 ## Why it was introduced
 
-Dwork and Rothblum (2016) observed that the proof of advanced composition uses only two facts about each step's privacy loss: its average is small, and it strays from that average no more than a normal variable would. Over many steps the averages add up while the fluctuations partly cancel, so they made those two facts the definition. Composition then becomes bookkeeping, in which you add the averages and add the squared spreads, and the conversion to approximate DP happens once, at the end. Bun and Steinke (2016) later called this definition mean-concentrated DP, to tell it apart from their own, which @sec-zcdp covers.
+Dwork and Rothblum (2016) noticed that the proof of advanced composition needs only two facts about the privacy loss of each step. The first is that the loss is small on average, and the second is that it strays from that average no more than a normal variable would. These two facts are enough because, over many steps, the averages add up while the fluctuations partly cancel. Dwork and Rothblum therefore turned the two facts into a definition of privacy: a mechanism is private in their sense when its privacy loss has a small average and fluctuates no more than a normal variable. With this definition, composition becomes bookkeeping. You add up the averages of the steps and add up their squared spreads, and you convert the total to approximate DP once, at the end. Bun and Steinke (2016) later called this definition mean-concentrated DP, to tell it apart from their own, which @sec-zcdp covers.
 
 ## The definition
 
