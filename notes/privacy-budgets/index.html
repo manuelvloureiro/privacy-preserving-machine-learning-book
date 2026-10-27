@@ -128,9 +128,10 @@ window.Quarto = {
   <li><a href="#sec-tradeoffs" id="toc-sec-tradeoffs" class="nav-link" data-scroll-target="#sec-tradeoffs"><span class="header-section-number">6</span> Trade-offs</a>
   <ul class="collapse">
   <li><a href="#side-by-side" id="toc-side-by-side" class="nav-link" data-scroll-target="#side-by-side"><span class="header-section-number">6.1</span> Side by side</a></li>
-  <li><a href="#which-guarantee-implies-which" id="toc-which-guarantee-implies-which" class="nav-link" data-scroll-target="#which-guarantee-implies-which"><span class="header-section-number">6.2</span> Which guarantee implies which</a></li>
-  <li><a href="#how-the-cost-grows-with-the-number-of-queries" id="toc-how-the-cost-grows-with-the-number-of-queries" class="nav-link" data-scroll-target="#how-the-cost-grows-with-the-number-of-queries"><span class="header-section-number">6.3</span> How the cost grows with the number of queries</a></li>
-  <li><a href="#which-definition-to-use" id="toc-which-definition-to-use" class="nav-link" data-scroll-target="#which-definition-to-use"><span class="header-section-number">6.4</span> Which definition to use</a></li>
+  <li><a href="#sec-tradeoffs-unit" id="toc-sec-tradeoffs-unit" class="nav-link" data-scroll-target="#sec-tradeoffs-unit"><span class="header-section-number">6.2</span> Composition in one unit</a></li>
+  <li><a href="#which-guarantee-implies-which" id="toc-which-guarantee-implies-which" class="nav-link" data-scroll-target="#which-guarantee-implies-which"><span class="header-section-number">6.3</span> Which guarantee implies which</a></li>
+  <li><a href="#how-the-cost-grows-with-the-number-of-queries" id="toc-how-the-cost-grows-with-the-number-of-queries" class="nav-link" data-scroll-target="#how-the-cost-grows-with-the-number-of-queries"><span class="header-section-number">6.4</span> How the cost grows with the number of queries</a></li>
+  <li><a href="#which-definition-to-use" id="toc-which-definition-to-use" class="nav-link" data-scroll-target="#which-definition-to-use"><span class="header-section-number">6.5</span> Which definition to use</a></li>
   </ul></li>
   <li><a href="#sec-apx" id="toc-sec-apx" class="nav-link" data-scroll-target="#sec-apx"><span class="header-section-number">7</span> Appendix: the complete derivations</a>
   <ul class="collapse">
@@ -350,7 +351,7 @@ Figure&nbsp;1: Left: the privacy loss at each output of a count whose true answe
 <h2 data-number="1.3" class="anchored" data-anchor-id="sec-ground-reference"><span class="header-section-number">1.3</span> The reference and the plan</h2>
 <p>A budget written in one definition’s unit says nothing to someone who uses another, so the four need a common unit. That unit is approximate DP with a fixed <span class="math inline">\(\delta\)</span>, for two reasons. Every one of the four definitions implies an approximate DP guarantee, so every budget can be converted into it. And approximate DP is a statement about events, which is what an attacker sees and what laws, papers and libraries report.</p>
 <p>The value of <span class="math inline">\(\delta\)</span> follows a common rule: at most <span class="math inline">\(1/n^{1.1}\)</span> for <span class="math inline">\(n\)</span> people, rounded down to a power of ten. <a href="#sec-approx" class="quarto-xref">Section&nbsp;3</a> explains why <span class="math inline">\(\delta\)</span> must be smaller than <span class="math inline">\(1/n\)</span>, and the exponent 1.1 makes it smaller by a factor that grows with <span class="math inline">\(n\)</span>. For <span class="math inline">\(n = 100{,}000\)</span> people, <span class="math inline">\(n^{1.1} = 10^{5.5}\)</span>, so <span class="math inline">\(1/n^{1.1}\)</span> is about <span class="math inline">\(3.2 \times 10^{-6}\)</span>, which rounds down to <span class="math inline">\(\delta = 10^{-6}\)</span>, ten times below <span class="math inline">\(1/n\)</span>. The value <span class="math inline">\(\varepsilon = 1\)</span> is a common, moderate choice, and any other value would serve for the comparison. With it, the <strong>reference</strong> for the whole release is approximate DP with <span class="math inline">\((\varepsilon, \delta) = (1, 10^{-6})\)</span>.</p>
-<p>Budgeting under any definition then takes three steps. First, find the budget in the definition’s own unit that converts to the reference. Second, split it across the queries with the definition’s composition rule. Third, turn each query’s share into a noise scale with the definition’s mechanism.</p>
+<p>Budgeting under any definition then takes three steps. First, find the budget in the definition’s own unit that converts to the reference. Second, split it across the queries with the definition’s composition rule. Third, turn each query’s share into a noise scale with the definition’s mechanism. The second step is where the definitions differ most, so each Composition subsection does two things. It composes every parameter of its definition, not only <span class="math inline">\(\varepsilon\)</span>. Then it states what <span class="math inline">\(k\)</span> equal steps give in the reference’s unit, as a pair <span class="math inline">\((\varepsilon, \delta)\)</span>, so that the four composition rules can be compared on one scale.</p>
 <p>Each of the next four sections follows the same plan, under the same headings: why the definition was introduced, its definition, its mechanism, composition, budgeting to the reference, and its limits. The main text states every result and says in a sentence or two how its proof goes. The full proofs are in <a href="#sec-apx" class="quarto-xref">Section&nbsp;7</a>, and every number comes from the script <a href="https://github.com/manuelvloureiro/privacy-preserving-machine-learning-book/blob/main/code/notes/privacy_budgets.py">code/notes/privacy_budgets.py</a>, which the test <a href="https://github.com/manuelvloureiro/privacy-preserving-machine-learning-book/blob/main/tests/test_notes_privacy_budgets.py">tests/test_notes_privacy_budgets.py</a> checks.</p>
 </section>
 </section>
@@ -395,6 +396,11 @@ Figure&nbsp;1: Left: the privacy loss at each output of a count whose true answe
 </div>
 <!-- proof: in @sec-apx-comp -->
 <p><a href="#sec-apx-comp" class="quarto-xref">Section&nbsp;7.3</a> derives it as the case <span class="math inline">\(\delta = 0\)</span> of basic composition, <a href="#thm-basic-comp" class="quarto-xref">Theorem&nbsp;4</a>.</p>
+<p>Pure DP has a single parameter, but it can be read as approximate DP with <span class="math inline">\(\delta = 0\)</span> at every step, and composition keeps that second parameter at zero. In the reference’s unit, <span class="math inline">\(k\)</span> equal steps of <span class="math inline">\(\varepsilon_0\)</span> therefore give</p>
+<p><span id="eq-auto-index-3"><span class="math display">\[
+(\varepsilon, \delta) = (k\varepsilon_0,\ 0).
+\tag{5}\]</span></span></p>
+<p>The same <span class="math inline">\(k\)</span> steps can also be read in the reference’s unit in a second way, if the release is allowed to spend a <span class="math inline">\(\delta\)</span>. <a href="#cor-pure-adv" class="quarto-xref">Corollary&nbsp;3</a> in <a href="#sec-zcdp" class="quarto-xref">Section&nbsp;5</a> shows that they are then <span class="math inline">\((k\varepsilon_0^2/2 + \varepsilon_0\sqrt{2k\ln(1/\delta)},\ \delta)\)</span>-DP for every <span class="math inline">\(\delta\)</span> between 0 and 1. That <span class="math inline">\(\varepsilon\)</span> grows like <span class="math inline">\(\sqrt k\)</span> instead of <span class="math inline">\(k\)</span>, which is what the budgeting below uses for Laplace counts accounted in zCDP.</p>
 </section>
 <section id="budgeting-to-the-reference" class="level2" data-number="2.5">
 <h2 data-number="2.5" class="anchored" data-anchor-id="budgeting-to-the-reference"><span class="header-section-number">2.5</span> Budgeting to the reference</h2>
@@ -416,15 +422,15 @@ Figure&nbsp;1: Left: the privacy loss at each output of a count whose true answe
 <section id="the-definition-1" class="level2" data-number="3.2">
 <h2 data-number="3.2" class="anchored" data-anchor-id="the-definition-1"><span class="header-section-number">3.2</span> The definition</h2>
 <div id="def-approx" class="theorem definition">
-<p><span class="theorem-title"><strong>Definition 2 (Approximate differential privacy)</strong></span> A mechanism <span class="math inline">\(M\)</span> is <strong><span class="math inline">\((\varepsilon, \delta)\)</span>-DP</strong> if, for every pair of neighbouring datasets <span class="math inline">\(D \sim D'\)</span> (in both orders) and every set <span class="math inline">\(S\)</span> of outputs, <span id="eq-auto-index-3"><span class="math display">\[
+<p><span class="theorem-title"><strong>Definition 2 (Approximate differential privacy)</strong></span> A mechanism <span class="math inline">\(M\)</span> is <strong><span class="math inline">\((\varepsilon, \delta)\)</span>-DP</strong> if, for every pair of neighbouring datasets <span class="math inline">\(D \sim D'\)</span> (in both orders) and every set <span class="math inline">\(S\)</span> of outputs, <span id="eq-auto-index-4"><span class="math display">\[
 \Pr[M(D) \in S] \le e^{\varepsilon} \Pr[M(D') \in S] + \delta.
-\tag{5}\]</span></span></p>
+\tag{6}\]</span></span></p>
 </div>
 <p>For a given <span class="math inline">\(\varepsilon\)</span> and a given pair, the smallest <span class="math inline">\(\delta\)</span> that works can be written through the privacy loss. That <span class="math inline">\(\delta\)</span> is the largest gap <span class="math inline">\(P(S) - e^\varepsilon Q(S)\)</span> over all sets <span class="math inline">\(S\)</span>. The set with the largest gap collects every output where <span class="math inline">\(p &gt; e^\varepsilon q\)</span>, which is where the loss exceeds <span class="math inline">\(\varepsilon\)</span>, so the exact <span class="math inline">\(\delta\)</span> is the gap of that set.</p>
 <div id="prp-profile" class="theorem proposition">
-<p><span class="theorem-title"><strong>Proposition 2 (The smallest δ)</strong></span> For a fixed neighbouring pair and a fixed <span class="math inline">\(\varepsilon\)</span>, the smallest <span class="math inline">\(\delta\)</span> for which the inequality of <a href="#def-approx" class="quarto-xref">Definition&nbsp;2</a> holds for every set <span class="math inline">\(S\)</span> is <span id="eq-auto-index-4"><span class="math display">\[
+<p><span class="theorem-title"><strong>Proposition 2 (The smallest δ)</strong></span> For a fixed neighbouring pair and a fixed <span class="math inline">\(\varepsilon\)</span>, the smallest <span class="math inline">\(\delta\)</span> for which the inequality of <a href="#def-approx" class="quarto-xref">Definition&nbsp;2</a> holds for every set <span class="math inline">\(S\)</span> is <span id="eq-auto-index-5"><span class="math display">\[
 \delta(\varepsilon) = \Pr_{Y \sim P}[L(Y) &gt; \varepsilon] - e^{\varepsilon} \Pr_{Y \sim Q}[L(Y) &gt; \varepsilon].
-\tag{6}\]</span></span> A mechanism is <span class="math inline">\((\varepsilon, \delta)\)</span>-DP if and only if <span class="math inline">\(\delta\)</span> is at least this value for every ordered neighbouring pair.</p>
+\tag{7}\]</span></span> A mechanism is <span class="math inline">\((\varepsilon, \delta)\)</span>-DP if and only if <span class="math inline">\(\delta\)</span> is at least this value for every ordered neighbouring pair.</p>
 </div>
 <!-- proof: in @sec-apx-loss -->
 <p>The proof in <a href="#sec-apx-loss" class="quarto-xref">Section&nbsp;7.1</a> shows that adding an output where the loss exceeds <span class="math inline">\(\varepsilon\)</span> to a set raises the gap <span class="math inline">\(P(S) - e^\varepsilon Q(S)\)</span>, and adding any other output lowers it. The curve <span class="math inline">\(\delta(\varepsilon)\)</span> is called the <strong>privacy profile</strong> of the pair. Dropping the second, subtracted term gives a simpler bound, which is the one the two concentrated definitions use to reach the reference.</p>
@@ -444,9 +450,9 @@ Figure&nbsp;1: Left: the privacy loss at each output of a count whose true answe
 <p>The Gaussian mechanism adds independent normal noise with standard deviation <span class="math inline">\(\sigma\)</span> to each coordinate, and its relevant sensitivity is the <span class="math inline">\(\ell_2\)</span> sensitivity <span class="math inline">\(\Delta_2 f\)</span>. Write <span class="math inline">\(s = \Delta_2 f/\sigma\)</span> for the sensitivity measured in standard deviations of noise.</p>
 <p>The loss of this mechanism generalizes the example of <a href="#fig-losses" class="quarto-xref">Figure&nbsp;1</a>, where <span class="math inline">\(s = 1\)</span>. For a pair whose statistics differ by exactly <span class="math inline">\(\Delta_2 f\)</span>, the loss is normal with mean <span class="math inline">\(s^2/2\)</span> and variance <span class="math inline">\(s^2\)</span> under <span class="math inline">\(P\)</span>, and with mean <span class="math inline">\(-s^2/2\)</span> and the same variance under <span class="math inline">\(Q\)</span>, as <a href="#lem-gauss-loss" class="quarto-xref">Lemma&nbsp;4</a> derives. These distributions depend on nothing but <span class="math inline">\(s\)</span>, so <span class="math inline">\(s\)</span> is all that matters for privacy. Putting them into <a href="#prp-profile" class="quarto-xref">Proposition&nbsp;2</a> gives the exact privacy profile in closed form, a result due to Balle and Wang (2018).</p>
 <div id="thm-gauss-exact" class="theorem">
-<p><span class="theorem-title"><strong>Theorem 3 (Exact privacy profile of the Gaussian mechanism)</strong></span> Let <span class="math inline">\(f\)</span> have <span class="math inline">\(\ell_2\)</span> sensitivity <span class="math inline">\(\Delta_2 f\)</span>, and let the mechanism release <span class="math inline">\(f(D) + Z\)</span> with <span class="math inline">\(Z\)</span> normal with mean zero and covariance <span class="math inline">\(\sigma^2 I\)</span>. Write <span class="math inline">\(s = \Delta_2 f/\sigma\)</span>. Then for every <span class="math inline">\(\varepsilon \ge 0\)</span> and every neighbouring pair, <span id="eq-auto-index-5"><span class="math display">\[
+<p><span class="theorem-title"><strong>Theorem 3 (Exact privacy profile of the Gaussian mechanism)</strong></span> Let <span class="math inline">\(f\)</span> have <span class="math inline">\(\ell_2\)</span> sensitivity <span class="math inline">\(\Delta_2 f\)</span>, and let the mechanism release <span class="math inline">\(f(D) + Z\)</span> with <span class="math inline">\(Z\)</span> normal with mean zero and covariance <span class="math inline">\(\sigma^2 I\)</span>. Write <span class="math inline">\(s = \Delta_2 f/\sigma\)</span>. Then for every <span class="math inline">\(\varepsilon \ge 0\)</span> and every neighbouring pair, <span id="eq-auto-index-6"><span class="math display">\[
 \delta(\varepsilon) \le \Phi\Big(\frac{s}{2} - \frac{\varepsilon}{s}\Big) - e^{\varepsilon}\, \Phi\Big(-\frac{s}{2} - \frac{\varepsilon}{s}\Big),
-\tag{7}\]</span></span> with equality for a pair whose statistics differ by exactly <span class="math inline">\(\Delta_2 f\)</span>. The right-hand side increases with <span class="math inline">\(s\)</span>.</p>
+\tag{8}\]</span></span> with equality for a pair whose statistics differ by exactly <span class="math inline">\(\Delta_2 f\)</span>. The right-hand side increases with <span class="math inline">\(s\)</span>.</p>
 </div>
 <!-- proof: in @sec-apx-mech -->
 <p>The proof in <a href="#sec-apx-mech" class="quarto-xref">Section&nbsp;7.2</a> computes the loss, reads the two tail probabilities off the normal distribution, and shows by differentiation that the bound grows with <span class="math inline">\(s\)</span>. Because it grows with <span class="math inline">\(s\)</span>, you calibrate by solving for the largest <span class="math inline">\(s\)</span> that gives the <span class="math inline">\(\delta\)</span> you want, and set <span class="math inline">\(\sigma = \Delta_2 f/s\)</span>. For one count at the reference <span class="math inline">\((1, 10^{-6})\)</span>, the largest ratio is <span class="math inline">\(s = 0.23670\)</span>, so <span class="math inline">\(\sigma = 4.22\)</span>.</p>
@@ -461,9 +467,9 @@ Figure&nbsp;1: Left: the privacy loss at each output of a count whose true answe
 <p>The proof in <a href="#sec-apx-comp" class="quarto-xref">Section&nbsp;7.3</a> handles two mechanisms and extends by induction. It bounds the probability of a set of output pairs by first applying the second mechanism’s guarantee for each first output, then the first mechanism’s guarantee to the resulting average over the first output.</p>
 <p>The second way, <strong>advanced composition</strong>, uses the fact that the losses of independent steps partly cancel, so that their sum grows like <span class="math inline">\(\sqrt k\)</span>. It pays for this with an extra slack <span class="math inline">\(\delta'\)</span> of your choosing, the probability that the sum strays above a bound of that <span class="math inline">\(\sqrt k\)</span> size.</p>
 <div id="thm-adv-comp" class="theorem">
-<p><span class="theorem-title"><strong>Theorem 5 (Advanced composition)</strong></span> Run <span class="math inline">\(k\)</span> mechanisms in sequence as in <a href="#thm-basic-comp" class="quarto-xref">Theorem&nbsp;4</a>, each <span class="math inline">\((\varepsilon_0, \delta_0)\)</span>-DP. For every <span class="math inline">\(\delta' &gt; 0\)</span>, the sequence is <span class="math inline">\((\varepsilon, k\delta_0 + \delta')\)</span>-DP with <span id="eq-auto-index-6"><span class="math display">\[
+<p><span class="theorem-title"><strong>Theorem 5 (Advanced composition)</strong></span> Run <span class="math inline">\(k\)</span> mechanisms in sequence as in <a href="#thm-basic-comp" class="quarto-xref">Theorem&nbsp;4</a>, each <span class="math inline">\((\varepsilon_0, \delta_0)\)</span>-DP. For every <span class="math inline">\(\delta' &gt; 0\)</span>, the sequence is <span class="math inline">\((\varepsilon, k\delta_0 + \delta')\)</span>-DP with <span id="eq-auto-index-7"><span class="math display">\[
 \varepsilon = \varepsilon_0 \sqrt{2k \ln(1/\delta')} + k\varepsilon_0 (e^{\varepsilon_0} - 1).
-\tag{8}\]</span></span></p>
+\tag{9}\]</span></span></p>
 </div>
 <!-- proof: cited -->
 <p>This is Theorem 3.20 of Dwork and Roth (2014), from Dwork, Rothblum and Vadhan (2010), and its proof is cited here. When <span class="math inline">\(\delta_0 &gt; 0\)</span>, that proof first shows that each pair of output distributions differs, on events of total probability at most <span class="math inline">\(\delta_0\)</span>, from a pair that is <span class="math inline">\(\varepsilon_0\)</span>-DP, a step this note does not build. For <span class="math inline">\(\delta_0 = 0\)</span>, <a href="#cor-pure-adv" class="quarto-xref">Corollary&nbsp;3</a> in <a href="#sec-zcdp" class="quarto-xref">Section&nbsp;5</a> proves a stronger version, with <span class="math inline">\(k\varepsilon_0^2/2\)</span> in place of <span class="math inline">\(k\varepsilon_0(e^{\varepsilon_0} - 1)\)</span>.</p>
@@ -473,6 +479,52 @@ Figure&nbsp;1: Left: the privacy loss at each output of a count whose true answe
 </div>
 <!-- proof: in @sec-apx-mech -->
 <p>The proof in <a href="#sec-apx-mech" class="quarto-xref">Section&nbsp;7.2</a> is the argument above. When the queries are chosen adaptively, the same bound still holds. That is the composition theorem of Gaussian differential privacy, a definition built on the Gaussian mechanism’s privacy profile (Dong, Roth and Su, 2022), and it is cited here.</p>
+<p>All three rules compose both parameters, and all three already give their result in the reference’s unit. <a href="#tbl-approx-comp" class="quarto-xref">Table&nbsp;3</a> sets them side by side for <span class="math inline">\(k\)</span> equal steps. Basic composition adds the <span class="math inline">\(\varepsilon\)</span>’s and the <span class="math inline">\(\delta\)</span>’s. Advanced composition makes <span class="math inline">\(\varepsilon\)</span> grow like <span class="math inline">\(\sqrt k\)</span>, while the <span class="math inline">\(\delta\)</span>’s still add and the extra slack <span class="math inline">\(\delta'\)</span> joins them. The exact rule for Gaussian counts has no per-step <span class="math inline">\(\delta\)</span> at all, because it composes the noise itself and computes one privacy profile for the whole release.</p>
+<div id="tbl-approx-comp" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-tbl figure">
+<figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl" id="tbl-approx-comp-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Table&nbsp;3: What k equal steps of approximate DP give in total, under each composition rule. Every rule composes both parameters.
+</figcaption>
+<div aria-describedby="tbl-approx-comp-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<table class="caption-top table">
+<colgroup>
+<col style="width: 25%">
+<col style="width: 25%">
+<col style="width: 25%">
+<col style="width: 25%">
+</colgroup>
+<thead>
+<tr class="header">
+<th style="text-align: left;">Rule</th>
+<th style="text-align: left;">Each step</th>
+<th style="text-align: left;"><span class="math inline">\(\varepsilon\)</span> of the total</th>
+<th style="text-align: left;"><span class="math inline">\(\delta\)</span> of the total</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: left;">Basic, <a href="#thm-basic-comp" class="quarto-xref">Theorem&nbsp;4</a></td>
+<td style="text-align: left;"><span class="math inline">\((\varepsilon_0, \delta_0)\)</span>-DP</td>
+<td style="text-align: left;"><span class="math inline">\(k\varepsilon_0\)</span></td>
+<td style="text-align: left;"><span class="math inline">\(k\delta_0\)</span></td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Advanced, <a href="#thm-adv-comp" class="quarto-xref">Theorem&nbsp;5</a></td>
+<td style="text-align: left;"><span class="math inline">\((\varepsilon_0, \delta_0)\)</span>-DP</td>
+<td style="text-align: left;"><span class="math inline">\(\varepsilon_0\sqrt{2k\ln(1/\delta')} + k\varepsilon_0(e^{\varepsilon_0} - 1)\)</span></td>
+<td style="text-align: left;"><span class="math inline">\(k\delta_0 + \delta'\)</span></td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Exact, <a href="#cor-gauss-k" class="quarto-xref">Corollary&nbsp;2</a></td>
+<td style="text-align: left;">Gaussian, ratio <span class="math inline">\(s_0 = \Delta/\sigma\)</span></td>
+<td style="text-align: left;">any <span class="math inline">\(\varepsilon\)</span></td>
+<td style="text-align: left;">the bound of <a href="#thm-gauss-exact" class="quarto-xref">Theorem&nbsp;3</a> at <span class="math inline">\(\varepsilon\)</span>, with <span class="math inline">\(s = \sqrt k\, s_0\)</span></td>
+</tr>
+</tbody>
+</table>
+</div>
+</figure>
+</div>
 </section>
 <section id="budgeting-to-the-reference-1" class="level2" data-number="3.5">
 <h2 data-number="3.5" class="anchored" data-anchor-id="budgeting-to-the-reference-1"><span class="header-section-number">3.5</span> Budgeting to the reference</h2>
@@ -497,9 +549,9 @@ Figure&nbsp;1: Left: the privacy loss at each output of a count whose true answe
 <h2 data-number="4.2" class="anchored" data-anchor-id="the-definition-2"><span class="header-section-number">4.2</span> The definition</h2>
 <p>The definition needs a precise meaning for “strays from its average no more than a normal variable would”. It compares exponential moments, the averages <span class="math inline">\(\mathbb E[e^{\lambda X}]\)</span>, which are large when <span class="math inline">\(X\)</span> has large values with appreciable probability. A normal variable with variance <span class="math inline">\(\tau^2\)</span> has exponential moments <span class="math inline">\(e^{\lambda^2 \tau^2/2}\)</span> around its mean, a fact <a href="#lem-normal-mgf" class="quarto-xref">Lemma&nbsp;3</a> derives. A variable is called subgaussian when its exponential moments are no larger than those.</p>
 <div id="def-subg" class="theorem definition">
-<p><span class="theorem-title"><strong>Definition 3 (Subgaussian)</strong></span> A random variable <span class="math inline">\(X\)</span> with mean <span class="math inline">\(m\)</span> is <strong><span class="math inline">\(\tau\)</span>-subgaussian</strong> if, for every real <span class="math inline">\(\lambda\)</span>, <span id="eq-auto-index-7"><span class="math display">\[
+<p><span class="theorem-title"><strong>Definition 3 (Subgaussian)</strong></span> A random variable <span class="math inline">\(X\)</span> with mean <span class="math inline">\(m\)</span> is <strong><span class="math inline">\(\tau\)</span>-subgaussian</strong> if, for every real <span class="math inline">\(\lambda\)</span>, <span id="eq-auto-index-8"><span class="math display">\[
 \mathbb E\big[e^{\lambda (X - m)}\big] \le e^{\lambda^2 \tau^2 / 2}.
-\tag{9}\]</span></span></p>
+\tag{10}\]</span></span></p>
 </div>
 <p>Large deviations of a subgaussian variable are rare: by the Chernoff bound of <a href="#lem-chernoff" class="quarto-xref">Lemma&nbsp;6</a>, it exceeds its mean by <span class="math inline">\(t\)</span> with probability at most <span class="math inline">\(e^{-t^2/(2\tau^2)}\)</span>, the same bound a normal variable with standard deviation <span class="math inline">\(\tau\)</span> satisfies. Any variable confined to an interval of length <span class="math inline">\(2\tau\)</span> is <span class="math inline">\(\tau\)</span>-subgaussian; that is Hoeffding’s lemma, <a href="#lem-hoeffding" class="quarto-xref">Lemma&nbsp;7</a>.</p>
 <div id="def-cdp" class="theorem definition">
@@ -525,27 +577,32 @@ Figure&nbsp;1: Left: the privacy loss at each output of a count whose true answe
 <h2 data-number="4.4" class="anchored" data-anchor-id="composition-1"><span class="header-section-number">4.4</span> Composition</h2>
 <p>When the queries are independent, the total loss is a sum of independent losses. Its mean is the sum of the means, and its exponential moment is the product of the steps’ exponential moments, so the squared spreads add.</p>
 <div id="thm-cdp-comp" class="theorem">
-<p><span class="theorem-title"><strong>Theorem 6 (Composition of CDP)</strong></span> Run <span class="math inline">\(k\)</span> mechanisms independently on the same dataset, the <span class="math inline">\(i\)</span>-th one <span class="math inline">\((\mu_i, \tau_i)\)</span>-CDP. The release of all <span class="math inline">\(k\)</span> outputs is <span class="math inline">\((\mu, \tau)\)</span>-CDP with <span id="eq-auto-index-8"><span class="math display">\[
+<p><span class="theorem-title"><strong>Theorem 6 (Composition of CDP)</strong></span> Run <span class="math inline">\(k\)</span> mechanisms independently on the same dataset, the <span class="math inline">\(i\)</span>-th one <span class="math inline">\((\mu_i, \tau_i)\)</span>-CDP. The release of all <span class="math inline">\(k\)</span> outputs is <span class="math inline">\((\mu, \tau)\)</span>-CDP with <span id="eq-auto-index-9"><span class="math display">\[
 \mu = \mu_1 + \dots + \mu_k, \qquad \tau = \sqrt{\tau_1^2 + \dots + \tau_k^2}.
-\tag{10}\]</span></span></p>
+\tag{11}\]</span></span></p>
 </div>
 <!-- proof: in @sec-apx-comp -->
 <p><a href="#sec-apx-comp" class="quarto-xref">Section&nbsp;7.3</a> proves it, and also handles queries chosen adaptively. For those, it proves a bound on the upper tail of the total loss only, <a href="#lem-cdp-adaptive" class="quarto-xref">Lemma&nbsp;5</a>, which is all that the conversion below needs. Dwork and Rothblum state the full theorem for adaptive queries too.</p>
 <p>The conversion to approximate DP uses the subgaussian tail. The loss exceeds <span class="math inline">\(\mu + t\)</span> with probability at most <span class="math inline">\(e^{-t^2/(2\tau^2)}\)</span>, and setting that bound equal to <span class="math inline">\(\delta\)</span> gives <span class="math inline">\(t = \tau\sqrt{2\ln(1/\delta)}\)</span>. Then <a href="#cor-tail" class="quarto-xref">Corollary&nbsp;1</a> turns the tail bound into approximate DP.</p>
 <div id="thm-cdp-conv" class="theorem">
-<p><span class="theorem-title"><strong>Theorem 7 (From CDP to approximate DP)</strong></span> A <span class="math inline">\((\mu, \tau)\)</span>-CDP mechanism is <span class="math inline">\((\varepsilon, \delta)\)</span>-DP for every <span class="math inline">\(\delta\)</span> between 0 and 1, and so is any mechanism whose loss satisfies <span class="math inline">\(\mathbb E_P[e^{\lambda(L - \mu)}] \le e^{\lambda^2\tau^2/2}\)</span> for every <span class="math inline">\(\lambda \ge 0\)</span> and every ordered neighbouring pair, with <span id="eq-auto-index-9"><span class="math display">\[
+<p><span class="theorem-title"><strong>Theorem 7 (From CDP to approximate DP)</strong></span> A <span class="math inline">\((\mu, \tau)\)</span>-CDP mechanism is <span class="math inline">\((\varepsilon, \delta)\)</span>-DP for every <span class="math inline">\(\delta\)</span> between 0 and 1, and so is any mechanism whose loss satisfies <span class="math inline">\(\mathbb E_P[e^{\lambda(L - \mu)}] \le e^{\lambda^2\tau^2/2}\)</span> for every <span class="math inline">\(\lambda \ge 0\)</span> and every ordered neighbouring pair, with <span id="eq-auto-index-10"><span class="math display">\[
 \varepsilon = \mu + \tau \sqrt{2 \ln(1/\delta)}.
-\tag{11}\]</span></span></p>
+\tag{12}\]</span></span></p>
 </div>
 <!-- proof: in @sec-apx-conv -->
 <p><a href="#sec-apx-conv" class="quarto-xref">Section&nbsp;7.4</a> proves it from Markov’s inequality applied to an exponential, which is the Chernoff bound.</p>
+<p>CDP has two parameters, and <a href="#thm-cdp-comp" class="quarto-xref">Theorem&nbsp;6</a> composes both: the means add, and the squared spreads add. Neither of them is a <span class="math inline">\(\delta\)</span>, so CDP has no <span class="math inline">\(\delta\)</span> to compose. A <span class="math inline">\(\delta\)</span> enters only when the total is converted to the reference’s unit, and it is chosen once, for the whole release, rather than spent step by step. In the reference’s unit, <span class="math inline">\(k\)</span> equal steps of <span class="math inline">\((\mu_0, \tau_0)\)</span> therefore give, for every <span class="math inline">\(\delta\)</span> between 0 and 1,</p>
+<p><span id="eq-cdp-k"><span class="math display">\[
+(\varepsilon, \delta) = \Big(k\mu_0 + \sqrt k\,\tau_0\sqrt{2\ln(1/\delta)},\ \delta\Big).
+\tag{13}\]</span></span></p>
+<p>The first term grows like <span class="math inline">\(k\)</span>, but <span class="math inline">\(\mu_0\)</span> is tiny; the second grows only like <span class="math inline">\(\sqrt k\)</span>, because the spreads add in squares.</p>
 </section>
 <section id="budgeting-to-the-reference-2" class="level2" data-number="4.5">
 <h2 data-number="4.5" class="anchored" data-anchor-id="budgeting-to-the-reference-2"><span class="header-section-number">4.5</span> Budgeting to the reference</h2>
 <p>The CDP budget is a pair, and many pairs convert to the same reference, so the pair depends on the noise. For Gaussian counts the two are tied together, since a Gaussian mechanism has <span class="math inline">\(\mu = \tau^2/2\)</span>, and <a href="#thm-cdp-comp" class="quarto-xref">Theorem&nbsp;6</a> keeps that relation when Gaussian mechanisms are combined. So the budget for a release of Gaussian counts is the <span class="math inline">\(\tau\)</span> that solves</p>
-<p><span id="eq-auto-index-10"><span class="math display">\[
+<p><span id="eq-auto-index-11"><span class="math display">\[
 \frac{\tau^2}{2} + \tau \sqrt{2 \ln(1/\delta)} = 1.
-\tag{12}\]</span></span></p>
+\tag{14}\]</span></span></p>
 <p>At <span class="math inline">\(\delta = 10^{-6}\)</span>, <span class="math inline">\(\ln(1/\delta) = 13.8155\)</span>, and this quadratic gives <span class="math inline">\(\tau = 0.18692\)</span> and <span class="math inline">\(\mu = 0.01747\)</span>. Composition adds the squared spreads, so each of the 100 counts gets <span class="math inline">\(\tau_0 = \tau/\sqrt{100} = 0.018692\)</span>. By <a href="#prp-cdp-gauss" class="quarto-xref">Proposition&nbsp;3</a>, <span class="math inline">\(\tau_0 = 1/\sigma\)</span> for a count, so <span class="math inline">\(\sigma = 53.50\)</span>. For Laplace counts, <a href="#prp-cdp-pure" class="quarto-xref">Proposition&nbsp;4</a> gives each count a mean <span class="math inline">\(\varepsilon_0\tanh(\varepsilon_0/2)\)</span> and a spread <span class="math inline">\(\varepsilon_0\)</span>, so the release has mean <span class="math inline">\(100\,\varepsilon_0\tanh(\varepsilon_0/2)\)</span> and spread <span class="math inline">\(10\,\varepsilon_0\)</span>. The script solves <a href="#thm-cdp-conv" class="quarto-xref">Theorem&nbsp;7</a> for the <span class="math inline">\(\varepsilon_0\)</span> that makes the total 1. Since <span class="math inline">\(\varepsilon_0\tanh(\varepsilon_0/2)\)</span> is almost exactly <span class="math inline">\(\varepsilon_0^2/2\)</span> for a small <span class="math inline">\(\varepsilon_0\)</span>, this is nearly the Gaussian equation, and the solution is <span class="math inline">\(\varepsilon_0 = 0.01869\)</span>. The Laplace scale is then <span class="math inline">\(1/\varepsilon_0 = 53.50\)</span> and the standard deviation <span class="math inline">\(\sqrt 2/\varepsilon_0 = 75.66\)</span>.</p>
 </section>
 <section id="limits-2" class="level2" data-number="4.6">
@@ -564,15 +621,15 @@ Figure&nbsp;1: Left: the privacy loss at each output of a count whose true answe
 <h2 data-number="5.2" class="anchored" data-anchor-id="the-definition-3"><span class="header-section-number">5.2</span> The definition</h2>
 <p>The divergence is the <strong>Rényi divergence</strong> of order <span class="math inline">\(\alpha\)</span>. It averages the likelihood ratio raised to the power <span class="math inline">\(\alpha\)</span>, so a larger order puts more weight on the outputs where the ratio is large.</p>
 <div id="def-renyi" class="theorem definition">
-<p><span class="theorem-title"><strong>Definition 5 (Rényi divergence)</strong></span> For an order <span class="math inline">\(\alpha &gt; 1\)</span>, the Rényi divergence of <span class="math inline">\(P\)</span> from <span class="math inline">\(Q\)</span> is <span id="eq-auto-index-11"><span class="math display">\[
+<p><span class="theorem-title"><strong>Definition 5 (Rényi divergence)</strong></span> For an order <span class="math inline">\(\alpha &gt; 1\)</span>, the Rényi divergence of <span class="math inline">\(P\)</span> from <span class="math inline">\(Q\)</span> is <span id="eq-auto-index-12"><span class="math display">\[
 D_\alpha(P \| Q) = \frac{1}{\alpha - 1} \ln \mathbb E_{Y \sim Q}\Big[\Big(\frac{p(Y)}{q(Y)}\Big)^{\alpha}\Big].
-\tag{13}\]</span></span></p>
+\tag{15}\]</span></span></p>
 </div>
 <p>The divergence is an exponential moment of the privacy loss in disguise. Inside the expectation, one factor <span class="math inline">\(p/q\)</span> can be absorbed into the distribution, which turns an average under <span class="math inline">\(Q\)</span> into an average under <span class="math inline">\(P\)</span>.</p>
 <div id="lem-renyi-loss" class="theorem lemma">
-<p><span class="theorem-title"><strong>Lemma 1</strong></span> For every order <span class="math inline">\(\alpha &gt; 1\)</span>, <span id="eq-auto-index-12"><span class="math display">\[
+<p><span class="theorem-title"><strong>Lemma 1</strong></span> For every order <span class="math inline">\(\alpha &gt; 1\)</span>, <span id="eq-auto-index-13"><span class="math display">\[
 D_\alpha(P \| Q) = \frac{1}{\alpha - 1} \ln \mathbb E_{Y \sim P}\big[e^{(\alpha - 1) L(Y)}\big].
-\tag{14}\]</span></span></p>
+\tag{16}\]</span></span></p>
 </div>
 <div class="proof">
 <p><span class="proof-title"><em>Proof</em>. </span></p>
@@ -582,14 +639,14 @@ D_\alpha(P \| Q) = \frac{1}{\alpha - 1} \ln \mathbb E_{Y \sim P}\big[e^{(\alpha 
 </ol>
 </div>
 <div id="def-zcdp" class="theorem definition">
-<p><span class="theorem-title"><strong>Definition 6 (Zero-concentrated differential privacy)</strong></span> A mechanism <span class="math inline">\(M\)</span> is <strong><span class="math inline">\(\rho\)</span>-zCDP</strong> if, for every pair of neighbouring datasets <span class="math inline">\(D \sim D'\)</span> (in both orders) and every order <span class="math inline">\(\alpha &gt; 1\)</span>, <span id="eq-auto-index-13"><span class="math display">\[
+<p><span class="theorem-title"><strong>Definition 6 (Zero-concentrated differential privacy)</strong></span> A mechanism <span class="math inline">\(M\)</span> is <strong><span class="math inline">\(\rho\)</span>-zCDP</strong> if, for every pair of neighbouring datasets <span class="math inline">\(D \sim D'\)</span> (in both orders) and every order <span class="math inline">\(\alpha &gt; 1\)</span>, <span id="eq-auto-index-14"><span class="math display">\[
 D_\alpha(P \| Q) \le \alpha \rho.
-\tag{15}\]</span></span></p>
+\tag{17}\]</span></span></p>
 </div>
 <p>By <a href="#lem-renyi-loss" class="quarto-xref">Lemma&nbsp;1</a>, the definition bounds the exponential moments of the loss. Multiply both sides of <span class="math inline">\(D_\alpha \le \alpha\rho\)</span> by <span class="math inline">\(\alpha - 1\)</span>, exponentiate, and write <span class="math inline">\(\lambda = \alpha - 1 &gt; 0\)</span>, so that <span class="math inline">\(\alpha = \lambda + 1\)</span>. The condition becomes</p>
-<p><span id="eq-auto-index-14"><span class="math display">\[
+<p><span id="eq-auto-index-15"><span class="math display">\[
 \mathbb E_P\big[e^{\lambda L}\big] \le e^{\lambda(\lambda + 1)\rho} \quad \text{for every } \lambda &gt; 0.
-\tag{16}\]</span></span></p>
+\tag{18}\]</span></span></p>
 <p>A normal loss with mean <span class="math inline">\(\rho\)</span> and variance <span class="math inline">\(2\rho\)</span> has exactly these exponential moments, by <a href="#lem-normal-mgf" class="quarto-xref">Lemma&nbsp;3</a>, since <span class="math inline">\(\lambda\rho + \lambda^2 (2\rho)/2 = \lambda(\lambda + 1)\rho\)</span>. So <span class="math inline">\(\rho\)</span>-zCDP says that the loss is no worse, in any exponential moment, than a normal loss with mean <span class="math inline">\(\rho\)</span> and variance <span class="math inline">\(2\rho\)</span>. That is the loss of a Gaussian mechanism with <span class="math inline">\(s^2 = 2\rho\)</span>.</p>
 </section>
 <section id="its-mechanism-1" class="level2" data-number="5.3">
@@ -609,9 +666,9 @@ D_\alpha(P \| Q) \le \alpha \rho.
 <h2 data-number="5.4" class="anchored" data-anchor-id="composition-2"><span class="header-section-number">5.4</span> Composition</h2>
 <p>The total loss of a sequence is the sum of the steps’ losses, and the exponential of a sum is a product. Averaging the last step first, for each value of the earlier outputs, bounds its factor by <span class="math inline">\(e^{\lambda(\lambda + 1)\rho_k}\)</span>, and repeating this step by step multiplies the bounds.</p>
 <div id="thm-zcdp-comp" class="theorem">
-<p><span class="theorem-title"><strong>Theorem 8 (Composition of zCDP)</strong></span> Run <span class="math inline">\(k\)</span> mechanisms in sequence on the same dataset, where the <span class="math inline">\(i\)</span>-th may depend on the earlier outputs and is <span class="math inline">\(\rho_i\)</span>-zCDP for every value of them. The sequence is <span class="math inline">\(\rho\)</span>-zCDP with <span id="eq-auto-index-15"><span class="math display">\[
+<p><span class="theorem-title"><strong>Theorem 8 (Composition of zCDP)</strong></span> Run <span class="math inline">\(k\)</span> mechanisms in sequence on the same dataset, where the <span class="math inline">\(i\)</span>-th may depend on the earlier outputs and is <span class="math inline">\(\rho_i\)</span>-zCDP for every value of them. The sequence is <span class="math inline">\(\rho\)</span>-zCDP with <span id="eq-auto-index-16"><span class="math display">\[
 \rho = \rho_1 + \dots + \rho_k.
-\tag{17}\]</span></span></p>
+\tag{19}\]</span></span></p>
 </div>
 <!-- proof: in @sec-apx-comp -->
 <p><a href="#sec-apx-comp" class="quarto-xref">Section&nbsp;7.3</a> proves it.</p>
@@ -623,27 +680,32 @@ D_\alpha(P \| Q) \le \alpha \rho.
 <p><a href="#sec-apx-post" class="quarto-xref">Section&nbsp;7.6</a> proves it. For zCDP, the step that matters is Jensen’s inequality, which says that the average of a convex function, here <span class="math inline">\(x^\alpha\)</span>, is at least the function of the average.</p>
 <p>The conversion to the reference applies Markov’s inequality to <span class="math inline">\(e^{\lambda L}\)</span> and chooses the best <span class="math inline">\(\lambda\)</span>, which gives a normal-shaped tail.</p>
 <div id="thm-zcdp-conv" class="theorem">
-<p><span class="theorem-title"><strong>Theorem 10 (From zCDP to approximate DP)</strong></span> A <span class="math inline">\(\rho\)</span>-zCDP mechanism is <span class="math inline">\((\varepsilon, \delta)\)</span>-DP for every <span class="math inline">\(\delta\)</span> between 0 and 1, with <span id="eq-auto-index-16"><span class="math display">\[
+<p><span class="theorem-title"><strong>Theorem 10 (From zCDP to approximate DP)</strong></span> A <span class="math inline">\(\rho\)</span>-zCDP mechanism is <span class="math inline">\((\varepsilon, \delta)\)</span>-DP for every <span class="math inline">\(\delta\)</span> between 0 and 1, with <span id="eq-auto-index-17"><span class="math display">\[
 \varepsilon = \rho + 2\sqrt{\rho \ln(1/\delta)}.
-\tag{18}\]</span></span></p>
+\tag{20}\]</span></span></p>
 </div>
 <!-- proof: in @sec-apx-conv -->
 <p><a href="#sec-apx-conv" class="quarto-xref">Section&nbsp;7.4</a> proves it. For a Gaussian mechanism, this is the same formula as <a href="#thm-cdp-conv" class="quarto-xref">Theorem&nbsp;7</a>: with <span class="math inline">\(\rho = s^2/2\)</span>, <span class="math inline">\(\mu = s^2/2\)</span> and <span class="math inline">\(\tau = s\)</span>, both give <span class="math inline">\(s^2/2 + s\sqrt{2\ln(1/\delta)}\)</span>. Chaining <a href="#prp-zcdp-pure" class="quarto-xref">Proposition&nbsp;6</a>, <a href="#thm-zcdp-comp" class="quarto-xref">Theorem&nbsp;8</a> and <a href="#thm-zcdp-conv" class="quarto-xref">Theorem&nbsp;10</a> gives an advanced composition theorem for pure DP, with a proof that this note completes.</p>
 <div id="cor-pure-adv" class="theorem corollary">
-<p><span class="theorem-title"><strong>Corollary 3 (Advanced composition of pure DP)</strong></span> Run <span class="math inline">\(k\)</span> mechanisms in sequence as in <a href="#thm-pure-comp" class="quarto-xref">Theorem&nbsp;2</a>, each <span class="math inline">\(\varepsilon_0\)</span>-DP. For every <span class="math inline">\(\delta\)</span> between 0 and 1, the sequence is <span class="math inline">\((\varepsilon, \delta)\)</span>-DP with <span id="eq-auto-index-17"><span class="math display">\[
+<p><span class="theorem-title"><strong>Corollary 3 (Advanced composition of pure DP)</strong></span> Run <span class="math inline">\(k\)</span> mechanisms in sequence as in <a href="#thm-pure-comp" class="quarto-xref">Theorem&nbsp;2</a>, each <span class="math inline">\(\varepsilon_0\)</span>-DP. For every <span class="math inline">\(\delta\)</span> between 0 and 1, the sequence is <span class="math inline">\((\varepsilon, \delta)\)</span>-DP with <span id="eq-auto-index-18"><span class="math display">\[
 \varepsilon = \frac{k \varepsilon_0^2}{2} + \varepsilon_0 \sqrt{2k \ln(1/\delta)}.
-\tag{19}\]</span></span></p>
+\tag{21}\]</span></span></p>
 </div>
 <!-- proof: in @sec-apx-pure -->
 <p>The proof in <a href="#sec-apx-pure" class="quarto-xref">Section&nbsp;7.5</a> chains the three results. Its second term is the same as in <a href="#thm-adv-comp" class="quarto-xref">Theorem&nbsp;5</a>, and its first term is about half as large, since <span class="math inline">\(e^{\varepsilon_0} - 1\)</span> is close to <span class="math inline">\(\varepsilon_0\)</span> for a small <span class="math inline">\(\varepsilon_0\)</span>.</p>
+<p>zCDP has one parameter, and <a href="#thm-zcdp-comp" class="quarto-xref">Theorem&nbsp;8</a> composes it by adding. Like CDP, it has no <span class="math inline">\(\delta\)</span> to compose: a <span class="math inline">\(\delta\)</span> is chosen once, when the total is converted. In the reference’s unit, <span class="math inline">\(k\)</span> equal steps of <span class="math inline">\(\rho_0\)</span> therefore give, for every <span class="math inline">\(\delta\)</span> between 0 and 1,</p>
+<p><span id="eq-zcdp-k"><span class="math display">\[
+(\varepsilon, \delta) = \Big(k\rho_0 + 2\sqrt{k\rho_0\ln(1/\delta)},\ \delta\Big).
+\tag{22}\]</span></span></p>
+<p>For Gaussian steps, where <span class="math inline">\(\mu_0 = \rho_0\)</span> and <span class="math inline">\(\tau_0^2 = 2\rho_0\)</span>, this is the same pair as <a href="#eq-cdp-k" class="quarto-xref">Equation&nbsp;13</a>.</p>
 </section>
 <section id="sec-zcdp-budget" class="level2" data-number="5.5">
 <h2 data-number="5.5" class="anchored" data-anchor-id="sec-zcdp-budget"><span class="header-section-number">5.5</span> Budgeting to the reference</h2>
 <p>The zCDP budget for the reference is the largest <span class="math inline">\(\rho\)</span> that <a href="#thm-zcdp-conv" class="quarto-xref">Theorem&nbsp;10</a> turns into <span class="math inline">\(\varepsilon = 1\)</span> at <span class="math inline">\(\delta = 10^{-6}\)</span>. The conversion is a quadratic in <span class="math inline">\(\sqrt\rho\)</span>, namely <span class="math inline">\((\sqrt\rho)^2 + 2\sqrt{\ln(1/\delta)}\,\sqrt\rho - \varepsilon = 0\)</span>, and its positive root gives</p>
 <p><span id="eq-rho-budget"><span class="math display">\[
 \rho = \Big(\sqrt{\ln(1/\delta) + \varepsilon} - \sqrt{\ln(1/\delta)}\Big)^2.
-\tag{20}\]</span></span></p>
-<p>With <span class="math inline">\(\ln(1/\delta) = 13.8155\)</span> and <span class="math inline">\(\varepsilon = 1\)</span>, <a href="#eq-rho-budget" class="quarto-xref">Equation&nbsp;20</a> gives <span class="math inline">\(\rho = 0.01747\)</span>. That is the whole release’s budget, and by <a href="#thm-zcdp-comp" class="quarto-xref">Theorem&nbsp;8</a> any split whose parts sum to it works. The even split gives each count <span class="math inline">\(\rho_0 = 1.747 \times 10^{-4}\)</span>.</p>
+\tag{23}\]</span></span></p>
+<p>With <span class="math inline">\(\ln(1/\delta) = 13.8155\)</span> and <span class="math inline">\(\varepsilon = 1\)</span>, <a href="#eq-rho-budget" class="quarto-xref">Equation&nbsp;23</a> gives <span class="math inline">\(\rho = 0.01747\)</span>. That is the whole release’s budget, and by <a href="#thm-zcdp-comp" class="quarto-xref">Theorem&nbsp;8</a> any split whose parts sum to it works. The even split gives each count <span class="math inline">\(\rho_0 = 1.747 \times 10^{-4}\)</span>.</p>
 <p>Each count can then be paid for with either kind of noise. With Gaussian noise, <a href="#prp-zcdp-gauss" class="quarto-xref">Proposition&nbsp;5</a> gives <span class="math inline">\(\sigma = 1/\sqrt{2\rho_0} = 53.50\)</span>, the same as under CDP. With Laplace noise, <a href="#prp-zcdp-pure" class="quarto-xref">Proposition&nbsp;6</a> gives <span class="math inline">\(\varepsilon_0 = \sqrt{2\rho_0} = 0.01869\)</span>, so the scale is 53.50 and the standard deviation is 75.66. That is the number promised in the pure DP section. The same Laplace noise, which pure DP certifies only at <span class="math inline">\(\varepsilon = 100 \times 0.01869 = 1.87\)</span>, meets the reference <span class="math inline">\((1, 10^{-6})\)</span> once it is accounted in zCDP.</p>
 <p>A single budget can also mix the two kinds of noise. A release might give its ten most important counts Gaussian noise with a larger <span class="math inline">\(\rho_i\)</span> each, and the rest Laplace noise with a smaller one. The only rule is that the <span class="math inline">\(\rho_i\)</span> add up to 0.01747.</p>
 </section>
@@ -654,14 +716,15 @@ D_\alpha(P \| Q) \le \alpha \rho.
 </section>
 <section id="sec-tradeoffs" class="level1" data-number="6">
 <h1 data-number="6"><span class="header-section-number">6</span> Trade-offs</h1>
-<p>Each of the four definitions has now been budgeted to the same reference. This section sets the results side by side, says which guarantees imply which, shows how the cost of each accounting grows with the number of queries, and ends with when to use each.</p>
+<p>Each of the four definitions has now been budgeted to the same reference. This section sets the results side by side, compares the composition rules in one unit, says which guarantees imply which, shows how the cost of each accounting grows with the number of queries, and ends with when to use each.</p>
 <section id="side-by-side" class="level2" data-number="6.1">
 <h2 data-number="6.1" class="anchored" data-anchor-id="side-by-side"><span class="header-section-number">6.1</span> Side by side</h2>
-<p><a href="#tbl-side" class="quarto-xref">Table&nbsp;3</a> summarizes the four sections. Its last row is the answer to the running example’s question: the noise each count needs so that 100 counts meet <span class="math inline">\((1, 10^{-6})\)</span>.</p>
+<p><a href="#tbl-side" class="quarto-xref">Table&nbsp;4</a> summarizes the four sections in words, and <a href="#tbl-math" class="quarto-xref">Table&nbsp;5</a> gives the same comparison in formulas. In the PDF, each table has a landscape page of its own. The last row of <a href="#tbl-side" class="quarto-xref">Table&nbsp;4</a> is the answer to the running example’s question: the noise each count needs so that 100 counts meet <span class="math inline">\((1, 10^{-6})\)</span>.</p>
+<p><a href="#tbl-math" class="quarto-xref">Table&nbsp;5</a> restates every formula the four sections use, row by row, so that one row compares the four definitions on one question. Writing <span class="math inline">\(s = \Delta_2 f/\sigma\)</span> for the Gaussian mechanism and <span class="math inline">\(b\)</span> for the Laplace scale, the rows go from the definition through the two mechanisms and composition to the conversion and the budget. The last two rows are the budgeting recipe for <span class="math inline">\(k\)</span> counts that must meet the reference <span class="math inline">\((\varepsilon, \delta)\)</span> in total.</p>
 <div id="tbl-side" class="quarto-float quarto-figure quarto-figure-center anchored">
 <figure class="quarto-float quarto-float-tbl figure">
 <figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl" id="tbl-side-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-Table&nbsp;3: The four definitions side by side. The last row is the standard deviation of the noise on each of 100 counts for the release to meet (ε, δ) = (1, 10⁻⁶).
+Table&nbsp;4: The four definitions side by side. The last row is the standard deviation of the noise on each of 100 counts for the release to meet (ε, δ) = (1, 10⁻⁶).
 </figcaption>
 <div aria-describedby="tbl-side-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
 <table class="caption-top table">
@@ -705,26 +768,33 @@ Table&nbsp;3: The four definitions side by side. The last row is the standard de
 </tr>
 <tr class="even">
 <td style="text-align: left;">Composition</td>
-<td style="text-align: left;">the <span class="math inline">\(\varepsilon\)</span>’s add</td>
-<td style="text-align: left;">basic adds both; advanced grows like <span class="math inline">\(\sqrt k\)</span> at the cost of a <span class="math inline">\(\delta'\)</span></td>
-<td style="text-align: left;">the <span class="math inline">\(\mu\)</span>’s add and the <span class="math inline">\(\tau^2\)</span>’s add</td>
-<td style="text-align: left;">the <span class="math inline">\(\rho\)</span>’s add</td>
+<td style="text-align: left;">the <span class="math inline">\(\varepsilon\)</span>’s add; <span class="math inline">\(\delta\)</span> stays 0</td>
+<td style="text-align: left;">basic adds the <span class="math inline">\(\varepsilon\)</span>’s and the <span class="math inline">\(\delta\)</span>’s; advanced makes <span class="math inline">\(\varepsilon\)</span> grow like <span class="math inline">\(\sqrt k\)</span> and adds the <span class="math inline">\(\delta\)</span>’s plus <span class="math inline">\(\delta'\)</span></td>
+<td style="text-align: left;">the <span class="math inline">\(\mu\)</span>’s add and the <span class="math inline">\(\tau^2\)</span>’s add; <span class="math inline">\(\delta\)</span> is chosen once, at conversion</td>
+<td style="text-align: left;">the <span class="math inline">\(\rho\)</span>’s add; <span class="math inline">\(\delta\)</span> is chosen once, at conversion</td>
 </tr>
 <tr class="odd">
+<td style="text-align: left;"><span class="math inline">\(k\)</span> equal steps, in the reference’s unit</td>
+<td style="text-align: left;"><span class="math inline">\((k\varepsilon_0, 0)\)</span></td>
+<td style="text-align: left;"><a href="#tbl-approx-comp" class="quarto-xref">Table&nbsp;3</a></td>
+<td style="text-align: left;"><a href="#eq-cdp-k" class="quarto-xref">Equation&nbsp;13</a></td>
+<td style="text-align: left;"><a href="#eq-zcdp-k" class="quarto-xref">Equation&nbsp;22</a></td>
+</tr>
+<tr class="even">
 <td style="text-align: left;">Budget for <span class="math inline">\((1, 10^{-6})\)</span></td>
 <td style="text-align: left;"><span class="math inline">\(\varepsilon = 1\)</span></td>
 <td style="text-align: left;">the reference itself, split by a composition rule</td>
 <td style="text-align: left;"><span class="math inline">\(\mu = 0.01747\)</span>, <span class="math inline">\(\tau = 0.18692\)</span> (Gaussian counts)</td>
 <td style="text-align: left;"><span class="math inline">\(\rho = 0.01747\)</span></td>
 </tr>
-<tr class="even">
+<tr class="odd">
 <td style="text-align: left;">Post-processing</td>
 <td style="text-align: left;">preserved</td>
 <td style="text-align: left;">preserved</td>
 <td style="text-align: left;">not preserved</td>
 <td style="text-align: left;">preserved</td>
 </tr>
-<tr class="odd">
+<tr class="even">
 <td style="text-align: left;">Noise per count, <span class="math inline">\(k = 100\)</span></td>
 <td style="text-align: left;">141.42 (Laplace)</td>
 <td style="text-align: left;">412.36 (basic), 243.80 (advanced), 42.25 (exact)</td>
@@ -736,19 +806,181 @@ Table&nbsp;3: The four definitions side by side. The last row is the standard de
 </div>
 </figure>
 </div>
+<div id="tbl-math" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-tbl figure">
+<figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl" id="tbl-math-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Table&nbsp;5: The four definitions side by side in formulas: each row answers one question for all four, and names the result that proves it.
+</figcaption>
+<div aria-describedby="tbl-math-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<table class="caption-top table">
+<colgroup>
+<col style="width: 20%">
+<col style="width: 16%">
+<col style="width: 20%">
+<col style="width: 20%">
+<col style="width: 20%">
+</colgroup>
+<thead>
+<tr class="header">
+<th style="text-align: left;"></th>
+<th style="text-align: left;">Pure DP</th>
+<th style="text-align: left;">Approximate DP</th>
+<th style="text-align: left;">CDP</th>
+<th style="text-align: left;">zCDP</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: left;">Definition, for every ordered neighbouring pair</td>
+<td style="text-align: left;"><span class="math inline">\(P(S) \le e^{\varepsilon} Q(S)\)</span> for every set <span class="math inline">\(S\)</span></td>
+<td style="text-align: left;"><span class="math inline">\(P(S) \le e^{\varepsilon} Q(S) + \delta\)</span> for every set <span class="math inline">\(S\)</span></td>
+<td style="text-align: left;"><span class="math inline">\(\mathbb E_P[L] \le \mu\)</span> and <span class="math inline">\(\mathbb E_P[e^{\lambda(L - \mathbb E_P L)}] \le e^{\lambda^2\tau^2/2}\)</span> for every real <span class="math inline">\(\lambda\)</span></td>
+<td style="text-align: left;"><span class="math inline">\(D_\alpha(P\Vert Q) \le \alpha\rho\)</span> for every <span class="math inline">\(\alpha &gt; 1\)</span></td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">The same, through the loss</td>
+<td style="text-align: left;"><span class="math inline">\(\lvert L \rvert \le \varepsilon\)</span> (<a href="#prp-pure-loss" class="quarto-xref">Proposition&nbsp;1</a>)</td>
+<td style="text-align: left;"><span class="math inline">\(\Pr_P[L &gt; \varepsilon] - e^{\varepsilon}\Pr_Q[L &gt; \varepsilon] \le \delta\)</span> (<a href="#prp-profile" class="quarto-xref">Proposition&nbsp;2</a>)</td>
+<td style="text-align: left;">as in the definition</td>
+<td style="text-align: left;"><span class="math inline">\(\mathbb E_P[e^{\lambda L}] \le e^{\lambda(\lambda + 1)\rho}\)</span> for every <span class="math inline">\(\lambda &gt; 0\)</span> (<a href="#lem-renyi-loss" class="quarto-xref">Lemma&nbsp;1</a>)</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Laplace mechanism, scale <span class="math inline">\(b\)</span></td>
+<td style="text-align: left;"><span class="math inline">\(\varepsilon = \Delta_1 f/b\)</span> (<a href="#thm-laplace" class="quarto-xref">Theorem&nbsp;1</a>)</td>
+<td style="text-align: left;"><span class="math inline">\((\Delta_1 f/b,\ 0)\)</span></td>
+<td style="text-align: left;"><span class="math inline">\((\varepsilon\tanh(\varepsilon/2),\ \varepsilon)\)</span> with <span class="math inline">\(\varepsilon = \Delta_1 f/b\)</span> (<a href="#prp-cdp-pure" class="quarto-xref">Proposition&nbsp;4</a>)</td>
+<td style="text-align: left;"><span class="math inline">\(\rho = \varepsilon^2/2\)</span> with <span class="math inline">\(\varepsilon = \Delta_1 f/b\)</span> (<a href="#prp-zcdp-pure" class="quarto-xref">Proposition&nbsp;6</a>)</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Gaussian mechanism, <span class="math inline">\(s = \Delta_2 f/\sigma\)</span></td>
+<td style="text-align: left;">not pure DP for any <span class="math inline">\(\varepsilon\)</span></td>
+<td style="text-align: left;"><span class="math inline">\(\delta = \Phi(s/2 - \varepsilon/s) - e^{\varepsilon}\Phi(-s/2 - \varepsilon/s)\)</span> (<a href="#thm-gauss-exact" class="quarto-xref">Theorem&nbsp;3</a>)</td>
+<td style="text-align: left;"><span class="math inline">\((s^2/2,\ s)\)</span> (<a href="#prp-cdp-gauss" class="quarto-xref">Proposition&nbsp;3</a>)</td>
+<td style="text-align: left;"><span class="math inline">\(\rho = s^2/2\)</span> (<a href="#prp-zcdp-gauss" class="quarto-xref">Proposition&nbsp;5</a>)</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Composition of steps <span class="math inline">\(i = 1, \dots, k\)</span></td>
+<td style="text-align: left;"><span class="math inline">\(\varepsilon = \sum_i \varepsilon_i\)</span> (<a href="#thm-pure-comp" class="quarto-xref">Theorem&nbsp;2</a>)</td>
+<td style="text-align: left;">basic: <span class="math inline">\((\sum_i \varepsilon_i,\ \sum_i \delta_i)\)</span> (<a href="#thm-basic-comp" class="quarto-xref">Theorem&nbsp;4</a>); advanced: <a href="#thm-adv-comp" class="quarto-xref">Theorem&nbsp;5</a></td>
+<td style="text-align: left;"><span class="math inline">\(\mu = \sum_i \mu_i\)</span>, <span class="math inline">\(\tau^2 = \sum_i \tau_i^2\)</span> (<a href="#thm-cdp-comp" class="quarto-xref">Theorem&nbsp;6</a>)</td>
+<td style="text-align: left;"><span class="math inline">\(\rho = \sum_i \rho_i\)</span> (<a href="#thm-zcdp-comp" class="quarto-xref">Theorem&nbsp;8</a>)</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Conversion to <span class="math inline">\((\varepsilon, \delta)\)</span>-DP</td>
+<td style="text-align: left;"><span class="math inline">\((\varepsilon, 0)\)</span></td>
+<td style="text-align: left;">none needed</td>
+<td style="text-align: left;"><span class="math inline">\(\varepsilon = \mu + \tau\sqrt{2\ln(1/\delta)}\)</span> (<a href="#thm-cdp-conv" class="quarto-xref">Theorem&nbsp;7</a>)</td>
+<td style="text-align: left;"><span class="math inline">\(\varepsilon = \rho + 2\sqrt{\rho\ln(1/\delta)}\)</span> (<a href="#thm-zcdp-conv" class="quarto-xref">Theorem&nbsp;10</a>)</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Budget of one of <span class="math inline">\(k\)</span> equal counts, for a total <span class="math inline">\((\varepsilon, \delta)\)</span></td>
+<td style="text-align: left;"><span class="math inline">\(\varepsilon_0 = \varepsilon/k\)</span></td>
+<td style="text-align: left;">basic: <span class="math inline">\((\varepsilon/k,\ \delta/k)\)</span></td>
+<td style="text-align: left;">Gaussian: <span class="math inline">\(\tau_0 = \big(\sqrt{2\ln(1/\delta) + 2\varepsilon} - \sqrt{2\ln(1/\delta)}\big)/\sqrt k\)</span>, <span class="math inline">\(\mu_0 = \tau_0^2/2\)</span></td>
+<td style="text-align: left;"><span class="math inline">\(\rho_0 = \big(\sqrt{\ln(1/\delta) + \varepsilon} - \sqrt{\ln(1/\delta)}\big)^2/k\)</span> (<a href="#eq-rho-budget" class="quarto-xref">Equation&nbsp;23</a>)</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Noise on one count (<span class="math inline">\(\Delta = 1\)</span>)</td>
+<td style="text-align: left;">Laplace, <span class="math inline">\(b = 1/\varepsilon_0\)</span></td>
+<td style="text-align: left;">Gaussian, <span class="math inline">\(\sigma = 1/s_0\)</span>, with <span class="math inline">\(s_0\)</span> the largest ratio that meets <span class="math inline">\((\varepsilon/k, \delta/k)\)</span></td>
+<td style="text-align: left;">Gaussian, <span class="math inline">\(\sigma = 1/\tau_0\)</span></td>
+<td style="text-align: left;">Gaussian, <span class="math inline">\(\sigma = 1/\sqrt{2\rho_0}\)</span>; Laplace, <span class="math inline">\(b = 1/\sqrt{2\rho_0}\)</span></td>
+</tr>
+</tbody>
+</table>
+</div>
+</figure>
+</div>
 </section>
-<section id="which-guarantee-implies-which" class="level2" data-number="6.2">
-<h2 data-number="6.2" class="anchored" data-anchor-id="which-guarantee-implies-which"><span class="header-section-number">6.2</span> Which guarantee implies which</h2>
+<section id="sec-tradeoffs-unit" class="level2" data-number="6.2">
+<h2 data-number="6.2" class="anchored" data-anchor-id="sec-tradeoffs-unit"><span class="header-section-number">6.2</span> Composition in one unit</h2>
+<p>Each definition composes its own parameters and converts to the reference’s unit once, at the end. A natural shortcut would be to convert each query to the reference’s unit first, as an <span class="math inline">\((\varepsilon_0, \delta_0)\)</span> pair, and then add the pairs with basic composition, the one rule that works on any pairs. <a href="#tbl-normalized" class="quarto-xref">Table&nbsp;6</a> shows what that shortcut costs, using the noise each accounting chose for the running example. Each count’s guarantee is written in the reference’s unit, with <span class="math inline">\(\delta_0 = \delta/100 = 10^{-8}\)</span> whenever the count needs a <span class="math inline">\(\delta\)</span>, so that the hundred <span class="math inline">\(\delta_0\)</span>’s add up to the reference’s <span class="math inline">\(\delta\)</span>. The last two columns add up the hundred per-count pairs. The definition’s own composition gives <span class="math inline">\((1, 10^{-6})\)</span> in every row, since that is how the noise was chosen.</p>
+<div id="tbl-normalized" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-tbl figure">
+<figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl" id="tbl-normalized-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Table&nbsp;6: The running example’s 100 counts, each count’s guarantee written in the reference’s unit, and the total from adding those pairs. The definitions’ own composition gives (ε, δ) = (1, 10⁻⁶) in every row.
+</figcaption>
+<div aria-describedby="tbl-normalized-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<table class="caption-top table">
+<colgroup>
+<col style="width: 20%">
+<col style="width: 20%">
+<col style="width: 20%">
+<col style="width: 20%">
+<col style="width: 20%">
+</colgroup>
+<thead>
+<tr class="header">
+<th style="text-align: left;">Noise and accounting</th>
+<th style="text-align: right;"><span class="math inline">\(\varepsilon_0\)</span> of one count</th>
+<th style="text-align: right;"><span class="math inline">\(\delta_0\)</span> of one count</th>
+<th style="text-align: right;"><span class="math inline">\(\varepsilon\)</span>, adding the pairs</th>
+<th style="text-align: right;"><span class="math inline">\(\delta\)</span>, adding the pairs</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: left;">Laplace, pure DP</td>
+<td style="text-align: right;">0.01000</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">1.000</td>
+<td style="text-align: right;">0</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Laplace, zCDP</td>
+<td style="text-align: right;">0.01869</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">1.869</td>
+<td style="text-align: right;">0</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Gaussian, basic composition</td>
+<td style="text-align: right;">0.01000</td>
+<td style="text-align: right;"><span class="math inline">\(10^{-8}\)</span></td>
+<td style="text-align: right;">1.000</td>
+<td style="text-align: right;"><span class="math inline">\(10^{-6}\)</span></td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Gaussian, advanced composition</td>
+<td style="text-align: right;">0.01782</td>
+<td style="text-align: right;"><span class="math inline">\(6.05 \times 10^{-9}\)</span></td>
+<td style="text-align: right;">1.782</td>
+<td style="text-align: right;"><span class="math inline">\(6.05 \times 10^{-7}\)</span></td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Gaussian, CDP or zCDP</td>
+<td style="text-align: right;">0.11363</td>
+<td style="text-align: right;"><span class="math inline">\(10^{-8}\)</span></td>
+<td style="text-align: right;">11.363</td>
+<td style="text-align: right;"><span class="math inline">\(10^{-6}\)</span></td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Gaussian, exact</td>
+<td style="text-align: right;">0.10915</td>
+<td style="text-align: right;"><span class="math inline">\(10^{-8}\)</span></td>
+<td style="text-align: right;">10.915</td>
+<td style="text-align: right;"><span class="math inline">\(10^{-6}\)</span></td>
+</tr>
+</tbody>
+</table>
+</div>
+</figure>
+</div>
+<p>The shortcut is harmless only where it is the definition’s own rule, in the rows for pure DP and basic composition. Everywhere else it loses badly, and most for Gaussian noise. Converted on its own, one Gaussian count with <span class="math inline">\(\sigma = 53.50\)</span> is <span class="math inline">\((0.11363, 10^{-8})\)</span>-DP, and a hundred of them add up to <span class="math inline">\(\varepsilon = 11.363\)</span>, eleven times the <span class="math inline">\(\varepsilon = 1\)</span> that the same noise really achieves. Even the exact per-count conversion gives 10.915.</p>
+<p>The reason is the cost of each conversion. Converting one step charges it for the rare large values of its loss, at a level set by its own small <span class="math inline">\(\delta_0\)</span>, and adding a hundred such charges counts a hundred tails. Composing first lets the hundred losses partly cancel, so the total has a single tail, whose size grows like <span class="math inline">\(\sqrt k\)</span>, and it is charged once. So the rule is to compose in the definition’s own unit and convert to the reference only at the end.</p>
+</section>
+<section id="which-guarantee-implies-which" class="level2" data-number="6.3">
+<h2 data-number="6.3" class="anchored" data-anchor-id="which-guarantee-implies-which"><span class="header-section-number">6.3</span> Which guarantee implies which</h2>
 <p>The definitions are not simply stronger or weaker versions of each other, and the results of this note say exactly how they relate. Pure DP is the strongest: an <span class="math inline">\(\varepsilon\)</span>-DP mechanism is <span class="math inline">\((\varepsilon^2/2, \varepsilon)\)</span>-CDP and <span class="math inline">\((\varepsilon^2/2)\)</span>-zCDP, by <a href="#prp-cdp-pure" class="quarto-xref">Proposition&nbsp;4</a> and <a href="#prp-zcdp-pure" class="quarto-xref">Proposition&nbsp;6</a>, and it is <span class="math inline">\((\varepsilon, 0)\)</span>-DP by definition. Both concentrated definitions imply approximate DP for every <span class="math inline">\(\delta\)</span>, by <a href="#thm-cdp-conv" class="quarto-xref">Theorem&nbsp;7</a> and <a href="#thm-zcdp-conv" class="quarto-xref">Theorem&nbsp;10</a>. None of these implications reverses. The Gaussian mechanism is zCDP and CDP but not pure DP, because its loss is unbounded. The mechanism of <a href="#exm-catastrophe" class="quarto-xref">Example&nbsp;1</a> is approximate DP but neither CDP nor zCDP, because its loss is infinite on some outputs.</p>
 <p>So the concentrated definitions sit between the other two. They exclude the catastrophic failures that approximate DP allows, yet they admit the Gaussian noise that pure DP excludes. A zCDP guarantee is a whole curve of approximate DP guarantees, one for each <span class="math inline">\(\delta\)</span>, while an approximate DP guarantee is a single point on such a curve.</p>
 </section>
-<section id="how-the-cost-grows-with-the-number-of-queries" class="level2" data-number="6.3">
-<h2 data-number="6.3" class="anchored" data-anchor-id="how-the-cost-grows-with-the-number-of-queries"><span class="header-section-number">6.3</span> How the cost grows with the number of queries</h2>
-<p>The running example fixed the number of queries at 100. <a href="#tbl-sweep" class="quarto-xref">Table&nbsp;4</a> and <a href="#fig-noise" class="quarto-xref">Figure&nbsp;2</a> repeat the budgeting for other numbers of counts, always for a total of <span class="math inline">\((1, 10^{-6})\)</span>.</p>
+<section id="how-the-cost-grows-with-the-number-of-queries" class="level2" data-number="6.4">
+<h2 data-number="6.4" class="anchored" data-anchor-id="how-the-cost-grows-with-the-number-of-queries"><span class="header-section-number">6.4</span> How the cost grows with the number of queries</h2>
+<p>The running example fixed the number of queries at 100. <a href="#tbl-sweep" class="quarto-xref">Table&nbsp;7</a> and <a href="#fig-noise" class="quarto-xref">Figure&nbsp;2</a> repeat the budgeting for other numbers of counts, always for a total of <span class="math inline">\((1, 10^{-6})\)</span>.</p>
 <div id="tbl-sweep" class="quarto-float quarto-figure quarto-figure-center anchored">
 <figure class="quarto-float quarto-float-tbl figure">
 <figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl" id="tbl-sweep-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-Table&nbsp;4: The noise standard deviation each count needs for k counts to meet (ε, δ) = (1, 10⁻⁶) in total, for each way of accounting.
+Table&nbsp;7: The noise standard deviation each count needs for k counts to meet (ε, δ) = (1, 10⁻⁶) in total, for each way of accounting.
 </figcaption>
 <div aria-describedby="tbl-sweep-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
 <table class="caption-top table">
@@ -824,14 +1056,14 @@ Figure&nbsp;2: The noise standard deviation per count for k counts to meet (ε, 
 </figcaption>
 </figure>
 </div>
-<p>The lines fall into two groups by their slope. Pure DP with Laplace noise and basic composition with Gaussian noise add worst cases, so their noise grows in proportion to <span class="math inline">\(k\)</span>. Everything else grows like <span class="math inline">\(\sqrt k\)</span>, because it lets the losses of different queries partly cancel. So the linear methods win for few queries and lose for many. For one count, pure DP needs a standard deviation of 1.41, a third of the best Gaussian’s 4.22, because a single Laplace count pays nothing for <span class="math inline">\(\delta\)</span>. Between the rows of <a href="#tbl-sweep" class="quarto-xref">Table&nbsp;4</a>, the script finds where the lines cross. The exact Gaussian overtakes pure DP at 9 counts, and Gaussian noise accounted in zCDP overtakes it at 15. Laplace noise accounted in zCDP beats Laplace noise accounted in pure DP from 29 counts on.</p>
+<p>The lines fall into two groups by their slope. Pure DP with Laplace noise and basic composition with Gaussian noise add worst cases, so their noise grows in proportion to <span class="math inline">\(k\)</span>. Everything else grows like <span class="math inline">\(\sqrt k\)</span>, because it lets the losses of different queries partly cancel. So the linear methods win for few queries and lose for many. For one count, pure DP needs a standard deviation of 1.41, a third of the best Gaussian’s 4.22, because a single Laplace count pays nothing for <span class="math inline">\(\delta\)</span>. Between the rows of <a href="#tbl-sweep" class="quarto-xref">Table&nbsp;7</a>, the script finds where the lines cross. The exact Gaussian overtakes pure DP at 9 counts, and Gaussian noise accounted in zCDP overtakes it at 15. Laplace noise accounted in zCDP beats Laplace noise accounted in pure DP from 29 counts on.</p>
 <p>Advanced composition illustrates how much a loose theorem can cost. It overtakes basic composition only at 34 counts and pure DP only at 313. At 1000 counts, it needs 4.8 times the noise of zCDP accounting, even though both grow like <span class="math inline">\(\sqrt k\)</span>, because the per-query <span class="math inline">\(\delta_0\)</span> it has to pay for is expensive for the Gaussian.</p>
-<p>Among the methods that grow like <span class="math inline">\(\sqrt k\)</span>, the gaps stay nearly constant. zCDP accounting needs 1.27 times the noise of exact accounting at every <span class="math inline">\(k\)</span> in <a href="#tbl-sweep" class="quarto-xref">Table&nbsp;4</a>, and Laplace noise in zCDP needs about <span class="math inline">\(\sqrt 2\)</span> times the noise of Gaussian noise in zCDP. The second ratio comes from the variances: Laplace noise with scale <span class="math inline">\(1/\varepsilon_0\)</span> has standard deviation <span class="math inline">\(\sqrt 2/\varepsilon_0\)</span>, while Gaussian noise with the same <span class="math inline">\(\rho_0 = \varepsilon_0^2/2\)</span> has standard deviation <span class="math inline">\(1/\varepsilon_0\)</span>.</p>
+<p>Among the methods that grow like <span class="math inline">\(\sqrt k\)</span>, the gaps stay nearly constant. zCDP accounting needs 1.27 times the noise of exact accounting at every <span class="math inline">\(k\)</span> in <a href="#tbl-sweep" class="quarto-xref">Table&nbsp;7</a>, and Laplace noise in zCDP needs about <span class="math inline">\(\sqrt 2\)</span> times the noise of Gaussian noise in zCDP. The second ratio comes from the variances: Laplace noise with scale <span class="math inline">\(1/\varepsilon_0\)</span> has standard deviation <span class="math inline">\(\sqrt 2/\varepsilon_0\)</span>, while Gaussian noise with the same <span class="math inline">\(\rho_0 = \varepsilon_0^2/2\)</span> has standard deviation <span class="math inline">\(1/\varepsilon_0\)</span>.</p>
 </section>
-<section id="which-definition-to-use" class="level2" data-number="6.4">
-<h2 data-number="6.4" class="anchored" data-anchor-id="which-definition-to-use"><span class="header-section-number">6.4</span> Which definition to use</h2>
+<section id="which-definition-to-use" class="level2" data-number="6.5">
+<h2 data-number="6.5" class="anchored" data-anchor-id="which-definition-to-use"><span class="header-section-number">6.5</span> Which definition to use</h2>
 <p>The answer depends on the number of queries and on what has to be reported. For a handful of queries, or when the guarantee must hold with <span class="math inline">\(\delta = 0\)</span>, use pure DP with Laplace noise. It is the simplest to explain, and for eight counts or fewer it needs the least noise of all.</p>
-<p>For many queries, account in zCDP. Convert the reference to a <span class="math inline">\(\rho\)</span> budget with <a href="#eq-rho-budget" class="quarto-xref">Equation&nbsp;20</a>, split <span class="math inline">\(\rho\)</span> across the queries in any proportions, use Gaussian noise where you can and Laplace noise where a query needs it, and report the release in approximate DP. Every step is one line of arithmetic, every result composes adaptively, and post-processing is safe.</p>
+<p>For many queries, account in zCDP. Convert the reference to a <span class="math inline">\(\rho\)</span> budget with <a href="#eq-rho-budget" class="quarto-xref">Equation&nbsp;23</a>, split <span class="math inline">\(\rho\)</span> across the queries in any proportions, use Gaussian noise where you can and Laplace noise where a query needs it, and report the release in approximate DP. Every step is one line of arithmetic, every result composes adaptively, and post-processing is safe.</p>
 <p>When every bit of accuracy matters, compute the final guarantee exactly rather than through a conversion. For Gaussian noise, the exact profile of <a href="#thm-gauss-exact" class="quarto-xref">Theorem&nbsp;3</a> is a closed form, and in the running example it saves about a fifth of the noise. For other mechanisms, numerical accounting of the loss distribution does the same job. A common workflow is to plan the budget in zCDP and then certify the release with an exact accountant.</p>
 <p>Concentrated DP is mostly of historical interest. For Gaussian noise its numbers are the same as zCDP’s, it needs two parameters, and it is not closed under post-processing. Approximate DP with the classical composition theorems is the definition to avoid as an accounting method. It is the right unit for reporting, but basic composition with Gaussian noise needed almost ten times the noise of exact accounting in the running example.</p>
 </section>
@@ -847,9 +1079,9 @@ Figure&nbsp;2: The noise standard deviation per count for k counts to meet (ε, 
 <div class="proof">
 <p><span class="proof-title"><em>Proof</em>. </span></p>
 <ol type="1">
-<li>For any set <span class="math inline">\(S\)</span> of outputs, <span class="math inline">\(p = e^{L} q\)</span>, so the probability of <span class="math inline">\(S\)</span> under <span class="math inline">\(P\)</span> is an integral against <span class="math inline">\(q\)</span>: <span id="eq-auto-index-18"><span class="math display">\[
+<li>For any set <span class="math inline">\(S\)</span> of outputs, <span class="math inline">\(p = e^{L} q\)</span>, so the probability of <span class="math inline">\(S\)</span> under <span class="math inline">\(P\)</span> is an integral against <span class="math inline">\(q\)</span>: <span id="eq-auto-index-19"><span class="math display">\[
 P(S) = \int_S e^{L(y)} q(y)\, \mathrm d y.
-\tag{21}\]</span></span></li>
+\tag{24}\]</span></span></li>
 <li>Suppose <span class="math inline">\(|L| \le \varepsilon\)</span> everywhere except on a set of probability zero. Then the integrand is at most <span class="math inline">\(e^\varepsilon q(y)\)</span> outside that set, which contributes nothing to the integral, so the integral is at most <span class="math inline">\(e^\varepsilon Q(S)\)</span>. That is the inequality of <a href="#def-pure" class="quarto-xref">Definition&nbsp;1</a> for the pair in this order. For the swapped pair the loss is <span class="math inline">\(-L\)</span>, whose absolute value is also at most <span class="math inline">\(\varepsilon\)</span>, so the same argument gives the inequality in the other order.</li>
 <li>Conversely, suppose the mechanism is <span class="math inline">\(\varepsilon\)</span>-DP, and let <span class="math inline">\(S\)</span> be the set of outputs where <span class="math inline">\(L &gt; \varepsilon\)</span>. On <span class="math inline">\(S\)</span>, the integrand of step 1 is strictly larger than <span class="math inline">\(e^\varepsilon q(y)\)</span>. If <span class="math inline">\(S\)</span> had positive probability, the integral would therefore be strictly larger than <span class="math inline">\(e^\varepsilon Q(S)\)</span>, contradicting <a href="#def-pure" class="quarto-xref">Definition&nbsp;1</a>. So <span class="math inline">\(S\)</span> has probability zero.</li>
 <li>The definition also holds with the two datasets swapped, and swapping them changes the sign of the loss. Step 3 applied to the swapped pair shows that <span class="math inline">\(L &lt; -\varepsilon\)</span> only on a set of probability zero.</li>
@@ -859,9 +1091,9 @@ P(S) = \int_S e^{L(y)} q(y)\, \mathrm d y.
 <div class="proof">
 <p><span class="proof-title"><em>Proof</em>. </span></p>
 <ol type="1">
-<li>The gap of a set is an integral of a pointwise difference: <span id="eq-auto-index-19"><span class="math display">\[
+<li>The gap of a set is an integral of a pointwise difference: <span id="eq-auto-index-20"><span class="math display">\[
 P(S) - e^{\varepsilon} Q(S) = \int_S \big(p(y) - e^{\varepsilon} q(y)\big)\, \mathrm d y.
-\tag{22}\]</span></span></li>
+\tag{25}\]</span></span></li>
 <li>The integrand is positive exactly where <span class="math inline">\(p &gt; e^\varepsilon q\)</span>, which is where <span class="math inline">\(L &gt; \varepsilon\)</span>, and it is zero or negative elsewhere. Call <span class="math inline">\(S^*\)</span> the set where <span class="math inline">\(L &gt; \varepsilon\)</span>.</li>
 <li>Any set <span class="math inline">\(S\)</span> can be compared with <span class="math inline">\(S^*\)</span>. Removing from <span class="math inline">\(S\)</span> the outputs outside <span class="math inline">\(S^*\)</span> removes zero or negative contributions, so it does not lower the integral. Adding the outputs of <span class="math inline">\(S^*\)</span> missing from <span class="math inline">\(S\)</span> adds positive contributions, so it does not lower it either. After both changes the set is <span class="math inline">\(S^*\)</span>, so no set has a larger gap than <span class="math inline">\(S^*\)</span>.</li>
 <li>The gap of <span class="math inline">\(S^*\)</span> is <span class="math inline">\(P(L &gt; \varepsilon) - e^\varepsilon Q(L &gt; \varepsilon)\)</span>, which is the formula of the result.</li>
@@ -877,22 +1109,22 @@ P(S) - e^{\varepsilon} Q(S) = \int_S \big(p(y) - e^{\varepsilon} q(y)\big)\, \ma
 </div>
 <p>The proofs of composition and post-processing need the guarantee of <a href="#def-approx" class="quarto-xref">Definition&nbsp;2</a> for averages of functions, not only for probabilities of sets. A function with values between 0 and 1 is an average of indicators of sets. For example, take two disjoint sets <span class="math inline">\(A\)</span> and <span class="math inline">\(B\)</span>, and the function equal to 1/2 on <span class="math inline">\(A\)</span>, to 1 on <span class="math inline">\(B\)</span> and to 0 elsewhere. It is the average of the indicator of <span class="math inline">\(A \cup B\)</span> and the indicator of <span class="math inline">\(B\)</span>, so its expectation is the average of the probabilities of those two sets. Applying the guarantee to each set and averaging gives the guarantee for the function. A function with many values needs many sets, one for each level <span class="math inline">\(t\)</span> between 0 and 1, and the average over finitely many sets becomes an integral over <span class="math inline">\(t\)</span>.</p>
 <div id="lem-functions" class="theorem lemma">
-<p><span class="theorem-title"><strong>Lemma 2 (From sets to functions)</strong></span> Suppose <span class="math inline">\(P(S) \le e^{\varepsilon} Q(S) + \delta\)</span> for every set <span class="math inline">\(S\)</span>. Then for every function <span class="math inline">\(\kappa\)</span> of the output with values in <span class="math inline">\([0, 1]\)</span>, <span id="eq-auto-index-20"><span class="math display">\[
+<p><span class="theorem-title"><strong>Lemma 2 (From sets to functions)</strong></span> Suppose <span class="math inline">\(P(S) \le e^{\varepsilon} Q(S) + \delta\)</span> for every set <span class="math inline">\(S\)</span>. Then for every function <span class="math inline">\(\kappa\)</span> of the output with values in <span class="math inline">\([0, 1]\)</span>, <span id="eq-auto-index-21"><span class="math display">\[
 \mathbb E_{Y \sim P}[\kappa(Y)] \le e^{\varepsilon}\, \mathbb E_{Y \sim Q}[\kappa(Y)] + \delta.
-\tag{23}\]</span></span></p>
+\tag{26}\]</span></span></p>
 </div>
 <div class="proof">
 <p><span class="proof-title"><em>Proof</em>. </span></p>
 <ol type="1">
-<li>For a number <span class="math inline">\(\kappa(y)\)</span> between 0 and 1, the numbers <span class="math inline">\(t\)</span> in <span class="math inline">\([0, 1]\)</span> below it form the interval <span class="math inline">\([0, \kappa(y))\)</span>, whose length is <span class="math inline">\(\kappa(y)\)</span>. So <span id="eq-auto-index-21"><span class="math display">\[
+<li>For a number <span class="math inline">\(\kappa(y)\)</span> between 0 and 1, the numbers <span class="math inline">\(t\)</span> in <span class="math inline">\([0, 1]\)</span> below it form the interval <span class="math inline">\([0, \kappa(y))\)</span>, whose length is <span class="math inline">\(\kappa(y)\)</span>. So <span id="eq-auto-index-22"><span class="math display">\[
 \kappa(y) = \int_0^1 \mathbf 1[\kappa(y) &gt; t]\, \mathrm d t.
-\tag{24}\]</span></span></li>
-<li>Take the expectation under <span class="math inline">\(P\)</span> of both sides. The integrand is never negative, so the expectation and the integral can be exchanged, and the expectation of an indicator is the probability of its set: <span id="eq-auto-index-22"><span class="math display">\[
+\tag{27}\]</span></span></li>
+<li>Take the expectation under <span class="math inline">\(P\)</span> of both sides. The integrand is never negative, so the expectation and the integral can be exchanged, and the expectation of an indicator is the probability of its set: <span id="eq-auto-index-23"><span class="math display">\[
 \mathbb E_P[\kappa(Y)] = \int_0^1 P(\{y : \kappa(y) &gt; t\})\, \mathrm d t.
-\tag{25}\]</span></span></li>
-<li>Apply the assumption to each set <span class="math inline">\(\{y : \kappa(y) &gt; t\}\)</span>, and integrate over <span class="math inline">\(t\)</span> from 0 to 1. The <span class="math inline">\(\delta\)</span> term integrates to <span class="math inline">\(\delta\)</span>: <span id="eq-auto-index-23"><span class="math display">\[
+\tag{28}\]</span></span></li>
+<li>Apply the assumption to each set <span class="math inline">\(\{y : \kappa(y) &gt; t\}\)</span>, and integrate over <span class="math inline">\(t\)</span> from 0 to 1. The <span class="math inline">\(\delta\)</span> term integrates to <span class="math inline">\(\delta\)</span>: <span id="eq-auto-index-24"><span class="math display">\[
 \mathbb E_P[\kappa(Y)] \le \int_0^1 \big(e^{\varepsilon} Q(\{y : \kappa(y) &gt; t\}) + \delta\big)\, \mathrm d t.
-\tag{26}\]</span></span></li>
+\tag{29}\]</span></span></li>
 <li>The factor <span class="math inline">\(e^\varepsilon\)</span> comes out of the integral, and steps 1 and 2 applied to <span class="math inline">\(Q\)</span> show that the remaining integral equals <span class="math inline">\(\mathbb E_Q[\kappa(Y)]\)</span>, which gives the result.</li>
 </ol>
 </div>
@@ -905,29 +1137,29 @@ P(S) - e^{\varepsilon} Q(S) = \int_S \big(p(y) - e^{\varepsilon} q(y)\big)\, \ma
 <p><span class="proof-title"><em>Proof</em>. </span></p>
 <ol type="1">
 <li>Fix neighbours <span class="math inline">\(D \sim D'\)</span> and write <span class="math inline">\(a = f(D)\)</span> and <span class="math inline">\(a' = f(D')\)</span>, with coordinates <span class="math inline">\(a_j\)</span> and <span class="math inline">\(a'_j\)</span>. The output has density <span class="math inline">\(\prod_j e^{-|y_j - a_j|/b}/(2b)\)</span> under <span class="math inline">\(P\)</span>, and the same with <span class="math inline">\(a'\)</span> under <span class="math inline">\(Q\)</span>.</li>
-<li>The normalizing constants <span class="math inline">\(1/(2b)\)</span> are the same in both densities and cancel in the ratio. The logarithm of a product of exponentials is the sum of their exponents: <span id="eq-auto-index-24"><span class="math display">\[
+<li>The normalizing constants <span class="math inline">\(1/(2b)\)</span> are the same in both densities and cancel in the ratio. The logarithm of a product of exponentials is the sum of their exponents: <span id="eq-auto-index-25"><span class="math display">\[
 L(y) = \frac{1}{b} \sum_{j=1}^{d} \big(|y_j - a'_j| - |y_j - a_j|\big).
-\tag{27}\]</span></span></li>
-<li>Each term compares the distances from <span class="math inline">\(y_j\)</span> to the two true values, and that difference is at most the distance between the true values themselves. This is the triangle inequality <span class="math inline">\(|u| - |v| \le |u - v|\)</span> with <span class="math inline">\(u = y_j - a'_j\)</span> and <span class="math inline">\(v = y_j - a_j\)</span>: <span id="eq-auto-index-25"><span class="math display">\[
+\tag{30}\]</span></span></li>
+<li>Each term compares the distances from <span class="math inline">\(y_j\)</span> to the two true values, and that difference is at most the distance between the true values themselves. This is the triangle inequality <span class="math inline">\(|u| - |v| \le |u - v|\)</span> with <span class="math inline">\(u = y_j - a'_j\)</span> and <span class="math inline">\(v = y_j - a_j\)</span>: <span id="eq-auto-index-26"><span class="math display">\[
 |y_j - a'_j| - |y_j - a_j| \le |a_j - a'_j|.
-\tag{28}\]</span></span></li>
+\tag{31}\]</span></span></li>
 <li>Summing over the coordinates, the loss is at most <span class="math inline">\(\sum_j |a_j - a'_j|/b\)</span>. That sum is the <span class="math inline">\(\ell_1\)</span> distance between <span class="math inline">\(a\)</span> and <span class="math inline">\(a'\)</span>, at most <span class="math inline">\(\Delta_1 f\)</span>, so <span class="math inline">\(L(y) \le \Delta_1 f/b = \varepsilon\)</span>.</li>
 <li>Swapping <span class="math inline">\(a\)</span> and <span class="math inline">\(a'\)</span> in steps 2 to 4 shows that <span class="math inline">\(-L(y) \le \varepsilon\)</span>. So <span class="math inline">\(|L(y)| \le \varepsilon\)</span> at every output, and <a href="#prp-pure-loss" class="quarto-xref">Proposition&nbsp;1</a> gives <span class="math inline">\(\varepsilon\)</span>-DP.</li>
 </ol>
 </div>
 <p>The Gaussian proofs need the exponential moments of a normal variable. The result follows from completing the square in the exponent of the normal density.</p>
 <div id="lem-normal-mgf" class="theorem lemma">
-<p><span class="theorem-title"><strong>Lemma 3 (Exponential moments of a normal variable)</strong></span> If <span class="math inline">\(X\)</span> is normal with mean <span class="math inline">\(m\)</span> and variance <span class="math inline">\(v\)</span>, then for every real <span class="math inline">\(\lambda\)</span>, <span id="eq-auto-index-26"><span class="math display">\[
+<p><span class="theorem-title"><strong>Lemma 3 (Exponential moments of a normal variable)</strong></span> If <span class="math inline">\(X\)</span> is normal with mean <span class="math inline">\(m\)</span> and variance <span class="math inline">\(v\)</span>, then for every real <span class="math inline">\(\lambda\)</span>, <span id="eq-auto-index-27"><span class="math display">\[
 \mathbb E\big[e^{\lambda X}\big] = e^{\lambda m + \lambda^2 v / 2}.
-\tag{29}\]</span></span></p>
+\tag{32}\]</span></span></p>
 </div>
 <div class="proof">
 <p><span class="proof-title"><em>Proof</em>. </span></p>
 <ol type="1">
 <li>The expectation is an integral of <span class="math inline">\(e^{\lambda x}\)</span> against the normal density, which is proportional to <span class="math inline">\(e^{-(x - m)^2/(2v)}\)</span>. So the exponent to integrate is <span class="math inline">\(\lambda x - (x - m)^2/(2v)\)</span>.</li>
-<li>Expanding the square <span class="math inline">\((x - m - \lambda v)^2 = (x - m)^2 - 2\lambda v (x - m) + \lambda^2 v^2\)</span> and dividing by <span class="math inline">\(-2v\)</span> shows that <span class="math inline">\(-(x - m - \lambda v)^2/(2v) = -(x - m)^2/(2v) + \lambda (x - m) - \lambda^2 v/2\)</span>. Adding <span class="math inline">\(\lambda m + \lambda^2 v/2\)</span> to both sides rewrites the exponent of step 1 as <span id="eq-auto-index-27"><span class="math display">\[
+<li>Expanding the square <span class="math inline">\((x - m - \lambda v)^2 = (x - m)^2 - 2\lambda v (x - m) + \lambda^2 v^2\)</span> and dividing by <span class="math inline">\(-2v\)</span> shows that <span class="math inline">\(-(x - m - \lambda v)^2/(2v) = -(x - m)^2/(2v) + \lambda (x - m) - \lambda^2 v/2\)</span>. Adding <span class="math inline">\(\lambda m + \lambda^2 v/2\)</span> to both sides rewrites the exponent of step 1 as <span id="eq-auto-index-28"><span class="math display">\[
 \lambda x - \frac{(x - m)^2}{2v} = -\frac{(x - m - \lambda v)^2}{2v} + \lambda m + \frac{\lambda^2 v}{2}.
-\tag{30}\]</span></span></li>
+\tag{33}\]</span></span></li>
 <li>The last two terms do not depend on <span class="math inline">\(x\)</span>, so <span class="math inline">\(e^{\lambda m + \lambda^2 v/2}\)</span> comes out of the integral. What remains, with the same constant <span class="math inline">\(1/\sqrt{2\pi v}\)</span> in front, is the integral of a normal density with mean <span class="math inline">\(m + \lambda v\)</span> and variance <span class="math inline">\(v\)</span>, which is 1.</li>
 </ol>
 </div>
@@ -938,12 +1170,12 @@ L(y) = \frac{1}{b} \sum_{j=1}^{d} \big(|y_j - a'_j| - |y_j - a_j|\big).
 <div class="proof">
 <p><span class="proof-title"><em>Proof</em>. </span></p>
 <ol type="1">
-<li>The two densities are proportional to <span class="math inline">\(e^{-\|y - f(D)\|^2/(2\sigma^2)}\)</span> and <span class="math inline">\(e^{-\|y - f(D')\|^2/(2\sigma^2)}\)</span>, with the same constant, which cancels in the ratio: <span id="eq-auto-index-28"><span class="math display">\[
+<li>The two densities are proportional to <span class="math inline">\(e^{-\|y - f(D)\|^2/(2\sigma^2)}\)</span> and <span class="math inline">\(e^{-\|y - f(D')\|^2/(2\sigma^2)}\)</span>, with the same constant, which cancels in the ratio: <span id="eq-auto-index-29"><span class="math display">\[
 L(y) = \frac{\|y - f(D')\|^2 - \|y - f(D)\|^2}{2\sigma^2}.
-\tag{31}\]</span></span></li>
-<li>Under <span class="math inline">\(P\)</span>, the output is <span class="math inline">\(y = f(D) + Z\)</span>, so <span class="math inline">\(y - f(D) = Z\)</span> and <span class="math inline">\(y - f(D') = Z + v\)</span>. Expanding <span class="math inline">\(\|Z + v\|^2 = \|Z\|^2 + 2\langle v, Z\rangle + \|v\|^2\)</span>, the term <span class="math inline">\(\|Z\|^2\)</span> cancels: <span id="eq-auto-index-29"><span class="math display">\[
+\tag{34}\]</span></span></li>
+<li>Under <span class="math inline">\(P\)</span>, the output is <span class="math inline">\(y = f(D) + Z\)</span>, so <span class="math inline">\(y - f(D) = Z\)</span> and <span class="math inline">\(y - f(D') = Z + v\)</span>. Expanding <span class="math inline">\(\|Z + v\|^2 = \|Z\|^2 + 2\langle v, Z\rangle + \|v\|^2\)</span>, the term <span class="math inline">\(\|Z\|^2\)</span> cancels: <span id="eq-auto-index-30"><span class="math display">\[
 L = \frac{\|v\|^2}{2\sigma^2} + \frac{\langle v, Z\rangle}{\sigma^2}.
-\tag{32}\]</span></span></li>
+\tag{35}\]</span></span></li>
 <li>The inner product <span class="math inline">\(\langle v, Z\rangle\)</span> is a sum of independent normal terms <span class="math inline">\(v_j Z_j\)</span> with variances <span class="math inline">\(v_j^2 \sigma^2\)</span>, so it is normal with mean zero and variance <span class="math inline">\(\|v\|^2 \sigma^2\)</span>. Dividing by <span class="math inline">\(\sigma^2\)</span> gives variance <span class="math inline">\(\|v\|^2/\sigma^2 = s_v^2\)</span>, and the first term of step 2 is the mean <span class="math inline">\(s_v^2/2\)</span>.</li>
 <li>Under <span class="math inline">\(Q\)</span>, the output is <span class="math inline">\(y = f(D') + Z\)</span>, so <span class="math inline">\(y - f(D') = Z\)</span> and <span class="math inline">\(y - f(D) = Z - v\)</span>. The same expansion gives <span class="math inline">\(L = -\|v\|^2/(2\sigma^2) + \langle v, Z\rangle/\sigma^2\)</span>, which has mean <span class="math inline">\(-s_v^2/2\)</span> and variance <span class="math inline">\(s_v^2\)</span>.</li>
 </ol>
@@ -952,22 +1184,22 @@ L = \frac{\|v\|^2}{2\sigma^2} + \frac{\langle v, Z\rangle}{\sigma^2}.
 <div class="proof">
 <p><span class="proof-title"><em>Proof</em>. </span></p>
 <ol type="1">
-<li>For a pair with <span class="math inline">\(s_v &gt; 0\)</span>, the loss under <span class="math inline">\(P\)</span> is <span class="math inline">\(s_v^2/2 + s_v N\)</span> with <span class="math inline">\(N\)</span> standard normal, by <a href="#lem-gauss-loss" class="quarto-xref">Lemma&nbsp;4</a>. It exceeds <span class="math inline">\(\varepsilon\)</span> when <span class="math inline">\(N\)</span> exceeds <span class="math inline">\((\varepsilon - s_v^2/2)/s_v\)</span>. A standard normal exceeds a number <span class="math inline">\(z\)</span> with probability <span class="math inline">\(\Phi(-z)\)</span>, and <span class="math inline">\(-(\varepsilon - s_v^2/2)/s_v = s_v/2 - \varepsilon/s_v\)</span>, so <span id="eq-auto-index-30"><span class="math display">\[
+<li>For a pair with <span class="math inline">\(s_v &gt; 0\)</span>, the loss under <span class="math inline">\(P\)</span> is <span class="math inline">\(s_v^2/2 + s_v N\)</span> with <span class="math inline">\(N\)</span> standard normal, by <a href="#lem-gauss-loss" class="quarto-xref">Lemma&nbsp;4</a>. It exceeds <span class="math inline">\(\varepsilon\)</span> when <span class="math inline">\(N\)</span> exceeds <span class="math inline">\((\varepsilon - s_v^2/2)/s_v\)</span>. A standard normal exceeds a number <span class="math inline">\(z\)</span> with probability <span class="math inline">\(\Phi(-z)\)</span>, and <span class="math inline">\(-(\varepsilon - s_v^2/2)/s_v = s_v/2 - \varepsilon/s_v\)</span>, so <span id="eq-auto-index-31"><span class="math display">\[
 \Pr_P[L &gt; \varepsilon] = \Phi\Big(\frac{s_v}{2} - \frac{\varepsilon}{s_v}\Big).
-\tag{33}\]</span></span></li>
-<li>Under <span class="math inline">\(Q\)</span> the loss is <span class="math inline">\(-s_v^2/2 + s_v N\)</span>. It exceeds <span class="math inline">\(\varepsilon\)</span> when <span class="math inline">\(N\)</span> exceeds <span class="math inline">\((\varepsilon + s_v^2/2)/s_v\)</span>, so <span id="eq-auto-index-31"><span class="math display">\[
-\Pr_Q[L &gt; \varepsilon] = \Phi\Big(-\frac{s_v}{2} - \frac{\varepsilon}{s_v}\Big).
-\tag{34}\]</span></span></li>
-<li><a href="#prp-profile" class="quarto-xref">Proposition&nbsp;2</a> combines the two: the pair’s smallest <span class="math inline">\(\delta\)</span> is <span class="math inline">\(H(s_v)\)</span>, where for a positive number <span class="math inline">\(x\)</span> <span id="eq-auto-index-32"><span class="math display">\[
-H(x) = \Phi(a) - e^{\varepsilon}\Phi(c), \qquad a = \frac{x}{2} - \frac{\varepsilon}{x}, \quad c = -\frac{x}{2} - \frac{\varepsilon}{x}.
-\tag{35}\]</span></span> A pair with <span class="math inline">\(s_v = 0\)</span> has <span class="math inline">\(P = Q\)</span> and needs no <span class="math inline">\(\delta\)</span> at all.</li>
-<li>To show that <span class="math inline">\(H\)</span> increases, differentiate it. Write <span class="math inline">\(\varphi\)</span> for the standard normal density, the derivative of <span class="math inline">\(\Phi\)</span>. By the chain rule, with the derivatives <span class="math inline">\(1/2 + \varepsilon/x^2\)</span> of <span class="math inline">\(a\)</span> and <span class="math inline">\(-1/2 + \varepsilon/x^2\)</span> of <span class="math inline">\(c\)</span>, <span id="eq-auto-index-33"><span class="math display">\[
-H'(x) = \varphi(a)\Big(\frac12 + \frac{\varepsilon}{x^2}\Big) - e^{\varepsilon}\varphi(c)\Big(-\frac12 + \frac{\varepsilon}{x^2}\Big).
 \tag{36}\]</span></span></li>
-<li>The two density values are related. Since <span class="math inline">\(c - a = -x\)</span> and <span class="math inline">\(c + a = -2\varepsilon/x\)</span>, their product gives <span class="math inline">\(c^2 - a^2 = 2\varepsilon\)</span>. The normal density is proportional to <span class="math inline">\(e^{-z^2/2}\)</span>, so <span class="math inline">\(\varphi(c)/\varphi(a) = e^{-(c^2 - a^2)/2} = e^{-\varepsilon}\)</span>, which means <span class="math inline">\(e^\varepsilon \varphi(c) = \varphi(a)\)</span>.</li>
-<li>Substituting step 5 into step 4, the terms in <span class="math inline">\(\varepsilon/x^2\)</span> cancel: <span id="eq-auto-index-34"><span class="math display">\[
-H'(x) = \varphi(a)\Big(\frac12 + \frac{\varepsilon}{x^2} + \frac12 - \frac{\varepsilon}{x^2}\Big) = \varphi(a) &gt; 0.
+<li>Under <span class="math inline">\(Q\)</span> the loss is <span class="math inline">\(-s_v^2/2 + s_v N\)</span>. It exceeds <span class="math inline">\(\varepsilon\)</span> when <span class="math inline">\(N\)</span> exceeds <span class="math inline">\((\varepsilon + s_v^2/2)/s_v\)</span>, so <span id="eq-auto-index-32"><span class="math display">\[
+\Pr_Q[L &gt; \varepsilon] = \Phi\Big(-\frac{s_v}{2} - \frac{\varepsilon}{s_v}\Big).
 \tag{37}\]</span></span></li>
+<li><a href="#prp-profile" class="quarto-xref">Proposition&nbsp;2</a> combines the two: the pair’s smallest <span class="math inline">\(\delta\)</span> is <span class="math inline">\(H(s_v)\)</span>, where for a positive number <span class="math inline">\(x\)</span> <span id="eq-auto-index-33"><span class="math display">\[
+H(x) = \Phi(a) - e^{\varepsilon}\Phi(c), \qquad a = \frac{x}{2} - \frac{\varepsilon}{x}, \quad c = -\frac{x}{2} - \frac{\varepsilon}{x}.
+\tag{38}\]</span></span> A pair with <span class="math inline">\(s_v = 0\)</span> has <span class="math inline">\(P = Q\)</span> and needs no <span class="math inline">\(\delta\)</span> at all.</li>
+<li>To show that <span class="math inline">\(H\)</span> increases, differentiate it. Write <span class="math inline">\(\varphi\)</span> for the standard normal density, the derivative of <span class="math inline">\(\Phi\)</span>. By the chain rule, with the derivatives <span class="math inline">\(1/2 + \varepsilon/x^2\)</span> of <span class="math inline">\(a\)</span> and <span class="math inline">\(-1/2 + \varepsilon/x^2\)</span> of <span class="math inline">\(c\)</span>, <span id="eq-auto-index-34"><span class="math display">\[
+H'(x) = \varphi(a)\Big(\frac12 + \frac{\varepsilon}{x^2}\Big) - e^{\varepsilon}\varphi(c)\Big(-\frac12 + \frac{\varepsilon}{x^2}\Big).
+\tag{39}\]</span></span></li>
+<li>The two density values are related. Since <span class="math inline">\(c - a = -x\)</span> and <span class="math inline">\(c + a = -2\varepsilon/x\)</span>, their product gives <span class="math inline">\(c^2 - a^2 = 2\varepsilon\)</span>. The normal density is proportional to <span class="math inline">\(e^{-z^2/2}\)</span>, so <span class="math inline">\(\varphi(c)/\varphi(a) = e^{-(c^2 - a^2)/2} = e^{-\varepsilon}\)</span>, which means <span class="math inline">\(e^\varepsilon \varphi(c) = \varphi(a)\)</span>.</li>
+<li>Substituting step 5 into step 4, the terms in <span class="math inline">\(\varepsilon/x^2\)</span> cancel: <span id="eq-auto-index-35"><span class="math display">\[
+H'(x) = \varphi(a)\Big(\frac12 + \frac{\varepsilon}{x^2} + \frac12 - \frac{\varepsilon}{x^2}\Big) = \varphi(a) &gt; 0.
+\tag{40}\]</span></span></li>
 <li>Every pair has <span class="math inline">\(s_v \le s\)</span>, because <span class="math inline">\(\|v\| \le \Delta_2 f\)</span>. Since <span class="math inline">\(H\)</span> increases, each pair’s <span class="math inline">\(\delta\)</span> is <span class="math inline">\(H(s_v) \le H(s)\)</span>, which is the bound of the theorem, with equality for a pair at which <span class="math inline">\(\|v\| = \Delta_2 f\)</span>.</li>
 </ol>
 </div>
@@ -976,9 +1208,9 @@ H'(x) = \varphi(a)\Big(\frac12 + \frac{\varepsilon}{x^2} + \frac12 - \frac{\vare
 <p><span class="proof-title"><em>Proof</em>. </span></p>
 <ol type="1">
 <li>Stack the <span class="math inline">\(k\)</span> statistics into one vector <span class="math inline">\(F(D) = (f_1(D), \dots, f_k(D))\)</span>. Releasing each <span class="math inline">\(f_i(D)\)</span> with independent noise of standard deviation <span class="math inline">\(\sigma\)</span> in each coordinate is exactly releasing <span class="math inline">\(F(D)\)</span> with noise of covariance <span class="math inline">\(\sigma^2 I\)</span>, since the noise of all coordinates is independent with the same variance.</li>
-<li>For neighbours, the squared length of the change of <span class="math inline">\(F\)</span> is the sum of the squared lengths of the changes of the <span class="math inline">\(f_i\)</span>, each at most <span class="math inline">\(\Delta^2\)</span>: <span id="eq-auto-index-35"><span class="math display">\[
+<li>For neighbours, the squared length of the change of <span class="math inline">\(F\)</span> is the sum of the squared lengths of the changes of the <span class="math inline">\(f_i\)</span>, each at most <span class="math inline">\(\Delta^2\)</span>: <span id="eq-auto-index-36"><span class="math display">\[
 \|F(D) - F(D')\|^2 = \sum_{i=1}^{k} \|f_i(D) - f_i(D')\|^2 \le k\Delta^2.
-\tag{38}\]</span></span></li>
+\tag{41}\]</span></span></li>
 <li>So <span class="math inline">\(F\)</span> has <span class="math inline">\(\ell_2\)</span> sensitivity <span class="math inline">\(\Delta_2 F \le \sqrt k\,\Delta\)</span>. <a href="#thm-gauss-exact" class="quarto-xref">Theorem&nbsp;3</a> bounds every pair’s <span class="math inline">\(\delta\)</span> by <span class="math inline">\(H(\Delta_2 F/\sigma)\)</span>, in the notation of its proof, and since <span class="math inline">\(H\)</span> increases, that is at most <span class="math inline">\(H(\sqrt k\,\Delta/\sigma)\)</span>.</li>
 <li>For a pair that changes every <span class="math inline">\(f_i\)</span> by exactly <span class="math inline">\(\Delta\)</span>, step 2 is an equality, so that pair’s ratio <span class="math inline">\(s_v\)</span> is <span class="math inline">\(\sqrt k\,\Delta/\sigma\)</span>, and its <span class="math inline">\(\delta\)</span> is exactly <span class="math inline">\(H(\sqrt k\,\Delta/\sigma)\)</span> by step 3 of that proof.</li>
 </ol>
@@ -996,9 +1228,9 @@ H'(x) = \varphi(a)\Big(\frac12 + \frac{\varepsilon}{x^2} + \frac12 - \frac{\vare
 <p><span class="proof-title"><em>Proof</em>. </span></p>
 <ol type="1">
 <li>By <a href="#lem-renyi-loss" class="quarto-xref">Lemma&nbsp;1</a>, with <span class="math inline">\(\lambda = \alpha - 1 &gt; 0\)</span>, it suffices to show that <span class="math inline">\(\mathbb E_P[e^{\lambda L}] \le e^{\lambda(\lambda + 1)s^2/2}\)</span>.</li>
-<li>By <a href="#lem-gauss-loss" class="quarto-xref">Lemma&nbsp;4</a> and <a href="#lem-normal-mgf" class="quarto-xref">Lemma&nbsp;3</a>, with mean <span class="math inline">\(s_v^2/2\)</span> and variance <span class="math inline">\(s_v^2\)</span>, <span id="eq-auto-index-36"><span class="math display">\[
+<li>By <a href="#lem-gauss-loss" class="quarto-xref">Lemma&nbsp;4</a> and <a href="#lem-normal-mgf" class="quarto-xref">Lemma&nbsp;3</a>, with mean <span class="math inline">\(s_v^2/2\)</span> and variance <span class="math inline">\(s_v^2\)</span>, <span id="eq-auto-index-37"><span class="math display">\[
 \mathbb E_P\big[e^{\lambda L}\big] = e^{\lambda s_v^2/2 + \lambda^2 s_v^2/2} = e^{\lambda(\lambda + 1) s_v^2/2}.
-\tag{39}\]</span></span></li>
+\tag{42}\]</span></span></li>
 <li>Since <span class="math inline">\(s_v \le s\)</span> and <span class="math inline">\(\lambda(\lambda + 1) &gt; 0\)</span>, this is at most <span class="math inline">\(e^{\lambda(\lambda + 1)s^2/2}\)</span>. For a pair with <span class="math inline">\(s_v = s\)</span>, step 2 is an equality, so for that pair <span class="math inline">\(D_\alpha(P\|Q) = \alpha s^2/2\)</span> exactly, and no smaller <span class="math inline">\(\rho\)</span> satisfies <a href="#def-zcdp" class="quarto-xref">Definition&nbsp;6</a>.</li>
 </ol>
 </div>
@@ -1009,24 +1241,24 @@ H'(x) = \varphi(a)\Big(\frac12 + \frac{\varepsilon}{x^2} + \frac12 - \frac{\vare
 <p>The joint density of all <span class="math inline">\(k\)</span> outputs is the product of the steps’ densities, by the chain rule of probability. So the total loss is a sum:</p>
 <p><span id="eq-loss-sum"><span class="math display">\[
 L(y_1, \dots, y_k) = \sum_{i=1}^{k} L_i(y_i \mid y_{&lt;i}), \qquad L_i(y_i \mid y_{&lt;i}) = \ln \frac{p_i(y_i \mid y_{&lt;i})}{q_i(y_i \mid y_{&lt;i})}.
-\tag{40}\]</span></span></p>
-<p><strong>Proof of <a href="#thm-pure-comp" class="quarto-xref">Theorem&nbsp;2</a>.</strong> The result says that the <span class="math inline">\(\varepsilon\)</span>’s of pure DP add. Pure DP is approximate DP with <span class="math inline">\(\delta = 0\)</span>, so this is the case <span class="math inline">\(\delta_1 = \dots = \delta_k = 0\)</span> of <a href="#thm-basic-comp" class="quarto-xref">Theorem&nbsp;4</a>, proved next. The argument by losses in the main text, which adds the bounds <span class="math inline">\(|L_i| \le \varepsilon_i\)</span> of <a href="#eq-loss-sum" class="quarto-xref">Equation&nbsp;40</a>, gives the same result, but making it rigorous needs care with the outputs of probability zero, which the proof by sets avoids.</p>
+\tag{43}\]</span></span></p>
+<p><strong>Proof of <a href="#thm-pure-comp" class="quarto-xref">Theorem&nbsp;2</a>.</strong> The result says that the <span class="math inline">\(\varepsilon\)</span>’s of pure DP add. Pure DP is approximate DP with <span class="math inline">\(\delta = 0\)</span>, so this is the case <span class="math inline">\(\delta_1 = \dots = \delta_k = 0\)</span> of <a href="#thm-basic-comp" class="quarto-xref">Theorem&nbsp;4</a>, proved next. The argument by losses in the main text, which adds the bounds <span class="math inline">\(|L_i| \le \varepsilon_i\)</span> of <a href="#eq-loss-sum" class="quarto-xref">Equation&nbsp;43</a>, gives the same result, but making it rigorous needs care with the outputs of probability zero, which the proof by sets avoids.</p>
 <p><strong>Proof of <a href="#thm-basic-comp" class="quarto-xref">Theorem&nbsp;4</a>.</strong> The result says that basic composition adds both parameters of approximate DP. The plan is to prove it for two mechanisms, then extend it by induction. For two, the probability of a set of output pairs is an average, over the first output, of the second mechanism’s probability. Bounding the second mechanism for each first output, then the first mechanism on the resulting average, gives the result. The step that needs care is that the bound from the second mechanism must be capped at 1, because <a href="#lem-functions" class="quarto-xref">Lemma&nbsp;2</a>, which handles the first mechanism, applies only to functions with values between 0 and 1.</p>
 <div class="proof">
 <p><span class="proof-title"><em>Proof</em>. </span></p>
 <ol type="1">
-<li>Take two mechanisms, and a set <span class="math inline">\(S\)</span> of output pairs. For a first output <span class="math inline">\(y_1\)</span>, write <span class="math inline">\(S_{y_1}\)</span> for the second outputs <span class="math inline">\(y_2\)</span> with <span class="math inline">\((y_1, y_2)\)</span> in <span class="math inline">\(S\)</span>. Under <span class="math inline">\(D\)</span>, the first output is drawn from <span class="math inline">\(P_1\)</span> and the second from <span class="math inline">\(P_2(\cdot \mid y_1)\)</span>, so the probability of <span class="math inline">\(S\)</span> is the average over the first output of the probability that the second lands in <span class="math inline">\(S_{y_1}\)</span>: <span id="eq-auto-index-37"><span class="math display">\[
+<li>Take two mechanisms, and a set <span class="math inline">\(S\)</span> of output pairs. For a first output <span class="math inline">\(y_1\)</span>, write <span class="math inline">\(S_{y_1}\)</span> for the second outputs <span class="math inline">\(y_2\)</span> with <span class="math inline">\((y_1, y_2)\)</span> in <span class="math inline">\(S\)</span>. Under <span class="math inline">\(D\)</span>, the first output is drawn from <span class="math inline">\(P_1\)</span> and the second from <span class="math inline">\(P_2(\cdot \mid y_1)\)</span>, so the probability of <span class="math inline">\(S\)</span> is the average over the first output of the probability that the second lands in <span class="math inline">\(S_{y_1}\)</span>: <span id="eq-auto-index-38"><span class="math display">\[
 \Pr_D[(Y_1, Y_2) \in S] = \mathbb E_{Y_1 \sim P_1}\big[P_2(S_{Y_1} \mid Y_1)\big].
-\tag{41}\]</span></span></li>
-<li>For each <span class="math inline">\(y_1\)</span>, the second mechanism is <span class="math inline">\((\varepsilon_2, \delta_2)\)</span>-DP, and a probability is at most 1. So <span id="eq-auto-index-38"><span class="math display">\[
-P_2(S_{y_1} \mid y_1) \le \min\big(1,\ e^{\varepsilon_2} Q_2(S_{y_1} \mid y_1)\big) + \delta_2.
-\tag{42}\]</span></span></li>
-<li>Call the minimum in step 2 <span class="math inline">\(\kappa(y_1)\)</span>. Averaging step 2 over the first output, drawn from <span class="math inline">\(P_1\)</span>, and using step 1, <span id="eq-auto-index-39"><span class="math display">\[
-\Pr_D[(Y_1, Y_2) \in S] \le \mathbb E_{P_1}[\kappa(Y_1)] + \delta_2.
-\tag{43}\]</span></span></li>
-<li>The function <span class="math inline">\(\kappa\)</span> lies between 0 and 1, which is why step 2 kept the minimum with 1. So <a href="#lem-functions" class="quarto-xref">Lemma&nbsp;2</a> applies to the first mechanism, which is <span class="math inline">\((\varepsilon_1, \delta_1)\)</span>-DP: <span id="eq-auto-index-40"><span class="math display">\[
-\mathbb E_{P_1}[\kappa(Y_1)] \le e^{\varepsilon_1} \mathbb E_{Q_1}[\kappa(Y_1)] + \delta_1.
 \tag{44}\]</span></span></li>
+<li>For each <span class="math inline">\(y_1\)</span>, the second mechanism is <span class="math inline">\((\varepsilon_2, \delta_2)\)</span>-DP, and a probability is at most 1. So <span id="eq-auto-index-39"><span class="math display">\[
+P_2(S_{y_1} \mid y_1) \le \min\big(1,\ e^{\varepsilon_2} Q_2(S_{y_1} \mid y_1)\big) + \delta_2.
+\tag{45}\]</span></span></li>
+<li>Call the minimum in step 2 <span class="math inline">\(\kappa(y_1)\)</span>. Averaging step 2 over the first output, drawn from <span class="math inline">\(P_1\)</span>, and using step 1, <span id="eq-auto-index-40"><span class="math display">\[
+\Pr_D[(Y_1, Y_2) \in S] \le \mathbb E_{P_1}[\kappa(Y_1)] + \delta_2.
+\tag{46}\]</span></span></li>
+<li>The function <span class="math inline">\(\kappa\)</span> lies between 0 and 1, which is why step 2 kept the minimum with 1. So <a href="#lem-functions" class="quarto-xref">Lemma&nbsp;2</a> applies to the first mechanism, which is <span class="math inline">\((\varepsilon_1, \delta_1)\)</span>-DP: <span id="eq-auto-index-41"><span class="math display">\[
+\mathbb E_{P_1}[\kappa(Y_1)] \le e^{\varepsilon_1} \mathbb E_{Q_1}[\kappa(Y_1)] + \delta_1.
+\tag{47}\]</span></span></li>
 <li>The minimum is at most its second argument, so <span class="math inline">\(\mathbb E_{Q_1}[\kappa(Y_1)] \le e^{\varepsilon_2} \mathbb E_{Q_1}[Q_2(S_{Y_1} \mid Y_1)]\)</span>. By step 1 applied to <span class="math inline">\(D'\)</span>, that last average is <span class="math inline">\(\Pr_{D'}[(Y_1, Y_2) \in S]\)</span>.</li>
 <li>Chaining steps 3, 4 and 5, the probability of <span class="math inline">\(S\)</span> under <span class="math inline">\(D\)</span> is at most <span class="math inline">\(e^{\varepsilon_1 + \varepsilon_2}\)</span> times its probability under <span class="math inline">\(D'\)</span>, plus <span class="math inline">\(\delta_1 + \delta_2\)</span>. The same argument with <span class="math inline">\(D\)</span> and <span class="math inline">\(D'\)</span> swapped gives the other order, so this is the result for two mechanisms.</li>
 <li>For <span class="math inline">\(k\)</span> mechanisms, the first <span class="math inline">\(k - 1\)</span> form one mechanism, whose output is <span class="math inline">\(y_{&lt;k}\)</span>, that by induction is <span class="math inline">\((\varepsilon_1 + \dots + \varepsilon_{k-1},\ \delta_1 + \dots + \delta_{k-1})\)</span>-DP. Steps 1 to 6, with <span class="math inline">\(y_{&lt;k}\)</span> in the role of <span class="math inline">\(y_1\)</span>, then compose it with the <span class="math inline">\(k\)</span>-th.</li>
@@ -1036,28 +1268,28 @@ P_2(S_{y_1} \mid y_1) \le \min\big(1,\ e^{\varepsilon_2} Q_2(S_{y_1} \mid y_1)\b
 <div class="proof">
 <p><span class="proof-title"><em>Proof</em>. </span></p>
 <ol type="1">
-<li>Independent mechanisms do not see each other’s outputs, so in <a href="#eq-loss-sum" class="quarto-xref">Equation&nbsp;40</a> each <span class="math inline">\(L_i\)</span> depends on <span class="math inline">\(y_i\)</span> alone, and under <span class="math inline">\(P\)</span> the outputs, and so the <span class="math inline">\(L_i\)</span>, are independent.</li>
+<li>Independent mechanisms do not see each other’s outputs, so in <a href="#eq-loss-sum" class="quarto-xref">Equation&nbsp;43</a> each <span class="math inline">\(L_i\)</span> depends on <span class="math inline">\(y_i\)</span> alone, and under <span class="math inline">\(P\)</span> the outputs, and so the <span class="math inline">\(L_i\)</span>, are independent.</li>
 <li>The mean of a sum is the sum of the means, so <span class="math inline">\(\mathbb E[L] = \sum_i \mathbb E[L_i] \le \sum_i \mu_i\)</span>.</li>
-<li>Centred at its mean, the total loss is the sum of the centred step losses. The exponential of a sum is a product, and the expectation of a product of independent variables is the product of their expectations: <span id="eq-auto-index-41"><span class="math display">\[
+<li>Centred at its mean, the total loss is the sum of the centred step losses. The exponential of a sum is a product, and the expectation of a product of independent variables is the product of their expectations: <span id="eq-auto-index-42"><span class="math display">\[
 \mathbb E\big[e^{\lambda (L - \mathbb E L)}\big] = \prod_{i=1}^{k} \mathbb E\big[e^{\lambda (L_i - \mathbb E L_i)}\big].
-\tag{45}\]</span></span></li>
+\tag{48}\]</span></span></li>
 <li>Each factor is at most <span class="math inline">\(e^{\lambda^2 \tau_i^2/2}\)</span>, because step <span class="math inline">\(i\)</span> is <span class="math inline">\((\mu_i, \tau_i)\)</span>-CDP. The product of these bounds is <span class="math inline">\(e^{\lambda^2 (\tau_1^2 + \dots + \tau_k^2)/2}\)</span>, so the total loss is <span class="math inline">\(\tau\)</span>-subgaussian with <span class="math inline">\(\tau^2 = \sum_i \tau_i^2\)</span>.</li>
 </ol>
 </div>
 <p>For adaptive queries, the mean of step <span class="math inline">\(i\)</span>’s loss may depend on the earlier outputs, so the total loss is no longer a sum of independent parts, and its mean is harder to pin down. The conversion to approximate DP, however, needs only an upper tail: a bound on <span class="math inline">\(\mathbb E[e^{\lambda (L - \mu)}]\)</span> for positive <span class="math inline">\(\lambda\)</span>. That bound survives adaptivity.</p>
 <div id="lem-cdp-adaptive" class="theorem lemma">
-<p><span class="theorem-title"><strong>Lemma 5 (Adaptive composition of CDP, one-sided)</strong></span> Run <span class="math inline">\(k\)</span> mechanisms in sequence as in <a href="#thm-basic-comp" class="quarto-xref">Theorem&nbsp;4</a>, where the <span class="math inline">\(i\)</span>-th is <span class="math inline">\((\mu_i, \tau_i)\)</span>-CDP for every value of the earlier outputs. Write <span class="math inline">\(\mu = \sum_i \mu_i\)</span> and <span class="math inline">\(\tau^2 = \sum_i \tau_i^2\)</span>. Then for every <span class="math inline">\(\lambda \ge 0\)</span> and every ordered neighbouring pair, <span id="eq-auto-index-42"><span class="math display">\[
+<p><span class="theorem-title"><strong>Lemma 5 (Adaptive composition of CDP, one-sided)</strong></span> Run <span class="math inline">\(k\)</span> mechanisms in sequence as in <a href="#thm-basic-comp" class="quarto-xref">Theorem&nbsp;4</a>, where the <span class="math inline">\(i\)</span>-th is <span class="math inline">\((\mu_i, \tau_i)\)</span>-CDP for every value of the earlier outputs. Write <span class="math inline">\(\mu = \sum_i \mu_i\)</span> and <span class="math inline">\(\tau^2 = \sum_i \tau_i^2\)</span>. Then for every <span class="math inline">\(\lambda \ge 0\)</span> and every ordered neighbouring pair, <span id="eq-auto-index-43"><span class="math display">\[
 \mathbb E_P\big[e^{\lambda (L - \mu)}\big] \le e^{\lambda^2 \tau^2 / 2}.
-\tag{46}\]</span></span></p>
+\tag{49}\]</span></span></p>
 </div>
 <div class="proof">
 <p><span class="proof-title"><em>Proof</em>. </span></p>
 <ol type="1">
 <li>Fix the earlier outputs <span class="math inline">\(y_{&lt;k}\)</span>, and write <span class="math inline">\(m_k\)</span> for the mean of the last step’s loss given them. Since the last step is <span class="math inline">\((\mu_k, \tau_k)\)</span>-CDP for these outputs, <span class="math inline">\(m_k \le \mu_k\)</span>, and the loss is <span class="math inline">\(\tau_k\)</span>-subgaussian around <span class="math inline">\(m_k\)</span>.</li>
-<li>Split <span class="math inline">\(L_k - \mu_k\)</span> as <span class="math inline">\((L_k - m_k) + (m_k - \mu_k)\)</span>. The second part is zero or negative, and <span class="math inline">\(\lambda \ge 0\)</span>, so its exponential is at most 1. The first part’s exponential moment is bounded by subgaussianity: <span id="eq-auto-index-43"><span class="math display">\[
+<li>Split <span class="math inline">\(L_k - \mu_k\)</span> as <span class="math inline">\((L_k - m_k) + (m_k - \mu_k)\)</span>. The second part is zero or negative, and <span class="math inline">\(\lambda \ge 0\)</span>, so its exponential is at most 1. The first part’s exponential moment is bounded by subgaussianity: <span id="eq-auto-index-44"><span class="math display">\[
 \mathbb E\big[e^{\lambda (L_k - \mu_k)} \mid y_{&lt;k}\big] \le e^{\lambda^2 \tau_k^2 / 2}.
-\tag{47}\]</span></span></li>
-<li>By <a href="#eq-loss-sum" class="quarto-xref">Equation&nbsp;40</a>, <span class="math inline">\(L - \mu\)</span> is the sum of the first <span class="math inline">\(k - 1\)</span> steps’ <span class="math inline">\(L_i - \mu_i\)</span>, which depend only on <span class="math inline">\(y_{&lt;k}\)</span>, plus <span class="math inline">\(L_k - \mu_k\)</span>. An expectation can be computed by averaging over the last output first, with <span class="math inline">\(y_{&lt;k}\)</span> fixed, and then over <span class="math inline">\(y_{&lt;k}\)</span>; this is the tower property of expectation. In the inner average the first part is a constant factor, and step 2 bounds the rest, so the exponential moment of the total is at most <span class="math inline">\(e^{\lambda^2 \tau_k^2/2}\)</span> times that of the first <span class="math inline">\(k - 1\)</span> steps.</li>
+\tag{50}\]</span></span></li>
+<li>By <a href="#eq-loss-sum" class="quarto-xref">Equation&nbsp;43</a>, <span class="math inline">\(L - \mu\)</span> is the sum of the first <span class="math inline">\(k - 1\)</span> steps’ <span class="math inline">\(L_i - \mu_i\)</span>, which depend only on <span class="math inline">\(y_{&lt;k}\)</span>, plus <span class="math inline">\(L_k - \mu_k\)</span>. An expectation can be computed by averaging over the last output first, with <span class="math inline">\(y_{&lt;k}\)</span> fixed, and then over <span class="math inline">\(y_{&lt;k}\)</span>; this is the tower property of expectation. In the inner average the first part is a constant factor, and step 2 bounds the rest, so the exponential moment of the total is at most <span class="math inline">\(e^{\lambda^2 \tau_k^2/2}\)</span> times that of the first <span class="math inline">\(k - 1\)</span> steps.</li>
 <li>Repeating step 3 for steps <span class="math inline">\(k - 1\)</span>, <span class="math inline">\(k - 2\)</span>, down to 1 multiplies the bounds, which gives <span class="math inline">\(e^{\lambda^2 (\tau_1^2 + \dots + \tau_k^2)/2}\)</span>.</li>
 </ol>
 </div>
@@ -1067,10 +1299,10 @@ P_2(S_{y_1} \mid y_1) \le \min\big(1,\ e^{\varepsilon_2} Q_2(S_{y_1} \mid y_1)\b
 <p><span class="proof-title"><em>Proof</em>. </span></p>
 <ol type="1">
 <li>Write <span class="math inline">\(\rho = \rho_1 + \dots + \rho_k\)</span>. By <a href="#lem-renyi-loss" class="quarto-xref">Lemma&nbsp;1</a>, with <span class="math inline">\(\lambda = \alpha - 1 &gt; 0\)</span>, it suffices to show that <span class="math inline">\(\mathbb E_P[e^{\lambda L}] \le e^{\lambda(\lambda + 1)\rho}\)</span> for every positive <span class="math inline">\(\lambda\)</span>.</li>
-<li>Fix the earlier outputs <span class="math inline">\(y_{&lt;k}\)</span>. The last step is <span class="math inline">\(\rho_k\)</span>-zCDP for these outputs, so by <a href="#lem-renyi-loss" class="quarto-xref">Lemma&nbsp;1</a> again, <span id="eq-auto-index-44"><span class="math display">\[
+<li>Fix the earlier outputs <span class="math inline">\(y_{&lt;k}\)</span>. The last step is <span class="math inline">\(\rho_k\)</span>-zCDP for these outputs, so by <a href="#lem-renyi-loss" class="quarto-xref">Lemma&nbsp;1</a> again, <span id="eq-auto-index-45"><span class="math display">\[
 \mathbb E\big[e^{\lambda L_k} \mid y_{&lt;k}\big] \le e^{\lambda(\lambda + 1)\rho_k}.
-\tag{48}\]</span></span></li>
-<li>By <a href="#eq-loss-sum" class="quarto-xref">Equation&nbsp;40</a>, <span class="math inline">\(e^{\lambda L}\)</span> is <span class="math inline">\(e^{\lambda L_k}\)</span> times the exponential of the first <span class="math inline">\(k - 1\)</span> losses, which depend only on <span class="math inline">\(y_{&lt;k}\)</span>. Averaging over the last output first, by the tower property as in <a href="#lem-cdp-adaptive" class="quarto-xref">Lemma&nbsp;5</a>, and using step 2, the exponential moment of the total is at most <span class="math inline">\(e^{\lambda(\lambda + 1)\rho_k}\)</span> times that of the first <span class="math inline">\(k - 1\)</span> steps.</li>
+\tag{51}\]</span></span></li>
+<li>By <a href="#eq-loss-sum" class="quarto-xref">Equation&nbsp;43</a>, <span class="math inline">\(e^{\lambda L}\)</span> is <span class="math inline">\(e^{\lambda L_k}\)</span> times the exponential of the first <span class="math inline">\(k - 1\)</span> losses, which depend only on <span class="math inline">\(y_{&lt;k}\)</span>. Averaging over the last output first, by the tower property as in <a href="#lem-cdp-adaptive" class="quarto-xref">Lemma&nbsp;5</a>, and using step 2, the exponential moment of the total is at most <span class="math inline">\(e^{\lambda(\lambda + 1)\rho_k}\)</span> times that of the first <span class="math inline">\(k - 1\)</span> steps.</li>
 <li>Repeating step 3 down to the first step multiplies the bounds, which gives <span class="math inline">\(e^{\lambda(\lambda + 1)(\rho_1 + \dots + \rho_k)}\)</span>.</li>
 </ol>
 </div>
@@ -1079,9 +1311,9 @@ P_2(S_{y_1} \mid y_1) \le \min\big(1,\ e^{\varepsilon_2} Q_2(S_{y_1} \mid y_1)\b
 <h2 data-number="7.4" class="anchored" data-anchor-id="sec-apx-conv"><span class="header-section-number">7.4</span> Conversions to approximate DP</h2>
 <p>This section proves <a href="#thm-cdp-conv" class="quarto-xref">Theorem&nbsp;7</a> and <a href="#thm-zcdp-conv" class="quarto-xref">Theorem&nbsp;10</a>. Both bound the probability that the loss exceeds <span class="math inline">\(\varepsilon\)</span> and then apply <a href="#cor-tail" class="quarto-xref">Corollary&nbsp;1</a>. The probability is bounded by the Chernoff bound, which is Markov’s inequality applied to an exponential.</p>
 <div id="lem-chernoff" class="theorem lemma">
-<p><span class="theorem-title"><strong>Lemma 6 (Chernoff bound)</strong></span> For any random variable <span class="math inline">\(X\)</span>, any number <span class="math inline">\(t\)</span> and any <span class="math inline">\(\lambda &gt; 0\)</span>, <span id="eq-auto-index-45"><span class="math display">\[
+<p><span class="theorem-title"><strong>Lemma 6 (Chernoff bound)</strong></span> For any random variable <span class="math inline">\(X\)</span>, any number <span class="math inline">\(t\)</span> and any <span class="math inline">\(\lambda &gt; 0\)</span>, <span id="eq-auto-index-46"><span class="math display">\[
 \Pr[X &gt; t] \le e^{-\lambda t}\, \mathbb E\big[e^{\lambda X}\big].
-\tag{49}\]</span></span></p>
+\tag{52}\]</span></span></p>
 </div>
 <div class="proof">
 <p><span class="proof-title"><em>Proof</em>. </span></p>
@@ -1095,12 +1327,12 @@ P_2(S_{y_1} \mid y_1) \le \min\big(1,\ e^{\varepsilon_2} Q_2(S_{y_1} \mid y_1)\b
 <p><span class="proof-title"><em>Proof</em>. </span></p>
 <ol type="1">
 <li>CDP gives the one-sided bound. With <span class="math inline">\(m = \mathbb E[L] \le \mu\)</span> and <span class="math inline">\(\lambda \ge 0\)</span>, <span class="math inline">\(e^{\lambda(L - \mu)} \le e^{\lambda(L - m)}\)</span>, and <a href="#def-subg" class="quarto-xref">Definition&nbsp;3</a> bounds the average of the right side by <span class="math inline">\(e^{\lambda^2 \tau^2/2}\)</span>.</li>
-<li>Apply <a href="#lem-chernoff" class="quarto-xref">Lemma&nbsp;6</a> to <span class="math inline">\(L - \mu\)</span> with a number <span class="math inline">\(t &gt; 0\)</span>, and use step 1: <span id="eq-auto-index-46"><span class="math display">\[
+<li>Apply <a href="#lem-chernoff" class="quarto-xref">Lemma&nbsp;6</a> to <span class="math inline">\(L - \mu\)</span> with a number <span class="math inline">\(t &gt; 0\)</span>, and use step 1: <span id="eq-auto-index-47"><span class="math display">\[
 \Pr_P[L &gt; \mu + t] \le e^{-\lambda t + \lambda^2 \tau^2/2}.
-\tag{50}\]</span></span></li>
-<li>The exponent is a quadratic in <span class="math inline">\(\lambda\)</span>, smallest at <span class="math inline">\(\lambda = t/\tau^2\)</span>, which is positive. At that <span class="math inline">\(\lambda\)</span>, the exponent is <span class="math inline">\(-t^2/\tau^2 + t^2/(2\tau^2) = -t^2/(2\tau^2)\)</span>: <span id="eq-auto-index-47"><span class="math display">\[
+\tag{53}\]</span></span></li>
+<li>The exponent is a quadratic in <span class="math inline">\(\lambda\)</span>, smallest at <span class="math inline">\(\lambda = t/\tau^2\)</span>, which is positive. At that <span class="math inline">\(\lambda\)</span>, the exponent is <span class="math inline">\(-t^2/\tau^2 + t^2/(2\tau^2) = -t^2/(2\tau^2)\)</span>: <span id="eq-auto-index-48"><span class="math display">\[
 \Pr_P[L &gt; \mu + t] \le e^{-t^2 / (2\tau^2)}.
-\tag{51}\]</span></span></li>
+\tag{54}\]</span></span></li>
 <li>Choose <span class="math inline">\(t = \tau\sqrt{2\ln(1/\delta)}\)</span>. Then <span class="math inline">\(t^2/(2\tau^2) = \ln(1/\delta)\)</span>, and the bound of step 3 equals <span class="math inline">\(\delta\)</span>. So the loss exceeds <span class="math inline">\(\varepsilon = \mu + t\)</span> with probability at most <span class="math inline">\(\delta\)</span>, for every ordered pair, and <a href="#cor-tail" class="quarto-xref">Corollary&nbsp;1</a> gives <span class="math inline">\((\varepsilon, \delta)\)</span>-DP.</li>
 </ol>
 </div>
@@ -1108,12 +1340,12 @@ P_2(S_{y_1} \mid y_1) \le \min\big(1,\ e^{\varepsilon_2} Q_2(S_{y_1} \mid y_1)\b
 <div class="proof">
 <p><span class="proof-title"><em>Proof</em>. </span></p>
 <ol type="1">
-<li>Apply <a href="#lem-chernoff" class="quarto-xref">Lemma&nbsp;6</a> to the loss with threshold <span class="math inline">\(\varepsilon\)</span>, and bound the exponential moment by <span class="math inline">\(e^{\lambda(\lambda + 1)\rho}\)</span>, the form of <a href="#def-zcdp" class="quarto-xref">Definition&nbsp;6</a> given by <a href="#lem-renyi-loss" class="quarto-xref">Lemma&nbsp;1</a>: <span id="eq-auto-index-48"><span class="math display">\[
+<li>Apply <a href="#lem-chernoff" class="quarto-xref">Lemma&nbsp;6</a> to the loss with threshold <span class="math inline">\(\varepsilon\)</span>, and bound the exponential moment by <span class="math inline">\(e^{\lambda(\lambda + 1)\rho}\)</span>, the form of <a href="#def-zcdp" class="quarto-xref">Definition&nbsp;6</a> given by <a href="#lem-renyi-loss" class="quarto-xref">Lemma&nbsp;1</a>: <span id="eq-auto-index-49"><span class="math display">\[
 \Pr_P[L &gt; \varepsilon] \le e^{\rho\lambda^2 + (\rho - \varepsilon)\lambda}.
-\tag{52}\]</span></span></li>
-<li>For <span class="math inline">\(\varepsilon &gt; \rho\)</span>, the exponent is a quadratic in <span class="math inline">\(\lambda\)</span>, smallest at <span class="math inline">\(\lambda = (\varepsilon - \rho)/(2\rho)\)</span>, which is positive. At that <span class="math inline">\(\lambda\)</span>, the exponent is <span class="math inline">\((\varepsilon - \rho)^2/(4\rho) - (\varepsilon - \rho)^2/(2\rho)\)</span>: <span id="eq-auto-index-49"><span class="math display">\[
+\tag{55}\]</span></span></li>
+<li>For <span class="math inline">\(\varepsilon &gt; \rho\)</span>, the exponent is a quadratic in <span class="math inline">\(\lambda\)</span>, smallest at <span class="math inline">\(\lambda = (\varepsilon - \rho)/(2\rho)\)</span>, which is positive. At that <span class="math inline">\(\lambda\)</span>, the exponent is <span class="math inline">\((\varepsilon - \rho)^2/(4\rho) - (\varepsilon - \rho)^2/(2\rho)\)</span>: <span id="eq-auto-index-50"><span class="math display">\[
 \Pr_P[L &gt; \varepsilon] \le e^{-(\varepsilon - \rho)^2 / (4\rho)}.
-\tag{53}\]</span></span></li>
+\tag{56}\]</span></span></li>
 <li>Choose <span class="math inline">\(\varepsilon = \rho + 2\sqrt{\rho\ln(1/\delta)}\)</span>, which is larger than <span class="math inline">\(\rho\)</span>. Then <span class="math inline">\((\varepsilon - \rho)^2 = 4\rho\ln(1/\delta)\)</span>, and the bound of step 2 equals <span class="math inline">\(\delta\)</span>. <a href="#cor-tail" class="quarto-xref">Corollary&nbsp;1</a> gives <span class="math inline">\((\varepsilon, \delta)\)</span>-DP.</li>
 </ol>
 </div>
@@ -1123,22 +1355,22 @@ P_2(S_{y_1} \mid y_1) \le \min\big(1,\ e^{\varepsilon_2} Q_2(S_{y_1} \mid y_1)\b
 <p>This section proves <a href="#prp-cdp-pure" class="quarto-xref">Proposition&nbsp;4</a>, <a href="#prp-zcdp-pure" class="quarto-xref">Proposition&nbsp;6</a> and <a href="#cor-pure-adv" class="quarto-xref">Corollary&nbsp;3</a>. An <span class="math inline">\(\varepsilon\)</span>-DP mechanism has a loss between <span class="math inline">\(-\varepsilon\)</span> and <span class="math inline">\(\varepsilon\)</span>, by <a href="#prp-pure-loss" class="quarto-xref">Proposition&nbsp;1</a>. The proofs need two facts about such a loss: that it is <span class="math inline">\(\varepsilon\)</span>-subgaussian, which is Hoeffding’s lemma, and that its mean is at most <span class="math inline">\(\varepsilon\tanh(\varepsilon/2)\)</span>. Both are proved first.</p>
 <p>Hoeffding’s lemma bounds the exponential moments of any variable confined to an interval. The plan is to replace the variable by one that takes only the two endpoints, which has larger exponential moments by convexity, and then to bound that two-point variable by a second-order Taylor expansion.</p>
 <div id="lem-hoeffding" class="theorem lemma">
-<p><span class="theorem-title"><strong>Lemma 7 (Hoeffding’s lemma)</strong></span> Let <span class="math inline">\(X\)</span> have mean zero and take values in an interval <span class="math inline">\([a, b]\)</span>. Then for every real <span class="math inline">\(\lambda\)</span>, <span id="eq-auto-index-50"><span class="math display">\[
+<p><span class="theorem-title"><strong>Lemma 7 (Hoeffding’s lemma)</strong></span> Let <span class="math inline">\(X\)</span> have mean zero and take values in an interval <span class="math inline">\([a, b]\)</span>. Then for every real <span class="math inline">\(\lambda\)</span>, <span id="eq-auto-index-51"><span class="math display">\[
 \mathbb E\big[e^{\lambda X}\big] \le e^{\lambda^2 (b - a)^2 / 8}.
-\tag{54}\]</span></span> In particular, a variable confined to an interval of length <span class="math inline">\(2\tau\)</span> is <span class="math inline">\(\tau\)</span>-subgaussian.</p>
+\tag{57}\]</span></span> In particular, a variable confined to an interval of length <span class="math inline">\(2\tau\)</span> is <span class="math inline">\(\tau\)</span>-subgaussian.</p>
 </div>
 <div class="proof">
 <p><span class="proof-title"><em>Proof</em>. </span></p>
 <ol type="1">
-<li>If <span class="math inline">\(a = b\)</span>, then <span class="math inline">\(X = 0\)</span> and the bound holds, so take <span class="math inline">\(a &lt; b\)</span>. A variable with mean zero cannot lie entirely above or below zero, so <span class="math inline">\(a \le 0 \le b\)</span>. The exponential is convex, so on <span class="math inline">\([a, b]\)</span> it lies below the chord joining its values at the endpoints: <span id="eq-auto-index-51"><span class="math display">\[
+<li>If <span class="math inline">\(a = b\)</span>, then <span class="math inline">\(X = 0\)</span> and the bound holds, so take <span class="math inline">\(a &lt; b\)</span>. A variable with mean zero cannot lie entirely above or below zero, so <span class="math inline">\(a \le 0 \le b\)</span>. The exponential is convex, so on <span class="math inline">\([a, b]\)</span> it lies below the chord joining its values at the endpoints: <span id="eq-auto-index-52"><span class="math display">\[
 e^{\lambda x} \le \frac{b - x}{b - a} e^{\lambda a} + \frac{x - a}{b - a} e^{\lambda b}.
-\tag{55}\]</span></span></li>
-<li>Take expectations. The right side is linear in <span class="math inline">\(x\)</span>, and <span class="math inline">\(\mathbb E[X] = 0\)</span>. Writing <span class="math inline">\(\pi = -a/(b - a)\)</span>, which lies between 0 and 1, the weights become <span class="math inline">\(1 - \pi\)</span> and <span class="math inline">\(\pi\)</span>: <span id="eq-auto-index-52"><span class="math display">\[
+\tag{58}\]</span></span></li>
+<li>Take expectations. The right side is linear in <span class="math inline">\(x\)</span>, and <span class="math inline">\(\mathbb E[X] = 0\)</span>. Writing <span class="math inline">\(\pi = -a/(b - a)\)</span>, which lies between 0 and 1, the weights become <span class="math inline">\(1 - \pi\)</span> and <span class="math inline">\(\pi\)</span>: <span id="eq-auto-index-53"><span class="math display">\[
 \mathbb E\big[e^{\lambda X}\big] \le (1 - \pi) e^{\lambda a} + \pi e^{\lambda b}.
-\tag{56}\]</span></span></li>
-<li>Write <span class="math inline">\(h = \lambda (b - a)\)</span>, so that <span class="math inline">\(\lambda a = -\pi h\)</span> and <span class="math inline">\(\lambda b = \lambda a + h\)</span>. Factoring out <span class="math inline">\(e^{\lambda a}\)</span>, the right side of step 2 is <span class="math inline">\(e^{\psi(h)}\)</span> with <span id="eq-auto-index-53"><span class="math display">\[
+\tag{59}\]</span></span></li>
+<li>Write <span class="math inline">\(h = \lambda (b - a)\)</span>, so that <span class="math inline">\(\lambda a = -\pi h\)</span> and <span class="math inline">\(\lambda b = \lambda a + h\)</span>. Factoring out <span class="math inline">\(e^{\lambda a}\)</span>, the right side of step 2 is <span class="math inline">\(e^{\psi(h)}\)</span> with <span id="eq-auto-index-54"><span class="math display">\[
 \psi(h) = -\pi h + \ln\big(1 - \pi + \pi e^{h}\big).
-\tag{57}\]</span></span></li>
+\tag{60}\]</span></span></li>
 <li>Compute the first two derivatives of <span class="math inline">\(\psi\)</span>. Write <span class="math inline">\(u = \pi e^h/(1 - \pi + \pi e^h)\)</span>, a number between 0 and 1. Then <span class="math inline">\(\psi'(h) = -\pi + u\)</span>, and since <span class="math inline">\(u\)</span> has derivative <span class="math inline">\(u(1 - u)\)</span>, <span class="math inline">\(\psi''(h) = u(1 - u)\)</span>, which is at most <span class="math inline">\(1/4\)</span>. Also <span class="math inline">\(\psi(0) = 0\)</span> and <span class="math inline">\(\psi'(0) = -\pi + \pi = 0\)</span>.</li>
 <li>By Taylor’s theorem with remainder, <span class="math inline">\(\psi(h) = \psi(0) + h\psi'(0) + h^2\psi''(\xi)/2\)</span> for some <span class="math inline">\(\xi\)</span> between 0 and <span class="math inline">\(h\)</span>. Step 4 bounds this by <span class="math inline">\(h^2/8 = \lambda^2(b - a)^2/8\)</span>.</li>
 <li>For an interval of length <span class="math inline">\(2\tau\)</span>, the bound is <span class="math inline">\(e^{\lambda^2 (2\tau)^2/8} = e^{\lambda^2 \tau^2/2}\)</span>, which is the condition of <a href="#def-subg" class="quarto-xref">Definition&nbsp;3</a>.</li>
@@ -1146,23 +1378,23 @@ e^{\lambda x} \le \frac{b - x}{b - a} e^{\lambda a} + \frac{x - a}{b - a} e^{\la
 </div>
 <p>The mean of the loss is the Kullback–Leibler divergence <span class="math inline">\(\mathbb E_P[L]\)</span>. To bound it, rewrite it as an average under <span class="math inline">\(Q\)</span> of a convex function of the likelihood ratio <span class="math inline">\(r = p/q\)</span>. The ratio lies between <span class="math inline">\(e^{-\varepsilon}\)</span> and <span class="math inline">\(e^{\varepsilon}\)</span> and averages to 1 under <span class="math inline">\(Q\)</span>. A convex function of a variable with a fixed average and a fixed range has the largest average when the variable sits at the two ends of the range.</p>
 <div id="lem-kl-pure" class="theorem lemma">
-<p><span class="theorem-title"><strong>Lemma 8 (The mean loss of a pure DP mechanism)</strong></span> If a mechanism is <span class="math inline">\(\varepsilon\)</span>-DP, then for every neighbouring pair, <span id="eq-auto-index-54"><span class="math display">\[
+<p><span class="theorem-title"><strong>Lemma 8 (The mean loss of a pure DP mechanism)</strong></span> If a mechanism is <span class="math inline">\(\varepsilon\)</span>-DP, then for every neighbouring pair, <span id="eq-auto-index-55"><span class="math display">\[
 \mathbb E_P[L] \le \varepsilon \tanh(\varepsilon / 2) \le \frac{\varepsilon^2}{2}.
-\tag{58}\]</span></span></p>
+\tag{61}\]</span></span></p>
 </div>
 <div class="proof">
 <p><span class="proof-title"><em>Proof</em>. </span></p>
 <ol type="1">
 <li>With <span class="math inline">\(r = p/q = e^{L}\)</span>, an average under <span class="math inline">\(P\)</span> is an average under <span class="math inline">\(Q\)</span> weighted by <span class="math inline">\(r\)</span>, so <span class="math inline">\(\mathbb E_P[L] = \mathbb E_Q[r \ln r]\)</span>. Also <span class="math inline">\(\mathbb E_Q[r] = \int p = 1\)</span>.</li>
-<li>By <a href="#prp-pure-loss" class="quarto-xref">Proposition&nbsp;1</a>, <span class="math inline">\(r\)</span> lies between <span class="math inline">\(A = e^{-\varepsilon}\)</span> and <span class="math inline">\(B = e^{\varepsilon}\)</span>, except on a set of probability zero. The function <span class="math inline">\(c(r) = r \ln r\)</span> is convex, since its second derivative is <span class="math inline">\(1/r &gt; 0\)</span>. So on <span class="math inline">\([A, B]\)</span> it lies below its chord: <span id="eq-auto-index-55"><span class="math display">\[
+<li>By <a href="#prp-pure-loss" class="quarto-xref">Proposition&nbsp;1</a>, <span class="math inline">\(r\)</span> lies between <span class="math inline">\(A = e^{-\varepsilon}\)</span> and <span class="math inline">\(B = e^{\varepsilon}\)</span>, except on a set of probability zero. The function <span class="math inline">\(c(r) = r \ln r\)</span> is convex, since its second derivative is <span class="math inline">\(1/r &gt; 0\)</span>. So on <span class="math inline">\([A, B]\)</span> it lies below its chord: <span id="eq-auto-index-56"><span class="math display">\[
 c(r) \le \frac{(B - r)\, c(A) + (r - A)\, c(B)}{B - A}.
-\tag{59}\]</span></span></li>
-<li>Take the average under <span class="math inline">\(Q\)</span>, where <span class="math inline">\(r\)</span> averages to 1, and substitute <span class="math inline">\(c(A) = -\varepsilon e^{-\varepsilon}\)</span> and <span class="math inline">\(c(B) = \varepsilon e^{\varepsilon}\)</span>: <span id="eq-auto-index-56"><span class="math display">\[
+\tag{62}\]</span></span></li>
+<li>Take the average under <span class="math inline">\(Q\)</span>, where <span class="math inline">\(r\)</span> averages to 1, and substitute <span class="math inline">\(c(A) = -\varepsilon e^{-\varepsilon}\)</span> and <span class="math inline">\(c(B) = \varepsilon e^{\varepsilon}\)</span>: <span id="eq-auto-index-57"><span class="math display">\[
 \mathbb E_Q[c(r)] \le \frac{-(e^{\varepsilon} - 1)\varepsilon e^{-\varepsilon} + (1 - e^{-\varepsilon})\varepsilon e^{\varepsilon}}{e^{\varepsilon} - e^{-\varepsilon}}.
-\tag{60}\]</span></span></li>
-<li>Multiplying out, the numerator is <span class="math inline">\(\varepsilon(e^{\varepsilon} + e^{-\varepsilon} - 2) = \varepsilon(e^{\varepsilon/2} - e^{-\varepsilon/2})^2\)</span>. The denominator factors as <span class="math inline">\((e^{\varepsilon/2} - e^{-\varepsilon/2})(e^{\varepsilon/2} + e^{-\varepsilon/2})\)</span>. Cancelling one common factor leaves <span id="eq-auto-index-57"><span class="math display">\[
+\tag{63}\]</span></span></li>
+<li>Multiplying out, the numerator is <span class="math inline">\(\varepsilon(e^{\varepsilon} + e^{-\varepsilon} - 2) = \varepsilon(e^{\varepsilon/2} - e^{-\varepsilon/2})^2\)</span>. The denominator factors as <span class="math inline">\((e^{\varepsilon/2} - e^{-\varepsilon/2})(e^{\varepsilon/2} + e^{-\varepsilon/2})\)</span>. Cancelling one common factor leaves <span id="eq-auto-index-58"><span class="math display">\[
 \mathbb E_P[L] \le \varepsilon\, \frac{e^{\varepsilon/2} - e^{-\varepsilon/2}}{e^{\varepsilon/2} + e^{-\varepsilon/2}} = \varepsilon \tanh(\varepsilon/2).
-\tag{61}\]</span></span></li>
+\tag{64}\]</span></span></li>
 <li>Finally, <span class="math inline">\(\tanh(x) \le x\)</span> for <span class="math inline">\(x \ge 0\)</span>. Both sides are 0 at <span class="math inline">\(x = 0\)</span>, and the derivative of <span class="math inline">\(x - \tanh(x)\)</span> is <span class="math inline">\(\tanh^2(x)\)</span>, which is never negative. With <span class="math inline">\(x = \varepsilon/2\)</span>, this gives the bound <span class="math inline">\(\varepsilon^2/2\)</span>.</li>
 </ol>
 </div>
@@ -1179,9 +1411,9 @@ c(r) \le \frac{(B - r)\, c(A) + (r - A)\, c(B)}{B - A}.
 <p><span class="proof-title"><em>Proof</em>. </span></p>
 <ol type="1">
 <li>By <a href="#lem-renyi-loss" class="quarto-xref">Lemma&nbsp;1</a>, it suffices to show <span class="math inline">\(\mathbb E_P[e^{\lambda L}] \le e^{\lambda(\lambda + 1)\varepsilon^2/2}\)</span> for every <span class="math inline">\(\lambda &gt; 0\)</span>.</li>
-<li>Split the loss into its mean <span class="math inline">\(m\)</span> and its centred part. The exponential of the mean is a constant and comes out of the expectation: <span id="eq-auto-index-58"><span class="math display">\[
+<li>Split the loss into its mean <span class="math inline">\(m\)</span> and its centred part. The exponential of the mean is a constant and comes out of the expectation: <span id="eq-auto-index-59"><span class="math display">\[
 \mathbb E_P\big[e^{\lambda L}\big] = e^{\lambda m}\, \mathbb E_P\big[e^{\lambda (L - m)}\big].
-\tag{62}\]</span></span></li>
+\tag{65}\]</span></span></li>
 <li><a href="#lem-kl-pure" class="quarto-xref">Lemma&nbsp;8</a> gives <span class="math inline">\(m \le \varepsilon^2/2\)</span>, so the first factor is at most <span class="math inline">\(e^{\lambda \varepsilon^2/2}\)</span>, since <span class="math inline">\(\lambda &gt; 0\)</span>. As in the proof of <a href="#prp-cdp-pure" class="quarto-xref">Proposition&nbsp;4</a>, <a href="#lem-hoeffding" class="quarto-xref">Lemma&nbsp;7</a> bounds the second factor by <span class="math inline">\(e^{\lambda^2 \varepsilon^2/2}\)</span>.</li>
 <li>The product of the two bounds is <span class="math inline">\(e^{\lambda\varepsilon^2/2 + \lambda^2\varepsilon^2/2} = e^{\lambda(\lambda + 1)\varepsilon^2/2}\)</span>.</li>
 </ol>
@@ -1215,12 +1447,12 @@ c(r) \le \frac{(B - r)\, c(A) + (r - A)\, c(B)}{B - A}.
 <ol type="1">
 <li>The processed outputs have densities <span class="math inline">\(p_g(z) = \int p(y) k(z \mid y)\, \mathrm d y\)</span> and <span class="math inline">\(q_g(z) = \int q(y) k(z \mid y)\, \mathrm d y\)</span>. Write <span class="math inline">\(r(y) = p(y)/q(y)\)</span>.</li>
 <li>Fix <span class="math inline">\(z\)</span> with <span class="math inline">\(q_g(z) &gt; 0\)</span>. (Where <span class="math inline">\(q_g(z) = 0\)</span>, the conditional density <span class="math inline">\(k(z \mid y)\)</span> vanishes for almost every <span class="math inline">\(y\)</span>, because <span class="math inline">\(q\)</span> is positive, so <span class="math inline">\(p_g(z) = 0\)</span> as well and such <span class="math inline">\(z\)</span> add nothing to either side below.) The weights <span class="math inline">\(w(y) = q(y)k(z \mid y)/q_g(z)\)</span> are not negative and integrate to 1 over <span class="math inline">\(y\)</span>, by the formula for <span class="math inline">\(q_g\)</span>, so they form a probability distribution. Under it, <span class="math inline">\(r\)</span> averages to <span class="math inline">\(p_g(z)/q_g(z)\)</span>, because <span class="math inline">\(w(y) r(y) = p(y)k(z \mid y)/q_g(z)\)</span>.</li>
-<li>The function <span class="math inline">\(x \mapsto x^\alpha\)</span> is convex for <span class="math inline">\(\alpha &gt; 1\)</span>. By Jensen’s inequality, the average of <span class="math inline">\(r^\alpha\)</span> under <span class="math inline">\(w\)</span> is at least the <span class="math inline">\(\alpha\)</span>-th power of the average of <span class="math inline">\(r\)</span>. Multiplying by <span class="math inline">\(q_g(z)\)</span>, <span id="eq-auto-index-59"><span class="math display">\[
+<li>The function <span class="math inline">\(x \mapsto x^\alpha\)</span> is convex for <span class="math inline">\(\alpha &gt; 1\)</span>. By Jensen’s inequality, the average of <span class="math inline">\(r^\alpha\)</span> under <span class="math inline">\(w\)</span> is at least the <span class="math inline">\(\alpha\)</span>-th power of the average of <span class="math inline">\(r\)</span>. Multiplying by <span class="math inline">\(q_g(z)\)</span>, <span id="eq-auto-index-60"><span class="math display">\[
 \int q(y) k(z \mid y)\, r(y)^{\alpha}\, \mathrm d y \ge q_g(z) \Big(\frac{p_g(z)}{q_g(z)}\Big)^{\alpha}.
-\tag{63}\]</span></span></li>
-<li>Integrate both sides over <span class="math inline">\(z\)</span>. On the left, exchange the two integrals; <span class="math inline">\(k(z \mid y)\)</span> integrates to 1 over <span class="math inline">\(z\)</span>, which leaves <span class="math inline">\(\mathbb E_Q[r^\alpha]\)</span>. The right side becomes the same average for the processed outputs: <span id="eq-auto-index-60"><span class="math display">\[
+\tag{66}\]</span></span></li>
+<li>Integrate both sides over <span class="math inline">\(z\)</span>. On the left, exchange the two integrals; <span class="math inline">\(k(z \mid y)\)</span> integrates to 1 over <span class="math inline">\(z\)</span>, which leaves <span class="math inline">\(\mathbb E_Q[r^\alpha]\)</span>. The right side becomes the same average for the processed outputs: <span id="eq-auto-index-61"><span class="math display">\[
 \mathbb E_{Q}\big[r(Y)^{\alpha}\big] \ge \mathbb E_{Z \sim Q_g}\Big[\Big(\frac{p_g(Z)}{q_g(Z)}\Big)^{\alpha}\Big].
-\tag{64}\]</span></span></li>
+\tag{67}\]</span></span></li>
 <li>Taking logarithms and dividing by <span class="math inline">\(\alpha - 1 &gt; 0\)</span> preserves the inequality. By <a href="#def-renyi" class="quarto-xref">Definition&nbsp;5</a>, the Rényi divergence of the processed outputs is therefore at most <span class="math inline">\(D_\alpha(P\|Q)\)</span>, which is at most <span class="math inline">\(\alpha\rho\)</span> because <span class="math inline">\(M\)</span> is <span class="math inline">\(\rho\)</span>-zCDP, for every order and every ordered pair.</li>
 </ol>
 </div>
