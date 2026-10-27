@@ -72,8 +72,9 @@ Rules for paragraphs (PROSE.md, "Rules for paragraphs"):
     argument (an example that subsamples 1% of the data cannot illustrate a run without subsampling).
 24. **Shorter overall.** Pay for each connection you add by cutting what the paragraph does not need:
     repetition, a result stated twice, a preview of what comes next, narration of what the page
-    does, a detail the reader will not use. A revised page should not be longer than the original;
-    if the connections cannot fit, cut a secondary topic, never the connections.
+    does, a detail the reader will not use, a second example, a sentence restating a table. Aim for
+    about 80% of the original length; a page may fall short with a reason, but is never longer. If
+    the connections cannot fit, cut a secondary topic, never the connections or a needed caveat.
 
 A structural failure of rules 11–13 (a section without a question, a proof away from its statement)
 makes the verdict **rewrite**, with the order the section should follow.

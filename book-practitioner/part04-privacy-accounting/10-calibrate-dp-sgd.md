@@ -2,11 +2,11 @@
 
 ## Why this matters
 
-An **accountant** is the code that turns a training run's settings into its privacy level $\varepsilon$ under differential privacy (DP). Before the run, it finds the noise that meets your target, and after it, the $\varepsilon$ the run spent. Both can go wrong without any visible sign. The noise may be calibrated with one accountant and reported with another, or the data loader may not sample the way the accountant assumes. A restart may also reset the accountant's count of steps. None of these changes the loss curve, but each makes the privacy claim false.
+An **accountant** turns a training run's settings into its privacy level $\varepsilon$ under differential privacy (DP). Before the run it finds the noise that meets your target, and after it the $\varepsilon$ the run spent. Both can go wrong silently. The noise may be calibrated with one accountant and reported with another, the loader may not sample as the accountant assumes, or a restart may reset the step count. None changes the loss curve, but each makes the claim false.
 
-This chapter does that accounting and trains nothing. Its run is stochastic gradient descent (SGD) with DP, called DP-SGD, on the Adult census data from the UCI Machine Learning Repository. [Train a model with DP-SGD](../part05-dp-ml/13-train-dp-sgd.md) trains it. It trains on 30,000 people in batches of 1,000 for ten epochs, aiming at $\varepsilon = 4$. Each section below is one step, and the rules they apply are explained in [Report and review an ε claim](09-choosing-an-accountant.md).
+This chapter does the accounting, and trains nothing, for a run of stochastic gradient descent (SGD) with DP, called DP-SGD, on the Adult census data from the UCI Machine Learning Repository. It trains on 30,000 people in batches of 1,000 for ten epochs, aiming at $\varepsilon = 4$, and [Train a model with DP-SGD](../part05-dp-ml/13-train-dp-sgd.md) trains it.
 
-The script [practitioner_calibrate.py](../../code/part04-privacy-accounting/practitioner_calibrate.py) runs all seven steps in one to two minutes, with Opacus 1.6.0 and `dp-accounting` 0.6.0. Its defaults are Part 5's run. Options set your own run: `--n`, `--batch`, `--epochs`, `--epsilon`, `--dataset`, `--unit` and `--delta`, which defaults to the rule of the next section. Only the planning table stays fixed. The second command plans ten epochs on MNIST's 60,000 images, in batches of 256, at a target of 3.
+The script [practitioner_calibrate.py](../../code/part04-privacy-accounting/practitioner_calibrate.py) runs the seven steps below in one to two minutes, with Opacus 1.6.0 and `dp-accounting` 0.6.0. Its defaults are Part 5's run. Options such as `--n`, `--batch`, `--epochs` and `--epsilon` set your own, as the second command does for MNIST, and only the planning table stays fixed.
 
 ```bash
 uv run python code/part04-privacy-accounting/practitioner_calibrate.py
@@ -15,9 +15,9 @@ uv run python code/part04-privacy-accounting/practitioner_calibrate.py --n 60000
 
 ## Fix the privacy unit, n and δ {#sec-calib-unit}
 
-The first decision is what one record is, because the guarantee protects exactly that. In Adult each row is one person, so protecting a row protects a person. If one person could own many rows, the number of records $n$ would have to count people, not rows, and training would need the user-level methods of [User-level differential privacy](../part05-dp-ml/07-user-level.md).
+The guarantee protects exactly one record, so first decide what a record is. In Adult each row is one person. If one person could own many rows, the number of records $n$ would have to count people, and training would need the methods of [User-level differential privacy](../part05-dp-ml/07-user-level.md).
 
-The slack $\delta$ is roughly the small chance that the guarantee does not hold. The book's rule sets it from $n$ as $\delta \le 1/n^{1.1}$, rounded down to a power of ten, which keeps it well below $1/n$ ([Choosing δ](09-choosing-an-accountant.md#sec-choose-delta)).
+The slack $\delta$ is roughly the chance that the guarantee fails. The book's rule sets it to at most $1/n^{1.1}$, rounded down to a power of ten, well below $1/n$ ([Choosing δ](09-choosing-an-accountant.md#sec-choose-delta)).
 
 ```{.python excerpt="calibrate-delta"}
 def delta_for(n: int) -> float:
@@ -32,11 +32,11 @@ delta_for(60,000) = 1e-06
 delta_for(569) = 1e-04
 ```
 
-Here $n$ counts the people of the training split, not the whole dataset, and the rule gives $10^{-5}$. Set the validation rows aside first: they are not trained on, so they are neither in $n$ nor protected. The other two lines are for MNIST and scikit-learn's breast cancer data. Adult's $\delta$ copied to MNIST would break the rule.
+Here $n$ counts the people of the training split, not all of Adult's rows, so $\delta$ is $10^{-5}$. Set the validation rows aside first, because rows that are not trained on are neither in $n$ nor protected. The lines for MNIST and scikit-learn's breast cancer data show that $\delta$ must be recomputed for each dataset.
 
 ## Choose the sampler {#sec-calib-sampler}
 
-The accountants on this page assume **Poisson sampling**, in which each record joins each batch independently with probability $q$, the sampling rate, so batches vary in size. It is the default because the accountants certify how much it hides each record, while the common alternatives cost far more (@sec-calib-samplers). With an expected batch size $B$, the rate is $q = B/n$. A run of $E$ epochs then takes $E/q$ steps, rounded down, which the output calls $T$.
+The accountants here assume **Poisson sampling**, in which each record joins each batch independently with probability $q$, the sampling rate, so batches vary in size. Other samplers cost far more privacy (@sec-calib-samplers). With an expected batch size $B$, the rate is $q = B/n$. A run of $E$ epochs then takes $E/q$ steps, rounded down, which the output calls $T$.
 
 ```text
 Poisson: B=1000, E=10: q=0.033333, T=300
@@ -44,11 +44,11 @@ Opacus DPDataLoader.from_data_loader: q=1/30=0.033333, 30 steps an epoch, 300 in
 chosen run uses the loader's q and steps; get_noise_multiplier at that q counts int(E/q)=300: equal True
 ```
 
-The second line is what training will do. Opacus replaces your loader with a Poisson `DPDataLoader`. Its rate is one over the number of batches in the original loader, $\lceil n/B \rceil$, and it runs that many steps per epoch. Here the batch size divides $n$, so the first two lines agree. When it does not, they differ slightly, and the loader's count is what training runs. So the script takes $q$ and $T$ from the loader, and the third line checks that Opacus's calibration counts the same steps. This step has gone wrong if the training code builds its own loader with `shuffle=True` and a fixed `batch_size`, which the Poisson accountant does not describe. Batches that all have the same size in the logs are the sign ([Amplification by subsampling](05-subsampling.md#sec-sub-schemes)).
+The second line is what training will run, because Opacus replaces your loader with a Poisson `DPDataLoader`. Its rate is one over the original loader's number of batches, $\lceil n/B \rceil$, with that many steps per epoch. Here $B$ divides $n$, so the two lines agree. When it does not, training runs the loader's numbers. So the script takes $q$ and $T$ from the loader, and the third line checks that Opacus's calibration counts the same steps. This step has gone wrong if the training code builds its own loader with `shuffle=True` and a fixed `batch_size`. The sign is that all batches in the logs have the same size ([Amplification by subsampling](05-subsampling.md#sec-sub-schemes)).
 
 ## Plan the noise {#sec-calib-plan}
 
-Next come the batch size, the epochs and the noise multiplier $\sigma$. Training clips each record's gradient to a length of at most $C$, the clipping norm, and $\sigma$ is the noise's standard deviation as a multiple of $C$. With the target and the sampler fixed, an accountant finds the smallest $\sigma$ that meets them, so calibrate with the accountant you will report ([The inverse problem](09-choosing-an-accountant.md#sec-choose-inverse)). The script uses two libraries that check each other, both with tight accountants ([Numerical accounting](06-numerical-accounting.md)). Opacus's `get_noise_multiplier`, from `opacus.accountants.utils`, searches with its privacy loss random variable (PRV) accountant and stops within 0.01 of the target $\varepsilon$. Google's `dp_accounting` searches with its privacy loss distribution (PLD) accountant and stops within 0.01 in $\sigma$.
+Next come the batch size, the epochs and the noise multiplier $\sigma$. Training clips each record's gradient to length at most $C$, the clipping norm, and $\sigma$ is the noise's standard deviation as a multiple of $C$. Given the target and the sampler, an accountant finds the smallest $\sigma$ that meets them, so calibrate with the accountant you will report ([The inverse problem](09-choosing-an-accountant.md#sec-choose-inverse)). The script uses tight accountants from two libraries, which check each other ([Numerical accounting](06-numerical-accounting.md)). Opacus's `get_noise_multiplier` searches with its privacy loss random variable (PRV) accountant to within 0.01 in $\varepsilon$. Google's `dp_accounting` searches with its privacy loss distribution (PLD) accountant to within 0.01 in $\sigma$.
 
 ```{.python excerpt="calibrate-sigma"}
 def sigma_opacus(epsilon: float, delta: float, q: float, epochs: int) -> float:
@@ -72,7 +72,7 @@ def sigma_dp_accounting(epsilon: float, delta: float, q: float, steps: int) -> f
 
 Pass `accountant="prv"` explicitly, because `get_noise_multiplier` defaults to the Rényi differential privacy (RDP) accountant, a valid but looser bound that asks for more noise. In `dp_accounting`, `LowerEndpointAndGuess(0.3, 1.0)` starts the search at a lower end of 0.3, so lower that number if the call raises an error.
 
-The table uses a PLD grid of $10^{-3}$, the step to which the accountant rounds the privacy loss, which keeps each search near a second. Its last column is $\sigma/B$ times 1,000. Averaging over a batch of $B$ divides the noise on the gradient sum by $B$, so that column is the noise on the averaged gradient per unit of clipping norm.
+The table uses a PLD grid of $10^{-3}$, the step to which the accountant rounds the privacy loss, so each search takes about a second. Averaging over a batch of $B$ divides the noise on the sum by $B$. So the last column, $\sigma/B$ times 1,000, is the noise on the averaged gradient per unit of clipping norm.
 
 ```text
 dataset             n  delta     B   E  eps      T  sigma PRV  sigma PLD  sigma/B x1000
@@ -83,24 +83,24 @@ Adult           30000  1e-05  1000  10    8    300       0.72       0.73        
 Adult           30000  1e-05  1000  20    4    600       1.16       1.16           1.16
 ```
 
-The block shows 5 of the script's 18 Adult cells. Read it along the batch size first. At $\varepsilon = 4$ and ten epochs, $\sigma$ grows from 0.62 at a batch of 100 to 0.97 at 1,000. Yet the noise on the averaged gradient falls from 6.16 to 0.97, because a larger batch divides the noise among more records. At that batch, twenty epochs raise $\sigma$ from 0.97 to 1.16.
+The block shows 5 of the script's 18 Adult cells. At $\varepsilon = 4$ and ten epochs, a batch of 1,000 needs more noise than a batch of 100, with $\sigma$ at 0.97 instead of 0.62. Yet that noise, averaged over ten times as many records, is smaller on the average, 0.97 instead of 6.16. Twenty epochs instead of ten raise $\sigma$ to 1.16.
 
-The table cannot choose the batch, because the noise on the average keeps falling as the batch grows, and so does the number of steps. So learn the epochs and steps your model needs from a non-private run or public data. Then take the largest batch that leaves those steps and fits in memory ([Batch size at a fixed budget](../part05-dp-ml/02-dp-sgd.md#sec-dpsgd-batch)). Compare cells by $\sigma/B$, never by $\sigma$ alone, since a smaller batch has the smaller $\sigma$ but the noisier average. The run takes the largest batch with ten epochs at $\varepsilon = 4$, which is the cell Part 5 trains.
+The table alone cannot choose the batch, because a larger batch lowers the noise on the average but also the number of steps. So learn the steps your model needs from a non-private run or public data. Then take the largest batch that leaves those steps and fits in memory ([Batch size at a fixed budget](../part05-dp-ml/02-dp-sgd.md#sec-dpsgd-batch)), which for Part 5 is 1,000.
 
-The size of the data changes the picture, as a row from the end of the table shows.
+Small datasets change the picture, as a row from the end of the table shows.
 
 ```text
 breast cancer     569  1e-04    64  20    1    177       4.96       4.91          77.51
 largest gap between PRV and PLD sigma: 1.6% (Adult, B=300, E=10, eps=8)
 ```
 
-With 569 records, a batch of 64 is a large share of the data, so sampling amplifies little. At $\varepsilon = 1$ the noise on the averaged gradient is 77.51, so small datasets need a large $\varepsilon$, public pretraining, or another method.
+With 569 records, a batch of 64 is over a tenth of the data, so sampling amplifies little. The noise on the average is then 77.51 at $\varepsilon = 1$, so small datasets need a large $\varepsilon$, public pretraining, or another method.
 
-The two libraries also check each other. Across all 24 cells their $\sigma$ differ by at most 1.6%. A gap above about 3% points to a call given different inputs. Look for a batch size passed as a rate, epochs passed as steps, or a different $\delta$.
+The block's last line is the libraries' check on each other. Across all 24 cells their $\sigma$ differ by at most 1.6%. A gap above about 3% means the two calls got different inputs, such as a batch size passed as a rate, epochs passed as steps, or another $\delta$.
 
 ## Check ε with a second accountant {#sec-calib-crosscheck}
 
-Train with the $\sigma$ the calibration returned, here Opacus's 0.9729, unrounded, as Part 5 does. If you round it, round up at the precision the statement prints, three decimals, and never down, since less noise means a larger $\varepsilon$. Before training, compute the planned run's $\varepsilon$ with every accountant at hand, three from Opacus and two from `dp_accounting`.
+Train with the calibrated $\sigma$ unrounded, as Part 5 does with Opacus's 0.9729. If you round it, round up to the three decimals the statement prints, because less noise means a larger $\varepsilon$. Before training, compute the planned run's $\varepsilon$ with every accountant at hand, three from Opacus and two from `dp_accounting`.
 
 ```{.python excerpt="calibrate-crosscheck"}
 def crosscheck_epsilon(sigma: float, q: float, steps: int, delta: float) -> dict[str, float]:
@@ -130,15 +130,15 @@ crosscheck: pass
 PLD bracket (grid 1e-4): lower 3.9656 (optimistic), upper 3.9806 (pessimistic); width 0.0150
 ```
 
-PRV and the PLD, the two tight accountants, agree at 3.99 and 3.98, and both meet the target. The two RDP implementations agree with each other at 4.50, above the target. That is expected of RDP, a valid but looser bound. Opacus may warn that an RDP order failed to converge, or that the best order is the largest it tried. Both concern only the RDP value, which you do not report. The Gaussian differential privacy (GDP) value of 3.34 is the trap. It comes from a central limit theorem (CLT), which approximates the run rather than bounding it, and here it lands below the certified values, so never report it.
+The two tight accountants, PRV and the PLD, agree at 3.99 and 3.98, and both meet the target. The two RDP implementations agree at 4.50, above the target, as a looser bound should, and Opacus's warnings about RDP orders concern only that value. The trap is the Gaussian differential privacy (GDP) value of 3.34. It comes from a central limit theorem (CLT), which approximates the run rather than bounding it, and it lands below the certified values, so never report it.
 
-The pass line runs three checks. The PLD value must be at most the target, which fails if $\sigma$ was rounded down or the steps differ from the plan. RDP should lie at or above the PLD, give or take the PLD's small grid error. And PRV and PLD must agree within 3%. A larger gap in either of the last two means the accountants were given different runs.
+The pass line runs three checks. The PLD value must be at most the target, which fails if $\sigma$ was rounded down or the steps differ from the plan. RDP must lie at or above the PLD, up to its grid error, and PRV must agree with the PLD within 3%. If either of these fails, the accountants were given different runs.
 
-The last line is the PLD's error bar. The PLD rounds each step's privacy loss up to its grid for the value it reports, 3.9806. Rounding down gives an optimistic 3.9656, and the true $\varepsilon$ lies between them. The claim is the upper value, and the lower one is reported next to it as the error bar ([Which accountant](09-choosing-an-accountant.md#sec-choose-decision)). The lower value comes from `privacy_loss_distribution.from_gaussian_mechanism` with `pessimistic_estimate=False` and `use_connect_dots=False`, composed over the steps. The bracket widens as the steps grow, so a long run needs a finer grid to keep it narrow.
+The last line is the PLD's error bar. Rounding each step's privacy loss up to the grid gives the reported 3.9806, and rounding it down gives an optimistic 3.9656, so the true $\varepsilon$ lies between them. Claim the upper value and report the lower one as its error bar ([Which accountant](09-choosing-an-accountant.md#sec-choose-decision)). The bracket widens with the steps, so a long run needs a finer grid.
 
 ## If the loader is not Poisson {#sec-calib-samplers}
 
-Not every training loop samples by the Poisson scheme, so price the alternatives before you train. The script builds the same four `dp_accounting` events as the snippet of [Amplification by subsampling](05-subsampling.md#sec-sub-dpsgd), for the chosen run and with the steps its loader runs.
+Not every training loop samples by the Poisson scheme, so price the alternatives before you train. The script accounts the chosen run, with its loader's steps, under the four samplers of [Amplification by subsampling](05-subsampling.md#sec-sub-dpsgd).
 
 ```text
 Poisson (PLD)                              eps=3.98
@@ -148,13 +148,13 @@ shuffle, zero-out, no amplification (PLD)  eps=18.51
 PLDAccountant supports sampling without replacement: add/remove False, replace-one False
 ```
 
-Under add/remove neighbours, fixed-size random batches are covered by the Poisson accountant at half the noise multiplier. A record added to a full batch pushes another out, so the sum can move by up to $2C$. On this run that turns 3.98 into 23.03. Under replace-one neighbours the sum also moves by up to $2C$, so these batches are accounted at $\sigma/2$ too. Only the RDP accountant handles them, as the last line shows. They give 52.60, but that number protects a record's value rather than its presence, so it cannot be compared with the add/remove values.
+Fixed-size random batches cost more, because a record added to a full batch pushes another out, so the clipped sum can move by twice the clipping norm $C$. Under add/remove neighbours, the Poisson accountant at half the noise multiplier covers them, which turns 3.98 into 23.03. Under replace-one neighbours only RDP accounts them, at $\sigma/2$ too, since the PLD accountant cannot (last line). Its 52.60 protects a record's value rather than its presence, so it does not compare with the add/remove values.
 
-Shuffling once per epoch and cutting the data into batches gets no amplification, so all that is certain is one Gaussian step per epoch, 18.51 here. It holds for zero-out neighbours, which differ by one record's gradient being replaced by zero. Under zero-out a step's clipped sum moves by at most $C$, as under add/remove, so this value does compare with the add/remove ones. Name the relation in the statement. It is below 23.03 here, but on the 100-epoch run of [Report and review an ε claim](09-choosing-an-accountant.md#sec-choose-match) the order reverses. So the fix for a non-Poisson loader is the loader, not the accountant: keep the Poisson loader that Opacus's `make_private` installs by default.
+Shuffling once per epoch and cutting the data into batches gets no amplification, so all that is certain is one Gaussian step per epoch, 18.51 here. That holds for zero-out neighbours, which differ by one record's gradient being replaced by zero, and the statement must name that relation. A step's sum then moves by at most $C$, as under add/remove, so the value compares with the add/remove ones. It beats fixed-size batches here, but on the 100-epoch run of [Report and review an ε claim](09-choosing-an-accountant.md#sec-choose-match) the order reverses. So the fix for a non-Poisson loader is the loader: keep the Poisson loader that Opacus's `make_private` installs.
 
 ## Train, stop early and resume {#sec-calib-train}
 
-During training, Opacus's optimizer calls `accountant.step` once for every noisy update. That is one call per logical batch, even when `BatchMemoryManager` splits it into smaller physical ones. The script simulates the run's 300 calls and asks for $\varepsilon$ at the end of each epoch.
+During training, Opacus's optimizer calls `accountant.step` once per noisy update, which is once per logical batch, even when `BatchMemoryManager` splits it into smaller physical ones. The script simulates the run's 300 calls and asks for $\varepsilon$ after each epoch.
 
 ```{.python excerpt="calibrate-train"}
 def train_epochs(
@@ -169,9 +169,9 @@ def train_epochs(
     return epsilons
 ```
 
-Suppose the validation loss stalls and the run stops after six of its ten planned epochs. The $\varepsilon$ to report is still the planned maximum. Stopping early within a maximum fixed in advance is safe, because the stopped run releases a prefix of the planned run, which the planned guarantee covers. The $\varepsilon$ at the stopping point is not a valid claim, because the decision to stop depended on what the run released. Only a privacy filter that ran from the first step could certify a smaller number ([Adaptive composition](08-adaptive-composition.md)), and this book runs none for subsampled steps. Log $\varepsilon$ every epoch anyway, because it must never decrease, and a drop means the accountant was reset.
+Suppose the validation loss stalls and the run stops after six of its ten planned epochs. Stopping early is safe, because the stopped run releases a prefix of the planned run, which the planned guarantee covers. But you still report the planned maximum. The $\varepsilon$ at the stopping point is not a valid claim, because the decision to stop depended on what the run released. Only a privacy filter running from the first step could certify it ([Adaptive composition](08-adaptive-composition.md)). Log $\varepsilon$ every epoch anyway, because it must never decrease, so a drop means the accountant was reset.
 
-Training past the maximum is the opposite case. If you decide after seeing the model to add epochs, the number of steps depends on what the run released. The longer run's $\varepsilon$, computed afterwards, is then the same plug-in mistake. An extension needs a new plan, accounted from the first step. If you might want more epochs, plan the longest run you could train before training starts, and treat stopping sooner as an early stop.
+Training past the maximum is not safe. If you add epochs after seeing the model, the number of steps depends on what the run released, so the longer run's $\varepsilon$ is not a valid claim either. An extension needs a new plan, accounted from the first step. So plan the longest run you might want, and treat stopping sooner as an early stop.
 
 A job that stops and restarts must carry the accountant with it. Save its `state_dict` with the model and load it before the first new step, as Opacus's `PrivacyEngine.save_checkpoint` and `load_checkpoint` do.
 
@@ -196,11 +196,11 @@ after resuming at epoch 6: eps at epoch 10=3.99; uninterrupted run: eps=3.99; eq
 steps recorded: 300; planned (the loader's 10 x 30): 300; equal: True
 ```
 
-The resumed run ends at 3.99, the same as a run that never stopped. Its history holds all 300 steps, the loader's 30 an epoch for ten epochs. Had the restart created a fresh accountant, it would have counted only the last four epochs and reported 2.69, the epoch-4 value above.
+The resumed run ends at 3.99, like a run that never stopped, with all 300 steps in its history. A fresh accountant would have counted only the last four epochs and reported 2.69.
 
 ## Write the statement {#sec-calib-statement}
 
-The last step writes the claim, with every input a reviewer needs to recompute it. The script fills the template from the run's own parameters, reads $\varepsilon$ from the PLD at the rule's $\delta$ and at $1/n^2$, and rounds both up.
+The last step writes the claim with every input a reviewer needs to recompute it. The script fills the template from the run's parameters, and rounds up the PLD's $\varepsilon$ at the rule's $\delta$ and at $1/n^2$, where $n$ is the training set's size.
 
 ```{.python excerpt="calibrate-statement"}
 def privacy_statement(
@@ -229,9 +229,9 @@ Guarantee: (epsilon = 3.99, delta = 1e-05); epsilon = 6.30 at delta = 1/n^2 = 1.
 Not covered: hyperparameter tuning runs (see Part 5), and any model released before this one
 ```
 
-The guarantee reads 3.99 because the PLD value of 3.98 was rounded up, never to the nearest value. At the stricter $\delta = 1/n^2$, the same run is 6.30. The accountant never sees the unit, the dataset or the clipping norm, so they come from the options `--unit`, `--dataset` and `--clip`. The last line matters most to a reviewer, because it names privacy spent outside the $\varepsilon$ above. Tuning on the private data adds its own cost ([Hyperparameter tuning](../part05-dp-ml/03-hyperparameter-tuning.md)), and so does every earlier model trained on the same people.
+The guarantee reads 3.99 because the PLD value printed as 3.98 above is rounded up here, not to the nearest value. The unit, dataset and clipping norm come from options, because the accountant never sees them. The last line matters most to a reviewer, because it names privacy spent outside this $\varepsilon$. Tuning on the private data adds its own cost ([Hyperparameter tuning](../part05-dp-ml/03-hyperparameter-tuning.md)), and so does every earlier model trained on the same people.
 
-A published statement adds what the script cannot know ([The statement](09-choosing-an-accountant.md#sec-choose-report)). It gives the setting, here the central model covering every checkpoint, and the PLD's grid, `dp_accounting`'s default of $10^{-4}$, with the bracket of step 4. It also names the data outside the run. That means any pretrained weights and their training data, any preprocessing fitted on the private rows, and the validation rows, which are not protected. [Release and governance](../part05-dp-ml/12-release-governance.md) builds the release package around it.
+A published statement also gives what the script cannot know ([The statement](09-choosing-an-accountant.md#sec-choose-report)). That is the setting, the PLD's grid and bracket, and the data outside the run, such as pretrained weights and the unprotected validation rows.
 
 ## Checklist
 

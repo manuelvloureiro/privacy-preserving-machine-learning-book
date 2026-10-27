@@ -4,9 +4,11 @@
 
 When you tune on a held-out validation set, you read the scores and try new settings, so each question depends on earlier answers. Such **adaptive** reuse overfits the holdout set, whose scores then overstate how the model does on new data.
 
-Each such question is a **statistical query**, which averages a per-record answer between 0 and 1 over the $n$ records you hold, such as the share of records a classifier gets right. Its population value is the same average over new data. Suppose the records are drawn independently and a number $k$ of queries are fixed before any answer is seen. Then the largest gap between the two values is on average at most
+Each such question is a **statistical query**, which averages a per-record answer between 0 and 1 over the $n$ records you hold. A classifier's accuracy is an example. Its population value is the same average over new data. Suppose the records are drawn independently and a number $k$ of queries are fixed before any answer is seen. Then the largest gap between the two values is on average at most
 $$\sqrt{\frac{\ln(2k)}{2n}}.$$ {#eq-ada-fixed}
-The number of queries hardly matters, because it enters through a logarithm. Adaptive queries break this, because a later query can be built to fit the sample's own noise. Blum & Hardt's boosting attack does so on a leaderboard whose labels are coin flips, where nothing can beat 0.5 on new data. Yet after 1,000 submissions on as many holdout records, it reports 0.7182.
+The number of queries enters through a logarithm, so it hardly matters.
+
+Adaptive queries break this, because a later query can be built to fit the sample's own noise. Blum & Hardt's boosting attack does so on a leaderboard whose labels are coin flips, where nothing can beat 0.5 on new data. Yet after 1,000 submissions on as many holdout records, it reports 0.7182.
 
 Differential privacy (DP) is the remedy, because answers that reveal little about any record cannot be used to overfit it. Let a mechanism's answers be on average within a distance $\alpha$ of the empirical values. Let the whole exchange be DP at a privacy level $\varepsilon$, with a small slack $\delta$, for samples that differ in one replaced record. The **transfer theorem** then bounds the expected largest error against the population by
 $$\alpha + e^\varepsilon - 1 + \delta,$$ {#eq-ada-transfer}
@@ -14,7 +16,7 @@ whatever the analyst does with the answers. For small $\varepsilon$ the middle t
 
 ## When you meet it {#sec-ada-when}
 
-You meet adaptivity whenever a validation set, a test set or a leaderboard answers more than one round of questions, as in hyperparameter search or early stopping. A round is a batch of questions fixed before any of its answers is seen, and the bounds below grow with the number of rounds. @tbl-ada-choose gives the choice for each situation.
+You meet adaptivity when a validation set, a test set or a leaderboard answers more than one round of questions, as in hyperparameter search. A round is a batch of questions fixed before any of its answers is seen. The bounds below grow with the number of rounds. @tbl-ada-choose gives the choice for each situation.
 
 | Situation | What to do |
 | --- | --- |
@@ -32,13 +34,11 @@ The simplest fix is **sample splitting**, which answers each of $r$ rounds on it
 
 Answering every query with Gaussian noise, under the transfer theorem, needs records that grow only like $\sqrt k$. Its constants are large, though, so splitting stays cheaper up to a few hundred adaptive queries.
 
-**Thresholdout** (Dwork et al. 2015) answers from a training set while the training value agrees with the holdout value, which reveals nothing about the holdout set. When they differ by more than a noisy threshold, it records a **detection** and returns a noisy holdout value. Its privacy cost in the holdout records grows with the number of detections, however many queries were answered below the threshold. But its formal $\varepsilon$ in the full edition's experiment is about 29, and no mainstream library ships it, so treat it as a brake rather than a guarantee.
+**Thresholdout** (Dwork et al. 2015) answers from a training set while the training value agrees with the holdout value. Such answers reveal nothing about the holdout set. When they differ by more than a noisy threshold, it records a **detection** and returns a noisy holdout value. So its privacy cost grows with the number of detections, not of queries. But its formal $\varepsilon$ in the full edition's experiment is about 29, and no mainstream library ships it. So treat it as a brake, not a guarantee.
 
 ## What goes wrong {#sec-ada-wrong}
 
-The common failure is not an attack but a long search that picks each setting from earlier validation scores. A fixed grid scored once, as in scikit-learn's `GridSearchCV`, is a single round, so its winner's overstatement is bounded by @eq-ada-fixed. A larger holdout set helps only slowly, since with splitting the records needed grow with every round.
-
-So count rounds, and report how many rounds a validation number has been through. Practice is often milder than the worst case, but the risk is real when records are few and rounds many.
+The common failure is not an attack but a long search that picks each setting from earlier validation scores. A fixed grid scored once, as in scikit-learn's `GridSearchCV`, is a single round, so @eq-ada-fixed bounds its winner's overstatement. So count rounds, and report how many a validation number has been through. Practice is often milder than the worst case, but the risk is real when records are few and rounds many.
 
 ## References
 

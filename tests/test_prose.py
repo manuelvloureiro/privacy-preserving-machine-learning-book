@@ -10,6 +10,9 @@ import subprocess
 import sys
 from pathlib import Path
 
+sys.path.insert(0, str(Path(__file__).resolve().parent.parent / "tools"))
+import ste
+
 ROOT = Path(__file__).resolve().parent.parent
 TOOL = ROOT / "tools" / "prose.py"
 
@@ -174,3 +177,20 @@ def test_a_symbol_back_after_many_paragraphs_is_flagged() -> None:
 
 def test_hand_waving_is_flagged() -> None:
     assert any("hand-wave" in f for f in flagged("It is easy to see that the count moves by one."))
+
+
+def test_ste_report_keeps_the_checks_rule_25_names() -> None:
+    """tools/ste.py drops ignored checks and sentences within 25 words, and keeps one issue per sentence."""
+    block = ste.Block("p.md", "s", "A sentence.", 1)
+    output = (
+        "x.md:1:1 STE100.SentenceLength: Keep sentences short. This sentence has 22 words. Use a maximum of 20 words.\n"
+        "x.md:1:5 STE100.SentenceLength: Keep sentences short. This sentence has 31 words. Use a maximum of 20 words.\n"
+        "x.md:1:5 STE100.SentenceLength: Keep sentences short. This sentence has 31 words. Use a maximum of 25 words.\n"
+        "x.md:1:9 STE100.MissingArticles: Add article before 'privacy'.\n"
+        "x.md:1:9 STE100.NonApprovedWords: Use 'use' instead of 'leverage'.\n"
+        "x.md:3:1 STE100.PassiveVoice: Use the active voice.\n"
+    )
+    cfg = {"ignore": ["MissingArticles"], "sentence_words": 25}
+    assert ste.attach(output, {1: block}, cfg) == 2
+    assert [rule for rule, _ in block.issues] == ["SentenceLength", "NonApprovedWords"]
+    assert "31 words" in block.issues[0][1]

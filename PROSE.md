@@ -91,7 +91,7 @@ A page can pass every rule above, one sentence at a time, and still be cryptic. 
 21. **Recall what is far away.** A term, symbol or result last used several paragraphs back gets a few words saying what it is when it returns: "the RDP curve, which gives $\varepsilon$ at each order $\alpha$". Never refer to an earlier object by a description the reader must match from memory ("the straight line") without saying what it was.
 22. **Show the step.** Write "X gives Y" only when the step from X to Y is shown or is one named fact the reader has. A conclusion comes after the argument for it, never before ("the shortcut also shows why DP-SGD needs subsampling", followed two sentences later by why, makes the reader hold a claim with nothing to attach it to).
 23. **One thread.** A paragraph follows one example or one argument, and the example's details agree with the argument. An example introduced with a detail the argument then ignores ("each step on a random 1% of the data", followed by "if every step used the full dataset") makes the reader stop and reconcile the two.
-24. **Shorter overall.** Filling inference calls adds words. Pay for them by cutting what the paragraph does not need: repetition, a result stated twice, a preview of what comes next, narration of what the page does, and detail the reader will not use. A revised paragraph should be no longer than the one it replaces, and a revised page shorter. When a topic cannot be explained with its connections inside the book's budget, cut the topic, never the connections (lesson one above).
+24. **Shorter overall.** Filling inference calls adds words. Pay for them by cutting what the paragraph does not need: repetition, a result stated twice, a preview of what comes next, narration of what the page does, and detail the reader will not use. A revision aims for about 80% of the original page's words. Beyond the cuts above, that means cutting secondary detail and secondary topics (a second example, a historical remark, an edge case no later page uses, a sentence that restates a table), merging paragraphs that make the same point, and shortening introductions. A section may fall short of the target when every remaining sentence is needed, but no revised page is longer than the one it replaced. When a topic cannot be explained with its connections inside that budget, cut the topic, never the connections or a caveat the reader needs to use a result safely (lesson one above).
 
 An example of rules 20–23, from the practitioner edition's chapter on Rényi DP. Every sentence of the rejected paragraph passes the analyzer:
 
@@ -100,6 +100,22 @@ An example of rules 20–23, from the practitioner edition's chapter on Rényi D
 > **Approved.** The sum is simplest for Gaussian steps, because their curve is a straight line: a step with noise multiplier $\sigma$ has $\varepsilon(\alpha) = \alpha/(2\sigma^2)$. Adding $k$ such lines multiplies the slope by $k$, which is the line of one step with noise multiplier $\sigma/\sqrt k$. So $k$ Gaussian steps cost as much privacy as one step with $\sqrt k$ times less noise. For training, that is bad news: 10,000 steps with noise multiplier 1 would cost as much as one step with noise multiplier $1/\sqrt{10{,}000} = 0.01$, which hides almost nothing. DP-SGD escapes this by running each step on a small random sample of the data, as [Subsampling](05-subsampling.md) shows.
 
 The rejected paragraph leaves five inference calls: which straight line, why adding lines divides the noise by $\sqrt k$, why that concerns subsampling, where 0.01 comes from, and why an example with 1% subsampling illustrates a run without it. The approved one states each connection, drops the detail that contradicted the argument, and is about the same length.
+
+## Simplified Technical English
+
+The prose of every book and note follows ASD-STE100, Simplified Technical English (STE), Issue 9 (January 2025), wherever STE does not conflict with the rules above. STE is the controlled language of aerospace manuals: a dictionary of about 900 approved words, each with one meaning, and 53 writing rules. Its limits match the readability limits of rule 1, and its word rules make the text unambiguous for a reader whose first language is not English. The specification is free from [asd-ste100.org](https://www.asd-ste100.org).
+
+25. **Write in STE, mostly.** The rules that apply to every page:
+    - **Words.** Use the approved word in its approved meaning ("use", not "leverage"; "start", not "commence"; "make sure", not "ensure"). Use one word for one thing, and the same word each time (rule 8). Use the past participle only as an adjective or after "is", "are" or "was", and do not use the *-ing* form of a verb except in a technical name.
+    - **Sentences.** A descriptive sentence has at most 25 words, an instruction at most 20. Write an instruction as a command ("Clip each gradient"), one instruction per sentence. Use the active voice in instructions and, as much as possible, in descriptions. Use simple tenses. Do not use semicolons, and do not leave out articles or verbs (rule 7). Keep noun clusters to three words or fewer.
+    - **Paragraphs.** One topic per paragraph (rule 19), at most six sentences.
+    - **Warnings.** A caution starts with the command, then gives the reason: "Fix the number of steps before the run. If you choose it from the data, the curves depend on the data."
+
+    STE yields where these books need more:
+    - **Technical names and verbs.** The terms of `terms.toml` and NOTATION.md (privacy loss, sensitivity, accountant, clip, subsample) and the vocabulary of mathematics (bound, converge, sample, variance) are technical names and verbs in STE's sense, so they are allowed.
+    - **Code, formulas and quoted names.** Identifiers, library names, formulas and quoted titles are outside STE.
+    - **Proofs and derivations.** In the full edition, the course and the study notes, a sentence of a proof may pass 25 words when the logical step needs it, within the book's limit in `tools/prose.toml`.
+    - **Connections.** STE's limits are maxima, not targets. Never split a claim from its reason to meet them (rules 9 and 20).
 
 ## The process
 
@@ -165,7 +181,7 @@ A page is ready to commit when:
 
 - `make prose-check BOOK=...` and `make structure-check BOOK=...` pass for it (the second checks the page's shape against its kind's skeleton in `tools/structure.toml`);
 - every cold-reader stall and inference call is fixed or explained, and a second cold reader on the revised page finds no paragraph with more than one inference call;
-- the revised page is no longer than the page it replaced (rule 24);
+- the revised page is no longer than the page it replaced, and close to 80% of its length unless the review explains why not (rule 24);
 - every editorial rewrite is applied or rejected with a reason;
 - for the practitioner edition, the correctness review against the full edition has no open items;
 - `uv run pytest tests/test_prose.py` passes.
@@ -181,4 +197,5 @@ A page is ready to commit when:
 - McNamara & Kintsch, "Learning from texts: Effects of prior knowledge and text coherence", *Discourse Processes* 22(3), 1996, and McNamara, Kintsch, Songer & Kintsch, "Are good texts always better?", *Cognition and Instruction* 14(1), 1996: coherent text helps readers new to a subject; the gaps a reader must fill depend on what the reader knows.
 - Graesser, McNamara et al., Coh-Metrix: adjacent-sentence argument overlap as a measure of cohesion, the basis of the gaps check.
 - Pinker, *The Sense of Style* (2014), chapter 3: the curse of knowledge.
+- ASD, *ASD-STE100 Simplified Technical English*, Issue 9, January 2025 (asd-ste100.org): the approved words, the 25- and 20-word sentence limits, six sentences per paragraph, active voice and commands for instructions.
 - A 2023 *PLOS One* study of how readers perceive sentence length (PubMed Central PMC9955962): the 17-word benchmark.

@@ -4,14 +4,14 @@
 
 When you train with differential privacy (DP), the accountant turns your configuration into a privacy level $\varepsilon$ at a slack $\delta$. That number is a proof about an algorithm, but what ships is code. A bug in the noise, the clipping or the sampling makes the model less private but barely changes its accuracy. Accuracy is flat across a wide range of noise levels ([the training workflow](13-train-dp-sgd.md)), so the usual tests never notice the bug.
 
-An **audit** checks the code by attacking it. It plants records called **canaries**, trains with and without them, and counts how often a membership test guesses right. DP caps how often any test can be right, so a test that is right too often proves that the code is less private than claimed. A test that is rarely right proves nothing, since a weak attack also fails against a leaky model. This chapter gives you two audits to run, a unit test for continuous integration (CI) and a one-run audit of a trained model. @tbl-audit-cheat compares them with two costlier ones.
+An **audit** checks the code by attacking it. It plants records called **canaries**, trains with and without them, and counts how often a membership test guesses right. DP caps how often any test can be right. So a test that is right too often proves that the code is less private than claimed. A test that is rarely right proves nothing, since a weak attack also fails against a leaky model.
 
 ## Known bugs, and which audit catches them {#sec-audit-bugs}
 
 These bugs break the private form of stochastic gradient descent (SGD), [DP-SGD](02-dp-sgd.md).
 
-- **The variance passed where the standard deviation is expected,** or **noise scaled for the mean but added to the sum,** which adds the batch size times too little noise. The CI test catches both.
-- **Clipping applied after averaging, or noise from a weak seed.** Nasr et al. (2023) found both in real code with per-step audits like the CI test below.
+- **The variance passed where the standard deviation is expected,** or **noise scaled for the mean but added to the sum,** which adds the batch size times too little noise. A unit test in continuous integration (CI) catches both (@sec-audit-ci).
+- **Clipping applied after averaging, or noise from a weak seed.** Nasr et al. (2023) found both in real code with per-step audits like the CI test.
 - **The accountant told the wrong numbers,** such as a record count that includes augmented copies, which makes $\varepsilon$ look smaller than it is. Only an end-to-end audit can catch it, and only if the error is large.
 - **Batches shuffled but accounted as Poisson sampling,** which can make the true $\varepsilon$ several times the reported one ([Amplification by subsampling](../part04-privacy-accounting/05-subsampling.md)). No audit here exercises the sampling, so check the loader itself.
 
@@ -22,7 +22,9 @@ Audits catch errors only in the unsafe direction, so code that adds too much noi
 The cheapest strong audit tests one step of the optimizer, many times. A **Dirac canary** is a per-example gradient that is zero except on one coordinate, where every other record's gradient is zero. Put it into every step of one run and leave it out of another. The reading $x_t$ is step $t$'s noisy gradient sum on that coordinate, divided by the clipping norm $C$. The canary is longer than $C$, so a correct optimizer clips it to length $C$ and it adds exactly 1 to the reading. The optimizer also adds noise of standard deviation $\sigma C$, where $\sigma$ is the noise multiplier, so each reading follows
 $$x_t \sim \mathcal N(0, \sigma^2) \text{ without the canary}, \qquad x_t \sim \mathcal N(1, \sigma^2) \text{ with it}.$$ {#eq-audit-perstep}
 
-A threshold test says "canary in" whenever a reading exceeds a threshold. Its **true positive rate (TPR)** is how often it says so when the canary was there. Its **false positive rate (FPR)** is how often it says so when the canary was not. For two normal distributions a distance $\mu$ apart, every threshold gives $\Phi^{-1}(\mathrm{TPR}) - \Phi^{-1}(\mathrm{FPR}) = \mu$, where $\Phi$ is the standard normal distribution function. So measured rates bound the true separation $\mu$, which a correct optimizer keeps at $1/\sigma$:
+A threshold test says "canary in" whenever a reading exceeds a threshold. Its **true positive rate (TPR)** is how often it says so when the canary was there. Its **false positive rate (FPR)** is how often it says so when the canary was not.
+
+For two normal distributions a distance $\mu$ apart, every threshold gives $\Phi^{-1}(\mathrm{TPR}) - \Phi^{-1}(\mathrm{FPR}) = \mu$, where $\Phi$ is the standard normal distribution function. So measured rates bound the true separation $\mu$, which a correct optimizer keeps at $1/\sigma$:
 $$\mu \ge \Phi^{-1}(\mathrm{TPR}) - \Phi^{-1}(\mathrm{FPR}).$$ {#eq-audit-mu}
 The test plugs in the low end of the TPR's Clopper–Pearson interval and the high end of the FPR's. Each end is taken at level $\beta/2$, so the bound holds with probability $1 - \beta$ ([Hypothesis testing](../part01-prerequisites/04-hypothesis-testing.md)). If this bound exceeds $1/\sigma$, the code adds less noise than it claims.
 
@@ -43,7 +45,7 @@ def canary_coordinate(sigma: float, planted_bug: str, with_canary: bool, steps: 
     return observations
 ```
 
-The canary's gradient is ten times $C$, so the test also exercises clipping. The test chooses its threshold on the first half of the steps and counts on the second half, and says "canary in" only for a reading strictly above it. It also checks that the canary-free readings have a standard deviation within 10% of $\sigma$, because with no noise at all every reading is 0 and the rates mean nothing. Run `uv run python code/part05-dp-ml/practitioner_audit.py`, which tests the correct optimizer, one with the variance bug planted and one with the noise turned off, at $\sigma = 0.7$ and a batch of $B = 64$ records. The variance bug removes noise only because $\sigma$ is below 1, where $\sigma^2 < \sigma$; above 1 it would pass.
+The canary's gradient is ten times $C$, so the test also exercises clipping. The threshold is chosen on the first half of the steps and the rates are counted on the second half. The test also checks that the canary-free readings have a standard deviation within 10% of $\sigma$, since with no noise every reading is 0. The command `uv run python code/part05-dp-ml/practitioner_audit.py` tests three optimizers at $\sigma = 0.7$ and a batch of $B = 64$ records. They are the correct one, one with the variance bug and one with no noise. The variance bug removes noise only because $\sigma^2 < \sigma$ when $\sigma$ is below 1, and above 1 it would pass.
 
 ```text
 sigma=0.7  C=1.0  B=64  steps per run=2000  claim mu=1/sigma=1.429
@@ -57,17 +59,20 @@ no noise: mu_lo=5.360  FAIL
 
 The correct optimizer's bound on $\mu$ is 1.201, below its claimed 1.429, so it passes. The variance bug's bound is 1.722 and the missing noise's is 5.360, so both fail. The test takes seconds, so run it on every commit.
 
-Three things go wrong in practice. First, a correct optimizer still fails with probability $\beta$, here 5%, so an unseeded test fails one build in twenty. Fix the seed, or use a $\beta$ of $10^{-3}$ with more steps. Second, the script builds its own optimizer, so it tests Opacus, not your call to it. Point it at your code by having your setup function return the optimizer it makes, and drive that one. Third, the test never draws a batch or calls the accountant. For those, assert in the same suite that the loader is Opacus's `DPDataLoader` and that a second library's $\varepsilon$ matches yours ([Train a model with DP-SGD](13-train-dp-sgd.md#sec-trainwf-crosscheck)).
+Three things go wrong in practice.
+
+First, a correct optimizer still fails with probability $\beta$, here 5%, so an unseeded test fails one build in twenty. Fix the seed, or use a $\beta$ of $10^{-3}$ with more steps. Second, the script builds its own optimizer, so it tests Opacus, not your call to it. To test your code, have your setup function return the optimizer it makes, and drive that one. Third, the test never draws a batch or calls the accountant. So the same suite should assert that the loader is Opacus's `DPDataLoader` and that a second library's $\varepsilon$ matches yours ([Train a model with DP-SGD](13-train-dp-sgd.md#sec-trainwf-crosscheck)).
 
 ## From an attack to a lower bound {#sec-audit-bound}
 
 For a whole training run, the attack is a membership test on a planted canary. A **trial** is one training run, with or without the canary. Under $(\varepsilon, \delta)$-DP, every such test satisfies
 $$\mathrm{TPR} \le e^\varepsilon\,\mathrm{FPR} + \delta, \qquad 1 - \mathrm{FPR} \le e^\varepsilon\,(1 - \mathrm{TPR}) + \delta.$$ {#eq-audit-region}
-Solving these two inequalities for $\varepsilon$ turns measured rates into a lower bound on it. Write $\overline{\mathrm{FPR}}$ for the one-sided Clopper–Pearson upper bound on the FPR at level $\beta/2$, and $\underline{\mathrm{TPR}}$ for the lower bound on the TPR at the same level. With probability at least $1 - \beta$, the code is then not $(\varepsilon, \delta)$-DP, at the claimed $\delta$, for any $\varepsilon$ below
-$$\varepsilon_{\mathrm{lo}} = \max\Big\{\ln\frac{\underline{\mathrm{TPR}} - \delta}{\overline{\mathrm{FPR}}},\ \ln\frac{1 - \overline{\mathrm{FPR}} - \delta}{1 - \underline{\mathrm{TPR}}}\Big\}.$$ {#eq-audit-eps-lo}
-The bound needs independent trials, and a threshold chosen on other trials than those it counts, since one tuned on the counted trials would inflate the bound.
 
-SciPy's `binomtest(k, n).proportion_ci(method="exact")` gives the Clopper–Pearson intervals. No library installed with this book computes the bound itself, so the script imports `eps_lower_bound` from the book's helper module, [practitioner_privacy_tests.py](../../code/practitioner_privacy_tests.py). The same module holds the bound on $\mu$ above and the one-run audit below. Suppose an attack catches the canary in 500 of 1,000 runs that include it, and raises one false alarm in 1,000 runs without it.
+Solving these for $\varepsilon$ turns measured rates into a lower bound on it. Write $\overline{\mathrm{FPR}}$ for the one-sided Clopper–Pearson upper bound on the FPR at level $\beta/2$, and $\underline{\mathrm{TPR}}$ for the TPR's lower bound. With probability at least $1 - \beta$, the code is then not $(\varepsilon, \delta)$-DP, at the claimed $\delta$, for any $\varepsilon$ below
+$$\varepsilon_{\mathrm{lo}} = \max\Big\{\ln\frac{\underline{\mathrm{TPR}} - \delta}{\overline{\mathrm{FPR}}},\ \ln\frac{1 - \overline{\mathrm{FPR}} - \delta}{1 - \underline{\mathrm{TPR}}}\Big\}.$$ {#eq-audit-eps-lo}
+The bound needs independent trials. It also needs a threshold chosen on other trials than those it counts, because a threshold tuned on them inflates it.
+
+No library installed with this book computes the bound, so the script imports `eps_lower_bound` from the book's helper module, [practitioner_privacy_tests.py](../../code/practitioner_privacy_tests.py). Suppose an attack catches the canary in 500 of 1,000 runs that include it, and raises one false alarm in 1,000 runs without it.
 
 ```{.python excerpt="audit-eps-bound"}
 for false_pos, true_pos in ((1, 500), (0, 1_000)):  # out of 1,000 runs without and with the canary
@@ -80,7 +85,7 @@ FP 1/1000  TP 500/1000: certified eps lower bound 4.43
 FP 0/1000  TP 1000/1000: certified eps lower bound 5.60
 ```
 
-The raw rates alone would suggest 6.21, but confidence is expensive, and the certified bound is only 4.43. Even a perfect attack certifies only 5.60 from 1,000 trials per hypothesis, so never expect an end-to-end audit to certify the whole of a large claim. Even a **white-box** attacker, who sees every intermediate model, certifies only 3.63 in the full edition against a claimed 6.71.
+The raw rates alone would suggest 6.21, but confidence is expensive, and the certified bound is only 4.43. Even a perfect attack certifies only 5.60 from 1,000 trials per hypothesis. So do not expect an end-to-end audit to certify all of a large claim.
 
 ## A one-run audit of the trained model {#sec-audit-onerun}
 
@@ -88,9 +93,9 @@ Thousands of runs are out of reach for a real model, so Steinke, Nasr & Jagielsk
 
 Under $\varepsilon$-DP, no attack guesses one canary's coin right with a probability above the limit $p_\varepsilon$ given below. So the count $W$ is no more likely to reach any value $v$ than a binomial count with that success rate is:
 $$\Pr[W \ge v] \le \Pr\big[\mathrm{Bin}(r, p_\varepsilon) \ge v\big], \qquad p_\varepsilon = \frac{e^\varepsilon}{1 + e^\varepsilon}.$$ {#eq-audit-onerun}
-An observed count that this binomial reaches with probability below $\beta$ rules out that $\varepsilon$. The certified bound is the largest $\varepsilon$ ruled out this way. Under $(\varepsilon, \delta)$-DP, the paper adds at most $2m\delta$ to that probability. The coins must be independent and fair. Trying several list lengths needs a Bonferroni correction, which runs each test at $\beta$ divided by their number.
+An observed count that this binomial reaches with probability below $\beta$ rules out that $\varepsilon$, and the certified bound is the largest $\varepsilon$ ruled out. Under $(\varepsilon, \delta)$-DP, the paper adds at most $2m\delta$ to that probability. The coins must be independent and fair. Several list lengths need a Bonferroni correction, which runs each test at $\beta$ divided by their number.
 
-The script runs it on the released pipeline of [Train a model with DP-SGD](13-train-dp-sgd.md), the Adult census data that predicts whether a person's income exceeds \$50K. It reuses that script's whole recipe and adds only the canaries, 1,000 held-out rows with flipped labels. Each is included by a coin, and 537 join the 30,000 training rows. DP-SGD runs at the release's noise multiplier, which gives $\varepsilon = 3.91$ for this slightly larger set. A non-private model uses the release's baseline recipe, and a memorizing control runs non-private Adam for 60 epochs with small batches. The slack is the book's default, $\delta = 10^{-5}$. Each canary is scored by minus its loss. The script tries six list lengths, from 20 to 1,000, and @tbl-audit-adult gives each model's best.
+The script runs it on the released pipeline of [Train a model with DP-SGD](13-train-dp-sgd.md) on the Adult census data. It adds only the canaries, 1,000 held-out rows with flipped labels. The coins put 537 of them in the training set, and the release's noise multiplier gives $\varepsilon = 3.91$ for this larger set at $\delta = 10^{-5}$. A non-private model uses the release's baseline recipe, and a memorizing control runs non-private Adam for 60 epochs with small batches. Each canary is scored by minus its loss, and @tbl-audit-adult gives each model's best of six list lengths from 20 to 1,000.
 
 | Training | Mean canary loss, in / out | Correct guesses | Certified $\varepsilon$ |
 | --- | --- | --- | --- |
@@ -100,11 +105,12 @@ The script runs it on the released pipeline of [Train a model with DP-SGD](13-tr
 
 : One-run audit of the released pipeline on Adult with 1,000 mislabeled canaries, at 95% overall confidence and $\delta = 10^{-5}$. {#tbl-audit-adult}
 
-Both release-recipe models certify nothing, and the reason is the recipe, not privacy. Ten epochs with large batches barely fit the flipped labels, so included canaries have the same loss as excluded ones, with or without noise. Adult's many near-duplicate rows with opposite labels make a flipped label look like ordinary noise. Only the memorizing control separates its canaries, and even it certifies 0.53 for a model with no finite $\varepsilon$, because each canary is a single trial and 1,000 trials cap any bound. Here a perfect list of all 1,000 guesses would certify at most 5.27.
+Both release-recipe models certify nothing, and the reason is the recipe, not privacy. Ten epochs with large batches barely fit the flipped labels, so included canaries have the same loss as excluded ones, with or without noise. Only the memorizing control separates its canaries. Even it certifies just 0.53 for a model with no finite $\varepsilon$, because each canary is a single trial. A perfect list of all 1,000 guesses would certify at most 5.27.
 
-So use the one-run audit as a test that exposes a bug when a DP model certifies more than its claim, never as evidence of privacy. Report it with its threat model, a black-box attacker who sees only the final model, and with a control that shows the attack can detect leakage on your data.
+So use the one-run audit to expose a bug, when a DP model certifies more than its claim, never as evidence of privacy. Report it with its threat model, a black-box attacker who sees only the final model. Also report a control that shows the attack can detect leakage on your data.
 
-Stronger black-box attacks, such as the likelihood ratio attack (LiRA) of [Pre-release privacy risk assessment](../part02-attacks/10-risk-assessment.md#sec-risk-lira), train **shadow models**, copies of the model trained with its exact recipe on similar data. Run them before release and keep their results with the release documents ([Release and governance](12-release-governance.md)). LiRA's TPR at a low FPR shows what a realistic attacker learns. But its (model, record) pairs share models, so they are not independent trials, and its rates in @eq-audit-eps-lo give no certified bound. Certify only from independent trials, such as the one-run audit's coins or many separate training runs.
+Stronger black-box attacks, such as the likelihood ratio attack (LiRA) of [Pre-release privacy risk assessment](../part02-attacks/10-risk-assessment.md#sec-risk-lira), train **shadow models**. These are copies of the model, trained with its exact recipe on similar data. Run them before release and keep their results with the release documents ([Release and governance](12-release-governance.md)). LiRA's TPR at a low FPR shows what a realistic attacker learns. But its (model, record) pairs share models, so they are not independent trials, and give no certified bound.
+
 
 ## Cheat sheet
 

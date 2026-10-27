@@ -43,13 +43,8 @@ max_opening_clause_words = 15
 max_nominalizations_per_sentence = 4
 grade_max = 14
 page_flagged_sentence_share = 0.25
-
-# Who reads each book, for the review prompts (`tools/prose.py prompt`).
-[audience]
-book-full = "a graduate student or engineer with undergraduate probability, linear algebra and calculus, new to privacy"
-book-practitioner = "an engineer or data scientist who ships models and statistics, knows Python and basic probability, and wants results and how to use them rather than proofs"
-book-course = "a student taking a first course in differential privacy, comfortable with proofs at the level of an undergraduate probability course"
-book-opendp = "a data scientist who knows Python and pandas and wants to release statistics with the OpenDP library"
+max_cohesion_gaps = 2          # sentences in one paragraph that share nothing with the one before
+recall_after_paragraphs = 8    # a symbol or term absent this many paragraphs is recalled when it returns
 
 # The course is light on prose and heavy on proofs: its derivations carry more formulas and numbers
 # per sentence than chapter prose, so it takes looser limits per sentence, with the same limits on
@@ -70,6 +65,15 @@ max_opening_clause_words = 15
 max_nominalizations_per_sentence = 4
 grade_max = 14
 page_flagged_sentence_share = 0.25
+max_cohesion_gaps = 2          # sentences in one paragraph that share nothing with the one before
+recall_after_paragraphs = 8    # a symbol or term absent this many paragraphs is recalled when it returns
+
+# Who reads each book, for the review prompts (`tools/prose.py prompt`).
+[audience]
+book-full = "a graduate student or engineer with undergraduate probability, linear algebra and calculus, new to privacy"
+book-practitioner = "an engineer or data scientist who ships models and statistics, knows Python and basic probability, and wants results and how to use them rather than proofs"
+book-course = "a student taking a first course in differential privacy, comfortable with proofs at the level of an undergraduate probability course"
+book-opendp = "a data scientist who knows Python and pandas and wants to release statistics with the OpenDP library"
 
 # Symbols every page of a book may use without introducing them, because the book's notation fixes
 # them early and a reader cannot reach a page without them. Keep this list short.
@@ -78,3 +82,30 @@ book-practitioner = []
 book-full = []
 book-course = []
 book-opendp = []
+
+# ASD-STE100 report (`tools/ste.py`, PROSE.md rule 25). stelint runs at a pinned version with the
+# spaCy model it needs, outside the project's environment, since it needs Python 3.13.
+[ste]
+runner = [
+  "uvx", "--python", "3.13",
+  "--with", "en_core_web_sm @ https://github.com/explosion/spacy-models/releases/download/en_core_web_sm-3.8.0/en_core_web_sm-3.8.0-py3-none-any.whl",
+  "--with", "pyyaml",  # stelint reads glossaries.yaml with it but does not declare it
+  "stelint==0.1.5",
+]
+# Checks dropped from the report. Some do not apply: NOTATION.md fixes British spelling,
+# parentheses hold formulas and citations, and the safety checks are for maintenance warnings.
+# The rest flag mostly sound sentences in expository prose, as sampled on the Rényi DP chapter:
+# articles before mass nouns ("differential privacy"), heuristic noun-phrase and topic counts that
+# rule 25 does not contain, possessives, a second sentence-length check, and checks that need to
+# know whether a sentence is a procedure step.
+ignore = [
+  "BritishEnglish", "Parentheses", "SafetyInstructionExplanation", "SafetyInstructionFormat",
+  "NoteContainsInstruction", "MissingArticles", "TechnicalNounClarity", "KeyWords", "ShortSentences",
+  "AmbiguousWith", "PossessiveForm", "ParagraphTopic", "ParagraphStructure", "NonImperativeInProcedures",
+  "ImperativeInDescription", "DescriptiveStatementFirst",
+]
+sentence_words = 25  # rule 25: a descriptive sentence has at most 25 words
+# Technical names and verbs of the books beyond those in terms.toml (rule 25's first exception).
+technical_words = []
+# Nouns of the books that stelint's base list treats as verbs only.
+technical_nouns = ["sample", "test", "record", "point", "set", "report", "plan", "level", "check"]

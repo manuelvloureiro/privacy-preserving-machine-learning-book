@@ -2,9 +2,10 @@
 
 ## Why this matters
 
-A model trained with differential privacy (DP) is not finished when training stops. Someone else, a privacy reviewer or a data protection officer, decides whether it may ship. They will ask what the guarantee covers, whether its number is right and what it means under the law, and none of them can rerun your training. So the claim must travel with everything needed to check it.
+A model trained with differential privacy (DP) is not finished when training stops. Someone else, a privacy reviewer or a data protection officer, decides whether it may ship. They will ask what the guarantee covers, whether its number is right and what it means under the law. None of them can rerun your training. So the claim must travel with everything needed to check it.
 
-This chapter packages a model trained with the private form of stochastic gradient descent (SGD), called DP-SGD, for release. It is the run of [Train a model with DP-SGD](13-train-dp-sgd.md), a small network trained on 30,000 people from Adult. Its target was a privacy level $\varepsilon$ of 4. The script [practitioner_release.py](../../code/part05-dp-ml/practitioner_release.py) runs every computed step in a few seconds. It starts from the run record, the file of settings that the training script writes. Pass that file with `--record PATH`. Without the option the script uses a built-in copy of the book's record, and a path it cannot read is an error, never a silent fall-back.
+This chapter packages a small network for release, trained on 30,000 people from Adult with the private form of stochastic gradient descent (SGD), called DP-SGD. It is the model of [Train a model with DP-SGD](13-train-dp-sgd.md), whose target privacy level $\varepsilon$ was 4. The script [practitioner_release.py](../../code/part05-dp-ml/practitioner_release.py) runs every computed step in a few seconds. It starts from the run record that the training script writes, passed with `--record PATH`, or else from a built-in copy of the book's record.
+
 
 ```bash
 uv run python code/part05-dp-ml/practitioner_release.py
@@ -12,9 +13,11 @@ uv run python code/part05-dp-ml/practitioner_release.py
 
 ## Assemble the run record {#sec-relgov-record}
 
-The record must hold what the accountant needs. An accountant, the code that turns a run's settings into $\varepsilon$ ([Report and review an ε claim](../part04-privacy-accounting/09-choosing-an-accountant.md)), reads four of them. They are the noise multiplier $\sigma$ and the sampling rate $q$, then the number of steps and the slack $\delta$ that the guarantee allows. It also takes four things for granted, so the record states those too. The privacy unit is what one protected record is, here one person. The neighbouring relation says whether neighbouring datasets differ by adding or removing a unit or by replacing one. The others are the sampler, how the code drew each batch, and that no other use of the private data went uncounted. The training script reads the sampler from the loader Opacus returned rather than typing it, and records whether Opacus's `secure_mode` was on and the seed.
+The record must hold what the accountant needs. An accountant is the code that turns a run's settings into $\varepsilon$ ([Report and review an ε claim](../part04-privacy-accounting/09-choosing-an-accountant.md)). It reads four of them, the noise multiplier $\sigma$, the sampling rate $q$, the number of steps and the slack $\delta$. It also takes four things for granted, so the record states those too.
 
-The record also gives $n$, the number of units, the library versions, how the hyperparameters were chosen and whether any preprocessing was fitted on private data. In the excerpt, `data` is the training script's record and `RELEASE_CONTEXT` holds the release owner's additions.
+They are the privacy unit, here one person, and the neighbouring relation, adding or removing a unit or replacing one. The others are the sampler, how the code drew each batch, and that no other use of the private data went uncounted. The training script reads the sampler from the loader Opacus returned rather than typing it, and records the seed and whether Opacus's `secure_mode` was on.
+
+The record also gives $n$, the number of units, and the library versions. It says how the hyperparameters were chosen and whether any preprocessing saw private data. In the excerpt, `data` is the training script's record and `RELEASE_CONTEXT` holds the release owner's additions.
 
 ```{.python excerpt="release-record-load"}
 merged = RELEASE_CONTEXT | data  # the training record, plus what the release owner adds
@@ -48,15 +51,17 @@ record limitations: 1
   - secure_mode=False: Opacus drew the noise from a seeded, non-cryptographic generator so the numbers reproduce; floating-point attacks on the noise are not excluded. Retrain with secure_mode=True to ship
 ```
 
-The record's $\delta$ follows the book's default of $\delta \le 1/n^{1.1}$ rounded down to a power of ten, which gives $10^{-5}$ for Adult ([Choosing ε](09-choosing-epsilon.md#sec-epsc-delta)). The three values of $\varepsilon$ come from the training script's cross-check. Opacus's privacy loss random variable (PRV) accountant gave the first. Google's `dp_accounting` gave the others, by its privacy loss distribution (PLD) accountant and its looser Rényi differential privacy (RDP) accountant.
+The record's $\delta$ follows the book's default of $\delta \le 1/n^{1.1}$ rounded down to a power of ten, $10^{-5}$ for Adult ([Choosing ε](09-choosing-epsilon.md#sec-epsc-delta)). Its three values of $\varepsilon$ come from the training script's cross-check. Opacus's privacy loss random variable (PRV) accountant gave the first. The privacy loss distribution (PLD) and looser Rényi differential privacy (RDP) accountants of Google's `dp_accounting` gave the others.
 
-The tuning entry matters most to a reviewer, because every run that helps choose a hyperparameter looks at the data, and the final run's $\varepsilon$ leaves those runs out. Here the learning rate was chosen by non-private runs on 2,000 held-out Adult rows that play the part of public data, and $\varepsilon = 4$ was fixed before any private run. The runs at other budgets only drew a utility curve and chose nothing. Those 2,000 people come from the same survey and get no guarantee, so the statement names them ([Train a model with DP-SGD](13-train-dp-sgd.md)). With that stated, the run's $\varepsilon$ is also the $\varepsilon$ of the whole procedure. If you tune on private data, report the run's $\varepsilon$ and the procedure's, as the template in [Hyperparameter tuning](03-hyperparameter-tuning.md#sec-hpt-practice) does.
+The tuning entry matters most to a reviewer. Every run that helps choose a hyperparameter looks at the data, and the final run's $\varepsilon$ leaves those runs out. Here non-private runs chose the learning rate on 2,000 held-out Adult rows that play the part of public data. And $\varepsilon = 4$ was fixed before any private run. Those 2,000 people come from the same survey and get no guarantee, so the statement names them.
 
-Each of these is a record problem that stops the release: a missing field, `secure_mode` included, a sampler that is not Poisson, a $\delta$ above $1/n^{1.1}$, or an unreported tuning cost. The one limitation, `secure_mode` left off so that the book's numbers repeat, is disclosed in the statement; a model you ship is retrained with it on.
+With that stated, the run's $\varepsilon$ is also the $\varepsilon$ of the whole procedure. If you tune on private data, report both, as in [Hyperparameter tuning](03-hyperparameter-tuning.md#sec-hpt-practice).
+
+A record problem stops the release, such as a missing field, a sampler that is not Poisson, a $\delta$ above $1/n^{1.1}$ or unreported tuning. The one limitation here is `secure_mode`, left off so that the book's numbers repeat. The statement discloses it, and a model you ship is retrained with it on.
 
 ## Recompute the guarantee {#sec-relgov-recompute}
 
-Next, recompute $\varepsilon$ from $\sigma$, $q$ and the number of steps alone, with a different library from the one that trained. A wrong number passed to the accountant would be passed again by a recomputation inside the training code. The default is the PLD accountant of `dp_accounting`, which rounds the privacy loss up so that its $\varepsilon$ is never too small. Read it at the record's $\delta$ and at one a hundred times smaller. Then read the trade-off curve at two false positive rates (FPR). The curve gives the largest true positive rate (TPR) that any membership test, an attack that guesses whether one person was in the training data, can reach at each FPR ([Choosing ε](09-choosing-epsilon.md#sec-epsc-curve)).
+Next, recompute $\varepsilon$ from $\sigma$, $q$ and the number of steps alone, with a different library from the one that trained. A recomputation inside the training code would reuse any wrong number. The default is the PLD accountant of `dp_accounting`, which rounds the privacy loss up so that its $\varepsilon$ is never too small. Read it at the record's $\delta$ and at one a hundred times smaller. Then read the trade-off curve, the largest true positive rate (TPR) that any membership test can reach at each false positive rate (FPR) ([Choosing ε](09-choosing-epsilon.md#sec-epsc-curve)).
 
 ```{.python excerpt="release-recompute"}
 pld = privacy_loss_distribution.from_gaussian_mechanism(sigma, sampling_prob=sample_rate).self_compose(steps)
@@ -77,15 +82,13 @@ TPR bound at FPR 1e-02: 0.0652 (PLD curve)  0.5355 (pair eps, delta only)
 record's PRV eps: reported 3.99, recomputed 3.98: consistent
 ```
 
-The recomputed PLD value, 3.981, agrees with the training run's PRV value, and the RDP value of 4.503 is higher because RDP is looser. Report the tight value with its accountant's name, and never set one accountant's $\varepsilon$ against a budget computed by another ([Report and review an ε claim](../part04-privacy-accounting/09-choosing-an-accountant.md)).
+The recomputed PLD value, 3.981, agrees with the training run's PRV value, and RDP's 4.503 is higher because RDP is looser. Report the tight value with its accountant's name, and never set one accountant's $\varepsilon$ against a budget computed by another. The curve gives a number a non-specialist can use. At an FPR of $10^{-3}$, no membership test can reach a TPR above 0.0123, while the pair $(3.98, 10^{-5})$ on its own would allow 0.0536.
 
-The curve gives the number a non-specialist can use. At an FPR of $10^{-3}$, no membership test can reach a TPR above 0.0123. The pair $(3.98, 10^{-5})$ on its own would allow 0.0536, more than four times as much.
-
-This step goes wrong in two ways. The script flags a reported $\varepsilon$ more than 0.05 below the recomputation, a claim that is too good. The subtler failure is a recomputation that agrees on wrong inputs. For example, the code may shuffle the data into fixed batches while the accountant assumes Poisson sampling at rate $q$ ([Amplification by subsampling](../part04-privacy-accounting/05-subsampling.md)). Neither the numbers nor Opacus's own `get_epsilon` show that, so the record's sampler, read from the loader, is what catches it.
+The script flags a reported $\varepsilon$ more than 0.05 below the recomputation, a claim that is too good. The subtler failure is a recomputation that agrees on wrong inputs. For example, the code shuffles the data into fixed batches, but the accountant assumes Poisson sampling ([Amplification by subsampling](../part04-privacy-accounting/05-subsampling.md)). No number shows that, so the record's sampler, read from the loader, is what catches it.
 
 ## Attach the evidence {#sec-relgov-evidence}
 
-An accountant proves a theorem about an algorithm, not about the code that runs it, so the release also needs evidence about the code and the model. Attach each piece in @tbl-relgov-evidence, and say which attacker each one models. The curve covers the strongest attacker, who sees every intermediate model, while the audit and the attack cover only the attacks they run.
+An accountant proves a theorem about an algorithm, not about the code that runs it. So the release also needs evidence about the code and the model. Attach each piece in @tbl-relgov-evidence, and say which attacker each one models. The curve covers the strongest attacker, who sees every intermediate model, while the audit and the attack cover only the attacks they run.
 
 | Evidence | Source | On the Adult run | What it cannot show |
 | --- | --- | --- | --- |
@@ -97,12 +100,14 @@ An accountant proves a theorem about an algorithm, not about the code that runs 
 
 : The evidence attached to a DP model release, and its limits. {#tbl-relgov-evidence}
 
-The audits can only refute a claim. A one-run bound above the claimed 4 would prove a bug, while 0.00 shows only that this attack found nothing, as it also found nothing in the non-private baseline. The audit reruns the released training code with canaries added, so it tests that code, not the released weights. The group accuracies were computed on the 16,842 Adult test rows, which are private too. To publish them, add noise to each group's count of correct predictions and count it in a budget of its own ([Release statistics with a library](../part03-dp-foundations/12-release-statistics.md)). Or measure them on a test set that is not private.
+The audits can only refute a claim. A one-run bound above the claimed 4 would prove a bug. But 0.00 shows only that this attack found nothing, as it also found nothing in the non-private baseline. The audit also tests the released training code, not the released weights.
+
+The group accuracies come from the 16,842 Adult test rows, which are private too. To publish them, add noise to each group's count of correct predictions, and charge it to its own budget ([Release statistics with a library](../part03-dp-foundations/12-release-statistics.md)). Or measure them on a test set that is not private.
+
 
 ## Write the statement {#sec-relgov-statement}
 
-The statement goes in the model card's privacy section. The script's `format_statement` builds it from the record, so no number is typed by hand.
-
+The statement goes in the model card's privacy section. The script's `format_statement` builds it from the record, so no number is typed by hand. The block below omits lines that repeat the record.
 
 ```text
 Guarantee: (3.98, 1e-05)-DP per person (one row of Adult), add/remove neighbours,
@@ -117,17 +122,15 @@ Noise generator: Opacus secure_mode=False, seed 0.
 Not covered: data outside the training set, API outputs that use other private data, other releases.
 ```
 
-The block leaves out the lines that repeat the record. Below the statement, add the evidence of @tbl-relgov-evidence, each item with the attacker it models.
-
-The last line deserves the most care. The guarantee covers the weights and anything computed from them alone, such as the logits that the deployed application programming interface (API) returns, because post-processing cannot weaken DP. An output that also uses other private data, such as a retrieval index, is a new release, and so is a second model trained on the same people.
+Below the statement, add the evidence of @tbl-relgov-evidence, each item with the attacker it models. The last line deserves the most care. The guarantee covers the weights and anything computed from them alone, because post-processing cannot weaken DP. An example is the logits that the deployed application programming interface (API) returns. An output that also uses other private data, such as a retrieval index, is a new release. So is a second model trained on the same people.
 
 ## Map the claim to regulation {#sec-relgov-law}
 
-This section is not legal advice: every answer depends on facts beyond the model.
+This section is not legal advice, since every answer depends on facts beyond the model.
 
-In the European Union, Recital 26 of the General Data Protection Regulation (GDPR) exempts anonymous information. It asks whether a person can be identified by the means "reasonably likely to be used". Pseudonymised data, which only information kept separately links to a person, remain personal data under Article 4(5). For AI models, the European Data Protection Board (EDPB) adopted Opinion 28/2024 in December 2024. Under it, a model is anonymous only if the likelihood of extracting personal data about its training set, directly or through queries, is insignificant. Each claim is assessed case by case. The opinion names differential privacy and attack tests, membership inference among them, as measures to weigh. It warns that passing a test shows resistance only to the attacks tested.
+In the European Union, Recital 26 of the General Data Protection Regulation (GDPR) exempts anonymous information. It asks about the means of identification "reasonably likely to be used". Pseudonymised data, which only information kept separately links to a person, remain personal data under Article 4(5).
 
-The trade-off curve speaks to extraction as well as membership. Guessing which of a number $m$ of equally likely values a person's record holds is a membership test at an FPR of $1/m$. So the curve caps reconstruction too ([Choosing ε](09-choosing-epsilon.md#sec-epsc-curve)).
+For AI models, Opinion 28/2024 of the European Data Protection Board (EDPB) sets a test. A model is anonymous only if the likelihood of extracting personal data about its training set is insignificant. Each claim is assessed case by case. The opinion names DP and attack tests, such as membership inference, as measures to weigh. It warns that a test shows resistance only to the attacks tested. The trade-off curve speaks to extraction as well as membership, because it caps reconstruction too ([Choosing ε](09-choosing-epsilon.md#sec-epsc-curve)).
 
 | Legal question | What DP evidence supports | What DP does not answer |
 | --- | --- | --- |
@@ -140,7 +143,7 @@ The trade-off curve speaks to extraction as well as membership. Guessing which o
 
 : What DP evidence answers, and leaves open, for the legal questions a release meets. {#tbl-relgov-law}
 
-Training still processes personal data, so the GDPR applies to it, lawful basis included. Article 35 requires a data protection impact assessment (DPIA) before processing likely to result in a high risk, and that is the natural home for the statement. In the United States, the safe harbor route of the Health Insurance Portability and Accountability Act (HIPAA) removes listed identifiers under §164.514(b)(2). DP does not do that. Its expert determination route can cite DP evidence but not be replaced by it. California's law, as amended by the California Privacy Rights Act, adds duties against re-identification for the business.
+Training still processes personal data, so the GDPR applies to it, lawful basis included. Article 35 requires a data protection impact assessment (DPIA) before processing likely to result in a high risk. The DPIA is the natural home for the statement. In the United States, the safe harbor route of the Health Insurance Portability and Accountability Act (HIPAA) removes listed identifiers (§164.514(b)(2)), which DP does not do. Its expert determination route can cite DP evidence but not be replaced by it. California's law, as amended by the California Privacy Rights Act, adds duties against re-identification for the business.
 
 None of these texts says that DP makes a model anonymous by itself. A DPIA entry built from this chapter's evidence can read as follows, with the bracketed parts filled in by the controller and counsel.
 
@@ -148,9 +151,9 @@ None of these texts says that DP makes a model anonymous by itself. A DPIA entry
 
 ## Review someone else's claim {#sec-relgov-review}
 
-The same steps run in reverse when someone else hands you a model. Ask for the record of @sec-relgov-record, refuse a claim that cannot be recomputed, then recompute $\varepsilon$ from the claim's own parameters, and check its $\delta$ against the number of units. [Report and review an ε claim](../part04-privacy-accounting/09-choosing-an-accountant.md#sec-choose-match) gives the checks on the accountant and the sampler.
+Run the same steps in reverse when someone else hands you a model. Ask for the record of @sec-relgov-record, and refuse a claim that cannot be recomputed. Recompute $\varepsilon$ from the claim's own parameters, and check its $\delta$ against the number of units. [Report and review an ε claim](../part04-privacy-accounting/09-choosing-an-accountant.md#sec-choose-match) gives the checks on the accountant and the sampler.
 
-The script reviews a claim made up for this book, with every flaw a review should catch. It claims $\varepsilon = 1$ at $\delta = 10^{-3}$ for a model trained on 50,000 records, over 5,000 steps with noise multiplier 0.8. Its batches of 256 are accounted as Poisson sampling at rate 256/50,000, although they were in fact shuffled and of fixed size. And the claim states no unit, no clipping norm and no tuning.
+The script reviews a claim made up for this book, with every flaw a review should catch. It claims $\varepsilon = 1$ at $\delta = 10^{-3}$ for a model trained on 50,000 records, over 5,000 steps with noise multiplier 0.8. Its batches of 256 were shuffled and of fixed size but are accounted as Poisson sampling. And the claim states no unit, no clipping norm and no tuning.
 
 ```{.python excerpt="release-review"}
 def review(claim: dict[str, Any]) -> list[str]:
@@ -184,15 +187,17 @@ findings: 10
   - at delta=1e-06 (1/n^1.1) PLD gives eps=3.75
 ```
 
-By the vendor's own parameters the claimed 1 is 2.17, and the RDP accountant it names gives 2.55. At a $\delta$ the book accepts it is 3.75. Even that is wrong, because shuffled fixed-size batches get no amplification by Poisson subsampling, so the true $\varepsilon$ can be far above every one of these numbers ([Amplification by subsampling](../part04-privacy-accounting/05-subsampling.md)). The script cannot see a wrong unit, since it takes $n$ as given. If the records are messages and a customer sends many, screen the per-customer $\varepsilon$ with [User-level differential privacy](07-user-level.md#sec-ulvl-code) yourself. Send the findings back with a request for a corrected record.
+By the vendor's own parameters the claimed 1 is 2.17, and the RDP accountant it names gives 2.55. At a $\delta$ the book accepts it is 3.75. Even that is too low, because shuffled fixed-size batches get no amplification by Poisson subsampling. The true $\varepsilon$ can be far above all these numbers.
+
+The script cannot see a wrong unit, since it takes $n$ as given. If the records are messages and a customer sends many, screen the per-customer $\varepsilon$ with [User-level differential privacy](07-user-level.md#sec-ulvl-code) yourself. Send the findings back with a request for a corrected record.
 
 ## After release {#sec-relgov-after}
 
-The guarantee is fixed at release, but every retraining on the same people is a new release that composes with the old ones. For identical runs, compose the PLD of one run with itself once per version, `pld.self_compose(steps * versions)`, and state the budget per model version and in total over a fixed **period**. If the total over a schedule is too large, calibrate each version to a share of it.
+The guarantee is fixed at release, but every retraining on the same people is a new release that composes with the old ones. For identical runs, compose the PLD of one run with itself once per version, `pld.self_compose(steps * versions)`. State the budget per model version and in total over a fixed **period**. If the total over a schedule is too large, calibrate each version to a share of it.
 
-Deletion requests need their own answer. DP deletes nothing. It says the model is about as likely as one trained without the person, but their row is still in the data. Honour a request by removing the row, from the stand-in and test rows too, and retraining on a fixed schedule. Whether that is fast enough for the GDPR's Article 17 is a question for counsel. Sharded, isolated, sliced and aggregated training trains separate models on disjoint shards so that a deletion retrains one shard. Combined with DP, each shard has its own smaller $n$, so its sampling rate and its $\delta$ follow from that $n$.
+Deletion requests need their own answer, because DP deletes nothing. It says the model is about as likely as one trained without the person, but their row is still in the data. So honour a request by removing the row, from the stand-in and test rows too, and retraining on a fixed schedule. Whether that is fast enough for the GDPR's Article 17 is a question for counsel.
 
-Give each model version its own record and statement, and name in advance the incidents that reopen a release. A failing CI test, an audit bound above the claim, or a bug in the sampler or the accountant calls for a corrected statement or a retrained model.
+Give each model version its own record and statement, and name in advance the incidents that reopen a release. A failing CI test, an audit bound above the claim, or a bug in the sampler or the accountant needs a corrected statement or a retrained model.
 
 ## Checklist
 

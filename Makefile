@@ -41,7 +41,7 @@ TEX_PKGS  := svg imakeidx makeindex trimspaces catchfile transparent caption kom
 
 .DEFAULT_GOAL := help
 .PHONY: help setup hooks tex-deps datasets test-fast figures figures-force full full-pdf exercises practitioner practitioner-pdf course course-pdf opendp opendp-pdf \
-        website pdf book notes note preview publish terms-check acronyms index-candidates prose prose-check notation notation-check \
+        website pdf book notes note preview publish terms-check acronyms index-candidates prose ste prose-check notation notation-check \
         structure structure-check format test typecheck check all clean
 
 help: ## List the targets
@@ -225,6 +225,9 @@ index-candidates: ## Suggest index terms (bold phrases) not yet in terms.toml (B
 
 prose: ## Report hard-to-read prose, worst paragraphs first (BOOK=book-full, PAGE=part../NN-x.md); see PROSE.md
 	uv run python tools/prose.py report --book $(or $(BOOK),book-full) $(if $(PAGE),--page $(PAGE)) --worst $(or $(WORST),5)
+
+ste: ## Report departures from ASD-STE100 Simplified Technical English with stelint, never a gate (BOOK=, PAGE=); see PROSE.md rule 25
+	uv run python tools/ste.py report --book $(or $(BOOK),book-practitioner) $(if $(PAGE),--page $(PAGE)) --worst $(or $(WORST),3) --rules
 
 prose-check: ## Fail if a page's prose is past its book's limits in tools/prose.toml (BOOK=)
 	@for b in $(CHECKED); do echo "== $$b"; uv run python tools/prose.py check --book $$b || exit 1; done

@@ -2,21 +2,21 @@
 
 ## What it is {#sec-adapt-why-breaks}
 
-The composition theorems of differential privacy (DP) assume that each step's privacy parameter, and the number of steps, are fixed before the run ([Composition](../part03-dp-foundations/04-composition.md)). Real runs often choose them from the outputs, as when training stops on the validation loss. Plugging the realized values into those theorems afterwards is then invalid (Rogers et al. 2016). This **plug-in mistake** can make the bound fail about three times as often as its $\delta$ claims.
+The composition theorems of differential privacy (DP) assume that each step's privacy parameter, and the number of steps, are fixed before the run ([Composition](../part03-dp-foundations/04-composition.md)). Real runs often choose them from the outputs, as when training stops on the validation loss. Plugging the realized values into the theorems afterwards is then invalid (Rogers et al. 2016). This **plug-in mistake** can make the bound fail about three times as often as its $\delta$ claims.
 
-A **privacy filter** fixes a total budget in advance and refuses any step that would exceed it, so the run keeps the budget's guarantee whatever the stopping rule. A **privacy odometer**, for open-ended analyses, instead reports the spend so far, valid at every step but at a higher $\varepsilon$.
+A **privacy filter** fixes a total budget in advance and refuses any step that would exceed it, so the run keeps the budget's guarantee whatever the stopping rule. A **privacy odometer**, for open-ended analyses, reports the spend so far instead, valid at every step but at a higher $\varepsilon$.
 
 ## When you meet it
 
-Early stopping with a planned maximum needs neither. You fix the noise, sampling rate and maximum number of steps in advance, then stop when the validation loss stalls. **Report the $\varepsilon$ of the planned maximum, not of the steps you ran.** A stopped run releases a prefix of the planned run, so the planned guarantee covers it. For example, 100 planned full-batch Gaussian steps with noise multiplier 10 are $(5.299, 10^{-5})$-DP, and a run that stops at step 60 reports that.
+Early stopping with a planned maximum needs neither. You fix the noise, sampling rate and maximum number of steps in advance, then stop when the validation loss stalls. **Report the $\varepsilon$ of the planned maximum, not of the steps you ran.** Those steps are a prefix of the planned run, so the planned guarantee covers them. If 100 planned full-batch Gaussian steps with noise multiplier 10 are $(5.299, 10^{-5})$-DP, a run that stops at step 60 reports that.
 
-The rule needs three conditions. The stopping signal must come from the released models or from data outside the protected training set, such as a held-out validation set, so that stopping is post-processing. A decision that reads the training data leaks through the stopping time. Deciding after seeing the model to train past the maximum is the plug-in mistake again, so it needs a new plan, accounted from the first step. And a resumed run must restore its accountant, which Opacus's `PrivacyEngine.save_checkpoint` stores, since a fresh one restarts at zero ([the calibration workflow](10-calibrate-dp-sgd.md#sec-calib-train)). Calling `get_epsilon` at the stopping point is the plug-in mistake.
+The rule needs three conditions. The stopping signal must come from the released models or from held-out data, so that stopping is post-processing. Training past the maximum needs a new plan, accounted from the first step. And a resumed run must restore its accountant ([the calibration workflow](10-calibrate-dp-sgd.md#sec-calib-train)).
 
-You meet filters when the noise changes during training, since a change chosen from the outputs makes the run adaptive. Analytics services enforce them too, as OpenDP's `make_privacy_filter` or Tumult Analytics' `Session`, which refuses queries past its budget.
+You meet filters when the noise is changed during training in response to the outputs, and in analytics services, such as OpenDP's `make_privacy_filter` or Tumult Analytics' `Session`.
 
 ## How to use it {#sec-adapt-dp-filters}
 
-The Rényi filter of Feldman and Zrnic (2021) works in Rényi differential privacy (RDP) at one order, written $\alpha$ and fixed in advance. It charges each step its spend at that order ([Rényi DP](01-renyi-dp.md)), which may depend on earlier outputs but must be known before the step runs. It runs a step only if the spends so far, its own included, stay within a budget $B$. To aim at a target privacy level $\varepsilon_g$ with slack $\delta$, run the [conversion from RDP](02-rdp-conversions.md) backwards, which sets
+The Rényi filter of Feldman and Zrnic (2021) works in Rényi differential privacy (RDP) at one order, written $\alpha$ and fixed in advance. It charges each step its spend at that order ([Rényi DP](01-renyi-dp.md)), which may depend on earlier outputs but must be known before the step runs. It refuses a step that would take the total past a budget $B$. To aim at a target privacy level $\varepsilon_g$ with slack $\delta$, run the [conversion from RDP](02-rdp-conversions.md) backwards, which sets
 $$B = \varepsilon_g - \frac{\ln(1/\delta)}{\alpha - 1}.$$
 
 A Gaussian step with a noise multiplier, written $\sigma$, spends $\alpha/(2\sigma^2)$ at order $\alpha$. At order 5.8, the best fit for the early-stopping target, the budget is $B = 2.900$. That lasts 100 full-batch steps at $\sigma = 10$. Suppose training plateaus at step 60 and you halve the noise. Each later step then costs four times as much, so the budget left for 40 steps buys 10 more, and the run still meets the target.
@@ -41,15 +41,13 @@ except dp.OpenDPException:  # the release that would exceed the budget
 print(answered)  # 99
 ```
 
-OpenDP lets through 99 releases, not 100, because it rounds each charge up for floating-point safety.
-
-For pure-DP queries, the **Whitehouse filter** (Whitehouse et al. 2023) sums the squares of their parameters, as advanced composition does. So it fits many more small queries than a plain sum.
+OpenDP lets through 99 releases, not 100, because it rounds each charge up for floating-point safety. For pure-DP queries, the **Whitehouse filter** (Whitehouse et al. 2023) fits many more small queries than a plain sum of their $\varepsilon$.
 
 ## What goes wrong
 
-An odometer costs more than a filter. The **Ville odometer** converts the RDP spend at the best of a grid of orders fixed in advance. It pays for that late choice by dividing $\delta$ by the grid's size, which on full-batch Gaussian steps adds 15 to 19% to $\varepsilon$. The 100-step run above would report 6.253.
+An odometer costs more than a filter. The **Ville odometer** converts the RDP spend at the best of a grid of orders fixed in advance, It pays for that late choice by dividing $\delta$ by the grid's size. On the 100-step run above, that raises $\varepsilon$ from 5.299 to 6.253.
 
-**Individual accounting** charges each training record by its own clipped gradient norm, since a small gradient moves the model less. It drops a record once its own spend would pass the budget. In the full edition's simulation, the median typical record ends at an individual $\varepsilon$ of 3.17, against 5.299 for the worst case. But that number comes from realized norms, so it is an estimate, not a guarantee. It is also sensitive, since a small individual $\varepsilon$ says the model fits that record well. And the records dropped first, those with large gradients, are often those the model serves worst ([Disparate impact](../part05-dp-ml/08-disparate-impact.md)).
+**Individual accounting** charges each training record by its own clipped gradient norm, since a small gradient moves the model less, and drops a record once its spend would pass the budget. In the full edition's simulation, the median record ends at an individual $\varepsilon$ of 3.17, against 5.299 for the worst case. But that number comes from realized norms, so it is an estimate, not a guarantee, and it is sensitive, since a small one says the model fits that record well. And the records dropped first, with large gradients, are often those the model serves worst ([Disparate impact](../part05-dp-ml/08-disparate-impact.md)).
 
 Choosing hyperparameters from several runs is a separate cost ([Hyperparameter tuning](../part05-dp-ml/03-hyperparameter-tuning.md)).
 

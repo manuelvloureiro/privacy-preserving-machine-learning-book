@@ -2,15 +2,15 @@
 
 ## What it is {#sec-crypto-what}
 
-A security claim is a statement about a guessing game. A challenger secretly picks one of two worlds, such as encrypting one of two messages, and an adversary sees the result and guesses. Write $X$ and $Y$ for what it sees in each world. If an adversary, written $\mathcal A$, answers 1 for the second, its **advantage** is the gap between how often it says 1 in each:
+A security claim is a statement about a guessing game. A challenger secretly picks one of two worlds, such as encrypting one of two messages, and an adversary sees the result and guesses which. Write $X$ and $Y$ for what it sees in the two worlds. If an adversary, written $\mathcal A$, answers 1 for the second, its **advantage** is the gap between how often it says 1 in each:
 $$\mathrm{Adv}_{\mathcal A}(X, Y) = \big|\Pr[\mathcal A(X) = 1] - \Pr[\mathcal A(Y) = 1]\big|.$$
-If each world is equally likely, it wins with probability $\frac12 + \frac12\mathrm{Adv}_{\mathcal A}$, and no advantage exceeds the total variation distance between $X$ and $Y$ ([Divergences](03-divergences.md)).
+If the two worlds are equally likely, it wins with probability $\frac12 + \frac12\mathrm{Adv}_{\mathcal A}$, and no advantage exceeds the total variation distance between $X$ and $Y$ ([Divergences](03-divergences.md)).
 
-A scheme has **$\kappa$-bit security** when no attack beats trying keys. An attacker who tries $t$ keys then gets an advantage of at most about $t/2^\kappa$. For example, testing $10^{18}$ keys per second for a year breaks a 128-bit key with probability $9.3\times10^{-14}$.
+A scheme has **$\kappa$-bit security** when no attack beats trying keys, so an attacker who tries $t$ keys gets an advantage of at most about $t/2^\kappa$. For example, testing $10^{18}$ keys per second for a year breaks a 128-bit key with probability $9.3\times10^{-14}$.
 
 ## When you meet it {#sec-crypto-when}
 
-You meet these tools whenever a pipeline pseudonymizes identifiers, generates keys, encrypts data or splits a value among holders. @tbl-crypto-tools gives the construction for each job; never implement your own.
+You meet these tools whenever a pipeline pseudonymizes identifiers, generates keys, encrypts data or splits a value among holders. @tbl-crypto-tools gives the construction for each job. Never implement your own.
 
 | Job | Use | In Python | What goes wrong |
 | --- | --- | --- | --- |
@@ -26,9 +26,9 @@ You meet these tools whenever a pipeline pseudonymizes identifiers, generates ke
 
 The **birthday bound** says that when a number $m$ of values are drawn uniformly from a number $N$ of possible values, the chance of a repeat is at most
 $$\Pr[\text{collision}] \le \frac{m(m-1)}{2N}.$$ {#eq-crypto-birthday}
-A repeat becomes as likely as not after about $1.18\sqrt N$ draws, so random $\kappa$-bit values start to collide after about $2^{\kappa/2}$. For example, 1,000 features hashed into $2^{20}$ buckets collide with exact probability 0.379.
+A repeat becomes as likely as not after about $1.18\sqrt N$ draws, so random $\kappa$-bit values start to collide after about $2^{\kappa/2}$.
 
-To split a secret among several holders, draw all shares but one uniformly modulo a prime $p$, and choose the last so that they add up to the secret. Adding two secrets' shares holder by holder gives shares of their sum. The snippet shares 42 and 100 and adds them. For 10 million identifiers, its birthday bounds show why a pseudonym keeps 128 bits of the HMAC. At 64 bits the bound is $2.7\times10^{-6}$.
+To split a secret among several holders, draw all shares but one uniformly modulo a prime $p$, and choose the last so that they add up to the secret. Adding two secrets' shares holder by holder gives shares of their sum, as the snippet shows for 42 and 100. Its birthday bounds then show why pseudonyms of 10 million identifiers keep 128 bits of the HMAC. At 64 bits, a collision has probability up to $2.7\times10^{-6}$.
 
 ```python
 import hashlib
@@ -57,13 +57,13 @@ nonce = secrets.token_bytes(12)             # 96 bits, fresh for every message
 ct = AESGCM(key).encrypt(nonce, data, aad)  # aad: authenticated, not encrypted
 ```
 
-HMAC is secure if SHA-256's compression function is a pseudorandom function. Encryption with AES assumes that AES is a pseudorandom permutation, and lattice schemes that learning with errors is hard. Secret sharing needs none: a holder's shares are random numbers whatever the secret, which **simulation** makes precise.
+HMAC is secure if SHA-256's compression function is a pseudorandom function. Encryption with AES assumes that AES is a pseudorandom permutation, and lattice schemes that learning with errors is hard. Secret sharing needs none, because a holder's shares are random numbers whatever the secret, which **simulation** makes precise.
 
-Homomorphic encryption hides each value behind a small random error modulo a number $Q$. Decryption works while the total error is below $Q/4$. Adding ciphertexts adds their errors, so if each error is at most a bound $B$ in size, a sum of $k$ ciphertexts is guaranteed to decrypt when $k < Q/(4B)$. With $Q = 4096$ and $B = 32$, that guarantees 32 ciphertexts. A larger modulus buys a larger **noise budget**, at the cost of slower arithmetic.
+Homomorphic encryption hides each value behind a small random error modulo a number $Q$, and decryption works while the total error is below $Q/4$. Adding ciphertexts adds their errors, so with each error at most a bound $B$, a sum of $k$ ciphertexts is guaranteed to decrypt when $k < Q/(4B)$. A larger modulus buys a larger **noise budget**, at the cost of slower arithmetic.
 
 ## What goes wrong {#sec-crypto-wrong}
 
-A repeated nonce reveals the XOR of the two messages, so rotate keys before the birthday bound bites.
+A repeated nonce reveals the XOR of the two messages, so rotate keys before random nonces collide. With 96-bit nonces, the snippet's last line puts that chance at $1.2\times10^{-10}$ after $2^{32}$ messages.
 
 Shares must be reduced modulo $p$, or their range moves with the secret. An unreduced share equal to the secret plus a random number from 0 to 15 tells the secrets 0 and 7 apart with advantage $7/16$.
 
