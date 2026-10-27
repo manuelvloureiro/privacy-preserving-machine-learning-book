@@ -1,18 +1,20 @@
 # Differential privacy foundations
 
-The previous part showed that models and statistics leak: membership, attributes, training text, whole datasets. This part introduces the defence that the rest of the book is built on, **differential privacy (DP)**, and develops it far enough that you can prove a new mechanism private, calibrate its noise, compose it with others, and say what any such mechanism must cost. The finer tools for tracking privacy over many steps (Rényi DP, numerical accountants, amplification by subsampling) come in the [next part](../part04-privacy-accounting/00-introduction.md), which builds directly on this one.
+The previous part showed that models and statistics leak membership, attributes, training text and even whole datasets. This part introduces the defence that the rest of the book uses, **differential privacy (DP)**. It goes far enough that you can prove a new mechanism private, calibrate its noise, compose it with others, and say what any such mechanism must cost. The [next part](../part04-privacy-accounting/00-introduction.md) builds on it with finer tools for many steps: Rényi DP, numerical accountants and amplification by subsampling.
 
 ## Who this part is for
 
-You are expected to have read the [Prerequisites](../part01-prerequisites/00-introduction.md) and [Threat models and attacks](../part02-attacks/00-introduction.md). This part uses the max-divergence, the hockey-stick divergence and the data processing inequality of [Divergences](../part01-prerequisites/03-divergences.md), the trade-off function of [Hypothesis testing](../part01-prerequisites/04-hypothesis-testing.md), and the tail bounds for the Laplace and normal distributions of [Concentration inequalities](../part01-prerequisites/02-concentration.md). It uses the games and the advantage of [Threat models and privacy games](../part02-attacks/01-threat-models.md), since the definition of DP is a bound on exactly those games. Each chapter restates in one sentence every fact it takes from an earlier page, and links to the page that proves it.
+This part assumes the [Prerequisites](../part01-prerequisites/00-introduction.md) and [Threat models and attacks](../part02-attacks/00-introduction.md). From [Divergences](../part01-prerequisites/03-divergences.md) it uses the max-divergence, the hockey-stick divergence and the data processing inequality. It also uses the trade-off function of [Hypothesis testing](../part01-prerequisites/04-hypothesis-testing.md) and the Laplace and normal tail bounds of [Concentration inequalities](../part01-prerequisites/02-concentration.md). The definition of DP bounds the games of [Threat models and privacy games](../part02-attacks/01-threat-models.md), so their advantage returns here. Each chapter restates in one sentence every fact it takes from an earlier page, with a link to its proof.
+
+A reader who has done the course can skim the core chapters. The full edition goes beyond the course in the privacy profile, discrete mechanisms, trust models and mean estimation.
 
 ## The common thread
 
-A randomized algorithm is differentially private when changing one person's record changes the distribution of its output by at most a factor $e^\varepsilon$, up to a small slack $\delta$. Everything in this part follows from reading that one sentence in three ways.
+A randomized algorithm is differentially private when a change to one person's record changes the distribution of its output by at most a factor $e^\varepsilon$, up to a small slack $\delta$. Everything in this part comes from three readings of that sentence.
 
-- **As a bound on a divergence.** Pure $\varepsilon$-DP bounds the max-divergence between the outputs on neighbouring datasets, and $(\varepsilon, \delta)$-DP bounds their hockey-stick divergence. The data processing inequality then gives post-processing for free, and the **privacy loss** $L_{D,D'}$, the log of the likelihood ratio, is the quantity whose sum governs composition.
-- **As a bound on every attack.** By the hypothesis-testing view, $\mathrm{FPR} + e^\varepsilon\,\mathrm{FNR} \ge 1 - \delta$ for any test of "was this record used". Every game of the attacks part, from membership inference to reconstruction, is therefore capped by a number you can compute before the data is touched.
-- **As a budget to spend.** Privacy is lost a little at each release. Noise is calibrated to how much one record can move the answer (its **sensitivity**), losses add up under composition, and lower bounds say how much accuracy no mechanism can avoid paying.
+- **As a bound on a divergence.** Pure $\varepsilon$-DP bounds the max-divergence between the outputs on neighbouring datasets, and $(\varepsilon, \delta)$-DP bounds their hockey-stick divergence. So the data processing inequality makes post-processing free. The **privacy loss** $L_{D,D'}$ is the log of the likelihood ratio, and its sum controls composition.
+- **As a bound on every attack.** Any test of "was this record used" has $\mathrm{FPR} + e^\varepsilon\,\mathrm{FNR} \ge 1 - \delta$. So every game of the attacks part, from membership inference to reconstruction, has a cap that you can compute before you touch the data.
+- **As a budget to spend.** Each release loses a little privacy, and its noise is set by how much one record can move the answer, its **sensitivity**. These losses add up under composition, and lower bounds say how much accuracy every mechanism must give up.
 
 @tbl-dp-map lists the chapters.
 
@@ -34,11 +36,11 @@ A randomized algorithm is differentially private when changing one person's reco
 
 ## How to read this part
 
-**Order.** Chapters 18 to 21 are the core and should be read in order: the definition, the properties that make it usable, the two mechanisms everything else is built from, and advanced and optimal composition, which finishes the story of composition that chapter 19 starts and introduces the privacy loss random variable that the next part uses throughout. Chapter 22 adds mechanisms for selection, and chapter 23 builds on them to answer many queries at once, by releasing synthetic data with private multiplicative weights. Chapter 24 handles data whose worst case is far from typical. Chapter 25 is short and practical: read it before you implement any mechanism yourself. Chapter 26 changes who is trusted with the raw data. Chapter 27 is the most theoretical; it ties back to reconstruction and membership attacks and says what privacy must cost. Chapter 28 closes the part by putting these tools together on the most common statistical task, estimating a mean, and matches each of its error rates with a lower bound from chapter 27.
+**Order.** Read chapters 18 to 21, the core, in order. They give the definition, the properties that make it usable, the two mechanisms that everything else uses, and advanced and optimal composition. Chapter 21 finishes the composition story of chapter 19 and introduces the privacy loss random variable, which the next part uses throughout. Chapter 22 adds mechanisms for selection, and chapter 23 uses them to answer many queries at once with private multiplicative weights. Chapter 24 handles data whose worst case is far from typical. Read chapter 25 before you implement a mechanism yourself. Chapter 26 changes who holds the raw data, and chapter 27 says what privacy must cost. Chapter 28 applies these tools to a mean and matches each of its error rates with a lower bound from chapter 27.
 
-**Structure of a chapter.** Every chapter opens with the question it answers and a running example with its numbers, such as the counting query of [the Laplace and Gaussian mechanisms](03-laplace-gaussian.md) or the dashboard of a hundred counts in [Advanced and optimal composition](04-composition.md). Then comes one section per topic. Its definitions, theorems, lemmas and worked examples are numbered environments, so that later chapters can cite them by number, and every theorem is followed at once by its proof in numbered steps. A Code section runs the script that checks every quoted number. A Summary table then lists each result of the chapter, its statement in a line and where it is used, and References close the chapter.
+**Structure of a chapter.** Every chapter opens with its question and a running example with numbers, such as the counting query of [the Laplace and Gaussian mechanisms](03-laplace-gaussian.md) or the dashboard of a hundred counts in [Advanced and optimal composition](04-composition.md). Then comes one section per topic. Its results are numbered environments, so that later chapters can cite them, and each theorem has its proof right after it, in numbered steps. A Code section runs the script that checks every quoted number. A Summary table lists each result with where it is used, and References close the chapter.
 
-**Proofs you can check by computer.** Most privacy claims in this part are checked numerically as well as proved: the exact privacy profile of a mechanism is computed and compared with its bound, a composition formula is compared with brute-force enumeration, and a buggy mechanism is shown to leak by computing its privacy loss. Running the scripts is the fastest way to see how loose each bound is. From the repository root, for example,
+**Proofs you can check by computer.** The scripts check most claims of this part with numbers as well as proofs. For example, they compare a mechanism's exact privacy profile with its bound, a composition formula with brute-force enumeration, and a buggy mechanism with its computed privacy loss. Run them to see how loose each bound is. From the repository root, for example, run
 
 ```bash
 uv run python code/part03-dp-foundations/laplace_gaussian.py
@@ -46,7 +48,7 @@ uv run python code/part03-dp-foundations/laplace_gaussian.py
 
 ## Notation
 
-The chapters share the conventions in @tbl-dp-notation, set in [the definition of differential privacy](01-definition.md) and fixed for the whole book. The next part uses the same notation. There the noise multiplier, the noise standard deviation per unit of sensitivity, is usually written $\sigma$; it equals the standard deviation when the sensitivity is 1.
+The chapters share the conventions in @tbl-dp-notation, set in [the definition of differential privacy](01-definition.md), and the next part uses them too. There $\sigma$ usually stands for the noise multiplier, the noise standard deviation per unit of sensitivity, which is the standard deviation when the sensitivity is 1.
 
 | Symbol | Meaning |
 | --- | --- |
@@ -70,9 +72,10 @@ The chapters share the conventions in @tbl-dp-notation, set in [the definition o
 
 ## What you will be able to do
 
-By the end of this part you should be able to:
+At the end of this part you can:
 
-- state pure and approximate DP for a stated neighbouring relation and unit of privacy, translate a guarantee into a bound on membership advantage and on posterior odds, and say why $\delta$ must be much smaller than $1/n$;
+- state pure and approximate DP for a stated neighbouring relation and unit of privacy, and translate a guarantee into a bound on membership advantage and on posterior odds;
+- say why $\delta$ must be much smaller than one over the number of records;
 - prove post-processing, group privacy and basic composition, and say what does not compose;
 - calibrate the Laplace and Gaussian mechanisms, including the exact (analytic) Gaussian calibration;
 - derive advanced composition and compute optimal composition exactly;
@@ -83,5 +86,3 @@ By the end of this part you should be able to:
 - design frequency estimation in the local model and explain what shuffling and secure aggregation buy;
 - prove packing and fingerprinting lower bounds, and run the tracing attack they come from;
 - estimate a mean privately when its range, its dimension or its tails are unknown, and match each error rate with a lower bound.
-
-Each of these is a result derived in one of the chapters that follow.

@@ -1,6 +1,6 @@
 # Discrete and floating-point-safe mechanisms
 
-Every privacy proof so far was a statement about real numbers, such as the proof in [the Laplace and Gaussian mechanisms](03-laplace-gaussian.md) that compares two densities on the real line. A computer has only floating-point numbers, a finite set with uneven gaps, and random bits, so the program that "samples $\mathrm{Lap}(b)$" produces a distribution that the proof says nothing about. Mironov (2012) showed that the gap matters: the textbook Laplace sampler has outputs that only one of two neighbouring datasets can produce, and an observer who sees one knows which dataset was used.
+Every privacy proof so far was a statement about real numbers, such as the proof in [the Laplace and Gaussian mechanisms](03-laplace-gaussian.md) that compares two densities on the real line. A computer has only floating-point numbers, a finite set with uneven gaps, and random bits. So the program that "samples $\mathrm{Lap}(b)$" produces a distribution that the proof says nothing about. Mironov (2012) showed that the gap matters: the textbook Laplace sampler has outputs that only one of two neighbouring datasets can produce, and an observer who sees one knows which dataset was used.
 
 The one idea of this chapter is that **differential privacy (DP) is a property of the output distribution the code actually produces**, so the code must produce exactly the distribution the proof is about. One way there keeps floating point and rounds the output to a coarse grid, so that every output is reachable from every input. The other way samples integer noise for integer-valued queries exactly, from uniform random integers, which gives the discrete Laplace and the discrete Gaussian mechanisms.
 
@@ -8,9 +8,9 @@ The running example is a hospital's count of patients with a rare diagnosis, wit
 
 ## Floating-point Laplace breaks differential privacy {#sec-discrete-float}
 
-The textbook way to sample $\mathrm{Lap}(b)$ is inverse cumulative distribution function (CDF) sampling. Draw $U$ uniform on $(0, 1)$ and a fair sign $\xi \in \{-1, +1\}$, and output $\xi\cdot b\ln(1/U)$. The magnitude exceeds a level $z$ exactly when $U < e^{-z/b}$, so it is exponential with mean $b$ ([Probability distributions](../part01-prerequisites/01-distributions.md)), and the sign mirrors it into $\mathrm{Lap}(b)$. In floating point, $U$, the logarithm and the sum with $f(D)$ are each rounded. This section asks whether the rounded mechanism is still DP, and the answer is no, for every $\varepsilon$.
+The textbook way to sample $\mathrm{Lap}(b)$ is inverse cumulative distribution function (CDF) sampling. Draw $U$ uniform on $(0, 1)$ and a fair sign $\xi \in \{-1, +1\}$, and output $\xi\cdot b\ln(1/U)$. The magnitude exceeds a level $z$ exactly when $U < e^{-z/b}$, so it is exponential with mean $b$ ([Probability distributions](../part01-prerequisites/01-distributions.md)), and the sign mirrors it into $\mathrm{Lap}(b)$. In floating point, $U$, the logarithm and the sum with $f(D)$ are each rounded, and the rounded mechanism is not DP for any $\varepsilon$.
 
-The tool that shows it also audits any implementation. If some outputs can only come from $D$, seeing one of them reveals $D$ with certainty, and since no factor $e^\varepsilon$ can pay for that, $\delta$ has to.
+The tool that shows it also audits any implementation. If some outputs can only come from $D$, one of them reveals $D$ with certainty. No factor $e^\varepsilon$ can pay for that, so $\delta$ has to.
 
 ::: {#prp-discrete-support name="The support argument"}
 Let $M$ be $(\varepsilon, \delta)$-DP, let $D \sim D'$ be neighbouring datasets, and write $\mathcal Y_D$ for the set of outputs that $M(D)$ can produce. Let $S = \mathcal Y_D \setminus \mathcal Y_{D'}$ be the outputs reachable from $D$ but not from $D'$. Then, whatever $\varepsilon$ is,
@@ -39,19 +39,17 @@ Doubles have too many values to enumerate, so the chapter's script (@sec-discret
 
 ![The toy floating-point Laplace sampler with $b = 1$. Left: at 12 bits, the outputs of $f(D) = 0$ (top) and $f(D') = 1$ (bottom) in a narrow window, coloured by whether the other input can produce them. Right: $\Pr[M(D) \in S]$ against $p$, textbook and snapped (@sec-discrete-snapping).](figures/discrete_float_support.svg){#fig-discrete-float-support}
 
-More precision does not help. The right panel of @fig-discrete-float-support stays at about 48% from 6 to 14 bits, because adding bits refines both grids together. Mironov (2012) found the same effect at $p = 53$ in several DP libraries of the time. The leak is not in where the output lands on the real line but in which float it is, so printing the output to a few decimals would hide it. That is the idea behind snapping.
+More precision does not help. The leak stays at about 48% from 6 to 14 bits, because more bits refine both grids together (@fig-discrete-float-support, right). Mironov (2012) found the same effect at $p = 53$ in several DP libraries. The leak is in which float the output is, not in where it lands on the real line, so an output printed to a few decimals would hide it. That is the idea behind snapping.
 
-A second, smaller leak comes from the tails, which are cut off. A uniform made of 53 random bits, a positive multiple of $2^{-53}$, is never below $2^{-53}$, so the noise magnitude never exceeds $b\ln(2^{53}) \approx 36.74\,b$, and outputs between $f(D) + 36.74b$ and $f(D') + 36.74b$ are reachable from one input only. By @eq-discrete-support-delta, their probability of about $2^{-53}$ is a floor on $\delta$ that rules out pure DP. Jin et al. (2022) found such leaks in libraries released after Mironov's paper.
+A second, smaller leak comes from the cut-off tails. A uniform made of 53 random bits is never below $2^{-53}$, so the noise magnitude never exceeds $b\ln(2^{53}) \approx 36.74\,b$. So outputs between $f(D) + 36.74b$ and $f(D') + 36.74b$ come from one input only, and by @eq-discrete-support-delta their probability of about $2^{-53}$ is a floor on $\delta$. Jin et al. (2022) found this leak in later libraries.
 
 ::: {#exm-discrete-float-count}
-The hospital releases its count with the textbook sampler and $b = 1$, so the exact mechanism would be $\varepsilon$-DP with $\varepsilon = \Delta_1 f/b = 1$. An analyst who knows that the count is 0 or 1, say whether one particular patient is in the data, checks whether the released float can be produced from 1. In the 12-bit toy the check identifies the count 0 with certainty 47.91% of the time, since $\Pr[M(D) \in S] = 0.4791$ in @tbl-discrete-float. By @prp-discrete-support, no $\varepsilon$ with a $\delta$ below 0.4791 describes the release, although the proof promised that one output moves the analyst's odds by at most a factor $e$.
+The hospital releases its count with the textbook sampler and $b = 1$, so the exact mechanism would be $\varepsilon$-DP with $\varepsilon = \Delta_1 f/b = 1$. An analyst knows that the count is 0 or 1, because the question is whether one particular patient is in the data. The analyst checks whether the released float can come from 1. In the 12-bit toy the check identifies the count 0 with certainty 47.91% of the time, since $\Pr[M(D) \in S] = 0.4791$ in @tbl-discrete-float. So by @prp-discrete-support, no $\varepsilon$ with a $\delta$ below 0.4791 describes the release. The proof promised that one output moves the analyst's odds by at most a factor $e$.
 :::
 
 ## The snapping mechanism {#sec-discrete-snapping}
 
-If the output must be a float, its low-order bits have to go. This section states the snapping mechanism of Mironov (2012), which removes them, gives its guarantee, whose proof is Mironov's, and checks it on the toy of @sec-discrete-float.
-
-In words, the mechanism clamps the true answer into a range $[-B, B]$, adds Laplace noise computed in floating point, rounds to the nearest multiple of a power of 2 at least as large as the noise scale, and clamps again. The clamps keep rounding errors small next to the grid.
+If the output must be a float, its low-order bits have to go, and the snapping mechanism of Mironov (2012) removes them. It clamps the true answer into a range $[-B, B]$, adds Laplace noise computed in floating point, rounds to the nearest multiple of a power of 2 at least as large as the noise scale, and clamps again. The clamps keep rounding errors small next to the grid.
 
 ::: {#def-discrete-snapping name="The snapping mechanism"}
 Let $f$ have sensitivity 1 and let $b$ be the noise scale. Let $\Lambda$ be the smallest power of 2 with $\Lambda \ge b$, and let $[-B, B]$ be the clamping range. Write $\oplus$, $\otimes$ and $\mathrm{LN}$ for floating-point addition, multiplication and logarithm. Write $\lfloor\cdot\rceil_\Lambda$ for rounding to the nearest multiple of $\Lambda$, and $\mathrm{clamp}_B$ for the map onto $[-B, B]$. With a fair sign $\xi$ and an ideal uniform double $U^*$, the **snapping mechanism** outputs
@@ -68,11 +66,11 @@ $$\varepsilon = \frac{1 + 12B\omega}{b} + \frac{2^{-49}B}{b}, \qquad \omega = 2^
 
 The proof is Mironov's (2012, Theorem 1 and §5). Clamping the input keeps every sum where floats are at most about $B\omega$ apart. Rounding makes the output one of the multiples of $\Lambda$ in $[-B, B]$, the same set for every input, so @prp-discrete-support has nothing to bite on. In exact arithmetic, each grid point collects an interval of noise values. The two inputs give it the probabilities of two intervals shifted by at most 1, whose ratio is at most $e^{1/b}$, as post-processing of the Laplace mechanism ([Post-processing, group privacy and composition](02-properties.md)). Floating-point error moves each interval's endpoints by a relative amount of order $\omega$, which gives the extra terms.
 
-The price is accuracy. Rounding to $\Lambda$, which is below $2b$, adds up to $\Lambda/2 \le b$ of error, and clamping biases answers near $\pm B$. The extra terms in $\varepsilon$ are tiny, about $3.1\times10^{-14}$ with $b = 1$ and $B = 10$. The guarantee assumes a correctly behaved logarithm and an ideal uniform $U^*$, which a library has to supply.
+The price is accuracy. Rounding to $\Lambda$, which is below $2b$, adds up to $\Lambda/2 \le b$ of error, and clamping biases answers near $\pm B$. The extra terms in $\varepsilon$ are tiny, about $3.1\times10^{-14}$ with $b = 1$ and $B = 10$. The guarantee assumes a correct logarithm and an ideal uniform $U^*$, which the library must supply.
 
-The snapped toy is measured by the **privacy loss** of [the definition of differential privacy](01-definition.md), the log of the ratio of an output's probabilities under the two inputs:
+To check the snapped toy, use the **privacy loss** of [the definition of differential privacy](01-definition.md), the log of the ratio of an output's probabilities under the two inputs:
 $$L_{D,D'}(y) = \ln\frac{\Pr[M(D) = y]}{\Pr[M(D') = y]}.$$
-That chapter showed that for discrete outputs, pure $\varepsilon$-DP is the same as $|L_{D,D'}(y)| \le \varepsilon$ at every output $y$.
+For discrete outputs, pure $\varepsilon$-DP is the same as $|L_{D,D'}(y)| \le \varepsilon$ at every output $y$.
 
 ::: {#exm-discrete-snapped}
 Snap the toy sampler of the running example to integers, $\Lambda = 1$ for $b = 1$, and clamp to $[-10, 10]$. Both inputs now reach the same 21 outputs, the integers from $-10$ to 10, so $\Pr[M(D) \in S] = 0$ at every precision (@fig-discrete-float-support, right). The largest privacy loss over those outputs is 1.0010 at $p = 12$ and 1.0002 at $p = 14$, against $\varepsilon = 1$ for the exact mechanism, and the excess shrinks with precision as the $\omega$ terms predict, with $\omega = 2^{-p}$ in the toy.
@@ -80,9 +78,7 @@ Snap the toy sampler of the running example to integers, $\Lambda = 1$ for $b = 
 
 ## An exact coin with an exponential bias {#sec-discrete-bernoulli-exp}
 
-Both exact samplers below need a coin that comes up 1 with probability $e^{-\lambda}$ for a rational $\lambda \ge 0$. The obvious code, `random() < exp(-lam)`, is inexact twice over, because `exp` rounds and `random()` has only 53 bits. The exact samplers use one primitive instead, a uniform integer in $\{0, 1, \dots, d - 1\}$, which Python's `random.Random.randrange(d)` and `secrets.SystemRandom().randrange(d)` provide exactly, by drawing random bits and redrawing when the result is $d$ or more. Algorithm 1 of Canonne, Kamath and Steinke (2020), after von Neumann (1951), builds the $e^{-\lambda}$ coin from these integers.
-
-Its first step flips coins whose bias is a fraction, and the lemma says that such coins are exact.
+Both exact samplers below need a coin that comes up 1 with probability $e^{-\lambda}$ for a rational $\lambda \ge 0$. The obvious code, `random() < exp(-lam)`, is inexact twice over, because `exp` rounds and `random()` has only 53 bits. The exact samplers use one primitive instead, a uniform integer in $\{0, 1, \dots, d - 1\}$, which Python's `random.Random.randrange(d)` gives exactly. Algorithm 1 of Canonne, Kamath and Steinke (2020), after von Neumann (1951), builds the $e^{-\lambda}$ coin from these integers. Its first step flips coins whose bias is a fraction, and the lemma says that such coins are exact.
 
 ::: {#lem-discrete-coin name="An exact coin with rational bias"}
 For integers $0 \le m \le d$, let $W$ be uniform on $\{0, \dots, d - 1\}$. Then $\Pr[W < m] = m/d$, so the indicator $\mathbf 1[W < m]$, which is 1 when $W < m$ and 0 otherwise, is an exact $\mathrm{Bern}(m/d)$ draw.
@@ -114,12 +110,12 @@ Each flip uses one uniform integer, so a coin costs $e^\lambda \le e$ uniform dr
 5. *Large $\lambda$.* A product of probabilities is the probability that independent coins all come up 1, and $e^{-\lambda} = (e^{-1})^{\lfloor\lambda\rfloor}\,e^{-(\lambda - \lfloor\lambda\rfloor)}$, so the output is $\mathrm{Bern}(e^{-\lambda})$. Each coin has an exponent of at most 1, so steps 1 to 3 cover it. Stopping at the first 0 does not change the output, which is 0 as soon as one coin is 0.
 :::
 
-The coin is exact, because no step rounds and the only randomness is uniform integers. It costs at most $e$ draws for $\lambda \le 1$ and below $\frac{e}{1 - e^{-1}} + 1 \approx 5.3$ for any $\lambda$. The whole-unit coins stop at the first 0, so on average fewer than $1/(1 - e^{-1})$ of them are flipped, at most $e$ draws each, and the last coin, reached with probability at most $e^{-1}$, costs at most $e$. The cost jumps at each integer (@fig-discrete-bernoulli-exp), from $e = 2.7183$ just below 1 to $e + e^{-1} = 3.0862$ at 1, because there the final coin for the fractional part 0 still costs a draw.
+The coin is exact, because no step rounds and the only randomness is uniform integers. By step 4 it costs at most $e$ draws for $\lambda \le 1$. For larger $\lambda$ it costs below $\frac{e}{1 - e^{-1}} + 1 \approx 5.3$, because on average fewer than $1/(1 - e^{-1})$ whole-unit coins are flipped before the first 0, and the last coin is rarely reached (@fig-discrete-bernoulli-exp).
 
 ![Left: the distribution of $K$ for $\lambda = 0.7$, exact and from 5,000 runs, odd and even $K$ coloured. Right: the frequency of 1s against $e^{-\lambda}$, with the expected draws per coin.](figures/discrete_bernoulli_exp.svg){#fig-discrete-bernoulli-exp}
 
 ::: {#exm-discrete-coin}
-To see the parity trick outcome by outcome, take $\lambda = 0.7$ (@tbl-discrete-bern-k). Each row is the chance of surviving $k - 1$ flips minus the chance of surviving $k$, and the odd rows add up to $0.3000 + 0.1878 + 0.0086 + \cdots = 0.4966 = e^{-0.7}$. Over 10,000 runs the script sees $K = 1$ in a fraction 0.2987 of them, against 0.3000, and outputs 1 with frequency 0.4897.
+To see the parity trick outcome by outcome, take $\lambda = 0.7$ (@tbl-discrete-bern-k). Each row is the chance of surviving $k - 1$ flips minus the chance of surviving $k$, and the odd rows add up to $0.3000 + 0.1878 + 0.0086 + \cdots = 0.4966 = e^{-0.7}$.
 
 | $K$ | Coins seen | $\Pr[K = k]$ | Output |
 | --- | --- | --- | --- |
@@ -131,14 +127,12 @@ To see the parity trick outcome by outcome, take $\lambda = 0.7$ (@tbl-discrete-
 
 : Algorithm 1 for $\lambda = 0.7$, outcome by outcome. The output is the parity of the index of the first 0. {#tbl-discrete-bern-k}
 
-The running count's sampler in @sec-discrete-laplace needs only the coin with $\lambda = 1$. Over 10,000 draws it comes up 1 with frequency 0.3709, against $e^{-1} = 0.3679$, at 3.096 uniform draws each, against the expected 3.086.
+
 :::
 
 ## The discrete Laplace mechanism {#sec-discrete-laplace}
 
-Most queries in DP are counts or histograms, like the running example. For them the natural noise is integer-valued too, so that the output has no low-order bits to leak and the noise can be sampled exactly. This section defines the discrete Laplace distribution, proves that adding it, the **geometric mechanism** of Ghosh, Roughgarden and Sundararajan (2009), has the continuous guarantee, and samples it exactly.
-
-Keep the Laplace density $e^{-|z|/b}$ only at the integers, and divide by the sum of those values. Each step away from 0 then multiplies the probability by the same factor $r = e^{-1/b}$.
+Most queries in DP are counts or histograms, like the running example. For them the natural noise is integer-valued too, so the output has no low-order bits to leak and the noise can be sampled exactly. Keep the Laplace density $e^{-|z|/b}$ only at the integers, and divide by the sum of those values. Each step away from 0 then multiplies the probability by the same factor $r = e^{-1/b}$. The mechanism that adds this noise is the **geometric mechanism** of Ghosh, Roughgarden and Sundararajan (2009).
 
 ::: {#def-discrete-laplace name="The discrete Laplace distribution"}
 The **discrete Laplace** distribution with scale $b > 0$, written $\mathrm{Lap}_{\mathbb Z}(b)$, has the probability mass function (PMF)
@@ -241,19 +235,15 @@ To follow steps 3 and 4 by hand, take $t = 3$ and $s = 2$, so $b = 1.5$ (@tbl-di
 
 ![Left: the PMF of $\mathrm{Lap}_{\mathbb Z}(1.5)$ on a log scale, exact and from 10,000 draws of Algorithm 2. Right: the privacy loss between counts 0 and 1, bounded by $\varepsilon = 2/3$.](figures/discrete_laplace.svg){#fig-discrete-laplace}
 
-The discrete Laplace gives the continuous guarantee with slightly less noise. At $b = 1$ its variance is 1.8413 against 2, and the gap tends to $\frac16$ as $b$ grows. Rounding $f(D) + \mathrm{Lap}(b)$ to an integer would also be $\varepsilon$-DP, but it is a different distribution and needs a floating-point sampler.
-
-For a single count, the discrete Laplace is the best possible mechanism. Ghosh, Roughgarden and Sundararajan (2009) show that every user, whatever their loss and prior, can post-process its output to do as well as with any other $\varepsilon$-DP mechanism.
+The discrete Laplace gives the continuous guarantee with slightly less noise. At $b = 1$ its variance is 1.8413 against 2, and at $b = 10$ it is 199.8334 against 200, a gap of 0.1666, close to its limit $\frac16$. The rounded $f(D) + \mathrm{Lap}(b)$ would also be $\varepsilon$-DP, by post-processing, but it is a different distribution and needs a floating-point sampler. For a single count, the discrete Laplace is the best possible mechanism (Ghosh, Roughgarden and Sundararajan 2009). Every user, whatever their loss and prior, can post-process its output to do as well as with any other $\varepsilon$-DP mechanism.
 
 ::: {#exm-discrete-dlap-count}
-Release the running count at $\varepsilon = 1$, so $b = 1$ and $r = e^{-1} = 0.3679$. The exact count is released when the noise is 0, which happens with probability $\frac{1 - r}{1 + r} = \frac{0.6321}{1.3679} = 0.4621$. The noise has variance $\frac{2r}{(1 - r)^2} = 1.8413$, a standard deviation of 1.357. Algorithm 2 with $s = t = 1$ always accepts in step 1, so a pass is a run of $e^{-1}$ coins and a fair bit, and a sample takes 1.462 passes on average. The script's 10,000 draws have variance 1.8305 and cost 11.49 uniform draws each, and over the scales in @tbl-discrete-code the cost stays between 10 and 12.
+Release the running count at $\varepsilon = 1$, so $b = 1$ and $r = e^{-1} = 0.3679$. The exact count is released when the noise is 0, which happens with probability $\frac{1 - r}{1 + r} = \frac{0.6321}{1.3679} = 0.4621$. The noise has variance $\frac{2r}{(1 - r)^2} = 1.8413$, a standard deviation of 1.357. Algorithm 2 with $s = t = 1$ always accepts in step 1, so a pass is a run of $e^{-1}$ coins and a fair bit, and a sample takes 1.462 passes on average. Over the scales in @tbl-discrete-code a sample costs 10 to 12 uniform draws.
 :::
 
 ## The discrete Gaussian mechanism {#sec-discrete-gaussian}
 
-The Gaussian mechanism is the workhorse of private machine learning, because its noise grows with the $\ell_2$ sensitivity, far smaller than the $\ell_1$ sensitivity in high dimension. Its integer analogue (Canonne, Kamath & Steinke 2020) served the 2020 US Census (Abowd et al., 2022) and suits noise added before secure aggregation, which works with integers (Kairouz, Liu & Steinke, 2021). This section compares it with the continuous Gaussian of [the Laplace and Gaussian mechanisms](03-laplace-gaussian.md) in exact $\delta(\varepsilon)$, Rényi divergence and variance.
-
-As with the discrete Laplace, keep the bell curve at the integers and normalize.
+The Gaussian mechanism is the workhorse of private machine learning, because its noise grows with the $\ell_2$ sensitivity, far smaller than the $\ell_1$ sensitivity in high dimension. Its integer analogue (Canonne, Kamath & Steinke 2020) served the 2020 US Census (Abowd et al., 2022) and suits noise added before secure aggregation, which works with integers (Kairouz, Liu & Steinke, 2021). This section compares it with the continuous Gaussian of [the Laplace and Gaussian mechanisms](03-laplace-gaussian.md) in exact $\delta(\varepsilon)$, Rényi divergence and variance. As with the discrete Laplace, keep the bell curve at the integers and normalize.
 
 ::: {#def-discrete-gaussian name="The discrete Gaussian distribution"}
 The **discrete Gaussian** with parameter $\sigma > 0$ and integer location $\mu$, written $\mathcal N_{\mathbb Z}(\mu, \sigma^2)$, gives each integer $x$ the probability
@@ -303,7 +293,7 @@ $$\hat g(k) = \sqrt{2\pi}\,\sigma e^{-2\pi^2\sigma^2k^2}e^{-2\pi ikc}.$$
 3. *Where it is largest.* Every coefficient $e^{-2\pi^2\sigma^2k^2}$ is positive and $\cos \le 1$, with $\cos(2\pi kc) = 1$ for all $k$ exactly when $c$ is an integer. So the right side is largest at integer $c$, and there the left side is $\mathcal Z_\sigma$ by relabelling.
 :::
 
-So moving the centre off the integers can only lower the sum. At $\sigma = 0.5$ the script finds 1.271342 at $c = 0$ and 1.235287 at $c = 0.5$, while at $\sigma = 1$ both are 2.506628, $\sqrt{2\pi}$ to six decimals.
+So a move of the centre off the integers can only lower the sum. At $\sigma = 0.5$ the sum is 1.271342 at $c = 0$ and 1.235287 at $c = 0.5$, while at $\sigma = 1$ both are $\sqrt{2\pi}$ to six decimals.
 
 The second comparison is in Rényi divergence. For two distributions $P$ and $Q$ on the integers, the **Rényi divergence** of order $\alpha > 1$ is
 $$D_\alpha(P\|Q) = \frac{1}{\alpha - 1}\ln\sum_xP(x)^\alpha Q(x)^{1 - \alpha},$$
@@ -350,7 +340,7 @@ $$-\frac{\mathrm d}{\mathrm d\tau}\ln\mathcal Z = \frac{1}{2\tau} - \frac{\theta
 
 The deficit is invisible in practice. Its leading term comes from $k = \pm1$, so the relative deficit $1 - \operatorname{Var}(X)/\sigma^2$ is about $8\pi^2\sigma^2e^{-2\pi^2\sigma^2}$, which is $2.11\times10^{-7}$ at $\sigma = 1$. Only below $\sigma \approx 0.6$ does it show, as $\operatorname{Var}(X) = 0.8601\,\sigma^2$ at $\sigma = 0.5$ (@fig-discrete-gaussian-variance).
 
-One property does not carry over: the sum of two independent discrete Gaussians is not exactly a discrete Gaussian. For $\sigma \ge 1$ it is very close, and distributed noise addition, where each client adds a share, relies on that.
+One property does not carry over: the sum of two independent discrete Gaussians is not exactly a discrete Gaussian. Kairouz, Liu & Steinke (2021) show that for $\sigma \ge 1$ it is very close, and distributed noise addition, where each client adds a share, relies on that.
 
 ![Left: $\operatorname{Var}(X)/\sigma^2$ for $X \sim \mathcal N_{\mathbb Z}(0, \sigma^2)$, by direct summation and from @eq-discrete-dgauss-var. Right: the relative deficit $1 - \operatorname{Var}(X)/\sigma^2$ on a log scale, with its leading term.](figures/discrete_gaussian_variance.svg){#fig-discrete-gaussian-variance}
 
@@ -404,17 +394,17 @@ To follow the algorithm by hand, take $\sigma^2 = 4$, so $t = 3$ and $\frac{1 - 
 
 ![Algorithm 3 for $\sigma^2 = 4$. Left: the discrete Laplace proposal with $t = 3$ and its accepted part, $A$ times the discrete Gaussian PMF. Right: 10,000 draws against the exact PMF on a log scale.](figures/discrete_gaussian_sampler.svg){#fig-discrete-gaussian-sampler}
 
-The sampler is exact and cheap. The acceptance rate runs from 0.5185 at $\sigma^2 = \frac14$ to 0.7532 at $\sigma^2 = 100$, so a draw takes fewer than two proposals and 15 to 27 uniform integers (@tbl-discrete-code). The choice of $t$ affects only the cost, because step 1 of the proof works for every integer $t \ge 1$. For large $\sigma$, $\frac{1 - r}{1 + r} \approx \frac{1}{2t}$ and $\mathcal Z_\sigma \approx \sqrt{2\pi}\sigma$, so $A$ is about $\frac{\sqrt{2\pi}\sigma}{2t}e^{-\sigma^2/(2t^2)}$. The derivative of its logarithm in $t$ is $-\frac1t + \frac{\sigma^2}{t^3}$, which vanishes at $t = \sigma$, and $\lfloor\sigma\rfloor + 1$ is an integer next to it.
+The sampler is exact and cheap. The acceptance rate runs from 0.5185 at $\sigma^2 = \frac14$ to 0.7532 at $\sigma^2 = 100$, so a draw takes fewer than two proposals and 15 to 27 uniform integers (@tbl-discrete-code). The choice of $t$ affects only the cost, because step 1 of the proof works for every integer $t \ge 1$. For large $\sigma$, $A$ is about $\frac{\sqrt{2\pi}\sigma}{2t}e^{-\sigma^2/(2t^2)}$, which is largest at $t = \sigma$, and $\lfloor\sigma\rfloor + 1$ is an integer next to it.
 
 Exactness is not timing safety. The number of rounds depends on the output, so the running time leaks information about the noise, and Jin et al. (2022) show that such leaks are exploitable. A deployment pads the running time or runs a fixed number of rounds.
 
 ::: {#exm-discrete-dgauss-sampler}
-Release the running count with $\mathcal N_{\mathbb Z}(0, 1)$ noise, as in @exm-discrete-dgauss-count. The proposal scale is $t = 2$ and the acceptance rate 0.5418, so a draw takes 1.85 proposals on average, and the script's 10,000 draws have variance 0.9977 and cost 24.8 uniform integers each. For a histogram of 1,000 such counts, where one record changes one bin by 1, add $\mathcal N_{\mathbb Z}(0, 100)$ to each bin. The 999 unchanged bins add nothing to the privacy loss, so @eq-discrete-dgauss-delta with $\Delta = 1$ and $\sigma = 10$ gives the release's $\delta(\varepsilon)$. At 15.6 uniform integers per bin, the histogram needs about 15,600 of them and no floating-point operation.
+Release the running count with $\mathcal N_{\mathbb Z}(0, 1)$ noise, as in @exm-discrete-dgauss-count. The proposal scale is $t = 2$ and the acceptance rate 0.5418, so a draw takes 1.85 proposals and 24.8 uniform integers on average. For a histogram of 1,000 such counts, where one record changes one bin by 1, add $\mathcal N_{\mathbb Z}(0, 100)$ to each bin. The 999 unchanged bins add nothing to the privacy loss, so @eq-discrete-dgauss-delta with $\Delta = 1$ and $\sigma = 10$ gives the release's $\delta(\varepsilon)$. At 15.6 uniform integers per bin, the histogram needs about 15,600 of them and no floating-point operation.
 :::
 
 ## Code {#sec-discrete-code}
 
-The script [code/discrete_mechanisms.py](../../code/part03-dp-foundations/discrete_mechanisms.py) implements Algorithms 1 to 3 with `fractions.Fraction` and integers, drawing uniform integers from a seeded `random.Random`. It also enumerates the toy floating-point sampler exactly and computes the discrete Gaussian's quantities by summation. Each sampler is compared with its exact distribution by the total variation (TV) distance, half the sum of the absolute differences between exact probabilities and observed frequencies. The "noise floor" is that distance for 10,000 draws from the exact PMF drawn with NumPy. From the repository root:
+The script [code/discrete_mechanisms.py](../../code/part03-dp-foundations/discrete_mechanisms.py) implements Algorithms 1 to 3 with `fractions.Fraction` and integers from a seeded `random.Random`. It enumerates the toy floating-point sampler exactly and computes the discrete Gaussian's quantities by summation. It compares each sampler with its exact distribution by the total variation (TV) distance, half the sum of the absolute differences between exact probabilities and observed frequencies. The "noise floor" is that distance for 10,000 NumPy draws from the exact PMF. From the repository root:
 
 ```bash
 uv run python code/part03-dp-foundations/discrete_mechanisms.py
@@ -457,10 +447,10 @@ uv run python code/part03-dp-foundations/discrete_mechanisms.py
 ## References {#sec-discrete-references}
 
 - Mironov, "On Significance of the Least Significant Bits for Differential Privacy" (CCS 2012). The floating-point attack on the textbook Laplace sampler, the snapping mechanism and its proof (Theorem 1 and §5).
-- Canonne, Kamath & Steinke, "The Discrete Gaussian for Differential Privacy" (NeurIPS 2020; journal version in the Journal of Privacy and Confidentiality, 2022). Algorithms 1–3, the exact $\delta(\varepsilon)$ (Theorem 7), the Rényi and concentrated-DP guarantee (Theorem 4), the variance and tail bounds via Poisson summation. Read §5 alongside the code here.
+- Canonne, Kamath & Steinke, "The Discrete Gaussian for Differential Privacy" (NeurIPS 2020; Journal of Privacy and Confidentiality, 2022). Algorithms 1–3, the exact $\delta(\varepsilon)$ (Theorem 7), the Rényi and concentrated-DP guarantee (Theorem 4), and the variance via Poisson summation.
 - Ghosh, Roughgarden & Sundararajan, "Universally Utility-Maximizing Privacy Mechanisms" (STOC 2009; SIAM Journal on Computing, 2012). The geometric mechanism and its optimality for a single count.
 - von Neumann, "Various Techniques Used in Connection with Random Digits" (1951). The original trick behind Algorithm 1: exponential probabilities from comparisons of uniform variables.
-- Jin, McMurtry, Rubinstein & Ohrimenko, "Are We There Yet? Timing and Floating-Point Attacks on Differential Privacy Systems" (IEEE S&P 2022). Floating-point and timing attacks on DP libraries released after Mironov's paper, including attacks on samplers whose running time depends on the output.
+- Jin, McMurtry, Rubinstein & Ohrimenko, "Are We There Yet? Timing and Floating-Point Attacks on Differential Privacy Systems" (IEEE S&P 2022). Floating-point and timing attacks on DP libraries released after Mironov's paper.
 - Kairouz, Liu & Steinke, "The Distributed Discrete Gaussian Mechanism for Federated Learning with Secure Aggregation" (ICML 2021). The discrete Gaussian when each client adds its own noise, and how close sums of discrete Gaussians are to a discrete Gaussian.
 - Abowd et al., "The 2020 Census Disclosure Avoidance System TopDown Algorithm" (Harvard Data Science Review, 2022). The largest deployment of the discrete Gaussian.
 - Stein & Shakarchi, *Fourier Analysis: An Introduction* (2003), ch. 5. The Poisson summation formula and the theta function behind @eq-discrete-poisson-theta.

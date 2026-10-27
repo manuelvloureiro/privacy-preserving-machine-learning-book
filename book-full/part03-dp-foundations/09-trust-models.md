@@ -2,9 +2,9 @@
 
 Every mechanism so far in this part assumed a **trusted curator**, who holds the raw data, runs the mechanism and releases only its output. The guarantee of differential privacy (DP) is about that output. It says nothing about the curator's database, the engineer who can read it or the court order that can demand it. As [Threat models](../part02-attacks/01-threat-models.md) put it, trust decides who the adversary is. A browser vendor collecting usage statistics is exactly the party its users do not want to see their data.
 
-This chapter asks how much accuracy each weaker trust assumption costs, and what you trust instead. There are four answers (@fig-trust-models). In the **central** model the curator is trusted, and the noise is added once, to the answer. In the **local** model nobody is trusted, and each person randomizes their own record before it leaves their device. In the **shuffle** model a shuffler is trusted only to unlink reports from senders. In the **distributed** model cryptography is trusted, and each person adds a share of the noise to a sum that a protocol reveals only in total.
+How much accuracy does each weaker trust assumption cost, and what do you trust instead? There are four answers (@fig-trust-models). In the **central** model the curator is trusted, and the noise is added once, to the answer. In the **local** model nobody is trusted, and each person randomizes their own record before it leaves their device. In the **shuffle** model a shuffler is trusted only to unlink reports from senders. In the **distributed** model cryptography is trusted, and each person adds a share of the noise to a sum that a protocol reveals only in total.
 
-What separates the models is where the noise enters. The further upstream it enters, the fewer parties you trust and the more noise reaches the answer, because $n$ independent noises of one size add up to about $\sqrt n$ times that size. The running example is the telemetry of an app, starting with one yes/no question put to $n = 10{,}000$ users, of whom 3,000 hold a 1. At $\varepsilon = \ln 3$, a trusted curator answers with standard deviation 1.287 on the count, while randomized response on every device has 86.6. The chapter proves that no local protocol avoids that factor of 67.3, and shows how shuffling and distributed noise win the accuracy back.
+The models differ in where the noise enters. The further upstream it enters, the fewer parties you trust and the more noise reaches the answer. That is because $n$ independent noises of one size add up to about $\sqrt n$ times that size. The running example is the telemetry of an app, starting with one yes/no question put to $n = 10{,}000$ users, of whom 3,000 hold a 1. At $\varepsilon = \ln 3$, a trusted curator answers with standard deviation 1.287 on the count, while randomized response on every device has 86.6. The chapter proves that no local protocol avoids that factor of 67.3, and shows how shuffling and distributed noise win the accuracy back.
 
 | Symbol | Meaning |
 | --- | --- |
@@ -21,7 +21,7 @@ What separates the models is where the noise enters. The further upstream it ent
 
 ## Central and local differential privacy {#sec-trust-local}
 
-In the **local model** there is no curator, and each person sends only a randomized version of their own record. This section asks what such a randomizer promises, to whom, and what it costs on the simplest task, counting one bit.
+In the **local model** there is no curator, and each person sends only a randomized version of their own record. What does such a randomizer promise, to whom, and what does it cost on the simplest task, a count of one bit?
 
 A report must look about the same whatever its owner's record is, because whoever receives it may know whose it is. So the requirement is the DP definition applied to a dataset of one record. In every model of this chapter, $D \sim D'$ means that the datasets differ by **replacing** one record. Each report arrives from a known device, so whether a person took part is visible anyway, and only their value can be hidden.
 
@@ -31,7 +31,7 @@ $$\Pr[R(x) \in S] \le e^{\varepsilon_0}\Pr[R(x') \in S].$$ {#eq-trust-ldp}
 Write $p_R(y \mid x)$ for the probability that $R$ reports $y$ on $x$. The **local protocol** releases $(R(x_1), \dots, R(x_n))$, with independent randomness for each person.
 :::
 
-Replacing one record changes only one report, so the transcript should be exactly as private as one report.
+A replaced record changes only one report, so the transcript should be exactly as private as one report.
 
 ::: {#prp-trust-protocol name="What a local protocol promises"}
 If $R$ is an $\varepsilon_0$-DP local randomizer, the transcript of the local protocol is $\varepsilon_0$-DP under replace neighbours, and each report is $\varepsilon_0$-DP against anyone who sees it, including its collector.
@@ -54,7 +54,7 @@ So a breach of the collector, an insider or a subpoena reveals only reports that
 
 : The four trust models and the order of the error of a count. {#tbl-trust-who}
 
-Every local estimator in this chapter is built the same way. A randomizer shrinks the signal, so the mean of a report moves less than the true value does, and the next lemma undoes the shrinking and says what that costs.
+A randomizer shrinks the signal: the mean of a report moves less than the true value does. Every local estimator in this chapter undoes the shrinking with the next lemma, which also says what that costs.
 
 ::: {#lem-trust-debias name="Debiasing a linear randomizer"}
 Suppose a report $Y$ has mean $\mathbb E[Y] = c_0 + c_1\vartheta$ for an unknown quantity $\vartheta$, a known offset $c_0$ and a known slope $c_1 \ne 0$. Then
@@ -64,7 +64,7 @@ is unbiased for $\vartheta$, with $\operatorname{Var}(\hat\vartheta) = \operator
 
 ::: {.proof}
 1. Linearity of expectation gives $\mathbb E[\hat\vartheta] = (c_0 + c_1\vartheta - c_0)/c_1 = \vartheta$.
-2. Subtracting a constant leaves a variance unchanged, and scaling by $1/c_1$ multiplies it by $1/c_1^2$.
+2. A constant subtracted leaves a variance unchanged, and a scale by $1/c_1$ multiplies it by $1/c_1^2$.
 :::
 
 A strongly private randomizer has a small slope, so the estimator multiplies the noise variance by a large $1/c_1^2$. That is where the cost of local privacy comes from. The variances below also use the fact from [Distributions](../part01-prerequisites/01-distributions.md#sec-dist-moments) that variances of independent reports add. A 0/1 report has variance equal to its probability of a 1 times its probability of a 0.
@@ -85,14 +85,14 @@ $$\operatorname{sd}(\hat\pi) = \frac{e^{\varepsilon_0/2}}{(e^{\varepsilon_0} - 1
 :::
 
 ::: {#exm-trust-survey}
-Of the app's $n = 10{,}000$ users, 3,000 hold a 1, and each uses randomized response at $\varepsilon_0 = \ln 3$, so $t = 0.75$. There $e^{\varepsilon_0}/(e^{\varepsilon_0} - 1)^2 = 3/4$, so @eq-trust-rr-sd gives a standard deviation of $\sqrt{0.75/10{,}000} = 0.00866$, and 20,000 simulated surveys give a mean of 0.3000 and a standard deviation of 0.00861. On the count, that is $10{,}000 \times 0.00866 = 86.6$ people.
+Of the app's $n = 10{,}000$ users, 3,000 hold a 1, and each uses randomized response at $\varepsilon_0 = \ln 3$, so $t = 0.75$. There $e^{\varepsilon_0}/(e^{\varepsilon_0} - 1)^2 = 3/4$, so @eq-trust-rr-sd gives a standard deviation of $\sqrt{0.75/10{,}000} = 0.00866$. On the count, that is $10{,}000 \times 0.00866 = 86.6$ people.
 
 A trusted curator would add Laplace noise to the count instead. One person moves the count by at most 1, so by @thm-lg-laplace the noise at the same level $\varepsilon = \ln 3 = 1.0986$ has standard deviation $\sqrt2/\varepsilon = 1.287$. The local survey is $86.6/1.287 = 67.3$ times noisier.
 :::
 
 ## The price of local privacy {#sec-trust-gap}
 
-Is the factor 67 a weakness of randomized response, or of the local model? This section shows that it is the model. No local protocol estimates a fraction with error below order $1/((e^{\varepsilon_0} - 1)\sqrt n)$, while the central Laplace mechanism reaches order $1/(n\varepsilon)$. The shuffle and distributed models exist to escape this gap.
+Is the factor 67 a weakness of randomized response, or of the local model? It is the model. No local protocol estimates a fraction with error below order $1/((e^{\varepsilon_0} - 1)\sqrt n)$, while the central Laplace mechanism reaches order $1/(n\varepsilon)$. The shuffle and distributed models exist to escape this gap.
 
 The proof measures what the reports reveal with the **Kullback–Leibler (KL) divergence** of [Divergences](../part01-prerequisites/03-divergences.md#sec-div-kl), $D_{\mathrm{KL}}(Q_0\|Q_1) = \sum_y q_0(y)\ln\frac{q_0(y)}{q_1(y)}$, which adds over independent observations. The proof compares two populations by their **total variation (TV) distance** $\mathrm{TV}(P_0, P_1) = \frac12\sum_x|P_0(x) - P_1(x)|$. The key step is that a randomizer changes each report's probability by at most a factor $e^{\varepsilon_0}$, so the reports of two populations differ only a little, however different the populations are.
 
@@ -140,10 +140,10 @@ $$\mathrm{TV}(Q_0^n, Q_1^n) \le a(e^{\varepsilon_0} - 1)\sqrt{n/2}.$$
 3. *Turn information into error.* @lem-trust-test forces this TV to be at least $1 - 2\beta$, so $a \ge (1 - 2\beta)\sqrt2/((e^{\varepsilon_0} - 1)\sqrt n)$, and halving gives @eq-trust-lower.
 :::
 
-Randomized response is optimal up to a constant, since dividing @eq-trust-rr-sd by @eq-trust-lower leaves $\sqrt2\,e^{\varepsilon_0/2}/(1 - 2\beta)$. The contraction is loose by a constant. For one report at $\varepsilon_0 = 1$, comparing $\mathrm{Bern}(0.5)$ with $\mathrm{Bern}(0.6)$, the exact KL is 0.00429 and @eq-trust-kl-contraction gives 0.02952. Duchi, Jordan & Wainwright (2018) apply the contraction to many local problems. Bounds of the same order hold even when each randomizer may depend on earlier reports.
+Randomized response is optimal up to a constant, because @eq-trust-rr-sd divided by @eq-trust-lower leaves $\sqrt2\,e^{\varepsilon_0/2}/(1 - 2\beta)$. Duchi, Jordan & Wainwright (2018) prove bounds of the same order even when each randomizer may depend on earlier reports.
 
 ::: {#exm-trust-gap}
-At $\varepsilon = 1$ and $n = 1{,}000$ (@fig-trust-rr-gap), randomized response has standard deviation $3.03\times10^{-2}$ and the lower bound at $\beta = 0.1$ is $1.04\times10^{-2}$. Their ratio 2.91 is the constant $\sqrt2\,e^{1/2}/(1 - 2\beta) = 1.4142 \times 1.6487/0.8$. The central Laplace mechanism gives $\sqrt2/1000 = 1.41\times10^{-3}$, 21 times less. That ratio, $e^{1/2}/((e - 1)\sqrt n)$ divided by $\sqrt2/n$, is $0.678\sqrt n$, so it is 215 at $n = 100{,}000$ and 2146 at $n = 10^7$. For a standard deviation of 0.001, randomized response needs 920,674 people and the central mechanism 1,415. So local DP suits only the frequent items of very large populations.
+At $\varepsilon = 1$ and $n = 1{,}000$ (@fig-trust-rr-gap), randomized response has standard deviation $3.03\times10^{-2}$ and the lower bound at $\beta = 0.1$ is $1.04\times10^{-2}$. Their ratio 2.91 is the constant $\sqrt2\,e^{1/2}/(1 - 2\beta) = 1.4142 \times 1.6487/0.8$. The central Laplace mechanism gives $\sqrt2/1000 = 1.41\times10^{-3}$, 21 times less. That ratio, $e^{1/2}/((e - 1)\sqrt n)$ divided by $\sqrt2/n$, is $0.678\sqrt n$, so it grows to 2146 at $n = 10^7$. For a standard deviation of 0.001, randomized response needs 920,674 people and the central mechanism 1,415. So local DP suits only the frequent items of very large populations.
 :::
 
 ![Standard deviation of an estimated fraction at $\varepsilon = 1$. Randomized response (line, simulated dots) falls like $1/\sqrt n$, a constant above the local lower bound; the central Laplace mechanism falls like $1/n$.](figures/trust_rr_gap.svg){#fig-trust-rr-gap}
@@ -183,7 +183,7 @@ The plan is to check both privacy levels, then put each scheme's $p$ and $q$ int
 4. *Crossover.* The two variances share a denominator, so compare $e^{\varepsilon_0} + k - 2$ with $4e^{\varepsilon_0}$.
 :::
 
-$k$-ary randomized response reports the truth with probability about $e^{\varepsilon_0}/k$, so its variance grows linearly in $k$ (@fig-trust-frequency-oracles). Unary encoding pays $\varepsilon_0$ once for two bits, so its variance does not depend on $k$, at the price of a $k$-bit report. The optimized choice rarely invents a 1, which matters because almost all bits are 0. Every entry of @tbl-trust-oracles is still divided by $n$, so the gap of @thm-trust-lower remains.
+For large $k$, $k$-ary randomized response reports the truth with probability about $e^{\varepsilon_0}/k$, so its variance grows linearly in $k$ (@fig-trust-frequency-oracles). Unary encoding pays $\varepsilon_0$ once for two bits, so its variance does not depend on $k$, at the price of a $k$-bit report. Almost all bits are 0, so the false 1s they produce, with probability $q$, set the noise floor. The optimized choice lowers $q$ to $1/(e^{\varepsilon_0} + 1)$, against $1/(e^{\varepsilon_0/2} + 1)$ for the symmetric one, and at $\varepsilon_0 = 1$ its scaled variance is 3.683 against 3.918. Every entry of @tbl-trust-oracles is still divided by $n$, so the gap of @thm-trust-lower remains.
 
 | $k$ | $k$-ary randomized response | Symmetric unary | Optimized unary |
 | --- | --- | --- | --- |
@@ -197,12 +197,12 @@ $k$-ary randomized response reports the truth with probability about $e^{\vareps
 ![$n$ times the rare-value variance against $k$, at $\varepsilon_0 = 1$ and 3. The dotted line is the crossover $k = 3e^{\varepsilon_0} + 2$.](figures/trust_frequency_oracles.svg){#fig-trust-frequency-oracles}
 
 ::: {#exm-trust-emoji}
-The app's keyboard wants the frequency of each of $k = 128$ emoji at $\varepsilon_0 = 1$ from $n = 10^6$ users. $k$-ary randomized response gives a rare emoji a standard deviation of $\sqrt{43.596/10^6} = 0.0066$, and optimized unary encoding gives $\sqrt{3.683/10^6} = 0.0019$. An estimate must stand about three standard deviations above 0, so even with optimized unary encoding, emoji used by fewer than about 0.6% of users are lost. With $k = 8$, below the crossover, $k$-ary randomized response is better, at $\sqrt{2.953/10^6} = 0.0017$.
+The app's keyboard wants the frequency of each of $k = 128$ emoji at $\varepsilon_0 = 1$ from $n = 10^6$ users. $k$-ary randomized response gives a rare emoji a standard deviation of $\sqrt{43.596/10^6} = 0.0066$. Optimized unary encoding gives $\sqrt{3.683/10^6} = 0.0019$. An estimate must stand about three standard deviations above 0, so even with optimized unary encoding, emoji used by fewer than about 0.6% of users are lost. With $k = 8$, below the crossover, $k$-ary randomized response is better, at $\sqrt{2.953/10^6} = 0.0017$.
 :::
 
 ## Large and unknown domains {#sec-trust-heavy}
 
-A unary report carries one bit per possible value, which is absurd for all web addresses. And an oracle answers only for values the analyst names in advance, while a keyboard app wants words nobody listed. This section removes both limits. Hashing makes reports short, and growing prefixes finds the frequent values without a dictionary, the **heavy hitters** problem.
+A unary report carries one bit per possible value, which is absurd for all web addresses. And an oracle answers only for values the analyst names in advance, while a keyboard app wants words nobody listed. Hashing makes reports short, and growing prefixes find the frequent values without a dictionary, the **heavy hitters** problem.
 
 In **local hashing** each person draws a hash function $h$ from a public family that maps the domain to $w$ buckets, so that two values collide with probability $1/w$. They send the index of $h$ and a $w$-ary randomized response of $h(x)$, with the $p$ and $q$ of @prp-trust-schemes at $w$ in place of $k$. A report supports $v$ if its bucket equals $h(v)$.
 
@@ -222,7 +222,7 @@ The plan is to undo two shrinkings with @lem-trust-debias, the randomized respon
 5. *The best width.* With $u = w - 1$, the part that depends on $w$ is $e^{2\varepsilon_0}/u + 2e^{\varepsilon_0} + u$. Two positive terms with a fixed product have the smallest sum when equal, at $u = e^{\varepsilon_0}$.
 :::
 
-Too few buckets waste the signal on collisions, and too many spread it thin (@fig-trust-local-hashing). At $\varepsilon_0 = 4$, with $w = 56$, a report needs about 6 bits. The price is the server's work, which Hadamard response (Acharya, Sun & Zhang 2019) makes fast at a constant factor in variance.
+Too few buckets waste the signal on collisions, and too many spread it thin (@fig-trust-local-hashing). At $\varepsilon_0 = 4$, with $w = 56$, a report needs about 6 bits.
 
 ![$n$ times the rare-value variance of local hashing against $w$, at $\varepsilon_0 = 1$ and 4. Dots mark $w = e^{\varepsilon_0} + 1$; dotted lines are optimized unary encoding.](figures/trust_local_hashing.svg){#fig-trust-local-hashing}
 
@@ -276,12 +276,12 @@ Both errors are of order $m/(\varepsilon_0\sqrt n)$, against $m/(\varepsilon_0n)
 The bound $m$ must be fixed before collection, because every randomizer uses it. A device whose value exceeds $m$ clips it, which biases the mean down, so a bound set too low trades noise for bias.
 
 ::: {#exm-trust-minutes}
-A million users spend between 0 and $m = 1{,}440$ minutes a day in the app, with a mean of 82.74. At $\varepsilon_0 = 1$ the one-bit estimate has standard deviation 1.420 minutes, within the bound 1.558 of @eq-trust-onebit-sd. In 200 simulated collections the estimates average 82.61, with standard deviation 1.415. Laplace reports would give 2.036 minutes, at about 11 bits each.
+A million users spend between 0 and $m = 1{,}440$ minutes a day in the app, with a mean of 82.74. At $\varepsilon_0 = 1$ the one-bit estimate has standard deviation 1.420 minutes, within the bound 1.558 of @eq-trust-onebit-sd. Laplace reports would give 2.036 minutes, at about 11 bits each.
 :::
 
 ## Collecting every day {#sec-trust-repeated}
 
-Telemetry asks the same question every day, and basic composition ([Post-processing, group privacy and composition](02-properties.md#sec-dpprop-comp)) prices $T$ reports of one record at $T\varepsilon_0$. This section shows that the price is real, then gives the two fixes deployments use, **memoization** and **α-point rounding**.
+Telemetry asks the same question every day, and basic composition ([Post-processing, group privacy and composition](02-properties.md#sec-dpprop-comp)) prices $T$ reports of one record at $T\varepsilon_0$. The price is real, and deployments use two fixes, **memoization** and **α-point rounding**.
 
 ::: {#prp-trust-fresh name="Fresh reports leak"}
 Suppose a person reports the same bit every day by randomized response at level $\varepsilon_0$, with fresh randomness. After $T$ days with $k$ ones, the likelihood ratio between bit 1 and bit 0 is $e^{\varepsilon_0(2k - T)}$, and the majority of the reports is wrong with a probability that falls exponentially in $T$.
@@ -333,14 +333,14 @@ So the collector learns nothing about people whose kept bits agree, and about th
 ::: {#exm-trust-month}
 Fresh reports at $\varepsilon_0 = \ln 3$ leak fast. After 100 days with 75 ones the likelihood ratio is $3^{50}$, about $7.18\times10^{23}$, while a memoized report leaves the majority wrong with probability $1 - t = 0.25$ (@fig-trust-repeated).
 
-For the app's minutes, with $m = 1{,}440$ and $\varepsilon_0 = 1$, the kept bits agree with probability $2e/(e + 1)^2 = 0.3932$. Let each person's minutes wobble by up to 15 either side of their level for 30 days. By item 3, the fraction whose report ever changes is $(1 - 0.3932)$ times the expected range of their values over $m$, which is 0.0118. A simulation of 100,000 people gives 0.0119, against 1.0000 with fresh one-bit reports. On one freshly simulated day the α-point estimate is 82.17 minutes against that day's true mean of 82.68, within the standard deviation of 1.42. With $\kappa = 0.2$, each change costs $\ln(0.8/0.2) = 1.386$.
+For the app's minutes, with $m = 1{,}440$ and $\varepsilon_0 = 1$, the kept bits agree with probability $2e/(e + 1)^2 = 0.3932$. Let each person's minutes wobble by up to 15 either side of their level for 30 days. By item 3, the fraction whose report ever changes is $(1 - 0.3932)$ times the expected range of their values over $m$, which is 0.0118, against 1 with fresh one-bit reports every day. With $\kappa = 0.2$, each change costs $\ln(0.8/0.2) = 1.386$.
 :::
 
 ![Left: how often the majority of $T$ daily reports is wrong, fresh or memoized. Right: the fraction of reports that ever change in 30 days, α-point or fresh.](figures/trust_repeated.svg){#fig-trust-repeated}
 
 ## The shuffle model {#sec-trust-shuffle}
 
-The local model loses $\sqrt n$ because the analyst knows whose report is whose. In the **shuffle model** (Bittau et al. 2017; Cheu et al. 2019) each person sends a randomized report to a **shuffler**, which strips identifiers and forwards a random permutation. The shuffler is trusted only to unlink, since the reports it sees are $\varepsilon_0$-DP. This section asks how far the central $\varepsilon$ then falls.
+The local model loses $\sqrt n$ because the analyst knows whose report is whose. In the **shuffle model** (Bittau et al. 2017; Cheu et al. 2019) each person sends a randomized report to a **shuffler**, which strips identifiers and forwards a random permutation. The shuffler is trusted only to unlink, since the reports it sees are $\varepsilon_0$-DP. How far does the central $\varepsilon$ then fall?
 
 Call the person whose privacy is at stake the target. The more reports the target's report is mixed with, the less the multiset reveals. The bound to compute with is Theorem 3.1 of Feldman, McMillan & Talwar (2021), in this book's notation and for replace neighbours. Its randomizers may depend on earlier outputs, which covers adaptive protocols.
 
@@ -367,12 +367,12 @@ So with probability $e^{-\varepsilon_0}$ each other person sends a **clone**, a 
 ::: {#exm-trust-clones}
 For 4-ary randomized response at $\varepsilon_0 = \ln 3$ (@fig-trust-clones), $p = \frac12$ and $q = \frac16$. Take a target with $x^0 = 1$ or $x^1 = 2$. Another person with value 3 reports $(\frac16, \frac16, \frac12, \frac16)$, the clone part is $\frac16\big(R(1) + R(2)\big) = (0.1111, 0.1111, 0.0556, 0.0556)$, and the leftover has mass $0.6667 = 1 - e^{-\varepsilon_0}$.
 
-For central $(1, 10^{-6})$, bisection on @eq-trust-fmt allows each user $\varepsilon_0 = 3.504$ at $n = 10^4$, $5.701$ at $10^5$ and $7.992$ at $10^6$. At 7.992, 8-ary randomized response keeps the truth with probability 0.998. For adding up bits as in Cheu et al. (2019), only about 676 of a million people then send a random bit, since binary randomized response at that level sends one with probability $2/(e^{\varepsilon_0} + 1)$, and the count has standard deviation 18.4, against 960 for local randomized response at $\varepsilon_0 = 1$.
+For central $(1, 10^{-6})$, bisection on @eq-trust-fmt allows each user $\varepsilon_0 = 3.504$ at $n = 10^4$, $5.701$ at $10^5$ and $7.992$ at $10^6$. At 7.992, 8-ary randomized response keeps the truth with probability 0.998. To add up bits as in Cheu et al. (2019), binary randomized response at that level sends a random bit with probability $2/(e^{\varepsilon_0} + 1)$. So only about 676 of a million people send one, and the count has standard deviation 18.4, against 960 for local randomized response at $\varepsilon_0 = 1$.
 :::
 
 ![The report distribution of value 3 under 4-ary randomized response at $\varepsilon_0 = \ln 3$, split into clones of value 1 (blue) and value 2 (orange) and a leftover (grey).](figures/trust_clones.svg){#fig-trust-clones}
 
-The factor before the bracket of @eq-trust-fmt is $\tanh(\varepsilon_0/2)$. For large $n$ the $1/n$ term is negligible and $\ln(1 + u) \approx u$, so the bound is about $8\tanh(\varepsilon_0/2)\sqrt{e^{\varepsilon_0}\ln(4/\delta)/n}$ (@fig-trust-shuffle-bound). So a target $\varepsilon$ allows $e^{\varepsilon_0}$ of order $\varepsilon^2n/\ln(1/\delta)$, and binary randomized response at that level has error about $1/\sqrt{ne^{\varepsilon_0}} = \sqrt{\ln(1/\delta)}/(\varepsilon n)$ on a fraction. Times $n$, that is the shuffle row of @tbl-trust-who. The constants are loose (@tbl-trust-shuffle). The numeric column computes the paper's clone-count comparison exactly, and the exact column is shuffled binary randomized response, below which no general bound can go. Reason with the closed form, but deploy with a numerical accountant.
+The factor before the bracket of @eq-trust-fmt is $\tanh(\varepsilon_0/2)$. For large $n$ the $1/n$ term is negligible and $\ln(1 + u) \approx u$, so the bound is about $8\tanh(\varepsilon_0/2)\sqrt{e^{\varepsilon_0}\ln(4/\delta)/n}$ (@fig-trust-shuffle-bound). So a target $\varepsilon$ allows $e^{\varepsilon_0}$ of order $\varepsilon^2n/\ln(1/\delta)$, and binary randomized response at that level has error about $1/\sqrt{ne^{\varepsilon_0}} = \sqrt{\ln(1/\delta)}/(\varepsilon n)$ on a fraction. Times $n$, that is the shuffle row of @tbl-trust-who. The constants are loose (@tbl-trust-shuffle). The numeric column computes the paper's clone-count comparison exactly, and the exact column is shuffled binary randomized response, below which no general bound can go. So use the closed form to reason, and a numerical accountant to deploy.
 
 | $\varepsilon_0$ | Closed form, @eq-trust-fmt | Numeric (Theorem 3.2) | Exact, shuffled binary randomized response |
 | --- | --- | --- | --- |
@@ -408,7 +408,7 @@ Secure aggregation adds integers modulo a large number, because only on a finite
 Distributed noise gives central Gaussian accuracy without a curator, as long as enough clients are honest (@fig-trust-collusion). If at most a fraction $\rho$ may collude or drop out, each client adds variance $\sigma^2/(n(1 - \rho))$, so the honest ones alone supply $\sigma^2$. Malicious inputs are another problem, since secure aggregation does not check them.
 
 ::: {#exm-trust-clients}
-A server aggregates the app's histogram through 100 clients at $(\varepsilon, \delta) = (1, 10^{-6})$. A user who changes value moves one count down and another up, so $\Delta_2 f = \sqrt2$. The analytic calibration of @cor-lg-calibration gives total noise $\sigma = 5.975$, so each client adds standard deviation $5.975/\sqrt{100} = 0.597$. With 80%, 50% or 10% of the clients honest, $\varepsilon$ rises to 1.128, 1.455 or 3.525. The script also checks that 100 Skellam shares of total variance 25 sum to mean 0.004 and variance 25.15, and that sharing $(3, -2)$, $(5, 7)$ and $(0, 1)$ modulo $2^{20}$ reveals $(8, 6)$.
+A server aggregates the app's histogram through 100 clients at $(\varepsilon, \delta) = (1, 10^{-6})$. A user who changes value moves one count down and another up, so $\Delta_2 f = \sqrt2$. The analytic calibration of @cor-lg-calibration gives total noise $\sigma = 5.975$, so each client adds standard deviation $5.975/\sqrt{100} = 0.597$. With 80%, 50% or 10% of the clients honest, $\varepsilon$ rises to 1.128, 1.455 or 3.525.
 :::
 
 ![The actual $\varepsilon$ at $\delta = 10^{-6}$ against the fraction of the noise the adversary does not know.](figures/trust_collusion.svg){#fig-trust-collusion}
