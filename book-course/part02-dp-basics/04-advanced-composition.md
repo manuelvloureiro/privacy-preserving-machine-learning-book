@@ -132,27 +132,36 @@ The four-outcome pair is the hardest $(\varepsilon,\delta)$-indistinguishable pa
 Let $\varepsilon \ge 0$ and $\delta \in [0,1)$, and let $A, B$ be $(\varepsilon,\delta)$-indistinguishable random variables on a countable space. Then there is a randomized map $F$ such that $F(U)$ has the distribution of $A$ and $F(V)$ has the distribution of $B$.
 :::
 
-The map sends each of the four outcomes to a distribution on the space. The outcome "I am $U$" covers the excess of $A$ on outcomes $y$ that are more than $e^\varepsilon$ times as likely under $A$ as under $B$, and "I am $V$" covers the reverse excess. The outcome $0$ puts more weight where $A$ is the more likely of the two, and $1$ where $B$ is. For $\delta > 0$ these four distributions need care. Kairouz, Oh and Viswanath (2015) prove that case with hypothesis tests and Blackwell's theorem on the comparison of statistical experiments. We prove the case $\delta = 0$, which already gives the theorem for pure DP.
+The map sends each of the four outcomes to a distribution on the space. Some outcomes $y$ are more than $e^\varepsilon$ times as likely under $A$ as under $B$. The definition bounds the total excess of $A$ on these outcomes by $\delta$, so "I am $U$" can carry it, and "I am $V$" carries the reverse excess. What is left is a pair whose probabilities are within a factor $e^\varepsilon$ at every outcome. The outcome $0$ puts more weight where $A$ is the more likely of the two, and $1$ where $B$ is. Kairouz, Oh and Viswanath (2015) first proved the theorem, with hypothesis tests and Blackwell's theorem on the comparison of statistical experiments. The proof below builds the map directly.
 
 ::: {.proof}
-*Proof for $\delta = 0$.* Write $p(y) = \Pr[A = y]$ and $q(y) = \Pr[B = y]$.
+Write $p(y) = \Pr[A = y]$ and $q(y) = \Pr[B = y]$.
 
-1. Applying the definition to the single outcome $\{y\}$ gives $p(y) \le e^\varepsilon q(y)$ and $q(y) \le e^\varepsilon p(y)$. If $\varepsilon = 0$, then $p = q$, and $F$ can ignore its input and output a sample of $A$. Assume $\varepsilon > 0$ from now on.
-2. Define
+1. *The excess.* Let $a(y) = \max(p(y) - e^\varepsilon q(y), 0)$ and $b(y) = \max(q(y) - e^\varepsilon p(y), 0)$, with totals $\alpha = \sum_y a(y)$ and $\beta = \sum_y b(y)$. Take $S$, the set of outcomes with $p(y) > e^\varepsilon q(y)$. Then $\alpha = \Pr[A\in S] - e^\varepsilon\Pr[B\in S] \le \delta$ by the definition. In the same way, $\beta \le \delta$.
+2. *The rest.* Let $p_1(y) = p(y) - a(y) = \min(p(y), e^\varepsilon q(y))$ and $q_1(y) = q(y) - b(y) = \min(q(y), e^\varepsilon p(y))$. Then $p_1 \le e^\varepsilon q$ and $p_1 \le p \le e^{2\varepsilon} p$, so $p_1 \le e^\varepsilon q_1$. In the same way, $q_1 \le e^\varepsilon p_1$. The totals of $p_1$ and $q_1$ are $1-\alpha$ and $1-\beta$.
+3. *Equal totals.* Suppose $\alpha \le \beta$; otherwise swap the roles of $p$ and $q$. The totals of step 2 differ by $\sum_y (p_1(y) - q_1(y)) = \beta - \alpha$. So the outcomes with $p_1(y) > q_1(y)$ carry an excess $c = \sum_y \max(p_1(y) - q_1(y), 0) \ge \beta - \alpha$. If $\beta > \alpha$, remove the fraction $\theta = (\beta-\alpha)/c \le 1$ of that excess:
+   $$
+   p_2(y) = p_1(y) - \theta\max(p_1(y) - q_1(y), 0) ,
+   $$
+   and if $\beta = \alpha$, let $p_2 = p_1$. Let $q_2 = q_1$. Where $p_2$ differs from $p_1$, it lies between $q_1$ and $p_1$, so the bounds of step 2 hold for $p_2$ and $q_2$. Both now have the total $1-\beta$.
+4. *Scale.* Let $p_0 = t\,p_2$ and $q_0 = t\,q_2$ with $t = (1-\delta)/(1-\beta)$, which is in $(0, 1]$ because $\beta \le \delta < 1$. Then $p_0$ and $q_0$ have the total $1-\delta$, satisfy $p_0 \le e^\varepsilon q_0$ and $q_0 \le e^\varepsilon p_0$, and $p_0 \le p$, $q_0 \le q$.
+5. *The two catastrophic outcomes.* If $\delta > 0$, let $F$ map "I am $U$" to a sample from $R_U = (p - p_0)/\delta$ and "I am $V$" to a sample from $R_V = (q - q_0)/\delta$. By step 4 both are non-negative, and each sums to $(1 - (1-\delta))/\delta = 1$. If $\delta = 0$, these two outcomes never occur.
+6. *The two ordinary outcomes.* If $\varepsilon = 0$, step 4 gives $p_0 = q_0$; let $F$ map $0$ and $1$ to a sample from $p_0/(1-\delta)$. If $\varepsilon > 0$, define
 
    $$
-   P_0(y) = \frac{e^\varepsilon p(y) - q(y)}{e^\varepsilon - 1}, \qquad P_1(y) = \frac{e^\varepsilon q(y) - p(y)}{e^\varepsilon - 1} .
+   P_0(y) = \frac{e^\varepsilon p_0(y) - q_0(y)}{(e^\varepsilon - 1)(1-\delta)}, \qquad P_1(y) = \frac{e^\varepsilon q_0(y) - p_0(y)}{(e^\varepsilon - 1)(1-\delta)} .
    $$
 
-   Both are non-negative by step 1, and each sums to $(e^\varepsilon - 1)/(e^\varepsilon - 1) = 1$ over $y$, so they are probability distributions.
-
-3. Let $F$ map the input $0$ to a sample from $P_0$ and the input $1$ to a sample from $P_1$. With $\delta = 0$, $U$ is $0$ with probability $e^\varepsilon/(1+e^\varepsilon)$ and $1$ otherwise. So $F(U)$ equals $y$ with probability
+   Both are non-negative by step 4, and each sums to $(e^\varepsilon - 1)(1-\delta)/((e^\varepsilon - 1)(1-\delta)) = 1$. Let $F$ map $0$ to a sample from $P_0$ and $1$ to a sample from $P_1$.
+7. *Check.* $U$ is $0$ with probability $e^\varepsilon(1-\delta)/(1+e^\varepsilon)$, $1$ with probability $(1-\delta)/(1+e^\varepsilon)$ and "I am $U$" with probability $\delta$. So, for $\varepsilon > 0$, $F(U)$ equals $y$ with probability
 
    $$
-   \frac{e^\varepsilon P_0(y) + P_1(y)}{1+e^\varepsilon} = \frac{e^{2\varepsilon}p(y) - e^\varepsilon q(y) + e^\varepsilon q(y) - p(y)}{(1+e^\varepsilon)(e^\varepsilon - 1)} = p(y).
+   \frac{e^\varepsilon(e^\varepsilon p_0(y) - q_0(y)) + e^\varepsilon q_0(y) - p_0(y)}{(1+e^\varepsilon)(e^\varepsilon - 1)} + \delta R_U(y) = p_0(y) + p(y) - p_0(y) = p(y) .
    $$
 
-4. In the same way, $F(V)$ equals $y$ with probability $(P_0(y) + e^\varepsilon P_1(y))/(1+e^\varepsilon) = q(y)$.
+   For $\varepsilon = 0$, the probability is $(1-\delta)\,p_0(y)/(1-\delta) + p(y) - p_0(y) = p(y)$. In the same way, $F(V)$ equals $y$ with probability $q(y)$.
+
+For $\delta = 0$, steps 1 to 4 change nothing: $\alpha = \beta = 0$, $p_0 = p$ and $q_0 = q$.
 :::
 
 Applying @thm-ac-simulation once per step of an adaptive composition reduces the whole transcript to a map of $k$ independent copies of the four-outcome pair.
