@@ -82,6 +82,25 @@ An example of rule 14, from the study note on concentrated privacy:
 
 The rejected display computes the log-ratio and bounds it twice in one line, then names the reason for one of the bounds after the reader has passed it. An example of rules 11 and 12, from the same note: a section headed "From a tail bound on the loss to $(\varepsilon,\delta)$-DP, and why the converse fails" gave the reader no reason to want either result, and a later section stated the advanced composition theorem while its proof sat in the two sections after it. The approved version opens the section by saying that every later guarantee is proved by showing that large privacy losses are rare, and keeps the composition theorem, its plan and its proof in one section.
 
+## Rules for paragraphs
+
+A page can pass every rule above, one sentence at a time, and still be cryptic. Each sentence is clear on its own, but the reader has to supply what connects it to the one before: a fact from three pages back, a line of algebra, the reason a conclusion holds. Britton and Gülgöz (1991) called each such gap an **inference call**, and found that rewriting a text to fill its inference calls, without changing its content, made readers learn more from it. McNamara and Kintsch (1996) found the same and showed who pays: a reader who already knows the subject fills the gaps and loses nothing, while a reader new to it stalls at each one. That second reader is the audience of every book here. A writer who knows the subject cannot see the gaps, which is the *curse of knowledge*, so the gaps are found by a reader who does not (stage 3), and the rules below say how to close them.
+
+19. **Point first.** The first sentence of a paragraph says what the paragraph establishes, and every later sentence serves that point: its reason, its steps, its example or its consequence. An aside, such as a library's error message, a historical remark or a second example, goes to its own paragraph or off the page (Williams & Bizup on the issue and point of a paragraph).
+20. **Leave no inference call.** For each pair of adjacent sentences, ask what a reader who has read only the earlier chapters must supply to get from one to the next. Write each such connection into the text, or cut the sentence that needed it. The connection is often a clause: "because the curve is a straight line", "that is, $1/\sqrt{10{,}000}$" (Britton & Gülgöz 1991; McNamara et al. 1996).
+21. **Recall what is far away.** A term, symbol or result last used several paragraphs back gets a few words saying what it is when it returns: "the RDP curve, which gives $\varepsilon$ at each order $\alpha$". Never refer to an earlier object by a description the reader must match from memory ("the straight line") without saying what it was.
+22. **Show the step.** Write "X gives Y" only when the step from X to Y is shown or is one named fact the reader has. A conclusion comes after the argument for it, never before ("the shortcut also shows why DP-SGD needs subsampling", followed two sentences later by why, makes the reader hold a claim with nothing to attach it to).
+23. **One thread.** A paragraph follows one example or one argument, and the example's details agree with the argument. An example introduced with a detail the argument then ignores ("each step on a random 1% of the data", followed by "if every step used the full dataset") makes the reader stop and reconcile the two.
+24. **Shorter overall.** Filling inference calls adds words. Pay for them by cutting what the paragraph does not need: repetition, a result stated twice, a preview of what comes next, narration of what the page does, and detail the reader will not use. A revised paragraph should be no longer than the one it replaces, and a revised page shorter. When a topic cannot be explained with its connections inside the book's budget, cut the topic, never the connections (lesson one above).
+
+An example of rules 20–23, from the practitioner edition's chapter on Rényi DP. Every sentence of the rejected paragraph passes the analyzer:
+
+> **Rejected, cryptic.** For Gaussian steps the sum has a useful shortcut. Adding $k$ copies of the straight line gives the curve of a single Gaussian step with noise multiplier $\sigma/\sqrt k$, whose exact $\varepsilon$ you can compute. The shortcut also shows why DP-SGD needs subsampling. This part's running example is a DP-SGD run of 10,000 steps with noise multiplier 1, each on a random 1% of the data. If every step used the full dataset, the run would act like one step with noise multiplier 0.01.
+>
+> **Approved.** The sum is simplest for Gaussian steps, because their curve is a straight line: a step with noise multiplier $\sigma$ has $\varepsilon(\alpha) = \alpha/(2\sigma^2)$. Adding $k$ such lines multiplies the slope by $k$, which is the line of one step with noise multiplier $\sigma/\sqrt k$. So $k$ Gaussian steps cost as much privacy as one step with $\sqrt k$ times less noise. For training, that is bad news: 10,000 steps with noise multiplier 1 would cost as much as one step with noise multiplier $1/\sqrt{10{,}000} = 0.01$, which hides almost nothing. DP-SGD escapes this by running each step on a small random sample of the data, as [Subsampling](05-subsampling.md) shows.
+
+The rejected paragraph leaves five inference calls: which straight line, why adding lines divides the noise by $\sqrt k$, why that concerns subsampling, where 0.01 comes from, and why an example with 1% subsampling illustrates a run without it. The approved one states each connection, drops the detail that contradicted the argument, and is about the same length.
+
 ## The process
 
 Every page goes through the same six stages, in order. A page is done when it passes every gate.
@@ -116,18 +135,21 @@ The analyzer strips tables, figures, code, captions and reference lists, counts 
 | nominalizations | several *-tion*, *-ment*, *-ness* words in one sentence | turn them back into verbs |
 | paragraph length | a paragraph over the limit | split at a change of idea |
 | choppy | a run of short sentences, each starting afresh with no word linking it to the last | join the ones that are reason, consequence, example or contrast of each other, or open with a linking word |
+| gaps | two or more sentences in a paragraph that share no topic word, symbol or linking opener with the one before | each is a likely inference call: state how it follows, or cut it (rule 20) |
+| far reference | a symbol or bold term that returns after several paragraphs without being named again | recall in a few words what it is (rule 21) |
+| hand-wave | "clearly", "obviously", "it is easy to see", "one can show" | show the step or name the fact it uses (rule 17) |
 | result in inline math | an inline formula that states a relation between probabilities, averages, sums or logarithms | display it on its own line |
 | section grade | Flesch–Kincaid grade of a section above the limit | usually fixed by the sentence-level fixes |
 
-The choppy and inline-result checks work on paragraphs and do not count toward the page's share of flagged sentences. A short sentence is often the right one, and a relation inside a derivation often belongs inline, so only a reader can tell. Treat it as a pointer for the reviews. A page fails the check if more than the book's share of its sentences are flagged (15% for the practitioner edition, 25% for the others) or if its mean sentence length is over the limit. The checks are deliberately simple and will sometimes flag a fine sentence; when a flag is wrong, leave the sentence, and if the same false flag recurs, fix the check and add the sentence to the anchors (stage 6). They cannot tell whether an explanation is right or whether a paragraph follows from the one before. Stages 3 and 4 do that.
+The choppy, gaps, far-reference and inline-result checks work on paragraphs and do not count toward the page's share of flagged sentences. A short sentence is often the right one, and a relation inside a derivation often belongs inline, so only a reader can tell. Treat it as a pointer for the reviews. A page fails the check if more than the book's share of its sentences are flagged (15% for the practitioner edition, 25% for the others) or if its mean sentence length is over the limit. The checks are deliberately simple and will sometimes flag a fine sentence; when a flag is wrong, leave the sentence, and if the same false flag recurs, fix the check and add the sentence to the anchors (stage 6). The gaps check is the analyzer's only view of inference calls, and a crude one: it sees that two sentences share no words, not what the reader must supply between them, so it misses most calls and flags some sentences that follow well. The report prints each page's words of prose; track it across drafts to hold rule 24. The checks cannot tell whether an explanation is right or which connections a paragraph leaves out. Stages 3 and 4 do that.
 
-### 3. Cold-reader test
+### 3. Cold-reader test and inference audit
 
-Give the page, and nothing else, to a reviewer who has not seen the full edition or the writer's notes: a person, or a model in a fresh context with the prompt in [tools/prose-review/cold-reader.md](tools/prose-review/cold-reader.md). The reviewer restates each paragraph in one sentence and lists every stall: an undefined term, an unexplained jump, an overload, an ambiguous reference, an unmotivated result, a garbled sentence. Every stall is either fixed or, if it is the reviewer's misreading, noted as such. This is the only stage that measures understanding directly.
+Give the page, and nothing else, to a reviewer who has not seen the full edition or the writer's notes: a person, or a model in a fresh context with the prompt in [tools/prose-review/cold-reader.md](tools/prose-review/cold-reader.md), which `uv run python tools/prose.py prompt --book BOOK --page PAGE` prints filled in. The reviewer restates each paragraph in one sentence, says whether its first sentence gave that point, and then audits it sentence by sentence: for each sentence, what had to be supplied to get there from the one before (a recalled fact, a step of algebra, a missing reason, a guessed referent, a conclusion before its argument). Each is an inference call, and the reviewer counts them. The reviewer also lists every other stall: an undefined term, an overload, an unmotivated result, a garbled sentence. Every inference call and stall is either fixed or, if it is the reviewer's misreading, noted as such. This is the only stage that measures understanding directly.
 
 ### 4. Editorial review
 
-A reviewer with the page, the analyzer report, the cold-reader report and, for the practitioner edition, the full-edition chapter applies the rules paragraph by paragraph with the prompt in [tools/prose-review/editor.md](tools/prose-review/editor.md), and proposes rewrites that keep every claim and number. For the practitioner edition the reviewer also checks each rewrite against the full edition: a clearer sentence that claims more than the full edition supports is a new error. Apply the rewrites, then repeat stage 2.
+A reviewer with the page, the analyzer report, the cold-reader report and, for the practitioner edition, the full-edition chapter applies the rules paragraph by paragraph, rewriting whole paragraphs rather than patching sentences, with the prompt in [tools/prose-review/editor.md](tools/prose-review/editor.md), and proposes rewrites that keep every claim and number. For the practitioner edition the reviewer also checks each rewrite against the full edition: a clearer sentence that claims more than the full edition supports is a new error. Apply the rewrites, then repeat stage 2.
 
 ### 5. Optional: register check
 
@@ -142,7 +164,8 @@ The author reads at least one page per part, chosen from those the analyzer rank
 A page is ready to commit when:
 
 - `make prose-check BOOK=...` and `make structure-check BOOK=...` pass for it (the second checks the page's shape against its kind's skeleton in `tools/structure.toml`);
-- every cold-reader stall is fixed or explained;
+- every cold-reader stall and inference call is fixed or explained, and a second cold reader on the revised page finds no paragraph with more than one inference call;
+- the revised page is no longer than the page it replaced (rule 24);
 - every editorial rewrite is applied or rejected with a reason;
 - for the practitioner edition, the correctness review against the full edition has no open items;
 - `uv run pytest tests/test_prose.py` passes.
@@ -154,4 +177,8 @@ A page is ready to commit when:
 - Halmos, "How to Write Mathematics" (1970): resist symbols, never start a sentence with one.
 - Bertsekas, "Ten Simple Rules for Mathematical Writing": the mix of natural and mathematical language.
 - Australian Government *Style Manual*, "Sentence length": an average of about 15 words, a ceiling of 25.
+- Britton & Gülgöz, "Using Kintsch's computational model to improve instructional text", *Journal of Educational Psychology* 83(3), 1991: inference calls, and revising a text to remove them.
+- McNamara & Kintsch, "Learning from texts: Effects of prior knowledge and text coherence", *Discourse Processes* 22(3), 1996, and McNamara, Kintsch, Songer & Kintsch, "Are good texts always better?", *Cognition and Instruction* 14(1), 1996: coherent text helps readers new to a subject; the gaps a reader must fill depend on what the reader knows.
+- Graesser, McNamara et al., Coh-Metrix: adjacent-sentence argument overlap as a measure of cohesion, the basis of the gaps check.
+- Pinker, *The Sense of Style* (2014), chapter 3: the curse of knowledge.
 - A 2023 *PLOS One* study of how readers perceive sentence length (PubMed Central PMC9955962): the 17-word benchmark.

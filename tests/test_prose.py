@@ -85,6 +85,15 @@ REVIEW_ONLY = [
         ),
         "out of order",
     ),
+    # Passes every sentence check on its page, yet leaves the reader five connections to supply.
+    (
+        (
+            "For Gaussian steps the sum has a useful shortcut. Adding $k$ copies of the straight line gives the "
+            "curve of a single Gaussian step with noise multiplier $\\sigma/\\sqrt k$, whose exact $\\varepsilon$ "
+            "you can compute. The shortcut also shows why DP-SGD needs subsampling."
+        ),
+        "inference call",
+    ),
 ]
 PROMPTS = ROOT / "tools" / "prose-review"
 
@@ -136,3 +145,32 @@ def test_review_prompts_name_the_failures_the_analyzer_misses() -> None:
     prompts = (PROMPTS / "cold-reader.md").read_text() + (PROMPTS / "editor.md").read_text()
     for text, failure in REVIEW_ONLY:
         assert failure in prompts, text[:60]
+
+
+def paragraph_flags(text: str) -> list[str]:
+    return [f for f in flagged(text) if f.startswith("¶")]
+
+
+def test_unconnected_sentences_are_flagged_as_gaps() -> None:
+    text = (
+        "Noise hides each record in the count. Budgets are spent per query. "
+        "Libraries round their outputs before release. The analyst reads the table."
+    )
+    assert any("gaps" in f for f in paragraph_flags(text))
+    linked = (
+        "Noise hides each record in the count. The count then moves by at most one per record, "
+        "so the noise only has to cover a move of one. That is why a count needs so little noise."
+    )
+    assert not any("gaps" in f for f in paragraph_flags(linked))
+
+
+def test_a_symbol_back_after_many_paragraphs_is_flagged() -> None:
+    filler = "\n\n".join(f"Paragraph {i} talks about counts and noise." for i in range(10))
+    text = f"Write $n$ for the number of records.\n\n{filler}\n\nThe bound shrinks like $1/n$."
+    assert any("far reference: symbol n" in f for f in paragraph_flags(text))
+    recalled = f"Write $n$ for the number of records.\n\n{filler}\n\nThe bound shrinks like one over $n$, the number of records."
+    assert not any("far reference" in f for f in paragraph_flags(recalled))
+
+
+def test_hand_waving_is_flagged() -> None:
+    assert any("hand-wave" in f for f in flagged("It is easy to see that the count moves by one."))

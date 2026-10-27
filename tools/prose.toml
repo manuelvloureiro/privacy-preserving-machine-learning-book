@@ -25,6 +25,8 @@ max_opening_clause_words = 12 # words before the main clause in a sentence that 
 max_nominalizations_per_sentence = 3
 grade_max = 12                # Flesch-Kincaid grade of a section's prose, formulas counted as one word
 page_flagged_sentence_share = 0.15   # `check` fails a page if more of its sentences are flagged
+max_cohesion_gaps = 2          # sentences in one paragraph that share nothing with the one before
+recall_after_paragraphs = 8    # a symbol or term absent this many paragraphs is recalled when it returns
 
 [profiles.full]
 choppy_sentence_words = 18  # a sentence this short or shorter can be part of a choppy run
@@ -61,6 +63,15 @@ max_opening_clause_words = 15
 max_nominalizations_per_sentence = 4
 grade_max = 14
 page_flagged_sentence_share = 0.25
+max_cohesion_gaps = 2          # sentences in one paragraph that share nothing with the one before
+recall_after_paragraphs = 8    # a symbol or term absent this many paragraphs is recalled when it returns
+
+# Who reads each book, for the review prompts (`tools/prose.py prompt`).
+[audience]
+book-full = "a graduate student or engineer with undergraduate probability, linear algebra and calculus, new to privacy"
+book-practitioner = "an engineer or data scientist who ships models and statistics, knows Python and basic probability, and wants results and how to use them rather than proofs"
+book-course = "a student taking a first course in differential privacy, comfortable with proofs at the level of an undergraduate probability course"
+book-opendp = "a data scientist who knows Python and pandas and wants to release statistics with the OpenDP library"
 
 # The course is light on prose and heavy on proofs: its derivations carry formulas the way worked
 # solutions do, so it takes the exercise book's limits per sentence, with the same limits on

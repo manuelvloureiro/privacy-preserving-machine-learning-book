@@ -57,6 +57,24 @@ Rules for pages with derivations (PROSE.md, "Rules for mathematics"):
 18. **Notation earns its place**: a symbol for something used three or more times, named at first
     use, one meaning per symbol, and a table of symbols when a page has more than about eight.
 
+Rules for paragraphs (PROSE.md, "Rules for paragraphs"):
+
+19. **Point first.** The first sentence says what the paragraph establishes; every later sentence
+    serves it. An aside (a library detail, a historical remark, a second example) moves to its own
+    paragraph or out of the page.
+20. **Leave no inference call.** Every connection the cold reader had to supply is written into the
+    text, in as few words as it takes, or the sentence that needed it is cut.
+21. **Recall what is far away.** A symbol or term last used several paragraphs back gets a few words
+    saying what it is when it returns.
+22. **Show the step.** "X gives Y" only when the step from X to Y is shown or is one named fact. A
+    conclusion comes after its argument, never before it.
+23. **One thread.** A paragraph follows one example or one argument. Its details must agree with the
+    argument (an example that subsamples 1% of the data cannot illustrate a run without subsampling).
+24. **Shorter overall.** Pay for each connection you add by cutting what the paragraph does not need:
+    repetition, a result stated twice, a preview of what comes next, narration of what the page
+    does, a detail the reader will not use. A revised page should not be longer than the original;
+    if the connections cannot fit, cut a secondary topic, never the connections.
+
 A structural failure of rules 11–13 (a section without a question, a proof away from its statement)
 makes the verdict **rewrite**, with the order the section should follow.
 
@@ -64,8 +82,9 @@ For each problem, give:
 
 - the exact text (quoted, at most 40 words);
 - the rule it breaks;
-- a rewrite that keeps the meaning, every number and every claim. The rewrite must itself follow
-  the rules, and must not add facts.
+- a rewrite that keeps the meaning, every number and every claim the page needs. The rewrite must
+  itself follow the rules, and must not add facts. Prefer rewriting a whole paragraph to patching
+  one sentence, and give the paragraph's word count before and after.
 
 Then give an overall verdict: **pass** (minor edits only), **revise** (the listed rewrites fix it),
 or **rewrite** (the page's structure is the problem: say what the structure should be).

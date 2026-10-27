@@ -5,20 +5,26 @@
     uv run python tools/prose.py report --book book-full --worst 20         # the 20 worst paragraphs
     uv run python tools/prose.py check --book book-practitioner             # exit 1 if a page fails
     uv run python tools/prose.py text "A sentence to test, with $x$ in it." # analyse a snippet
+    uv run python tools/prose.py prompt --book book-full --page part01-prerequisites/02-concentration.md
+                                                                            # the cold-reader prompt, filled in
 
 The checks are the measurable half of PROSE.md: long and overloaded sentences, chained clauses,
 formulas and numbers piled into one sentence, symbols used before they are explained in words,
 too many new concepts in one paragraph, long openings before the main clause, nominalizations,
-runs of short unlinked sentences that read in hiccups, results written as inline formulas, and the
-reading grade of each section. Thresholds are per book, in tools/prose.toml. The checks
-cannot tell whether an explanation is right or whether a paragraph follows from the one before;
-PROSE.md's editorial review does that. They find where to look.
+runs of short unlinked sentences that read in hiccups, results written as inline formulas, the
+reading grade of each section, and, per paragraph, sentences that share nothing with the one before
+(each a connection the reader must infer), symbols and terms that return after a long absence
+unexplained, and words that call a step obvious instead of showing it. Thresholds are per book,
+in tools/prose.toml. The checks cannot tell whether an explanation is right or which inferences
+a paragraph leaves to the reader; PROSE.md's inference audit and editorial review do that. They
+find where to look.
 
 Formulas count as one word each, so a sentence is judged on its prose. Tables, figures, code,
 display captions and reference lists are skipped.
 """
 
 import argparse
+import itertools
 import json
 import re
 import sys
@@ -208,6 +214,21 @@ LINKED = re.compile(
 # averages, sums or logarithms, rather than a value or a piece of arithmetic.
 RELATION = re.compile(r"\\(le|ge|leq|geq|approx|propto)\b|(?<![<>!\\])=|<|>")
 RESULT_PARTS = re.compile(r"\\(Pr|mathbb\s*E|exp|sum|prod|int|max|min|log|ln)\b|\b[DH]_")
+# Words that tell the reader a step is obvious instead of showing it (PROSE.md, rule 17).
+HANDWAVE = re.compile(
+    r"\b(clearly|obviously|trivially|it is (easy|straightforward) to (see|check|show|verify)|"
+    r"one can (show|check|verify)|it can be (shown|checked|verified)|by standard arguments)\b",
+    re.IGNORECASE,
+)
+# Function words long enough to pass the length filter in `content_stems`; they carry no topic.
+STOP_WORDS = """
+this that these those with from have been which where when then than they them their there here what
+such also only each every both into onto over under more most much many some same other another about
+after before because since while would could should must will shall does doing done make makes made
+take takes gives give given just very like even well your yours being were whose ever never always
+first second third next last thing things case cases part kind way ways
+"""
+STOP = set(STOP_WORDS.split())
 NOMINALIZATION = re.compile(r"\b[a-z]{3,}(?:tion|sion|ment|ness|ity|ance|ence|ancy|ency)s?\b")
 TECHNICAL_NOUNS = {
     "probability",
@@ -342,6 +363,7 @@ class Report:
     mean_words: float
     grades: dict[str, float]
     counts: Counter[str]
+    words: int = 0  # prose words on the page, formulas counted as one
 
     @property
     def flagged_share(self) -> float:
@@ -351,8 +373,10 @@ class Report:
 def analyse(page: str, raw: str, limits: dict[str, Any], allowed: set[str], acronyms: set[str]) -> Report:
     seen_symbols: set[str] = set(allowed)
     seen_acronyms: set[str] = set()
+    last_symbol: dict[str, int] = {}  # the paragraph where each symbol was last used
+    last_term: dict[str, int] = {}  # the same for each bold term
     paragraphs: list[Paragraph] = []
-    for section, source in prose_blocks(raw):
+    for index, (section, source) in enumerate(prose_blocks(raw)):
         text, math, bold = plain(source)
         sentences: list[Sentence] = []
         new_concepts = len(bold)
@@ -386,6 +410,17 @@ def analyse(page: str, raw: str, limits: dict[str, Any], allowed: set[str], acro
                 f"choppy: {run} short sentences in a row, none linked to the one before; "
                 "join them with the relation between them (because, so, for example, but)"
             )
+        gaps = cohesion_gaps(sentences)
+        if len(gaps) >= limits["max_cohesion_gaps"]:
+            p.flags.append(
+                f"gaps: {len(gaps)} sentences share no word, symbol or link with the one before "
+                f"(“{gaps[0][:60]}”); say how each follows, or cut it"
+            )
+        for name, last in far_references(sentences, text, bold, index, last_symbol, last_term):
+            if index - last > limits["recall_after_paragraphs"]:
+                p.flags.append(
+                    f"far reference: {name} was last used {index - last} paragraphs ago; recall in a few words what it is"
+                )
         paragraphs.append(p)
     sentences = [s for p in paragraphs for s in p.sentences]
     by_section: dict[str, list[Sentence]] = {}
@@ -399,7 +434,8 @@ def analyse(page: str, raw: str, limits: dict[str, Any], allowed: set[str], acro
             counts[f"section grade above {limits['grade_max']}"] += 1
     flagged = sum(1 for s in sentences if any(not f.startswith("note") for f in s.flags))
     mean = sum(s.words for s in sentences) / len(sentences) if sentences else 0.0
-    return Report(page, paragraphs, len(sentences), flagged, round(mean, 1), grades, counts)
+    words = sum(s.words for s in sentences)
+    return Report(page, paragraphs, len(sentences), flagged, round(mean, 1), grades, counts, words)
 
 
 def inline_result(formula: str) -> bool:
@@ -432,8 +468,66 @@ def choppy_run(sentences: list[Sentence], limits: dict[str, Any]) -> int:
     return longest if longest >= limits["choppy_run"] else 0
 
 
+def content_stems(s: Sentence) -> set[str]:
+    """The sentence's topic words, crudely stemmed, and its symbols: what a next sentence can pick up."""
+    words = re.findall(r"[A-Za-z][A-Za-z-]{3,}", re.sub(r"⟦\d+⟧", " ", s.text))
+    stems = {w.lower().rstrip("s")[:5] for w in words if w.lower() not in STOP}
+    return stems | {sym for f in s.math for sym in symbols_in(f)}
+
+
+def cohesion_gaps(sentences: list[Sentence]) -> list[str]:
+    """Sentences that share nothing with the one before: no linking opener, no topic word, no symbol.
+
+    This is the argument overlap of cohesion research (Coh-Metrix): each such sentence asks the reader
+    to supply the connection, an inference the text left out (Britton & Gülgöz 1991).
+    """
+    gaps: list[str] = []
+    for prev, s in itertools.pairwise(sentences):
+        if LINKED.match(s.text) or content_stems(prev) & content_stems(s):
+            continue
+        gaps.append(s.text)
+    return gaps
+
+
+def far_references(
+    sentences: list[Sentence],
+    text: str,
+    bold: list[str],
+    index: int,
+    last_symbol: dict[str, int],
+    last_term: dict[str, int],
+) -> list[tuple[str, int]]:
+    """Symbols and bold terms that come back in this paragraph, unnamed, with the paragraph they were
+    last used in. Updates the two maps to this paragraph."""
+    out: list[tuple[str, int]] = []
+    named: set[str] = set()
+    used: set[str] = set()
+    for s in sentences:
+        for i, formula in enumerate(s.math):
+            syms = symbols_in(formula)
+            used.update(syms)
+            if len(syms) == 1 and introduced(s.text, s.ids[i], formula):
+                named.update(syms)
+    for sym in sorted(used):
+        if sym in last_symbol and sym not in named:
+            out.append((f"symbol {sym}", last_symbol[sym]))
+        last_symbol[sym] = index
+    lowered = text.lower()
+    for term in list(last_term):
+        if term in lowered:
+            if term not in {b.lower() for b in bold}:
+                out.append((f"term “{term}”", last_term[term]))
+            last_term[term] = index
+    for b in bold:
+        last_term[b.lower()] = index
+    return out
+
+
 def check_sentence(s: Sentence, limits: dict[str, Any], seen_symbols: set[str]) -> None:
     prose = re.sub(r"⟦\d+⟧", "X", s.text)
+    wave = HANDWAVE.search(prose)
+    if wave:
+        s.flags.append(f"hand-wave: “{wave.group(0)}”; show the step or name the fact it uses")
     if s.words > limits["max_sentence_words"]:
         s.flags.append(f"long sentence: {s.words} words (limit {limits['max_sentence_words']})")
     # An acronym's expansion, "gradient descent (GD)", is required by the terms check, not an aside.
@@ -538,7 +632,7 @@ def show(report: Report, worst: int, limits: dict[str, Any]) -> None:
     status = "FAIL" if failing(report, limits) else "ok"
     print(
         f"\n## {report.page}  [{status}]  {report.flagged}/{report.sentences} sentences flagged "
-        f"({report.flagged_share:.0%}), mean {report.mean_words} words"
+        f"({report.flagged_share:.0%}), mean {report.mean_words} words, {report.words} words of prose"
     )
     hard = {s: g for s, g in report.grades.items() if g > limits["grade_max"]}
     if hard:
@@ -558,6 +652,31 @@ def show(report: Report, worst: int, limits: dict[str, Any]) -> None:
                 print(f"       • {f}\n         in: {s.text[:140]}")
 
 
+def review_prompt(book: str, page: str, review: str) -> str:
+    """The review prompt of tools/prose-review/, filled in for one page: the audience, the titles of
+    the chapters before it, and the page."""
+    config = tomllib.loads(CONFIG.read_text())
+    audience = cast(dict[str, str], config.get("audience", {})).get(book, "a reader of this book")
+    pages = pages_of(book)
+    earlier = pages[: pages.index(page)] if page in pages else []
+    titles: list[str] = []
+    for f in earlier:
+        heading = re.search(r"^#\s+(.+?)\s*(\{[^}]*\})?$", (ROOT / book / f).read_text(), re.MULTILINE)
+        titles.append(heading.group(1) if heading else f)
+    template = (Path(__file__).resolve().parent / "prose-review" / f"{review}.md").read_text()
+    template = template.split("\n---\n", 1)[1].strip() if "\n---\n" in template else template
+    fills = {
+        "AUDIENCE": audience,
+        "EARLIER_TITLES": "; ".join(titles) or "none, this is the first chapter",
+        "BOOK": book,
+        "PAGE_PATH": page,
+        "PAGE": (ROOT / book / page).read_text(),
+    }
+    for key, value in fills.items():
+        template = template.replace("{" + key + "}", value)
+    return template
+
+
 def failing(report: Report, limits: dict[str, Any]) -> bool:
     return (
         report.flagged_share > limits["page_flagged_sentence_share"]
@@ -567,16 +686,24 @@ def failing(report: Report, limits: dict[str, Any]) -> bool:
 
 def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
-    parser.add_argument("command", choices=["report", "check", "text"])
+    parser.add_argument("command", choices=["report", "check", "text", "prompt"])
     parser.add_argument("text", nargs="?", help="for `text`: the prose to analyse")
     parser.add_argument("--book", default="book-full", help="a book folder, or notes/<name> for a study note")
     parser.add_argument("--page", help="one page, relative to the book's folder")
     parser.add_argument("--worst", type=int, default=5, help="paragraphs to show per page")
     parser.add_argument("--json", action="store_true", help="machine-readable output")
+    parser.add_argument(
+        "--review", choices=["cold-reader", "editor"], default="cold-reader", help="for `prompt`: which review"
+    )
     args = parser.parse_args()
     book: str = args.book
     limits, allowed = load(book)
     acronyms = set(terms.load_terms()[0])
+    if args.command == "prompt":
+        if not args.page:
+            parser.error("prompt needs --page")
+        print(review_prompt(book, cast(str, args.page), cast(str, args.review)))
+        return
     if args.command == "text":
         reports = [analyse("(text)", cast(str, args.text) or sys.stdin.read(), limits, allowed, acronyms)]
     else:
@@ -588,7 +715,8 @@ def main() -> None:
         bad = [r for r in reports if failing(r, limits)]
         for r in sorted(reports, key=lambda r: -r.flagged_share):
             print(
-                f"{'FAIL' if r in bad else 'ok  '}  {r.flagged_share:4.0%} flagged  mean {r.mean_words:4} words  {r.page}"
+                f"{'FAIL' if r in bad else 'ok  '}  {r.flagged_share:4.0%} flagged  mean {r.mean_words:4} words  "
+                f"{r.words:6} words  {r.page}"
             )
         print(f"{len(bad)} of {len(reports)} pages fail")
         sys.exit(1 if bad else 0)
@@ -596,7 +724,10 @@ def main() -> None:
         for r in sorted(reports, key=lambda r: -r.flagged_share):
             show(r, args.worst, limits)
         total = sum(r.sentences for r in reports)
-        print(f"\n{sum(r.flagged for r in reports)}/{total} sentences flagged across {len(reports)} pages")
+        print(
+            f"\n{sum(r.flagged for r in reports)}/{total} sentences flagged across {len(reports)} pages, "
+            f"{sum(r.words for r in reports)} words of prose"
+        )
 
 
 if __name__ == "__main__":
