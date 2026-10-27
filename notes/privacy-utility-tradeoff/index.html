@@ -164,7 +164,7 @@ window.Quarto = {
 <div>
   <div class="abstract">
     <div class="block-title">Abstract</div>
-    <p>A bank wants to train a targeting model on its customer records, and its privacy policy says the model must be trained with differential privacy (DP). Someone has to choose how much privacy to buy, and that person is rarely the engineer. This note walks through the choice step by step on a public dataset, with every number computed by a script. It shows how to state the business goal as a count the bank cares about, how to turn the privacy setting into a sentence a privacy officer can sign, how to compare two DP techniques on the same axes, and how to end with a short menu of options and a decision.</p>
+    <p>A bank must train a targeting model with differential privacy (DP), and someone other than the engineer has to choose how much privacy to buy. This note works through that choice on a public dataset, from a business count and a sentence a privacy officer can sign to a short menu of options and a decision.</p>
   </div>
 </div>
 
@@ -172,46 +172,145 @@ window.Quarto = {
 </header>
 
 
+<p>How strict should a differential privacy (DP) guarantee be, and who decides? This note answers it for one use case, a bank that trains a targeting model, and ends with a decision that three people sign. You need basic probability to follow it, such as odds, averages and percentiles. <a href="#tbl-map" class="quarto-xref">Table&nbsp;1</a> gives the question each section answers, and <a href="#tbl-symbols" class="quarto-xref">Table&nbsp;2</a> lists the symbols.</p>
+<div id="tbl-map" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-tbl figure">
+<figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl" id="tbl-map-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Table&nbsp;1: The question each section answers.
+</figcaption>
+<div aria-describedby="tbl-map-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<table class="caption-top table">
+<colgroup>
+<col style="width: 50%">
+<col style="width: 50%">
+</colgroup>
+<thead>
+<tr class="header">
+<th style="text-align: left;">Section</th>
+<th style="text-align: left;">The question it answers</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: left;"><a href="#sec-case" class="quarto-xref">Section&nbsp;1</a></td>
+<td style="text-align: left;">What does the bank want, and which public data stands in for its records?</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;"><a href="#sec-goal" class="quarto-xref">Section&nbsp;2</a></td>
+<td style="text-align: left;">Which count does the business care about, and what must a model beat?</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;"><a href="#sec-policy" class="quarto-xref">Section&nbsp;3</a></td>
+<td style="text-align: left;">What does <span class="math inline">\(\varepsilon\)</span> mean to a privacy officer, and which value does the policy allow?</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;"><a href="#sec-fixed" class="quarto-xref">Section&nbsp;4</a></td>
+<td style="text-align: left;">Which choices must be fixed before training, so that they leak nothing?</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;"><a href="#sec-results" class="quarto-xref">Section&nbsp;5</a></td>
+<td style="text-align: left;">Which technique is best at each privacy level, and what does privacy cost in customers?</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;"><a href="#sec-size" class="quarto-xref">Section&nbsp;6</a></td>
+<td style="text-align: left;">How does that cost change with the number of customers?</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;"><a href="#sec-decision" class="quarto-xref">Section&nbsp;7</a></td>
+<td style="text-align: left;">Which option does the policy pick, and who signs it?</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;"><a href="#sec-other" class="quarto-xref">Section&nbsp;8</a></td>
+<td style="text-align: left;">How do the steps carry over to another business?</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;"><a href="#sec-sources" class="quarto-xref">Section&nbsp;9</a></td>
+<td style="text-align: left;">Where do the data, the methods and the arguments come from?</td>
+</tr>
+</tbody>
+</table>
+</div>
+</figure>
+</div>
+<div id="tbl-symbols" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-tbl figure">
+<figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl" id="tbl-symbols-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Table&nbsp;2: The symbols the note uses. Each is also explained where it first appears.
+</figcaption>
+<div aria-describedby="tbl-symbols-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<table class="caption-top table">
+<colgroup>
+<col style="width: 50%">
+<col style="width: 50%">
+</colgroup>
+<thead>
+<tr class="header">
+<th style="text-align: left;">Symbol</th>
+<th style="text-align: left;">Meaning</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: left;"><span class="math inline">\(\varepsilon\)</span></td>
+<td style="text-align: left;">the privacy parameter of DP: a smaller value means stronger privacy</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;"><span class="math inline">\(e^{\varepsilon}\)</span></td>
+<td style="text-align: left;">the most that seeing the model can multiply an attacker’s odds by</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;"><span class="math inline">\(\delta\)</span></td>
+<td style="text-align: left;">the small probability that the guarantee fails outright</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;"><span class="math inline">\(V\)</span></td>
+<td style="text-align: left;">what the bank gains when it reaches one eligible customer instead of an ineligible one</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;"><span class="math inline">\(k\)</span></td>
+<td style="text-align: left;">a difference in the number of eligible customers reached</td>
+</tr>
+</tbody>
+</table>
+</div>
+</figure>
+</div>
 <section id="sec-case" class="level1" data-number="1">
 <h1 data-number="1"><span class="header-section-number">1</span> The use case</h1>
-<p>A retail bank is about to launch a premium credit card. The card only makes sense for customers who earn more than $50,000 a year, so the marketing team wants to send the offer to those customers and to nobody else. The bank does not record income directly, but it holds other facts about each customer, such as age, education, occupation, hours worked and marital status. The team wants a model that predicts from those facts who is likely to be eligible.</p>
-<p>The model will leave the bank’s secure environment, because an outside agency runs the campaign. The bank’s privacy policy therefore requires the model to be trained with differential privacy (DP), so that the model cannot be used to learn much about any single customer. The policy does not say how strict the guarantee must be. That choice is the subject of this note.</p>
-<p>We need data that behaves like the bank’s records, and the standard public dataset for this is Adult. It holds 48,842 people from the 1994 US Current Population Survey, each with the attributes above and a label saying whether their income was above $50,000 (<a href="https://archive.ics.uci.edu/dataset/2/adult">UCI Machine Learning Repository</a>). We use its training file of 32,561 people as the bank’s customer records, which the model learns from. Its test file of 16,281 people plays the customers who will receive the next campaign. Everything below is computed by one script, <a href="https://github.com/manuelvloureiro/privacy-preserving-machine-learning-book/blob/main/code/notes/privacy_utility_tradeoff.py">code/notes/privacy_utility_tradeoff.py</a>, which a reader can run to get the same numbers.</p>
-<p>Each step below shows the lines of the script that carry it out. The whole experiment runs with one command, and it takes a few minutes with all of a machine’s processor cores:</p>
+<p>A retail bank is about to launch a premium credit card for customers who earn more than $50,000 a year, and it wants to send the offer to them alone. The bank does not record income, but it holds other facts about each customer, such as age, education, occupation, hours worked and marital status. So the marketing team wants a model that predicts from those facts who is likely to be eligible.</p>
+<p>An outside agency runs the campaign, so the model will leave the bank’s secure environment. For that reason the bank’s privacy policy requires DP training, so that nobody can use the model to learn much about any one customer. The policy does not say how strict the guarantee must be, and that choice is the subject of this note.</p>
+<p>The bank’s records are private, so we use a public dataset like them, called Adult. Adult holds 48,842 people from the 1994 US Current Population Survey. Each has these attributes and a label for income above $50,000 (<a href="https://archive.ics.uci.edu/dataset/2/adult">UCI Machine Learning Repository</a>). Its training file of 32,561 people plays the bank’s customer records, which the model learns from. Its test file of 16,281 people plays the customers of the next campaign. One script computes every number below, <a href="https://github.com/manuelvloureiro/privacy-preserving-machine-learning-book/blob/main/code/notes/privacy_utility_tradeoff.py">code/notes/privacy_utility_tradeoff.py</a>, and each step shows its lines. It runs in a few minutes on all of a machine’s processor cores:</p>
 <div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb1"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="ex">uv</span> run python code/notes/privacy_utility_tradeoff.py</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-<p>The walk-through has six steps. It states the business goal as a number (<a href="#sec-goal" class="quarto-xref">Section&nbsp;2</a>), turns the privacy setting into a policy sentence (<a href="#sec-policy" class="quarto-xref">Section&nbsp;3</a>), and fixes everything that must not be tuned on private data (<a href="#sec-fixed" class="quarto-xref">Section&nbsp;4</a>). It then runs the experiment and reads the results, first in technical terms and then in business terms (<a href="#sec-results" class="quarto-xref">Section&nbsp;5</a>). The last steps look at how much the size of the dataset matters (<a href="#sec-size" class="quarto-xref">Section&nbsp;6</a>) and how to present the decision (<a href="#sec-decision" class="quarto-xref">Section&nbsp;7</a>).</p>
 </section>
 <section id="sec-goal" class="level1" data-number="2">
 <h1 data-number="2"><span class="header-section-number">2</span> Step 1: state the business goal as a count</h1>
-<p>Engineers usually measure a model by its accuracy or its area under the curve (AUC), but neither tells the marketing team what it will get. The team cares about one thing, which is how many of the offers reach eligible customers. So we need to fix how many offers are sent and then count how many of them land well.</p>
-<p>The number of offers is a business input, and here is how the bank can choose it without guessing. The Census Bureau publishes the share of people who earn more than $50,000, and in Adult that share is about 24%. If the bank sends as many offers as it expects to have eligible customers, a perfect model would reach every one of them and waste nothing. For the 16,281 campaign customers we send 3,846 offers, the number of eligible customers among them, which is what this rule gives when the published share holds for the bank’s customers.</p>
-<p>That choice makes the business metric easy to read. The model scores every customer, and the bank sends the 3,846 offers to the highest scores. The metric is the number of eligible customers among those 3,846. Every offer that does not reach an eligible customer is wasted, so the waste is 3,846 minus that number.</p>
-<p>In the script, the metric is a short function. It sorts the customers by the model’s score, takes the first <code>offers</code> of them and counts the eligible ones:</p>
+<p>Engineers usually measure a model by its accuracy or its area under the curve (AUC), but neither tells the marketing team what it will get. The team cares about how many offers reach eligible customers, so this step fixes the number of offers and counts how many land well.</p>
+<p>The bank can choose the number of offers from public data. The Census Bureau publishes the share of people who earn more than $50,000, about 24% in Adult. If the bank sends as many offers as it expects eligible customers, a perfect model wastes none. For the 16,281 campaign customers this rule gives 3,846 offers, the number of eligible customers among them, when the published share holds for the bank.</p>
+<p>The bank sends the 3,846 offers to the customers with the highest scores. The business metric is the number of eligible customers among them, and every other offer is wasted. The script computes it with a short function:</p>
 <div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb2" data-excerpt="put-reached"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> reached(scores: Array, y: npt.NDArray[np.int64], offers: <span class="bu">int</span>) <span class="op">-&gt;</span> <span class="bu">int</span>:</span>
 <span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>    <span class="co">"""Eligible customers among the `offers` highest-scored; ties are broken by position, deterministically."""</span></span>
 <span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>    top <span class="op">=</span> np.argsort(<span class="op">-</span>scores, kind<span class="op">=</span><span class="st">"stable"</span>)[:offers]</span>
 <span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> <span class="bu">int</span>(y[top].<span class="bu">sum</span>())</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-<p>The metric needs a baseline, and the natural one is to have no model at all. If the bank sent the 3,846 offers to customers picked at random, each offer would reach an eligible customer with probability 3,846 / 16,281, about 24%. The expected number reached would then be</p>
+<p>The metric needs a baseline, and the natural one is no model at all. If the bank sent the offers to customers picked at random, each would reach an eligible customer with probability 3,846 / 16,281, about 24%. So the expected number reached would be</p>
 <p><span id="eq-auto-index-1"><span class="math display">\[3{,}846 \times \frac{3{,}846}{16{,}281} \approx 909. \tag{1}\]</span></span></p>
-<p>Any model, private or not, has to beat 909 to be worth having.</p>
-<p>The script sets up the campaign the same way. It splits Adult into the bank’s records and the campaign customers, counts the eligible customers to fix the number of offers, and computes the expected reach of random offers:</p>
+<p>Any model, private or not, has to beat 909 to be worth having. The script sets up the campaign in the same way:</p>
 <div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb3" data-excerpt="put-campaign"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a>df <span class="op">=</span> practitioner_datasets.adult()</span>
 <span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>train, test <span class="op">=</span> df.head(TRAIN_ROWS), df.<span class="bu">slice</span>(TRAIN_ROWS)</span>
 <span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a>data <span class="op">=</span> (features(train), labels(train), features(test), labels(test))</span>
 <span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a>eligible <span class="op">=</span> <span class="bu">int</span>(data[<span class="dv">3</span>].<span class="bu">sum</span>())</span>
 <span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a><span class="co"># Random offers reach an eligible customer at the base rate, eligible / campaign customers.</span></span>
 <span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a>baseline <span class="op">=</span> eligible <span class="op">*</span> eligible <span class="op">/</span> <span class="bu">len</span>(data[<span class="dv">3</span>])</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-<p>The money follows from the count. Write <span class="math inline">\(V\)</span> for what the bank gains from reaching one eligible customer instead of an ineligible one. It is the chance that an eligible customer takes up the card times the margin the card earns, and the finance team estimates it, not the data team. Every comparison below is a difference in eligible customers reached, so a difference of <span class="math inline">\(k\)</span> customers is worth <span class="math inline">\(k\,V\)</span> to the bank. We never need to invent a value for <span class="math inline">\(V\)</span>, because the decision in <a href="#sec-decision" class="quarto-xref">Section&nbsp;7</a> only depends on how <span class="math inline">\(k\,V\)</span> compares with what the privacy policy protects.</p>
+<p>The count also gives the money. Write <span class="math inline">\(V\)</span> for what the bank gains when it reaches one eligible customer instead of an ineligible one. It is the chance that an eligible customer takes up the card times the card’s margin, and the finance team estimates it. Every comparison below is a difference of <span class="math inline">\(k\)</span> eligible customers reached, worth <span class="math inline">\(k\,V\)</span> to the bank. So the note never needs a value for <span class="math inline">\(V\)</span>, because the decision in <a href="#sec-decision" class="quarto-xref">Section&nbsp;7</a> only compares <span class="math inline">\(k\,V\)</span> with what the policy protects.</p>
 </section>
 <section id="sec-policy" class="level1" data-number="3">
 <h1 data-number="3"><span class="header-section-number">3</span> Step 2: turn the privacy setting into a sentence</h1>
-<p>DP is controlled by one number, <span class="math inline">\(\varepsilon\)</span>, and a smaller <span class="math inline">\(\varepsilon\)</span> means stronger privacy. On its own, <span class="math inline">\(\varepsilon\)</span> means nothing to a privacy officer, so we translate it into the question an attacker would ask. Suppose an attacker wants to know whether a particular person, say Alice, is one of the bank’s customers. Before seeing the model, the attacker has some belief about that. DP guarantees that seeing the model can multiply the attacker’s odds by at most <span class="math inline">\(e^{\varepsilon}\)</span>.</p>
-<p>The cleanest case is an attacker who starts at even odds, a belief of 50%. The odds are then 1 to 1, and after seeing the model they are at most <span class="math inline">\(e^\varepsilon\)</span> to 1. Turned back into a probability, the attacker’s belief can rise to at most</p>
+<p>DP is set by one number, <span class="math inline">\(\varepsilon\)</span>, and a smaller <span class="math inline">\(\varepsilon\)</span> means stronger privacy. A privacy officer cannot sign a bare number, so this step translates <span class="math inline">\(\varepsilon\)</span> into an attacker’s question. Suppose an attacker wants to know whether one person, say Alice, is a customer of the bank, and starts with some belief about it. DP guarantees that seeing the model can multiply the attacker’s odds by at most <span class="math inline">\(e^{\varepsilon}\)</span>.</p>
+<p>The simplest case is an attacker who starts at even odds, a belief of 50%. The odds are then 1 to 1, and after the attacker sees the model they are at most <span class="math inline">\(e^\varepsilon\)</span> to 1. Odds of <span class="math inline">\(e^\varepsilon\)</span> to 1 are a probability of <span class="math inline">\(e^\varepsilon\)</span> out of <span class="math inline">\(1 + e^\varepsilon\)</span>, so the attacker’s belief can rise to at most</p>
 <p><span id="eq-auto-index-2"><span class="math display">\[\text{belief ceiling} = \frac{e^{\varepsilon}}{1 + e^{\varepsilon}}. \tag{2}\]</span></span></p>
-<p>At <span class="math inline">\(\varepsilon = 1\)</span> the ceiling is <span class="math inline">\(e/(1+e)\)</span>, about 73%. At <span class="math inline">\(\varepsilon = 0.1\)</span> it is about 52.5%, so the model teaches the attacker almost nothing, and at <span class="math inline">\(\varepsilon = 3\)</span> it is about 95%. That last guarantee still holds, but it is weak.</p>
-<p>This is the sentence the privacy officer signs, and in our use case they choose a ceiling of 75%. In other words, an attacker who thinks it is a coin flip whether Alice is a customer must not end up more than 75% sure. Solving the formula for <span class="math inline">\(\varepsilon\)</span> turns the sentence into a number:</p>
+<p>At <span class="math inline">\(\varepsilon = 1\)</span> the ceiling is <span class="math inline">\(e/(1+e)\)</span>, about 73%. At <span class="math inline">\(\varepsilon = 0.1\)</span> it is about 52.5%, so the model teaches the attacker almost nothing. At <span class="math inline">\(\varepsilon = 3\)</span> it is about 95%, a guarantee that still holds but is weak.</p>
+<p>The privacy officer signs this sentence, and in our use case they choose a ceiling of 75%. In other words, an attacker who thinks it is a coin flip whether Alice is a customer must not end up more than 75% sure. To turn the sentence into a number, multiply out the fraction to get a bound on <span class="math inline">\(e^{\varepsilon}\)</span>, then take the logarithm:</p>
 <p><span id="eq-auto-index-3"><span class="math display">\[\frac{e^{\varepsilon}}{1+e^{\varepsilon}} \le 0.75 \quad\Longleftrightarrow\quad e^{\varepsilon} \le 3 \quad\Longleftrightarrow\quad \varepsilon \le \ln 3 \approx 1.10. \tag{3}\]</span></span></p>
-<p>The script holds both directions of this translation. The first function gives the ceiling for a given <span class="math inline">\(\varepsilon\)</span>, which labels the top axis of every figure below. The second turns the officer’s ceiling back into <span class="math inline">\(\varepsilon\)</span>, and <code>epsilon_for_belief(0.75)</code> returns the policy’s limit of 1.10:</p>
+<p>The script holds both directions of this translation. The first function labels the top axis of every figure below with the ceiling, and <code>epsilon_for_belief(0.75)</code> returns the policy’s limit of 1.10:</p>
 <div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb4" data-excerpt="put-belief"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> belief_ceiling(eps: <span class="bu">float</span>, prior: <span class="bu">float</span> <span class="op">=</span> <span class="fl">0.5</span>) <span class="op">-&gt;</span> <span class="bu">float</span>:</span>
 <span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>    <span class="co">"""Highest posterior that epsilon-DP allows an attacker who starts at `prior` that one customer is in the data."""</span></span>
 <span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a>    odds <span class="op">=</span> math.exp(eps) <span class="op">*</span> prior <span class="op">/</span> (<span class="dv">1</span> <span class="op">-</span> prior)</span>
@@ -221,14 +320,13 @@ window.Quarto = {
 <span id="cb4-7"><a href="#cb4-7" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> epsilon_for_belief(belief: <span class="bu">float</span>, prior: <span class="bu">float</span> <span class="op">=</span> <span class="fl">0.5</span>) <span class="op">-&gt;</span> <span class="bu">float</span>:</span>
 <span id="cb4-8"><a href="#cb4-8" aria-hidden="true" tabindex="-1"></a>    <span class="co">"""The largest epsilon whose belief ceiling, from `prior`, is `belief`."""</span></span>
 <span id="cb4-9"><a href="#cb4-9" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> math.log((belief <span class="op">/</span> (<span class="dv">1</span> <span class="op">-</span> belief)) <span class="op">/</span> (prior <span class="op">/</span> (<span class="dv">1</span> <span class="op">-</span> prior)))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-<p>The policy is set before anyone looks at the model’s results. If the ceiling were chosen after seeing the accuracy, it would drift to wherever the model happens to do well.</p>
-<p>One technical detail completes the guarantee. The training method used below adds a second parameter, <span class="math inline">\(\delta\)</span>, which is the small probability that the guarantee fails outright. A common rule sets <span class="math inline">\(\delta\)</span> below one over the number of people, so that the guarantee is not expected to fail for anyone. For 32,561 customers this gives <span class="math inline">\(\delta = 10^{-5}\)</span>, and we use that value throughout.</p>
+<p>The officer fixes the ceiling before anyone sees the model’s results, because a ceiling chosen afterwards would drift to wherever the model does well. The training method below adds a second parameter, <span class="math inline">\(\delta\)</span>, the small probability that the guarantee fails outright. A common rule sets <span class="math inline">\(\delta\)</span> below one over the number of people, so that the guarantee is not expected to fail for anyone. For 32,561 customers this gives <span class="math inline">\(\delta = 10^{-5}\)</span>, and we use that value throughout.</p>
 </section>
 <section id="sec-fixed" class="level1" data-number="4">
 <h1 data-number="4"><span class="header-section-number">4</span> Step 3: fix everything that must not be tuned on private data</h1>
-<p>A DP guarantee covers what the training run does with the data. It does not cover choices that someone made by looking at the private data beforehand. If an engineer tried twenty settings on the customer records and kept the best one, that choice would itself leak information. So everything apart from the training run is decided from public information.</p>
-<p>The preprocessing comes from the survey’s public codebook, not from the data. Ages are scaled within 17 to 90, years of education within 1 to 16 and weekly hours within 1 to 99. Capital gains and losses are scaled on a log scale up to the survey’s published cap of 99,999. Each category, such as an occupation, becomes a 0-or-1 column taken from the codebook’s list. Every customer’s row then lies in a known range, which DP needs, because it bounds how much one customer can change the training.</p>
-<p>The preprocessing function reads only these public ranges and lists, never a statistic of the data. Each number is clipped into <span class="math inline">\([0, 1]\)</span>, and each customer has at most one 1 per category, which is what bounds every row:</p>
+<p>A DP guarantee covers what the training run does with the data, but not choices made earlier by looking at it. If an engineer tried twenty settings on the customer records and kept the best one, that choice would itself leak information. So every choice outside the training run comes from public information.</p>
+<p>The preprocessing comes from the survey’s public codebook, not from the data. It scales ages within 17 to 90 and years of education within 1 to 16. It scales weekly hours within 1 to 99, and capital gains and losses on a log scale up to the survey’s published cap of 99,999. Each category, such as an occupation, becomes a 0-or-1 column taken from the codebook’s list. So every customer’s row lies in a known range, which DP needs, because that range bounds how much one customer can change the training.</p>
+<p>The preprocessing function reads only these public ranges and lists, never a statistic of the data:</p>
 <div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb5" data-excerpt="put-features"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> features(df: pl.DataFrame) <span class="op">-&gt;</span> Array:</span>
 <span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a>    <span class="co">"""Map each row to [0, 1]^d using only the codebook; a missing category is a row of zeros."""</span></span>
 <span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a>    cols: <span class="bu">list</span>[Array] <span class="op">=</span> []</span>
@@ -243,8 +341,8 @@ window.Quarto = {
 <span id="cb5-12"><a href="#cb5-12" aria-hidden="true" tabindex="-1"></a>        <span class="cf">for</span> value <span class="kw">in</span> values:</span>
 <span id="cb5-13"><a href="#cb5-13" aria-hidden="true" tabindex="-1"></a>            cols.append(np.array([<span class="fl">1.0</span> <span class="cf">if</span> v <span class="op">==</span> value <span class="cf">else</span> <span class="fl">0.0</span> <span class="cf">for</span> v <span class="kw">in</span> column]))</span>
 <span id="cb5-14"><a href="#cb5-14" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> np.column_stack(cols)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-<p>The two techniques we compare are also fixed in advance. The first is private stochastic gradient descent (SGD), known as <strong>DP-SGD</strong>, the standard way to train a model with DP. It trains a logistic regression, the same kind of model a bank would use without DP, in small random batches. It caps how much each customer can move the model at each step, which is called <em>clipping</em>, and it adds random noise to every update (<a href="https://opacus.ai/">Opacus</a>). The noise is set by Opacus’s privacy accountant so that the whole training run meets the target <span class="math inline">\(\varepsilon\)</span> at <span class="math inline">\(\delta = 10^{-5}\)</span>.</p>
-<p>The accountant works backwards from the target. Given <span class="math inline">\(\varepsilon\)</span>, <span class="math inline">\(\delta\)</span>, the share of customers in each batch and the number of passes, it returns the noise multiplier, the size of the noise relative to the clipping norm:</p>
+<p>The two techniques we compare are also fixed in advance. The first is private stochastic gradient descent (SGD), known as <strong>DP-SGD</strong>, the standard way to train a model with DP. It trains a logistic regression, as a bank would without DP, on small random batches. At each step it caps how much each customer can move the model, which is called <em>clipping</em>, and it adds random noise to the update (<a href="https://opacus.ai/">Opacus</a>).</p>
+<p>Opacus’s privacy accountant sets the noise so that the whole run meets the target <span class="math inline">\(\varepsilon\)</span> at <span class="math inline">\(\delta = 10^{-5}\)</span>. From <span class="math inline">\(\varepsilon\)</span>, <span class="math inline">\(\delta\)</span>, the share of customers in each batch and the number of passes, it returns the noise multiplier, the size of the noise relative to the clipping norm:</p>
 <div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb6" data-excerpt="put-calibrate"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> noise_multiplier(eps: <span class="bu">float</span>, n: <span class="bu">int</span>) <span class="op">-&gt;</span> <span class="bu">float</span>:</span>
 <span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a>    <span class="co">"""The noise multiplier that makes DP-SGD with these settings (eps, DELTA)-DP, by Opacus's PRV accountant."""</span></span>
 <span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> <span class="bu">float</span>(</span>
@@ -252,7 +350,7 @@ window.Quarto = {
 <span id="cb6-5"><a href="#cb6-5" aria-hidden="true" tabindex="-1"></a>            target_epsilon<span class="op">=</span>eps, target_delta<span class="op">=</span>DELTA, sample_rate<span class="op">=</span>BATCH <span class="op">/</span> n, epochs<span class="op">=</span>EPOCHS, accountant<span class="op">=</span><span class="st">"prv"</span></span>
 <span id="cb6-6"><a href="#cb6-6" aria-hidden="true" tabindex="-1"></a>        )</span>
 <span id="cb6-7"><a href="#cb6-7" aria-hidden="true" tabindex="-1"></a>    )</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-<p>Opacus then wraps the model, the optimizer and the data loader. After that, every training step draws a random batch, clips each customer’s contribution and adds noise of that size, and the rest of the training loop is the same as without DP:</p>
+<p>Opacus then wraps the model, the optimizer and the data loader, so that every step draws a random batch, clips each customer’s contribution and adds that noise. The rest of the loop is the same as without DP:</p>
 <div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb7" data-excerpt="put-private"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a>optimizer <span class="op">=</span> torch.optim.SGD(layer.parameters(), lr<span class="op">=</span>LR, momentum<span class="op">=</span>MOMENTUM)</span>
 <span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a>engine: PrivacyEngine <span class="op">|</span> <span class="va">None</span> <span class="op">=</span> <span class="va">None</span></span>
 <span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a>model: nn.Module <span class="op">=</span> layer</span>
@@ -261,9 +359,8 @@ window.Quarto = {
 <span id="cb7-6"><a href="#cb7-6" aria-hidden="true" tabindex="-1"></a>    model, optimizer, loader <span class="op">=</span> engine.make_private(  <span class="co"># Poisson sampling, per-example clipping, Gaussian noise</span></span>
 <span id="cb7-7"><a href="#cb7-7" aria-hidden="true" tabindex="-1"></a>        module<span class="op">=</span>layer, optimizer<span class="op">=</span>optimizer, data_loader<span class="op">=</span>loader, noise_multiplier<span class="op">=</span>sigma, max_grad_norm<span class="op">=</span>CLIP</span>
 <span id="cb7-8"><a href="#cb7-8" aria-hidden="true" tabindex="-1"></a>    )</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-<p>DP-SGD’s settings were fixed before training and never tuned on the customer records. It uses batches of about 1,000 customers, 10 passes over the data, a clipping norm of 1 and a learning rate of 0.5. The second technique is a <strong>private naive Bayes</strong> classifier from IBM’s diffprivlib, which adds noise to simple averages per class (<a href="https://github.com/IBM/differential-privacy-library">diffprivlib</a>). It gives the stronger pure <span class="math inline">\(\varepsilon\)</span> guarantee, with no <span class="math inline">\(\delta\)</span>, so it also meets the <span class="math inline">\((\varepsilon, 10^{-5})\)</span> standard, and both techniques can be placed on the same axis.</p>
-<p>The experiment then trains each technique at ten values of <span class="math inline">\(\varepsilon\)</span> from 0.01 to 10. It repeats each setting with 20 random seeds, because DP training is random and one run can be lucky or unlucky. It also trains each model without DP, with the same settings, so that the cost of privacy can be read off directly.</p>
-<p>Each training run is one job, made of a technique, a value of <span class="math inline">\(\varepsilon\)</span> (or none, for no DP), a number of customers and a seed. The script lists the jobs and spreads them over the processor cores:</p>
+<p>DP-SGD’s settings were fixed in advance, with batches of about 1,000 customers, 10 passes over the data, a clipping norm of 1 and a learning rate of 0.5. The second technique is a <strong>private naive Bayes</strong> classifier from IBM’s diffprivlib, which adds noise to simple averages per class (<a href="https://github.com/IBM/differential-privacy-library">diffprivlib</a>). It gives the stronger pure <span class="math inline">\(\varepsilon\)</span> guarantee, with no <span class="math inline">\(\delta\)</span>. A pure guarantee also meets the <span class="math inline">\((\varepsilon, 10^{-5})\)</span> standard, so both techniques sit on the same axis.</p>
+<p>The experiment trains each technique at ten values of <span class="math inline">\(\varepsilon\)</span> from 0.01 to 10. DP training is random, and one run can be lucky or unlucky, so each setting runs with 20 random seeds. Each model is also trained without DP, with the same settings, so that the figures show the cost of privacy directly. The script spreads these runs over the processor cores:</p>
 <div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb8" data-excerpt="put-sweep"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a>jobs: <span class="bu">list</span>[<span class="bu">tuple</span>[<span class="bu">str</span>, <span class="bu">float</span> <span class="op">|</span> <span class="va">None</span>, <span class="bu">int</span>, <span class="bu">int</span>]] <span class="op">=</span> []</span>
 <span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> technique <span class="kw">in</span> COLOURS:</span>
 <span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a>    jobs <span class="op">+=</span> [(technique, eps, TRAIN_ROWS, seed) <span class="cf">for</span> eps <span class="kw">in</span> [<span class="va">None</span>, <span class="op">*</span>EPSILONS] <span class="cf">for</span> seed <span class="kw">in</span> <span class="bu">range</span>(seeds)]</span>
@@ -274,7 +371,7 @@ window.Quarto = {
 </section>
 <section id="sec-results" class="level1" data-number="5">
 <h1 data-number="5"><span class="header-section-number">5</span> Step 4: read the results, technical first</h1>
-<p><a href="#fig-technical" class="quarto-xref">Figure&nbsp;1</a> shows the engineer’s view. Its vertical axis is the AUC, the probability that the model scores a randomly chosen eligible customer above a randomly chosen ineligible one. An AUC of 0.5 is guessing, and 1 is perfect. The bottom axis is <span class="math inline">\(\varepsilon\)</span>, and the top axis translates it into the attacker’s belief ceiling of <a href="#sec-policy" class="quarto-xref">Section&nbsp;3</a>. The shaded bands show the range from the 10th to the 90th percentile over the seeds.</p>
+<p><a href="#fig-technical" class="quarto-xref">Figure&nbsp;1</a> shows the results in the engineer’s terms. Its vertical axis is the AUC, the probability that the model scores a randomly chosen eligible customer above a randomly chosen ineligible one, so 0.5 is guessing and 1 is perfect. The bottom axis is <span class="math inline">\(\varepsilon\)</span>, and the top axis gives the attacker’s belief ceiling from <a href="#sec-policy" class="quarto-xref">Section&nbsp;3</a>. The shaded bands run from the 10th to the 90th percentile over the seeds.</p>
 <div id="fig-technical" class="quarto-float quarto-figure quarto-figure-center anchored">
 <figure class="quarto-float quarto-float-fig figure">
 <div aria-describedby="fig-technical-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
@@ -285,8 +382,8 @@ Figure&nbsp;1: Model quality against the privacy setting. Each line is a DP tech
 </figcaption>
 </figure>
 </div>
-<p>Two things stand out. DP-SGD is better than naive Bayes at every privacy level, so naive Bayes can be dropped. And DP-SGD’s curve is flat over most of the range, which means that from about <span class="math inline">\(\varepsilon = 0.3\)</span> upwards it is almost as good as the model trained without DP. The quality only falls away below <span class="math inline">\(\varepsilon \approx 0.1\)</span>, where the attacker’s ceiling is already within a few points of 50%.</p>
-<p><a href="#fig-business" class="quarto-xref">Figure&nbsp;2</a> shows the same experiment in the bank’s terms. Its vertical axis is the number of eligible customers reached by the 3,846 offers, and it adds the two lines that matter to the business. The upper dashed line is the best model without DP, and the dotted line is no model at all. The shaded region on the right is what the privacy policy forbids.</p>
+<p>DP-SGD is better than naive Bayes at every privacy level except the smallest, <span class="math inline">\(\varepsilon = 0.01\)</span>, where the two are almost tied, so naive Bayes can be dropped. DP-SGD’s curve is also flat over most of the range, so from about <span class="math inline">\(\varepsilon = 0.3\)</span> upwards it is almost as good as the model trained without DP. Its quality only falls away below <span class="math inline">\(\varepsilon \approx 0.1\)</span>, where the attacker’s ceiling is already within a few points of 50%.</p>
+<p><a href="#fig-business" class="quarto-xref">Figure&nbsp;2</a> shows them in the bank’s terms. Its vertical axis is the number of eligible customers reached by the 3,846 offers. The upper dashed line is the best model without DP, the dotted line is no model at all, and the shaded region on the right is what the privacy policy forbids.</p>
 <div id="fig-business" class="quarto-float quarto-figure quarto-figure-center anchored">
 <figure class="quarto-float quarto-float-fig figure">
 <div aria-describedby="fig-business-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
@@ -297,8 +394,8 @@ Figure&nbsp;2: Eligible customers reached by the campaign against the privacy se
 </figcaption>
 </figure>
 </div>
-<p>The gap between a DP curve and the upper dashed line is the cost of privacy, counted in customers. The gap between the curve and the dotted line is what the model is worth compared with sending offers at random. <a href="#tbl-frontier" class="quarto-xref">Table&nbsp;1</a> lists every private configuration. A configuration is on the <em>frontier</em> when no other configuration is at least as private and reaches more customers. Only the frontier is worth considering, and here it consists of DP-SGD alone.</p>
-<p>The frontier comes from a short filter. It sorts the configurations from most to least private and keeps each one that reaches more customers than every more private configuration before it:</p>
+<p>The gap between a DP curve and the upper dashed line is the cost of privacy, counted in customers. The gap between the curve and the dotted line is what the model is worth compared with random offers. <a href="#tbl-frontier" class="quarto-xref">Table&nbsp;3</a> lists every private configuration. A configuration is on the <em>frontier</em> when no other configuration is at least as private and reaches more customers, so only the frontier is worth considering. Here the frontier is DP-SGD at every level from <span class="math inline">\(\varepsilon = 0.02\)</span> up, with naive Bayes only at <span class="math inline">\(\varepsilon = 0.01\)</span>.</p>
+<p>The script finds the frontier with a short filter:</p>
 <div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb9" data-excerpt="put-frontier"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> non_dominated(points: <span class="bu">list</span>[<span class="bu">tuple</span>[<span class="bu">float</span>, <span class="bu">float</span>]]) <span class="op">-&gt;</span> <span class="bu">list</span>[<span class="bu">int</span>]:</span>
 <span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a>    <span class="co">"""Indices of the (privacy loss, utility) points that no other point dominates."""</span></span>
 <span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a>    order <span class="op">=</span> <span class="bu">sorted</span>(<span class="bu">range</span>(<span class="bu">len</span>(points)), key<span class="op">=</span><span class="kw">lambda</span> i: (points[i][<span class="dv">0</span>], <span class="op">-</span>points[i][<span class="dv">1</span>]))</span>
@@ -312,7 +409,7 @@ Figure&nbsp;2: Eligible customers reached by the campaign against the privacy se
 <div id="tbl-frontier" class="quarto-float quarto-figure quarto-figure-center anchored">
 <figure class="quarto-float quarto-float-tbl figure">
 <figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl" id="tbl-frontier-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-Table&nbsp;1: Every private configuration, averaged over the seeds.
+Table&nbsp;3: Every private configuration, averaged over the seeds.
 </figcaption>
 <div aria-describedby="tbl-frontier-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
 <table class="caption-top table">
@@ -503,7 +600,7 @@ Table&nbsp;1: Every private configuration, averaged over the seeds.
 </section>
 <section id="sec-size" class="level1" data-number="6">
 <h1 data-number="6"><span class="header-section-number">6</span> Step 5: check how much the data size matters</h1>
-<p>The flat curve in <a href="#fig-business" class="quarto-xref">Figure&nbsp;2</a> depends on the bank having many customers. DP hides each individual by adding noise, and the more customers there are, the less that noise matters relative to the signal they provide together. A bank with fewer customers, or a campaign aimed at one region, pays more for the same guarantee. The script therefore trains DP-SGD again on the first 2,000 and the first 8,000 customers, and <a href="#fig-sizes" class="quarto-xref">Figure&nbsp;3</a> compares the three sizes.</p>
+<p>The flat curve in <a href="#fig-business" class="quarto-xref">Figure&nbsp;2</a> depends on the bank having many customers. DP hides each person with noise, and the more customers there are, the less that noise matters next to their combined signal. So a bank with fewer customers, or a campaign aimed at one region, pays more for the same guarantee. To measure how much, the script trains DP-SGD again on the first 2,000 and the first 8,000 customers, and <a href="#fig-sizes" class="quarto-xref">Figure&nbsp;3</a> compares the three sizes.</p>
 <div id="fig-sizes" class="quarto-float quarto-figure quarto-figure-center anchored">
 <figure class="quarto-float quarto-float-fig figure">
 <div aria-describedby="fig-sizes-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
@@ -514,11 +611,11 @@ Figure&nbsp;3: Eligible customers reached by DP-SGD trained on 2,000, 8,000 and 
 </figcaption>
 </figure>
 </div>
-<p>With fewer customers the curve bends down at a larger <span class="math inline">\(\varepsilon\)</span>, and the gap to the model without DP is wider at every setting. <a href="#tbl-sizes" class="quarto-xref">Table&nbsp;2</a> puts numbers on it. For the smallest base the gap stays open even at <span class="math inline">\(\varepsilon = 10\)</span>, where the noise is negligible. That part of the cost comes from clipping with settings chosen for the full dataset, and a bank in that position would tune the clipping norm and learning rate on public or synthetic data before paying it. For a business this is often the most useful finding, because it says whether the guarantee is cheap for this dataset, and whether pooling data or waiting for more customers would make a stricter policy affordable.</p>
+<p>With fewer customers the curve bends down at a larger <span class="math inline">\(\varepsilon\)</span>. The gap to the model without DP is also wider at every setting, as <a href="#tbl-sizes" class="quarto-xref">Table&nbsp;4</a> shows in numbers. For the smallest base the gap stays open even at <span class="math inline">\(\varepsilon = 10\)</span>, where the noise is negligible. That part of the cost comes from the clipping settings, which suit the full dataset. So a bank in that position would first tune them on public or synthetic data. For a business this is often the most useful finding. It says whether the guarantee is cheap for this dataset, and whether more data would make a stricter policy affordable.</p>
 <div id="tbl-sizes" class="quarto-float quarto-figure quarto-figure-center anchored">
 <figure class="quarto-float quarto-float-tbl figure">
 <figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl" id="tbl-sizes-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-Table&nbsp;2: Eligible customers missed because of privacy, by the number of customers the model is trained on.
+Table&nbsp;4: Eligible customers missed because of privacy, by the number of customers the model is trained on.
 </figcaption>
 <div aria-describedby="tbl-sizes-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
 <table class="caption-top table">
@@ -568,11 +665,11 @@ Table&nbsp;2: Eligible customers missed because of privacy, by the number of cus
 </section>
 <section id="sec-decision" class="level1" data-number="7">
 <h1 data-number="7"><span class="header-section-number">7</span> Step 6: present the menu and decide</h1>
-<p>The decision maker does not need the curves. They need a few options, each with a privacy sentence and its business effect, and <a href="#tbl-menu" class="quarto-xref">Table&nbsp;3</a> gives them. The options are the best technique at a few privacy levels, plus the two reference points, no model and no DP. The membership column gives a second privacy sentence. It bounds how often any attack that wrongly accuses 1% of non-customers can correctly identify a real customer (<a href="https://arxiv.org/abs/1311.0776">Kairouz et al., 2015</a>).</p>
+<p>The decision maker needs a few options, each with a privacy sentence and its business effect, and <a href="#tbl-menu" class="quarto-xref">Table&nbsp;5</a> gives them. The options are the best technique at a few privacy levels, plus the two reference points, no model and no DP. The membership column gives a second privacy sentence. It bounds how often an attack can correctly identify a real customer, for any attack that wrongly accuses 1% of non-customers (<a href="https://arxiv.org/abs/1311.0776">Kairouz et al., 2015</a>).</p>
 <div id="tbl-menu" class="quarto-float quarto-figure quarto-figure-center anchored">
 <figure class="quarto-float quarto-float-tbl figure">
 <figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl" id="tbl-menu-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-Table&nbsp;3: The options menu for one campaign of 3,846 offers, best technique at each option.
+Table&nbsp;5: The options menu for one campaign of 3,846 offers, best technique at each option.
 </figcaption>
 <div aria-describedby="tbl-menu-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
 <table class="caption-top table">
@@ -656,14 +753,14 @@ Table&nbsp;3: The options menu for one campaign of 3,846 offers, best technique 
 </div>
 </figure>
 </div>
-<p>The policy ceiling of <a href="#sec-policy" class="quarto-xref">Section&nbsp;3</a>, <span class="math inline">\(\varepsilon \le 1.10\)</span>, picks the option.</p>
+<p>The policy ceiling from <a href="#sec-policy" class="quarto-xref">Section&nbsp;3</a>, <span class="math inline">\(\varepsilon \le 1.10\)</span>, picks the option.</p>
 <p>The largest value on the grid below the ceiling is <span class="math inline">\(\varepsilon = 1\)</span>, and at that value the DP-SGD model is on the frontier. Across the seeds it reaches between 2,544 and 2,557 of the 3,846 eligible customers, 2,552 on average. The model without DP reaches 2,568, and random offers reach 909. So privacy costs about 16 eligible customers per campaign, while the private model still reaches about 1,643 more than sending the offers at random. In money, with <span class="math inline">\(V\)</span> the value to the bank of reaching one eligible customer, the cost of privacy is about <span class="math inline">\(16\,V\)</span> per campaign and the value of the private model over no model is about <span class="math inline">\(1,643\,V\)</span>. Even at <span class="math inline">\(\varepsilon = 10\)</span>, where the noise is small, the private model reaches 2,552. So almost all of the cost at the ceiling comes from clipping each customer’s influence, which DP-SGD does at every <span class="math inline">\(\varepsilon\)</span>, and almost none from the noise that the stricter policy adds.</p>
-<p>The decision then comes down to one comparison that the business can make. The finance team supplies <span class="math inline">\(V\)</span>, and the cost of privacy in money follows from the count above. The bank compares that cost with what the policy buys, which is the ability to hand the model to an outside agency at all, and a defensible answer if a regulator or a customer asks what the model reveals about them. In this use case the cost is small enough that the comparison is easy. In another use case, with fewer customers or a stricter ceiling, <a href="#tbl-sizes" class="quarto-xref">Table&nbsp;2</a> shows how quickly it can stop being easy.</p>
-<p>Three people sign the decision, each for their own part. The privacy officer signs the ceiling, which was fixed before the results were known. The engineer signs that the configuration meets it, with the accountant’s <span class="math inline">\(\varepsilon\)</span> and <span class="math inline">\(\delta\)</span> and the settings of <a href="#sec-fixed" class="quarto-xref">Section&nbsp;4</a>. The business owner signs the cost in customers, and so in money. All of this goes into a release record, together with the script that produced the numbers, so that the decision can be checked and revisited when the data or the policy changes.</p>
+<p>The decision then comes down to one comparison. The finance team supplies <span class="math inline">\(V\)</span>, the value of one eligible customer reached, so the cost of privacy in money is <span class="math inline">\(V\)</span> times the customers it loses. The bank compares that cost with what the policy buys. The bank can hand the model to an outside agency, and it can answer a regulator or a customer who asks what the model reveals. Here the cost is small, so the comparison is easy, but <a href="#tbl-sizes" class="quarto-xref">Table&nbsp;4</a> shows how quickly that changes with fewer customers.</p>
+<p>Three people sign the decision. The privacy officer signs the ceiling, fixed before the results were known. The engineer signs that the configuration meets the ceiling, with the accountant’s <span class="math inline">\(\varepsilon\)</span> and <span class="math inline">\(\delta\)</span> and the settings of <a href="#sec-fixed" class="quarto-xref">Section&nbsp;4</a>. The business owner signs the cost in customers, and so in money. A release record keeps all of this with the script, so that anyone can check the decision and revisit it when the data or the policy changes.</p>
 </section>
 <section id="sec-other" class="level1" data-number="8">
 <h1 data-number="8"><span class="header-section-number">8</span> Doing this in another business</h1>
-<p>The six steps carry over to any use case, and only the contents of each step change. The business metric is whatever count the decision turns on, such as fraud caught at a fixed number of reviews, customers retained by a fixed number of calls, or forecast error in units of stock. The baseline is always what the business would do without the model. The privacy ceiling is always a sentence about an attacker’s belief, translated into <span class="math inline">\(\varepsilon\)</span> before anyone sees the results. The experiment is always a sweep over <span class="math inline">\(\varepsilon\)</span>, techniques and seeds, read first as model quality and then as the business count. And the output is always a short menu with a cost in the business’s own units, which the people who own the risk and the revenue can sign.</p>
+<p>The six steps carry over to any use case, and only their contents change. The metric is whatever count the decision turns on, such as fraud caught at a fixed number of reviews, and the baseline is what the business does without the model. The ceiling is still a sentence about an attacker’s belief, fixed before anyone sees the results. The output is still a short menu with a cost in the business’s own units, for the people who own the risk and the revenue to sign.</p>
 </section>
 <section id="sec-sources" class="level1" data-number="9">
 <h1 data-number="9"><span class="header-section-number">9</span> Sources</h1>

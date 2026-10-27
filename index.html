@@ -18,65 +18,57 @@
   h2 { font-size: 1.2rem; margin: 0 0 .35rem; }
   p { margin: 0 0 .5rem; }
   a { color: var(--link); }
-</style>
-</head>
-<body>
-<main>
-  <h1>Privacy-Preserving Machine Learning</h1>
-  <p class="author">Manuel V. Loureiro</p>
+  h3 { font-size: .85rem; letter-spacing: .06em; text-transform: uppercase; color: var(--muted); margin: 2.25rem 0 .25rem;  <p>Four books and a set of study notes. They are written to be read in order: the course gives the foundations, the full edition the depth, the practitioner edition the practice, the OpenDP book one library end to end, and each study note one question after the book it extends. If you build or review private systems and want results rather than proofs, start at step 3.</p>
 
+  <h3>Reading order</h3>
   <section>
-    <h2><a href="book-full/">The full edition</a></h2>
-    <p>Every result derived, for readers who want the mathematics.</p>
-    <p><a href="Privacy-Preserving-Machine-Learning.pdf">Download the PDF</a></p>
-  </section>
-
-  <section>
-    <h2><a href="book-practitioner/">The practitioner edition</a></h2>
-    <p>The same topics without proofs, for people who build and audit private machine-learning systems.</p>
-    <p><a href="Privacy-Preserving-Machine-Learning-Practitioner.pdf">Download the PDF</a></p>
-  </section>
-
-  <section>
-    <h2><a href="book-exercises/">The exercise book</a></h2>
-    <p>The full edition's exercises, each with a worked solution.</p>
-  </section>
-
-  <section>
-    <h2><a href="book-course/">A Course in Differential Privacy</a></h2>
-    <p>Differential privacy from first principles, one topic per chapter, with every proof and little else.</p>
+    <h2><span class="step">1</span><a href="book-course/">A Course in Differential Privacy</a></h2>
+    <p>Start here. Differential privacy from first principles, one topic per chapter, with every proof and little else: why anonymization fails, the definition, its mechanisms and composition, answering many queries, private learning and statistics, lower bounds and deployments.</p>
     <p><a href="A-Course-in-Differential-Privacy.pdf">Download the PDF</a></p>
   </section>
 
   <section>
-    <h2><a href="book-opendp/">Differential Privacy with OpenDP</a></h2>
-    <p>The OpenDP library from its first release to synthetic data: tabular queries with Polars, the framework of transformations, measurements and combinators, plugins and models, and contingency tables with AIM and MST, every number computed by code you can run.</p>
+    <h2><span class="step">2</span><a href="book-full/">The full edition</a></h2>
+    <p>The depth. The mathematics the subject needs, the attacks that motivate it, its foundations, privacy accounting and differentially private machine learning, every result derived, with appendices that work through each cited step.</p>
+    <p><a href="Privacy-Preserving-Machine-Learning.pdf">Download the PDF</a></p>
+  </section>
+
+  <section>
+    <h2><span class="step">3</span><a href="book-practitioner/">The practitioner edition</a></h2>
+    <p>The practice. The full edition's topics without proofs, for people who build and audit private machine-learning systems, with workflows that run the real libraries on public data.</p>
+    <p><a href="Privacy-Preserving-Machine-Learning-Practitioner.pdf">Download the PDF</a></p>
+  </section>
+
+  <section>
+    <h2><span class="step">4</span><a href="book-opendp/">Differential Privacy with OpenDP</a></h2>
+    <p>One library end to end. The OpenDP library from its first release to synthetic data: tabular queries with Polars, the framework of transformations, measurements and combinators, plugins and models, and contingency tables with AIM and MST, every number computed by code you can run.</p>
     <p><a href="Differential-Privacy-with-OpenDP.pdf">Download the PDF</a></p>
   </section>
+
+  <h3>Study notes, after the book each one extends</h3>
   <section>
     <h2><a href="notes/concentrated-privacy/">From Differential Privacy to Concentrated Privacy</a></h2>
-    <p>Study notes that derive pure, approximate, mean-concentrated and zero-concentrated differential privacy step by step, with their composition theorems and conversions.</p>
+    <p class="when">After the course's chapters on approximate DP and advanced composition.</p>
+    <p>Pure, approximate, mean-concentrated and zero-concentrated differential privacy derived step by step, with their composition theorems and conversions.</p>
     <p><a href="notes/concentrated-privacy/From-DP-to-Concentrated-Privacy.pdf">Download the PDF</a></p>
   </section>
   <section>
     <h2><a href="notes/privacy-budgets/">Four Definitions of Differential Privacy and Their Budgets</a></h2>
+    <p class="when">After the concentrated-privacy note, or the full edition's Part 4.</p>
     <p>Pure, approximate, concentrated and zero-concentrated differential privacy in one shared structure: the reasoning, the mathematics and how to budget with each, all converted to one reference guarantee and compared, with complete proofs in the appendices.</p>
     <p><a href="notes/privacy-budgets/Four-Privacy-Definitions-and-Their-Budgets.pdf">Download the PDF</a></p>
   </section>
   <section>
+    <h2><a href="notes/python-privacy-libraries/">Privacy Libraries for Python, Compared</a></h2>
+    <p class="when">After the practitioner edition.</p>
+    <p>What each package for differential privacy, privacy auditing, encrypted computation and federated learning does, what it assumes, and the same three jobs run in OpenDP, diffprivlib, Opacus and dp-accounting with every number computed.</p>
+    <p><a href="notes/python-privacy-libraries/Privacy-Libraries-for-Python-Compared.pdf">Download the PDF</a></p>
+  </section>
+  <section>
     <h2><a href="notes/privacy-utility-tradeoff/">The Privacy–Utility Trade-off, Worked Through</a></h2>
+    <p class="when">After the practitioner edition's Part 5.</p>
     <p>One use case from start to finish: a bank trains a targeting model with differential privacy on the Adult dataset, measures the cost in customers reached, turns epsilon into a policy sentence and ends with a menu of options and a decision.</p>
     <p><a href="notes/privacy-utility-tradeoff/Pricing-the-Privacy-Utility-Trade-off.pdf">Download the PDF</a></p>
-  </section>
-  <section>
-    <h2><a href="notes/aim/">AIM, Explained From Scratch</a></h2>
-    <p>Study notes on AIM, a differentially private synthetic-data mechanism, for a reader who knows probability and nothing about privacy or graphical models: the task, the privacy accounting, Private-PGM without its machinery, every round of the algorithm on a toy dataset, and the privacy proof.</p>
-    <p><a href="notes/aim/AIM-Explained-From-Scratch.pdf">Download the PDF</a></p>
-  </section>
-  <section>
-    <h2><a href="notes/dp-datasets/">Datasets for Differentially Private Machine Learning</a></h2>
-    <p>A catalogue of the public datasets that differential privacy papers use, by kind of data, with sizes, licences and the results each is known for, a section on the benchmarks of DP synthetic data generation, and a guide to choosing a dataset for a privacy-utility study.</p>
-    <p><a href="notes/dp-datasets/Datasets-for-Differentially-Private-Machine-Learning.pdf">Download the PDF</a></p>
   </section>
   <!-- Unpublished until the synthetic-data sweep has run and the note has its results.
   <section>
@@ -86,8 +78,18 @@
   </section>
   -->
   <section>
-    <h2><a href="notes/python-privacy-libraries/">Privacy Libraries for Python, Compared</a></h2>
-    <p>What each package for differential privacy, privacy auditing, encrypted computation and federated learning does, what it assumes, and the same three jobs run in OpenDP, diffprivlib, Opacus and dp-accounting with every number computed.</p>
+    <h2><a href="notes/aim/">AIM, Explained From Scratch</a></h2>
+    <p class="when">After the OpenDP book's Part 5.</p>
+    <p>AIM, a differentially private synthetic-data mechanism, for a reader who knows probability and nothing about privacy or graphical models: the task, the privacy accounting, Private-PGM without its machinery, every round of the algorithm on a toy dataset, and the privacy proof.</p>
+    <p><a href="notes/aim/AIM-Explained-From-Scratch.pdf">Download the PDF</a></p>
+  </section>
+  <section>
+    <h2><a href="notes/dp-datasets/">Datasets for Differentially Private Machine Learning</a></h2>
+    <p class="when">When you design a privacy–utility experiment of your own.</p>
+    <p>A catalogue of the public datasets that differential privacy papers use, by kind of data, with sizes, licences and the results each is known for, a section on the benchmarks of DP synthetic data generation, and a guide to choosing a dataset for a privacy-utility study.</p>
+    <p><a href="notes/dp-datasets/Datasets-for-Differentially-Private-Machine-Learning.pdf">Download the PDF</a></p>
+  </section>
+earning does, what it assumes, and the same three jobs run in OpenDP, diffprivlib, Opacus and dp-accounting with every number computed.</p>
     <p><a href="notes/python-privacy-libraries/Privacy-Libraries-for-Python-Compared.pdf">Download the PDF</a></p>
   </section>
 </main>

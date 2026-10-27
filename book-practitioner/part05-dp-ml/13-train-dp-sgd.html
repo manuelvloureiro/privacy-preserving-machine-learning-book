@@ -82,7 +82,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <link href="../site_libs/quarto-html/quarto-syntax-highlighting-bf27225e3a48a9273f3daa8f8e829971.css" rel="stylesheet" id="quarto-text-highlighting-styles">
 <script src="../site_libs/bootstrap/bootstrap.min.js"></script>
 <link href="../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
-<link href="../site_libs/bootstrap/bootstrap-c76bce1ab0818eb3e57b6c28e4057b54.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
+<link href="../site_libs/bootstrap/bootstrap-78f503ea39f784e8964cd205807fbe37.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
 <script id="quarto-search-options" type="application/json">{
   "location": "sidebar",
   "copy-button": false,
@@ -637,148 +637,126 @@ window.Quarto = {
 
 <section id="why-this-matters" class="level2" data-number="43.1">
 <h2 data-number="43.1" class="anchored" data-anchor-id="why-this-matters"><span class="header-section-number">43.1</span> Why this matters</h2>
-<p>You have a PyTorch training loop on sensitive data, and it must become private. The algorithm is stochastic gradient descent (SGD) with differential privacy (DP), called DP-SGD, which clips each record’s gradient and adds noise at every step (<a href="../part05-dp-ml/02-dp-sgd.html">DP-SGD</a>). The library is Opacus, and the hard part is not the call that wraps the model but the dozen decisions around it. Most are inputs to the guarantee. A mistake in any of them leaves code that trains as before but reports a false privacy level <span class="math inline">\(\varepsilon\)</span>.</p>
-<p>This chapter does the whole job on Adult, a census survey of 48,842 people from the UCI Machine Learning Repository. The task is to predict whether a person earns more than $50,000 a year. The script <a href="https://github.com/manuelvloureiro/privacy-preserving-machine-learning-book/blob/main/code/part05-dp-ml/practitioner_dp_sgd.py">practitioner_dp_sgd.py</a> runs every step except tuning, which <a href="https://github.com/manuelvloureiro/privacy-preserving-machine-learning-book/blob/main/code/part05-dp-ml/practitioner_tuning.py">practitioner_tuning.py</a> does. Each runs in one to two minutes without a GPU.</p>
+<p>You have a PyTorch training loop on sensitive data, and it must become private. The algorithm is stochastic gradient descent (SGD) with differential privacy (DP), called DP-SGD, which clips each record’s gradient and adds noise at every step (<a href="../part05-dp-ml/02-dp-sgd.html">DP-SGD</a>). Opacus does it with one call that wraps the model. The hard part is the decisions around that call. A mistake in one of them leaves code that trains as before but reports a false privacy level <span class="math inline">\(\varepsilon\)</span>.</p>
+<p>This chapter trains on Adult, a census survey of 48,842 people from the UCI Machine Learning Repository, to predict whether a person earns more than $50,000 a year. <a href="../part04-privacy-accounting/10-calibrate-dp-sgd.html">Calibrate and account a DP-SGD run</a> plans the privacy side of this run, and this chapter keeps training, tuning and utility. The script <a href="https://github.com/manuelvloureiro/privacy-preserving-machine-learning-book/blob/main/code/part05-dp-ml/practitioner_dp_sgd.py">practitioner_dp_sgd.py</a> runs every step except tuning, which <a href="https://github.com/manuelvloureiro/privacy-preserving-machine-learning-book/blob/main/code/part05-dp-ml/practitioner_tuning.py">practitioner_tuning.py</a> does. Each runs in one to two minutes without a GPU.</p>
 <div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb1"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="ex">uv</span> run python code/part05-dp-ml/practitioner_dp_sgd.py</span>
 <span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="ex">uv</span> run python code/part05-dp-ml/practitioner_tuning.py</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </section>
 <section id="sec-trainwf-unit" class="level2" data-number="43.2">
 <h2 data-number="43.2" class="anchored" data-anchor-id="sec-trainwf-unit"><span class="header-section-number">43.2</span> Fix the privacy unit, n and δ</h2>
-<p>The first decision is what one record is, because the guarantee protects exactly that (<a href="../part05-dp-ml/07-user-level.html">User-level differential privacy</a>). In Adult each row is one person, which rests on how the survey was collected, since Adult has no person identifier. When your data has one, count distinct identifiers, not rows, and give a person with many rows user-level training.</p>
-<p>The script splits the rows with seed 0 into 30,000 private training rows and 16,842 test rows. The other 2,000, the stand-in rows from here on, play the part of public data. The script chooses the clipping norm (the length each record’s gradient is cut to) and the learning rate on them, and never trains on them. Since they come from the same survey, this is an assumption for the demonstration. In production the role belongs to genuinely public data, and without any, tuning costs privacy (<a href="#sec-trainwf-tune" class="quarto-xref"><span>Section 43.10</span></a>).</p>
-<p>Next comes <span class="math inline">\(\delta\)</span>, the small additive slack the guarantee allows on top of <span class="math inline">\(\varepsilon\)</span>. It depends only on the number of people <span class="math inline">\(n\)</span> in the private training set. The book’s default is <span class="math inline">\(\delta \le 1/n^{1.1}\)</span>, rounded down to a power of ten, which keeps it safely below <span class="math inline">\(1/n\)</span> (<a href="../part05-dp-ml/09-choosing-epsilon.html">Choosing ε</a>).</p>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb2" data-excerpt="dpsgd-delta"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> delta_for(n: <span class="bu">int</span>) <span class="op">-&gt;</span> <span class="bu">float</span>:</span>
-<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>    <span class="co">"""The book's default: delta &lt;= 1/n^1.1, rounded down to a power of ten."""</span></span>
-<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> <span class="fl">10.0</span> <span class="op">**</span> math.floor(math.log10(n<span class="op">**-</span><span class="fl">1.1</span>))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-<p>For the 30,000 private training rows, not the 48,842 of the whole dataset, the script prints <span class="math inline">\(\delta = 10^{-5}\)</span>. The usual mistake is quoting a <span class="math inline">\(\delta\)</span> above <span class="math inline">\(1/n\)</span>.</p>
+<p>The guarantee protects exactly one record, so first decide what a record is (<a href="../part05-dp-ml/07-user-level.html">User-level differential privacy</a>). Adult has no person identifier, so one row counts as one person because of how the survey was collected. When your data has an identifier, count distinct identifiers, not rows.</p>
+<p>The script splits the rows with seed 0 into 30,000 private training rows and 16,842 test rows. The other 2,000, the stand-in rows from here on, play the part of public data. The script chooses settings on them but never trains on them. They come from the same survey, so this is an assumption for the demonstration. In production the role belongs to public data, and without any, tuning costs privacy (<a href="#sec-trainwf-tune" class="quarto-xref"><span>Section 43.10</span></a>).</p>
+<p>The slack <span class="math inline">\(\delta\)</span> depends on the number of people <span class="math inline">\(n\)</span> in the training set, not in the whole dataset. The book’s rule (<a href="../part03-dp-foundations/01-definition.html#sec-dpdef-small-delta">How small δ must be</a>) gives <span class="math inline">\(\delta = 10^{-5}\)</span> for <span class="math inline">\(n = 30{,}000\)</span>.</p>
 </section>
 <section id="sec-trainwf-preprocess" class="level2" data-number="43.3">
 <h2 data-number="43.3" class="anchored" data-anchor-id="sec-trainwf-preprocess"><span class="header-section-number">43.3</span> Preprocess from public facts</h2>
-<p>Every statistic computed from the private rows is itself a release. The accountant, which adds up the privacy cost of training, does not count it. A scaler fitted on the training set leaks each column’s mean and spread. An encoder fitted on it leaks which categories occur, even a country only one person comes from.</p>
-<p>So the script takes its category lists from the dataset’s documentation. It scales each number by bounds the survey publishes, such as ages from 17 to 90. Capital gains and losses go on a log scale first, and a missing value becomes its own category.</p>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb3" data-excerpt="dpsgd-preprocess"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> features(rows: pl.DataFrame) <span class="op">-&gt;</span> Array:</span>
-<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>    <span class="co">"""One-hot categories from the documented lists, numbers scaled by public bounds."""</span></span>
-<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a>    rows <span class="op">=</span> rows.with_columns(pl.col(<span class="st">"capital-gain"</span>, <span class="st">"capital-loss"</span>).log1p())</span>
-<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a>    numeric <span class="op">=</span> [</span>
-<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a>        np.clip((rows[name].to_numpy() <span class="op">-</span> low) <span class="op">/</span> (high <span class="op">-</span> low), <span class="fl">0.0</span>, <span class="fl">1.0</span>) <span class="cf">for</span> name, (low, high) <span class="kw">in</span> NUMERIC_BOUNDS.items()</span>
-<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a>    ]</span>
-<span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a>    encoder <span class="op">=</span> OneHotEncoder(categories<span class="op">=</span><span class="bu">list</span>(CATEGORIES.values()), sparse_output<span class="op">=</span><span class="va">False</span>)</span>
-<span id="cb3-8"><a href="#cb3-8" aria-hidden="true" tabindex="-1"></a>    text <span class="op">=</span> rows.select(pl.col(<span class="bu">list</span>(CATEGORIES)).fill_null(<span class="st">"?"</span>)).to_numpy()</span>
-<span id="cb3-9"><a href="#cb3-9" aria-hidden="true" tabindex="-1"></a>    encoder.fit(text[:<span class="dv">1</span>])  <span class="co"># the categories are given, so fitting learns nothing from the rows</span></span>
-<span id="cb3-10"><a href="#cb3-10" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> np.hstack([np.column_stack(numeric), encoder.transform(text)])</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-<p>This gives 91 features, and the model is a small network with one hidden layer of 64 units and 6,018 weights in all. To check this step in someone else’s code, search for every <code>fit</code> call and ask what data it sees.</p>
+<p>Every statistic computed from the private rows is a release that the accountant does not count. A scaler fitted on the training set leaks each column’s mean and spread. An encoder fitted on it leaks which categories occur, even a country that only one person comes from. So the script takes its category lists from the dataset’s documentation, and scales each number by bounds the survey publishes, such as ages from 17 to 90. Capital gains and losses go on a log scale first, and a missing value becomes its own category.</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb2" data-excerpt="dpsgd-preprocess"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> features(rows: pl.DataFrame) <span class="op">-&gt;</span> Array:</span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>    <span class="co">"""One-hot categories from the documented lists, numbers scaled by public bounds."""</span></span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>    rows <span class="op">=</span> rows.with_columns(pl.col(<span class="st">"capital-gain"</span>, <span class="st">"capital-loss"</span>).log1p())</span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a>    numeric <span class="op">=</span> [</span>
+<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a>        np.clip((rows[name].to_numpy() <span class="op">-</span> low) <span class="op">/</span> (high <span class="op">-</span> low), <span class="fl">0.0</span>, <span class="fl">1.0</span>) <span class="cf">for</span> name, (low, high) <span class="kw">in</span> NUMERIC_BOUNDS.items()</span>
+<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a>    ]</span>
+<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a>    encoder <span class="op">=</span> OneHotEncoder(categories<span class="op">=</span><span class="bu">list</span>(CATEGORIES.values()), sparse_output<span class="op">=</span><span class="va">False</span>)</span>
+<span id="cb2-8"><a href="#cb2-8" aria-hidden="true" tabindex="-1"></a>    text <span class="op">=</span> rows.select(pl.col(<span class="bu">list</span>(CATEGORIES)).fill_null(<span class="st">"?"</span>)).to_numpy()</span>
+<span id="cb2-9"><a href="#cb2-9" aria-hidden="true" tabindex="-1"></a>    encoder.fit(text[:<span class="dv">1</span>])  <span class="co"># the categories are given, so fitting learns nothing from the rows</span></span>
+<span id="cb2-10"><a href="#cb2-10" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> np.hstack([np.column_stack(numeric), encoder.transform(text)])</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>This gives 91 features for a network with one hidden layer of 64 units and 6,018 weights. To check this step in other code, find every <code>fit</code> call and ask what data it sees.</p>
 </section>
 <section id="sec-trainwf-baselines" class="level2" data-number="43.4">
 <h2 data-number="43.4" class="anchored" data-anchor-id="sec-trainwf-baselines"><span class="header-section-number">43.4</span> Train the baselines</h2>
-<p>A private accuracy means little on its own, so train three baselines with the same model, batch size, epochs and optimizer. The non-private model shows the best you can hope for. A model with clipping and no noise separates the cost of clipping from the cost of noise. Always predicting the majority class shows the floor, where a private model whose training collapsed lands.</p>
+<p>A private accuracy means little on its own, so train three baselines with the same model, batch size, epochs and optimizer. The non-private model shows the best you can expect. A model with clipping and no noise separates the cost of clipping from the cost of noise. The majority class shows the floor, where a collapsed private model lands.</p>
 <pre class="text"><code>non-private: test accuracy 0.847
 clip only (C=1, no noise): test accuracy 0.845
 always '&lt;=50K': test accuracy 0.759</code></pre>
-<p>Clipping alone costs little here. Had clip-only accuracy been far below non-private, no privacy budget would fix it, because the problem would be the clipping norm or the learning rate.</p>
+<p>Clipping alone costs little here. If clip-only accuracy were far below non-private, no budget would fix it, because the problem would be the clipping norm or the learning rate.</p>
 </section>
 <section id="sec-trainwf-validate" class="level2" data-number="43.5">
 <h2 data-number="43.5" class="anchored" data-anchor-id="sec-trainwf-validate"><span class="header-section-number">43.5</span> Check the model</h2>
-<p>Opacus computes one gradient per record, and some layers break that. Batch normalization is the common case, because its statistics mix the records of a batch, so one record changes every other record’s gradient. The validator lists such layers before you train.</p>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb5" data-excerpt="dpsgd-validate"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a>errors <span class="op">=</span> ModuleValidator.validate(model, strict<span class="op">=</span><span class="va">False</span>)</span>
-<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"validator errors: </span><span class="sc">{</span><span class="bu">len</span>(errors)<span class="sc">}</span><span class="ss">"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>Opacus computes one gradient per record, and some layers break that. Batch normalization is the common case, because its statistics let one record change every other record’s gradient. The validator lists such layers before you train.</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb4" data-excerpt="dpsgd-validate"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a>errors <span class="op">=</span> ModuleValidator.validate(model, strict<span class="op">=</span><span class="va">False</span>)</span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"validator errors: </span><span class="sc">{</span><span class="bu">len</span>(errors)<span class="sc">}</span><span class="ss">"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <p>Here it finds none. For a model with such layers, <code>ModuleValidator.fix</code> replaces batch normalization with group normalization (<a href="../part05-dp-ml/02-dp-sgd.html#sec-dpsgd-checklist">DP-SGD</a> shows it on a ResNet).</p>
 </section>
 <section id="sec-trainwf-clip" class="level2" data-number="43.6">
 <h2 data-number="43.6" class="anchored" data-anchor-id="sec-trainwf-clip"><span class="header-section-number">43.6</span> Choose the clipping norm, batch and epochs</h2>
-<p>These settings are fixed before the private data is touched, because choosing them on it costs privacy. The usual guide for the clipping norm <span class="math inline">\(C\)</span> is the typical per-example gradient norm on public data. So the script measures it on the stand-in rows.</p>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb6" data-excerpt="dpsgd-grad-norms"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a>wrapped <span class="op">=</span> GradSampleModule(model)  <span class="co"># adds hooks that keep one gradient per row</span></span>
-<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a>wrapped.train()</span>
-<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a>logits: torch.Tensor <span class="op">=</span> wrapped(split.x)</span>
-<span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a>nn.CrossEntropyLoss()(logits, split.y).backward()  <span class="co"># fills p.grad_sample for every weight p</span></span>
-<span id="cb6-5"><a href="#cb6-5" aria-hidden="true" tabindex="-1"></a>norms <span class="op">=</span> stacked_norms(wrapped)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>Fix these settings before you touch the private data, because choosing them on it costs privacy. The usual guide for the clipping norm <span class="math inline">\(C\)</span>, the length each record’s gradient is cut to, is the typical gradient norm on public data. So the script measures it on the stand-in rows.</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb5" data-excerpt="dpsgd-grad-norms"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a>wrapped <span class="op">=</span> GradSampleModule(model)  <span class="co"># adds hooks that keep one gradient per row</span></span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a>wrapped.train()</span>
+<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a>logits: torch.Tensor <span class="op">=</span> wrapped(split.x)</span>
+<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a>nn.CrossEntropyLoss()(logits, split.y).backward()  <span class="co"># fills p.grad_sample for every weight p</span></span>
+<span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a>norms <span class="op">=</span> stacked_norms(wrapped)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <pre class="text"><code>at initialisation: median norm 1.444  90th percentile 1.538
 fraction clipped at C=1: 1.000</code></pre>
 <p>The median rule would give a <span class="math inline">\(C\)</span> of about 1.4. The script keeps the usual default <span class="math inline">\(C = 1\)</span>, just below the median, so every gradient is clipped at the start. That costs nothing, because when every gradient is clipped, only the learning rate times <span class="math inline">\(C\)</span> matters (<a href="../part05-dp-ml/02-dp-sgd.html#sec-dpsgd-clipping">DP-SGD</a>).</p>
-<p>The batch should be as large as you can afford. The noise on the averaged gradient is <span class="math inline">\(\sigma C/B\)</span>. Here <span class="math inline">\(B\)</span> is the expected batch size, and the noise multiplier <span class="math inline">\(\sigma\)</span> is the noise’s standard deviation in units of <span class="math inline">\(C\)</span>. The size is only expected because every batch is drawn at random (<a href="#sec-trainwf-train" class="quarto-xref"><span>Section 43.8</span></a>).</p>
-<p>With <span class="math inline">\(B = 1{,}000\)</span>, Opacus sets the sampling rate <span class="math inline">\(q\)</span>, the chance that a row joins a batch, to one over the number of batches per epoch. That is <span class="math inline">\(B/n = 0.0333\)</span> for the <span class="math inline">\(n = 30{,}000\)</span> training rows, but not when <span class="math inline">\(B\)</span> does not divide <span class="math inline">\(n\)</span>, so plan with Opacus’s value. Ten epochs of <span class="math inline">\(1/q\)</span> steps each make 300 steps, and the epochs must be fixed now, since the noise is calibrated to them.</p>
+<p>Make the batch as large as you can afford. The reason is that the noise on the averaged gradient is <span class="math inline">\(\sigma C/B\)</span>, where <span class="math inline">\(B\)</span> is the expected batch size and the noise multiplier <span class="math inline">\(\sigma\)</span> is the noise’s standard deviation in units of <span class="math inline">\(C\)</span>. With <span class="math inline">\(B = 1{,}000\)</span>, Opacus sets the sampling rate <span class="math inline">\(q\)</span>, the chance that a row joins a batch, to <span class="math inline">\(1/30 = 0.0333\)</span>. Ten epochs then make 300 steps. Fix the epochs now, because the noise is calibrated to them.</p>
 <p>The optimizer is SGD with momentum 0.9. The script picks its learning rate on the stand-in rows too. It trains a non-private model on 1,500 of them at six rates and scores each on the other 500.</p>
 <pre class="text"><code>  lr=0.05: 0.814  lr=0.1: 0.816  lr=0.2: 0.826  lr=0.5: 0.792  lr=1: 0.812  lr=2: 0.768
 non-private learning rate 0.2; DP-SGD learning rate 2 (x10)</code></pre>
-<p>DP-SGD then uses ten times the winning rate. That factor is a rule of thumb, not a measurement. Private runs usually need a step several times the non-private one, because clipped gradients are shorter (<a href="../part05-dp-ml/02-dp-sgd.html#sec-dpsgd-clipping">DP-SGD</a>). No private row has been touched, so this choice costs no privacy.</p>
+<p>DP-SGD then uses ten times the winning rate, a rule of thumb rather than a measurement. Private runs usually need a larger step, because clipped gradients are shorter (<a href="../part05-dp-ml/02-dp-sgd.html#sec-dpsgd-clipping">DP-SGD</a>). No private row was used, so this choice costs no privacy.</p>
 </section>
 <section id="sec-trainwf-calibrate" class="level2" data-number="43.7">
 <h2 data-number="43.7" class="anchored" data-anchor-id="sec-trainwf-calibrate"><span class="header-section-number">43.7</span> Calibrate the noise</h2>
-<p>Fix the target <span class="math inline">\(\varepsilon\)</span>, the slack <span class="math inline">\(\delta\)</span>, the sampling rate <span class="math inline">\(q\)</span> and the number of epochs. Then let the accountant solve for the smallest noise multiplier that meets them. Use the accountant you will report, here the privacy loss random variable (PRV) accountant, which computes <span class="math inline">\(\varepsilon\)</span> almost exactly. Calibrating with a looser accountant pays for its overestimate of <span class="math inline">\(\varepsilon\)</span> with extra noise (<a href="../part04-privacy-accounting/10-calibrate-dp-sgd.html#sec-calib-plan">Calibrate and account a DP-SGD run</a>).</p>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb9" data-excerpt="dpsgd-calibrate"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a>sigma <span class="op">=</span> get_noise_multiplier(</span>
-<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a>    target_epsilon<span class="op">=</span>epsilon,</span>
-<span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a>    target_delta<span class="op">=</span>delta,</span>
-<span id="cb9-4"><a href="#cb9-4" aria-hidden="true" tabindex="-1"></a>    sample_rate<span class="op">=</span>sample_rate,</span>
-<span id="cb9-5"><a href="#cb9-5" aria-hidden="true" tabindex="-1"></a>    epochs<span class="op">=</span>epochs,</span>
-<span id="cb9-6"><a href="#cb9-6" aria-hidden="true" tabindex="-1"></a>    accountant<span class="op">=</span><span class="st">"prv"</span>,</span>
-<span id="cb9-7"><a href="#cb9-7" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-<p>For <span class="math inline">\(\varepsilon = 4\)</span> at <span class="math inline">\(\delta = 10^{-5}\)</span> it prints <code>sigma=0.973</code>. The result holds only for the epochs and sampling rate you gave it. If you later train longer or change the batch size, recompute <span class="math inline">\(\sigma\)</span> before training. Otherwise report the larger <span class="math inline">\(\varepsilon\)</span> of what actually ran.</p>
+<p>The target is a privacy level of <span class="math inline">\(\varepsilon = 4\)</span> at the slack <span class="math inline">\(\delta = 10^{-5}\)</span> of <a href="#sec-trainwf-unit" class="quarto-xref"><span>Section 43.2</span></a>. For this <span class="math inline">\(q\)</span> and these epochs, Opacus’s <code>get_noise_multiplier</code> finds the smallest <span class="math inline">\(\sigma\)</span> that meets it. With its privacy loss random variable (PRV) accountant it gives <span class="math inline">\(\sigma = 0.973\)</span>, and <a href="../part04-privacy-accounting/10-calibrate-dp-sgd.html#sec-calib-plan">Calibrate and account a DP-SGD run</a> shows the call. That <span class="math inline">\(\sigma\)</span> holds only for those epochs and that <span class="math inline">\(q\)</span>, so recompute it if you change either.</p>
 </section>
 <section id="sec-trainwf-train" class="level2" data-number="43.8">
 <h2 data-number="43.8" class="anchored" data-anchor-id="sec-trainwf-train"><span class="header-section-number">43.8</span> Train</h2>
-<p>The privacy engine wraps the model, the optimizer and the data loader. Its optimizer clips each record’s gradient and adds the noise. Its loader draws Poisson batches, in which each row joins each batch independently with probability <span class="math inline">\(q\)</span>, which is the sampling the accountant assumes. The script’s own loader shuffles and cuts fixed batches, so <code>make_private</code> must replace it for that assumption to hold.</p>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb10" data-excerpt="dpsgd-setup"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a>engine <span class="op">=</span> PrivacyEngine(accountant<span class="op">=</span><span class="st">"prv"</span>)</span>
-<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a>optimizer <span class="op">=</span> torch.optim.SGD(model.parameters(), lr<span class="op">=</span>lr, momentum<span class="op">=</span><span class="fl">0.9</span>)</span>
-<span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a>model, optimizer, data_loader <span class="op">=</span> engine.make_private(</span>
-<span id="cb10-4"><a href="#cb10-4" aria-hidden="true" tabindex="-1"></a>    module<span class="op">=</span>model,</span>
-<span id="cb10-5"><a href="#cb10-5" aria-hidden="true" tabindex="-1"></a>    optimizer<span class="op">=</span>optimizer,</span>
-<span id="cb10-6"><a href="#cb10-6" aria-hidden="true" tabindex="-1"></a>    data_loader<span class="op">=</span>data_loader,</span>
-<span id="cb10-7"><a href="#cb10-7" aria-hidden="true" tabindex="-1"></a>    noise_multiplier<span class="op">=</span>sigma,</span>
-<span id="cb10-8"><a href="#cb10-8" aria-hidden="true" tabindex="-1"></a>    max_grad_norm<span class="op">=</span>CLIP,</span>
-<span id="cb10-9"><a href="#cb10-9" aria-hidden="true" tabindex="-1"></a>)  <span class="co"># Poisson sampling is the default: each row joins each batch with probability q</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-<p>The training loop is an ordinary one inside <code>BatchMemoryManager</code>. It splits each logical batch of about 1,000 rows into physical batches of at most 500 that fit in memory. The optimizer still steps once per logical batch, so the accounting does not change.</p>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb11" data-excerpt="dpsgd-train-loop"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a><span class="cf">with</span> BatchMemoryManager(</span>
-<span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a>    data_loader<span class="op">=</span>data_loader, max_physical_batch_size<span class="op">=</span>PHYSICAL_BATCH, optimizer<span class="op">=</span>optimizer</span>
-<span id="cb11-3"><a href="#cb11-3" aria-hidden="true" tabindex="-1"></a>) <span class="im">as</span> batches:</span>
-<span id="cb11-4"><a href="#cb11-4" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> x, y <span class="kw">in</span> batches:  <span class="co"># Opacus splits each logical batch; it steps once per logical batch</span></span>
-<span id="cb11-5"><a href="#cb11-5" aria-hidden="true" tabindex="-1"></a>        optimizer.zero_grad()</span>
-<span id="cb11-6"><a href="#cb11-6" aria-hidden="true" tabindex="-1"></a>        loss <span class="op">=</span> criterion(model(x), y)</span>
-<span id="cb11-7"><a href="#cb11-7" aria-hidden="true" tabindex="-1"></a>        loss.backward()</span>
-<span id="cb11-8"><a href="#cb11-8" aria-hidden="true" tabindex="-1"></a>        optimizer.step()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>The privacy engine wraps the model, the optimizer and the data loader. Its optimizer clips each record’s gradient and adds the noise. Its loader draws Poisson batches, in which each row joins each batch independently with probability <span class="math inline">\(q\)</span>, as the accountant assumes. The script’s own loader cuts fixed batches, so <code>make_private</code> must replace it.</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb8" data-excerpt="dpsgd-setup"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a>engine <span class="op">=</span> PrivacyEngine(accountant<span class="op">=</span><span class="st">"prv"</span>)</span>
+<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a>optimizer <span class="op">=</span> torch.optim.SGD(model.parameters(), lr<span class="op">=</span>lr, momentum<span class="op">=</span><span class="fl">0.9</span>)</span>
+<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a>model, optimizer, data_loader <span class="op">=</span> engine.make_private(</span>
+<span id="cb8-4"><a href="#cb8-4" aria-hidden="true" tabindex="-1"></a>    module<span class="op">=</span>model,</span>
+<span id="cb8-5"><a href="#cb8-5" aria-hidden="true" tabindex="-1"></a>    optimizer<span class="op">=</span>optimizer,</span>
+<span id="cb8-6"><a href="#cb8-6" aria-hidden="true" tabindex="-1"></a>    data_loader<span class="op">=</span>data_loader,</span>
+<span id="cb8-7"><a href="#cb8-7" aria-hidden="true" tabindex="-1"></a>    noise_multiplier<span class="op">=</span>sigma,</span>
+<span id="cb8-8"><a href="#cb8-8" aria-hidden="true" tabindex="-1"></a>    max_grad_norm<span class="op">=</span>CLIP,</span>
+<span id="cb8-9"><a href="#cb8-9" aria-hidden="true" tabindex="-1"></a>)  <span class="co"># Poisson sampling is the default: each row joins each batch with probability q</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>The training loop runs inside <code>BatchMemoryManager</code>, which splits each logical batch of about 1,000 rows into physical batches of at most 500. The optimizer still steps once per logical batch, so the accounting does not change.</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb9" data-excerpt="dpsgd-train-loop"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="cf">with</span> BatchMemoryManager(</span>
+<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a>    data_loader<span class="op">=</span>data_loader, max_physical_batch_size<span class="op">=</span>PHYSICAL_BATCH, optimizer<span class="op">=</span>optimizer</span>
+<span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a>) <span class="im">as</span> batches:</span>
+<span id="cb9-4"><a href="#cb9-4" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> x, y <span class="kw">in</span> batches:  <span class="co"># Opacus splits each logical batch; it steps once per logical batch</span></span>
+<span id="cb9-5"><a href="#cb9-5" aria-hidden="true" tabindex="-1"></a>        optimizer.zero_grad()</span>
+<span id="cb9-6"><a href="#cb9-6" aria-hidden="true" tabindex="-1"></a>        loss <span class="op">=</span> criterion(model(x), y)</span>
+<span id="cb9-7"><a href="#cb9-7" aria-hidden="true" tabindex="-1"></a>        loss.backward()</span>
+<span id="cb9-8"><a href="#cb9-8" aria-hidden="true" tabindex="-1"></a>        optimizer.step()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <pre class="text"><code>steps=300  q=0.0333
 epsilon (Opacus PRV) = 3.99
 test accuracy at epsilon=4: 0.846</code></pre>
-<p>The script leaves <code>secure_mode</code> off, so that its noise is seeded and its numbers repeat, and its record says so. For a model you release, pass <code>secure_mode=True</code> to <code>PrivacyEngine</code>. It draws the noise from a cryptographically secure generator and guards against the floating-point flaws of ordinary Gaussian samples (<a href="../part03-dp-foundations/08-discrete-mechanisms.html">Discrete and floating-point-safe mechanisms</a>).</p>
+<p>The script leaves <code>secure_mode</code> off, so that its noise is seeded and its numbers repeat, and its record says so. For a model you release, pass <code>secure_mode=True</code> to <code>PrivacyEngine</code>. It draws the noise from a secure generator and guards against the floating-point flaws of ordinary Gaussian samples (<a href="../part03-dp-foundations/08-discrete-mechanisms.html">Discrete and floating-point-safe mechanisms</a>).</p>
 </section>
 <section id="sec-trainwf-crosscheck" class="level2" data-number="43.9">
 <h2 data-number="43.9" class="anchored" data-anchor-id="sec-trainwf-crosscheck"><span class="header-section-number">43.9</span> Cross-check ε</h2>
-<p>An <span class="math inline">\(\varepsilon\)</span> from one library is a claim about that library’s arithmetic. So recompute it with Google’s <code>dp_accounting</code> from the noise multiplier, sampling rate and step count of your plan. Opacus counts the steps it actually took. Its privacy loss distribution (PLD) accountant is almost exact, like PRV, but uses a different numerical method, so the two should agree to within rounding. Its Rényi differential privacy (RDP) accountant, an older and slightly loose bound, runs alongside.</p>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb13" data-excerpt="dpsgd-cross-check"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a>step <span class="op">=</span> dp_accounting.PoissonSampledDpEvent(sample_rate, dp_accounting.GaussianDpEvent(sigma))</span>
-<span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a>training <span class="op">=</span> dp_accounting.SelfComposedDpEvent(step, steps)</span>
-<span id="cb13-3"><a href="#cb13-3" aria-hidden="true" tabindex="-1"></a>epsilon_pld <span class="op">=</span> dp_accounting.pld.PLDAccountant().compose(training).get_epsilon(delta)</span>
-<span id="cb13-4"><a href="#cb13-4" aria-hidden="true" tabindex="-1"></a>epsilon_rdp <span class="op">=</span> dp_accounting.rdp.RdpAccountant().compose(training).get_epsilon(delta)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-<pre class="text"><code>epsilon PRV (Opacus) = 3.99
-epsilon PLD (dp_accounting) = 3.98
-epsilon RDP (dp_accounting) = 4.50</code></pre>
-<p>The PRV and PLD values agree. RDP gives 4.50 for the same run, a valid but looser bound, so a statement must name its accountant. If the two tight accountants disagree by more than rounding, the run did not do what the plan says.</p>
+<p>An <span class="math inline">\(\varepsilon\)</span> from one library is a claim about that library’s arithmetic. So the script recomputes it with Google’s <code>dp_accounting</code>, whose privacy loss distribution (PLD) accountant gives 3.98 against Opacus’s 3.99. The looser Rényi differential privacy (RDP) accountant gives 4.50, so a statement must name its accountant. <a href="../part04-privacy-accounting/10-calibrate-dp-sgd.html#sec-calib-crosscheck">Calibrate and account a DP-SGD run</a> runs this check and says what a disagreement means.</p>
 </section>
 <section id="sec-trainwf-tune" class="level2" data-number="43.10">
 <h2 data-number="43.10" class="anchored" data-anchor-id="sec-trainwf-tune"><span class="header-section-number">43.10</span> Tune honestly</h2>
-<p>The default is the one this run used: choose every hyperparameter on public data, or on a public stand-in, and tuning costs nothing. When no public data exists, tuning runs on the private rows. Then every private run that influences the release costs privacy, including the runs you discard (<a href="../part05-dp-ml/03-hyperparameter-tuning.html">Hyperparameter tuning</a>).</p>
-<p>The tuning script measures that cost for six learning rates at a total <span class="math inline">\(\varepsilon\)</span> of 4, against a single untuned run. A grid runs all six rates and pays for each by composition. A random search runs a Poisson number of models with mean 4, each at a rate drawn from the six, and releases only the best. Only RDP handles a random number of runs, so the script uses it throughout. That is why its single-run <span class="math inline">\(\sigma\)</span> is larger than the PRV value above.</p>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb15" data-excerpt="tuning-cost"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> random_search(sigma: <span class="bu">float</span>) <span class="op">-&gt;</span> dp_accounting.DpEvent:</span>
-<span id="cb15-2"><a href="#cb15-2" aria-hidden="true" tabindex="-1"></a>    <span class="co">"""A Poisson number of runs with mean 4 (shape=inf selects the Poisson case); only the best is released."""</span></span>
-<span id="cb15-3"><a href="#cb15-3" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> dp_accounting.dp_event.RepeatAndSelectDpEvent(one_run(sigma), mean<span class="op">=</span>MEAN_RUNS, shape<span class="op">=</span>math.inf)</span>
-<span id="cb15-4"><a href="#cb15-4" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb15-5"><a href="#cb15-5" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb15-6"><a href="#cb15-6" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> sigma_for(strategy: Callable[[<span class="bu">float</span>], dp_accounting.DpEvent], epsilon: <span class="bu">float</span>, delta: <span class="bu">float</span>) <span class="op">-&gt;</span> <span class="bu">float</span>:</span>
-<span id="cb15-7"><a href="#cb15-7" aria-hidden="true" tabindex="-1"></a>    <span class="co">"""The smallest noise multiplier per run that keeps the whole strategy within (epsilon, delta).</span></span>
-<span id="cb15-8"><a href="#cb15-8" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb15-9"><a href="#cb15-9" aria-hidden="true" tabindex="-1"></a><span class="co">    The search starts at 0.1 and tries 1 first.</span></span>
-<span id="cb15-10"><a href="#cb15-10" aria-hidden="true" tabindex="-1"></a><span class="co">    """</span></span>
-<span id="cb15-11"><a href="#cb15-11" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> dp_accounting.calibrate_dp_mechanism(</span>
-<span id="cb15-12"><a href="#cb15-12" aria-hidden="true" tabindex="-1"></a>        dp_accounting.rdp.RdpAccountant, strategy, epsilon, delta, dp_accounting.LowerEndpointAndGuess(<span class="fl">0.1</span>, <span class="fl">1.0</span>)</span>
-<span id="cb15-13"><a href="#cb15-13" aria-hidden="true" tabindex="-1"></a>    )</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>This run chose every hyperparameter on a public stand-in, so tuning cost nothing. Without public data, tuning runs on the private rows, and every private run that influences the release costs privacy, the discarded ones too (<a href="../part05-dp-ml/03-hyperparameter-tuning.html">Hyperparameter tuning</a>).</p>
+<p>The tuning script measures that cost for six learning rates at a total <span class="math inline">\(\varepsilon\)</span> of 4. A grid runs all six rates and pays for each by composition. A random search runs a Poisson number of models with mean 4, each at a rate drawn from the six, and releases only the best. Only RDP handles a random number of runs, so the script uses it throughout, and its single-run <span class="math inline">\(\sigma\)</span> is larger than the PRV value above.</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb11" data-excerpt="tuning-cost"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> random_search(sigma: <span class="bu">float</span>) <span class="op">-&gt;</span> dp_accounting.DpEvent:</span>
+<span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a>    <span class="co">"""A Poisson number of runs with mean 4 (shape=inf selects the Poisson case); only the best is released."""</span></span>
+<span id="cb11-3"><a href="#cb11-3" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> dp_accounting.dp_event.RepeatAndSelectDpEvent(one_run(sigma), mean<span class="op">=</span>MEAN_RUNS, shape<span class="op">=</span>math.inf)</span>
+<span id="cb11-4"><a href="#cb11-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-5"><a href="#cb11-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-6"><a href="#cb11-6" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> sigma_for(strategy: Callable[[<span class="bu">float</span>], dp_accounting.DpEvent], epsilon: <span class="bu">float</span>, delta: <span class="bu">float</span>) <span class="op">-&gt;</span> <span class="bu">float</span>:</span>
+<span id="cb11-7"><a href="#cb11-7" aria-hidden="true" tabindex="-1"></a>    <span class="co">"""The smallest noise multiplier per run that keeps the whole strategy within (epsilon, delta).</span></span>
+<span id="cb11-8"><a href="#cb11-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-9"><a href="#cb11-9" aria-hidden="true" tabindex="-1"></a><span class="co">    The search starts at 0.1 and tries 1 first.</span></span>
+<span id="cb11-10"><a href="#cb11-10" aria-hidden="true" tabindex="-1"></a><span class="co">    """</span></span>
+<span id="cb11-11"><a href="#cb11-11" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> dp_accounting.calibrate_dp_mechanism(</span>
+<span id="cb11-12"><a href="#cb11-12" aria-hidden="true" tabindex="-1"></a>        dp_accounting.rdp.RdpAccountant, strategy, epsilon, delta, dp_accounting.LowerEndpointAndGuess(<span class="fl">0.1</span>, <span class="fl">1.0</span>)</span>
+<span id="cb11-13"><a href="#cb11-13" aria-hidden="true" tabindex="-1"></a>    )</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <pre class="text"><code>one run, no tuning: sigma=1.029
 grid of 6, all runs counted: sigma=1.816
 random search, Poisson mean 4 runs: sigma=1.256
 naive grid of 6 at sigma=1.029: reports epsilon=4.00
 naive grid, true epsilon of all 6 runs = 9.84</code></pre>
-<p>The naive grid is the common mistake. It trains six models at the single-run noise, reports the <span class="math inline">\(\varepsilon\)</span> of one, and actually spends 9.84. The random search pays for its honesty with a modest rise in <span class="math inline">\(\sigma\)</span>, from 1.029 to 1.256.</p>
-<p>With seed 0, the search drew only two runs, both at the learning rate 0.05. Its model reaches 0.828 on the test set, below the 0.846 of the run tuned on public data. A search with few runs can miss. Do not redraw until you like the answer, because the guarantee depends on the randomness of the draw. So spend private runs on tuning only when no public data can stand in.</p>
+<p>The naive grid is the common mistake. It trains six models at the single-run noise, reports the <span class="math inline">\(\varepsilon\)</span> of one, and actually spends 9.84. The random search costs a modest rise in <span class="math inline">\(\sigma\)</span>, from 1.029 to 1.256.</p>
+<p>With seed 0, the search drew only two runs, both at the learning rate 0.05. So its model reaches only 0.828 on the test set, against 0.846 for the run tuned on public data. Do not redraw until you like the answer, because the guarantee depends on the randomness of the draw. So spend private runs on tuning only when no public data can stand in.</p>
 </section>
 <section id="sec-trainwf-utility" class="level2" data-number="43.11">
 <h2 data-number="43.11" class="anchored" data-anchor-id="sec-trainwf-utility"><span class="header-section-number">43.11</span> Measure utility and groups</h2>
-<p>Train at several budgets with everything else fixed, and compare against the baselines. Fix the budget you release beforehand, as the script does with <span class="math inline">\(\varepsilon = 4\)</span>. These runs are scored on private rows, so choosing <span class="math inline">\(\varepsilon\)</span> from them would use private data that no <span class="math inline">\(\varepsilon\)</span> counts (<a href="../part05-dp-ml/09-choosing-epsilon.html">Choosing ε</a>).</p>
+<p>Train at several budgets with everything else fixed, and compare against the baselines. Fix the released budget beforehand, as the script does with <span class="math inline">\(\varepsilon = 4\)</span>, because the script scores these runs on private rows that no <span class="math inline">\(\varepsilon\)</span> counts (<a href="../part05-dp-ml/09-choosing-epsilon.html">Choosing ε</a>).</p>
 <div id="tbl-trainwf-utility" class="quarto-float quarto-figure quarto-figure-center anchored">
 <figure class="quarto-float quarto-float-tbl figure">
 <figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl" id="tbl-trainwf-utility-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
@@ -839,21 +817,20 @@ Table&nbsp;43.1: Test accuracy on Adult against the privacy budget, with <span c
 </div>
 </figure>
 </div>
-<p>Privacy costs almost nothing on Adult down to <span class="math inline">\(\varepsilon = 1\)</span>, and only at <span class="math inline">\(\varepsilon = 0.25\)</span> does accuracy drop, by about five points. Above that, the differences are a thousandth or two on a single seed, too small to read as an effect.</p>
+<p>Privacy costs almost nothing on Adult down to <span class="math inline">\(\varepsilon = 1\)</span>. Only at <span class="math inline">\(\varepsilon = 0.25\)</span> does accuracy drop, by about five points, and the other differences are too small to read on one seed.</p>
 <p>Adult is easy. Its training set is large, so a batch of 1,000 still has a small sampling rate and divides the noise by 1,000. Its model is small, and the noise’s total length grows with the square root of the number of trained weights. So expect a steeper curve with millions of weights trained from scratch, a few thousand records, a rare class or many more epochs. The running example of <a href="../part05-dp-ml/02-dp-sgd.html#sec-dpsgd-run">DP-SGD</a> already loses several points at <span class="math inline">\(\varepsilon = 1\)</span>, and public pretraining is the usual remedy (<a href="../part05-dp-ml/06-public-data.html">Public data and private fine-tuning</a>).</p>
-<p>An average can hide a group that pays. So check accuracy by group with exact (Clopper–Pearson) binomial intervals, which stay valid for small groups (<a href="../part05-dp-ml/08-disparate-impact.html">Disparate impact</a>).</p>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb17" data-excerpt="dpsgd-per-group"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a>in_group <span class="op">=</span> sex <span class="op">==</span> group</span>
-<span id="cb17-2"><a href="#cb17-2" aria-hidden="true" tabindex="-1"></a>correct, total <span class="op">=</span> <span class="bu">int</span>(right[in_group].<span class="bu">sum</span>()), <span class="bu">int</span>(in_group.<span class="bu">sum</span>())</span>
-<span id="cb17-3"><a href="#cb17-3" aria-hidden="true" tabindex="-1"></a>interval <span class="op">=</span> binomtest(correct, total).proportion_ci(confidence_level<span class="op">=</span><span class="fl">0.95</span>, method<span class="op">=</span><span class="st">"exact"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>An average can hide a group that pays. So check accuracy by group with exact (Clopper–Pearson) intervals, which stay valid for small groups (<a href="../part05-dp-ml/08-disparate-impact.html">Disparate impact</a>).</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb13" data-excerpt="dpsgd-per-group"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a>in_group <span class="op">=</span> sex <span class="op">==</span> group</span>
+<span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a>correct, total <span class="op">=</span> <span class="bu">int</span>(right[in_group].<span class="bu">sum</span>()), <span class="bu">int</span>(in_group.<span class="bu">sum</span>())</span>
+<span id="cb13-3"><a href="#cb13-3" aria-hidden="true" tabindex="-1"></a>interval <span class="op">=</span> binomtest(correct, total).proportion_ci(confidence_level<span class="op">=</span><span class="fl">0.95</span>, method<span class="op">=</span><span class="st">"exact"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <pre class="text"><code>non-private Female: 0.924 [0.917, 0.931]  (5,186/5,613)
 non-private Male: 0.808 [0.800, 0.815]  (9,071/11,229)
 DP Female: 0.922 [0.915, 0.929]  (5,177/5,613)
 DP Male: 0.807 [0.800, 0.815]  (9,065/11,229)</code></pre>
-<p>At <span class="math inline">\(\varepsilon = 4\)</span> neither group pays a measurable price, since each private interval overlaps its non-private one almost entirely. The gap between the groups exists without privacy too, and it is the baseline a private model must be compared against.</p>
+<p>At <span class="math inline">\(\varepsilon = 4\)</span> neither group pays a measurable price, since each private interval almost covers its non-private one. The gap between the groups exists without privacy too, so it is the baseline for the private model.</p>
 </section>
 <section id="sec-trainwf-troubleshoot" class="level2" data-number="43.12">
 <h2 data-number="43.12" class="anchored" data-anchor-id="sec-trainwf-troubleshoot"><span class="header-section-number">43.12</span> When it goes wrong</h2>
-<p><a href="#tbl-trainwf-trouble" class="quarto-xref">Table&nbsp;<span>43.2</span></a> maps the common symptoms to their usual cause and fix.</p>
 <div id="tbl-trainwf-trouble" class="quarto-float quarto-figure quarto-figure-center anchored">
 <figure class="quarto-float quarto-float-tbl figure">
 <figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl" id="tbl-trainwf-trouble-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
@@ -909,11 +886,11 @@ Table&nbsp;43.2: Common DP-SGD failures and their fixes.
 </div>
 </figure>
 </div>
-<p>Accuracy and privacy fail independently. A run whose <span class="math inline">\(\varepsilon\)</span> is wrong usually trains normally, which is why the cross-check and the audit of <a href="../part05-dp-ml/10-auditing.html">Auditing private training</a> exist.</p>
+<p>Accuracy and privacy fail independently. A run whose <span class="math inline">\(\varepsilon\)</span> is wrong usually trains normally, so only the cross-check and the audit of <a href="../part05-dp-ml/10-auditing.html">Auditing private training</a> catch it.</p>
 </section>
 <section id="sec-trainwf-record" class="level2" data-number="43.13">
 <h2 data-number="43.13" class="anchored" data-anchor-id="sec-trainwf-record"><span class="header-section-number">43.13</span> Record the run</h2>
-<p>A reviewer can only check a claim whose inputs are written down, so the script ends by writing a record of the run. It holds the unit, <span class="math inline">\(n\)</span> and <span class="math inline">\(\delta\)</span>, the accountant’s three inputs and its name, the library versions, and the three values of <span class="math inline">\(\varepsilon\)</span>. It reads the sampler from the loader Opacus returned and <code>secure_mode</code> from the engine, so it cannot claim Poisson sampling the code did not do. It also says how each setting was chosen and whether that choice is counted in <span class="math inline">\(\varepsilon\)</span>. <a href="../part05-dp-ml/12-release-governance.html">Release and governance</a> turns the record into a statement.</p>
+<p>A reviewer can only check a claim whose inputs are on record. So the script ends by writing a record of the run. <a href="../part05-dp-ml/12-release-governance.html#sec-relgov-record">Release and governance</a> lists its fields and turns it into a statement. The script reads the sampler from the loader Opacus returned and <code>secure_mode</code> from the engine, so the record cannot claim Poisson sampling that the code did not do.</p>
 </section>
 <section id="checklist" class="level2" data-number="43.14">
 <h2 data-number="43.14" class="anchored" data-anchor-id="checklist"><span class="header-section-number">43.14</span> Checklist</h2>
@@ -924,11 +901,6 @@ Table&nbsp;43.3: The steps of training with DP-SGD, their defaults and their che
 </figcaption>
 <div aria-describedby="tbl-trainwf-checklist-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
 <table class="caption-top table">
-<colgroup>
-<col style="width: 33%">
-<col style="width: 33%">
-<col style="width: 33%">
-</colgroup>
 <thead>
 <tr class="header">
 <th>Step</th>
@@ -939,8 +911,8 @@ Table&nbsp;43.3: The steps of training with DP-SGD, their defaults and their che
 <tbody>
 <tr class="odd">
 <td>Unit, <span class="math inline">\(n\)</span>, <span class="math inline">\(\delta\)</span></td>
-<td>Person; <span class="math inline">\(\delta \le 1/n^{1.1}\)</span> rounded down</td>
-<td><span class="math inline">\(n\)</span> counts people; <span class="math inline">\(\delta &lt; 1/n\)</span></td>
+<td>Person; <span class="math inline">\(\delta\)</span> by the book’s rule</td>
+<td><span class="math inline">\(n\)</span> counts people in the training set</td>
 </tr>
 <tr class="even">
 <td>Preprocessing</td>
@@ -963,8 +935,8 @@ Table&nbsp;43.3: The steps of training with DP-SGD, their defaults and their che
 <td>Chosen without private data</td>
 </tr>
 <tr class="even">
-<td>Noise</td>
-<td><code>get_noise_multiplier</code> with the reported accountant</td>
+<td>Noise and cross-check</td>
+<td>As in <a href="../part04-privacy-accounting/10-calibrate-dp-sgd.html">Calibrate and account a DP-SGD run</a></td>
 <td>Epochs and <span class="math inline">\(q\)</span> match the run</td>
 </tr>
 <tr class="odd">
@@ -973,21 +945,16 @@ Table&nbsp;43.3: The steps of training with DP-SGD, their defaults and their che
 <td>The loader is Opacus’s</td>
 </tr>
 <tr class="even">
-<td>Cross-check</td>
-<td>PLD from <code>dp_accounting</code></td>
-<td>Agrees with PRV within rounding</td>
-</tr>
-<tr class="odd">
 <td>Tuning</td>
 <td>On public data; else random search with a Poisson number of runs</td>
 <td>Every private run counted</td>
 </tr>
-<tr class="even">
+<tr class="odd">
 <td>Utility and groups</td>
 <td>Several budgets; per-group exact intervals</td>
 <td>Compared with the baselines</td>
 </tr>
-<tr class="odd">
+<tr class="even">
 <td>Record</td>
 <td>Every parameter and version written</td>
 <td><span class="math inline">\(\varepsilon\)</span> recomputable from it</td>

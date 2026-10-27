@@ -335,8 +335,8 @@ ul.task-list li input[type="checkbox"] {
 </header>
 
 
-<p>Everything the Context API did in the previous parts was built from a small number of pieces, and this part opens the box. OpenDP’s framework describes a private computation as a chain of two kinds of object. A transformation maps data to data, and it promises how much its output can change when its input changes, which is its stability. A measurement maps data to a random release, and it promises how much the distribution of that release can change, which is its privacy. Chaining the two multiplies the promises through, and composing measurements adds them up. Once you can read these objects, you can see exactly what guarantee any query carries. You can also build queries the Context API does not offer, and check a claim someone else makes.</p>
-<p><a href="../part03-framework/08-a-framework-for-privacy.html">A framework to understand differential privacy</a> introduces the vocabulary, namely domains, metrics and measures, and the two maps, the stability map and the privacy map. <a href="../part03-framework/09-transformations.html">Transformations</a> builds the preprocessing and aggregation steps, from clamping and resizing to sums, means and quantile scores. <a href="../part03-framework/10-measurements.html">Measurements</a> covers the mechanisms that add noise or select, from Laplace and Gaussian to thresholded noise, noisy max and randomized response. <a href="../part03-framework/11-combinators.html">Combinators</a> chains and composes them, converts between privacy measures, and shows the adaptive compositors and odometers behind a context. <a href="../part03-framework/12-utilities-and-the-context-api.html">Utilities and the Context API inside</a> covers the type descriptors, the parameter search that finds a scale from a budget, and serialization. It ends by showing how the Context API maps onto the framework.</p>
+<p>Every query that the Context API ran in the previous parts was built from a few pieces, and this part shows those pieces. OpenDP’s framework describes a private computation as a chain of two kinds of object. A transformation maps data to data, and its stability bounds how much its output can change when its input changes. A measurement maps data to a random release, and its privacy bounds how much the distribution of the release can change. In a chain, these promises pass from one step to the next, and when you compose measurements, their privacy losses add up. So when you can read these objects, you can see exactly which guarantee a query carries. You can also build queries that the Context API does not offer, and check a claim that someone else makes.</p>
+<p>The first chapter gives the vocabulary: domains, metrics and measures, and the two maps that carry the promises. The next three build the pieces in order: the data-to-data steps, the mechanisms that add noise or select, and the combinators that chain and compose them. The last chapter covers the tools around the pieces and shows how the Context API maps onto them.</p>
 <div id="tbl-p3-chapters" class="quarto-float quarto-figure quarto-figure-center anchored">
 <figure class="quarto-float quarto-float-tbl figure">
 <figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl" id="tbl-p3-chapters-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
@@ -376,7 +376,7 @@ Table&nbsp;1: The chapters of this part and the questions they answer.
 </div>
 </figure>
 </div>
-<p>By the end of this part you will be able to build a private query from its pieces and read off the guarantee of any chain with <code>map</code> and <code>check</code>. You will also be able to explain what the Context API does when it resolves a query.</p>
+<p>At the end of this part, you can build a private query from its pieces and read the guarantee of any chain with <code>map</code> and <code>check</code>. You can also explain what the Context API does when it resolves a query.</p>
 
 
 

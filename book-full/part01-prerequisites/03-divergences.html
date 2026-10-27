@@ -1241,7 +1241,7 @@ Figure&nbsp;3.8: <span class="math inline">\(E_\gamma\)</span> against <span cla
 </figure>
 </div>
 <div id="exm-div-rejection" class="theorem example">
-<p><span class="theorem-title"><strong>Example 3.6</strong></span> On the die, only the six has <span class="math inline">\(r &gt; \gamma\)</span> for <span class="math inline">\(1 \le \gamma &lt; 3\)</span>, so <span class="math inline">\(E_\gamma = 0.5 - \gamma/6\)</span> falls linearly to zero at <span class="math inline">\(\gamma = 3\)</span>, the largest ratio. In rejection sampling of the loaded die from fair rolls, an envelope <span class="math inline">\(2q\)</span> leaves the mass <span class="math inline">\(E_2(P\|Q) = \frac16\)</span> of the six uncovered, and the sampled six comes up 40% of the time instead of 50%. <a href="../../book-exercises/part01-prerequisites/03-divergences.html#sec-sol-div-4">Exercise 4</a> shows that the error in TV is never more than <span class="math inline">\(E_\gamma\)</span>.</p>
+<p><span class="theorem-title"><strong>Example 3.6</strong></span> On the die, only the six has <span class="math inline">\(r &gt; \gamma\)</span> for <span class="math inline">\(1 \le \gamma &lt; 3\)</span>, so <span class="math inline">\(E_\gamma = 0.5 - \gamma/6\)</span> falls linearly to zero at <span class="math inline">\(\gamma = 3\)</span>, the largest ratio. In rejection sampling of the loaded die from fair rolls, an envelope <span class="math inline">\(2q\)</span> leaves the mass <span class="math inline">\(E_2(P\|Q) = \frac16\)</span> of the six uncovered, and the sampled six comes up 40% of the time instead of 50%. The error in TV is never more than <span class="math inline">\(E_\gamma\)</span>.</p>
 </div>
 </section>
 <section id="sec-div-f" class="level2" data-number="3.7">
@@ -1502,7 +1502,7 @@ Figure&nbsp;3.11: KL after binning, against the bin width.
 <li><em>Express in KL.</em> Since <span class="math inline">\(\sqrt{pq} = p\,e^{-L/2}\)</span>, the sum is <span class="math inline">\(\mathbb E_P[e^{-L/2}]\)</span>, and <span class="math inline">\(e^{-y/2}\)</span> is convex, so <a href="#lem-div-jensen" class="quarto-xref">Lemma&nbsp;<span>3.1</span></a> puts it above <span class="math inline">\(e^{-D_{\mathrm{KL}}/2}\)</span>. Squaring and using step 2 gives <span class="math inline">\(e^{-D_{\mathrm{KL}}} \le 1 - \mathrm{TV}^2\)</span>.</li>
 </ol>
 </div>
-<p>Pinsker’s inequality is tight for two nearly fair coins (<a href="../../book-exercises/part01-prerequisites/03-divergences.html#sec-sol-div-6">Exercise 6</a>), passes 1 at KL <span class="math inline">\(= 2\)</span>, and loses to Bretagnolle–Huber once KL is above 1.59 (<a href="#fig-div-pinsker" class="quarto-xref">Figure&nbsp;<span>3.12</span></a>). Neither can be reversed: if <span class="math inline">\(Q\)</span> puts a tiny mass where <span class="math inline">\(P\)</span> puts none, TV is tiny but <span class="math inline">\(D_{\mathrm{KL}}(Q\|P)\)</span> is infinite.</p>
+<p>Pinsker’s inequality is tight for two nearly fair coins, passes 1 at KL <span class="math inline">\(= 2\)</span>, and loses to Bretagnolle–Huber once KL is above 1.59 (<a href="#fig-div-pinsker" class="quarto-xref">Figure&nbsp;<span>3.12</span></a>). Neither can be reversed: if <span class="math inline">\(Q\)</span> puts a tiny mass where <span class="math inline">\(P\)</span> puts none, TV is tiny but <span class="math inline">\(D_{\mathrm{KL}}(Q\|P)\)</span> is infinite.</p>
 <div id="fig-div-pinsker" class="quarto-float quarto-figure quarto-figure-center anchored">
 <figure class="quarto-float quarto-float-fig figure">
 <div aria-describedby="fig-div-pinsker-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
@@ -1704,7 +1704,6 @@ Table&nbsp;3.11: The results of this chapter, and where each is used.
 <li>Liese &amp; Vajda, “On Divergences and Informations in Statistics and Information Theory” (IEEE Transactions on Information Theory, 2006): f-divergences and their representation through the curves <span class="math inline">\(E_\gamma\)</span>.</li>
 <li>Nowozin, Cseke &amp; Tomioka, “f-GAN: Training Generative Neural Samplers using Variational Divergence Minimization” (NeurIPS 2016): f-divergences estimated from samples with neural networks.</li>
 </ul>
-<p><strong>Practice.</strong> Exercises for this chapter, each with a worked solution, are in <a href="../../book-exercises/part01-prerequisites/03-divergences.html">the exercise book</a>.</p>
 
 
 </section>

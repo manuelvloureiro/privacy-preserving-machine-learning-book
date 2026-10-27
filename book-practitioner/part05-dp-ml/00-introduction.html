@@ -47,7 +47,7 @@ ul.task-list li input[type="checkbox"] {
 <link href="../site_libs/quarto-html/quarto-syntax-highlighting-bf27225e3a48a9273f3daa8f8e829971.css" rel="stylesheet" id="quarto-text-highlighting-styles">
 <script src="../site_libs/bootstrap/bootstrap.min.js"></script>
 <link href="../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
-<link href="../site_libs/bootstrap/bootstrap-c76bce1ab0818eb3e57b6c28e4057b54.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
+<link href="../site_libs/bootstrap/bootstrap-78f503ea39f784e8964cd205807fbe37.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
 <script id="quarto-search-options" type="application/json">{
   "location": "sidebar",
   "copy-button": false,
@@ -584,7 +584,7 @@ window.Quarto = {
 <p>Every private training method has two halves. The privacy half, the guarantee <span class="math inline">\(\varepsilon\)</span>, is computed by an accountant, while the utility half, accuracy, can only be measured. The main private algorithm is stochastic gradient descent (SGD) with clipped per-example gradients and Gaussian noise, called DP-SGD. Its accountant needs just three settings: the noise multiplier, the sampling rate and the number of steps. So every page asks whether the <span class="math inline">\(\varepsilon\)</span> is correct and whether the accuracy at that <span class="math inline">\(\varepsilon\)</span> is good enough.</p>
 <p>Three pages are workflows, each a whole job done with real libraries on public data. <a href="../part05-dp-ml/13-train-dp-sgd.html">Train a model with DP-SGD</a> trains a classifier on the Adult census data with Opacus. <a href="../part05-dp-ml/14-private-llm-finetuning.html">Fine-tune a language model privately with LoRA</a> adapts a small public language model to a private text and checks it for memorized secrets. <a href="../part05-dp-ml/12-release-governance.html">Release and governance</a> recomputes the guarantee, writes it down, maps it to the law and lists what to check before a model ships.</p>
 <p>The other pages explain the decisions those jobs make, in the order a project meets them. A short page on <a href="../part05-dp-ml/01-dp-erm.html">private empirical risk minimization</a> for convex models leads to <a href="../part05-dp-ml/02-dp-sgd.html">DP-SGD</a>. Then come <a href="../part05-dp-ml/03-hyperparameter-tuning.html">hyperparameter tuning</a>, the privacy unit in <a href="../part05-dp-ml/07-user-level.html">User-level differential privacy</a> and the budget in <a href="../part05-dp-ml/09-choosing-epsilon.html">Choosing ε</a>. <a href="../part05-dp-ml/06-public-data.html">Public data and private fine-tuning</a> explains why a public starting model helps so much. <a href="../part05-dp-ml/08-disparate-impact.html">Disparate impact</a> and <a href="../part05-dp-ml/10-auditing.html">Auditing private training</a> are the checks before release. Three reference pages cover rarer methods: <a href="../part05-dp-ml/05-private-prediction.html">private prediction</a>, <a href="../part05-dp-ml/04-matrix-mechanisms.html">correlated noise across steps</a> and <a href="../part05-dp-ml/11-adaptive-data-analysis.html">adaptive data analysis</a>.</p>
-<p>Every number on these pages comes from a script you can run. At the end, you can train a private model, defend its settings and its <span class="math inline">\(\varepsilon\)</span>, audit it, and write its release statement.</p>
+<p>Every number on these pages comes from a script you can run.</p>
 
 
 

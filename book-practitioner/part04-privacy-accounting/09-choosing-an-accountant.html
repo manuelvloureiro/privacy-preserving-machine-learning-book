@@ -82,7 +82,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <link href="../site_libs/quarto-html/quarto-syntax-highlighting-bf27225e3a48a9273f3daa8f8e829971.css" rel="stylesheet" id="quarto-text-highlighting-styles">
 <script src="../site_libs/bootstrap/bootstrap.min.js"></script>
 <link href="../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
-<link href="../site_libs/bootstrap/bootstrap-c76bce1ab0818eb3e57b6c28e4057b54.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
+<link href="../site_libs/bootstrap/bootstrap-78f503ea39f784e8964cd205807fbe37.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
 <script id="quarto-search-options" type="application/json">{
   "location": "sidebar",
   "copy-button": false,
@@ -599,12 +599,10 @@ window.Quarto = {
   <li><a href="#sec-choose-decision" id="toc-sec-choose-decision" class="nav-link" data-scroll-target="#sec-choose-decision"><span class="header-section-number">31.2</span> Which accountant</a></li>
   <li><a href="#sec-choose-inverse" id="toc-sec-choose-inverse" class="nav-link" data-scroll-target="#sec-choose-inverse"><span class="header-section-number">31.3</span> The inverse problem: noise for a target ε</a></li>
   <li><a href="#sec-choose-delta" id="toc-sec-choose-delta" class="nav-link" data-scroll-target="#sec-choose-delta"><span class="header-section-number">31.4</span> Choosing δ</a></li>
-  <li><a href="#sec-choose-report" id="toc-sec-choose-report" class="nav-link" data-scroll-target="#sec-choose-report"><span class="header-section-number">31.5</span> The statement</a></li>
-  <li><a href="#sec-choose-match" id="toc-sec-choose-match" class="nav-link" data-scroll-target="#sec-choose-match"><span class="header-section-number">31.6</span> Matching the accountant to the code</a></li>
-  <li><a href="#sec-choose-review" id="toc-sec-choose-review" class="nav-link" data-scroll-target="#sec-choose-review"><span class="header-section-number">31.7</span> Reviewing someone else’s claim</a></li>
-  <li><a href="#sec-choose-check" id="toc-sec-choose-check" class="nav-link" data-scroll-target="#sec-choose-check"><span class="header-section-number">31.8</span> Checking an accountant</a></li>
-  <li><a href="#cheat-sheet" id="toc-cheat-sheet" class="nav-link" data-scroll-target="#cheat-sheet"><span class="header-section-number">31.9</span> Cheat sheet</a></li>
-  <li><a href="#references" id="toc-references" class="nav-link" data-scroll-target="#references"><span class="header-section-number">31.10</span> References</a></li>
+  <li><a href="#sec-choose-match" id="toc-sec-choose-match" class="nav-link" data-scroll-target="#sec-choose-match"><span class="header-section-number">31.5</span> Matching the accountant to the code</a></li>
+  <li><a href="#sec-choose-check" id="toc-sec-choose-check" class="nav-link" data-scroll-target="#sec-choose-check"><span class="header-section-number">31.6</span> Checking an accountant</a></li>
+  <li><a href="#cheat-sheet" id="toc-cheat-sheet" class="nav-link" data-scroll-target="#cheat-sheet"><span class="header-section-number">31.7</span> Cheat sheet</a></li>
+  <li><a href="#references" id="toc-references" class="nav-link" data-scroll-target="#references"><span class="header-section-number">31.8</span> References</a></li>
   </ul>
 </nav>
     </div>
@@ -632,7 +630,7 @@ window.Quarto = {
 
 <section id="why-this-matters" class="level2" data-number="31.1">
 <h2 data-number="31.1" class="anchored" data-anchor-id="why-this-matters"><span class="header-section-number">31.1</span> Why this matters</h2>
-<p>A model trained with differential privacy (DP) is reported with a privacy level <span class="math inline">\(\varepsilon\)</span> and a small slack <span class="math inline">\(\delta\)</span>. The procedure that computes <span class="math inline">\(\varepsilon\)</span> is an <strong>accountant</strong>, and the same run can get 6.24 or 24,379.55 depending on which one you use. <a href="#tbl-choose-main" class="quarto-xref">Table&nbsp;<span>31.1</span></a> shows three, advanced composition, Rényi differential privacy (RDP) and the privacy loss distribution (PLD), on one run of private stochastic gradient descent (SGD), called DP-SGD. Each record joins each batch with probability <span class="math inline">\(q = 0.01\)</span>, the sampling rate, and the noise multiplier <span class="math inline">\(\sigma\)</span>, the noise as a multiple of the clipping norm, is 1.</p>
+<p>You report a model trained with differential privacy (DP) with a privacy level <span class="math inline">\(\varepsilon\)</span> and a small slack <span class="math inline">\(\delta\)</span>. The code that computes <span class="math inline">\(\varepsilon\)</span> is an <strong>accountant</strong>, and the same run can get 6.24 from one accountant and 24,379.55 from another. <a href="#tbl-choose-main" class="quarto-xref">Table&nbsp;<span>31.1</span></a> runs three accountants on one run of private stochastic gradient descent (SGD), called DP-SGD. They are advanced composition, Rényi differential privacy (RDP) and the privacy loss distribution (PLD). Each record joins each batch with probability <span class="math inline">\(q = 0.01\)</span>, the sampling rate. The noise multiplier <span class="math inline">\(\sigma\)</span>, the noise as a multiple of the clipping norm, is 1.</p>
 <div id="tbl-choose-main" class="quarto-float quarto-figure quarto-figure-center anchored">
 <figure class="quarto-float quarto-float-tbl figure">
 <figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl" id="tbl-choose-main-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
@@ -669,11 +667,11 @@ Table&nbsp;31.1: One DP-SGD run, <span class="math inline">\(q = 0.01\)</span> a
 </div>
 </figure>
 </div>
-<p>Only the PLD’s lower column is a lower bound, so the true <span class="math inline">\(\varepsilon\)</span> lies between the two PLD columns. Advanced composition, which adds up each step’s guarantee, is useless here, and RDP still overstates <span class="math inline">\(\varepsilon\)</span>, by 14.6% on the shorter run and 7.6% on the longer one. Hence the chapter’s rule. <strong>Report the tightest upper bound whose assumptions hold for the code you ran, and give enough detail that someone else can recompute it.</strong></p>
+<p>The true <span class="math inline">\(\varepsilon\)</span> lies between the two PLD columns, because the lower PLD column is a lower bound. Advanced composition, which adds up the guarantees of the steps, is useless here. RDP is much closer, but it still overstates <span class="math inline">\(\varepsilon\)</span>, by 14.6% on the shorter run and by 7.6% on the longer one. This gives the rule of the chapter. <strong>Report the tightest upper bound whose assumptions hold for the code you ran, and give enough detail that someone else can recompute it.</strong></p>
 </section>
 <section id="sec-choose-decision" class="level2" data-number="31.2">
 <h2 data-number="31.2" class="anchored" data-anchor-id="sec-choose-decision"><span class="header-section-number">31.2</span> Which accountant</h2>
-<p>An accountant is tight only when the summary it keeps of each step fits the mechanism, so the mechanism decides (<a href="#tbl-choose-decision" class="quarto-xref">Table&nbsp;<span>31.2</span></a>).</p>
+<p>An accountant is tight only when its summary of each step fits the mechanism. So let the mechanism choose the accountant (<a href="#tbl-choose-decision" class="quarto-xref">Table&nbsp;<span>31.2</span></a>).</p>
 <div id="tbl-choose-decision" class="quarto-float quarto-figure quarto-figure-center anchored">
 <figure class="quarto-float quarto-float-tbl figure">
 <figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl" id="tbl-choose-decision-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
@@ -721,7 +719,7 @@ Table&nbsp;31.2: Which accountant to report for which mechanism.
 </tr>
 <tr class="odd">
 <td>A shuffler of locally randomized reports, or only the last model released</td>
-<td><a href="../part04-privacy-accounting/07-shuffling-iteration.html">Shuffling and iteration</a>, with its conditions; a loader that shuffles is a sampler (<a href="#tbl-choose-checklist" class="quarto-xref">Table&nbsp;<span>31.4</span></a>)</td>
+<td><a href="../part04-privacy-accounting/07-shuffling-iteration.html">Shuffling and iteration</a>, with its conditions; a loader that shuffles is a sampler (<a href="#tbl-choose-checklist" class="quarto-xref">Table&nbsp;<span>31.3</span></a>)</td>
 <td>The Poisson accountant for a shuffler; a last-model claim for non-convex training</td>
 </tr>
 </tbody>
@@ -729,80 +727,24 @@ Table&nbsp;31.2: Which accountant to report for which mechanism.
 </div>
 </figure>
 </div>
-<p>The GDP CLT is an approximation, not a bound. After 1,000 steps it gives 1.6177, below the PLD’s certified lower value of 1.8232, a guarantee the run does not have. Opacus’s <code>"gdp"</code> accountant is this CLT, so never report it; its default PRV accountant is safe.</p>
+<p>The GDP CLT is an approximation, not a bound. After 1,000 steps it gives 1.6177, which is below the certified lower value of the PLD, 1.8232. So it claims a guarantee that the run does not have. Opacus’s <code>"gdp"</code> accountant is this CLT, so do not report it. The default PRV accountant of Opacus is safe.</p>
 </section>
 <section id="sec-choose-inverse" class="level2" data-number="31.3">
 <h2 data-number="31.3" class="anchored" data-anchor-id="sec-choose-inverse"><span class="header-section-number">31.3</span> The inverse problem: noise for a target ε</h2>
-<p>Usually you fix the target <span class="math inline">\(\varepsilon\)</span>, batch size and epochs, and ask for the smallest <span class="math inline">\(\sigma\)</span> that meets them. A looser accountant overstates <span class="math inline">\(\varepsilon\)</span>, so it asks for more noise. For a target of 3 on the 10,000-step run, RDP needs 1.662 and the PLD only 1.584. So calibrate with the accountant you will report, passing <code>accountant="prv"</code> to Opacus’s <code>get_noise_multiplier</code>, whose default is <code>"rdp"</code> (<a href="../part04-privacy-accounting/10-calibrate-dp-sgd.html">Calibrate and account a DP-SGD run</a>).</p>
+<p>Usually you fix the target <span class="math inline">\(\varepsilon\)</span>, the batch size and the number of epochs, and you ask for the smallest <span class="math inline">\(\sigma\)</span> that meets them. A looser accountant overstates <span class="math inline">\(\varepsilon\)</span>, so it asks for more noise. For a target of 3 on the 10,000-step run, RDP needs a noise multiplier of 1.662 and the PLD only 1.584. So calibrate with the accountant that you will report. Opacus’s <code>get_noise_multiplier</code> uses <code>"rdp"</code> by default, so give it <code>accountant="prv"</code> (<a href="../part04-privacy-accounting/10-calibrate-dp-sgd.html">Calibrate and account a DP-SGD run</a>).</p>
 </section>
 <section id="sec-choose-delta" class="level2" data-number="31.4">
 <h2 data-number="31.4" class="anchored" data-anchor-id="sec-choose-delta"><span class="header-section-number">31.4</span> Choosing δ</h2>
-<p>Treat <span class="math inline">\(\delta\)</span> roughly as the chance that the guarantee fails for someone, possibly badly. On a dataset of <span class="math inline">\(n\)</span> people, publishing one random record in full meets a <span class="math inline">\(\delta\)</span> of about <span class="math inline">\(1/n\)</span> with <span class="math inline">\(\varepsilon\)</span> zero, yet exposes someone completely. So <span class="math inline">\(\delta\)</span> must sit well below <span class="math inline">\(1/n\)</span>. This book follows Ponomareva et al.&nbsp;(2023) and chooses <span id="eq-choose-delta"><span class="math display">\[\delta \le \frac{1}{n^{1.1}}, \quad \text{rounded down to a power of ten.} \tag{31.1}\]</span></span> Count <span class="math inline">\(n\)</span> in the unit the claim protects, which at the user level means users, not records.</p>
-<p>For example, run the 10,000 steps of <a href="#tbl-choose-main" class="quarto-xref">Table&nbsp;<span>31.1</span></a> on 50,000 records, which at <span class="math inline">\(q = 0.01\)</span> is 100 epochs. Then <span class="math inline">\(1/n^{1.1}\)</span> is <span class="math inline">\(6.8\times10^{-6}\)</span>, which rounds down to <span class="math inline">\(10^{-6}\)</span>. The table’s <span class="math inline">\(10^{-5}\)</span> is half of <span class="math inline">\(1/n\)</span>, so it fails the rule. The US National Institute of Standards and Technology (NIST) recommends the stricter <span class="math inline">\(1/n^2\)</span>, so report <span class="math inline">\(\varepsilon\)</span> there too.</p>
+<p>Choose <span class="math inline">\(\delta\)</span> by the rule of this book, which for <span class="math inline">\(n\)</span> people is at most <span class="math inline">\(1/n^{1.1}\)</span>, rounded down to a power of ten (<a href="../part03-dp-foundations/01-definition.html#sec-dpdef-small-delta">How small δ must be</a>). Count <span class="math inline">\(n\)</span> in the unit that the claim protects, which at the user level means users, not records. For example, run the 10,000 steps of <a href="#tbl-choose-main" class="quarto-xref">Table&nbsp;<span>31.1</span></a> on 50,000 records. At <span class="math inline">\(q = 0.01\)</span>, that is 100 epochs. For 50,000 records the rule gives <span class="math inline">\(10^{-6}\)</span>, so the <span class="math inline">\(10^{-5}\)</span> of the table fails it. The US National Institute of Standards and Technology (NIST) recommends the stricter <span class="math inline">\(1/n^2\)</span>, so report <span class="math inline">\(\varepsilon\)</span> there too.</p>
+<p>Publish the upper value of the accountant that you name, rounded up, because the accountant does not certify a lower value. <a href="../part05-dp-ml/12-release-governance.html#sec-relgov-statement">Write the statement</a> shows the full privacy statement that carries these numbers.</p>
 </section>
-<section id="sec-choose-report" class="level2" data-number="31.5">
-<h2 data-number="31.5" class="anchored" data-anchor-id="sec-choose-report"><span class="header-section-number">31.5</span> The statement</h2>
-<p><a href="#tbl-choose-statement" class="quarto-xref">Table&nbsp;<span>31.3</span></a> fills in the items that Ponomareva et al.&nbsp;(2023) and NIST ask for, for the run on 50,000 records.</p>
-<div id="tbl-choose-statement" class="quarto-float quarto-figure quarto-figure-center anchored">
-<figure class="quarto-float quarto-float-tbl figure">
-<figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl" id="tbl-choose-statement-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-Table&nbsp;31.3: A filled privacy statement.
-</figcaption>
-<div aria-describedby="tbl-choose-statement-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-<table class="caption-top table">
-<colgroup>
-<col style="width: 50%">
-<col style="width: 50%">
-</colgroup>
-<thead>
-<tr class="header">
-<th>Item</th>
-<th>The run on 50,000 records</th>
-</tr>
-</thead>
-<tbody>
-<tr class="odd">
-<td>Setting</td>
-<td>DP-SGD in the central model, covering every checkpoint and the final model</td>
-</tr>
-<tr class="even">
-<td>Unit and neighbours</td>
-<td>One record per person; neighbours add or remove one record</td>
-</tr>
-<tr class="odd">
-<td>Training</td>
-<td>Poisson sampling at <span class="math inline">\(q = 0.01\)</span>, 10,000 steps (100 epochs), clipping norm 1, noise multiplier 1</td>
-</tr>
-<tr class="even">
-<td>Accountant</td>
-<td>PLD, upper value, on the grid <span class="math inline">\(10^{-5}\)</span>, with the library’s version</td>
-</tr>
-<tr class="odd">
-<td>Guarantee</td>
-<td><span class="math inline">\((6.96, 10^{-6})\)</span> and, at <span class="math inline">\(1/n^2\)</span>, <span class="math inline">\((9.06, 4.0\times10^{-10})\)</span>; the PLD’s lower values, 6.8574 and 8.9378, show how far each could still fall</td>
-</tr>
-<tr class="even">
-<td>Other data</td>
-<td>No pretrained weights; no preprocessing fitted on private rows; validation rows held out and not protected</td>
-</tr>
-<tr class="odd">
-<td>Not covered</td>
-<td>Nothing: hyperparameters were tuned on a public proxy dataset, so no tuning run touched the private data</td>
-</tr>
-</tbody>
-</table>
-</div>
-</figure>
-</div>
-<p>Round an upper bound up, because a lower value is one the accountant has not certified. So the PLD’s upper value at <span class="math inline">\(10^{-6}\)</span>, 6.9574, becomes 6.96. And publish the value of the accountant you name: with <code>dp_accounting</code>’s PLD, which gives 6.9074 (<a href="#sec-choose-check" class="quarto-xref"><span>Section 31.8</span></a>), the claim is 6.91. <a href="../part04-privacy-accounting/10-calibrate-dp-sgd.html#sec-calib-statement">Calibrate and account a DP-SGD run</a> prints such a statement from code.</p>
-</section>
-<section id="sec-choose-match" class="level2" data-number="31.6">
-<h2 data-number="31.6" class="anchored" data-anchor-id="sec-choose-match"><span class="header-section-number">31.6</span> Matching the accountant to the code</h2>
-<p>An accountant’s number holds only if the code does what its theorem assumes. Many papers have reported the Poisson-sampling number while training with shuffled fixed-size batches, a different algorithm (Ponomareva et al.&nbsp;2023). So check <a href="#tbl-choose-checklist" class="quarto-xref">Table&nbsp;<span>31.4</span></a> against the code before you report.</p>
+<section id="sec-choose-match" class="level2" data-number="31.5">
+<h2 data-number="31.5" class="anchored" data-anchor-id="sec-choose-match"><span class="header-section-number">31.5</span> Matching the accountant to the code</h2>
+<p>The number of an accountant holds only if the code does what its theorem assumes. Many papers reported the number for Poisson sampling but trained with shuffled batches of fixed size, a different algorithm (Ponomareva et al.&nbsp;2023). So check the code against <a href="#tbl-choose-checklist" class="quarto-xref">Table&nbsp;<span>31.3</span></a> before you report.</p>
 <div id="tbl-choose-checklist" class="quarto-float quarto-figure quarto-figure-center anchored">
 <figure class="quarto-float quarto-float-tbl figure">
 <figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl" id="tbl-choose-checklist-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-Table&nbsp;31.4: A checklist for matching the accountant to the training code.
+Table&nbsp;31.3: A checklist for matching the accountant to the training code.
 </figcaption>
 <div aria-describedby="tbl-choose-checklist-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
 <table class="caption-top table">
@@ -850,59 +792,31 @@ Table&nbsp;31.4: A checklist for matching the accountant to the training code.
 </div>
 </figure>
 </div>
-<p>The sampler costs the most. At <span class="math inline">\(10^{-5}\)</span>, the 6.19 that <code>dp_accounting</code>’s PLD gives under Poisson sampling becomes 43.37 with fixed-size batches, and 91.82, for zero-out neighbours only, with shuffle and partition (<a href="../part04-privacy-accounting/05-subsampling.html#sec-sub-dpsgd">Subsampling</a>).</p>
+<p>The sampler has the largest effect. Under Poisson sampling, the PLD of <code>dp_accounting</code> gives 6.19 at <span class="math inline">\(\delta = 10^{-5}\)</span>, but batches of fixed size raise this to 43.37. Shuffle and partition raise it to 91.82, and that number holds only for zero-out neighbours (<a href="../part04-privacy-accounting/05-subsampling.html#sec-sub-dpsgd">Subsampling</a>).</p>
+<p>A review of someone else’s claim also uses this checklist, in the order that <a href="../part05-dp-ml/12-release-governance.html#sec-relgov-review">Review someone else’s claim</a> gives.</p>
 </section>
-<section id="sec-choose-review" class="level2" data-number="31.7">
-<h2 data-number="31.7" class="anchored" data-anchor-id="sec-choose-review"><span class="header-section-number">31.7</span> Reviewing someone else’s claim</h2>
-<p>A reviewer works in this order.</p>
-<ol type="1">
-<li>Ask for the inputs of <a href="#tbl-choose-statement" class="quarto-xref">Table&nbsp;<span>31.3</span></a>, and reject a claim that cannot be recomputed.</li>
-<li>Check <span class="math inline">\(\delta\)</span> against <a href="#eq-choose-delta" class="quarto-xref">Equation&nbsp;<span>31.1</span></a>, with <span class="math inline">\(n\)</span> counted in the claim’s unit.</li>
-<li>Recompute <span class="math inline">\(\varepsilon\)</span> with a different library, and expect agreement within a few percent. A PLD accountant’s <code>get_delta</code> at the claimed <span class="math inline">\(\varepsilon\)</span> gives the <span class="math inline">\(\delta\)</span> at which it holds. A claim well above your value is valid but loose.</li>
-<li>Read the training code against <a href="#tbl-choose-checklist" class="quarto-xref">Table&nbsp;<span>31.4</span></a>, starting with the sampler.</li>
-<li>Ask what the claim leaves out, such as tuning runs, pretraining data and preprocessing fitted on the private rows.</li>
-</ol>
-<p>For example, a team claims <span class="math inline">\((2, 10^{-5})\)</span>-DP for a model trained on one million users with noise multiplier 0.65. Batches of 1,000 users make the sampling rate <span class="math inline">\(q\)</span> 0.001, and 10 epochs 10,000 steps, but the loader shuffles and takes fixed batches. This snippet does steps 2 and 3, then accounts for the loader as it ran.</p>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb1"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> math <span class="im">import</span> floor, log10</span>
-<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> dp_accounting <span class="im">import</span> GaussianDpEvent, PoissonSampledDpEvent, SelfComposedDpEvent</span>
-<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> dp_accounting.pld <span class="im">import</span> PLDAccountant</span>
-<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a>n, q, sigma, steps, epochs <span class="op">=</span> <span class="dv">1_000_000</span>, <span class="fl">0.001</span>, <span class="fl">0.65</span>, <span class="dv">10_000</span>, <span class="dv">10</span>  <span class="co"># the claim's parameters</span></span>
-<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a>delta <span class="op">=</span> <span class="fl">10.0</span> <span class="op">**</span> floor(log10(n<span class="op">**-</span><span class="fl">1.1</span>))  <span class="co"># the book's rule for one million users</span></span>
-<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"</span><span class="sc">{</span>delta<span class="sc">:.0e}</span><span class="ss">"</span>)  <span class="co"># 1e-07</span></span>
-<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a>poisson <span class="op">=</span> SelfComposedDpEvent(PoissonSampledDpEvent(q, GaussianDpEvent(sigma)), steps)</span>
-<span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a>pld <span class="op">=</span> PLDAccountant(value_discretization_interval<span class="op">=</span><span class="fl">1e-4</span>).compose(poisson)</span>
-<span id="cb1-11"><a href="#cb1-11" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"</span><span class="sc">{</span>pld<span class="sc">.</span>get_epsilon(<span class="fl">1e-5</span>)<span class="sc">:.2f}</span><span class="ss">"</span>)  <span class="co"># 1.72</span></span>
-<span id="cb1-12"><a href="#cb1-12" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"</span><span class="sc">{</span>pld<span class="sc">.</span>get_delta(<span class="fl">2.0</span>)<span class="sc">:.1e}</span><span class="ss">"</span>)  <span class="co"># 3.0e-06</span></span>
-<span id="cb1-13"><a href="#cb1-13" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"</span><span class="sc">{</span>pld<span class="sc">.</span>get_epsilon(delta)<span class="sc">:.2f}</span><span class="ss">"</span>)  <span class="co"># 2.84</span></span>
-<span id="cb1-14"><a href="#cb1-14" aria-hidden="true" tabindex="-1"></a><span class="co"># What the loader ran: shuffle and partition, zero-out neighbours, no amplification</span></span>
-<span id="cb1-15"><a href="#cb1-15" aria-hidden="true" tabindex="-1"></a>shuffled <span class="op">=</span> SelfComposedDpEvent(GaussianDpEvent(sigma), epochs)</span>
-<span id="cb1-16"><a href="#cb1-16" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"</span><span class="sc">{</span>PLDAccountant(value_discretization_interval<span class="op">=</span><span class="fl">1e-4</span>)<span class="sc">.</span>compose(shuffled)<span class="sc">.</span>get_epsilon(delta)<span class="sc">:.2f}</span><span class="ss">"</span>)  <span class="co"># 36.45</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-<p>The arithmetic holds up, since the claim’s parameters give 1.72 at its <span class="math inline">\(\delta\)</span>. But that <span class="math inline">\(\delta\)</span> is a hundred times the rule’s <span class="math inline">\(10^{-7}\)</span>, at which the run gives 2.84. And the loader voids both numbers, which assume Poisson sampling. What the code ran is certified only at 36.45, for zero-out neighbours, so the review asks for a Poisson loader and a <span class="math inline">\(\delta\)</span> of <span class="math inline">\(10^{-7}\)</span>.</p>
+<section id="sec-choose-check" class="level2" data-number="31.6">
+<h2 data-number="31.6" class="anchored" data-anchor-id="sec-choose-check"><span class="header-section-number">31.6</span> Checking an accountant</h2>
+<p>An accountant is code, so test it on known answers. With sampling rate <span class="math inline">\(q = 1\)</span>, each step is a plain Gaussian mechanism, and the composition of such steps is exact (<a href="../part04-privacy-accounting/04-gaussian-dp.html">f-DP and Gaussian DP</a>). Ten such steps at noise multiplier 1 are exactly <span class="math inline">\((17.8566, 10^{-5})\)</span>-DP. So an upper bound must be above 17.8566, and a PLD bracket must contain it. Also, <span class="math inline">\(\varepsilon\)</span> must not decrease when you add steps, and it must not increase when you add noise.</p>
+<p>Then compare two maintained libraries at pinned versions. This snippet recomputes <a href="#tbl-choose-main" class="quarto-xref">Table&nbsp;<span>31.1</span></a> with Google’s <code>dp_accounting</code>.</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb1"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> dp_accounting</span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> dp_accounting.pld <span class="im">import</span> PLDAccountant</span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> dp_accounting.rdp <span class="im">import</span> RdpAccountant</span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a>step <span class="op">=</span> dp_accounting.PoissonSampledDpEvent(<span class="fl">0.01</span>, dp_accounting.GaussianDpEvent(<span class="fl">1.0</span>))</span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a>run <span class="op">=</span> dp_accounting.SelfComposedDpEvent(step, <span class="dv">10_000</span>)  <span class="co"># q = 0.01, sigma = 1, 10,000 steps</span></span>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a>pld <span class="op">=</span> PLDAccountant(value_discretization_interval<span class="op">=</span><span class="fl">1e-4</span>).compose(run)</span>
+<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a>rdp <span class="op">=</span> RdpAccountant(orders<span class="op">=</span><span class="bu">list</span>(<span class="bu">range</span>(<span class="dv">2</span>, <span class="dv">65</span>))).compose(run)  <span class="co"># integer orders only</span></span>
+<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"</span><span class="sc">{</span>pld<span class="sc">.</span>get_epsilon(<span class="fl">1e-5</span>)<span class="sc">:.4f}</span><span class="ss"> </span><span class="sc">{</span>rdp<span class="sc">.</span>get_epsilon(<span class="fl">1e-5</span>)<span class="sc">:.4f}</span><span class="ss">"</span>)  <span class="co"># 6.1877 6.7194</span></span>
+<span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"</span><span class="sc">{</span>pld<span class="sc">.</span>get_epsilon(<span class="fl">1e-6</span>)<span class="sc">:.4f}</span><span class="ss"> </span><span class="sc">{</span>rdp<span class="sc">.</span>get_epsilon(<span class="fl">1e-6</span>)<span class="sc">:.4f}</span><span class="ss">"</span>)  <span class="co"># 6.9074 7.4869</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>Each PLD value is inside the bracket of the table. Each RDP value is just above the value in the table, because the table also tries fractional orders. When libraries disagree, look for three causes. If two RDP values differ by an amount that depends only on the order, such as 0.3612 at order 10, the libraries use different conversions (<a href="../part04-privacy-accounting/02-rdp-conversions.html">RDP conversions</a>). If two PLD brackets do not overlap, one library has a bug. A factor of two often comes from different neighbouring relations.</p>
 </section>
-<section id="sec-choose-check" class="level2" data-number="31.8">
-<h2 data-number="31.8" class="anchored" data-anchor-id="sec-choose-check"><span class="header-section-number">31.8</span> Checking an accountant</h2>
-<p>An accountant is code, so test it on known answers. With sampling rate <span class="math inline">\(q = 1\)</span>, each step is a plain Gaussian mechanism, whose composition is exact (<a href="../part04-privacy-accounting/04-gaussian-dp.html">f-DP and Gaussian DP</a>). Ten such steps at noise multiplier 1 are exactly <span class="math inline">\((17.8566, 10^{-5})\)</span>-DP, so an upper bound must lie above 17.8566 and a PLD bracket must contain it. Also, <span class="math inline">\(\varepsilon\)</span> must never fall as steps grow or rise as noise grows.</p>
-<p>Then compare two maintained libraries, with pinned versions. This snippet recomputes <a href="#tbl-choose-main" class="quarto-xref">Table&nbsp;<span>31.1</span></a> with Google’s <code>dp_accounting</code>.</p>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb2"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> dp_accounting</span>
-<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> dp_accounting.pld <span class="im">import</span> PLDAccountant</span>
-<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> dp_accounting.rdp <span class="im">import</span> RdpAccountant</span>
-<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a>step <span class="op">=</span> dp_accounting.PoissonSampledDpEvent(<span class="fl">0.01</span>, dp_accounting.GaussianDpEvent(<span class="fl">1.0</span>))</span>
-<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a>run <span class="op">=</span> dp_accounting.SelfComposedDpEvent(step, <span class="dv">10_000</span>)  <span class="co"># q = 0.01, sigma = 1, 10,000 steps</span></span>
-<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a>pld <span class="op">=</span> PLDAccountant(value_discretization_interval<span class="op">=</span><span class="fl">1e-4</span>).compose(run)</span>
-<span id="cb2-8"><a href="#cb2-8" aria-hidden="true" tabindex="-1"></a>rdp <span class="op">=</span> RdpAccountant(orders<span class="op">=</span><span class="bu">list</span>(<span class="bu">range</span>(<span class="dv">2</span>, <span class="dv">65</span>))).compose(run)  <span class="co"># integer orders only</span></span>
-<span id="cb2-9"><a href="#cb2-9" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"</span><span class="sc">{</span>pld<span class="sc">.</span>get_epsilon(<span class="fl">1e-5</span>)<span class="sc">:.4f}</span><span class="ss"> </span><span class="sc">{</span>rdp<span class="sc">.</span>get_epsilon(<span class="fl">1e-5</span>)<span class="sc">:.4f}</span><span class="ss">"</span>)  <span class="co"># 6.1877 6.7194</span></span>
-<span id="cb2-10"><a href="#cb2-10" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"</span><span class="sc">{</span>pld<span class="sc">.</span>get_epsilon(<span class="fl">1e-6</span>)<span class="sc">:.4f}</span><span class="ss"> </span><span class="sc">{</span>rdp<span class="sc">.</span>get_epsilon(<span class="fl">1e-6</span>)<span class="sc">:.4f}</span><span class="ss">"</span>)  <span class="co"># 6.9074 7.4869</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-<p>Each PLD value lies inside the table’s bracket, and each RDP value sits just above the table’s, which also tries fractional orders. When libraries disagree, look for three causes. RDP values that differ by an amount depending only on the order, 0.3612 at order 10, come from different conversions (<a href="../part04-privacy-accounting/02-rdp-conversions.html">RDP conversions</a>). PLD brackets that do not overlap mean a bug. And a factor of two often means different neighbouring relations.</p>
-</section>
-<section id="cheat-sheet" class="level2" data-number="31.9">
-<h2 data-number="31.9" class="anchored" data-anchor-id="cheat-sheet"><span class="header-section-number">31.9</span> Cheat sheet</h2>
+<section id="cheat-sheet" class="level2" data-number="31.7">
+<h2 data-number="31.7" class="anchored" data-anchor-id="cheat-sheet"><span class="header-section-number">31.7</span> Cheat sheet</h2>
 <div id="tbl-choose-cheat" class="quarto-float quarto-figure quarto-figure-center anchored">
 <figure class="quarto-float quarto-float-tbl figure">
 <figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl" id="tbl-choose-cheat-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-Table&nbsp;31.5: Reporting and reviewing an <span class="math inline">\(\varepsilon\)</span> claim.
+Table&nbsp;31.4: Choosing and checking an accountant.
 </figcaption>
 <div aria-describedby="tbl-choose-cheat-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
 <table class="caption-top table">
@@ -921,7 +835,7 @@ Table&nbsp;31.5: Reporting and reviewing an <span class="math inline">\(\varepsi
 </tr>
 <tr class="even">
 <td><span class="math inline">\(\delta\)</span></td>
-<td><span class="math inline">\(1/n^{1.1}\)</span> rounded down, <span class="math inline">\(n\)</span> counted in the claim’s unit</td>
+<td>The rule of <a href="../part03-dp-foundations/01-definition.html#sec-dpdef-small-delta">How small δ must be</a>, <span class="math inline">\(n\)</span> counted in the claim’s unit</td>
 <td>Also report <span class="math inline">\(\varepsilon\)</span> at <span class="math inline">\(1/n^2\)</span></td>
 </tr>
 <tr class="odd">
@@ -940,8 +854,8 @@ Table&nbsp;31.5: Reporting and reviewing an <span class="math inline">\(\varepsi
 </figure>
 </div>
 </section>
-<section id="references" class="level2" data-number="31.10">
-<h2 data-number="31.10" class="anchored" data-anchor-id="references"><span class="header-section-number">31.10</span> References</h2>
+<section id="references" class="level2" data-number="31.8">
+<h2 data-number="31.8" class="anchored" data-anchor-id="references"><span class="header-section-number">31.8</span> References</h2>
 <ul>
 <li>Ponomareva et al., “How to DP-fy ML: A Practical Guide to Machine Learning with Differential Privacy” (JAIR 2023): matching the accounting to the pipeline, and what to report.</li>
 <li>Near, Darais, Lefkovitz &amp; Howarth, “Guidelines for Evaluating Differential Privacy Guarantees” (NIST SP 800-226, 2025): what an evaluator will ask of your claim.</li>

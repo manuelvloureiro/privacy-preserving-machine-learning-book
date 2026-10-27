@@ -375,18 +375,18 @@ window.Quarto = {
 </header>
 
 
-<p>A lab spends years collecting a dataset and tests a hypothesis on it, which fails. It tests a second hypothesis, then a third, each suggested by what the earlier tests showed, until one comes out significant. Other labs then fail to reproduce the finding on fresh data. Every test may have been sound on its own, but the sequence used the same data both to choose the questions and to answer them, and the answers ended up describing the sample instead of the population.</p>
-<p>This chapter makes that failure precise for averages of predicates, called statistical queries, and shows how differential privacy (DP) prevents it. Answers to queries fixed in advance generalize with a sample size logarithmic in the number <span class="math inline">\(k\)</span> of queries. Adaptively chosen queries can overfit unless the sample size is of order <span class="math inline">\(k\)</span>. A mechanism that answers through a DP algorithm needs only about <span class="math inline">\(\sqrt k\)</span>, because a private algorithm cannot find a query on which the sample and the population disagree.</p>
+<p>A lab tests hypothesis after hypothesis on one dataset, each suggested by the earlier results, until one is significant. Often, fresh data does not reproduce that result. Each test may be sound alone, but the sequence used the same data to choose the questions and to answer them. So the answers describe the sample instead of the population.</p>
+<p>This chapter makes that failure precise for averages of predicates, called statistical queries, and shows how differential privacy (DP) prevents it. Queries fixed in advance need a sample size logarithmic in the number <span class="math inline">\(k\)</span> of queries, and adaptively chosen queries can overfit unless it is of order <span class="math inline">\(k\)</span>. A mechanism that answers through a DP algorithm needs only about <span class="math inline">\(\sqrt k\)</span>, because a private algorithm cannot find a query on which the sample and the population disagree.</p>
 <section id="sec-ada-setup" class="level2" data-number="16.1">
 <h2 data-number="16.1" class="anchored" data-anchor-id="sec-ada-setup"><span class="header-section-number">16.1</span> Statistical queries</h2>
-<p>The data is a sample from an unknown distribution <span class="math inline">\(\mathcal D\)</span> on a universe <span class="math inline">\(\mathcal X\)</span>, and the analyst cares about the distribution, not the sample. The questions the analyst asks are the simplest kind, the fraction of records with a yes-or-no property, and each question has a value on the sample and a value on the distribution.</p>
+<p>The data is a sample from an unknown distribution <span class="math inline">\(\mathcal D\)</span> on a universe <span class="math inline">\(\mathcal X\)</span>, and the analyst cares about the distribution, not the sample. Each question asks for the fraction of records with a yes-or-no property, so it has a value on the sample and a value on the distribution.</p>
 <div id="def-ada-query" class="theorem definition">
 <p><span class="theorem-title"><strong>Definition 16.1 (Statistical query)</strong></span> A <strong>statistical query</strong> is a function <span class="math inline">\(q \colon \mathcal X \to \{0,1\}\)</span>. Its value on the distribution and its empirical value on a dataset <span class="math inline">\(D = (X_1, \dots, X_n)\)</span> are</p>
 <p><span id="eq-auto-05adaptivedataanalysis-1"><span class="math display">\[
 q(\mathcal D) = \mathbb E_{x \sim \mathcal D}[q(x)], \qquad q(D) = \frac1n \sum_{j=1}^n q(X_j).
 \tag{16.1}\]</span></span></p>
 </div>
-<p>So <span class="math inline">\(q(\mathcal D)\)</span> is the fraction of the population with the property <span class="math inline">\(q\)</span>, such as having red hair, and <span class="math inline">\(q(D)\)</span> is the fraction in the sample. These are the counting queries of earlier chapters, normalized by <span class="math inline">\(n\)</span>. If the records are drawn independently from <span class="math inline">\(\mathcal D\)</span>, the empirical value is an unbiased estimate of the population value. A fixed list of queries can be answered this way with a sample whose size is only logarithmic in the length of the list.</p>
+<p>So <span class="math inline">\(q(\mathcal D)\)</span> is the fraction of the population with the property <span class="math inline">\(q\)</span>, such as red hair, and <span class="math inline">\(q(D)\)</span> is the fraction in the sample. These are the counting queries of earlier chapters, divided by <span class="math inline">\(n\)</span>. If the records are independent draws from <span class="math inline">\(\mathcal D\)</span>, the empirical value is an unbiased estimate of the population value. For a fixed list of queries, a sample whose size is logarithmic in the length of the list is enough.</p>
 <div id="prp-ada-nonadaptive" class="theorem proposition">
 <p><span class="theorem-title"><strong>Proposition 16.1</strong></span> Let <span class="math inline">\(\alpha &gt; 0\)</span> be the allowed error and <span class="math inline">\(\beta \in (0,1)\)</span> the allowed failure probability. Let <span class="math inline">\(q_1, \dots, q_k\)</span> be statistical queries fixed before the sample is drawn, and let <span class="math inline">\(X_1, \dots, X_n\)</span> be independent draws from <span class="math inline">\(\mathcal D\)</span>. If</p>
 <p><span id="eq-auto-05adaptivedataanalysis-2"><span class="math display">\[
@@ -404,15 +404,15 @@ n \ge \frac{\ln(2k/\beta)}{2\alpha^2},
 <li>A union bound over the <span class="math inline">\(k\)</span> queries gives failure probability at most <span class="math inline">\(2k e^{-2\alpha^2 n}\)</span>, which the condition on <span class="math inline">\(n\)</span> makes at most <span class="math inline">\(\beta\)</span>.</li>
 </ol>
 </div>
-<p>Turned around, a sample of size <span class="math inline">\(n\)</span> supports about <span class="math inline">\(e^{2\alpha^2 n}\)</span> queries. Step 1 needs the query to be independent of the sample, and that is where adaptivity breaks the argument.</p>
+<p>So a sample of size <span class="math inline">\(n\)</span> supports about <span class="math inline">\(e^{2\alpha^2 n}\)</span> queries. But step 1 needs the query to be independent of the sample, and adaptivity breaks that step.</p>
 </section>
 <section id="sec-ada-adaptivity" class="level2" data-number="16.2">
 <h2 data-number="16.2" class="anchored" data-anchor-id="sec-ada-adaptivity"><span class="header-section-number">16.2</span> Adaptivity breaks the bound</h2>
-<p>In an adaptive analysis, each query may depend on the answers to the earlier ones. The definition below sets up this interaction, and says what it means for the mechanism that answers to be private whatever the analyst does.</p>
+<p>In an adaptive analysis, each query may depend on the answers to the earlier ones. The definition sets up this interaction, and says when the mechanism that answers is private whatever the analyst does.</p>
 <div id="def-ada-interaction" class="theorem definition">
 <p><span class="theorem-title"><strong>Definition 16.2 (Adaptive analysis)</strong></span> An <strong>analyst</strong> <span class="math inline">\(\mathcal A\)</span> and a <strong>mechanism</strong> <span class="math inline">\(M\)</span> interact for <span class="math inline">\(k\)</span> rounds. In round <span class="math inline">\(i\)</span>, the analyst chooses a statistical query <span class="math inline">\(q_i\)</span> as a function of the earlier answers <span class="math inline">\(a_1, \dots, a_{i-1}\)</span> and its own random bits, called its coins. The mechanism returns an answer <span class="math inline">\(a_i\)</span>, computed from the dataset <span class="math inline">\(D\)</span>, its own coins and the history. The mechanism is <strong><span class="math inline">\((\varepsilon,\delta)\)</span>-DP against adaptive analysts</strong> if for every analyst <span class="math inline">\(\mathcal A\)</span> the map from <span class="math inline">\(D\)</span> to the transcript <span class="math inline">\((q_1, a_1, \dots, q_k, a_k)\)</span> is <span class="math inline">\((\varepsilon, \delta)\)</span>-DP.</p>
 </div>
-<p>The empirical mechanism <span class="math inline">\(a_i = q_i(D)\)</span> answers every query exactly on the sample. Against an adaptive analyst it fails badly.</p>
+<p>The empirical mechanism <span class="math inline">\(a_i = q_i(D)\)</span> answers every query exactly on the sample, and an adaptive analyst makes it fail badly.</p>
 <div id="prp-ada-overfit" class="theorem proposition">
 <p><span class="theorem-title"><strong>Proposition 16.2</strong></span> Let <span class="math inline">\(\mathcal X = \{1, \dots, N\}\)</span>, let <span class="math inline">\(\mathcal D\)</span> be uniform on <span class="math inline">\(\mathcal X\)</span>, and let the mechanism answer <span class="math inline">\(a_i = q_i(D)\)</span>. Some analyst with <span class="math inline">\(k = N+1\)</span> queries ends with a query <span class="math inline">\(q_k\)</span> such that, for every sample,</p>
 <p><span id="eq-auto-05adaptivedataanalysis-4"><span class="math display">\[
@@ -427,7 +427,7 @@ q_k(D) - q_k(\mathcal D) \ge 1 - \frac{n}{k-1}.
 <li>The set <span class="math inline">\(S\)</span> has at most <span class="math inline">\(n\)</span> elements, so <span class="math inline">\(q_k(\mathcal D) = |S|/N \le n/N = n/(k-1)\)</span>.</li>
 </ol>
 </div>
-<p>The first <span class="math inline">\(N\)</span> queries are harmless one at a time, and each could have been fixed in advance. The last one is built from their answers, and on it the sample and the population disagree by almost <span class="math inline">\(1\)</span> unless <span class="math inline">\(n\)</span> is of order <span class="math inline">\(k\)</span>. Compared with <a href="#prp-ada-nonadaptive" class="quarto-xref">Proposition&nbsp;<span>16.1</span></a>, the number of queries a sample supports drops from exponential in <span class="math inline">\(n\)</span> to linear in <span class="math inline">\(n\)</span>.</p>
+<p>The first <span class="math inline">\(N\)</span> queries are harmless one at a time, and each could be fixed in advance. The analyst builds the last one from their answers, and on it the sample and the population disagree by almost <span class="math inline">\(1\)</span> unless <span class="math inline">\(n\)</span> is of order <span class="math inline">\(k\)</span>. So the number of queries that a sample supports drops from exponential in <span class="math inline">\(n\)</span> to linear in <span class="math inline">\(n\)</span>.</p>
 <p>A simple defence is to give each query fresh data. The analyst can still choose adaptively, but each answer comes from records that no earlier answer has seen.</p>
 <div id="prp-ada-split" class="theorem proposition">
 <p><span class="theorem-title"><strong>Proposition 16.3 (Sample splitting)</strong></span> Let <span class="math inline">\(k\)</span> divide <span class="math inline">\(n\)</span>. Split <span class="math inline">\(D\)</span> into <span class="math inline">\(k\)</span> disjoint parts <span class="math inline">\(D^{(1)}, \dots, D^{(k)}\)</span> of <span class="math inline">\(n/k\)</span> records each, and answer <span class="math inline">\(a_i = q_i(D^{(i)})\)</span>. If the records are independent draws from <span class="math inline">\(\mathcal D\)</span> and</p>
@@ -439,20 +439,20 @@ n \ge \frac{k\ln(2k/\beta)}{2\alpha^2},
 <div class="proof">
 <p><span class="proof-title"><em>Proof</em>. </span></p>
 <ol type="1">
-<li>The query <span class="math inline">\(q_i\)</span> depends only on the analyst’s coins and on <span class="math inline">\(a_1, \dots, a_{i-1}\)</span>, which depend only on the parts <span class="math inline">\(D^{(1)}, \dots, D^{(i-1)}\)</span>. So <span class="math inline">\(q_i\)</span> is independent of <span class="math inline">\(D^{(i)}\)</span>.</li>
+<li>The query <span class="math inline">\(q_i\)</span> depends only on the coins of the analyst and on <span class="math inline">\(a_1, \dots, a_{i-1}\)</span>, which depend only on the parts <span class="math inline">\(D^{(1)}, \dots, D^{(i-1)}\)</span>. So <span class="math inline">\(q_i\)</span> is independent of <span class="math inline">\(D^{(i)}\)</span>.</li>
 <li>Conditioned on <span class="math inline">\(q_i\)</span>, the part <span class="math inline">\(D^{(i)}\)</span> is still <span class="math inline">\(n/k\)</span> independent draws from <span class="math inline">\(\mathcal D\)</span>. Step 1 of the proof of <a href="#prp-ada-nonadaptive" class="quarto-xref">Proposition&nbsp;<span>16.1</span></a> gives <span class="math inline">\(\Pr[|a_i - q_i(\mathcal D)| \ge \alpha] \le 2e^{-2\alpha^2 n/k}\)</span>.</li>
 <li>A union bound over <span class="math inline">\(i\)</span> gives at most <span class="math inline">\(2k e^{-2\alpha^2 n/k}\)</span>, which the condition makes at most <span class="math inline">\(\beta\)</span>.</li>
 </ol>
 </div>
-<p>Sample splitting is valid but expensive, because it needs <span class="math inline">\(k\)</span> times the data of the non-adaptive case. Answering through a DP mechanism does much better. With Gaussian noise, a sample of size</p>
+<p>Sample splitting is valid but expensive, because it needs <span class="math inline">\(k\)</span> times the data of the non-adaptive case. A DP mechanism does much better. With Gaussian noise, a sample of size</p>
 <p><span id="eq-auto-05adaptivedataanalysis-6"><span class="math display">\[
 n = O\!\left(\frac{\sqrt{k}\,\ln^{3/2}(k/(\alpha\beta))}{\alpha^2}\right)
 \tag{16.6}\]</span></span></p>
-<p>suffices for error <span class="math inline">\(\alpha\)</span> (<a href="#cor-ada-gaussian" class="quarto-xref">Corollary&nbsp;<span>16.1</span></a>). Under a standard cryptographic assumption, no computationally efficient mechanism can do better than <span class="math inline">\(\sqrt k\)</span> in general. For a finite universe and a very large <span class="math inline">\(k\)</span>, a different private algorithm does better still.</p>
+<p>is enough for error <span class="math inline">\(\alpha\)</span> (<a href="#cor-ada-gaussian" class="quarto-xref">Corollary&nbsp;<span>16.1</span></a>). Under a standard cryptographic assumption, no computationally efficient mechanism can do better than <span class="math inline">\(\sqrt k\)</span> in general.</p>
 </section>
 <section id="sec-ada-transfer" class="level2" data-number="16.3">
 <h2 data-number="16.3" class="anchored" data-anchor-id="sec-ada-transfer"><span class="header-section-number">16.3</span> Privacy implies generalization</h2>
-<p>Overfitting needs the analyst to learn too much about individual records, as the analyst of <a href="#prp-ada-overfit" class="quarto-xref">Proposition&nbsp;<span>16.2</span></a> did. If every answer passes through a DP mechanism, no answer reveals much about one record, and the analyst can learn only about the population. A <strong>transfer theorem</strong> makes this precise. It turns accuracy on the sample and privacy into accuracy on the population.</p>
+<p>To overfit, the analyst must learn too much about individual records, as the analyst of <a href="#prp-ada-overfit" class="quarto-xref">Proposition&nbsp;<span>16.2</span></a> did. If every answer passes through a DP mechanism, no answer reveals much about one record, so the analyst can learn only about the population. A <strong>transfer theorem</strong> makes this precise. It turns accuracy on the sample and privacy into accuracy on the population.</p>
 <div id="thm-ada-transfer" class="theorem">
 <p><span class="theorem-title"><strong>Theorem 16.1 (Transfer theorem)</strong></span> Let <span class="math inline">\(\alpha, \beta \in (0, 0.1)\)</span>, and let <span class="math inline">\(M\)</span> answer <span class="math inline">\(k\)</span> adaptively chosen statistical queries. Suppose that</p>
 <ol type="1">
@@ -465,13 +465,12 @@ n = O\!\left(\frac{\sqrt{k}\,\ln^{3/2}(k/(\alpha\beta))}{\alpha^2}\right)
 \tag{16.7}\]</span></span></p>
 </div>
 <!-- proof: cited -->
-<p>This is Theorem 3.4 of Bassily, Nissim, Smith, Steinke, Stemmer and Ullman (2016), for queries of sensitivity <span class="math inline">\(1/n\)</span>. The failure probability on the sample must be of order <span class="math inline">\(\alpha\beta\)</span>, not <span class="math inline">\(\beta\)</span>, for the conclusion to hold with failure probability <span class="math inline">\(\beta\)</span>. The proof is long, so only its plan is given here. It runs about <span class="math inline">\(1/\beta\)</span> independent copies of the interaction, each on its own sample. It then imagines a monitor, which knows <span class="math inline">\(\mathcal D\)</span> and exists only in the proof, and which picks the copy and the query with the largest error on the population. The monitor only post-processes the outputs of DP interactions, so its choice is itself DP. A version of <a href="#lem-ada-key" class="quarto-xref">Lemma&nbsp;<span>16.1</span></a> below for several samples shows that such a choice cannot find a large population error on average. Hence each copy errs with probability <span class="math inline">\(O(\beta)\)</span>. A shorter proof of a stronger theorem is in Jung et al.&nbsp;(2020).</p>
-<p>Two ingredients from earlier chapters instantiate the theorem. The <a href="../part02-dp-basics/03-approximate-dp.html">Gaussian mechanism</a> answers a query <span class="math inline">\(f\)</span> with Gaussian noise, and its sensitivity <span class="math inline">\(\Delta f\)</span> sets the standard deviation. With <span class="math inline">\(\sigma = \Delta f\sqrt{2\ln(1/\delta_0) + \varepsilon_0}/\varepsilon_0\)</span>, the mechanism is <span class="math inline">\((\varepsilon_0, \delta_0)\)</span>-DP for every <span class="math inline">\(\varepsilon_0 &gt; 0\)</span> and <span class="math inline">\(\delta_0 \in (0,1)\)</span>. A corollary of <a href="../part02-dp-basics/04-advanced-composition.html">advanced composition</a> says that, for <span class="math inline">\(\varepsilon \in (0,1]\)</span> and <span class="math inline">\(\delta' \in (0, 1/2]\)</span>, <span class="math inline">\(k\)</span> adaptively chosen mechanisms that are each <span class="math inline">\((\varepsilon_0, \delta_0)\)</span>-DP with</p>
+<p>This is Theorem 3.4 of Bassily, Nissim, Smith, Steinke, Stemmer and Ullman (2016), for queries of sensitivity <span class="math inline">\(1/n\)</span>. The failure probability on the sample must be of order <span class="math inline">\(\alpha\beta\)</span>, not <span class="math inline">\(\beta\)</span>, for the conclusion to hold with failure probability <span class="math inline">\(\beta\)</span>. The proof runs about <span class="math inline">\(1/\beta\)</span> independent copies of the interaction, each on its own sample. A monitor, which knows <span class="math inline">\(\mathcal D\)</span> and exists only in the proof, picks the copy and the query with the largest error on the population. Its choice post-processes DP outputs, so it is DP, and a version of <a href="#lem-ada-key" class="quarto-xref">Lemma&nbsp;<span>16.1</span></a> below for several samples shows that it cannot find a large population error on average.</p>
+<p>Two results from earlier chapters apply the theorem. The <a href="../part02-dp-basics/03-approximate-dp.html">Gaussian mechanism</a> answers a query <span class="math inline">\(f\)</span> with Gaussian noise, and the sensitivity <span class="math inline">\(\Delta f\)</span> sets the standard deviation. With <span class="math inline">\(\sigma = \Delta f\sqrt{2\ln(1/\delta_0) + \varepsilon_0}/\varepsilon_0\)</span>, the mechanism is <span class="math inline">\((\varepsilon_0, \delta_0)\)</span>-DP for every <span class="math inline">\(\varepsilon_0 &gt; 0\)</span> and <span class="math inline">\(\delta_0 \in (0,1)\)</span>. A corollary of <a href="../part02-dp-basics/04-advanced-composition.html">advanced composition</a> says that, for <span class="math inline">\(\varepsilon \in (0,1]\)</span> and <span class="math inline">\(\delta' \in (0, 1/2]\)</span>, <span class="math inline">\(k\)</span> adaptively chosen mechanisms that are each <span class="math inline">\((\varepsilon_0, \delta_0)\)</span>-DP with</p>
 <p><span id="eq-auto-05adaptivedataanalysis-8"><span class="math display">\[
 \varepsilon_0 = \frac{\varepsilon}{2\sqrt{2k\ln(1/\delta')}}
 \tag{16.8}\]</span></span></p>
-<p>are, together, <span class="math inline">\((\varepsilon, k\delta_0 + \delta')\)</span>-DP. A statistical query has sensitivity <span class="math inline">\(1/n\)</span>, because replacing one record changes one term of the average by at most <span class="math inline">\(1\)</span>.</p>
-<p>The corollary below combines these ingredients. It adds Gaussian noise to each empirical answer, with a scale chosen so that the whole interaction meets both hypotheses of <a href="#thm-ada-transfer" class="quarto-xref">Theorem&nbsp;<span>16.1</span></a>, and reads off the sample size that this needs.</p>
+<p>are, together, <span class="math inline">\((\varepsilon, k\delta_0 + \delta')\)</span>-DP. A statistical query has sensitivity <span class="math inline">\(1/n\)</span>, because a replaced record changes one term of the average by at most <span class="math inline">\(1\)</span>. The corollary adds Gaussian noise to each empirical answer, at a scale that meets both hypotheses of <a href="#thm-ada-transfer" class="quarto-xref">Theorem&nbsp;<span>16.1</span></a>, and gives the sample size that this needs.</p>
 <div id="cor-ada-gaussian" class="theorem corollary">
 <p><span class="theorem-title"><strong>Corollary 16.1 (Gaussian answers generalize)</strong></span> Let <span class="math inline">\(\alpha, \beta \in (0, 0.1)\)</span>. Answer each query by <span class="math inline">\(a_i = q_i(D) + Z_i\)</span> with independent <span class="math inline">\(Z_i \sim \mathcal N(0, \sigma^2)\)</span>, where</p>
 <p><span id="eq-auto-05adaptivedataanalysis-9"><span class="math display">\[
@@ -486,8 +485,8 @@ n \ge \frac{2048\sqrt3}{\alpha^2}\sqrt{k\ln\frac{64}{\alpha\beta}}\;\ln\frac{64k
 <div class="proof">
 <p><span class="proof-title"><em>Proof</em>. </span></p>
 <ol type="1">
-<li><em>Each answer is private.</em> With <span class="math inline">\(\delta_0 = \alpha\beta/(64k)\)</span>, the noise is the Gaussian mechanism’s for sensitivity <span class="math inline">\(1/n\)</span> and budget <span class="math inline">\((\varepsilon_0, \delta_0)\)</span>. For a fixed analyst, the <span class="math inline">\(i\)</span>-th answer is this mechanism applied to a query fixed by the earlier answers and the analyst’s coins.</li>
-<li><em>All answers are <span class="math inline">\((\alpha/64, \alpha\beta/32)\)</span>-DP.</em> Apply the corollary of advanced composition with <span class="math inline">\(\varepsilon = \alpha/64\)</span> and <span class="math inline">\(\delta' = \alpha\beta/64\)</span>. The total <span class="math inline">\(\delta\)</span> is <span class="math inline">\(k\delta_0 + \delta' = \alpha\beta/32\)</span>. The queries in the transcript are a post-processing of the answers and the analyst’s coins, so the transcript has the same guarantee.</li>
+<li><em>Each answer is private.</em> With <span class="math inline">\(\delta_0 = \alpha\beta/(64k)\)</span>, the noise is the Gaussian mechanism’s for sensitivity <span class="math inline">\(1/n\)</span> and budget <span class="math inline">\((\varepsilon_0, \delta_0)\)</span>. For a fixed analyst, the <span class="math inline">\(i\)</span>-th answer is this mechanism applied to a query fixed by the earlier answers and the coins of the analyst.</li>
+<li><em>All answers are <span class="math inline">\((\alpha/64, \alpha\beta/32)\)</span>-DP.</em> The corollary of advanced composition applies with <span class="math inline">\(\varepsilon = \alpha/64\)</span> and <span class="math inline">\(\delta' = \alpha\beta/64\)</span>. The total <span class="math inline">\(\delta\)</span> is <span class="math inline">\(k\delta_0 + \delta' = \alpha\beta/32\)</span>. The queries in the transcript are a post-processing of the answers and the coins of the analyst, so the transcript has the same guarantee.</li>
 <li><em>Accuracy on the sample.</em> The error <span class="math inline">\(a_i - q_i(D)\)</span> is the noise <span class="math inline">\(Z_i\)</span>, and a Gaussian variable exceeds <span class="math inline">\(t\)</span> standard deviations in absolute value with probability at most <span class="math inline">\(2e^{-t^2/2}\)</span>. With <span class="math inline">\(t = \sqrt{2\ln(32k/(\alpha\beta))}\)</span>, each <span class="math inline">\(|Z_i|\)</span> exceeds <span class="math inline">\(t\sigma\)</span> with probability at most <span class="math inline">\(\alpha\beta/(16k)\)</span>, so by a union bound all <span class="math inline">\(k\)</span> answers are within <span class="math inline">\(t\sigma\)</span> of the sample values with probability at least <span class="math inline">\(1 - \alpha\beta/16\)</span>.</li>
 <li><em>The threshold.</em> Write <span class="math inline">\(\ell = \ln(64k/(\alpha\beta))\)</span>. Since <span class="math inline">\(\varepsilon_0 &lt; 1 &lt; \ell\)</span>, we have <span class="math inline">\(2\ell + \varepsilon_0 \le 3\ell\)</span>, and <span class="math inline">\(t \le \sqrt{2\ell}\)</span>. So</li>
 </ol>
@@ -496,32 +495,28 @@ t\sigma \le \frac{\sqrt{6}\,\ell}{\varepsilon_0 n} = \frac{256\sqrt3}{\alpha n}\
 \tag{16.11}\]</span></span></p>
 <p>which <a href="#eq-ada-gaussian-n" class="quarto-xref">Equation&nbsp;<span>16.10</span></a> makes at most <span class="math inline">\(\alpha/8\)</span>. Steps 2 to 4 are the hypotheses of <a href="#thm-ada-transfer" class="quarto-xref">Theorem&nbsp;<span>16.1</span></a>, which gives the claim.</p>
 </div>
-<p>The <span class="math inline">\(\sqrt k\)</span> in <a href="#eq-ada-gaussian-n" class="quarto-xref">Equation&nbsp;<span>16.10</span></a> is the <span class="math inline">\(\sqrt k\)</span> of advanced composition. The constant is large because the transfer theorem’s constants are, but the number of queries a sample supports grows from linear in <span class="math inline">\(n\)</span>, for sample splitting, to quadratic in <span class="math inline">\(n\)</span>. Other private mechanisms give other trade-offs. For a finite universe, answering with <a href="../part03-query-release/01-multiplicative-weights.html">private multiplicative weights</a> gives, by an analogous transfer theorem for the average error over the queries (Bassily et al., 2016, Corollary 6.3), a sample size of order</p>
-<p><span id="eq-auto-05adaptivedataanalysis-11"><span class="math display">\[
-n = \frac{\sqrt{\ln|\mathcal X|}\,\ln k\,\ln^{3/2}(1/(\alpha\beta))}{\alpha^3},
-\tag{16.12}\]</span></span></p>
-<p>which is only logarithmic in <span class="math inline">\(k\)</span>, and better when <span class="math inline">\(k\)</span> is very large compared with <span class="math inline">\(\ln |\mathcal X|\)</span>.</p>
+<p>The <span class="math inline">\(\sqrt k\)</span> in <a href="#eq-ada-gaussian-n" class="quarto-xref">Equation&nbsp;<span>16.10</span></a> is the <span class="math inline">\(\sqrt k\)</span> of advanced composition. The constant is large because the constants of the transfer theorem are. But the number of queries that a sample supports grows from linear in <span class="math inline">\(n\)</span>, for sample splitting, to quadratic in <span class="math inline">\(n\)</span>. For a finite universe and a very large <span class="math inline">\(k\)</span>, <a href="../part03-query-release/01-multiplicative-weights.html">private multiplicative weights</a> does better still. For the average error over the queries, it needs a sample only logarithmic in <span class="math inline">\(k\)</span> (Bassily et al., 2016, Corollary 6.3).</p>
 </section>
 <section id="sec-ada-easy" class="level2" data-number="16.4">
 <h2 data-number="16.4" class="anchored" data-anchor-id="sec-ada-easy"><span class="header-section-number">16.4</span> An easier transfer theorem</h2>
-<p>A weaker transfer theorem, with accuracy measured in expectation instead of with high probability, has a short complete proof. Its hypothesis bounds the expected worst error on the sample, and its conclusion bounds the expected worst error on the population.</p>
+<p>A weaker transfer theorem, with accuracy in expectation instead of with high probability, has a short complete proof. It turns a bound on the expected worst error on the sample into one on the population.</p>
 <div id="thm-ada-easy" class="theorem">
 <p><span class="theorem-title"><strong>Theorem 16.2 (Transfer in expectation)</strong></span> Let <span class="math inline">\(M\)</span> be <span class="math inline">\((\varepsilon, \delta)\)</span>-DP against adaptive analysts. Suppose that for every analyst, if the records are independent draws from <span class="math inline">\(\mathcal D\)</span>, then</p>
-<p><span id="eq-auto-05adaptivedataanalysis-12"><span class="math display">\[
+<p><span id="eq-auto-05adaptivedataanalysis-11"><span class="math display">\[
 \mathbb E\Big[\max_{i \le k} |a_i - q_i(D)|\Big] \le \alpha .
-\tag{16.13}\]</span></span></p>
+\tag{16.12}\]</span></span></p>
 <p>Then for every analyst,</p>
-<p><span id="eq-auto-05adaptivedataanalysis-13"><span class="math display">\[
+<p><span id="eq-auto-05adaptivedataanalysis-12"><span class="math display">\[
 \mathbb E\Big[\max_{i \le k} |a_i - q_i(\mathcal D)|\Big] \le \alpha + e^{\varepsilon} - 1 + \delta .
-\tag{16.14}\]</span></span></p>
+\tag{16.13}\]</span></span></p>
 </div>
 <!-- proof: after @lem-ada-key -->
-<p>For small <span class="math inline">\(\varepsilon\)</span>, the excess is about <span class="math inline">\(\varepsilon + \delta\)</span>. Most of the work is in a lemma about one query. It says that a query chosen by a DP algorithm takes about the same value on the sample as on the population, on average. The last query of <a href="#prp-ada-overfit" class="quarto-xref">Proposition&nbsp;<span>16.2</span></a> is exactly a query on which the two disagree, so a DP algorithm cannot produce it.</p>
+<p>For small <span class="math inline">\(\varepsilon\)</span>, the excess is about <span class="math inline">\(\varepsilon + \delta\)</span>. Most of the work is in a lemma about one query. It says that a query chosen by a DP algorithm has on average about the same value on the sample as on the population. So a DP algorithm cannot produce the last query of <a href="#prp-ada-overfit" class="quarto-xref">Proposition&nbsp;<span>16.2</span></a>, on which the two disagree.</p>
 <div id="lem-ada-key" class="theorem lemma">
 <p><span class="theorem-title"><strong>Lemma 16.1 (A private query generalizes)</strong></span> Let <span class="math inline">\(W\)</span> be an <span class="math inline">\((\varepsilon, \delta)\)</span>-DP algorithm that maps a dataset in <span class="math inline">\(\mathcal X^n\)</span> to a statistical query. Let <span class="math inline">\(X_1, \dots, X_n\)</span> be independent draws from <span class="math inline">\(\mathcal D\)</span> and <span class="math inline">\(q = W(D)\)</span>. Then</p>
-<p><span id="eq-auto-05adaptivedataanalysis-14"><span class="math display">\[
+<p><span id="eq-auto-05adaptivedataanalysis-13"><span class="math display">\[
 \big|\mathbb E[q(D)] - \mathbb E[q(\mathcal D)]\big| \le e^{\varepsilon} - 1 + \delta ,
-\tag{16.15}\]</span></span></p>
+\tag{16.14}\]</span></span></p>
 <p>with expectations over the sample and the coins of <span class="math inline">\(W\)</span>.</p>
 </div>
 <div class="proof">
@@ -529,54 +524,54 @@ n = \frac{\sqrt{\ln|\mathcal X|}\,\ln k\,\ln^{3/2}(1/(\alpha\beta))}{\alpha^3},
 <ol type="1">
 <li><em>Linearity.</em> Since <span class="math inline">\(q\)</span> takes values in <span class="math inline">\(\{0,1\}\)</span>,</li>
 </ol>
-<p><span id="eq-auto-05adaptivedataanalysis-15"><span class="math display">\[
+<p><span id="eq-auto-05adaptivedataanalysis-14"><span class="math display">\[
 \mathbb E[q(D)] = \frac1n\sum_{i=1}^n \mathbb E[q(X_i)] = \frac1n\sum_{i=1}^n \Pr[q(X_i) = 1].
-\tag{16.16}\]</span></span></p>
+\tag{16.15}\]</span></span></p>
 <ol start="2" type="1">
 <li><em>A fresh record.</em> Fix <span class="math inline">\(i\)</span>, draw <span class="math inline">\(X_i'\)</span> from <span class="math inline">\(\mathcal D\)</span> independently of everything else, and let <span class="math inline">\(D^{(i)}\)</span> be <span class="math inline">\(D\)</span> with entry <span class="math inline">\(i\)</span> replaced by <span class="math inline">\(X_i'\)</span>. The datasets <span class="math inline">\(D\)</span> and <span class="math inline">\(D^{(i)}\)</span> are neighbours, <span class="math inline">\(D \sim D^{(i)}\)</span>, since they differ in one replaced record.</li>
 <li><em>Privacy.</em> Write <span class="math inline">\(W(D)(X_i)\)</span> for the value of the query <span class="math inline">\(W(D)\)</span> on the record <span class="math inline">\(X_i\)</span>. For fixed values of <span class="math inline">\(D\)</span> and <span class="math inline">\(X_i'\)</span>, the queries <span class="math inline">\(q'\)</span> with <span class="math inline">\(q'(X_i) = 1\)</span> form an event about the output of <span class="math inline">\(W\)</span>. DP for the neighbours <span class="math inline">\(D\)</span> and <span class="math inline">\(D^{(i)}\)</span> gives</li>
 </ol>
-<p><span id="eq-auto-05adaptivedataanalysis-16"><span class="math display">\[
+<p><span id="eq-auto-05adaptivedataanalysis-15"><span class="math display">\[
 \Pr_W\big[W(D)(X_i) = 1\big] \le e^{\varepsilon}\Pr_W\big[W(D^{(i)})(X_i) = 1\big] + \delta .
-\tag{16.17}\]</span></span></p>
-<p>Averaging over <span class="math inline">\(D\)</span> and <span class="math inline">\(X_i'\)</span> keeps the inequality. 4. <em>Swapping.</em> The pair <span class="math inline">\((D^{(i)}, X_i)\)</span> has the same distribution as the pair <span class="math inline">\((D, X_i')\)</span>, since each is <span class="math inline">\(n\)</span> independent draws from <span class="math inline">\(\mathcal D\)</span> plus one more independent draw. Hence <span class="math inline">\(\Pr[W(D^{(i)})(X_i) = 1] = \Pr[q(X_i') = 1]\)</span>. The record <span class="math inline">\(X_i'\)</span> is independent of <span class="math inline">\(q = W(D)\)</span>, so this probability is <span class="math inline">\(\mathbb E[q(\mathcal D)]\)</span>. 5. <em>One direction.</em> Steps 1, 3 and 4 give <span class="math inline">\(\mathbb E[q(D)] \le e^\varepsilon\,\mathbb E[q(\mathcal D)] + \delta\)</span>. Since <span class="math inline">\(\mathbb E[q(\mathcal D)] \le 1\)</span>,</p>
-<p><span id="eq-auto-05adaptivedataanalysis-17"><span class="math display">\[
+\tag{16.16}\]</span></span></p>
+<p>The average over <span class="math inline">\(D\)</span> and <span class="math inline">\(X_i'\)</span> keeps the inequality. 4. <em>Swapping.</em> The pair <span class="math inline">\((D^{(i)}, X_i)\)</span> has the same distribution as the pair <span class="math inline">\((D, X_i')\)</span>, since each is <span class="math inline">\(n\)</span> independent draws from <span class="math inline">\(\mathcal D\)</span> plus one more independent draw. Hence <span class="math inline">\(\Pr[W(D^{(i)})(X_i) = 1] = \Pr[q(X_i') = 1]\)</span>. The record <span class="math inline">\(X_i'\)</span> is independent of <span class="math inline">\(q = W(D)\)</span>, so this probability is <span class="math inline">\(\mathbb E[q(\mathcal D)]\)</span>. 5. <em>One direction.</em> Steps 1, 3 and 4 give <span class="math inline">\(\mathbb E[q(D)] \le e^\varepsilon\,\mathbb E[q(\mathcal D)] + \delta\)</span>. Since <span class="math inline">\(\mathbb E[q(\mathcal D)] \le 1\)</span>,</p>
+<p><span id="eq-auto-05adaptivedataanalysis-16"><span class="math display">\[
 \mathbb E[q(D)] - \mathbb E[q(\mathcal D)] \le (e^\varepsilon - 1)\,\mathbb E[q(\mathcal D)] + \delta \le e^{\varepsilon} - 1 + \delta .
-\tag{16.18}\]</span></span></p>
+\tag{16.17}\]</span></span></p>
 <ol start="6" type="1">
 <li><em>Other direction.</em> DP applied from <span class="math inline">\(D^{(i)}\)</span> to <span class="math inline">\(D\)</span> gives <span class="math inline">\(\Pr[W(D^{(i)})(X_i) = 1] \le e^\varepsilon \Pr[W(D)(X_i) = 1] + \delta\)</span>. With steps 1 and 4, this is <span class="math inline">\(\mathbb E[q(\mathcal D)] \le e^\varepsilon\,\mathbb E[q(D)] + \delta\)</span>, and the same argument as in step 5 bounds <span class="math inline">\(\mathbb E[q(\mathcal D)] - \mathbb E[q(D)]\)</span> by <span class="math inline">\(e^{\varepsilon} - 1 + \delta\)</span>.</li>
 </ol>
 </div>
-<p>The proof of <a href="#thm-ada-easy" class="quarto-xref">Theorem&nbsp;<span>16.2</span></a> lets a private algorithm pick out the query with the worst error. Two tricks make that query fit the lemma.</p>
+<p>The proof of <a href="#thm-ada-easy" class="quarto-xref">Theorem&nbsp;<span>16.2</span></a> lets a private algorithm pick out the query with the worst error, and two tricks make that query fit the lemma.</p>
 <div class="proof">
 <p><span class="proof-title"><em>Proof</em>. </span></p>
 <ol type="1">
 <li><em>Removing the absolute value.</em> Whenever the analyst asks <span class="math inline">\(q_i\)</span> and receives <span class="math inline">\(a_i\)</span>, add the query <span class="math inline">\(1 - q_i\)</span> with the answer <span class="math inline">\(1 - a_i\)</span>. The extended transcript is a post-processing of the original, so it is still <span class="math inline">\((\varepsilon,\delta)\)</span>-DP. The errors on the sample are unchanged, because <span class="math inline">\(|(1 - a_i) - (1 - q_i)(D)| = |a_i - q_i(D)|\)</span>. Since <span class="math inline">\((1-q_i)(\mathcal D) - (1 - a_i) = -(q_i(\mathcal D) - a_i)\)</span>, the <span class="math inline">\(2k\)</span> queries <span class="math inline">\(q_j\)</span> satisfy</li>
 </ol>
-<p><span id="eq-auto-05adaptivedataanalysis-18"><span class="math display">\[
+<p><span id="eq-auto-05adaptivedataanalysis-17"><span class="math display">\[
 \max_{i \le k}|q_i(\mathcal D) - a_i| = \max_{j \le 2k}\big(q_j(\mathcal D) - a_j\big).
-\tag{16.19}\]</span></span></p>
+\tag{16.18}\]</span></span></p>
 <ol start="2" type="1">
 <li><em>The selector.</em> Let <span class="math inline">\(W\)</span> run the interaction on <span class="math inline">\(D\)</span> and output the query <span class="math inline">\(q^\ast = q_{j^\ast}\)</span>, with answer <span class="math inline">\(a^\ast = a_{j^\ast}\)</span>, where <span class="math inline">\(j^\ast\)</span> maximizes <span class="math inline">\(q_j(\mathcal D) - a_j\)</span>. The selector uses <span class="math inline">\(\mathcal D\)</span>, which is fixed and is not the data, so <span class="math inline">\(W\)</span> is a post-processing of the transcript and is <span class="math inline">\((\varepsilon,\delta)\)</span>-DP. It is a device of the proof and is never run.</li>
 <li><em>Splitting the error.</em> By linearity of expectation,</li>
 </ol>
-<p><span id="eq-auto-05adaptivedataanalysis-19"><span class="math display">\[
+<p><span id="eq-auto-05adaptivedataanalysis-18"><span class="math display">\[
 \mathbb E\Big[\max_{i}|q_i(\mathcal D) - a_i|\Big] = \mathbb E\big[q^\ast(\mathcal D) - q^\ast(D)\big] + \mathbb E\big[q^\ast(D) - a^\ast\big] .
-\tag{16.20}\]</span></span></p>
+\tag{16.19}\]</span></span></p>
 <ol start="4" type="1">
 <li><em>The two terms.</em> <a href="#lem-ada-key" class="quarto-xref">Lemma&nbsp;<span>16.1</span></a>, applied to <span class="math inline">\(W\)</span>, bounds the first term by <span class="math inline">\(e^\varepsilon - 1 + \delta\)</span>. The second is at most <span class="math inline">\(\mathbb E[\max_j |q_j(D) - a_j|] \le \alpha\)</span>, by the accuracy hypothesis and step 1.</li>
 </ol>
 </div>
-<p>The Gaussian mechanism instantiates this theorem too, with a proof that needs nothing cited. The only change from <a href="#cor-ada-gaussian" class="quarto-xref">Corollary&nbsp;<span>16.1</span></a> is that the error on the sample is bounded in expectation.</p>
+<p>The Gaussian mechanism applies this theorem too, with a proof that cites nothing. The only change from <a href="#cor-ada-gaussian" class="quarto-xref">Corollary&nbsp;<span>16.1</span></a> is that the error on the sample is bounded in expectation.</p>
 <div id="cor-ada-expected" class="theorem corollary">
 <p><span class="theorem-title"><strong>Corollary 16.2</strong></span> Let <span class="math inline">\(\alpha \in (0, 1]\)</span>. Answer each query by <span class="math inline">\(a_i = q_i(D) + Z_i\)</span> with independent <span class="math inline">\(Z_i \sim \mathcal N(0, \sigma^2)\)</span>, where</p>
-<p><span id="eq-auto-05adaptivedataanalysis-20"><span class="math display">\[
+<p><span id="eq-auto-05adaptivedataanalysis-19"><span class="math display">\[
 \varepsilon_0 = \frac{\alpha}{2\sqrt{2k\ln(2/\alpha)}}, \qquad \sigma = \frac{\sqrt{2\ln(2k/\alpha) + \varepsilon_0}}{\varepsilon_0\, n}.
-\tag{16.21}\]</span></span></p>
+\tag{16.20}\]</span></span></p>
 <p>If</p>
-<p><span id="eq-auto-05adaptivedataanalysis-21"><span class="math display">\[
+<p><span id="eq-auto-05adaptivedataanalysis-20"><span class="math display">\[
 n \ge \frac{4\sqrt3}{\alpha^2}\sqrt{k\ln\frac{2}{\alpha}}\;\ln\frac{2k}{\alpha},
-\tag{16.22}\]</span></span></p>
+\tag{16.21}\]</span></span></p>
 <p>then for every analyst, <span class="math inline">\(\mathbb E[\max_i |a_i - q_i(\mathcal D)|] \le 4\alpha\)</span>.</p>
 </div>
 <div class="proof">
@@ -585,13 +580,13 @@ n \ge \frac{4\sqrt3}{\alpha^2}\sqrt{k\ln\frac{2}{\alpha}}\;\ln\frac{2k}{\alpha},
 <li><em>Privacy.</em> As in steps 1 and 2 of the proof of <a href="#cor-ada-gaussian" class="quarto-xref">Corollary&nbsp;<span>16.1</span></a>, each answer is the Gaussian mechanism with budget <span class="math inline">\((\varepsilon_0, \alpha/(2k))\)</span>, and the corollary of advanced composition with <span class="math inline">\(\varepsilon = \alpha\)</span> and <span class="math inline">\(\delta' = \alpha/2\)</span> makes the mechanism <span class="math inline">\((\alpha, \alpha)\)</span>-DP against adaptive analysts.</li>
 <li><em>Expected worst noise.</em> For <span class="math inline">\(\lambda &gt; 0\)</span>, Jensen’s inequality and <span class="math inline">\(e^{\lambda\max_i|Z_i|} \le \sum_i e^{\lambda |Z_i|}\)</span> give</li>
 </ol>
-<p><span id="eq-auto-05adaptivedataanalysis-22"><span class="math display">\[
+<p><span id="eq-auto-05adaptivedataanalysis-21"><span class="math display">\[
 e^{\lambda\,\mathbb E[\max_i |Z_i|]} \le \sum_{i=1}^k \mathbb E\big[e^{\lambda|Z_i|}\big] \le 2k\,e^{\lambda^2\sigma^2/2},
-\tag{16.23}\]</span></span></p>
-<p>because <span class="math inline">\(\mathbb E[e^{\lambda|Z|}] \le \mathbb E[e^{\lambda Z}] + \mathbb E[e^{-\lambda Z}] = 2e^{\lambda^2\sigma^2/2}\)</span>. Taking logarithms with <span class="math inline">\(\lambda = \sqrt{2\ln(2k)}/\sigma\)</span> gives <span class="math inline">\(\mathbb E[\max_i|Z_i|] \le \sigma\sqrt{2\ln(2k)}\)</span>. 3. <em>The threshold.</em> Write <span class="math inline">\(\ell = \ln(2k/\alpha) \ge \ln 2\)</span>. Since <span class="math inline">\(\varepsilon_0 \le 1/(2\sqrt{2\ln 2}) &lt; \ln 2 \le \ell\)</span>, we have <span class="math inline">\(2\ell + \varepsilon_0 \le 3\ell\)</span>, and <span class="math inline">\(\ln(2k) \le \ell\)</span>. So</p>
-<p><span id="eq-auto-05adaptivedataanalysis-23"><span class="math display">\[
+\tag{16.22}\]</span></span></p>
+<p>because <span class="math inline">\(\mathbb E[e^{\lambda|Z|}] \le \mathbb E[e^{\lambda Z}] + \mathbb E[e^{-\lambda Z}] = 2e^{\lambda^2\sigma^2/2}\)</span>. The logarithm, with <span class="math inline">\(\lambda = \sqrt{2\ln(2k)}/\sigma\)</span>, gives <span class="math inline">\(\mathbb E[\max_i|Z_i|] \le \sigma\sqrt{2\ln(2k)}\)</span>. 3. <em>The threshold.</em> Write <span class="math inline">\(\ell = \ln(2k/\alpha) \ge \ln 2\)</span>. Since <span class="math inline">\(\varepsilon_0 \le 1/(2\sqrt{2\ln 2}) &lt; \ln 2 \le \ell\)</span>, we have <span class="math inline">\(2\ell + \varepsilon_0 \le 3\ell\)</span>, and <span class="math inline">\(\ln(2k) \le \ell\)</span>. So</p>
+<p><span id="eq-auto-05adaptivedataanalysis-22"><span class="math display">\[
 \sigma\sqrt{2\ln(2k)} \le \frac{\sqrt6\,\ell}{\varepsilon_0 n} = \frac{4\sqrt3}{\alpha n}\sqrt{k\ln\frac{2}{\alpha}}\;\ell ,
-\tag{16.24}\]</span></span></p>
+\tag{16.23}\]</span></span></p>
 <p>which the condition on <span class="math inline">\(n\)</span> makes at most <span class="math inline">\(\alpha\)</span>. Hence the expected worst error on the sample is at most <span class="math inline">\(\alpha\)</span>. 4. <a href="#thm-ada-easy" class="quarto-xref">Theorem&nbsp;<span>16.2</span></a> with <span class="math inline">\(\varepsilon = \delta = \alpha\)</span> gives at most <span class="math inline">\(\alpha + (e^\alpha - 1) + \alpha \le 4\alpha\)</span>, since <span class="math inline">\(e^\alpha - 1 \le 2\alpha\)</span> for <span class="math inline">\(\alpha \le 1\)</span>.</p>
 </div>
 </section>
@@ -656,13 +651,13 @@ Table&nbsp;16.1: The chapter’s results.
 <section id="sec-ada-notes" class="level2" data-number="16.6">
 <h2 data-number="16.6" class="anchored" data-anchor-id="sec-ada-notes"><span class="header-section-number">16.6</span> References</h2>
 <ul>
-<li>John P. A. Ioannidis, “Why Most Published Research Findings Are False”, 2005. The reproducibility problem that motivates the chapter.</li>
-<li>Cynthia Dwork, Vitaly Feldman, Moritz Hardt, Toniann Pitassi, Omer Reingold and Aaron Roth, “Preserving Statistical Validity in Adaptive Data Analysis”, 2015. The first use of differential privacy to answer adaptively chosen queries with guarantees on the population.</li>
-<li>Raef Bassily, Kobbi Nissim, Adam Smith, Thomas Steinke, Uri Stemmer and Jonathan Ullman, “Algorithmic Stability for Adaptive Data Analysis”, 2016. The transfer theorem with high probability (Theorem 3.4), the bound in expectation of <a href="#lem-ada-key" class="quarto-xref">Lemma&nbsp;<span>16.1</span></a> (Lemma 3.1), and instantiations with the Gaussian mechanism and private multiplicative weights.</li>
-<li>Christopher Jung, Katrina Ligett, Seth Neel, Aaron Roth, Saeed Sharifi-Malvajerdi and Moshe Shenfeld, “A New Analysis of Differential Privacy’s Generalization Guarantees”, 2020. A simpler and stronger transfer theorem.</li>
-<li>Moritz Hardt and Jonathan Ullman, “Preventing False Discovery in Interactive Data Analysis Is Hard”, 2014, and Thomas Steinke and Jonathan Ullman, “Interactive Fingerprinting Codes and the Hardness of Preventing False Discovery”, 2015. Assuming one-way functions with exponential hardness exist, computationally efficient mechanisms cannot answer many more than <span class="math inline">\(n^2\)</span> adaptive queries in general, so the <span class="math inline">\(\sqrt k\)</span> dependence is optimal for them.</li>
-<li>Cynthia Dwork, Guy N. Rothblum and Salil Vadhan, “Boosting and Differential Privacy”, 2010. Advanced composition.</li>
-<li>Cynthia Dwork and Aaron Roth, <em>The Algorithmic Foundations of Differential Privacy</em>, 2014. The Gaussian mechanism and advanced composition (Theorem 3.20).</li>
+<li>John P. A. Ioannidis, “Why Most Published Research Findings Are False”, 2005, on the reproducibility problem that motivates the chapter.</li>
+<li>Cynthia Dwork, Vitaly Feldman, Moritz Hardt, Toniann Pitassi, Omer Reingold and Aaron Roth, “Preserving Statistical Validity in Adaptive Data Analysis”, 2015, the first use of DP for adaptively chosen queries with guarantees on the population.</li>
+<li>Raef Bassily, Kobbi Nissim, Adam Smith, Thomas Steinke, Uri Stemmer and Jonathan Ullman, “Algorithmic Stability for Adaptive Data Analysis”, 2016, with the transfer theorem (Theorem 3.4) and the bound of <a href="#lem-ada-key" class="quarto-xref">Lemma&nbsp;<span>16.1</span></a> (Lemma 3.1).</li>
+<li>Christopher Jung, Katrina Ligett, Seth Neel, Aaron Roth, Saeed Sharifi-Malvajerdi and Moshe Shenfeld, “A New Analysis of Differential Privacy’s Generalization Guarantees”, 2020, with a simpler and stronger transfer theorem.</li>
+<li>Moritz Hardt and Jonathan Ullman, “Preventing False Discovery in Interactive Data Analysis Is Hard”, 2014, and Thomas Steinke and Jonathan Ullman, “Interactive Fingerprinting Codes and the Hardness of Preventing False Discovery”, 2015, which show that efficient mechanisms cannot answer many more than <span class="math inline">\(n^2\)</span> adaptive queries, if one-way functions with exponential hardness exist.</li>
+<li>Cynthia Dwork, Guy N. Rothblum and Salil Vadhan, “Boosting and Differential Privacy”, 2010, which proves advanced composition.</li>
+<li>Cynthia Dwork and Aaron Roth, <em>The Algorithmic Foundations of Differential Privacy</em>, 2014, on the Gaussian mechanism and advanced composition (Theorem 3.20).</li>
 </ul>
 
 
