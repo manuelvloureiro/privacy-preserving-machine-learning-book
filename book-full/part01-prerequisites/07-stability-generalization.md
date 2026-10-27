@@ -141,6 +141,7 @@ By the chain rule, the gradient of the logistic loss is $-y\,\sigma(-y\langle\th
 : Replace-one changes of regularized logistic regression against @eq-stability-erm. With $L = 1$ the weight and loss bounds coincide. Ratio is the loss change over its bound. {#tbl-stability-replace-one}
 
 For $\lambda \ge 0.1$ the changes follow $1/(\lambda n)$ closely (@fig-stability-erm-bound). At $\lambda = 0.01$ the training loss's own curvature adds to $\lambda$, so the ratio drops to about 0.15.
+:::
 
 ![Largest replace-one loss change of regularized logistic regression against $n$, for three values of $\lambda$ (solid), with the bound $2L^2/(\lambda n)$ (dashed).](figures/stability_erm_bound.svg){#fig-stability-erm-bound}
 
