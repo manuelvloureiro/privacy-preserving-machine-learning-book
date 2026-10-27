@@ -11,6 +11,10 @@ Status on 2026-10-27. Work items, largest saving first within each step. Word co
   - Step 5 is done. Each course property is proved once: the [0,1]-functions fact is `lem-rr-functions`, at its first use, and `lem-adp-functions` adds δ. There is one definition of adaptive composition (`def-lap-adaptive`), and the shuffle and mean-estimation lemmas cite their originals. History and asides are cut, references are one sentence each, and part pages are one paragraph plus the table.
   - Step 6 is done. Chapter 03 owns the first count. The margin lives in chapter 02. "36 quarters" is a clause plus a link. The wrong pointers and the Context API recap are fixed.
   - Step 7.2 (the trade-off note's tables) and 7.3 are done.
+- Steps 1 and 3 for the full edition (2026-10-27), together with a paragraph rewrite of every chapter in Parts 1–5:
+  - Step 1 is done. Each claim that lost its exercise is proved on the page, quotes a number its script prints, cites a paper, or is cut. No number that a script does not print remains.
+  - Step 3 is done for the proofs. Each re-proof in the table is a one-sentence restatement plus a reference to its canonical copy. `thm-dpsgd-privacy` is gone, since it was the same theorem as `thm-sub-dpsgd`. `cor-rdp-gauss-opt` is the one home of the order optimisation. The part README files are each one line that links to the part page.
+  - Step 3's symbol unification (α/β against FPR/FNR, β against κ for the Gumbel scale) is still open.
 
 ## The reading order
 
