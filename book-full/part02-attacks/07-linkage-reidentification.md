@@ -1,14 +1,14 @@
 # Linkage and re-identification
 
-A hospital shares its discharge records with researchers, after deleting the names and keeping ZIP code, date of birth, sex and diagnosis. Is anyone in the file identifiable? Usually, yes, because most people are the only person with their combination of ZIP code, birth date and sex, so anyone who holds a voter roll with names and those three columns can join the two tables and name most rows. This is a **linkage attack**, and putting a name back on a "de-identified" record is **re-identification**. Unlike the rest of this part, it attacks the data itself rather than a trained model.
+A hospital shares its discharge records with researchers, after deleting the names and keeping ZIP code, date of birth, sex and diagnosis. Is anyone in the file identifiable? Usually, yes. Most people are the only person with their combination of ZIP code, birth date and sex. So anyone who holds a voter roll with names and those three columns can join the two tables and name most rows. This is a **linkage attack**, and putting a name back on a "de-identified" record is **re-identification**. Unlike the rest of this part, it attacks the data itself, not a trained model.
 
-The one idea of the chapter is that identifying information is measured in bits, and bits add up. Picking one person out of $n$ takes $\log_2 n$ bits, because each bit halves the number of candidates, so 27.9 bits single out one of the 248.7 million people in the United States in 1990, the census year of the classic study below. An attribute with 12 equally likely values, such as a birth month, cuts the candidates twelvefold and so carries $\log_2 12 \approx 3.6$ bits. When attributes are independent their cuts multiply, so their bits add. **Once the attributes you know carry a few bits more than $\log_2 n$, almost everyone is unique.**
+The one idea of the chapter is that identifying information is measured in bits, and bits add up. Picking one person out of $n$ takes $\log_2 n$ bits, because each bit halves the number of candidates, so 27.9 bits single out one of the 248.7 million people in the United States in 1990. An attribute with 12 equally likely values, such as a birth month, cuts the candidates twelvefold and so carries $\log_2 12 \approx 3.6$ bits. When attributes are independent their cuts multiply, so their bits add. **Once the attributes you know carry a few bits more than $\log_2 n$, almost everyone is unique.**
 
-The running example is a synthetic census of $n = 10{,}000$ people with eight attributes, which an adversary learns one at a time. Once the known attributes carry 12.90 bits, an average over people that @sec-link-bounds defines, a third of the people are already unique, even though that is below the $\log_2 n = 13.29$ bits needed to name one person, because skewed attributes leave some people in rare combinations. At 20.39 bits 97.5% are unique.
+The running example is a synthetic census of $n = 10{,}000$ people with eight attributes, which an adversary learns one at a time. Once the known attributes carry 12.90 bits on average (@sec-link-bounds), a third of the people are already unique. That is below the $\log_2 n = 13.29$ bits needed to name one person, because skewed attributes leave some people in rare combinations. At 20.39 bits 97.5% are unique.
 
 ## Quasi-identifiers and the linkage attack {#sec-link-quasi}
 
-Data protection practice sorts a table's columns into three kinds. **Direct identifiers**, such as a name, name a person on their own, while **sensitive attributes**, such as a diagnosis, are what must not be tied to a person. Between them sit **quasi-identifiers**, such as a birth date. Each names nobody alone, but together they often single out one person, and they appear next to names in other datasets. "De-identification" usually removes only the direct identifiers. This section scores a join on the quasi-identifiers with a game in the style of [Threat models](01-threat-models.md), in which a challenger hides a secret and an adversary guesses it.
+Data protection practice sorts a table's columns into three kinds. **Direct identifiers**, such as a name, name a person on their own, while **sensitive attributes**, such as a diagnosis, must not be tied to a person. Between them sit **quasi-identifiers**, such as a birth date. Each names nobody alone, but together they often single out one person, and they appear next to names in other datasets. "De-identification" usually removes only the direct identifiers. This section scores a join on the quasi-identifiers with a game in the style of [Threat models](01-threat-models.md).
 
 ::: {#def-link-linkage name="The linkage game"}
 A release $R$ holds $n$ records, each with quasi-identifiers and a sensitive attribute. Records with identical quasi-identifiers form an **equivalence class**, and the $J$ classes have sizes $k_1, \dots, k_J$. A challenger draws a target uniformly from the $n$ records and gives the adversary the target's quasi-identifiers, as a voter roll would. The adversary outputs one record of $R$ and wins if it is the target's. The **linkage attack** outputs a record drawn uniformly from the target's class.
@@ -28,7 +28,7 @@ the number of distinct quasi-identifier combinations divided by the number of re
 3. *Average over the target.* The target lands in class $j$ with probability $k_j/n$, so the success is $\sum_j\frac{k_j}{n}\cdot\frac{1}{k_j} = \frac Jn$.
 :::
 
-Each unique record is a sure win, so the fraction of unique records is a lower bound on the success. Conversely, if every class has at least $k$ records, then $n$ records fill at most $n/k$ classes, so $J \le n/k$ and the success is at most $1/k$, the idea that [Syntactic anonymity](08-syntactic-anonymity.md) studies.
+Each unique record is a sure win, so the fraction of unique records is a lower bound on the success. Conversely, if every class has at least $k$ records, then $n$ records fill at most $n/k$ classes. So $J \le n/k$ and the success is at most $1/k$, the idea that [Syntactic anonymity](08-syntactic-anonymity.md) studies.
 
 The game assumes the adversary knows that the target is in the release. Otherwise a unique match may belong to someone who is not in $R$, and whether that doubt protects anyone is the question of @sec-link-sampling.
 
@@ -48,9 +48,9 @@ The game assumes the adversary knows that the target is in the release. Otherwis
 
 : A de-identified hospital release, three quasi-identifiers and one sensitive attribute, joined with part of a voter roll. {#tbl-link-release}
 
-The join gives Ana's asthma, Carla's depression and Dan's pneumonia with certainty, because each of them matches exactly one record. Ben matches two records, his own and a stranger's with the same quasi-identifiers, so the adversary is right about him with probability $\frac12$. The three records born on 1990-01-01 count too, since a target drawn from them is found one time in three, though this part of the roll names none of them. With $J = 5$ classes for $n = 8$ records, @eq-link-success gives a success of $5/8 = 0.625$.
+The join gives Ana's asthma, Carla's depression and Dan's pneumonia with certainty, because each of them matches exactly one record. Ben matches two records, so the adversary is right about him with probability $\frac12$. The three records born on 1990-01-01 count too, since a target drawn from them is found one time in three. With $J = 5$ classes for $n = 8$ records, @eq-link-success gives a success of $5/8 = 0.625$.
 
-This is, in miniature, how the computer scientist Latanya Sweeney re-identified the governor of Massachusetts in the late 1990s: in the Cambridge voter roll, six people shared his birth date, three of them were men, and only one lived in his ZIP code.
+This is, in miniature, how Latanya Sweeney re-identified the governor of Massachusetts in the late 1990s. In the Cambridge voter roll, six people shared his birth date, three of them were men, and only one lived in his ZIP code.
 
 Sweeney (2000) then estimated from 1990 census tables that 87% of the US population were likely unique on {5-digit ZIP code, date of birth, sex}. The bits explain why (@fig-link-bits). Treating each attribute as uniform gives an upper bound on its bits, because equally likely values are the hardest to guess, so about 40,000 ZIP codes, $365 \times 80 = 29{,}200$ birthdays in about 80 birth years, and two sexes carry at most
 $$\log_2 40{,}000 + \log_2 29{,}200 + 1 = 15.3 + 14.8 + 1.0 = 31.1 \text{ bits},$$
@@ -61,13 +61,13 @@ against the 27.9 bits needed to single out one American, which leaves room for m
 
 ## Pseudonyms and hashed identifiers {#sec-link-pseudonyms}
 
-Deleting an identifier also deletes the ability to follow one person through the data. A common alternative is to replace the identifier by a code that stays the same on all of that person's records, often its MD5 hash, a standard 128-bit hash. This section shows two separate ways in which the code fails to hide the person.
+Deleting an identifier also deletes the ability to follow one person through the data. So a common alternative is to replace the identifier by a code that stays the same on all of that person's records, often its MD5 hash, a standard 128-bit hash. This section shows two separate ways in which the code fails to hide the person.
 
 ::: {#def-link-pseudonym name="Pseudonyms"}
 A **pseudonym** replaces an identifier $x$ by a code that is the same on every record of the same person. A **hashed pseudonym** is $h(x)$ for a public hash function $h$ that anyone can compute. A **keyed hash** mixes a secret key into $h$, so that only the key holder can compute it.
 :::
 
-A good hash cannot be run backwards, so the way to invert it is to hash candidate inputs until one matches, and an identifier with a public format can be guessed by listing every value. Even a pseudonym that nobody can invert has a second weakness, because all of one person's records carry it.
+A good hash cannot be run backwards, so the way to invert it is to hash candidate inputs until one matches, and an identifier with a public format can be guessed by listing every value. A pseudonym that nobody can invert still has a second weakness, because all of one person's records carry it.
 
 ::: {#prp-link-hash name="Two ways a pseudonym fails"}
 Suppose the identifiers come from a public set of $N$ values.
@@ -82,19 +82,19 @@ Suppose the identifiers come from a public set of $N$ values.
 3. *Part 2: a consistent pseudonym groups a person's records.* It is the same on every record of one person, so learning it from one record identifies all of them.
 :::
 
-Hashing therefore protects only identifiers that are already hard to guess. Phone, licence and identity numbers carry between about 20 and 33 bits (ten-digit phone numbers carry 33.2), and a laptop computes millions of MD5 hashes a second, so it lists any of these sets in seconds to hours. A keyed hash stops the enumeration, but not the second failure. Keeping a person's rows together, the reason to use a pseudonym, makes them one long record, which @sec-link-sparse shows to be identifying.
+Hashing therefore protects only identifiers that are already hard to guess. Phone, licence and identity numbers carry between about 20 and 33 bits (ten-digit phone numbers carry 33.2). A laptop computes millions of MD5 hashes a second, so it lists any of these sets in seconds to hours. A keyed hash stops the enumeration, but not the second failure. Keeping a person's rows together, the reason to use a pseudonym, makes them one long record, and @sec-link-sparse shows that such records identify people.
 
 ::: {#exm-link-taxi}
 In 2014 a freedom-of-information request obtained every New York City taxi trip of 2013, about 173 million trips, with each medallion number, the permit number of a cab, and each driver's licence number replaced by its MD5 hash. One hashed licence seemed to earn thousands of dollars a day. Its code, `cfcd208495d565ef66e7dff9f98764da`, is the MD5 of the string "0", as the script of @sec-link-code confirms, the placeholder that every trip with a missing licence carried, so the codes were plain MD5 with no key.
 
-Vijay Pandurangan then inverted all the pseudonyms, as part 1 of @prp-link-hash predicts. Licence numbers have six digits, or seven starting with 5, about 2 million possibilities or 20.9 bits, and medallion numbers, which follow a few fixed patterns of letters and digits, about 22 million or 24.4 bits. He hashed every possibility in minutes. In miniature, the script hashes all $10^6$ six-digit numbers, 19.9 bits' worth, and recovers five secret identifiers.
+Vijay Pandurangan then inverted all the pseudonyms, as part 1 of @prp-link-hash predicts. Licence numbers have about 2 million possible values (20.9 bits), and medallion numbers, which follow a few fixed patterns, about 22 million (24.4 bits), so he hashed every possibility in minutes. In miniature, the script hashes all $10^6$ six-digit numbers, 19.9 bits' worth, and recovers five secret identifiers.
 
-Passengers had no pseudonym, yet each trip is itself a record of rare details, of the kind @sec-link-sparse studies. A pickup minute (one of 525,600 in the year) carries 19.0 bits and a pickup square of 100 metres (one of 78,000) carries 16.3 bits, together at most 35.3 bits, more than the 27.4 bits that single out one trip among 173 million. Anthony Tockar showed this in 2014 with photographs of celebrities entering taxis. And by part 2 of @prp-link-hash, a passenger who finds their own trip and knows who drove it learns the driver's pseudonym, and with it the year's trips and income.
+Passengers had no pseudonym, yet each trip is itself a record of rare details, of the kind @sec-link-sparse studies. A pickup minute (one of 525,600 in the year) carries 19.0 bits and a pickup square of 100 metres (one of 78,000) carries 16.3 bits. Together that is at most $19.0 + 16.3 = 35.3$ bits, more than the $\log_2(173 \times 10^6) = 27.4$ bits that single out one trip, and Anthony Tockar used this in 2014 with photographs of celebrities entering taxis. By part 2 of @prp-link-hash, a passenger who finds their own trip and knows who drove it also learns the driver's pseudonym, and with it the year's trips and income.
 :::
 
 ## How many people are unique {#sec-link-unique}
 
-A **custodian**, the organization that holds and releases data, can count the unique records in its own table, but not in the population behind it, nor for columns an adversary might combine from elsewhere. So it needs a model that predicts the count. It is the birthday problem of [Cryptography basics](../part01-prerequisites/08-crypto-basics.md) asked the other way round: how many people share their cell with *nobody*?
+A **custodian**, the organization that holds and releases data, can count the unique records in its own table, but not in the population behind it, nor for columns an adversary might combine from elsewhere. So it needs a model that predicts the count. The question is the birthday problem of [Cryptography basics](../part01-prerequisites/08-crypto-basics.md) asked the other way round: how many people share their cell with *nobody*?
 
 ::: {#def-link-cells name="Cells and uniqueness"}
 A population has $n$ people, and a release may cover all of them. A person's combination of attribute values is their **cell**. Under the **population model**, each person falls in cell $c$ with probability $p_c$, independently of everyone else, and $K$ is the number of cells. A person is **unique** when nobody else is in their cell, and $U$ is the number of unique people.
@@ -116,7 +116,7 @@ The plan is to write $U$ as a sum of one 0/1 counter per person, find the chance
 4. *Average over the cell.* One person is unique with probability $\sum_cp_c(1 - p_c)^{n-1}$, and by step 1, $\mathbb E[U]$ is $n$ times this.
 :::
 
-When all $K$ cells are equally likely, the formula is a single power, close to $e^{-n/K}$ because $1 - p$ is close to $e^{-p}$ when $p$ is small, and the proof of @cor-link-uniform, after the next lemma, needs to know how close.
+When all $K$ cells are equally likely, the formula is a single power, close to $e^{-n/K}$ because $1 - p$ is close to $e^{-p}$ when $p$ is small. The proof of @cor-link-uniform needs to know how close.
 
 ::: {#lem-link-power name="A power and its exponential"}
 For $0 \le p < 1$ and any exponent $\ell \ge 0$,
@@ -142,17 +142,17 @@ $$\frac{\mathbb E[U]}{n} \approx e^{-n/K} = \exp\big(-2^{\log_2n - b}\big).$$ {#
 
 For uniform cells, then, the fraction unique depends only on $b - \log_2n$, the bits beyond those needed to name one person, and the curve is the same for a town and for the planet (@fig-link-uniqueness, right). Setting $\exp(-2^{\log_2 n - b})$ equal to a fraction $f$ and solving gives $b - \log_2 n = -\log_2\ln(1/f)$, so half the people are unique once $b$ exceeds $\log_2n$ by 0.53 bits, 90% at 3.25 bits more and 99% at 6.64 bits more.
 
-Real attributes are skewed, and skew usually lowers uniqueness, because many people crowd into a few common cells while many rare cells stay empty. This is not a theorem. With 10 equally likely cells and 100 people, nobody is unique, but making one cell rare lets the few people in it be unique.
+Real attributes are skewed, and skew usually lowers uniqueness, because many people crowd into a few common cells while many rare cells stay empty. This is not a theorem: with 10 equally likely cells and 100 people nobody is unique, but making one cell rare lets the few people in it be unique.
 
 ::: {#exm-link-uniform}
-Sweeney's three attributes have $K = 40{,}000 \times 29{,}200 \times 2 = 2.34\times10^9$ cells for $n = 248.7$ million people, so $n/K = 0.106$ people per cell. If everyone fell into a uniformly random cell, @eq-link-uniform says that a fraction $e^{-0.106} = 0.899$ would be unique. Sweeney's 87% is a little lower because ZIP codes and birth years are not equally common. Golle (2006) repeated the estimate with the 2000 census and found 63%, and both estimates depend on how they spread birth dates within age groups, since the census publishes only the groups.
+Sweeney's three attributes have $K = 40{,}000 \times 29{,}200 \times 2 = 2.34\times10^9$ cells for $n = 248.7$ million people, so $n/K = 0.106$ people per cell. If everyone fell into a uniformly random cell, @eq-link-uniform says that a fraction $e^{-0.106} = 0.899$ would be unique. Sweeney's 87% is a little lower because ZIP codes and birth years are not equally common. Golle (2006) repeated the estimate with the 2000 census and found 63%, and both estimates depend on how they spread birth dates within the age groups the census publishes.
 
-The often-quoted "33 bits identify anyone" is the point $b = \log_2 n$. With $2^{33}$ uniform cells for 8 billion people, $n/K = 8\times10^9/2^{33} = 0.93$, and only a fraction $e^{-0.93} = 0.394$ is unique; 99% needs $32.9 + 6.64 = 39.5$ bits. The running census is skewed, so uniform cells misjudge it, and @sec-link-bounds compares it with the exact formula.
+The often-quoted "33 bits identify anyone" is the point $b = \log_2 n$. With $2^{33}$ uniform cells for 8 billion people, $n/K = 8\times10^9/2^{33} = 0.93$, so only a fraction $e^{-0.93} = 0.394$ is unique, and 99% needs $32.9 + 6.64 = 39.5$ bits.
 :::
 
 ## Uniqueness from marginals and from one population {#sec-link-bounds}
 
-@thm-link-unique needs every cell probability, and there can be billions of cells, while a custodian often knows only how common each value of each attribute is. Its answer is also an average over imagined populations, while the custodian has one. This section closes both gaps, with a floor from the per-attribute frequencies and a bound on how far one population strays.
+@thm-link-unique needs every cell probability, and there can be billions of cells, while a custodian often knows only how common each value of each attribute is. Its answer is also an average over imagined populations, while the custodian has one. This section closes both gaps.
 
 The floor uses the chance that two random people share a cell. Both land in cell $c$ with probability $p_c \cdot p_c$, so this **collision probability** is $\sum_cp_c^2$, a measure of how crowded a typical cell is.
 
@@ -175,9 +175,9 @@ $$\prod_j\sum_vp_j(v)^2 = \sum_c\prod_jp_j(c_j)^2 = \sum_cp_c^2.$$
 
 Step 3 is an equality when all cells with positive probability are equally likely, so the floor is tight for uniform cells. It is loose when a few crowded cells push the collision probability up while people in rare cells stay unique.
 
-The **entropy** $H = \sum_cp_c\log_2(1/p_c)$ is the average number of bits a cell carries, and it adds over independent attributes, by the chain rule of [Information theory](../part01-prerequisites/05-information-theory.md), @thm-min-chain-rule. The entropy rule $e^{-n2^{-H}}$ replaces the cells by $2^H$ equally likely ones. It is not a bound in either direction, but it is often closer to the exact value than the floor.
+The **entropy** $H = \sum_cp_c\log_2(1/p_c)$ is the average number of bits a cell carries, and it adds over independent attributes by the chain rule, @thm-min-chain-rule. The entropy rule $e^{-n2^{-H}}$ replaces the cells by $2^H$ equally likely ones. It is not a bound in either direction, but it is often closer to the exact value than the floor.
 
-The second gap is that the custodian has one population, in which no single person moves the fraction unique by much. McDiarmid's inequality, @thm-conc-mcdiarmid, makes this a bound. If changing input $i$ alone moves a function of independent inputs by at most $d_i$, it strays more than a margin $\gamma > 0$ above (or below) its mean with probability at most $\exp(-2\gamma^2/\sum_id_i^2)$.
+The second gap is that the custodian has one population, in which no single person moves the fraction unique by much. McDiarmid's inequality, @thm-conc-mcdiarmid, makes this a bound. If changing input $i$ alone moves a function of independent inputs by at most $d_i$, it strays more than $\gamma > 0$ above (or below) its mean with probability at most $\exp(-2\gamma^2/\sum_id_i^2)$.
 
 ::: {#prp-link-concentration name="One population is enough"}
 Under the population model, for every margin $\gamma > 0$,
@@ -206,16 +206,15 @@ The running census has eight independent attributes, with region and occupation 
 
 : Fraction of 10,000 people who are unique as attributes are revealed: exact, simulated (mean of 20 populations), and three approximations. $\log_2n = 13.29$ bits. {#tbl-link-census}
 
-With 20.39 bits, $20.39 - 13.29 = 7.1$ bits beyond $\log_2 n$, 97.5% of people are unique, a little below the 99% that uniform cells give at 6.64 bits beyond, because skew lowers uniqueness. For the same reason, uniform cells overstate uniqueness once birth month is known, by up to $0.8498 - 0.5789 = 0.27$.
+With 20.39 bits, $20.39 - 13.29 = 7.1$ bits beyond $\log_2 n$, 97.5% of people are unique, a little below the 99% that uniform cells give at 6.64 bits beyond, because skew lowers uniqueness. For the same reason, uniform cells overstate uniqueness once birth month is known, by up to $0.8498 - 0.5789 = 0.27$. Simulation and the exact formula agree to within 0.003. For $\beta = 0.05$, @eq-link-mcdiarmid gives a half-width of $\sqrt{2\ln 40/10^4} = 0.0272$, about five times the largest standard deviation over the 20 simulated populations, 0.0053, so the bound is safe but loose.
 
-Simulation and the exact formula agree to within 0.003. For $\beta = 0.05$, @eq-link-mcdiarmid gives a half-width of $\sqrt{2\ln 40/10^4} = 0.0272$, about five times the largest standard deviation over the 20 simulated populations, 0.0053, so the bound is safe but loose.
 :::
 
 ![Left: the fraction unique in the synthetic census as attributes are added, exact and simulated, with the collision floor and the entropy rule. Right: with uniform cells, the curves for $n = 10^4$, $10^6$ and $8\times10^9$ against the bits beyond $\log_2 n$ coincide.](figures/link_uniqueness.svg){#fig-link-uniqueness}
 
 ## Sparse, high-dimensional data {#sec-link-sparse}
 
-In 2006 Netflix released about 100 million movie ratings by 480,189 subscribers, with names replaced by random numbers. Each record is a set of (movie, rating, date) triples, 209 on average out of 17,770 movies. There are no columns to join on, and what an adversary knows about a person is partial and noisy. Narayanan & Shmatikov (2008) still matched Netflix records to named reviews on the Internet Movie Database. This section asks how to match noisy information to a record, and when to trust the match.
+In 2006 Netflix released about 100 million movie ratings by 480,189 subscribers, with names replaced by random numbers. Each record is a set of (movie, rating, date) triples, 209 on average out of 17,770 movies. There are no columns to join on, and what an adversary knows about a person is partial and noisy, yet Narayanan & Shmatikov (2008) matched Netflix records to named reviews on the Internet Movie Database. This section asks how to match noisy information to a record, and when to trust the match.
 
 No record matches exactly, so the attack scores how well each record agrees with what the adversary knows, item by item. An agreement on a film that half the subscribers rated says little, while one on an obscure film says a lot, so rarer items get larger weights.
 
@@ -225,7 +224,7 @@ $$\mathrm{Score}(\mathrm{aux}, r) = \sum_{i \in \mathrm{aux}}w_i\,\mathrm{Sim}(\
 Narayanan and Shmatikov use $w_i = 1/\ln\lvert\mathrm{supp}(i)\rvert$, where the **support** $\lvert\mathrm{supp}(i)\rvert$ is the number of records that rated item $i$. Their attack also scores dates, which this chapter leaves out.
 :::
 
-The weights can be derived. For each record, the adversary weighs "this record is the target" against "this record is someone unrelated" by the **likelihood ratio**, the probability of what it observed under the first explanation divided by that under the second. For independent items its logarithm is a sum over items, the form of @eq-link-score.
+The weights can be derived. For each record, the adversary weighs "this record is the target" against "this record is someone unrelated" by the **likelihood ratio** of what it observed under the two explanations. For independent items its logarithm is a sum over items, the form of @eq-link-score.
 
 ::: {#prp-link-lr name="The score is a log-likelihood ratio"}
 Suppose an unrelated record agrees with item $i$ of the auxiliary information with probability $s_i$, and the target's record with probability $1 - \rho$, independently across items, where $\rho$ covers wrong or stale information. Then the logarithm of a record's likelihood ratio is its score @eq-link-score with the weights
@@ -246,9 +245,9 @@ $$\ln\frac{P_1(r)}{P_0(r)} = \sum_i\Big[a_i\ln\frac{1 - \rho}{s_i} + (1 - a_i)\l
 5. *Bayes' rule.* If $t$ is the target, record $t$'s pattern follows $P_1$ and every other record's follows $P_0$, so all the patterns together have probability $P_1(t)\prod_{j \ne t}P_0(j)$. The prior is the same for every $t$, so the posterior of $t$ is proportional to this. Dividing by $\prod_jP_0(j)$, which does not depend on $t$, leaves $\mathrm{LR}(t) = P_1(t)/P_0(t)$, and normalizing gives @eq-link-posterior.
 :::
 
-For rare items these weights are about $\ln(1/s_i)$. They and the Narayanan–Shmatikov weights both grow as an item gets rarer, at different rates, and @exm-link-netflix compares the two. For one record, "target or unrelated" is a hypothesis test, and by the Neyman–Pearson lemma, @thm-ht-np, thresholding the likelihood ratio is the most powerful test.
+For rare items these weights are about $\ln(1/s_i)$, and like the Narayanan–Shmatikov weights they grow as an item gets rarer, at a different rate (@exm-link-netflix compares the two). For one record, "target or unrelated" is a hypothesis test, so by the Neyman–Pearson lemma, @thm-ht-np, thresholding the likelihood ratio is the most powerful test.
 
-Because the score adds up evidence, noise costs little: with a wrong item the target loses one term, while unrelated records rarely gain one. What decides success is the bits, and each item contributes its **surprisal** $\log_2(1/s_i)$, the bits that single out an event of probability $s_i$.
+Because the score adds up evidence, noise costs little: with a wrong item the target loses one term, while unrelated records rarely gain one. What decides success is the bits. Each item contributes its **surprisal** $\log_2(1/s_i)$, the bits that single out an event of probability $s_i$.
 
 ::: {#prp-link-false-matches name="False matches and bits"}
 Take reliable information ($\rho \to 0$) with exact agreement required. If an unrelated record agrees on each item $i$ of a set $I$ independently with probability $s_i$, the expected number of the $n$ records that agree on all of $I$ by chance is
@@ -261,7 +260,7 @@ $$n\prod_{i\in I}s_i = 2^{\log_2n - \sum_{i\in I}\log_2(1/s_i)}.$$
 3. *Write it in bits.* Writing $n = 2^{\log_2 n}$ and $s_i = 2^{-\log_2(1/s_i)}$ turns the product into a power of 2.
 :::
 
-So false matches vanish once the items' bits exceed $\log_2n$, as in @sec-link-unique. A film that 1% of subscribers rated carries $\log_2100 = 6.64$ bits, and three of them carry $3 \times 6.64 = 19.9$ bits, more than the $\log_2480{,}189 = 18.9$ bits that single out one Netflix subscriber. This is why sparsity is the weakness: most items are rated by few people, so each one a person rated is worth many bits.
+So false matches vanish once the items' bits exceed $\log_2n$, as in @sec-link-unique. A film that 1% of subscribers rated carries $\log_2100 = 6.64$ bits, and three of them carry $3 \times 6.64 = 19.9$ bits, more than the $\log_2480{,}189 = 18.9$ bits that single out one Netflix subscriber. Sparsity is the weakness: most items are rated by few people, so each one a person rated is worth many bits.
 
 The top score is the best guess *if the target is in the release*. If it may not be, the adversary must also decide whether to trust the guess, and a real match should stand out from the other scores.
 
@@ -271,7 +270,7 @@ $$\frac{\mathrm{top}_1 - \mathrm{top}_2}{\sigma} \ge \tau,$$ {#eq-link-eccentric
 and otherwise says "no match". Narayanan and Shmatikov used $\tau = 1.5$.
 :::
 
-How often the top score stands out by chance depends on the shape of the score distribution, so $\tau$ has to be calibrated by running the test for people known to be absent from the release, at a small false positive rate ([Hypothesis testing](../part01-prerequisites/04-hypothesis-testing.md)). On Netflix, Narayanan and Shmatikov found that 8 ratings, 2 of them wrong, with dates known to within 14 days (their score uses dates), identify 99% of records, and 2 ratings with dates within 3 days identify 68%.
+How often the top score stands out by chance depends on the shape of the score distribution. So $\tau$ must be calibrated by running the test for people known to be absent from the release, at a small false positive rate ([Hypothesis testing](../part01-prerequisites/04-hypothesis-testing.md)). On Netflix, Narayanan and Shmatikov found that 8 ratings, 2 of them wrong, with dates known to within 14 days, identify 99% of records, and 2 ratings with dates within 3 days identify 68%.
 
 ::: {#exm-link-netflix}
 The script draws a scaled-down Netflix of 5,000 users and 4,000 items, with 203,029 ratings and density 0.0102 (the share of user–item pairs rated), close to Netflix's 0.0118. An item drawn from a random user's record carries a median of 5.83 bits, against $\log_2 5000 = 12.29$ bits needed.
@@ -287,9 +286,9 @@ The auxiliary information is a few items from the target's record, with the rati
 
 : Re-identification rate in a synthetic ratings matrix with 5,000 users: the fraction of 400 targets whose record gets the top score (ties broken at random), for three weightings of @eq-link-score. {#tbl-link-netflix}
 
-Two items carry about $2 \times 5.83 = 11.7$ bits, a little under $\log_2n$, and re-identify about 43% of targets, while four carry about 23 bits and re-identify 93%. With 8 items of which 2 are wrong, the rarity weightings re-identify 98–99%, as Narayanan and Shmatikov found. Equal weights fall to 94%, because a wrong popular item helps many unrelated records. The two rarity weightings differ by less than two standard errors, each $\sqrt{0.98 \times 0.02/400} = 0.007$. The derived weighting of @prp-link-lr trails with 2 and 4 items, by $0.440 - 0.402 = 0.038$ and $0.941 - 0.924 = 0.017$, within two standard errors, since its $\rho = \frac12$ and independence model do not describe this noise.
+Two items carry about $2 \times 5.83 = 11.7$ bits, a little under $\log_2n$, and re-identify about 43% of targets, while four carry about 23 bits and re-identify 93%. With 8 items of which 2 are wrong, the rarity weightings re-identify 98–99%, as Narayanan and Shmatikov found. Equal weights fall to 94%, because a wrong popular item helps many unrelated records. The two rarity weightings differ by less than two standard errors, each $\sqrt{0.98 \times 0.02/400} = 0.007$. The derived weighting of @prp-link-lr trails with 2 and 4 items, by 0.038 and 0.017, since its $\rho = \frac12$ and independence model do not describe this noise.
 
-To test the eccentricity (@fig-link-netflix), the script also scores 400 outsiders drawn from the same model, so that any match declared for them is false. With 8 items, 2 of them wrong, and $\tau = 1.5$, 94.8% of insiders, the targets in the release, are correctly re-identified, but 26.3% of outsiders are also "matched". The median eccentricity is 7.32 for insiders and 0.72 for outsiders, but the outsiders' distribution has a long tail. Holding false matches to 1% of outsiders takes $\tau = 4.83$, which still re-identifies 73.0% of insiders (@fig-link-eccentricity).
+To test the eccentricity (@fig-link-netflix), the script also scores 400 outsiders drawn from the same model, so that any match declared for them is false. With 8 items, 2 of them wrong, and $\tau = 1.5$, 94.8% of insiders, the targets in the release, are correctly re-identified, but 26.3% of outsiders are also "matched". The median eccentricity is 7.32 for insiders and 0.72 for outsiders, but the outsiders' distribution has a long tail, so holding false matches to 1% of outsiders takes $\tau = 4.83$. That still re-identifies 73.0% of insiders (@fig-link-eccentricity).
 :::
 
 ![Left and centre: the scores of all 5,000 records for one target (8 items, 2 wrong), on a log scale; the target's record stands far out when it is in the release, and the best score is the edge of the crowd when it is not. Right: re-identification rate against the number of items, for three weightings, and with a quarter of the items wrong.](figures/link_netflix.svg){#fig-link-netflix}
@@ -298,11 +297,11 @@ To test the eccentricity (@fig-link-netflix), the script also scores 400 outside
 
 ## Does releasing a sample protect? {#sec-link-sampling}
 
-Statistical agencies often release a sample, such as 1% of a census. The argument is plausible deniability: a record unique in the sample need not be unique in the population, because the person you have in mind may share their attributes with someone who was not sampled. Yet Rocher, Hendrickx & de Montjoye (2019) predicted, from a statistical model of the population fitted to a sample, that 99.98% of Americans would be correctly re-identified in any dataset with 15 demographic attributes. This section derives when a match found in a sample can be trusted.
+Statistical agencies often release a sample, such as 1% of a census. The argument is plausible deniability: a record unique in the sample need not be unique in the population, because the person you have in mind may share their attributes with someone who was not sampled. Yet Rocher, Hendrickx & de Montjoye (2019) predicted, from a model fitted to a sample, that 99.98% of Americans would be correctly re-identified in any dataset with 15 demographic attributes. This section derives when a match found in a sample can be trusted.
 
 Each of $n$ people is in the release independently with probability $q$, the **sampling rate**. Take a cell with probability $p$, and let $\lambda = (n - 1)p$ be the expected number of *other* people in it. The adversary can start from a person or from a record.
 
-From a person, the adversary knows a target's cell and finds exactly one record there. Either the target was sampled and no one else in the cell was, or exactly one other person was sampled instead, which grows more likely in a crowded cell.
+From a person, the adversary knows a target's cell and finds exactly one record there. Either the target was sampled and no one else in the cell was, or exactly one other person was sampled instead, which is likelier in a crowded cell.
 
 ::: {#prp-link-kappa name="A match from a person"}
 Given that the target's cell holds exactly one record of the release, that record is the target's with probability
@@ -321,7 +320,7 @@ $$\kappa = \frac{\mathbb E[(1 - q)^W]}{\mathbb E[(1 + W)(1 - q)^W]}.$$
 5. *Simplify.* The denominator of step 3 is the first average plus the second. Dividing both by $(1 - pq)^{n-1}$ turns the first into 1 and the second into $\frac{(n-1)p(1-q)}{1 - pq}$, which gives @eq-link-kappa. For small $p$, $1 - pq \approx 1$ and $(n-1)p = \lambda$.
 :::
 
-From a record, the adversary takes a record alone in its cell in the release and looks the cell up in a population register, such as a voter roll. Being alone in the sample says that nobody else in the cell was sampled, so what remains is whether anyone in the cell was left out.
+From a record, the adversary takes a record alone in its cell in the release and looks the cell up in a population register, such as a voter roll. Being alone in the sample says that nobody else in the cell was sampled, so the question is whether anyone in the cell was left out.
 
 ::: {#prp-link-xi name="A match from a record"}
 A record that is alone in its cell in the release is alone in the population with probability
@@ -348,7 +347,7 @@ It tends to the population's fraction unique, @eq-link-unique, as $q \to 0$ and 
 3. *Divide.* The factor $nq$ cancels. As $q \to 0$ the denominator tends to $\sum_cp_c = 1$, and at $q = 1$ the two sums are equal.
 :::
 
-Sampling only helps people in crowded cells. It enters @eq-link-kappa and @eq-link-xi through the factor $1 - q$ on $\lambda$, so for rare combinations, $\lambda \ll 1$, both are close to 1 whatever $q$ is. Since shrinking $q$ only raises $\lambda(1 - q)$ towards $\lambda$, neither falls below its value at $q = 0$: $\kappa \ge 1/(1 + \lambda)$ and $\xi \ge e^{-\lambda}$.
+Sampling only helps people in crowded cells. It enters @eq-link-kappa and @eq-link-xi through the factor $1 - q$ on $\lambda$, so for rare combinations, $\lambda \ll 1$, both are close to 1 whatever $q$ is. Shrinking $q$ only raises $\lambda(1 - q)$ towards $\lambda$, so neither falls below its value at $q = 0$: $\kappa \ge 1/(1 + \lambda)$ and $\xi \ge e^{-\lambda}$.
 
 At small sampling rates, by @eq-link-sample-unique, the share of sample uniques that are unique in the population is the population's own fraction unique. So a 1% sample gives deniability only to the people who were not unique anyway. The adversary can also estimate each record's $p$ from the sample and compute $\xi$, which tells it which matches to trust.
 
@@ -363,9 +362,9 @@ At small sampling rates, by @eq-link-sample-unique, the share of sample uniques 
 
 : Probability that a match in a sample is correct: from a person to the release ($\kappa$) and from a sample-unique record to the population ($\xi$), for three crowding levels and two sampling rates. {#tbl-link-kappa}
 
-Going from a 50% to a 1% sample lowers $\kappa$ by $0.952 - 0.910 = 0.04$ for a rare cell and by $0.500 - 0.336 = 0.16$ for a crowded one. A larger running census has $n = 100{,}000$ people and its first seven attributes, and 82.8% of them are unique. @eq-link-sample-unique gives 0.8301 of sample uniques being population-unique at $q = 0.01$ (simulated: 0.8334 over 19,951 sample uniques in 20 samples), 0.8493 at $q = 0.1$ and 0.9235 at $q = 0.5$.
+Going from a 50% to a 1% sample lowers $\kappa$ by $0.952 - 0.910 = 0.04$ for a rare cell and by $0.500 - 0.336 = 0.16$ for a crowded one. A larger census of $n = 100{,}000$ people with the first seven attributes has 82.8% unique. @eq-link-sample-unique gives 0.8301 of sample uniques being population-unique at $q = 0.01$ (simulated: 0.8334 over 19,951 sample uniques in 20 samples), 0.8493 at $q = 0.1$ and 0.9235 at $q = 0.5$.
 
-The adversary's own estimate works too (@fig-link-sampling, right). From one 1% sample with 993 sample-unique records, it treats the attributes as independent and multiplies their estimated frequencies to get each record's cell probability, and computes $\xi$ by @eq-link-xi. Its mean prediction is 0.817 against an actual 0.824. The 415 records it rates above 0.95 average a prediction of 0.980 and are population-unique 99.3% of the time, while the 119 it rates below 0.5 average 0.284 and are unique 30.3% of the time.
+The adversary's own estimate works too (@fig-link-sampling, right). From one 1% sample with 993 sample-unique records, it treats the attributes as independent, multiplies their estimated frequencies to get each record's cell probability, and computes $\xi$ by @eq-link-xi. Its mean prediction is 0.817 against an actual 0.824. The 415 records it rates above 0.95 are population-unique 99.3% of the time, while the 119 it rates below 0.5 are unique 30.3% of the time.
 :::
 
 ![Left: the fraction of sample uniques that are unique in a population of 100,000, against the sampling rate, for 5 to 8 attributes; lines are @eq-link-sample-unique, dots simulations. Right: the adversary's predicted $\xi$ from a 1% sample against the observed fraction, in bins of width 0.1.](figures/link_sampling.svg){#fig-link-sampling}
@@ -421,8 +420,6 @@ uv run python code/part02-attacks/linkage.py
 - Golle, "Revisiting the Uniqueness of Simple Demographics in the US Population" (Workshop on Privacy in the Electronic Society, 2006): the same estimate from the 2000 census.
 - Narayanan & Shmatikov, "Robust De-anonymization of Large Sparse Datasets" (IEEE Symposium on Security and Privacy, 2008): the score, the eccentricity test and the Netflix experiments.
 - Rocher, Hendrickx & de Montjoye, "Estimating the success of re-identifications in incomplete datasets using generative models" (Nature Communications, 2019): why sampling and incompleteness do not protect.
-- de Montjoye, Hidalgo, Verleysen & Blondel, "Unique in the Crowd: The privacy bounds of human mobility" (Scientific Reports, 2013): the same sparsity argument for location traces.
 - Pandurangan, "On Taxis and Rainbows" (blog post, 2014), and Tockar, "Riding with the Stars: Passenger Privacy in the NYC Taxicab Dataset" (Neustar Research blog, 2014): the two taxi attacks.
 - Barth-Jones, "The 'Re-Identification' of Governor William Weld's Medical Information: A Critical Re-Examination of Health Data Identification Risks and Privacy Protections, Then and Now" (2012): what the Massachusetts story does and does not show about ordinary people.
-- Ohm, "Broken Promises of Privacy: Responding to the Surprising Failure of Anonymization" (UCLA Law Review, 2010): the legal side.
 - Dwork, McSherry, Nissim & Smith, "Calibrating Noise to Sensitivity in Private Data Analysis" (2006): where the response to these attacks starts, with a guarantee that holds whatever auxiliary information the adversary has.

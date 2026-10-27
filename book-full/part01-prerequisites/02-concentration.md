@@ -1,16 +1,16 @@
 # Concentration inequalities
 
-Almost every number in machine learning is random. A test error depends on which examples happened to land in the test set, and the size of a randomly sampled minibatch changes from one step to the next. Before you rely on such a number, you need to know **how far a random quantity can be from what you expect, and with what probability**. Concentration inequalities answer that question.
+Almost every number in machine learning is random. A test error depends on which examples happened to land in the test set, and the size of a randomly sampled minibatch changes from one step to the next. Before you rely on such a number, you need to know **how far a random quantity can be from what you expect, and with what probability**.
 
-The whole subject is one idea: to bound the chance that a quantity lands far out, you compare it with something whose average you know, and the more you know, the sharper the comparison. The mean alone gives Markov's inequality, whose bound decays like $1/t$ at a distance $t$ out, and the variance gives Chebyshev's, which decays like $1/t^2$. The **moment generating function (MGF)**, an average of an exponential of the quantity, gives the Chernoff bound, which decays exponentially, and the later sections specialize it to bounded variables, to random noise added to a number, and to sums of dependent terms.
+Concentration inequalities answer with one idea. To bound the chance that a quantity lands far out, you compare it with something whose average you know, and the more you know, the sharper the comparison. The mean alone gives Markov's inequality, whose bound decays like $1/t$ at a distance $t$ out, and the variance gives Chebyshev's, which decays like $1/t^2$. The **moment generating function (MGF)**, an average of an exponential of the quantity, gives the Chernoff bound, which decays exponentially. Later sections apply it to bounded variables, to random noise added to a number, and to sums of dependent terms.
 
-The running example is a classifier whose true error rate is 10%. You test it on $n = 200$ examples drawn independently, and its measured error rate is the fraction of them it gets wrong. How likely is the measured rate to reach 15%, half again its true value? A simulation of 200,000 test sets says $9.6\times10^{-3}$. The bounds of this chapter put that probability at most at 0.67 (Markov), 0.18 (Chebyshev), 0.37 (Hoeffding) and 0.135 (Chernoff). Each section explains one number, including why Hoeffding's does worse than Chebyshev's here.
+The running example is a classifier whose true error rate is 10%. You test it on $n = 200$ examples drawn independently, and its measured error rate is the fraction of them it gets wrong. How likely is the measured rate to reach 15%, half again its true value? A simulation of 200,000 test sets says $9.6\times10^{-3}$. The bounds of this chapter put that probability at most at 0.67 (Markov), 0.18 (Chebyshev), 0.37 (Hoeffding) and 0.135 (Chernoff), and each section explains one of these numbers.
 
 ## Markov and Chebyshev {#sec-conc-markov}
 
 Start with the crudest version of the question. If all you know about a quantity is its mean, or its mean and its variance, how often can it land far from where you expect? The answers are weak, but every stronger bound in this chapter is the same argument applied to a better function.
 
-The argument turns a probability into an average, and a die shows how. Write $\mathbf 1[A]$ for the **indicator** of an event $A$, the variable that is 1 on outcomes where $A$ happens and 0 elsewhere. Its average is $\Pr[A]$, because averaging a 0/1 variable counts the fraction of outcomes where the event happens. Averages also keep order: if one variable is at most another on every outcome, its average is at most the other's average. Now roll a fair die, let $X$ be the roll, and compare $5\cdot\mathbf 1[X \ge 5]$ with $X$ itself, outcome by outcome (@tbl-conc-die-markov).
+The argument turns a probability into an average, and a die shows how. Write $\mathbf 1[A]$ for the **indicator** of an event $A$, the variable that is 1 on outcomes where $A$ happens and 0 elsewhere. Its average is $\Pr[A]$, because averaging a 0/1 variable counts the fraction of outcomes where the event happens. Averages also keep order: if one variable is at most another on every outcome, so is its average. Now roll a fair die, let $X$ be the roll, and compare $5\cdot\mathbf 1[X \ge 5]$ with $X$ itself, outcome by outcome (@tbl-conc-die-markov).
 
 | Roll | 1 | 2 | 3 | 4 | 5 | 6 | Average |
 | --- | --- | --- | --- | --- | --- | --- | --- |
@@ -23,7 +23,7 @@ Every entry in the top row is at most the one below it, so the averages are orde
 
 ![The scaled indicator $5\cdot\mathbf 1[X \ge 5]$ never exceeds the die roll $X$, so its average never exceeds 3.5.](figures/markov_die.svg){#fig-conc-markov-die}
 
-Markov's inequality is the same comparison with any threshold in place of 5, and it needs the quantity never to be negative, because negative values could balance large ones in the average.
+Markov's inequality is the same comparison with any threshold in place of 5. It needs the quantity never to be negative, because negative values could balance large ones in the average.
 
 ::: {#thm-conc-markov name="Markov's inequality"}
 Let $X$ be a random variable that is never negative, and let $a > 0$ be a threshold. Then
@@ -31,16 +31,16 @@ $$\Pr[X \ge a] \le \frac{\mathbb E[X]}{a}.$$
 :::
 
 ::: {.proof}
-1. *Compare outcome by outcome.* If $X \ge a$, the scaled indicator $a\,\mathbf 1[X \ge a]$ equals $a$, which is at most $X$. If $X < a$, it equals 0, which is at most $X$ because $X$ is never negative. This is the only place the hypothesis is used, and it gives, at every outcome,
+1. *Compare outcome by outcome.* If $X \ge a$, the scaled indicator $a\,\mathbf 1[X \ge a]$ equals $a$, which is at most $X$. If $X < a$, it equals 0, which is at most $X$ because $X$ is never negative, the only use of the hypothesis. So at every outcome
 $$a\,\mathbf 1[X \ge a] \le X.$$
 2. *Average both sides.* Averages keep a pointwise order, and the average of the indicator is the probability of its event, so
 $$a\Pr[X \ge a] \le \mathbb E[X].$$
 Dividing by $a > 0$ gives the bound.
 :::
 
-No bound that uses only the mean can do better. When $\mathbb E[X] \le a$, the variable that equals $a$ with probability $\mathbb E[X]/a$ and 0 otherwise has that mean and meets the bound with equality.
+No bound that uses only the mean can do better. When $\mathbb E[X] \le a$, take the variable that equals $a$ with probability $\mathbb E[X]/a$ and 0 otherwise. It has that mean, and its probability of reaching $a$ is exactly $\mathbb E[X]/a$.
 
-Markov's inequality applies to any quantity that is never negative, so you can apply it to a transformed version of $X$ instead of $X$ itself.
+Because Markov's inequality applies to any quantity that is never negative, you can apply it to a transformed version of $X$ instead of $X$ itself.
 
 ::: {#cor-conc-generalized-markov name="Markov's inequality through a function"}
 Let $X$ be a random variable, let $g$ be a function that is positive and strictly increasing, and let $t$ be a real number. Then
@@ -52,9 +52,9 @@ $$\Pr[X \ge t] \le \frac{\mathbb E[g(X)]}{g(t)}.$$
 2. The variable $g(X)$ is never negative and the threshold $g(t)$ is positive, so @thm-conc-markov applies to $g(X)$ at the threshold $a = g(t)$.
 :::
 
-The rest of the chapter is a search for good functions $g$, which grow fast but keep $\mathbb E[g(X)]$ computable. The square gives Chebyshev's inequality below, and the exponential gives the Chernoff bound of @sec-conc-chernoff.
+The rest of the chapter searches for good functions $g$, which grow fast but keep $\mathbb E[g(X)]$ computable. The square gives Chebyshev's inequality below, and the exponential gives the Chernoff bound of @sec-conc-chernoff.
 
-A tail bound answers the question "how likely is a deviation of size $t$?". In practice you usually want the reverse: how large a deviation must you allow so that it is exceeded with probability at most $\beta$? That number is the **width** at failure probability $\beta$, found by setting the bound equal to $\beta$ and solving for $t$. Most bounds here have the form $e^{-h(t)}$, so the lemma below does this once.
+A tail bound answers the question "how likely is a deviation of size $t$?". In practice you usually want the reverse: how large a deviation must you allow so that it is exceeded with probability at most $\beta$? That number is the **width** at failure probability $\beta$, and you find it by setting the bound equal to $\beta$ and solving for $t$. Most bounds here have the form $e^{-h(t)}$, so the lemma below does this once.
 
 ::: {#lem-conc-width name="From a tail bound to a width"}
 Let $V$ be a random deviation, such as the distance of a measured average from its mean, and let $h$ be a continuous, strictly increasing function such that for every $t$
@@ -78,16 +78,16 @@ $$|\bar X - \mu| < \frac{\sigma}{\sqrt{n\beta}}.$$
 :::
 
 ::: {.proof}
-The plan is to rewrite the two-sided event as an event about a square, apply Markov's inequality to the square, and then repeat the bound for a mean of samples and invert it.
+The plan is to rewrite the two-sided event as an event about a square, apply Markov's inequality to the square, then repeat the bound for a mean of samples and invert it.
 
 1. *Square the event.* The distance $|X - \mu|$ is at least $t$ exactly when its square $(X - \mu)^2$ is at least $t^2$, because squaring keeps the order of numbers that are not negative.
 2. *Apply Markov.* The square $(X - \mu)^2$ is never negative, and its average is $\sigma^2$ by the definition of the variance. So @thm-conc-markov at the threshold $t^2$ gives the first bound.
-3. *The variance of a mean.* Variances add for independent terms, because the covariances between them vanish, and dividing by $n$ divides the variance by $n^2$, as [Probability distributions](01-distributions.md) shows. So $\bar X$ has mean $\mu$ and variance $\sigma^2/n$, and step 2 applied to $\bar X$ gives
+3. *The variance of a mean.* By @cor-dist-sqrt-n, $\bar X$ has mean $\mu$ and variance $\sigma^2/n$, because the covariances of independent terms vanish. So step 2 applied to $\bar X$ gives
 $$\Pr[|\bar X - \mu| \ge t] \le \frac{\sigma^2}{nt^2}.$$
 4. *Invert.* Setting $\sigma^2/(nt^2) = \beta$ and solving gives $t = \sigma/\sqrt{n\beta}$, the width.
 :::
 
-Only step 3 used independence, and only to make the covariances vanish, so pairwise uncorrelated samples suffice. The price of knowing only the variance shows in the width. For a single variable, setting $\sigma^2/t^2 = \beta$ gives $t = \sigma/\sqrt\beta$. Most tails of later sections have the Gaussian shape $e^{-t^2/(2\sigma^2)}$, so @lem-conc-width with $h(t) = t^2/(2\sigma^2)$ gives $t = \sigma\sqrt{2\ln(1/\beta)}$, and @tbl-conc-width-price compares the two in units of $\sigma$.
+Only step 3 used independence, and only to make the covariances vanish, so pairwise uncorrelated samples are enough. The price of knowing only the variance shows in the width. For a single variable, setting $\sigma^2/t^2 = \beta$ gives $t = \sigma/\sqrt\beta$. Most tails of later sections have the Gaussian shape $e^{-t^2/(2\sigma^2)}$, so @lem-conc-width with $h(t) = t^2/(2\sigma^2)$ gives $t = \sigma\sqrt{2\ln(1/\beta)}$. @tbl-conc-width-price compares the two in units of $\sigma$.
 
 | $\beta$ | Chebyshev, $1/\sqrt\beta$ | Gaussian-shaped, $\sqrt{2\ln(1/\beta)}$ |
 | --- | --- | --- |
@@ -102,12 +102,12 @@ The Chebyshev width grows like a power of $1/\beta$, the Gaussian-shaped one onl
 ::: {#exm-conc-markov}
 The measured error rate of the running example is the mean $\bar X$ of $n = 200$ independent errors, each 1 with probability 0.1 and 0 otherwise. Its mean is 0.1, and one error has variance $0.1 \times 0.9 = 0.09$. Markov's inequality at the threshold 0.15 gives $0.1/0.15 = 0.67$. Chebyshev's inequality with the deviation $t = 0.05$ gives
 $$\Pr[|\bar X - 0.1| \ge 0.05] \le \frac{0.09}{200 \times 0.05^2} = 0.18,$$
-which covers the upper tail you ask about, since reaching 0.15 is one way to be 0.05 away. Against the simulated $9.6\times10^{-3}$, Markov is about 70 times too large and Chebyshev about 19 times, because neither uses more than one or two numbers about the distribution.
+which covers the upper tail you ask about, since reaching 0.15 is one way to be 0.05 away. Against the simulated $9.6\times10^{-3}$, Markov is about 70 times too large and Chebyshev about 19 times, because each uses only one or two numbers about the distribution.
 :::
 
 ## The Chernoff method {#sec-conc-chernoff}
 
-Failure probabilities like $10^{-5}$ are out of reach for polynomial bounds at sensible widths, as @tbl-conc-width-price showed. This section reaches them by applying @cor-conc-generalized-markov with an exponential, $g(x) = e^{\lambda x}$, for a chosen $\lambda > 0$. The average of $e^{\lambda X}$ is the MGF $M_X(\lambda) = \mathbb E[e^{\lambda X}]$ of [Probability distributions](01-distributions.md), which contains every moment of $X$ at once.
+Polynomial bounds cannot reach failure probabilities like $10^{-5}$ at sensible widths, as @tbl-conc-width-price showed. This section reaches them with @cor-conc-generalized-markov and an exponential, $g(x) = e^{\lambda x}$, for a chosen $\lambda > 0$. The average of $e^{\lambda X}$ is the MGF $M_X(\lambda) = \mathbb E[e^{\lambda X}]$ of [Probability distributions](01-distributions.md), which contains every moment of $X$ at once.
 
 A larger $\lambda$ weights large values of $X$ more, which helps, but also enlarges $M_X(\lambda)$, which hurts. With the **log-MGF** $K_X(\lambda) = \ln M_X(\lambda)$, the bound is $e$ to minus an exponent, and the best $\lambda$ makes that exponent largest.
 
@@ -124,19 +124,13 @@ $$\Pr[X \ge t] \le \exp\Big(-\sup_{\lambda > 0}\big(\lambda t - K_X(\lambda)\big
 3. The bound holds for every allowed $\lambda$, so it holds for the smallest of the bounds, which is the one with the largest exponent.
 :::
 
-For large sums the best exponent is also the right one. For a sum of $n$ independent copies of a variable, Cramér's theorem says that the probability of a large deviation is $e^{-n I}$ up to factors that grow slower than exponentially, where $I$ is the optimized exponent for one copy, and @sec-apx-tail-cramer-stein in the appendices derives that matching lower bound. In practice every Chernoff bound in this chapter is computed by the same five steps:
+For large sums the best exponent is also the right one. For a sum of $n$ independent copies of a variable, Cramér's theorem says that the probability of a large deviation is $e^{-n I}$ up to factors that grow slower than exponentially, where $I$ is the optimized exponent for one copy. @sec-apx-tail-cramer-stein in the appendices derives that matching lower bound. Every Chernoff bound in this chapter follows the same steps: write down the MGF, split it into one factor per independent term, bound each factor by something simple, minimize the exponent over $\lambda$, and simplify.
 
-1. Write down the MGF of $X$.
-2. If $X$ is a sum of independent terms, factorize the MGF into one factor per term.
-3. Bound each factor by something simple.
-4. Minimize the exponent over $\lambda$ by setting its derivative to zero.
-5. Simplify the result into a usable form.
-
-@fig-conc-chernoff-lambda shows the trade-off in $\lambda$ for a binomial count. The bound has a clear minimum, and bounding each factor with $1 + x \le e^x$, as step 1 of the next proof does, costs a little but puts the minimizing $\lambda$ in closed form.
+@fig-conc-chernoff-lambda shows the trade-off in $\lambda$ for a binomial count. The bound has a clear minimum. Bounding each factor with $1 + x \le e^x$, as step 1 of the next proof does, costs a little but puts the minimizing $\lambda$ in closed form.
 
 ![The Chernoff bound $e^{-\lambda t}\mathbb E[e^{\lambda S}]$ for $S \sim \mathrm{Bin}(100, 0.1)$ and $t = 20$, as a function of $\lambda$, before and after the relaxation $1 + x \le e^x$. Both stay above the exact tail.](figures/chernoff_lambda.svg){#fig-conc-chernoff-lambda}
 
-The method is used most for a count of independent yes/no events, such as errors on a test set or records drawn into a batch. Each event is a variable $X_i \sim \mathrm{Bern}(p_i)$, equal to 1 with probability $p_i$, and the question is how likely the count $S$ is to land a fraction $r$ above or below its mean $\mu$.
+The method is used most for a count of independent yes/no events, such as errors on a test set or records drawn into a batch. Each event is a variable $X_i \sim \mathrm{Bern}(p_i)$, equal to 1 with probability $p_i$. The question is how likely the count $S$ is to land a fraction $r$ above or below its mean $\mu$.
 
 ::: {#thm-conc-chernoff-bernoulli name="Chernoff bounds for a count"}
 Let $X_1, \dots, X_n$ be independent with $X_i \sim \mathrm{Bern}(p_i)$, let $S = \sum_i X_i$, and let $\mu = \sum_i p_i$. For every $r > 0$, the upper tail obeys
@@ -146,17 +140,17 @@ $$\Pr[S \le (1-r)\mu] \le \exp\left(-\frac{r^2\mu}{2}\right).$$
 :::
 
 ::: {.proof}
-The plan is to bound the MGF of the count by that of a Poisson count with the same mean, apply the Chernoff bound, choose the best $\lambda$, and simplify. The lower tail repeats the same steps for $-S$.
+The plan is to bound the MGF of the count by that of a Poisson count with the same mean, apply the Chernoff bound, choose the best $\lambda$, and simplify. The lower tail repeats these steps for $-S$.
 
-1. *One factor.* Each $X_i$ is 1 with probability $p_i$, so its MGF is $p_ie^\lambda + (1 - p_i) = 1 + p_i(e^\lambda - 1)$. The inequality $1 + x \le e^x$ holds for every real $x$, because the convex curve $e^x$ lies above its tangent line $1 + x$ at 0 ([Probability distributions](01-distributions.md)). With $x = p_i(e^\lambda - 1)$ it gives
+1. *One factor.* Each $X_i$ is 1 with probability $p_i$, so its MGF is $1 + p_i(e^\lambda - 1)$. The convex curve $e^x$ lies above its tangent line $1 + x$ at 0, so $1 + x \le e^x$ for every real $x$. With $x = p_i(e^\lambda - 1)$ it gives
 $$M_{X_i}(\lambda) \le \exp\big(p_i(e^\lambda - 1)\big).$$
 The right side is the MGF of a Poisson count with mean $p_i$.
-2. *Product.* The MGF of a sum of independent variables is the product of their MGFs, because the exponential turns the sum into a product and independence lets the average of that product split ([Probability distributions](01-distributions.md)). The exponents of step 1 then add up to $\mu(e^\lambda - 1)$:
+2. *Product.* The MGF of a sum of independent variables is the product of their MGFs (@lem-dist-mgf-sum), so the exponents of step 1 add up to $\mu(e^\lambda - 1)$:
 $$M_S(\lambda) \le \exp\big(\mu(e^\lambda - 1)\big).$$
 3. *Chernoff bound.* Putting this into @eq-conc-chernoff at $t = (1+r)\mu$ gives
 $$\Pr[S \ge (1+r)\mu] \le \exp\big(\mu(e^\lambda - 1) - \lambda(1+r)\mu\big).$$
 4. *Minimize.* The derivative of the exponent, $\mu e^\lambda - (1+r)\mu$, vanishes at $e^\lambda = 1 + r$, so $\lambda = \ln(1+r)$, which is positive as required. Substituting it turns the exponent into $\mu r - (1+r)\mu\ln(1+r)$, which is the first upper-tail bound.
-5. *Simplify.* A width needs the exponent solved for $r$, and $(1+r)\ln(1+r) - r$ has no closed-form inverse. So replace the logarithm by the lower bound $\ln(1+r) \ge 2r/(2+r)$, valid for $r \ge 0$, which turns the bracket into a ratio of polynomials. The difference $\ln(1+r) - 2r/(2+r)$ is 0 at $r = 0$, and it never decreases, because its derivative is never negative:
+5. *Simplify.* A width needs the exponent solved for $r$, and $(1+r)\ln(1+r) - r$ has no closed-form inverse. So replace the logarithm by the lower bound $\ln(1+r) \ge 2r/(2+r)$ for $r \ge 0$, which turns the bracket into a ratio of polynomials. The bound holds because the difference $\ln(1+r) - 2r/(2+r)$ is 0 at $r = 0$ and its derivative is never negative:
 $$\frac{1}{1+r} - \frac{4}{(2+r)^2} = \frac{r^2}{(1+r)(2+r)^2} \ge 0.$$
 Putting the lower bound into the bracket gives $(1+r)\frac{2r}{2+r} - r = \frac{r^2}{2+r}$, which is the second upper-tail bound.
 6. *Lower tail.* A small $S$ is a large $-S$. For $\lambda > 0$ the function $e^{-\lambda x}$ is decreasing, so $S \le s$ exactly when $e^{-\lambda S} \ge e^{-\lambda s}$. Markov's inequality applied to $e^{-\lambda S}$, with steps 1 and 2 at $-\lambda$ in place of $\lambda$, gives
@@ -168,17 +162,17 @@ $$(1-r)\ln(1-r) = -r + \sum_{j \ge 2}\frac{r^j}{j(j-1)}.$$
 Every term of the sum is non-negative, so keeping only the first one, $r^2/2$, gives a lower bound. Adding $r$, the bracket is then at least $r^2/2$, which is the lower-tail bound.
 :::
 
-The bounds depend on the expected count $\mu$, not on the number of trials $n$, so a relative deviation $r$ becomes unlikely only once $\mu$ is large. Because step 1 keeps each $p_i$, a small $\mu$, and with it a small variance $\sum_i p_i(1 - p_i) \le \mu$, gives a small MGF bound, which is why this bound will beat Hoeffding's range-only bound of the next section. For large $r$ the simplified upper-tail exponent $r^2\mu/(2+r)$ grows like $r\mu$, not $r^2\mu$, so counts overshoot their mean more easily than they undershoot it.
+The bounds depend on the expected count $\mu$, not on the number of trials $n$, so a relative deviation $r$ becomes unlikely only once $\mu$ is large. Step 1 keeps each $p_i$, so a small $\mu$, and with it a small variance $\sum_i p_i(1 - p_i) \le \mu$, gives a small MGF bound. That is why this bound beats the range-only bound of Hoeffding in the next section. For large $r$ the simplified upper-tail exponent $r^2\mu/(2+r)$ grows like $r\mu$, not $r^2\mu$, so counts overshoot their mean more easily than they undershoot it.
 
 ::: {#exm-conc-chernoff}
 In the running example the number of errors $S$ is a sum of 200 independent $\mathrm{Bern}(0.1)$ variables, so $\mu = 20$. A measured rate of 15% means 30 errors, which is $(1 + r)\mu$ with $r = 0.5$. The simplified upper-tail bound gives
 $$\Pr[S \ge 30] \le \exp\left(-\frac{0.5^2 \times 20}{2.5}\right) = e^{-2} = 0.135.$$
-That is the best bound so far, below Chebyshev's 0.18, but still 14 times the simulated $9.6\times10^{-3}$. Part of the gap is the simplification in step 5 of the proof, and the rest is a factor in front of the exponential, shrinking like $1/\sqrt\mu$, that the Chernoff method cannot see because it bounds only the exponent.
+That is the best bound so far, below Chebyshev's 0.18, but still 14 times the simulated $9.6\times10^{-3}$. Part of the gap is the simplification in step 5 of the proof. The rest is the factor in front of the exponential that Cramér's theorem leaves out, and that the Chernoff method cannot see because it bounds only the exponent. Bahadur & Rao (1960) show that this factor shrinks like $1/\sqrt\mu$.
 :::
 
 ## Sub-Gaussian variables and Hoeffding {#sec-conc-hoeffding}
 
-Redoing the Chernoff calculation for every new distribution is tedious. A normal variable $\mathcal N(0, \sigma^2)$, with mean 0 and variance $\sigma^2$, has the MGF $e^{\lambda^2\sigma^2/2}$ ([Probability distributions](01-distributions.md)), a quadratic log-MGF, and the Chernoff calculation for it uses nothing else. So this section defines a class of variables by that one property, proves tail and sum bounds for the class once, and applies them to bounded variables, which gives Hoeffding's inequality for averages.
+Redoing the Chernoff calculation for every new distribution is tedious. A normal variable $\mathcal N(0, \sigma^2)$, with mean 0 and variance $\sigma^2$, has the MGF $e^{\lambda^2\sigma^2/2}$ ([Probability distributions](01-distributions.md)), and the Chernoff calculation for it uses nothing else. So this section defines a class of variables by that one property, proves tail and sum bounds for the class once, and applies them to bounded variables. That gives Hoeffding's inequality for averages.
 
 ::: {#def-conc-subgaussian name="Sub-Gaussian variable"}
 A random variable $X$ with mean $\mu$ is **$\sigma$-sub-Gaussian** if, for every real $\lambda$,
@@ -186,7 +180,7 @@ $$\mathbb E\big[e^{\lambda(X - \mu)}\big] \le e^{\lambda^2\sigma^2/2}.$$
 The square $\sigma^2$ is its **variance proxy**.
 :::
 
-The next result shows that it is never smaller than the true variance, and it can be much larger, which is where these bounds lose accuracy.
+The next result shows that the variance proxy is never smaller than the true variance. It can be much larger, and that is where these bounds lose accuracy.
 
 ::: {#prp-conc-subgaussian name="Properties of sub-Gaussian variables"}
 Let $X$ be $\sigma$-sub-Gaussian with mean $\mu$, and let $t > 0$.
@@ -200,15 +194,15 @@ $$\Pr[X - \mu \ge t] \le e^{-t^2/(2\sigma^2)}, \qquad \Pr[|X - \mu| \ge t] \le 2
 
 ::: {.proof}
 1. *Variance.* Expand both sides of the definition around $\lambda = 0$. The left side is $1 + \lambda^2\operatorname{Var}(X)/2 + \dots$, with no linear term because $X - \mu$ has mean 0, and the right side is $1 + \lambda^2\sigma^2/2 + \dots$. Subtracting 1, dividing by $\lambda^2/2$ and letting $\lambda \to 0$ forces $\operatorname{Var}(X) \le \sigma^2$.
-2. *Tail.* Putting the bound of the definition into @eq-conc-chernoff for $X - \mu$ gives, for every $\lambda > 0$,
+2. *Tail.* The bound of the definition in @eq-conc-chernoff for $X - \mu$ gives, for every $\lambda > 0$,
 $$\Pr[X - \mu \ge t] \le \exp\big(-\lambda t + \lambda^2\sigma^2/2\big).$$
-The exponent is a parabola in $\lambda$, whose derivative $-t + \lambda\sigma^2$ vanishes at $\lambda = t/\sigma^2 > 0$, and substituting it gives the exponent $-t^2/\sigma^2 + t^2/(2\sigma^2) = -t^2/(2\sigma^2)$. Replacing $\lambda$ by $-\lambda$ in the definition shows that $-X$ is also $\sigma$-sub-Gaussian, which gives the same bound for the lower tail, and adding the two gives the two-sided bound.
+The exponent is a parabola in $\lambda$ with its minimum at $\lambda = t/\sigma^2 > 0$, where it equals $-t^2/\sigma^2 + t^2/(2\sigma^2) = -t^2/(2\sigma^2)$. Replacing $\lambda$ by $-\lambda$ in the definition shows that $-X$ is also $\sigma$-sub-Gaussian, which gives the same bound for the lower tail. Adding the two gives the two-sided bound.
 3. *Sums.* The centred MGF $\mathbb E[e^{\lambda(X - \mu)}]$ of a sum of independent terms is the product of their centred MGFs, as in step 2 of the proof of @thm-conc-chernoff-bernoulli. Each factor is at most a normal MGF, and the exponents of those add up:
 $$\mathbb E\big[e^{\lambda\sum_i(X_i - \mu_i)}\big] \le \prod_i e^{\lambda^2\sigma_i^2/2} = e^{\lambda^2(\sum_i\sigma_i^2)/2}.$$
 4. *Scaling and means.* Multiplying $X$ by $c$ is the same as multiplying $\lambda$ by $c$, so the definition at $c\lambda$ gives the bound $e^{c^2\lambda^2\sigma^2/2}$. The sum of $n$ independent $\sigma$-sub-Gaussian variables is $\sigma\sqrt n$-sub-Gaussian by item 3, and dividing by $n$ makes their mean $(\sigma/\sqrt n)$-sub-Gaussian.
 :::
 
-Hoeffding's inequality also needs the fact that bounded variables are sub-Gaussian. A variable trapped in an interval cannot have a heavy tail, since it cannot go beyond the interval at all. The lemma makes this quantitative, with a variance proxy of half the interval's length, squared.
+Hoeffding's inequality also needs the fact that bounded variables are sub-Gaussian. A variable trapped in an interval cannot have a heavy tail, because it cannot go beyond the interval. The lemma gives the variance proxy: half the interval's length, squared.
 
 ::: {#lem-conc-hoeffding name="Hoeffding's lemma"}
 Let $X$ take values in an interval $[l, u]$ and have mean $\mu$. Then $X$ is $\frac{u-l}{2}$-sub-Gaussian, that is, for every real $\lambda$,
@@ -216,13 +210,13 @@ $$\mathbb E\big[e^{\lambda(X-\mu)}\big] \le \exp\big(\lambda^2(u-l)^2/8\big).$$
 :::
 
 ::: {.proof}
-Shifting $X$ and the interval by $\mu$ changes neither side, so assume $\mu = 0$. A variable with mean 0 takes values on both sides of 0, so $l \le 0 \le u$. The plan is to bound $e^{\lambda X}$ by a straight line in $X$, whose average depends only on the mean, and then to show that the logarithm of the result is at most a quadratic.
+Shifting $X$ and the interval by $\mu$ changes neither side, so assume $\mu = 0$, which puts $l \le 0 \le u$. The plan is to bound $e^{\lambda X}$ by a straight line in $X$, whose average depends only on the mean, and then to show that the logarithm of the result is at most a quadratic.
 
 1. *Use convexity.* On $[l, u]$ the convex curve $e^{\lambda x}$ lies below the chord joining its values at the two endpoints. That chord is the weighted average of the endpoint values, with weights that say how close $x$ is to each end:
 $$e^{\lambda x} \le \frac{u - x}{u - l}e^{\lambda l} + \frac{x - l}{u - l}e^{\lambda u}.$$
 2. *Take expectations.* The right side is linear in $x$, so its average needs only $\mathbb E[X] = 0$:
 $$\mathbb E[e^{\lambda X}] \le \frac{u}{u-l}e^{\lambda l} - \frac{l}{u-l}e^{\lambda u}.$$
-This is exactly the MGF of the two-point variable that sits at $l$ or $u$ with mean 0, so that variable is the worst case on the interval.
+This is the MGF of the two-point variable on $l$ and $u$ with mean 0, the worst case on the interval.
 3. *Reduce to one variable.* Let $p = -l/(u-l)$, a number in $[0, 1]$, so that $\frac{u}{u-l} = 1 - p$. Write $w = \lambda(u - l)$, so that $\lambda l = -wp$ and $e^{\lambda u} = e^{\lambda l}e^{w}$. Factoring $e^{\lambda l} = e^{-wp}$ out of the right side of step 2 leaves $1 - p + pe^w$, so that side equals $e^{\Lambda(w)}$, where
 $$\Lambda(w) = -wp + \ln\big(1 - p + pe^w\big).$$
 It remains to show that $\Lambda(w) \le w^2/8$, by a Taylor expansion around $w = 0$.
@@ -231,7 +225,7 @@ It remains to show that $\Lambda(w) \le w^2/8$, by a Taylor expansion around $w 
 6. *Taylor with remainder.* Taylor's theorem gives $\Lambda(w) = \Lambda(0) + w\Lambda'(0) + \frac{w^2}{2}\Lambda''(\xi)$ for some $\xi$ between 0 and $w$. With value and slope 0 and curvature at most $\frac14$, this is at most $w^2/8 = \lambda^2(u-l)^2/8$.
 :::
 
-The constant $\frac18$ cannot be improved. A fair coin on the two endpoints has variance $(u-l)^2/4$, and step 1 of @prp-conc-subgaussian shows that no variance proxy can be below the variance. Combining the lemma with items 3 and 4 of @prp-conc-subgaussian gives Hoeffding's inequality: the mean of $n$ bounded independent variables has a variance proxy that shrinks like $1/n$.
+The constant $\frac18$ cannot be improved. A fair coin on the two endpoints has variance $(u-l)^2/4$, and by item 1 of @prp-conc-subgaussian no variance proxy is below the variance. So that coin needs a proxy of at least $(u-l)^2/4$, which is exactly what the lemma gives. With items 3 and 4 of @prp-conc-subgaussian, the lemma gives Hoeffding's inequality for the mean of $n$ bounded independent variables.
 
 ::: {#thm-conc-hoeffding name="Hoeffding's inequality"}
 Let $X_1, \dots, X_n$ be independent, each with values in $[l, u]$, and let $\bar X_n$ be their mean, with $\mathbb E[\bar X_n] = \mu$. For every $t > 0$,
@@ -247,7 +241,7 @@ $$|\bar X_n - \mu| < (u-l)\sqrt{\frac{\ln(2/\beta)}{2n}}.$$
 4. *Width.* The two-sided bound is twice this. Setting it equal to $\beta$ and solving for $t$, as in @lem-conc-width, gives the width.
 :::
 
-Hoeffding's inequality needs only the range, not the variance. That is its strength, since there is nothing to estimate, and its weakness, since it assumes the worst-case variance $(u-l)^2/4$ of the fair coin on the endpoints.
+Hoeffding's inequality needs only the range, not the variance. That is its strength, because there is nothing to estimate. It is also its weakness, because it assumes the worst-case variance $(u-l)^2/4$ of the fair coin on the endpoints.
 
 ::: {#exm-conc-hoeffding}
 Each error of the running example lies in $[0, 1]$, so $u - l = 1$, and the deviation is $t = 0.05$ with $n = 200$. Hoeffding's inequality gives
@@ -267,17 +261,17 @@ $$\sqrt{\frac{2\sigma^2\ln(1/\beta)}{n}} + \frac{2R\ln(1/\beta)}{3n}.$$
 :::
 <!-- proof: cited -->
 
-The proof is the same Chernoff recipe, with a sharper bound on each factor's MGF. Boucheron, Lugosi & Massart (ch. 2) give it, and @sec-apx-tail-bernstein in the appendices derives it and the width step by step. For small $t$ the $2\sigma^2$ term of the denominator dominates, and the bound looks Gaussian with the true variance. For large $t$ the $\frac23 Rt$ term dominates, and the bound decays like $e^{-ct}$, more slowly than the $e^{-ct^2}$ of the Gaussian regime.
+The proof is the same Chernoff recipe with a sharper bound on each factor's MGF. Boucheron, Lugosi & Massart (ch. 2) give it, and @sec-apx-tail-bernstein in the appendices derives it and the width step by step. For small $t$ the $2\sigma^2$ term of the denominator dominates, so the bound looks Gaussian with the true variance. For large $t$ the $\frac23 Rt$ term dominates, and the bound decays like $e^{-ct}$, more slowly than the $e^{-ct^2}$ of the Gaussian regime.
 
 ::: {#exm-conc-small-rate}
-The variance matters most when the rate is near zero. A classifier makes 1 false positive on 1,000 negative records, and you want a 95% upper bound on its true false-positive rate, so $\beta = 0.05$ and $\ln(1/\beta) = \ln 20 \approx 3.0$. Setting the one-sided bound of @thm-conc-hoeffding equal to $\beta$ gives the half-width $\sqrt{\ln(1/\beta)/(2n)} = \sqrt{\ln 20/2000} \approx 0.039$, added to the measured rate of $0.001$, because Hoeffding assumes a variance of $0.25$. Bernstein's inequality with the variance $\sigma^2 = 0.001 \times 0.999 \approx 0.001$ of the measured rate, $R = 1$ and $n = 1{,}000$ gives the width
+The variance matters most when the rate is near zero. A classifier makes 1 false positive on 1,000 negative records, and you want a 95% upper bound on its true false-positive rate, so $\beta = 0.05$ and $\ln(1/\beta) = \ln 20 \approx 3.0$. The one-sided bound of @thm-conc-hoeffding adds the half-width $\sqrt{\ln 20/2000} \approx 0.039$ to the measured rate of $0.001$, because Hoeffding assumes a variance of $0.25$. Bernstein's inequality with the variance $\sigma^2 = 0.001 \times 0.999 \approx 0.001$ of the measured rate, $R = 1$ and $n = 1{,}000$ gives the width
 $$\sqrt{\frac{2\times0.001\times3.0}{1000}} + \frac{2\times3.0}{3000} \approx 0.0045,$$
-almost ten times tighter, though only as a heuristic, because $\sigma^2$ was estimated from the same data. The exact **Clopper–Pearson** bound, the largest rate under which 1 or fewer false positives in 1,000 trials still has probability at least $0.05$, is $0.0047$.
+almost ten times tighter. That is only a heuristic, because $\sigma^2$ was estimated from the same data. The exact **Clopper–Pearson** bound, the largest rate under which 1 or fewer false positives in 1,000 trials still has probability at least $0.05$, is $0.0047$.
 :::
 
 ## Many estimates at once {#sec-conc-union}
 
-A learner rarely relies on one estimate. It compares many models or runs many training steps, and it needs all of them to behave at the same time. The union bound says that the chance that at least one of several events happens is at most the sum of their separate chances, because the sum counts an outcome that lies in several events several times. The running example is one estimate, so this section uses a training loop.
+A learner rarely relies on one estimate. It compares many models or runs many training steps, and it needs all of them to behave at the same time. The union bound says that the chance that at least one of several events happens is at most the sum of their separate chances. The sum can only overcount, because it counts an outcome that lies in several events several times.
 
 ::: {#lem-conc-union name="The union bound"}
 For any events $A_1, \dots, A_k$, independent or not,
@@ -290,9 +284,9 @@ $$\mathbf 1[A_1 \cup \dots \cup A_k] \le \sum_{i=1}^k \mathbf 1[A_i].$$
 2. *Average.* Averages keep this order, and the average of each indicator is the probability of its event, as in the proof of @thm-conc-markov.
 :::
 
-If each of $k$ estimates fails with probability at most $\beta/k$, all of them succeed together except with probability at most $k\cdot\beta/k = \beta$. In an exponential bound, asking for $\beta/k$ instead of $\beta$ replaces $\ln(1/\beta)$ by $\ln(k/\beta) = \ln k + \ln(1/\beta)$, and that is the $\ln k$ cost.
+So if each of $k$ estimates fails with probability at most $\beta/k$, all of them succeed together except with probability at most $k\cdot\beta/k = \beta$. In an exponential bound, asking for $\beta/k$ instead of $\beta$ replaces $\ln(1/\beta)$ by $\ln(k/\beta) = \ln k + \ln(1/\beta)$, and that is the $\ln k$ cost.
 
-The first use is a question every learner faces. A learner picks its model after seeing the data, so you need its training loss to be close to its population loss for every model it could pick, not just for one fixed model.
+A learner picks its model after seeing the data. So you need its training loss to be close to its population loss for every model it could pick, not only for one fixed model.
 
 ::: {#cor-conc-finite-class name="Uniform convergence over a finite class"}
 Let $\Theta$ be a finite set of models, and let the loss of each model on each record lie in $[0, 1]$. Let $D$ be a dataset of $n$ records drawn independently from a population $\mathcal D$. Write $\mathcal L(\theta; D)$ for the **empirical risk** of a model $\theta$, its average loss on $D$, and $\mathcal L_{\mathcal D}(\theta)$ for its **true risk**, its average loss on the population. For every $\beta \in (0, 1)$, with probability at least $1 - \beta$,
@@ -306,19 +300,19 @@ $$\Pr\big[|\mathcal L(\theta; D) - \mathcal L_{\mathcal D}(\theta)| \ge t\big] \
 3. *Invert.* Setting this equal to $\beta$ and solving for $t$, as in @lem-conc-width, gives the width.
 :::
 
-The size of the class enters only through $\ln|\Theta|$, so squaring the number of models only doubles that term.
+The size of the class enters only through $\ln|\Theta|$, so squaring the number of models only doubles that term. The union bound also controls a training loop, where each of many steps draws a random batch.
 
 ::: {#exm-conc-minibatch}
 A training loop includes each of $n = 60{,}000$ records in a minibatch independently with probability $q = 0.01$, so the batch size $B$ is a count with mean $\mu = 600$. For a batch more than 20% off, $r = 0.2$, $r^2 = 0.04$ and $2 + r = 2.2$, and the two tails of @thm-conc-chernoff-bernoulli give
 $$\Pr[B \ge 720] \le e^{-0.04 \times 600/2.2} = e^{-10.9} \approx 1.8\times10^{-5}, \qquad \Pr[B \le 480] \le e^{-0.04 \times 600/2} = e^{-12} \approx 6.1\times10^{-6}.$$
-The two events cannot happen together, so $B$ stays within $600 \pm 20\%$ except with probability about $2.4\times10^{-5}$ per step. Over 1,000 steps, @lem-conc-union adds the per-step failure probabilities, so every batch stays in that range except with probability about $1{,}000 \times 2.4\times10^{-5} = 0.024$.
+The two events cannot happen together, so $B$ stays within $600 \pm 20\%$ except with probability about $2.4\times10^{-5}$ per step. Over 1,000 steps, @lem-conc-union adds the failure probabilities of the steps, so every batch stays in that range except with probability about $1{,}000 \times 2.4\times10^{-5} = 0.024$.
 :::
 
 ## Gaussian and Laplace tails {#sec-conc-tails}
 
-The normal and Laplace distributions are the two standard models of additive noise, and later chapters add such noise to computed numbers on purpose, so they need to know how large it can be. Both densities are known exactly, so this section bounds their tails directly and more sharply, and gives the width of the largest of many draws. The running example is a count, not a noise model, so this section's examples use the noise itself.
+The normal and Laplace distributions are the two standard models of additive noise, and later chapters add such noise to computed numbers on purpose, so they need to know how large it can be. Both densities are known exactly, so this section bounds their tails directly and more sharply, and gives the width of the largest of many draws.
 
-Write $Z \sim \mathcal N(0, 1)$ for a standard normal variable and $\varphi(z) = e^{-z^2/2}/\sqrt{2\pi}$ for its density. Of the two bounds below, the second, the **Mills ratio** bound, named after the ratio of tail to density, is sharper far out. Its proof weights the density by a factor that is at least 1 on the tail and makes the integral easy.
+Write $Z \sim \mathcal N(0, 1)$ for a standard normal variable and $\varphi(z) = e^{-z^2/2}/\sqrt{2\pi}$ for its density. Of the two bounds below, the second, the **Mills ratio** bound, named after the ratio of tail to density, is sharper far out. Its proof multiplies the density by a factor that is at least 1 on the tail and makes the integral easy.
 
 ::: {#prp-conc-gaussian-tail name="Gaussian tail bounds"}
 Let $Z \sim \mathcal N(0, 1)$ have density $\varphi$, and let $t > 0$. Then
@@ -340,7 +334,7 @@ $$\Pr[Z \ge t] = \int_t^\infty \varphi(z)\,\mathrm dz \le \int_t^\infty \frac zt
 6. *Width of $k$ draws.* Each $X_i$ is $\sigma Z$, so the first bound, doubled for both tails, gives $\Pr[|X_i| \ge t] \le e^{-t^2/(2\sigma^2)}$. Setting this equal to $\beta/k$ gives $t = \sigma\sqrt{2\ln(k/\beta)}$ by @lem-conc-width, and @lem-conc-union over the $k$ draws gives a total failure probability of at most $\beta$.
 :::
 
-A standard normal is 1-sub-Gaussian, since its MGF is $e^{\lambda^2/2}$, so @prp-conc-subgaussian gives the Chernoff bound $e^{-t^2/2}$, and the first bound beats it by a factor of $\frac12$. The ratio of the Mills bound to the exact tail tends to 1 as $t$ grows, because the tail mass sits ever closer to $t$, where the factor $z/t$ is close to 1.
+A standard normal is 1-sub-Gaussian, since its MGF is $e^{\lambda^2/2}$, so @prp-conc-subgaussian gives the Chernoff bound $e^{-t^2/2}$, and the first bound halves it. The ratio of the Mills bound to the exact tail tends to 1 as $t$ grows, because the tail mass sits ever closer to $t$, where the factor $z/t$ is close to 1.
 
 ::: {#exm-conc-gaussian}
 At $t = 3$ the exact standard normal tail is $1.35\times10^{-3}$. Against it, Chebyshev's inequality allows $1/3^2 = 0.111$ and the Chernoff bound $e^{-9/2} = 0.0111$, while the two bounds of @prp-conc-gaussian-tail allow $0.0056$ (the halved Chernoff bound) and $\varphi(3)/3 = 0.00148$ (the Mills ratio). So the Mills ratio is within 10% of the exact tail, while the Chernoff bound is 8 times too large (@fig-conc-gaussian-tails).
@@ -348,7 +342,7 @@ At $t = 3$ the exact standard normal tail is $1.35\times10^{-3}$. Against it, Ch
 
 ![The exact standard normal tail against the Chebyshev, Chernoff, halved Chernoff and Mills-ratio bounds.](figures/gaussian_tails.svg){#fig-conc-gaussian-tails}
 
-For the Laplace distribution the tail can be computed exactly, so no bound is needed. The **Laplace distribution** $\mathrm{Lap}(b)$ with scale $b > 0$ has density $\frac{1}{2b}e^{-|x|/b}$, symmetric around 0.
+For the Laplace distribution you can compute the tail exactly, so no bound is needed. The **Laplace distribution** $\mathrm{Lap}(b)$ with scale $b > 0$ has density $\frac{1}{2b}e^{-|x|/b}$, symmetric around 0.
 
 ::: {#prp-conc-laplace-tail name="Laplace tails and widths"}
 Let $X \sim \mathrm{Lap}(b)$ and $t \ge 0$. Then
@@ -362,13 +356,13 @@ For $\beta \in (0, 1)$, one draw satisfies $|X| \le b\ln(1/\beta)$ with probabil
 3. *Many draws.* Setting $e^{-t/b} = \beta/k$ gives $t = b\ln(k/\beta)$, and @lem-conc-union over the $k$ draws gives a total failure probability of at most $\beta$.
 :::
 
-For independent draws the union bound is nearly exact, because they rarely fail together when each fails rarely. For $k = 100$ draws of $\mathrm{Lap}(1)$ at $\beta = 0.05$, the width is $\ln(100/0.05) = 7.60$, and simulated draws exceed it at the rate 0.0486, close to the target (@fig-conc-laplace-max).
+For independent draws the union bound is nearly exact, because draws that each fail rarely seldom fail together. For $k = 100$ draws of $\mathrm{Lap}(1)$ at $\beta = 0.05$, the width is $\ln(100/0.05) = 7.60$, and simulated draws exceed it at the rate 0.0486, close to the target (@fig-conc-laplace-max).
 
 ![Left: the bound $b\ln(k/\beta)$ grows like $\ln k$. Right: the empirical probability that the maximum of $k$ Laplace draws exceeds it stays at $\beta = 0.05$.](figures/laplace_max.svg){#fig-conc-laplace-max}
 
 ### Sums of Laplace variables
 
-Noise is often added many times and summed, so how large can a sum of $k$ Laplace draws get? The Laplace MGF is $1/(1 - \lambda^2b^2)$ for $|\lambda| < 1/b$ and infinite beyond ([Probability distributions](01-distributions.md)), so no bound of the form $e^{\lambda^2\sigma^2/2}$ holds for every $\lambda$, and a Laplace variable is not sub-Gaussian. For $|\lambda| \le 1/(2b)$, though, its log-MGF is still at most a quadratic, and the proof of @prp-conc-laplace-sum below runs the Chernoff bound on that range only.
+Noise is often added many times and summed, so how large can a sum of $k$ Laplace draws get? The Laplace MGF is $1/(1 - \lambda^2b^2)$ for $|\lambda| < 1/b$ and infinite beyond ([Probability distributions](01-distributions.md)). So no bound of the form $e^{\lambda^2\sigma^2/2}$ holds for every $\lambda$, and a Laplace variable is not sub-Gaussian. For $|\lambda| \le 1/(2b)$, though, its log-MGF is still at most a quadratic, and the proof of @prp-conc-laplace-sum runs the Chernoff bound on that range only.
 
 ::: {#lem-conc-laplace-mgf name="The Laplace MGF near zero"}
 Let $X \sim \mathrm{Lap}(b)$. For every $\lambda$ with $|\lambda| \le 1/(2b)$,
@@ -387,7 +381,7 @@ $$\Pr[S \ge t] \le \exp\left(-\min\left(\frac{t^2}{8kb^2},\ \frac{t}{4b}\right)\
 :::
 
 ::: {.proof}
-The plan is to bound the MGF of $S$ on the range of $\lambda$ where @lem-conc-laplace-mgf applies, run the Chernoff bound with $\lambda$ restricted to that range, and split by whether the best $\lambda$ lies inside it.
+The plan is to bound the MGF of $S$ where @lem-conc-laplace-mgf applies, run the Chernoff bound with $\lambda$ in that range, and split by whether the best $\lambda$ lies inside it.
 
 1. *The MGF of the sum.* The MGF of $S$ is the product of $k$ factors, each at most $e^{2\lambda^2b^2}$ by the lemma, so $M_S(\lambda) \le e^{2k\lambda^2b^2}$ for $0 < \lambda \le 1/(2b)$.
 2. *The unconstrained optimum.* By @eq-conc-chernoff the exponent to minimize is $-\lambda t + 2k\lambda^2b^2$, a parabola whose derivative $-t + 4k\lambda b^2$ vanishes at $\lambda^* = t/(4kb^2)$.
@@ -396,17 +390,17 @@ The plan is to bound the MGF of $S$ on the range of $\lambda$ where @lem-conc-la
 5. *Combine.* Since $t^2/(8kb^2) \le t/(4b)$ exactly when $t \le 2kb$, the minimum is $t^2/(8kb^2)$ in the regime of step 3 and $t/(4b)$ in that of step 4.
 :::
 
-Small deviations look Gaussian, with a variance of order $kb^2$, and large deviations decay only exponentially. That two-regime shape is what **sub-exponential** means.
+So small deviations look Gaussian, with a variance of order $kb^2$, and large deviations decay only exponentially. That two-regime shape is what **sub-exponential** means.
 
 ::: {#exm-conc-laplace-sum}
-Take $k = 10$ and $b = 1$. The central limit theorem approximates the sum by a normal variable with the same mean 0 and variance $10 \times 2b^2 = 20$, since one $\mathrm{Lap}(b)$ draw has variance $2b^2$. It matches the bulk, with $\Pr[S \ge 10]$ equal to $1.42\times10^{-2}$ in simulation and $1.27\times10^{-2}$ from the normal. But $\Pr[S \ge 20]$ is $3.4\times10^{-5}$ in simulation and only $3.9\times10^{-6}$ from the normal, a factor of 9 too small. Both deviations are in the Gaussian regime of @prp-conc-laplace-sum, so the bound gives $e^{-100/80} = 0.287$ at $t = 10$ and $e^{-5} = 6.7\times10^{-3}$ at $t = 20$, loose but a guarantee (@fig-conc-laplace-sum).
+Take $k = 10$ and $b = 1$. One $\mathrm{Lap}(b)$ draw has variance $2b^2$, so the central limit theorem approximates the sum by a normal variable with mean 0 and variance $10 \times 2b^2 = 20$. It matches the bulk, with $\Pr[S \ge 10]$ equal to $1.42\times10^{-2}$ in simulation and $1.27\times10^{-2}$ from the normal. But $\Pr[S \ge 20]$ is $3.4\times10^{-5}$ in simulation and only $3.9\times10^{-6}$ from the normal, a factor of 9 too small. Both deviations are in the Gaussian regime of @prp-conc-laplace-sum, where the bound gives $e^{-100/80} = 0.287$ at $t = 10$ and $e^{-5} = 6.7\times10^{-3}$ at $t = 20$. These are loose, but they are guarantees (@fig-conc-laplace-sum).
 :::
 
 ![Empirical tail of a sum of 10 Laplace(1) variables, against the sub-exponential bound and the normal approximation.](figures/laplace_sum.svg){#fig-conc-laplace-sum}
 
 ## Azuma and McDiarmid {#sec-conc-martingales}
 
-So far every quantity was a sum of independent terms, and two common situations break that. In sequential procedures each step can be chosen after seeing earlier outcomes, so the terms are dependent and the MGF of their sum no longer factorizes. And the risk of a model trained on the data is a complicated function of all the records, not a sum of one term per record. Azuma's inequality handles the first situation, and McDiarmid's inequality, which follows from it, the second. Azuma's needs a **martingale**, a running total whose next step is zero on average given the past, like your fortune in a sequence of fair bets that you choose as you go.
+So far every quantity was a sum of independent terms, and two common situations break that. In sequential procedures each step can be chosen after seeing earlier outcomes, so the terms are dependent and the MGF of their sum no longer factorizes. And the risk of a trained model is a complicated function of all the records, not a sum of one term per record. Azuma's inequality handles the first situation, and McDiarmid's inequality, which follows from it, the second. Azuma's needs a **martingale**, a running total whose next step is zero on average given the past, like your fortune in a sequence of fair bets that you choose as you go.
 
 ::: {#def-conc-martingale name="Martingale"}
 A sequence $W_0, W_1, \dots, W_n$ of random variables is a **martingale** if each increment $U_i = W_i - W_{i-1}$ has mean zero given the past, that is, given everything observed before step $i$:
@@ -421,7 +415,7 @@ $$\Pr[W_n - W_0 \ge t] \le \exp\left(-\frac{2t^2}{\sum_i d_i^2}\right).$$
 :::
 
 ::: {.proof}
-The plan is to bound it one step at a time instead, starting from the last step and working back, and then to apply the Chernoff bound.
+The MGF of the total no longer factorizes, so the plan is to bound it one step at a time, starting from the last step and working back, and then to apply the Chernoff bound.
 
 1. *Bound one step given the past.* Given the past, $U_i$ is a variable with mean zero on an interval of length $d_i$. So @lem-conc-hoeffding applies to it, with every expectation taken given the past, and its proof runs unchanged:
 $$\mathbb E\big[e^{\lambda U_i} \mid \text{past}\big] \le e^{\lambda^2d_i^2/8}.$$
@@ -437,14 +431,14 @@ $$\mathbb E\big[e^{\lambda(W_n - W_0)}\big] \le \exp\Big(\lambda^2\sum_i d_i^2/8
 Hoeffding's inequality is the special case of independent increments.
 
 ::: {#exm-conc-azuma}
-You have two coins, with heads probabilities 0.3 and 0.7. You flip 200 times, and before each flip you pick the 0.7 coin if the previous flip was heads and the 0.3 coin otherwise. The flips are dependent, so Hoeffding's inequality does not apply. What you can control is how far the heads count drifts from what your own choices predicted. Let $X_i$ be 1 if flip $i$ is heads, and $p_i$ the heads probability of the coin chosen for it. Let $W_n = \sum_{i \le n}(X_i - p_i)$ be the number of heads minus the number you expected. Given the past the coin is fixed, so $X_i - p_i$ has mean $p_i - p_i = 0$ and lies in $[-p_i, 1 - p_i]$, an interval of length 1. So $W$ is a martingale with $d_i = 1$ and $\sum_i d_i^2 = 200$. At $t = 20$, @thm-conc-azuma gives
+You have two coins, with heads probabilities 0.3 and 0.7. You flip 200 times, and before each flip you pick the 0.7 coin if the previous flip was heads and the 0.3 coin otherwise. The flips are dependent, so Hoeffding's inequality does not apply, but you can bound how far the heads count drifts from what your own choices predicted. Let $X_i$ be 1 if flip $i$ is heads, and $p_i$ the heads probability of the coin chosen for it. Let $W_n = \sum_{i \le n}(X_i - p_i)$ be the number of heads minus the number you expected. Given the past the coin is fixed, so $X_i - p_i$ has mean 0 and lies in $[-p_i, 1 - p_i]$, an interval of length 1. So $W$ is a martingale with $d_i = 1$ and $\sum_i d_i^2 = 200$. At $t = 20$, @thm-conc-azuma gives
 $$\Pr[W_{200} \ge 20] \le e^{-2 \times 400/200} = e^{-4} = 1.83\times10^{-2},$$
-while simulation gives $1.12\times10^{-3}$ (@fig-conc-azuma-adaptive). The bound pays for assuming the worst-case variance, exactly as Hoeffding's does. Each step's true variance is $p_i(1 - p_i) = 0.21$, not the $0.25$ the interval allows.
+while simulation gives $1.12\times10^{-3}$ (@fig-conc-azuma-adaptive). Like Hoeffding's bound, this one assumes the worst-case variance $0.25$ that the interval allows, while the true variance of each step is $p_i(1 - p_i) = 0.21$.
 :::
 
 ![Empirical tail of the martingale in the adaptive coin game against the Azuma bound.](figures/azuma_adaptive.svg){#fig-conc-azuma-adaptive}
 
-McDiarmid's inequality says that a function of many independent inputs that no single input can move much concentrates as tightly as a sum of bounded terms would. The proof turns the function into a martingale by revealing the inputs one at a time and tracking your best guess of its value. Each revealed input moves the guess by a bounded amount, and Azuma's inequality does the rest.
+McDiarmid's inequality says that a function of many independent inputs, which no single input can move much, concentrates as tightly as a sum of bounded terms. The proof makes the function into a martingale. It reveals the inputs one at a time and tracks your best guess of the value. Each revealed input moves the guess by a bounded amount, and Azuma's inequality does the rest.
 
 ::: {#thm-conc-mcdiarmid name="McDiarmid's inequality"}
 Let $X = (X_1, \dots, X_n)$ have independent coordinates, and let $f$ be a function of them such that changing only the $i$-th input, with all others held fixed, changes $f$ by at most $c_i$. For every $t > 0$,
@@ -457,10 +451,10 @@ $$\Pr\big[f(X) - \mathbb E[f(X)] \ge t\big] \le \exp\left(-\frac{2t^2}{\sum_i c_
 3. *Apply Azuma.* @thm-conc-azuma with $d_i = c_i$ gives the bound.
 :::
 
-The bounded-difference constant $c_i$ measures how much one input can move the output. Its real use is for functions that are not averages, such as the risk of a trained model ([Algorithmic stability and generalization](07-stability-generalization.md)).
+The bounded-difference constant $c_i$ measures how much one input can move the output. On an average it gives nothing new, as @exm-conc-mcdiarmid shows. Its real use is for functions that are not averages, such as the risk of a trained model ([Algorithmic stability and generalization](07-stability-generalization.md)).
 
 ::: {#exm-conc-mcdiarmid}
-One test example moves the running example's error rate by at most $c_i = 1/200$, so $\sum_i c_i^2 = 1/200$. McDiarmid's inequality at $t = 0.05$ then gives $e^{-2 \times 0.05^2 \times 200} = e^{-1} = 0.37$, which is Hoeffding's bound of @exm-conc-hoeffding again.
+One test example moves the running example's error rate by at most $c_i = 1/200$, so $\sum_i c_i^2 = 1/200$. At $t = 0.05$, McDiarmid's inequality gives $e^{-2 \times 0.05^2 \times 200} = e^{-1} = 0.37$, which is Hoeffding's bound of @exm-conc-hoeffding.
 :::
 
 ## Code {#sec-conc-code}
@@ -514,3 +508,4 @@ uv run python code/part01-prerequisites/concentration.py
 - Vershynin, *High-Dimensional Probability* (2018), ch. 2: sub-Gaussian and sub-exponential variables in depth. Read it after this chapter rather than before.
 - Boucheron, Lugosi & Massart, *Concentration Inequalities* (2013), ch. 2 and 6: reference depth
 - Bousquet & Elisseeff, "Stability and Generalization" (JMLR 2002): McDiarmid applied to learning algorithms
+- Bahadur & Rao, "On deviations of the sample mean" (1960): the factor in front of the exponential in a large-deviation probability

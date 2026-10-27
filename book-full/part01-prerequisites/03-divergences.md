@@ -1,10 +1,10 @@
 # Divergences
 
-Someone hands you a die that is either fair or loaded so that a six comes up half the time, and you may roll it as often as you like. How much does one roll tell you, on average, about which die you hold? How strongly can a single roll point the wrong way? How often can the best guess from one roll be right? Each answer is a **divergence**, a number that is zero when two distributions, call them $P$ and $Q$, are equal and grows as they become easier to tell apart. The same questions measure how far a fitted model is from the truth and how many samples an A/B test needs.
+Someone hands you a die that is either fair or loaded so that a six comes up half the time, and you may roll it as often as you like. How much does one roll tell you, on average, about which die you hold? How strongly can a single roll point the wrong way? How often can the best guess from one roll be right? Each answer is a **divergence**, a number that is zero when two distributions, call them $P$ and $Q$, are equal and grows as they become easier to tell apart.
 
-One idea organizes the answers. To decide which distribution produced an outcome $x$, compare how likely $x$ is under each. Write $p$ and $q$ for the probabilities, or densities, of $P$ and $Q$. Their quotient is the **likelihood ratio** $r(x) = p(x)/q(x)$. Its logarithm $L(x) = \ln r(x)$ is the **evidence** for $P$, in nats, and it adds over independent observations. Every divergence is a summary of $r$. The Kullback–Leibler (KL) divergence averages the evidence over draws from $P$, the max-divergence takes its largest value, and the total variation (TV) distance measures the mass of $p$ above $q$. Processing data, such as binning it, can only average likelihood ratios together, so no divergence grows under processing, and this **data-processing inequality** is what later parts use most.
+One idea organizes the answers. To decide which distribution produced an outcome $x$, compare how likely $x$ is under each. Write $p$ and $q$ for the probabilities, or densities, of $P$ and $Q$. Their quotient is the **likelihood ratio** $r(x) = p(x)/q(x)$, and its logarithm $L(x) = \ln r(x)$ is the **evidence** for $P$, in nats, which adds over independent observations. Every divergence is a summary of $r$. For example, the Kullback–Leibler (KL) divergence averages the evidence over draws from $P$, and the max-divergence takes its largest value. The total variation (TV) distance measures the mass of $p$ above $q$. Processing data, such as binning it, can only average likelihood ratios together, so no divergence grows under processing. This **data-processing inequality** is what later parts use most.
 
-The running example is the die, with $P$ loaded and $Q$ fair (@tbl-div-die). A six is three times more likely under $P$, evidence of $\ln 3 = 1.10$ nats for "loaded". Any other roll gives $\ln 0.6 = -0.51$ nats, weak evidence for "fair". Two continuous pairs recur, a normal and a Laplace density each against a shifted copy, whose evidence is unbounded and bounded ([Probability distributions](01-distributions.md)). Sums $\sum_x$ are integrals for densities, and @tbl-div-symbols lists the symbols.
+The running example is the die, with $P$ loaded and $Q$ fair (@tbl-div-die). A six is three times more likely under $P$, which is evidence of $\ln 3 = 1.10$ nats for "loaded". Any other roll gives $\ln 0.6 = -0.51$ nats, weak evidence for "fair". Two continuous pairs recur, a normal and a Laplace density each against a shifted copy, whose evidence is unbounded and bounded ([Probability distributions](01-distributions.md)). Sums $\sum_x$ are integrals for densities, and @tbl-div-symbols lists the symbols.
 
 | Roll $x$ | 1 to 5 (each) | 6 |
 | --- | --- | --- |
@@ -28,7 +28,7 @@ The running example is the die, with $P$ loaded and $Q$ fair (@tbl-div-die). A s
 
 ## KL divergence {#sec-div-kl}
 
-Add up the evidence of $n$ rolls of the die. With the loaded die the sum climbs, with the fair die it falls, and each family of runs drifts along a straight line (@fig-div-evidence-walk). This section names its slope, the average evidence per roll, and proves the two facts every later use rests on: it is never negative, and it adds over independent observations.
+Add up the evidence of $n$ rolls of the die. With the loaded die the sum climbs, with the fair die it falls, and each family of runs drifts along a straight line (@fig-div-evidence-walk). This section names the slope, the average evidence per roll, and proves the two facts that every later use needs: it is never negative, and it adds over independent observations.
 
 ![Cumulative evidence for "loaded" over 60 rolls of the loaded die (blue) and the fair die (orange).](figures/divergences_evidence_walk.svg){#fig-div-evidence-walk}
 
@@ -38,7 +38,7 @@ $$D_{\mathrm{KL}}(P\|Q) = \mathbb E_P[L] = \sum_x p(x)\ln\frac{p(x)}{q(x)}.$$
 It is infinite when $P$ puts mass where $Q$ puts none.
 :::
 
-That data from $P$ cannot favour $Q$ on average sounds obvious, but the proof needs a tool that compares a function of an average with the average of the function. A function $f$ is **convex** when its graph bends upward, so that every chord lies above it, and **strictly convex** when the graph has no straight pieces. The next proof uses Jensen's inequality at step 2, and later sections use it again.
+That data from $P$ cannot favour $Q$ on average sounds obvious, but the proof needs a tool that compares a function of an average with the average of the function. A function $f$ is **convex** when its graph bends upward, so that every chord lies above it, and **strictly convex** when the graph has no straight pieces. Step 2 of the next proof uses Jensen's inequality, and later sections use it again.
 
 ::: {#lem-div-jensen name="Jensen's inequality"}
 Let $f$ be convex and let $X$ be a random variable with a finite average. Then
@@ -52,7 +52,7 @@ If $f$ is strictly convex, equality holds only when $X$ is constant. For a conca
 3. *Equality.* A strictly convex graph touches the tangent only at $\mathbb E[X]$, so equality forces $X = \mathbb E[X]$ with probability 1. A concave function is minus a convex one, which flips the inequality.
 :::
 
-For the die's two ratios, 0.6 and 3 each with probability $\frac12$ under $P$, and $f(x) = x^2$, the average is 1.8 and the two sides are $1.8^2 = 3.24$ and $\frac12(0.36 + 9) = 4.68$.
+For example, the die's two ratios, 0.6 and 3, each have probability $\frac12$ under $P$, so their average is 1.8. With $f(x) = x^2$ the two sides are $1.8^2 = 3.24$ and $\frac12(0.36 + 9) = 4.68$.
 
 ::: {#thm-div-kl name="Gibbs' inequality and additivity"}
 For any two distributions, $D_{\mathrm{KL}}(P\|Q) \ge 0$, with equality only if $P = Q$. Write $P_1 \times P_2$ for the distribution of a pair drawn independently from $P_1$ and $P_2$. Then
@@ -71,7 +71,7 @@ $$D_{\mathrm{KL}}(P\|Q) \ge -\ln\mathbb E_P\Big[\frac{q(X)}{p(X)}\Big].$$
 5. *Additivity.* Under a product distribution the probability of a pair is the product of the probabilities, so the evidence of a pair is the sum $L_1(x_1) + L_2(x_2)$. Averages are linear, and the average of $L_i(X_i)$ involves only $P_i$, so it is $D_{\mathrm{KL}}(P_i\|Q_i)$.
 :::
 
-KL also measures a model's fit. For a model $q_\theta$ with parameter $\theta$, only the term $-\mathbb E_P[\ln q_\theta(X)]$ of $D_{\mathrm{KL}}(P\|Q_\theta)$ depends on $\theta$, so minimizing this forward KL is maximum likelihood. Because KL averages under its first argument, the forward fit must cover every region the data visit, while the reverse divergence $D_{\mathrm{KL}}(Q_\theta\|P)$ of variational inference may lock onto one mode (@fig-div-forward-reverse).
+KL also measures a model's fit. For a model $q_\theta$ with parameter $\theta$, only the term $-\mathbb E_P[\ln q_\theta(X)]$ of $D_{\mathrm{KL}}(P\|Q_\theta)$ depends on $\theta$, so minimizing this forward KL is maximum likelihood. KL averages under its first argument, so the forward fit must cover every region the data visit. The reverse divergence $D_{\mathrm{KL}}(Q_\theta\|P)$ of variational inference may lock onto one mode instead (@fig-div-forward-reverse).
 
 ![One Gaussian fitted to two bumps by forward and by reverse KL.](figures/divergences_forward_reverse_kl.svg){#fig-div-forward-reverse}
 
@@ -80,14 +80,14 @@ Under $P$ the five non-sixes together have probability 0.5 and evidence $\ln 0.6
 $$D_{\mathrm{KL}}(P\|Q) = 0.5\ln 0.6 + 0.5\ln 3 = 0.5\ln 1.8 = 0.2939.$$
 In the other direction the fair die weights the non-sixes $\frac56$ and the six $\frac16$, and the evidence is for "fair":
 $$D_{\mathrm{KL}}(Q\|P) = \tfrac56\ln\tfrac{1}{0.6} + \tfrac16\ln\tfrac13 = 0.4257 - 0.1831 = 0.2426.$$
-A loaded die gives itself away faster than a fair one proves its innocence, because its sixes carry strong evidence. In general, telling two distributions apart takes a number of observations of order $1/D_{\mathrm{KL}}$, which @sec-div-pinsker makes precise.
+A loaded die gives itself away faster than a fair one proves its innocence, because its sixes carry strong evidence. In general, telling two distributions apart takes a number of observations of order $1/D_{\mathrm{KL}}$, as @sec-div-pinsker shows.
 :::
 
 ## Rényi divergence {#sec-div-renyi}
 
-KL is an average, so it cannot say how often the evidence is large, and later parts need that. Since $e^{D_{\mathrm{KL}}}$ is the geometric mean of $r$ under $P$, other means can weight large ratios more. The **power mean** with exponent $\lambda$ raises each value to the power $\lambda$, averages, and undoes the power:
+KL is an average, so it cannot say how often the evidence is large, and later parts need that. Since $e^{D_{\mathrm{KL}}}$ is the geometric mean of $r$ under $P$, other means can give large ratios more weight. The **power mean** with exponent $\lambda$ raises each value to the power $\lambda$, averages, and undoes the power:
 $$m_\lambda = \big(\mathbb E_P[r^\lambda]\big)^{1/\lambda}.$$
-Exponent $-1$ gives the harmonic mean, the limit 0 the geometric mean, 1 the arithmetic mean, and $\lambda \to \infty$ the largest value (@tbl-div-power-means). The Rényi divergence takes the logarithm of the power mean with exponent $\alpha - 1$, so its **order** $\alpha$ is a dial from the typical evidence to the worst case.
+Exponent $-1$ gives the harmonic mean, the limit 0 the geometric mean, 1 the arithmetic mean, and $\lambda \to \infty$ the largest value (@tbl-div-power-means). The Rényi divergence is the logarithm of the power mean with exponent $\alpha - 1$, so its **order** $\alpha$ is a dial from the typical evidence to the worst case.
 
 | Mean of $r$ under $P$ | Value | Its logarithm | Divergence |
 | --- | --- | --- | --- |
@@ -104,7 +104,7 @@ $$D_\alpha(P\|Q) = \frac{1}{\alpha - 1}\ln\sum_x p(x)^\alpha q(x)^{1 - \alpha}.$
 The **max-divergence** is $D_\infty(P\|Q) = \ln\max_x r(x)$, an essential supremum for densities, and $D_1$ is defined as $D_{\mathrm{KL}}$, which @thm-div-renyi shows is the limit at order 1.
 :::
 
-The forms used below move an average under $Q$ to one under $P$: an outcome three times as likely under $P$ must count three times as much.
+The forms below move an average under $Q$ to one under $P$. An outcome three times as likely under $P$ must count three times as much.
 
 ::: {#lem-div-change-of-measure name="Change of measure"}
 Suppose $Q$ gives positive probability to every outcome that $P$ does. Then for any function $g$,
@@ -116,7 +116,7 @@ In particular $\mathbb E_Q[r] = 1$, and $\Pr_P[A] = \mathbb E_Q[r\,\mathbf 1[A]]
 Multiply and divide each term of $\sum_x p(x)g(x)$ by $q(x)$. The special cases take $g = 1$ and $g = \mathbf 1[A]$.
 :::
 
-A second form links the divergence to the Chernoff method of [Concentration inequalities](02-concentration.md), which bounds tails through the logarithm of a moment generating function. For the evidence under $P$ that logarithm, the cumulant generating function of [Probability distributions](01-distributions.md), is
+A second form links the divergence to the Chernoff method of [Concentration inequalities](02-concentration.md), which bounds tails through the logarithm of a moment generating function. For the evidence under $P$, that logarithm is
 $$K_L(\lambda) = \ln\mathbb E_P\big[e^{\lambda L}\big].$$
 
 ::: {#prp-div-renyi-forms name="Three forms of the Rényi divergence"}
@@ -133,7 +133,7 @@ $$D_\alpha(P\|Q) = \frac{K_L(\alpha - 1)}{\alpha - 1}.$$ {#eq-div-renyi-psi}
 3. Since $r^{\alpha - 1} = e^{(\alpha - 1)L}$, the logarithm of $\mathbb E_P[r^{\alpha - 1}]$ is $K_L(\alpha - 1)$, which gives @eq-div-renyi-psi.
 :::
 
-The behaviour of the family therefore follows from the shape of $K_L$, and the limit at order 1 needs its slope at 0.
+So the behaviour of the family follows from the shape of $K_L$, and the limit at order 1 needs its slope at 0.
 
 ::: {#lem-div-psi name="Shape of the log moment generating function"}
 If $K_L$ is finite near 0, then $K_L(0) = 0$, $K_L'(0) = D_{\mathrm{KL}}(P\|Q)$, and $K_L$ is convex.
@@ -183,7 +183,7 @@ and raising both sides to the positive power $1/\lambda_2$ keeps the order, so $
 
 ![The tilted weights $p^\alpha q^{1 - \alpha}$ for a Gaussian pair (left) and a Laplace pair (right).](figures/divergences_renyi_tilt.svg){#fig-div-renyi-tilt}
 
-The family can also bound how often a sample from $Q$ looks like strong evidence for $P$. The tool is Markov's inequality, which says that a quantity that cannot be negative exceeds a level with probability at most its average divided by that level.
+The family also bounds how often a sample from $Q$ looks like strong evidence for $P$. The tool is Markov's inequality: a quantity that cannot be negative exceeds a level with probability at most its average divided by that level.
 
 ::: {#prp-div-renyi-tail name="Tail of the evidence"}
 For every evidence level $c$ and every order $\alpha > 0$,
@@ -207,12 +207,12 @@ At order 1 the bound is $e^{-c}$ for every pair, and larger orders use more abou
 
 : Rényi divergences between the loaded and the fair die. {#tbl-div-die-renyi}
 
-At order 2, $r$ is 0.6 with probability $\frac56$ and 3 with probability $\frac16$ under the fair die, so $D_2(P\|Q) = \ln(\frac56 \times 0.36 + \frac16 \times 9) = \ln 1.8 = 0.5878$. Each row increases, as monotonicity requires, and the entries at order 0.5 agree, as skew symmetry requires.
+At order 2, $r$ is 0.6 with probability $\frac56$ and 3 with probability $\frac16$ under the fair die, so $D_2(P\|Q) = \ln(\frac56 \times 0.36 + \frac16 \times 9) = \ln 1.8 = 0.5878$. Each row increases, as monotonicity requires, and the two entries at order 0.5 agree, as skew symmetry requires.
 :::
 
 ## Two Gaussians with equal variance {#sec-div-gauss}
 
-The most common pair in practice is a distribution and a shifted copy of it, such as a feature before and after a drift. For two normals with equal variance every divergence has a closed form in the shift measured in standard deviations: KL is half its square, each Rényi divergence is $\alpha$ times the KL, and the max-divergence is infinite, because the evidence is a line with no top.
+The most common pair in practice is a distribution and a shifted copy of it, such as a feature before and after a drift. For two normals with equal variance every divergence has a closed form in the shift measured in standard deviations. KL is half its square, each Rényi divergence is $\alpha$ times the KL, and the max-divergence is infinite, because the evidence is a line with no top.
 
 ::: {#prp-div-gauss name="Divergences of two shifted normals"}
 Let $P = \mathcal N(0, \sigma^2)$ and $Q = \mathcal N(s, \sigma^2)$, and write $\mu = s/\sigma$ for the shift in standard deviations. Then for every order $\alpha$,
@@ -221,10 +221,10 @@ The same holds for any two means a distance $s$ apart, since shifting both chang
 :::
 
 ::: {.proof}
-The plan is to compute the evidence, average it for KL, and complete the square in the Rényi integral.
+The plan is to take the evidence from [Probability distributions](01-distributions.md), average it for KL, and complete the square in the Rényi integral.
 
-1. *The evidence.* The normal density with mean $m$ is $\frac{1}{\sigma\sqrt{2\pi}}e^{-(x - m)^2/(2\sigma^2)}$. The constants cancel in the ratio, and expanding $(x - s)^2$ cancels the $x^2$ terms:
-$$L(x) = \frac{(x - s)^2 - x^2}{2\sigma^2} = \frac{s^2 - 2sx}{2\sigma^2}.$$
+1. *The evidence.* By @thm-dist-shift, the evidence of $\mathcal N(0, \sigma^2)$ against its copy shifted by $s$ is the line
+$$L(x) = \frac{s^2 - 2sx}{2\sigma^2}.$$
 2. *KL.* The evidence is linear in $x$, so its average under $P$ is its value at the mean 0, which is $s^2/(2\sigma^2) = \mu^2/2$.
 3. *Constants.* The factors $\frac{1}{\sigma\sqrt{2\pi}}$ raised to the powers $\alpha$ and $1 - \alpha$ multiply back to one such factor. What remains of $p^\alpha q^{1 - \alpha}$ is $\exp(-B(x)/(2\sigma^2))$, with $B(x) = \alpha x^2 + (1 - \alpha)(x - s)^2$.
 4. *Complete the square* around $(1 - \alpha)s$. The constant left over is $(1 - \alpha)s^2 - (1 - \alpha)^2s^2$, so
@@ -232,10 +232,10 @@ $$B(x) = \big(x - (1 - \alpha)s\big)^2 + \alpha(1 - \alpha)s^2.$$
 5. *Integrate.* The squared term, with the factor $\frac{1}{\sigma\sqrt{2\pi}}$, is the density of $\mathcal N((1 - \alpha)s, \sigma^2)$ and integrates to 1, so
 $$\int p^\alpha q^{1 - \alpha}\,\mathrm dx = \exp\Big(-\frac{\alpha(1 - \alpha)s^2}{2\sigma^2}\Big).$$
 6. *Divide.* Taking the logarithm and dividing by $\alpha - 1$ gives $\alpha s^2/(2\sigma^2)$, since $-\alpha(1 - \alpha)/(\alpha - 1) = \alpha$.
-7. *Max-divergence.* The line $L$ has a non-zero slope, so it is unbounded above.
+7. *Max-divergence.* The line $L$ has the non-zero slope $-s/\sigma^2$, so it is unbounded above.
 :::
 
-Doubling the noise is the same as halving the shift. By additivity, independent coordinates with shifts $s_i$ give $\alpha\sum_i s_i^2/(2\sigma^2)$, which depends only on the length of the shift vector (@sec-apx-prob-convolution in the appendices proves the rotation invariance behind this). Every finite order is finite while the worst case is infinite, because large ratios exist but are rare, and @eq-div-renyi-tail measures how rare.
+Doubling the noise is the same as halving the shift. By additivity, independent coordinates with shifts $s_i$ give $\alpha\sum_i s_i^2/(2\sigma^2)$, which depends only on the length of the shift vector. Every finite order is finite while the worst case is infinite, because large ratios exist but are rare, and @eq-div-renyi-tail measures how rare.
 
 ::: {#exm-div-gauss-tail}
 Take $\mu = 1$, so $D_{\mathrm{KL}} = 0.5$ and $D_\alpha = \alpha/2$. How often does a draw from $Q$ give at least $c = 2$ nats of evidence for $P$? The evidence decreases in $x$, so $L \ge c$ exactly when $x \le \frac s2 - \frac{c\sigma^2}{s}$. Under $Q$, $x = s + \sigma Z$ with $Z$ standard normal. Write $\Phi$ for the standard normal cumulative distribution function, so that $\Phi(z)$ is the probability that $Z \le z$. Then
@@ -245,7 +245,7 @@ At order 1, @eq-div-renyi-tail gives Markov's bound $e^{-2} = 0.1353$. With $D_\
 
 ## Two Laplace distributions with shifted location {#sec-div-laplace}
 
-The Laplace distribution, with density $\frac{1}{2b}e^{-|x - m|/b}$ for centre $m$ and scale $b$, is the other standard noise model. Its evidence against a shifted copy is bounded, so this section computes the whole Rényi family to see what a bounded ratio changes. The max-divergence turns out to be the shift in units of the scale, and KL slightly less.
+The Laplace distribution, with density $\frac{1}{2b}e^{-|x - m|/b}$ for centre $m$ and scale $b$, is the other standard noise model. Its evidence against a shifted copy is bounded, and computing the whole Rényi family shows what a bounded ratio changes. The max-divergence is the shift in units of the scale, and KL is slightly less.
 
 ::: {#prp-div-laplace name="Divergences of two shifted Laplace distributions"}
 Let $P = \mathrm{Lap}(0, b)$ and $Q = \mathrm{Lap}(s, b)$ with $s \ge 0$, and write $t = s/b$. Then
@@ -259,7 +259,7 @@ At $\alpha = \frac12$ the bracket is replaced by its limit $(1 + \frac t2)e^{-t/
 The plan is to rescale, read the max-divergence off the evidence, average the evidence for KL, and integrate the Rényi sum piece by piece.
 
 1. *Rescale.* Dividing by $b$ is a bijection, which changes no divergence (apply @thm-div-dpi to it and to its inverse), so take $b = 1$ and $s = t$. The evidence is the difference of the exponents, $L(x) = |x - t| - |x|$.
-2. *Max-divergence.* Two numbers a distance $t$ apart have absolute values that differ by at most $t$, by the triangle inequality, so $L \le t$. For $x \le 0$ both $x$ and $x - t$ are negative, and $L(x) = t$ exactly.
+2. *Max-divergence.* By @thm-dist-shift, the evidence of a Laplace density against its copy shifted by $t$ is at most $t$, and it equals $t$ for every $x \le 0$.
 3. *KL, set up.* KL is $\mathbb E[|X - t|] - \mathbb E[|X|]$ with $X \sim \mathrm{Lap}(0, 1)$, and the second average is 1, the mean of the exponential density of $|X|$.
 4. *KL, remove the absolute value.* Every number satisfies $|y| = y + 2(-y)_+$. Put $y = X - t$ and use $\mathbb E[X] = 0$:
 $$\mathbb E[|X - t|] = -t + 2\,\mathbb E[(t - X)_+].$$
@@ -269,7 +269,7 @@ So $\mathbb E[|X - t|] = t + e^{-t}$, and subtracting 1 gives the KL.
 6. *Rényi.* The integral $I(\alpha) = \frac12\int\exp(-\alpha|x| - (1 - \alpha)|x - t|)\,\mathrm dx$ has an exponent linear in $x$ on each of the pieces $x < 0$, $0 \le x \le t$ and $x > t$, which integrate to $e^{-(1 - \alpha)t}$, $\frac{e^{-\alpha t} - e^{-(1 - \alpha)t}}{1 - 2\alpha}$ and $e^{-\alpha t}$. Adding the pieces and halving, $e^{-\alpha t}$ gets the coefficient $\frac12(1 + \frac{1}{1 - 2\alpha}) = \frac{\alpha - 1}{2\alpha - 1}$, and $e^{(\alpha - 1)t}$ gets $\frac12(1 - \frac{1}{1 - 2\alpha}) = \frac{\alpha}{2\alpha - 1}$. Then $\frac{1}{\alpha - 1}\ln I(\alpha)$ is @eq-div-laplace-renyi.
 :::
 
-The worst case is not rare here: the evidence equals $t$ on all of $x \le 0$, which has probability $\frac12$ under $P$. Against a Gaussian pair of the same variance $2b^2$, the Laplace pair is further apart at low orders, but the Gaussian $D_\alpha$ grows linearly while the Laplace one levels off at $t$, and at $t = 1$ they cross at order 2.98 (@fig-div-gauss-laplace-renyi).
+The worst case is not rare here, because the evidence equals $t$ on all of $x \le 0$, which has probability $\frac12$ under $P$. Compare a Gaussian pair of the same variance $2b^2$. The Laplace pair is further apart at low orders, but the Gaussian $D_\alpha$ grows linearly while the Laplace one levels off at $t$, and at $t = 1$ they cross at order 2.98 (@fig-div-gauss-laplace-renyi).
 
 ![A Laplace and a Gaussian pair with shift 1 and variance 2, and their Rényi divergences.](figures/divergences_gauss_laplace_renyi.svg){#fig-div-gauss-laplace-renyi}
 
@@ -288,14 +288,14 @@ The Laplace KL is $e^{-1} = 0.3679$. At order 2 the coefficients in @eq-div-lapl
 
 ## Total variation {#sec-div-tv}
 
-KL and Rényi divergences are convenient to compute, but total variation answers the operational questions. It says how well the best possible test tells $P$ from $Q$ with one observation, and how far any bounded statistic can move when $Q$ is replaced by $P$.
+KL and Rényi divergences are convenient to compute, but total variation answers the practical questions. It says how well the best possible test tells $P$ from $Q$ with one observation, and how far any bounded statistic can move when $Q$ is replaced by $P$.
 
 ::: {#def-div-tv name="Total variation distance"}
 The **total variation distance** is the largest difference between the probabilities that $P$ and $Q$ give to one event:
 $$\mathrm{TV}(P, Q) = \max_A\big|\Pr_P[A] - \Pr_Q[A]\big|.$$
 :::
 
-The hockey-stick divergence of @sec-div-hockey asks the same question with a weight on $Q$. Which event, or which soft event that includes each outcome with some probability, makes $\Pr_P[A] - \gamma\Pr_Q[A]$ largest? The next lemma answers it once for both sections.
+The hockey-stick divergence of @sec-div-hockey asks the same question with a weight $\gamma$ on $Q$. Which event, or which soft event that includes each outcome with some probability, makes $\Pr_P[A] - \gamma\Pr_Q[A]$ largest? The next lemma answers it once for both sections.
 
 ::: {#lem-div-best-event name="The best event"}
 Let $\gamma \ge 0$. The largest value of $\Pr_P[A] - \gamma\Pr_Q[A]$ over events $A$ is
@@ -329,7 +329,7 @@ The plan is to get the forms from @lem-div-best-event with weight 1, then to tre
 5. *Metric.* The half-sum is half the $\ell_1$ distance between two probability tables, which has the three properties and is at most 1.
 :::
 
-So no classifier beats $\frac12 + \frac12\mathrm{TV}$ accuracy from one draw, and a data shift of TV 0.01 moves any fixed classifier's accuracy by at most 0.01. TV is not additive, so for $n$ samples you compute KL and convert it with @sec-div-pinsker.
+So no classifier beats $\frac12 + \frac12\mathrm{TV}$ accuracy from one draw, and a data shift of TV 0.01 moves the accuracy of any fixed classifier by at most 0.01. TV is not additive, so for $n$ samples you compute KL and convert it with @sec-div-pinsker.
 
 ::: {#exm-div-tv}
 On the die only the six has $p > q$, so $\mathrm{TV} = 0.5 - \frac16 = \frac13$. The best test says "loaded" exactly when it sees a six, and it is right with probability $\frac23$. For the Gaussian pair the curves cross at the midpoint $s/2$, so the best event is $\{x < s/2\}$. It has probability $\Phi(\frac\mu2)$ under $P$ and $\Phi(-\frac\mu2) = 1 - \Phi(\frac\mu2)$ under $Q$, so
@@ -368,7 +368,7 @@ $$\pi(1 - \Pr_P[A]) + (1 - \pi)\Pr_Q[A] = \pi - \pi\big[\Pr_P[A] - \gamma\Pr_Q[A
 which is smallest when the bracket is largest, that is equal to $E_\gamma$.
 :::
 
-Always guessing $Q$ errs with probability $\pi$, and one observation removes a fraction $E_\gamma$ of that error. For the shifted pairs, property 3 gives the whole curve in closed form, and later parts use exactly these two curves.
+Always guessing $Q$ errs with probability $\pi$, and one observation removes a fraction $E_\gamma$ of that error. For the shifted pairs, property 3 gives the whole curve in closed form.
 
 ::: {#prp-div-hockey-pairs name="Hockey-stick divergence of the shifted pairs"}
 Let $\gamma \ge 1$ and $c = \ln\gamma$. For the normal pair of @prp-div-gauss,
@@ -389,7 +389,9 @@ The curve $\gamma \mapsto E_\gamma$ starts at TV and reaches zero at the largest
 ![$E_\gamma$ against $\ln\gamma$ for the die, a Laplace pair and a Gaussian pair.](figures/divergences_hockey_stick.svg){#fig-div-hockey-stick}
 
 ::: {#exm-div-rejection}
-On the die, only the six has $r > \gamma$ for $1 \le \gamma < 3$, so $E_\gamma = 0.5 - \gamma/6$ falls linearly to zero at $\gamma = 3$, the largest ratio. In rejection sampling of the loaded die from fair rolls, an envelope $2q$ leaves the mass $E_2(P\|Q) = \frac16$ of the six uncovered, and the sampled six comes up 40% of the time instead of 50%. The error in TV is never more than $E_\gamma$.
+On the die, only the six has $r > \gamma$ for $1 \le \gamma < 3$, so $E_\gamma = 0.5 - \gamma/6$ falls linearly to zero at $\gamma = 3$, the largest ratio. Rejection sampling proposes a fair roll $x$ and accepts it with probability $\min(1, p(x)/(\gamma q(x)))$, so it accepts each outcome with mass $\min(p, \gamma q)$. With the envelope $2q$, the six gets $\frac13$ instead of $\frac12$, which leaves the mass $E_2(P\|Q) = \frac16$ uncovered. The accepted masses add to $1 - E_2 = \frac56$, so the sampled six comes up $\frac13 / \frac56 = 40\%$ of the time instead of 50%.
+
+The error in TV is never more than $E_\gamma$. The sampled distribution is $\min(p, \gamma q)/(1 - E_\gamma)$, which is at least $\min(p, \gamma q)$ at every outcome. So by @thm-div-tv its TV from $P$ is at most $\sum_x(p - \min(p, \gamma q)) = \sum_x(p - \gamma q)_+$, which is $E_\gamma$ by @prp-div-hockey. On the die the TV is $0.5 - 0.4 = 0.1$, below $E_2 = \frac16$.
 :::
 
 ## f-divergences {#sec-div-f}
@@ -431,7 +433,7 @@ each an increasing function of $D_f$.
 3. *Orders below 1.* Now $u^\alpha$ is concave, so $1 - u^\alpha$ is convex, with $D_f = 1 - \mathbb E_Q[r^\alpha]$. The logarithm decreases in $D_f$ and $\frac{1}{\alpha - 1}$ is negative, so the second formula increases in $D_f$.
 :::
 
-A convex function is a sum of hockey-stick shapes weighted by its curvature, so every f-divergence is a weighted sum of the curves $E_\gamma$, which therefore carry all the information about a pair.
+The curves $E_\gamma$ carry all the information about a pair, because a convex function is a sum of hockey-stick shapes weighted by its curvature. So every f-divergence is a weighted sum of the curves $E_\gamma$.
 
 ::: {#thm-div-f-hockey name="f-divergences from the hockey-stick curves"}
 If the generator $f$ is twice differentiable, then
@@ -448,13 +450,13 @@ $$f(u) = f(1) + f'(1)(u - 1) + \int_1^u f''(\gamma)(u - \gamma)\,\mathrm d\gamma
 4. *The two integrals.* $\mathbb E_Q[(r - \gamma)_+] = E_\gamma(P\|Q)$ by @prp-div-hockey. Also $\mathbb E_Q[(\gamma - r)_+] = \sum_x(\gamma q - p)_+ = \gamma\sum_x(q - p/\gamma)_+$, which is $\gamma E_{1/\gamma}(Q\|P)$.
 :::
 
-Each generator weights the ratio differently (@fig-div-f-generators); the quadratic one of $\chi^2$ lets large ratios dominate. An f-divergence can also be estimated from samples alone, through a variational form that a generative adversarial network (GAN) fits with a neural network, as in the f-GAN of Nowozin, Cseke & Tomioka (2016).
+Each generator weights the ratio differently (@fig-div-f-generators), and the quadratic one of $\chi^2$ lets large ratios dominate.
 
 ![The generators of six f-divergences.](figures/divergences_f_generators.svg){#fig-div-f-generators}
 
 ## The data-processing inequality {#sec-div-dpi}
 
-You rarely look at raw data. You bin it, compute features, or pass it through a randomized algorithm, and the data-processing inequality says that none of this can make two distributions easier to tell apart. When processing maps several inputs to one output, the output's likelihood ratio is an average of theirs. Every f-divergence is a convex summary of the ratios, and by Jensen averaging first can only make it smaller.
+You rarely look at raw data. You bin it, compute features, or pass it through a randomized algorithm, and the data-processing inequality says that none of this can make two distributions easier to tell apart. When processing maps several inputs to one output, the output's likelihood ratio is an average of theirs. Every f-divergence is a convex summary of the ratios, so by Jensen, averaging first can only make it smaller.
 
 ::: {#def-div-channel name="Channel"}
 A **channel** $K$ maps each input $x$ to a distribution $K(\cdot \mid x)$ over outputs $y$. Feeding $X \sim P$ through it gives the output distribution $PK(y) = \sum_x p(x)K(y\mid x)$, and likewise $QK$.
@@ -478,7 +480,7 @@ By Bayes' rule the weights are the probabilities of $X$ given $Y = y$ when $X \s
 5. *Equality.* If $r(x)$ is a function of $y$, then $r(X)$ is constant given $Y = y$, and step 2 is an equality.
 :::
 
-The channel may use its own randomness, as long as it is the same whether the input came from $P$ or $Q$. The coarsest processing reports only whether an event happened, and this gives a lower bound on KL from any single event.
+The channel may use its own randomness, as long as it is the same whether the input came from $P$ or $Q$. The coarsest processing reports only whether an event happened, and it gives a lower bound on KL from any single event.
 
 ::: {#cor-div-dpi-event name="KL bounds every event"}
 For every event $A$, write $p_A = \Pr_P[A]$ and $q_A = \Pr_Q[A]$. Then
@@ -505,27 +507,9 @@ Report only whether the die roll is odd or even (@tbl-div-dpi-die).
 The twos and fours dilute the six's evidence, and the KL drops from 0.2939 to $0.7\ln 1.4 + 0.3\ln 0.6 = 0.0823$. Reporting only whether the roll is a six loses nothing. The ratio depends only on that bit, so the bit is sufficient, and its KL is $\mathrm{kl}(0.5\|\frac16) = 0.5\ln 3 + 0.5\ln 0.6 = 0.2939$.
 :::
 
-Different divergences can lose different amounts. Round draws of $\mathcal N(0, 1)$ and $\mathcal N(1, 1)$ into bins of width $w$ with an edge at $\frac12$, which flattens the evidence into steps (@fig-div-dpi-staircase).
-
-![The evidence of a Gaussian pair, raw and after binning.](figures/divergences_dpi_staircase.svg){#fig-div-dpi-staircase}
-
-::: {#exm-div-binning}
-@tbl-div-binning gives the KL after binning.
-
-| Bin width $w$ | 0.5 | 1 | 2 | one bit: $x < \frac12$? | raw |
-| --- | --- | --- | --- | --- | --- |
-| KL after binning | 0.4898 | 0.4618 | 0.3781 | 0.3090 | 0.5 |
-
-: KL between $\mathcal N(0, 1)$ and $\mathcal N(1, 1)$ after rounding $x$ into bins. {#tbl-div-binning}
-
-The single bit at the midpoint keeps 62% of the KL (@fig-div-dpi-binning), but it is the best event of @thm-div-tv, so it keeps all of the TV.
-:::
-
-![KL after binning, against the bin width.](figures/divergences_dpi_binning.svg){#fig-div-dpi-binning}
-
 ## Pinsker's inequality {#sec-div-pinsker}
 
-KL adds up over samples, while TV is what you want, the accuracy of the best test. Pinsker's inequality converts the first into a bound on the second, with a square root because, for nearby distributions, TV grows linearly in the difference and KL quadratically.
+KL adds up over samples, while TV is what you want, the accuracy of the best test. Pinsker's inequality turns the first into a bound on the second. It has a square root because, for nearby distributions, TV grows linearly in the difference and KL quadratically.
 
 ::: {#thm-div-pinsker name="Pinsker's inequality"}
 For any two distributions,
@@ -558,12 +542,14 @@ $$\Big(\sum_x\sqrt{pq}\Big)^2 \le \sum_x\min(p, q) \cdot \sum_x\max(p, q).$$
 3. *Express in KL.* Since $\sqrt{pq} = p\,e^{-L/2}$, the sum is $\mathbb E_P[e^{-L/2}]$, and $e^{-y/2}$ is convex, so @lem-div-jensen puts it above $e^{-D_{\mathrm{KL}}/2}$. Squaring and using step 2 gives $e^{-D_{\mathrm{KL}}} \le 1 - \mathrm{TV}^2$.
 :::
 
-Pinsker's inequality is tight for two nearly fair coins, passes 1 at KL $= 2$, and loses to Bretagnolle–Huber once KL is above 1.59 (@fig-div-pinsker). Neither can be reversed: if $Q$ puts a tiny mass where $P$ puts none, TV is tiny but $D_{\mathrm{KL}}(Q\|P)$ is infinite.
+Pinsker's inequality is tight for two nearly fair coins. With heads probabilities $\frac12 + \varepsilon$ and $\frac12$, the TV is $\varepsilon$. To second order in $p_A - q_A$, the binary KL is $(p_A - q_A)^2/(2q_A(1 - q_A))$, because its first two derivatives in $p_A$ at $p_A = q_A$ are 0 and $1/(q_A(1 - q_A))$. At $q_A = \frac12$ that is $2\varepsilon^2$. So Pinsker's bound is $\varepsilon$ up to higher-order terms.
+
+Pinsker's bound passes 1 at KL $= 2$, and it loses to Bretagnolle–Huber once KL is above 1.59 (@fig-div-pinsker). Neither can be reversed. If $Q$ puts a tiny mass where $P$ puts none, TV is tiny but $D_{\mathrm{KL}}(Q\|P)$ is infinite.
 
 ![Total variation against KL, with the two bounds.](figures/divergences_pinsker.svg){#fig-div-pinsker}
 
 ::: {#exm-div-pinsker-samples}
-How many samples tell $\mathcal N(0, 1)$ from $\mathcal N(0.1, 1)$, where one sample has TV 0.0399 and KL 0.005? By additivity $n$ samples have KL $0.005\,n$, which Pinsker turns into a cap on TV and, by @eq-div-tv-test, on accuracy. The exact TV is known too, because the evidence of $n$ samples depends only on their mean, a Gaussian pair with shift $0.1\sqrt n$ (@tbl-div-pinsker).
+How many samples tell $\mathcal N(0, 1)$ from $\mathcal N(0.1, 1)$, where one sample has TV 0.0399 and KL 0.005? By additivity $n$ samples have KL $0.005\,n$, which Pinsker turns into a cap on TV and, by @eq-div-tv-test, on accuracy. The exact TV is also known, because the evidence of $n$ samples depends only on their mean, which gives a Gaussian pair with shift $0.1\sqrt n$ (@tbl-div-pinsker).
 
 | $n$ | KL | Exact TV | Best accuracy (simulated) | Pinsker | Bretagnolle–Huber |
 | --- | --- | --- | --- | --- | --- |
@@ -572,7 +558,7 @@ How many samples tell $\mathcal N(0, 1)$ from $\mathcal N(0.1, 1)$, where one sa
 
 : $n$ samples of $\mathcal N(0, 1)$ against $\mathcal N(0.1, 1)$: exact TV, best accuracy (simulated over 20,000 trials), and the two bounds on TV. {#tbl-div-pinsker}
 
-Any test needs $n$ of order $1/D_{\mathrm{KL}}$. At $n = 100$ Pinsker's bound overstates TV by 31%, and at $n = 400$ it is vacuous while Bretagnolle–Huber is not.
+So any test needs $n$ of order $1/D_{\mathrm{KL}}$. At $n = 100$ Pinsker's bound overstates TV by 31%, and at $n = 400$ it is vacuous while Bretagnolle–Huber is not.
 :::
 
 ## Code {#sec-div-code}
@@ -620,4 +606,3 @@ uv run python code/part01-prerequisites/divergences.py
 - Tsybakov, *Introduction to Nonparametric Estimation* (2009), §2.4: Pinsker, Bretagnolle–Huber and other inequalities between divergences.
 - Bishop, *Pattern Recognition and Machine Learning* (2006), §10.1: forward against reverse KL in variational inference.
 - Liese & Vajda, "On Divergences and Informations in Statistics and Information Theory" (IEEE Transactions on Information Theory, 2006): f-divergences and their representation through the curves $E_\gamma$.
-- Nowozin, Cseke & Tomioka, "f-GAN: Training Generative Neural Samplers using Variational Divergence Minimization" (NeurIPS 2016): f-divergences estimated from samples with neural networks.

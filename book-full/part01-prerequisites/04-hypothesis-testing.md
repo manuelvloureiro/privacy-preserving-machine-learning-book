@@ -1,8 +1,8 @@
 # Hypothesis testing
 
-A spam filter must say "ham" or "spam", a medical test "healthy" or "ill", a monitoring job "calibrated" or "drifted". Each faces the same problem: an observation came from one of two distributions, and you must decide which. This chapter asks what the best decision rule is, how good it can be, how to summarize real rules, and how to measure their error rates from finite data. Later parts need exactly this: how well *any* test can tell two distributions apart.
+A spam filter must say "ham" or "spam", a medical test "healthy" or "ill", a monitoring job "calibrated" or "drifted". Each faces the same problem: an observation came from one of two distributions, and you must decide which. This chapter asks what the best decision rule is, how good it can be, how to summarize real rules, and how to measure their error rates from finite data. Later parts need to know how well *any* test can tell two distributions apart.
 
-One idea organizes every answer. Write $p(x)$ for the probability (or density) of an observation $x$ under the first distribution and $q(x)$ for its probability under the second. Their ratio $\Lambda(x) = q(x)/p(x)$, the **likelihood ratio**, says how many times more likely $x$ is under the second, and @sec-ht-np proves that it is the only thing about $x$ that matters. The best rule compares this ratio with a cut-off. Plotting the two error rates of the best rule at every cut-off gives a curve that depends on the two distributions alone, and the chapter reads every summary of a rule off that curve.
+One idea organizes every answer. Write $p(x)$ for the probability (or density) of an observation $x$ under the first distribution and $q(x)$ for its probability under the second. Their ratio $\Lambda(x) = q(x)/p(x)$, the **likelihood ratio**, says how many times more likely $x$ is under the second, and @sec-ht-np proves that it is the only thing about $x$ that matters. The best rule compares this ratio with a cut-off. The two error rates of the best rule at every cut-off trace a curve that depends on the two distributions alone, and every summary of a rule can be read off that curve.
 
 Two running examples carry the chapter. In the first, a spam filter counts suspicious words in an email, capped at 3, and @tbl-ht-spam gives the count's distribution $P$ for ham and $Q$ for spam. A count of 3 is four times as likely in spam, and a count of 0 a quarter as likely. Spam's probability goes in the numerator of the ratio, the reverse of the convention in [Divergences](03-divergences.md). The second example is a biomarker that is normal with standard deviation 1, with mean 0 in healthy patients and mean 2 in ill ones.
 
@@ -16,7 +16,7 @@ Two running examples carry the chapter. In the first, a spam filter counts suspi
 
 ## Tests and their two errors {#sec-ht-setup}
 
-Before asking which decision rule is best, you need to say what a rule is and how to score it. This chapter compares two candidate distributions that are each fully specified, called **simple** hypotheses, unlike a composite one such as "the mean is positive". The **null hypothesis** $H_0$, the default you keep unless the evidence is strong, is that the observation comes from $P$, and the **alternative** $H_1$ is that it comes from $Q$. A rule may also reject $H_0$ (say "spam") on some outcomes only with some probability, by flipping a biased coin, and @exm-ht-np-spam shows why that matters.
+Before asking which decision rule is best, you need to say what a rule is and how to score it. This chapter compares two candidate distributions that are each fully specified, called **simple** hypotheses, unlike a composite one such as "the mean is positive". The **null hypothesis** $H_0$, the default you keep unless the evidence is strong, is that the observation comes from $P$. The **alternative** $H_1$ is that it comes from $Q$. A rule may also reject $H_0$ (say "spam") on some outcomes only with some probability, by flipping a biased coin, and @exm-ht-np-spam shows why that matters.
 
 ::: {#def-ht-test name="Test, errors and power"}
 Let $P$ and $Q$ be distributions on a set $\mathcal X$ of outcomes, and test $H_0\colon X \sim P$ against $H_1\colon X \sim Q$. A **test** is a function $\phi\colon \mathcal X \to [0, 1]$, where $\phi(x)$ is the probability of rejecting $H_0$ after observing $x$. It is **deterministic** if it takes only the values 0 and 1, and so is the indicator of its **rejection region**. Its **type I error**, or **size**, and its **type II error** are
@@ -24,7 +24,7 @@ $$\alpha_\phi = \mathbb E_P[\phi(X)], \qquad \beta_\phi = 1 - \mathbb E_Q[\phi(X
 also called its false positive rate (FPR) and false negative rate (FNR). Its **power**, or true positive rate (TPR), is $1 - \beta_\phi$. A test has **level** $\alpha$ if $\alpha_\phi \le \alpha$.
 :::
 
-For a deterministic test the two averages are the masses that $P$ and $Q$ give to the rejection region, because the average of an indicator is the probability of its event ([Concentration inequalities](02-concentration.md)). Since $H_0$ is the default, a false alarm, rejecting $H_0$ when it holds, is the error you control first, so you fix the level and then look for the most powerful test within it.
+For a deterministic test the two averages are the masses that $P$ and $Q$ give to the rejection region, because the average of an indicator is the probability of its event ([Concentration inequalities](02-concentration.md)). Because $H_0$ is the default, a false alarm, which rejects $H_0$ when it holds, is the error you control first. So you fix the level and then look for the most powerful test within it.
 
 | Rejection region | $\alpha$ | $\beta$ | Power |
 | --- | --- | --- | --- |
@@ -41,14 +41,14 @@ For a deterministic test the two averages are the masses that $P$ and $Q$ give t
 Down the first five rows of @tbl-ht-spam-tests the region grows, and each added outcome adds its ham mass to $\alpha$ and its spam mass to the power. So along the thresholds you can only trade one error for the other. The yardstick is the coin-flip test $\phi \equiv \alpha$, which ignores the email and rejects with a fixed probability $\alpha$, so its power equals its size. The region $\{0\}$ does worse than that coin, with power 0.10 at size 0.40, because it rejects on the outcome most typical of ham.
 
 ::: {#exm-ht-screening}
-A screening test flags a patient when the biomarker exceeds $\tau = 1.645$, chosen so that $\alpha = 0.05$ (@fig-ht-errors). Write $\Phi$ for the standard normal cumulative distribution function (CDF), so that $\Phi^{-1}(0.95) = 1.6449$. A healthy patient's biomarker is standard normal, so it exceeds $\tau$ with probability $1 - \Phi(1.645) = 0.05$. An ill patient's biomarker is centred at 2, so it falls below $\tau$ with probability $\beta = \Phi(\tau - 2) = \Phi(-0.3551) = 0.3612$. So the test catches about two ill patients in three, $1 - \beta = 0.6388$, while sending one healthy patient in 20 for a follow-up. A lower threshold catches more ill patients and alarms more healthy ones.
+A screening test flags a patient when the biomarker exceeds $\tau = 1.645$, chosen so that $\alpha = 0.05$ (@fig-ht-errors). Write $\Phi$ for the standard normal cumulative distribution function (CDF), so that $\Phi^{-1}(0.95) = 1.6449$. A healthy patient's biomarker is standard normal, so it exceeds $\tau$ with probability $1 - \Phi(1.645) = 0.05$. An ill patient's biomarker is centred at 2, so it falls below $\tau$ with probability $\beta = \Phi(\tau - 2) = \Phi(-0.3551) = 0.3612$. So the test catches about two ill patients in three, $1 - \beta = 0.6388$, while it sends one healthy patient in 20 for a follow-up.
 :::
 
 ![The two errors of the threshold test "reject when $x > \tau$" for $P = \mathcal N(0, 1)$ against $Q = \mathcal N(2, 1)$, with $\tau$ set so that $\alpha = 0.05$. The blue area under $P$ beyond $\tau$ is $\alpha$; the orange area under $Q$ before $\tau$ is $\beta = 0.361$.](figures/hypothesis_testing_errors.svg){#fig-ht-errors}
 
 ## The Neyman–Pearson lemma {#sec-ht-np}
 
-Since the two errors trade against each other, the question is which test gives the most power for a given false positive budget. Rejecting an outcome $x$ costs $p(x)$ of budget and buys $q(x)$ of power, an exchange rate of $\Lambda(x)$. The best buyer spends on the best rates first, which means rejecting exactly where $\Lambda$ is above some cut-off. The test below writes that as $q(x) > c\,p(x)$, so that it always rejects outcomes that $P$ never produces, $p(x) = 0$, which cost no budget.
+The two errors trade against each other, so the question is which test gives the most power for a given false positive budget. Rejecting an outcome $x$ costs $p(x)$ of budget and buys $q(x)$ of power, an exchange rate of $\Lambda(x)$. The best buyer spends on the best rates first, which means rejecting exactly where $\Lambda$ is above some cut-off. The test below writes that as $q(x) > c\,p(x)$, so that it always rejects outcomes that $P$ never produces, which cost no budget.
 
 ::: {#thm-ht-np name="Neyman–Pearson lemma"}
 Let $P$ and $Q$ have densities, or mass functions, $p$ and $q$. For a cut-off $c \ge 0$, a **likelihood ratio (LR) test** rejects where $q$ exceeds $c$ times $p$, keeps $H_0$ where it falls short, and on the tie set, where $q(x) = c\,p(x)$, rejects with some probability $\gamma(x) \in [0, 1]$:
@@ -61,7 +61,7 @@ So the most powerful test of level $\alpha$ is the LR test of size $\alpha$.
 :::
 
 ::: {.proof}
-The plan is to prove optimality by comparing $\phi^*$ with any other test outcome by outcome, and existence by choosing the lowest cut-off whose outcomes strictly above it still fit in the budget, then randomizing on the ties.
+The plan is to prove optimality by comparing $\phi^*$ with any other test outcome by outcome, and existence by choosing the lowest cut-off whose strict region still fits in the budget, then randomizing on the ties.
 
 1. *A pointwise inequality.* Weight each outcome by $q(x) - c\,p(x)$, which is positive exactly where $\phi^*$ rejects. Where it is positive $\phi^* = 1 \ge \phi$, where it is negative $\phi^* = 0 \le \phi$, and on the tie set it is 0. So for every $x$, using only that $\phi$ takes values in $[0, 1]$,
 $$\big(\phi^*(x) - \phi(x)\big)\big(q(x) - c\,p(x)\big) \ge 0.$$
@@ -73,12 +73,12 @@ $$\mathbb E_Q[\phi^*] - \mathbb E_Q[\phi] \ge c\big(\mathbb E_P[\phi^*] - \mathb
 6. *Randomize on the ties.* The LR test with constant $\gamma$ has size $G(c) + \gamma\Pr_P[\Lambda = c]$, which runs from $G(c) \le \alpha$ at $\gamma = 0$ to $\Pr_P[\Lambda \ge c] \ge \alpha$ at $\gamma = 1$. It is linear in $\gamma$, so some $\gamma \in [0, 1]$ makes it exactly $\alpha$.
 :::
 
-The optimal test looks at $x$ only through $\Lambda(x)$. When $\Lambda$ increases with a simple statistic, such as the word count or the biomarker, the optimal test is a plain threshold on the statistic. A calibrated classifier score, an estimate of the probability of $H_1$ given $x$, is such a statistic, by Bayes' rule (@sec-ht-bayes), which is why thresholding it is right.
+The optimal test looks at $x$ only through $\Lambda(x)$. So when $\Lambda$ increases with a simple statistic, such as the word count or the biomarker, the optimal test is a plain threshold on the statistic. A calibrated classifier score, an estimate of the probability of $H_1$ given $x$, is such a statistic, by Bayes' rule (@sec-ht-bayes). That is why you threshold it.
 
-How fast does the error fall with more data? For $n$ independent observations the ratio of the sample is the product of the individual ratios, and at a fixed false positive rate the best type II error decays like $e^{-n\,D_{\mathrm{KL}}(P\|Q)}$, with the Kullback–Leibler (KL) divergence of [Divergences](03-divergences.md) as the rate. @sec-apx-tail-cramer-stein derives this Chernoff–Stein lemma.
+How fast does the error fall with more data? For $n$ independent observations the ratio of the sample is the product of the individual ratios. At a fixed false positive rate the best type II error decays like $e^{-n\,D_{\mathrm{KL}}(P\|Q)}$, with the Kullback–Leibler (KL) divergence of [Divergences](03-divergences.md) as the rate. @sec-apx-tail-cramer-stein derives this Chernoff–Stein lemma.
 
 ::: {#exm-ht-np-spam}
-Take the spam example at budget $\alpha = 0.25$, a size no threshold has. A cut-off between 1.5 and 4 rejects only the count 3, with size 0.1, which fits. Just below 1.5 the count 2 joins and the size is 0.3, which does not, so $c = 1.5$. The test spends the remaining 0.15 on the tie set $\{2\}$, whose ham mass is 0.2, so it rejects the count 2 with probability $\gamma = 0.75$. Its power is $0.4 + 0.75 \times 0.3 = 0.625$. Randomizing matters only for discrete data like these, since for a continuous score a threshold alone can hit any size.
+Take the spam example at budget $\alpha = 0.25$, a size no threshold has. A cut-off between 1.5 and 4 rejects only the count 3, with size 0.1, which fits. Just below 1.5 the count 2 joins and the size is 0.3, which does not, so $c = 1.5$. The test spends the remaining 0.15 on the tie set $\{2\}$, whose ham mass is 0.2, so it rejects the count 2 with probability $\gamma = 0.75$. Its power is $0.4 + 0.75 \times 0.3 = 0.625$. Randomizing matters only for discrete data like these, because for a continuous score a threshold alone can hit any size.
 
 A brute-force check agrees. Of 200,000 random tests, each $\phi(x)$ uniform on $[0, 1]$, 11,727 have size at most 0.25, and the best of them has power only 0.587 (@fig-ht-discrete-tradeoff).
 :::
@@ -87,7 +87,7 @@ A brute-force check agrees. Of 200,000 random tests, each $\phi(x)$ uniform on $
 
 ## Trade-off functions and ROC curves {#sec-ht-tradeoff}
 
-A single test gives one point $(\alpha, \beta)$. To say how hard it is to tell $P$ from $Q$ you want the best $\beta$ at every $\alpha$ at once. That curve depends only on the pair, and later parts use it to describe how distinguishable two distributions are.
+A single test gives one point $(\alpha, \beta)$. To say how hard it is to tell $P$ from $Q$, you want the best $\beta$ at every $\alpha$ at once. That curve depends only on the pair, and later parts use it to describe how distinguishable two distributions are.
 
 ::: {#def-ht-tradeoff name="Trade-off function"}
 The **trade-off function** of $P$ and $Q$ gives, at each false positive budget $\alpha$, the smallest type II error of any test within it:
@@ -95,7 +95,7 @@ $$T(P, Q)(\alpha) = \inf\{\beta_\phi : \alpha_\phi \le \alpha\}, \qquad \alpha \
 Write $T$ for $T(P, Q)$ when the pair is clear. The **receiver operating characteristic (ROC) curve** of the optimal tests plots its power against its size, $\alpha \mapsto 1 - T(\alpha)$.
 :::
 
-By @thm-ht-np the infimum is attained by the LR test of size $\alpha$, so sweeping the LR cut-off traces $T$. The proof that every trade-off function is convex and continuous needs two tools. Convexity comes from mixing two tests, and the first tool says what mixing does to their errors.
+By @thm-ht-np the LR test of size $\alpha$ attains the infimum, so sweeping the LR cut-off traces $T$. The proof that every trade-off function is convex and continuous needs two tools. Convexity comes from mixing two tests, and the first tool says what mixing does to their errors.
 
 ::: {#lem-ht-mixing name="Mixing tests mixes their errors"}
 Let $\phi_1$ and $\phi_2$ be tests and $\lambda \in [0, 1]$. The test $\phi = \lambda\phi_1 + (1 - \lambda)\phi_2$, which runs $\phi_1$ with probability $\lambda$ and $\phi_2$ otherwise, has errors $\alpha_\phi = \lambda\alpha_{\phi_1} + (1 - \lambda)\alpha_{\phi_2}$ and $\beta_\phi = \lambda\beta_{\phi_1} + (1 - \lambda)\beta_{\phi_2}$.
@@ -106,7 +106,7 @@ Let $\phi_1$ and $\phi_2$ be tests and $\lambda \in [0, 1]$. The test $\phi = \l
 2. Both errors are averages of $\phi$ by @def-ht-test, and the average of a weighted sum is the weighted sum of the averages.
 :::
 
-Continuity at $\alpha = 0$ needs a second tool, because a convex function can jump at an end of its interval. It comes from bounding a test's power, an average under $Q$, by averages under $P$ weighted by $\Lambda$. [Divergences](03-divergences.md) proved this **change of measure** when both distributions give positive probability to the same outcomes. Here $Q$ may also put mass where $P$ has none, which needs a term of its own.
+Continuity at $\alpha = 0$ needs a second tool, because a convex function can jump at an end of its interval. It bounds a test's power, an average under $Q$, by averages under $P$ weighted by $\Lambda$. This is the **change of measure** of [Divergences](03-divergences.md), with one extra term because $Q$ may put mass where $P$ has none.
 
 ::: {#lem-ht-change-of-measure name="Change of measure"}
 For every function $g \ge 0$ on the outcomes,
@@ -115,9 +115,8 @@ In particular, the likelihood ratio has average $\mathbb E_P[\Lambda(X)] = 1 - \
 :::
 
 ::: {.proof}
-1. Split the sum (or integral) $\sum_xg(x)q(x)$ into the outcomes with $p(x) > 0$ and those with $p(x) = 0$. The second part is the second term.
-2. Where $p(x) > 0$ the ratio's definition gives $q(x) = \Lambda(x)p(x)$, so the first part is $\mathbb E_P[g\Lambda]$.
-3. With $g = 1$ the left side is 1 and the second term is $\Pr_Q[p = 0]$.
+1. Split the sum (or integral) $\sum_xg(x)q(x)$ into the outcomes with $p(x) > 0$ and those with $p(x) = 0$. The second part is the second term. On the first part, $q = \Lambda p$, so it is $\mathbb E_P[g\Lambda]$ by @lem-div-change-of-measure with the roles of $P$ and $Q$ swapped.
+2. With $g = 1$ the left side is 1 and the second term is $\Pr_Q[p = 0]$.
 :::
 
 ::: {#thm-ht-tradeoff name="Properties of trade-off functions"}
@@ -137,9 +136,9 @@ $$1 - \beta_\phi \le \Pr_Q[p = 0] + K\alpha + \mathbb E_P\big[\Lambda\,\mathbf 1
 7. *Let the budget shrink.* Since $\beta_\phi$ is 1 minus the power and $T(0) = 1 - \Pr_Q[p = 0]$ by step 5, the bound says $\beta_\phi \ge T(0) - K\alpha - \mathbb E_P[\Lambda\,\mathbf 1[\Lambda > K]]$ for every test within budget, and so for their infimum $T(\alpha)$. The average of $\Lambda$ is finite by @lem-ht-change-of-measure, so its part from $\Lambda > K$ vanishes as $K$ grows. Choosing $K$ large, then $\alpha$ small, and using $T(\alpha) \le T(0)$ from step 1, $T(\alpha)$ tends to $T(0)$.
 :::
 
-Conversely, every function with these four properties is the trade-off function of some pair (@sec-apx-comp-canonical derives it). A pair is **harder to distinguish** than another if its curve is higher everywhere. The hardest curve is $1 - \alpha$, for $P = Q$, and the easiest is $T \equiv 0$, for distributions that never produce the same outcome. The curve starts below 1 when $Q$ has mass where $P$ has none, and swapping $P$ and $Q$ reflects it across the line $\beta = \alpha$, because the test $1 - \phi$ for the swapped pair has the errors of $\phi$ in the other order.
+Conversely, every function with these four properties is the trade-off function of some pair (@sec-apx-comp-canonical derives it). A pair is **harder to distinguish** than another if its curve is higher everywhere. The hardest curve is $1 - \alpha$, for $P = Q$, and the easiest is $T \equiv 0$, for distributions that never produce the same outcome. By step 5 the curve starts below 1 exactly when $Q$ has mass where $P$ has none. Swapping $P$ and $Q$ reflects the curve across the line $\beta = \alpha$, because the test $1 - \phi$ for the swapped pair has the errors of $\phi$ in the other order.
 
-The curves of the next sections differ in how fast they fall, and one rule explains their shapes. The slope of the curve is minus the exchange rate of @sec-ht-np, the likelihood ratio of the outcomes the test is currently adding.
+The curves of the next sections differ in how fast they fall, and one rule explains their shapes. The slope of the curve is minus the exchange rate of @sec-ht-np, the likelihood ratio of the outcomes that the test is currently adding.
 
 ::: {#prp-ht-slope name="The slope of the curve is the likelihood ratio"}
 If $P$ and $Q$ are discrete, $T$ is piecewise linear, and the segment on which the LR test adds the outcome $x$ has slope $-\Lambda(x)$. If they have continuous positive densities and $\Lambda$ increases with the observation, the slope at the point whose LR test is $\mathbf 1[x > \tau]$ is $T'(\alpha) = -\Lambda(\tau)$.
@@ -165,9 +164,9 @@ More generally, $\mathcal N(m_0, \sigma^2)$ against $\mathcal N(m_1, \sigma^2)$ 
 :::
 
 ::: {.proof}
-The plan is to compute the likelihood ratio, see that the LR tests are thresholds, read both errors off normal tails, and then reduce the general pair to this one.
+The plan is to take the likelihood ratio from [Probability distributions](01-distributions.md), see that the LR tests are thresholds, read both errors off normal tails, and then reduce the general pair to this one.
 
-1. *The likelihood ratio.* With the standard normal density $\varphi(x) = e^{-x^2/2}/\sqrt{2\pi}$, the density of $Q$ is $\varphi(x - \mu)$. The constants cancel, and $x^2 - (x - \mu)^2 = 2\mu x - \mu^2$, so
+1. *The likelihood ratio.* With the standard normal density $\varphi(x) = e^{-x^2/2}/\sqrt{2\pi}$, the density of $Q$ is $\varphi(x - \mu)$. By @thm-dist-shift with $\sigma = 1$ and shift $\mu$, the log ratio $\ln(p/q)$ is the line $(\mu^2 - 2\mu x)/2$, so
 $$\Lambda(x) = \exp\Big(\mu x - \frac{\mu^2}2\Big).$$
 2. *The LR tests are thresholds.* For $\mu > 0$ the ratio is strictly increasing in $x$, so it exceeds a cut-off exactly when $x$ exceeds some $\tau$. A tie happens only at that one point, which has probability 0, so by @thm-ht-np the tests $\mathbf 1[x > \tau]$ are optimal. At $\mu = 0$ the curve is the diagonal, as the formula says.
 3. *The size fixes the threshold.* The size is $\Pr_P[X > \tau] = 1 - \Phi(\tau)$, and setting it to $\alpha$ gives $\tau = \Phi^{-1}(1 - \alpha)$.
@@ -187,7 +186,7 @@ $$\mu = \frac{h\sqrt n}{\sigma}.$$
 2. The sample mean is $\mathcal N(0, \sigma^2/n)$ against $\mathcal N(h, \sigma^2/n)$, a shift of $h$ in units of $\sigma/\sqrt n$, and @thm-ht-gaussian applies.
 :::
 
-So distinguishability grows like $\sqrt n$. Near $\alpha = 0$ the curve is vertical, because by @prp-ht-slope its slope is $-\Lambda(\tau)$, which grows without bound as the threshold moves out. Swapping $P$ and $Q$ gives a shift pair at the same distance $\mu$, so the curve is also its own reflection across the line $\beta = \alpha$.
+So distinguishability grows like $\sqrt n$. Near $\alpha = 0$ the curve is vertical, because by @prp-ht-slope its slope is $-\Lambda(\tau)$, which grows without bound as the threshold moves out. Swapping $P$ and $Q$ gives a shift pair at the same distance $\mu$, which has the same curve. So the curve is its own reflection across the line $\beta = \alpha$.
 
 ::: {#exm-ht-drift}
 A monitoring job averages $n = 100$ readings from a sensor with noise $\sigma$ and must detect a drift of $h = 0.2\sigma$ in the mean. By @cor-ht-averaging the shift is $\mu = 0.2 \times 10 = 2$, the biomarker's, and @tbl-ht-gaussian evaluates the curve there and at $\mu = 1$. At $\alpha = 0.05$ the threshold is $\Phi^{-1}(0.95) = 1.6449$, and $\beta = \Phi(-0.3551) = 0.3612$, so the job catches the drift with probability 0.6388. A simulation with 1,000,000 draws per hypothesis gives $\hat\alpha = 0.0503$ and $\hat\beta = 0.3617$.
@@ -203,14 +202,14 @@ A monitoring job averages $n = 100$ readings from a sensor with noise $\sigma$ a
 
 Turned around, the curve says how many readings a target needs. Power 0.9 at $\alpha = 0.01$ needs
 $$\mu \ge \Phi^{-1}(0.99) - \Phi^{-1}(0.1) = 2.3263 + 1.2816,$$
-and for a drift of $h = 0.25\sigma$, $\mu = 0.25\sqrt n$ reaches this at 209 readings.
+and for a drift of $h = 0.25\sigma$, the shift $\mu = 0.25\sqrt n$ reaches this at 209 readings, as the chapter's script computes.
 :::
 
 ![The Gaussian trade-off curve $\Phi(\Phi^{-1}(1 - \alpha) - \mu)$ for $\mu = 0, 0.5, 1, 2, 3$. Crosses are simulated errors of threshold tests at $\mu = 1$.](figures/hypothesis_testing_gaussian_tradeoff.svg){#fig-ht-gaussian-tradeoff}
 
 ## The Laplace trade-off curve {#sec-ht-laplace}
 
-Does the shape of the noise change the curve? Replacing the normal by a Laplace distribution shows that it does, at small and at large $\alpha$. The Laplace distribution $\mathrm{Lap}(m, b)$ with centre $m$ and scale $b$ has density $\frac1{2b}e^{-|x - m|/b}$. Moving the centre by $m_1$ changes the distance $|x - m|$ by at most $m_1$, so the likelihood ratio stays between $e^{-m_1/b}$ and $e^{m_1/b}$ ([Probability distributions](01-distributions.md)). It equals these bounds on whole tails, so by the slope rule of @prp-ht-slope the two ends of the curve are straight lines.
+Does the shape of the noise change the curve? A Laplace distribution in place of the normal shows that it does, at small and at large $\alpha$. The Laplace distribution $\mathrm{Lap}(m, b)$ with centre $m$ and scale $b$ has density $\frac1{2b}e^{-|x - m|/b}$. Moving the centre by $m_1$ changes the distance $|x - m|$ by at most $m_1$, so the likelihood ratio stays between $e^{-m_1/b}$ and $e^{m_1/b}$ ([Probability distributions](01-distributions.md)). It equals these bounds on whole tails, so by the slope rule of @prp-ht-slope the two ends of the curve are straight lines.
 
 ::: {#thm-ht-laplace name="Laplace trade-off curve"}
 Let $P = \mathrm{Lap}(0, b)$ and $Q = \mathrm{Lap}(m_1, b)$ with $m_1 > 0$, and write $\kappa = m_1/b$ for the shift in units of the scale. Then
@@ -230,9 +229,9 @@ It is non-decreasing and clipped to $[-\kappa, \kappa]$ (@fig-ht-laplace-tradeof
 6. *Threshold below 0.* Now $\alpha = 1 - \frac12e^\tau$ exceeds $\frac12$, so $\frac12e^\tau = 1 - \alpha$ and $\beta = \frac12e^{\tau - \kappa} = e^{-\kappa}(1 - \alpha)$.
 :::
 
-The upper bound $e^\kappa$ on the ratio limits every test, not only thresholds. Here $p > 0$ everywhere, so by @lem-ht-change-of-measure any test's power is $\mathbb E_P[\phi\Lambda] \le e^\kappa\alpha$, and the first piece shows that the best test reaches this bound.
+The upper bound $e^\kappa$ on the ratio limits every test, not only thresholds. Here $p > 0$ everywhere, so by @lem-ht-change-of-measure the power of any test is $\mathbb E_P[\phi\Lambda] \le e^\kappa\alpha$, and the first piece shows that the best test reaches this bound.
 
-To compare the shapes fairly, match the pairs by their best advantage, the largest gap $\mathrm{TPR} - \mathrm{FPR}$ of any test, which @sec-ht-tv shows is their total variation. That is 0.3935 for the Laplace pair at $\kappa = 1$, and solving $2\Phi(\mu/2) - 1 = 0.3935$ (@cor-ht-tv-pairs) gives the matching Gaussian pair, $\mu = 1.0301$. The two curves nearly coincide in the bulk but not at small $\alpha$ (@tbl-ht-laplace-vs-gaussian). At $\alpha = 10^{-6}$ the Gaussian test is 36.2 times more powerful, because its unbounded ratio lets a test find rare observations that are overwhelmingly more likely under $Q$ (@fig-ht-laplace-tradeoff).
+To compare the shapes fairly, match the pairs by their best advantage, the largest gap $\mathrm{TPR} - \mathrm{FPR}$ of any test, which @sec-ht-tv shows is their total variation. That is 0.3935 for the Laplace pair at $\kappa = 1$, and solving $2\Phi(\mu/2) - 1 = 0.3935$ (@cor-ht-tv-pairs) gives the matching Gaussian pair, $\mu = 1.0301$. The two curves nearly coincide in the bulk but not at small $\alpha$ (@tbl-ht-laplace-vs-gaussian). At $\alpha = 10^{-6}$ the Gaussian test is 36.2 times more powerful. Its unbounded ratio lets a test find rare observations that are overwhelmingly more likely under $Q$ (@fig-ht-laplace-tradeoff).
 
 | $\alpha$ | Laplace power, $\kappa = 1$ | Gaussian power, $\mu = 1.0301$ |
 | --- | --- | --- |
@@ -244,12 +243,12 @@ To compare the shapes fairly, match the pairs by their best advantage, the large
 ![Left: the log likelihood ratio of $\mathrm{Lap}(1, 1)$ against $\mathrm{Lap}(0, 1)$ is clipped at $\pm1$, while the Gaussian one with the same total variation is a straight line. Right: best power $1 - T(\alpha)$ on log axes. The Laplace curve follows $e\alpha$ for small $\alpha$; the Gaussian curve rises far above it.](figures/hypothesis_testing_laplace_tradeoff.svg){#fig-ht-laplace-tradeoff}
 
 ::: {#exm-ht-residuals}
-Suppose a regression model's residuals are Laplace with scale $b$, and you test whether a batch's residuals are centred at 0 ($P$) or shifted by $m_1 = b$ ($Q$), so $\kappa = 1$. The first breakpoint of @eq-ht-laplace-tradeoff is $\frac12e^{-1} = 0.1839$, so at $\alpha = 0.05$ the first piece gives $\beta = 1 - e \times 0.05 = 0.8641$, while at $\alpha = 0.25$ the middle piece gives $\beta = e^{-1} = 0.3679$ and at $\alpha = 0.75$ the last gives 0.0920. Simulating the threshold test at $\alpha = 0.25$ with 1,000,000 draws per hypothesis gives $\hat\alpha = 0.2498$ and $\hat\beta = 0.3685$.
+Suppose a regression model's residuals are Laplace with scale $b$, and you test whether a batch's residuals are centred at 0 ($P$) or shifted by $m_1 = b$ ($Q$), so $\kappa = 1$. The first breakpoint of @eq-ht-laplace-tradeoff is $\frac12e^{-1} = 0.1839$. So at $\alpha = 0.05$ the first piece gives $\beta = 1 - e \times 0.05 = 0.8641$, and at $\alpha = 0.25$ the middle piece gives $\beta = e^{-1} = 0.3679$. Simulating the threshold test at $\alpha = 0.25$ with 1,000,000 draws per hypothesis gives $\hat\alpha = 0.2498$ and $\hat\beta = 0.3685$.
 :::
 
 ## Best advantage equals total variation {#sec-ht-tv}
 
-Sometimes you want one number for how distinguishable $P$ and $Q$ are. A natural one is the **advantage** of a test, $1 - \alpha_\phi - \beta_\phi = \mathrm{TPR} - \mathrm{FPR}$, how much more often it fires under $Q$ than under $P$, which is 0 for the coin flip. The advantage adds up $\phi(x)$ times $q(x) - p(x)$ over the outcomes, so the best test fires exactly where $q$ exceeds $p$. Its advantage is the total excess of $q$ over $p$, the total variation (TV) distance of [Divergences](03-divergences.md).
+Sometimes you want one number for how distinguishable $P$ and $Q$ are. A natural one is the **advantage** of a test, $1 - \alpha_\phi - \beta_\phi = \mathrm{TPR} - \mathrm{FPR}$, which says how much more often it fires under $Q$ than under $P$ and is 0 for the coin flip. The best advantage is the total variation (TV) distance of [Divergences](03-divergences.md), and the proof is the best event of that chapter.
 
 ::: {#thm-ht-tv name="Best advantage equals total variation"}
 For any distributions $P$ and $Q$ with mass functions $p$ and $q$,
@@ -259,11 +258,10 @@ with an integral for densities. The LR test with cut-off $c = 1$, which rejects 
 
 ::: {.proof}
 1. *Advantage as one sum.* By @def-ht-test the advantage is $\mathbb E_Q[\phi] - \mathbb E_P[\phi] = \sum_x\phi(x)\big(q(x) - p(x)\big)$.
-2. *Maximize term by term.* Each $\phi(x)$ appears in one term, so the maximum takes $\phi(x) = 1$ where $q(x) > p(x)$ and 0 where $q(x) < p(x)$. It equals $\Pr_Q[A^*] - \Pr_P[A^*]$ for $A^* = \{q > p\}$. Each event $A$ gives the deterministic test $\mathbf 1[x \in A]$, so the supremum over events is at most this maximum, and $A^*$ attains it.
-3. *Half the absolute difference.* Both tables sum to 1, so the positive and negative parts of $q - p$ have equal totals, and each is half of $\sum_x\lvert q - p\rvert$.
+2. *The best event.* @lem-div-best-event, with the roles of $P$ and $Q$ swapped and weight 1, says that this sum is largest at $\phi = \mathbf 1[q > p]$, where it equals $\sum_x(q - p)_+$, and that no event or soft event does better. @thm-div-tv shows that this is the TV and half of $\sum_x\lvert q - p\rvert$.
 :::
 
-On the curve, the advantage at level $\alpha$ is the gap $1 - \alpha - T(\alpha)$ between the diagonal and the curve. For a continuous pair it peaks where the slope of $T$ is $-1$, which by @prp-ht-slope is where the ratio at the threshold is 1 (@fig-ht-tv-advantage). The next result evaluates the peak for the two shift pairs.
+On the curve, the advantage at level $\alpha$ is the gap $1 - \alpha - T(\alpha)$ between the diagonal and the curve. For a continuous pair it peaks where the slope of $T$ is $-1$, which by @prp-ht-slope is where the ratio at the threshold is 1 (@fig-ht-tv-advantage).
 
 ::: {#cor-ht-tv-pairs name="Total variation of the two shift pairs"}
 For $\mathcal N(0, 1)$ against $\mathcal N(\mu, 1)$, $\mathrm{TV} = 2\Phi(\mu/2) - 1$, reached at $\alpha = 1 - \Phi(\mu/2)$. For $\mathrm{Lap}(0, b)$ against $\mathrm{Lap}(m_1, b)$ with $\kappa = m_1/b$, $\mathrm{TV} = 1 - e^{-\kappa/2}$, reached at $\alpha = \frac12e^{-\kappa/2}$.
@@ -275,17 +273,17 @@ For $\mathcal N(0, 1)$ against $\mathcal N(\mu, 1)$, $\mathrm{TV} = 2\Phi(\mu/2)
 3. *Laplace, the middle.* There the gap is $1 - \alpha - e^{-\kappa}/(4\alpha)$, whose derivative vanishes at $\alpha = \frac12e^{-\kappa/2}$. At that point $e^{-\kappa}/(4\alpha) = \frac12e^{-\kappa/2}$ too, so the gap is $1 - e^{-\kappa/2}$.
 :::
 
-TV measures one point of the curve and says nothing about its ends, as @tbl-ht-laplace-vs-gaussian showed, so if false alarms must be very rare, the whole curve is the right summary.
+TV measures one point of the curve and says nothing about its ends, as @tbl-ht-laplace-vs-gaussian showed. So if false alarms must be very rare, the whole curve is the right summary.
 
 ::: {#exm-ht-tv}
-In the spam example half the sum of the differences $\lvert q - p\rvert$ in @tbl-ht-spam is $\mathrm{TV} = 0.40$, and rejecting the counts where spam is more likely, $\{2, 3\}$, has advantage $1 - 0.3 - 0.3 = 0.4$ (@tbl-ht-spam-tests). For the Gaussian pair at $\mu = 1$, @cor-ht-tv-pairs gives 0.3829 at $\alpha = 0.3085$, and so does a grid search over 100,001 values of $\alpha$. For the Laplace pair at $\kappa = 1$ both give 0.3935 at $\alpha = 0.3033$.
+In the spam example half the sum of the differences $\lvert q - p\rvert$ in @tbl-ht-spam is $\mathrm{TV} = 0.40$, and rejecting the counts where spam is more likely, $\{2, 3\}$, has advantage $1 - 0.3 - 0.3 = 0.4$ (@tbl-ht-spam-tests). For the Gaussian pair at $\mu = 1$, @cor-ht-tv-pairs gives 0.3829 at $\alpha = 0.3085$, and for the Laplace pair at $\kappa = 1$ it gives 0.3935 at $\alpha = 0.3033$. A grid search over 100,001 values of $\alpha$ finds the same peaks.
 :::
 
 ![The Gaussian trade-off curve at $\mu = 1$, the diagonal $1 - \alpha$, and the advantage $1 - \alpha - T(\alpha)$ (dashed). The red segment is the largest gap, at $\alpha = 0.3085$, and its length is the total variation 0.3829.](figures/hypothesis_testing_tv_advantage.svg){#fig-ht-tv-advantage}
 
 ## The area under the ROC curve {#sec-ht-auc}
 
-A real detector outputs a score and fires above a threshold. Detectors are compared on held-out data by their ROC curves, usually summarized by the area under the curve (AUC). Yet a spam filter, say, cares only about the corner of very low false positive rates. This section shows that the AUC is the probability that the detector scores a random positive above a random negative, and that two detectors with the same AUC can differ tenfold in that corner.
+A real detector outputs a score and fires above a threshold. Detectors are compared on held-out data by their ROC curves, usually summarized by the area under the curve (AUC). Yet a spam filter, say, cares only about the corner of very low false positive rates. This section shows that the AUC is the probability that the detector scores a random positive above a random negative. Two detectors with the same AUC can differ tenfold in that corner.
 
 ::: {#prp-ht-auc name="The AUC is a ranking probability"}
 Let a detector's score be $S_-$ on negatives and $S_+$ on positives, independent and continuous. The test "positive when the score exceeds $\tau$" has $\mathrm{FPR}(\tau) = \Pr[S_- > \tau]$ and $\mathrm{TPR}(\tau) = \Pr[S_+ > \tau]$, and the area under the curve they trace is
@@ -306,7 +304,7 @@ $$\mathrm{AUC} = \int_{-\infty}^{\infty}\Pr[S_+ > \tau]\,p_-(\tau)\,\mathrm d\ta
 :::
 
 ::: {#exm-ht-auc}
-Detector A has positives that score $\mathcal N(1, 1)$, so $\mathrm{AUC} = \Phi(1/\sqrt2) = 0.7602$. Detector B has positives that score $\mathcal N(m, 2^2)$, more spread out, with $m/\sqrt{1 + 2^2} = 1/\sqrt2$, so that $m = 1.5811$ gives the same AUC. @tbl-ht-auc compares them. At FPR $10^{-3}$ the threshold is 3.0902, so A's TPR is $1 - \Phi(3.0902 - 1) = 0.0183$, while B's is $1 - \Phi((3.0902 - 1.5811)/2) = 1 - \Phi(0.7546) = 0.2253$, which is $0.2253/0.0183 = 12.3$ times more. (@fig-ht-auc-low-fpr).
+Detector A has positives that score $\mathcal N(1, 1)$, so $\mathrm{AUC} = \Phi(1/\sqrt2) = 0.7602$. Detector B has positives that score $\mathcal N(m, 2^2)$, more spread out, with $m/\sqrt{1 + 2^2} = 1/\sqrt2$, so that $m = 1.5811$ gives the same AUC. @tbl-ht-auc compares them. At FPR $10^{-3}$ the threshold is 3.0902, so A's TPR is $1 - \Phi(3.0902 - 1) = 0.0183$. B's is $1 - \Phi((3.0902 - 1.5811)/2) = 1 - \Phi(0.7546) = 0.2253$, which is $0.2253/0.0183 = 12.3$ times more (@fig-ht-auc-low-fpr).
 
 | Detector | AUC (formula / simulated) | TPR at FPR $= 0.1$ | TPR at FPR $= 10^{-3}$ |
 | --- | --- | --- | --- |
@@ -319,13 +317,11 @@ Detector A has positives that score $\mathcal N(1, 1)$, so $\mathrm{AUC} = \Phi(
 
 ![ROC curves of two detectors with the same AUC of 0.760. Left, linear axes: the curves cross and enclose equal areas. Right, log axes: at FPR $= 10^{-3}$ detector B has 12 times the TPR of detector A.](figures/hypothesis_testing_auc_low_fpr.svg){#fig-ht-auc-low-fpr}
 
-The AUC hides this because it weights all FPRs equally, and FPRs up to $10^{-3}$ are a tenth of a percent of the axis. A few of B's spread-out positives score far above every negative, and a strict threshold catches exactly those. So report the TPR at a fixed low FPR chosen by the application, and plot ROC curves on log–log axes. An extreme case is a detector with AUC 0.525 that catches 5% of positives at FPR $10^{-3}$.
-
-A's threshold is optimal, but B's is not. With unequal variances the $x^2$ terms of the two log densities no longer cancel, so the log likelihood ratio is quadratic in the score, so the optimal test of @thm-ht-np also flags very *low* scores.
+The AUC hides this because it weights all FPRs equally, and FPRs up to $10^{-3}$ are a tenth of a percent of the axis. A few of B's spread-out positives score far above every negative, and a strict threshold catches exactly those. So report the TPR at a fixed low FPR chosen by the application, and plot ROC curves on log–log axes.
 
 ## The Bayesian view {#sec-ht-bayes}
 
-Neyman–Pearson uses no prior, but often you know a base rate, such as 1% of patients being ill. Then you ask how likely $H_1$ is after the observation, and which rule makes the fewest mistakes. The likelihood ratio answers both, and shows why a low false positive rate matters most when positives are rare.
+Neyman–Pearson uses no prior, but often you know a base rate, such as 1% of patients being ill. Then you ask how likely $H_1$ is after the observation, and which rule makes the fewest mistakes. The likelihood ratio answers both, and it shows why a low false positive rate matters most when positives are rare.
 
 ::: {#thm-ht-bayes name="Posterior odds and the Bayes-optimal test"}
 Let $H_1$ have prior probability $\pi \in (0, 1)$. The odds of $H_1$ after seeing $x$ are the odds before seeing it, multiplied by the likelihood ratio of $x$:
@@ -337,26 +333,26 @@ The test that minimizes the probability of error, $(1 - \pi)\alpha_\phi + \pi\be
 1. *Bayes' rule.* The probability of $H_1$ and $x$ together is $\pi q(x)$, and that of $H_0$ and $x$ is $(1 - \pi)p(x)$. Each posterior is one of these divided by the total probability of $x$, which cancels in their ratio and leaves @eq-ht-posterior-odds.
 2. *The error of a test.* A test errs when $H_0$ holds and it rejects, or when $H_1$ holds and it misses. Writing both errors as sums by @def-ht-test,
 $$(1 - \pi)\alpha_\phi + \pi\beta_\phi = \pi + \sum_x\phi(x)\big((1 - \pi)p(x) - \pi q(x)\big).$$
-3. *Minimize term by term.* Each $\phi(x)$ appears in one term, so the minimum sets $\phi(x) = 1$ where the bracket is negative, that is where $\Lambda(x) > (1 - \pi)/\pi$, and 0 where it is positive.
+3. *Minimize.* The sum is $-\pi\sum_x\phi(x)\big(q(x) - \gamma p(x)\big)$ with $\gamma = (1 - \pi)/\pi$. By @lem-div-best-event, with the roles of $P$ and $Q$ swapped, it is smallest at $\phi = \mathbf 1[\Lambda > \gamma]$, the LR test with cut-off $(1 - \pi)/\pi$.
 :::
 
-With equal priors the error is $\frac12(\alpha_\phi + \beta_\phi)$, one half minus half the advantage, so its smallest value is $\frac12(1 - \mathrm{TV})$ by @thm-ht-tv, which is 0.3085 for the Gaussian pair at $\mu = 1$. The theorem also applies to coarser evidence: if all you know is that a test fired, the likelihood ratio of that evidence is $(1 - \beta)/\alpha$, the power over the false positive rate.
+With equal priors the error is $\frac12(\alpha_\phi + \beta_\phi)$, one half minus half the advantage, so its smallest value is $\frac12(1 - \mathrm{TV})$ by @thm-ht-tv. That is 0.3085 for the Gaussian pair at $\mu = 1$. The theorem also applies to coarser evidence. If all you know is that a test fired, the likelihood ratio of that evidence is $(1 - \beta)/\alpha$, the power over the false positive rate.
 
 ::: {#exm-ht-prevalence}
 Use the biomarker test with $\mu = 2$ from @tbl-ht-gaussian in a population where 1% are ill, so the prior odds are $1/99$. To get the probability of illness after a positive result, multiply the prior odds by the likelihood ratio of a positive, then turn the odds $o$ into a probability $o/(1 + o)$.
 
-At $\alpha = 0.05$ the power is 0.6388, so a positive has likelihood ratio $0.6388/0.05 = 12.8$. The posterior odds are $12.8/99 = 0.129$, so the probability of illness is 0.114, and nine positives in ten are false alarms. At $\alpha = 10^{-3}$ the likelihood ratio is $0.1378/0.001 = 137.8$, and the probability of illness rises to 0.582. The stricter test catches fewer ill patients, but its positives are far more informative (@fig-ht-posterior).
+At $\alpha = 0.05$ the power is 0.6388, so a positive has likelihood ratio $0.6388/0.05 = 12.8$. The posterior odds are $12.8/99 = 0.129$, so the probability of illness is 0.114, and nine positives in ten are false alarms. At $\alpha = 10^{-3}$ the likelihood ratio is $0.1378/0.001 = 137.8$, and the probability of illness rises to 0.582. So the stricter test catches fewer ill patients, but its positives are far more informative (@fig-ht-posterior).
 
-The test with the fewest errors at this prior rejects where $\Lambda(x) > 99$, which for the biomarker means $x > 3.2976$. It has $\alpha = 4.88\times10^{-4}$ and power only 0.0972, because when both errors count equally and the disease is rare, it is cheapest to rarely say "ill".
+The test with the fewest errors at this prior rejects where $\Lambda(x) > 99$, which for the biomarker means $x > 3.2976$. It has $\alpha = 4.88\times10^{-4}$ and power only 0.0972. When both errors count equally and the disease is rare, it is cheapest to rarely say "ill".
 :::
 
 ![Posterior probability of illness after a positive result, as a function of the prior, for the $\mu = 2$ biomarker test at two thresholds. At 1% prevalence (dashed line) the stricter test gives 0.582 against 0.114.](figures/hypothesis_testing_posterior.svg){#fig-ht-posterior}
 
 ## Estimating error rates from finite trials {#sec-ht-estimation}
 
-Everything so far assumed that you know $P$ and $Q$. In practice you measure a detector's rates on test data, for example $k$ false positives among $n$ negatives. If each negative is flagged independently with probability $p$, here a rate rather than a density, then $k$ is a draw from $\mathrm{Bin}(n, p)$ ([Probability distributions](01-distributions.md)), and at low rates its uncertainty is large compared with the rate itself.
+Everything so far assumed that you know $P$ and $Q$. In practice you measure a detector's rates on test data, for example $k$ false positives among $n$ negatives. If each negative is flagged independently with probability $p$, here a rate rather than a density, then $k$ is a draw from $\mathrm{Bin}(n, p)$ ([Probability distributions](01-distributions.md)). At low rates its uncertainty is large compared with the rate itself.
 
-An interval for the rate collects the true rates that would make the observed count unsurprising. A rate far above $k/n$ would make a count as small as $k$ very unlikely, so the upper end $u$ is the rate at which seeing $k$ or fewer has probability $\alpha/2$. Likewise the lower end $l$ is the rate at which seeing $k$ or more has probability $\alpha/2$. Here $\alpha$ is the chance that the interval misses, not a test's size, and the confidence level is $1 - \alpha$.
+An interval for the rate collects the true rates that would make the observed count unsurprising. A rate far above $k/n$ would make a count as small as $k$ very unlikely, so the upper end $u$ is the rate at which $k$ or fewer has probability $\alpha/2$. Likewise the lower end $l$ is the rate at which $k$ or more has probability $\alpha/2$. Here $\alpha$ is the chance that the interval misses, not a test's size, and the confidence level is $1 - \alpha$.
 
 ::: {#thm-ht-clopper-pearson name="Clopper–Pearson interval"}
 For $k$ successes in $n$ independent trials and a level $1 - \alpha$, let $l$ and $u$ solve
@@ -372,12 +368,12 @@ The interval is random, because it depends on the count, and the claim is about 
 3. *Combine the two ends.* The lower end misses with probability at most $\alpha/2$ in the same way, and by the union bound the interval misses with probability at most $\alpha$.
 :::
 
-The interval is exact, since it uses the binomial itself, and conservative, since its coverage may exceed $1 - \alpha$. For a zero count, a one-sided upper bound at level 0.95, which puts all of the 0.05 on the upper side, solves $(1 - u)^n = 0.05$. Since $\ln(1 - u) \approx -u$ for small $u$, this gives $u \approx \ln(20)/n \approx 3/n$, the **rule of three**. With 3,000 negatives and no false positive, $u = 9.981\times10^{-4}$, and certifying an FPR below $10^{-3}$ takes 2,995 clean negatives.
+The interval is exact, because it uses the binomial itself, and conservative, because its coverage may exceed $1 - \alpha$. For a zero count, a one-sided upper bound at level 0.95, which puts all of the 0.05 on the upper side, solves $(1 - u)^n = 0.05$. Since $\ln(1 - u) \approx -u$ for small $u$, this gives $u \approx \ln(20)/n \approx 3/n$, the **rule of three**. With 3,000 negatives and no false positive, $u = 9.981\times10^{-4}$. Solving $(1 - 10^{-3})^n = 0.05$ for $n$ shows that certifying an FPR below $10^{-3}$ takes 2,995 clean negatives.
 
-The interval's width relative to the rate is set mainly by the expected count $np$, since a binomial count with a small rate has variance close to its mean, so a count near $k$ fluctuates by about $\sqrt k$. Ten false positives leave the rate uncertain by a factor of two, and a hundred, at $n = 100{,}000$, by about 20%: $[0.00081, 0.00122]$ around $10^{-3}$. So measuring an FPR near $p$ to within 20% takes about $100/p$ negatives. A threshold tuned to hit a target rate on some data also fits that data's noise, so choose thresholds on one split and measure rates on another.
+The width of the interval relative to the rate depends mainly on the expected count $np$. A binomial count with a small rate has variance close to its mean, so a count near $k$ fluctuates by about $\sqrt k$. Ten false positives leave the rate uncertain by a factor of two, and a hundred, at $n = 100{,}000$, by about 20%: $[0.00081, 0.00122]$ around $10^{-3}$. So to measure an FPR near $p$ to within 20% you need about $100/p$ negatives. A threshold tuned to hit a target rate on some data also fits that data's noise, so choose thresholds on one split and measure rates on another.
 
 ::: {#exm-ht-measure}
-Take the $\mu = 2$ biomarker test at the threshold 3.0902, with true FPR $10^{-3}$ and true TPR 0.1378, and evaluate it on 10,000 negatives and 10,000 positives. @tbl-ht-one-run gives one simulated run. The TPR is pinned down to about $\pm0.007$, but the data are consistent with a true FPR from about half to almost twice the target.
+Take the $\mu = 2$ biomarker test at the threshold 3.0902, with true FPR $10^{-3}$ and true TPR 0.1378, and evaluate it on 10,000 negatives and 10,000 positives. @tbl-ht-one-run gives one simulated run. The TPR is known to about $\pm0.007$, but the data are consistent with a true FPR from about half to almost twice the target.
 
 | Quantity | Count | Estimate | 95% Clopper–Pearson interval |
 | --- | --- | --- | --- |
@@ -386,14 +382,14 @@ Take the $\mu = 2$ biomarker test at the threshold 3.0902, with true FPR $10^{-3
 
 : One simulated evaluation of the $\mu = 2$ test at its $10^{-3}$ threshold, with 10,000 examples per class. {#tbl-ht-one-run}
 
-Two alternatives do worse. The **Wald** interval, from the normal approximation, gives $[0.00038, 0.00162]$, too narrow and symmetric for a skewed count, and at $k = 0$ it collapses to $[0, 0]$. The interval from Hoeffding's inequality ([Concentration inequalities](02-concentration.md)) has half-width $\sqrt{\ln(2/0.05)/(2n)} = 0.0136$, over 13 times the rate itself, because it uses only the range $[0, 1]$ and ignores the tiny variance $p(1 - p)$. Clopper–Pearson is conservative but not loose: over 2,000 simulated evaluations it covered the true rate 97.20% of the time. @fig-ht-rate-ci shows how slowly it tightens as $n$ grows.
+Clopper–Pearson is conservative but not loose: over 2,000 simulated evaluations it covered the true rate 97.20% of the time. The normal approximation gives an interval too narrow and symmetric for a skewed count, and Hoeffding's inequality ([Concentration inequalities](02-concentration.md)) gives one over 13 times wider than the rate, because it ignores the tiny variance. @fig-ht-rate-ci shows how slowly it tightens as $n$ grows.
 :::
 
 ![95% Clopper–Pearson intervals for an observed false positive rate of exactly $10^{-3}$, as the number of negatives grows from $10^3$ to $10^6$, with the upper end of the two-sided Hoeffding interval for comparison.](figures/hypothesis_testing_rate_ci.svg){#fig-ht-rate-ci}
 
 ## Code {#sec-ht-code}
 
-The script [code/hypothesis_testing.py](../../code/part01-prerequisites/hypothesis_testing.py) computes every number quoted in this chapter and draws every figure. It checks the Neyman–Pearson lemma against random tests, and the closed-form curves and the interval's coverage by simulation. From the repository root:
+The script [code/hypothesis_testing.py](../../code/part01-prerequisites/hypothesis_testing.py) computes every number quoted in this chapter and draws every figure. It checks the Neyman–Pearson lemma against random tests, and the closed-form curves and the coverage of the interval by simulation. From the repository root:
 
 ```bash
 uv run python code/part01-prerequisites/hypothesis_testing.py

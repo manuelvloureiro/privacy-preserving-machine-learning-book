@@ -1,16 +1,14 @@
 # Prerequisites
 
-This part collects the mathematics the rest of the book stands on. It contains no new ideas about privacy. Everything here is standard probability, statistics, optimization, information theory and cryptography, and you may have met most of it before. What is different is the selection and the angle: each topic is chosen because a later part needs it, and each is developed only as far as that need goes, but always with full derivations.
+This part collects the mathematics that the rest of the book uses. It is standard probability, statistics, optimization, information theory and cryptography, with no ideas about privacy yet. Each topic is here because a later part needs it, and each goes only as far as that need, but always with full derivations.
 
 ## Who this part is for
 
-You are expected to know undergraduate calculus and linear algebra, the basics of probability (random variables, expectation, variance, independence, conditional probability), and enough machine learning to recognise a loss function, a training set and stochastic gradient descent. You should be able to read short Python programs that use NumPy. Nothing beyond that is assumed. Every inequality, divergence or definition that the later parts rely on is stated and derived here, so you can check each step for yourself instead of taking it on trust.
-
-If you already know a topic well, read the Summary table at the end of its chapter, and move on if every result in it is familiar.
+You need undergraduate calculus and linear algebra, the basics of probability (random variables, expectation, variance, independence, conditional probability), and enough machine learning to recognise a loss function, a training set and stochastic gradient descent. You also need to read short Python programs that use NumPy. This part derives everything else that later parts use. If you already know a topic well, read the Summary table at the end of its chapter, and move on if every result in it is familiar.
 
 ## The common thread
 
-Later parts study algorithms whose output is random, and keep asking the same few questions about them. How far is a random output from its expected value? How different are the output distributions on two slightly different inputs, and how would anyone tell them apart? How much does a trained model depend on a single training record? How much does an observation reveal about something hidden, and what can an observer with limited computing power learn from it? Each chapter of this part supplies the vocabulary and tools for one of these questions (@tbl-prereq-map).
+Later parts study algorithms whose output is random, and they keep asking the same few questions about them. How far is a random output from its expected value? How different are the output distributions on two slightly different inputs, and how would anyone tell them apart? How much does a trained model depend on one training record? How much does an observation reveal about something hidden, and what can an observer with limited computing power learn from it? Each chapter of this part gives the tools for one of these questions (@tbl-prereq-map).
 
 | Chapter | The question it answers | Builds on |
 | --- | --- | --- |
@@ -25,15 +23,15 @@ Later parts study algorithms whose output is random, and keep asking the same fe
 
 : The chapters of this part, the question each one answers, and the earlier chapters it uses. {#tbl-prereq-map}
 
-Two ideas run through all eight chapters. The first is the **likelihood ratio** $p(x)/q(x)$: how many times more likely an observation is under one distribution than under another. Divergences are averages of functions of it, the best test thresholds it, and mutual information is a divergence in disguise. The second is the **effect of one input**: how much one record shifts an average, a minimizer, a loss or a test statistic. Concentration inequalities bound it for sums, stability bounds it for learning algorithms, and the sensitivity of regularized empirical risk minimization makes it a concrete number. Watch for both as you read. Most of the later parts are built from them.
+Two ideas run through all eight chapters, and most later parts are built from them. The first is the **likelihood ratio** $p(x)/q(x)$, which says how many times more likely an observation is under one distribution than under another. A divergence is an average of a function of it, the best test compares it with a threshold, and mutual information is a divergence too. The second is the **effect of one input**, which is how much one record moves an average, a minimizer, a loss or a test statistic. Concentration inequalities bound it for sums, and stability bounds it for learning algorithms. The sensitivity of regularized empirical risk minimization makes it a concrete number.
 
 ## How to read this part
 
-**Order.** Read chapters 1 to 4 in order, since each one uses the previous ones. Together they form the core of this part: tail bounds, then a number for how different two distributions are, then what that number means for anyone trying to tell them apart. Chapter 5, information theory, continues that thread: it measures how much an observation reveals, on average and for a single best guess. Then read chapters 6 and 7, which go together: how training moves when one record changes, and why that matters for generalization. Chapter 8 is used by three later chapters: chapter 9 on threat models uses its security games and advantage, chapter 15 on linkage uses its birthday bound, and chapter 26 on trust models builds secure aggregation from its secret sharing. A planned later part on cryptographic approaches will use all of it. You can defer it until you reach chapter 9.
+**Order.** Read chapters 1 to 4 in order, because each one uses the ones before. They are the core of this part. Tail bounds come first, then a number for how different two distributions are, then what that number means for anyone who tries to tell them apart. Chapter 5, information theory, continues that thread and measures how much an observation reveals. Chapters 6 and 7 go together: how training moves when one record changes, and why that matters for generalization. You can leave chapter 8 until chapter 9, which uses its security games. Chapter 15 on linkage uses its birthday bound, and chapter 26 on trust models builds secure aggregation from its secret sharing.
 
-**Structure of a chapter.** Every chapter has the same shape, so you always know where to look. It opens with the question it answers, the one idea that organizes the answer, and a running example with its numbers. Then comes one section per topic, in teaching order. Each section opens with its question, and its definitions, theorems and worked examples are numbered so that later chapters can point to them. Every theorem is followed at once by its proof in numbered steps, and then by what it means and how tight it is. A **Code** section runs the script that checks every quoted number, a **Summary** table lists each result with where it is used, and **References** close the chapter.
+**Structure of a chapter.** Every chapter opens with its question and a running example, then gives one section per topic. Its definitions, theorems and examples are numbered so that later chapters can point to them. Each theorem has its proof right after it, in numbered steps. A **Code** section runs the script that checks every quoted number, and a **Summary** table lists each result with where it is used.
 
-**Abstract steps are made concrete.** Where a derivation takes an abstract step, such as writing a probability as the expectation of an indicator or changing the distribution an expectation is taken under, the text works the step out on a small case first, usually a die or a coin with a table of every outcome. If a step feels like a trick, look for that table. It is there to show that the step is just bookkeeping.
+**Abstract steps are made concrete.** An abstract step, such as writing a probability as the average of an indicator, is first worked out on a small case, usually a die or a coin with a table of every outcome. If a step feels like a trick, look for that table.
 
 **Run the code.** Each chapter has a script in `code/` that reproduces every number and figure in its text. From the repository root, run, for example,
 
@@ -41,11 +39,11 @@ Two ideas run through all eight chapters. The first is the **likelihood ratio** 
 uv run python code/part01-prerequisites/concentration.py
 ```
 
-The scripts use fixed random seeds, so your output matches the tables in the text. Change the parameters and watch how the bounds respond. That is the quickest way to develop a feel for how loose each bound is.
+The scripts use fixed random seeds, so your output matches the tables in the text. To get a feel for how loose each bound is, change the parameters and watch how the bounds respond.
 
 ## Notation
 
-The chapters share the conventions in @tbl-prereq-notation. Where a chapter departs from them, it says so at its start.
+The chapters share the conventions in @tbl-prereq-notation, and a chapter that departs from them says so at its start.
 
 | Symbol | Meaning |
 | --- | --- |
@@ -65,14 +63,12 @@ The chapters share the conventions in @tbl-prereq-notation. Where a chapter depa
 
 ## What you will be able to do
 
-By the end of this part you should be able to do each of the following on paper:
+By the end of this part you can do each of the following on paper, because each is a result derived in one of the chapters that follow:
 
-- derive exponential tail bounds for sums of independent variables, and for normal and Laplace noise;
-- compute the Kullback–Leibler (KL), Rényi, total-variation and hockey-stick divergences between two normal or two Laplace distributions, and explain why processing data cannot increase any of them;
-- derive the optimal test between two distributions and its trade-off curve between the two kinds of error;
-- prove convergence rates for stochastic gradient descent, and bound how far a regularized minimizer moves when one training record is replaced;
-- prove that a uniformly stable algorithm generalizes;
-- compute entropy, mutual information and min-entropy leakage, and say when the last two disagree;
-- state a security definition as a game between two worlds, and prove a simple scheme secure with a hybrid argument or a simulator.
-
-Each of these is a result derived in one of the chapters that follow.
+- Derive exponential tail bounds for sums of independent variables, and for normal and Laplace noise.
+- Compute the Kullback–Leibler (KL), Rényi, total-variation and hockey-stick divergences between two normal or two Laplace distributions. Explain why processing data cannot increase them.
+- Derive the optimal test between two distributions and its trade-off curve between the two kinds of error.
+- Prove convergence rates for stochastic gradient descent, and bound how far a regularized minimizer moves when one training record is replaced.
+- Prove that a uniformly stable algorithm generalizes.
+- Compute entropy, mutual information and min-entropy leakage, and say when the last two disagree.
+- State a security definition as a game between two worlds, and prove a simple scheme secure with a hybrid argument or a simulator.

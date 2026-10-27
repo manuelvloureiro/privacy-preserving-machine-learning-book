@@ -1,10 +1,10 @@
 # Syntactic anonymity and how it breaks
 
-[Linkage and re-identification](07-linkage-reidentification.md) showed that deleting names does not anonymize a table. The columns that remain, such as age, ZIP code and sex, are **quasi-identifiers**. None of them names anyone, but together they single out most people, so anyone with a list of names and the same columns can join that list to the release. Between 1998 and 2008, researchers answered with definitions that constrain the released table itself. k-anonymity hides every record in a crowd of at least $k$ records with the same quasi-identifiers. l-diversity asks each crowd to hold several different values of the sensitive column, such as a diagnosis, and t-closeness asks each crowd to have the same mix of those values as the whole table. They are called **syntactic** because each is a property of the published table that you can check by reading it. Statistics offices and open-source anonymization tools such as ARX still use them, so you need to know where each promise ends.
+[Linkage and re-identification](07-linkage-reidentification.md) showed that deleting names does not anonymize a table. The columns that remain, such as age, ZIP code and sex, are **quasi-identifiers**: none of them names anyone, but together they single out most people. Between 1998 and 2008, researchers answered with definitions that constrain the released table itself. k-anonymity hides every record in a crowd of at least $k$ records with the same quasi-identifiers. l-diversity asks each crowd to hold several different values of the sensitive column, such as a diagnosis, and t-closeness asks each crowd to have the same mix of those values as the whole table. They are called **syntactic** because each is a property of the published table that you can check by reading it. Statistics offices and open-source tools such as ARX still use them, so you need to know where each promise ends.
 
-The one idea of this chapter is that a syntactic definition fixes the adversary's knowledge in advance. k-anonymity assumes that the adversary knows the target's quasi-identifiers and nothing else, l-diversity lets it also rule out a few of the target's sensitive values, and t-closeness lets it know how the sensitive values are spread over the whole table. Each attack below gives the adversary one piece of knowledge more than its definition assumes, and the guarantee then no longer applies. A second release, the most ordinary extra knowledge there is, breaks all three definitions.
+The one idea of this chapter is that a syntactic definition fixes the adversary's knowledge in advance. k-anonymity assumes that the adversary knows the target's quasi-identifiers and nothing else. l-diversity lets it also rule out a few of the target's sensitive values, and t-closeness lets it know how the sensitive values are spread over the whole table. Each attack below gives the adversary one piece of knowledge more than its definition assumes, and the guarantee then fails. A second release, the most ordinary extra knowledge there is, breaks all three definitions.
 
-The running example is a synthetic hospital table of 10,000 patients, with age, ZIP code and sex as quasi-identifiers and one of eight diagnoses as the sensitive attribute. Released with exact quasi-identifiers, it lets an adversary who knows a random patient's three columns pick out that patient's record with probability 0.933, guessing at random among the records that share those values. Two independent anonymized releases of it reveal more than three times as many diagnoses as either alone.
+The running example is a synthetic hospital table of 10,000 patients, with age, ZIP code and sex as quasi-identifiers and one of eight diagnoses as the sensitive attribute. Released with exact quasi-identifiers, it lets an adversary who knows a random patient's three columns pick out that patient's record with probability 0.933. Two independent anonymized releases of it reveal more than three times as many diagnoses as either alone.
 
 | Symbol | Meaning |
 | --- | --- |
@@ -19,13 +19,13 @@ The running example is a synthetic hospital table of 10,000 patients, with age, 
 
 ## k-anonymity {#sec-anon-k}
 
-Sweeney and Samarati's 1998 answer to the linkage attack is to make sure that every combination of quasi-identifiers in the release is shared by at least $k$ people. The data holder, the **custodian**, gets there by generalizing, so that age 37 becomes 35–39 and ZIP code 02139 becomes 021\*\*, and by suppressing the few records that still stand out. This section asks what the definition buys against linkage, and what it costs in the detail the quasi-identifiers can keep.
+Sweeney and Samarati's 1998 answer to the linkage attack is to make every combination of quasi-identifiers in the release shared by at least $k$ people. The data holder, the **custodian**, gets there by generalizing, so that age 37 becomes 35–39 and ZIP code 02139 becomes 021\*\*, and by suppressing the few records that still stand out. This section asks what the definition buys against linkage, and what it costs in detail.
 
 ::: {#def-anon-k name="k-anonymity"}
 A **generalization** replaces each quasi-identifier of a record by a coarser value, such as an age by a range or a ZIP code by a prefix, and different records may be coarsened differently. **Suppression** deletes records. An **equivalence class** $E$ of the released table is a set of records with the same generalized quasi-identifiers, and $\lvert E\rvert$ is its number of records. A release is **k-anonymous** if every equivalence class has at least $k$ records.
 :::
 
-The linkage game of [Linkage and re-identification](07-linkage-reidentification.md) draws a target uniformly from a release of $n$ records and gives the adversary the target's quasi-identifiers, and the adversary wins if it picks out the target's record. It finds the target's class but cannot tell the records inside apart, so it guesses one of them at random. In a class of $\lvert E\rvert$ records it is then right with probability $1/\lvert E\rvert$, and the target lands there with probability $\lvert E\rvert/n$. So each class contributes $1/n$, and summing over $J$ classes gives the success $J/n$ of @eq-link-success. For a fixed $n$, large classes mean few classes, and that is the whole guarantee.
+The linkage game of [Linkage and re-identification](07-linkage-reidentification.md) draws a target uniformly from a release of $n$ records and gives the adversary the target's quasi-identifiers, and the adversary wins if it picks out the target's record. By @prp-link-success, the best it can do is guess at random within the target's class, which succeeds with probability $J/n$ over $J$ classes. For a fixed $n$, large classes mean few classes, and that is the whole guarantee.
 
 ::: {#prp-anon-k-link name="k-anonymity caps linkage"}
 If a release of $n$ records is k-anonymous, then the adversary's success in the linkage game is at most $1/k$:
@@ -38,9 +38,9 @@ $$\Pr[\text{win}] = \frac{J}{n} \le \frac1k.$$ {#eq-anon-k-link}
 3. *Read off the linkage success.* @eq-link-success says that the linkage success is $J/n$, so it is at most $1/k$.
 :::
 
-The guarantee is about identity only. @eq-anon-k-link bounds the chance of picking out the target's *record*, and says nothing about the sensitive attribute, which the next two sections attack. It also needs the right columns treated as quasi-identifiers. In data with many columns and few filled entries, such as movie ratings, every column is one, because a few ratings already single a person out (@sec-link-sparse). Every column must then be coarsened until $k$ records agree on all of them, which leaves little of the table (Aggarwal, 2005).
+The guarantee is about identity only. @eq-anon-k-link bounds the chance of picking out the target's *record*, and says nothing about the sensitive attribute, which the next two sections attack. It also needs the right columns treated as quasi-identifiers. In sparse data such as movie ratings, every column is one, because a few ratings already single a person out (@sec-link-sparse). Every column must then be coarsened until $k$ records agree on all of them, which leaves little of the table (Aggarwal, 2005).
 
-Coarse quasi-identifiers protect more but say less, so the next question is how coarse they must be. Suppose the generalized quasi-identifiers split $n$ people into $K$ cells, each person falling into a cell independently and every cell equally likely, and no record is suppressed, so each cell is a class. Naming a person's cell then takes $\log_2 K$ bits, to compare with the $\log_2 n$ bits that single out one person of $n$. Each of the other $n - 1$ people lands in a given person's cell with probability $1/K$, so the number of others there is a $\mathrm{Bin}(n - 1, 1/K)$ count. With many people and many cells, @thm-dist-poisson-limit in [Probability distributions](../part01-prerequisites/01-distributions.md) shows that this count is close to a Poisson count with the same mean, $(n - 1)/K \approx n/K$.
+Coarse quasi-identifiers protect more but say less, so how coarse must they be? Suppose the generalized quasi-identifiers split $n$ people into $K$ equally likely cells, each person falling into a cell independently, and no record is suppressed, so each cell is a class. Naming a cell takes $\log_2 K$ bits, against the $\log_2 n$ bits that single out one person. The number of other people in a given person's cell is a $\mathrm{Bin}(n - 1, 1/K)$ count, which by @thm-dist-poisson-limit is close to a Poisson count with mean $(n - 1)/K \approx n/K$ when people and cells are many.
 
 ::: {#prp-anon-k-violate name="The cost of k-anonymity for uniform cells"}
 Suppose $n$ people fall independently into $K$ equally likely cells, and treat the number of other people in a person's cell as a $\mathrm{Poisson}(n/K)$ count. A person's class is smaller than $k$ when at most $k - 2$ others share the cell, so the expected fraction of people in classes smaller than $k$ is
@@ -58,7 +58,7 @@ The plan is to compute the chance that one person's class is too small, note tha
 4. *Solve for the coarseness.* A Poisson count with a larger mean is more likely to exceed any fixed level, so the chance that it is at most $k - 2$ falls as the mean grows. The fraction is therefore at most 1% exactly when $n/K \ge \lambda_k$, that is $K \le n/\lambda_k$. Taking $\log_2$ of both sides gives $\log_2 K \le \log_2 n - \log_2\lambda_k$.
 :::
 
-So k-anonymity costs more than the naive $\log_2 k$ bits below $\log_2 n$, which is what exactly $k$ people in each of $K = n/k$ cells would allow. Cells vary in size around their mean, and the unlucky small cells violate the definition, so you need $\lambda_k$ people per cell *on average*, more than $k$. For $k = 2$ a person violates the definition when $N = 0$, which has probability $e^{-n/K}$. Setting $e^{-n/K} = 0.01$ gives $\lambda_2 = \ln 100 = 4.61$, more than twice $k$.
+So k-anonymity costs more than the naive $\log_2 k$ bits below $\log_2 n$, which exactly $k$ people in each of $K = n/k$ cells would allow. Cells vary in size around their mean, and the unlucky small cells violate the definition, so you need $\lambda_k$ people per cell *on average*, more than $k$. For $k = 2$ a person violates the definition when $N = 0$, which has probability $e^{-n/K}$, and $e^{-n/K} = 0.01$ gives $\lambda_2 = \ln 100 = 4.61$, more than twice $k$.
 
 ::: {#exm-anon-bits}
 @tbl-anon-bits applies @eq-anon-k-violate to a population of $n = 10{,}000$, with $\log_2 n = 13.29$ bits. For $k = 2$, $\lambda_2 = 4.61$ from the calculation above, $\log_2 4.61 = 2.20$, and $13.29 - 2.20 = 11.08$ bits are allowed.
@@ -73,14 +73,14 @@ So k-anonymity costs more than the naive $\log_2 k$ bits below $\log_2 n$, which
 
 : Uniform cells, $n = 10{,}000$: how many bits of quasi-identifier k-anonymity allows if at most 1% of records may fall in classes smaller than $k$. {#tbl-anon-bits}
 
-The last two columns compare the true cost with the naive $\log_2 k$. The gap is about 1.2 bits at $k = 2$ ($2.20 - 1.00$) and shrinks to about 0.4 bits at $k = 50$ ($6.06 - 5.64$), because a Poisson count with a large mean varies little relative to its mean, so $\lambda_k/k$ approaches 1 and $\log_2\lambda_k$ approaches $\log_2 k$. @fig-anon-bits draws the whole curve for each $k$.
+The last two columns compare the true cost with the naive $\log_2 k$. The gap is about 1.2 bits at $k = 2$ ($2.20 - 1.00$) and shrinks to about 0.4 bits at $k = 50$ ($6.06 - 5.64$). A Poisson count with a large mean varies little relative to its mean, so $\lambda_k/k$ approaches 1 (@fig-anon-bits).
 
-At the other extreme, @sec-link-unique showed that 99% of people are unique once the quasi-identifiers carry $\log_2n + 6.64$ bits. Hiding 99% in pairs needs 2.20 bits below $\log_2 n$, so only $6.64 + 2.20 = 8.84$ bits, about 9, separate "almost everyone is unique" from "almost everyone is hidden in a pair", and every published attribute uses some of those bits.
+At the other extreme, @sec-link-unique showed that 99% of people are unique once the quasi-identifiers carry $\log_2n + 6.64$ bits. Hiding 99% in pairs needs 2.20 bits below $\log_2 n$. So only $6.64 + 2.20 = 8.84$ bits, about 9, separate "almost everyone is unique" from "almost everyone is hidden in a pair", and every published attribute uses some of those bits.
 :::
 
 ![The fraction of records in classes smaller than $k$, against the bits of quasi-identifier minus $\log_2 n$ (negative when below $\log_2 n$), for uniform cells. Each curve is a Poisson CDF (cumulative distribution function); the dotted line is 1% of records.](figures/anon_bits.svg){#fig-anon-bits}
 
-Real tables are not uniform, so real anonymizers search for a generalization that works on the data at hand. This chapter's script uses the algorithm of LeFevre, DeWitt & Ramakrishnan (2006).
+Real tables are not uniform, so real anonymizers search for a generalization that works on the data at hand. The script uses the algorithm of LeFevre, DeWitt & Ramakrishnan (2006).
 
 ::: {#def-anon-mondrian name="Mondrian"}
 Given a table and a criterion that a class must meet, such as having at least $k$ records, **Mondrian** starts with the whole table as one box. Each quasi-identifier is coded as ordered numbers (ZIP codes in a fixed order, sex as 0 and 1). Mondrian splits a box at the median of the quasi-identifier whose values in the box span the largest share of their full range, as long as both halves still meet the criterion. If that split fails, it tries the next widest quasi-identifier, and a box whose every split fails is final. Each final box is a class, published as a range per quasi-identifier.
@@ -89,7 +89,7 @@ Given a table and a criterion that a class must meet, such as having at least $k
 Because Mondrian splits until a half would fail the criterion, its classes stay close to size $k$. With no tied values they have between $k$ and $2k - 1$ records, because a box of $2k$ or more records splits at its median into two halves of at least $k$.
 
 ::: {#exm-anon-mondrian}
-In the hospital table of $n = 10{,}000$ patients, age runs from 0 to 89, the ZIP code takes 800 values with a few areas far more common than the rest, and sex has two values. The diagnosis depends on age, from asthma in childhood to cancer late in life. Flu is equally common at every age, and HIV is rare (1.0% of records). The exact linkage success of 0.933 means, by @eq-link-success, that the patients fall into $0.933 \times 10{,}000 = 9{,}330$ distinct combinations, so most are alone in theirs. @tbl-anon-k gives the result of Mondrian with k-anonymity as the criterion. Its last two columns concern the diagnosis and are read in @sec-anon-l.
+In the hospital table of $n = 10{,}000$ patients, age runs from 0 to 89, the ZIP code takes 800 values with a few areas far more common than the rest, and sex has two values. The diagnosis depends on age, from asthma in childhood to cancer late in life. Flu is equally common at every age, and HIV is rare (1.0% of records). By @eq-link-success, the exact linkage success of 0.933 means that the patients fall into $0.933 \times 10{,}000 = 9{,}330$ distinct combinations, so most are alone in theirs. @tbl-anon-k gives the result of Mondrian with k-anonymity as the criterion, and @sec-anon-l reads its last two columns.
 
 | $k$ | Classes | Sizes | Mean width | Linkage $J/n$ | Certain disclosure | Guess accuracy |
 | --- | --- | --- | --- | --- | --- | --- |
@@ -101,14 +101,14 @@ In the hospital table of $n = 10{,}000$ patients, age runs from 0 to 89, the ZIP
 
 : Mondrian k-anonymization of a synthetic hospital table of 10,000 patients. Mean width is the average, over records and quasi-identifiers, of the class's range as a fraction of the full range. Certain disclosure is the fraction of records in a class with a single diagnosis. Guess accuracy is the fraction of records whose diagnosis is the most common one in their class. {#tbl-anon-k}
 
-The linkage success sits between $1/(2k)$ and $1/k$ for every $k$ (@fig-anon-tradeoff, left), because $J/n$ is one over the average class size. No class is smaller than $k$, so the upper bound $1/k$ is guaranteed by @prp-anon-k-link. The lower bound is not guaranteed, because ties in age and sex let Mondrian leave classes larger than $2k$, up to 41 records at $k = 20$, but they are rare enough that the average size stays below $2k$ in every row, which keeps $J/n$ above $1/(2k)$. The cost in precision is small, since at $k = 5$ the average range covers 1.6% of each quasi-identifier's span.
+The linkage success sits between $1/(2k)$ and $1/k$ for every $k$ (@fig-anon-tradeoff, left), because $J/n$ is one over the average class size. The upper bound $1/k$ is guaranteed by @prp-anon-k-link. The lower bound is not, because ties in age and sex let Mondrian leave classes larger than $2k$, up to 41 records at $k = 20$, but they are rare enough that the average stays below $2k$. The cost in precision is small: at $k = 5$ the average range covers 1.6% of each quasi-identifier's span.
 :::
 
 ![Left: the linkage success of Mondrian releases of the synthetic hospital table against $k$, between $1/(2k)$ and the bound $1/k$. Right: how often the diagnosis is the most common one in the record's class, and how often the class holds a single diagnosis, against two baselines that use no release, the table's most common diagnosis and the best guess from age.](figures/anon_tradeoff.svg){#fig-anon-tradeoff}
 
 ## Homogeneity, background knowledge and l-diversity {#sec-anon-l}
 
-Machanavajjhala, Kifer, Gehrke & Venkitasubramaniam (2006) pointed out that k-anonymity hides who a record belongs to but not what it says. The release exists to show a **sensitive attribute** $S$, such as a diagnosis. This section asks what an adversary learns about a target's sensitive value from a k-anonymous release, and what condition on the classes limits it. @tbl-anon-toy is a 3-anonymous release that shows the two attacks.
+Machanavajjhala, Kifer, Gehrke & Venkitasubramaniam (2006) pointed out that k-anonymity hides who a record belongs to but not what it says, and the release exists to show a **sensitive attribute** $S$, such as a diagnosis. This section asks what an adversary learns about a target's sensitive value from a k-anonymous release, and what condition on the classes limits it. @tbl-anon-toy is a 3-anonymous release that shows the two attacks.
 
 | ZIP code | Age | Diagnosis |
 | --- | --- | --- |
@@ -141,7 +141,7 @@ $$\Pr[S_{\text{target}} = v \mid \text{release}, S_{\text{target}} \notin B] = \
 
 Alice is 26 and lives in ZIP code 13053, so her class is the first. Every record in it says heart disease, and by @lem-anon-posterior her posterior for heart disease is $\frac33 = 1$, so the **homogeneity attack** discloses her diagnosis without re-identifying anyone. Bob is 35, lives in 13068, and is in the third class, where two of three records say cancer, so his posterior for cancer is $\frac23$. His neighbour knows that Bob never had flu that season and rules it out. Crossing out the flu record leaves two cancer records, and cancer then has posterior $\frac22 = 1$, which is the **background knowledge attack**.
 
-Both attacks work because one value dominates the class, either from the start or after a few values are ruled out. l-diversity therefore asks for enough different values in each class, and its three versions differ in how they measure "enough". Sort a class's value counts from largest to smallest as $r_1 \ge r_2 \ge \dots \ge r_m$, so that $r_1$ is the count of the most common value. The entropy $H(P_E) = -\sum_v P_E(v)\log_2 P_E(v)$ measures in bits how spread out the values are, and $\ell$ equally common values have entropy exactly $\log_2 \ell$. The third version is built to survive the background knowledge attack.
+Both attacks work because one value dominates the class, either from the start or after a few values are ruled out. So l-diversity asks for enough different values in each class, and its three versions differ in how they measure "enough". Sort a class's value counts from largest to smallest as $r_1 \ge r_2 \ge \dots \ge r_m$. The entropy $H(P_E) = -\sum_v P_E(v)\log_2 P_E(v)$ measures in bits how spread out the values are, and $\ell$ equally common values have entropy exactly $\log_2 \ell$. The third version is built to survive the background knowledge attack.
 
 ::: {#def-anon-l name="l-diversity"}
 A class $E$ is
@@ -153,7 +153,7 @@ A class $E$ is
 A release is $\ell$-diverse in one of these senses if every class is.
 :::
 
-The right-hand side of the recursive condition is $c$ times the tail, the records left after the $\ell - 1$ most common values are set aside. The guarantee allows the adversary to rule out $\ell - 2$ values, the most any guarantee can allow, since ruling out $\ell - 1$ values of a class with exactly $\ell$ values leaves one. Ruling out values only removes counts, so the top count cannot grow and the rest cannot shrink below the tail.
+The right-hand side of the recursive condition is $c$ times the tail, the records left after the $\ell - 1$ most common values are set aside. The guarantee below lets the adversary rule out $\ell - 2$ values, the most any guarantee can allow, since ruling out $\ell - 1$ values of a class with exactly $\ell$ values leaves one. It holds because ruling out values only removes counts, so the top count cannot grow and the rest cannot shrink below the tail.
 
 ::: {#prp-anon-recursive name="What recursive diversity guarantees"}
 Let a class be recursive $(c, \ell)$-diverse, and let the adversary know, besides the target's quasi-identifiers, that the target's value is not one of some $\ell - 2$ values. Then every remaining value $v$ has
@@ -174,9 +174,9 @@ $$\frac{cR}{cR + R} = \frac{c}{1 + c}.$$
 
 l-diversity rules out certainty but still allows high likelihood. The bound $c/(1 + c)$ is $\frac12$ at $c = 1$, $\frac23$ at $c = 2$ and $\frac34$ at $c = 3$, so even recursive diversity lets the adversary be fairly sure. Distinct $\ell$-diversity only says that the adversary must rule out $\ell - 1$ values to be certain, while one value can still hold all but $\ell - 1$ of the records. Entropy $\ell$-diversity does not limit the top value's share directly either. An entropy 3-diverse class over 8 values can have one value in 73% of its records, because the other 27% spread evenly over seven values give entropy $-0.73\log_2 0.73 - 0.27\log_2\frac{0.27}{7} = 1.60$ bits, above $\log_2 3 = 1.58$.
 
-The guarantee assumes how much the adversary knows rather than limiting it. It covers $\ell - 2$ ruled-out values, and one more can give certainty whatever $c$ is. An adversary who knows something softer, such as "probably not flu", is not covered either.
+The guarantee assumes how much the adversary knows instead of limiting it. It covers $\ell - 2$ ruled-out values, and one more can give certainty whatever $c$ is. Softer knowledge, such as "probably not flu", is not covered either.
 
-Some tables cannot be made diverse at all. The whole table's distribution $P$ is the average of its classes' distributions $P_E$, each weighted by the class's share of the records. In entropy, such an average is at least as spread out as its parts are on average, so a concentrated table forces some class to be concentrated too.
+Some tables cannot be made diverse at all. The whole table's distribution $P$ is the average of its classes' distributions $P_E$, weighted by the class shares. Such an average is at least as spread out in entropy as its parts are on average, so a concentrated table forces some class to be concentrated too.
 
 ::: {#prp-anon-entropy-table name="A table with low entropy has no entropy-diverse release"}
 If the whole table's distribution $P$ of the sensitive attribute has entropy below $\log_2\ell$, then no partition of the table into classes is entropy $\ell$-diverse.
@@ -191,9 +191,9 @@ If the whole table's distribution $P$ of the sensitive attribute has entropy bel
 ::: {#exm-anon-l}
 In @tbl-anon-toy the three classes hold 1, 3 and 2 different values, so they are distinct 1-, 3- and 2-diverse. The largest $\ell$ for which a class is entropy $\ell$-diverse is $2^{H(P_E)}$, because $\ell$ equally common values have entropy $\log_2\ell$. The first class has one value, entropy 0 and $\ell = 1.00$, and the second has three equally common values and $\ell = 3.00$. The third, $\frac23$ cancer and $\frac13$ flu, has entropy $\frac23\log_2\frac32 + \frac13\log_2 3 = 0.918$ bits and $\ell = 2^{0.918} = 1.89$. The release as a whole is only 1-diverse, because of Alice's class.
 
-In the hospital table, the "certain disclosure" column of @tbl-anon-k counts the patients in homogeneous classes, 28.0% of all patients at $k = 2$ and 2.3% at $k = 5$, which is 232 patients whose diagnosis the release states outright. Knowing a patient's age never gives that certainty, since at no age does the population's distribution give any diagnosis more than 0.705.
+In the hospital table, the "certain disclosure" column of @tbl-anon-k counts the patients in homogeneous classes. They are 28.0% of all patients at $k = 2$, and 2.3% at $k = 5$, which is 232 patients whose diagnosis the release states outright. Knowing a patient's age never gives that certainty, since at no age does any diagnosis have population probability above 0.705.
 
-A posterior has to be read against what the adversary would believe with no release, since 0.6 for a diagnosis is no leak if the population already gives 0.6 to people of the target's age. The right comparison is the **imputation baseline** of [Attribute inference and model inversion](03-attribute-inference.md), the best guess from the target's own quasi-identifiers when the population is known exactly. Here the diagnosis depends only on age, so imputation guesses from age alone. Guessing the most common diagnosis of the whole table is right for 18.5% of patients. Imputation is right for 53.6% (@fig-anon-tradeoff, right). A 5-anonymous release is right for 59.3%. So most of what the release teaches the adversary is the age–diagnosis pattern, which any useful study of this table would report. The excess over imputation, $0.593 - 0.536 = 0.057$ at $k = 5$, comes from classes so small that their most common diagnosis is often the member's own, and it is down to $0.540 - 0.536 = 0.004$ at $k = 20$.
+A posterior must be read against what the adversary would believe with no release. The right comparison is the **imputation baseline** of [Attribute inference and model inversion](03-attribute-inference.md), the best guess from the target's own quasi-identifiers when the population is known exactly, which here is a guess from age alone. Guessing the table's most common diagnosis is right for 18.5% of patients, imputation for 53.6% (@fig-anon-tradeoff, right), and a 5-anonymous release for 59.3%. So most of what the release teaches is the age–diagnosis pattern, which any useful study of this table would report. The excess over imputation, $0.593 - 0.536 = 0.057$ at $k = 5$, comes from classes so small that their most common diagnosis is often the member's own, and it falls to $0.540 - 0.536 = 0.004$ at $k = 20$.
 
 @tbl-anon-l adds diversity to $k = 5$.
 
@@ -210,15 +210,14 @@ Distinct 3-diversity removes the certain disclosures for little cost. Recursive 
 
 ## Skewness, similarity and t-closeness {#sec-anon-t}
 
-l-diversity counts values, but what matters is how far the adversary's belief moves. Li, Li & Venkatasubramanian (2007) found two attacks that diversity does not see. In the **skewness attack**, 1% of the table has HIV, and a class that is half HIV is 2-diverse in every sense, yet by @lem-anon-posterior it raises the belief that a member has HIV fifty-fold. In the **similarity attack**, a class holds gastric ulcer, gastritis and stomach cancer, so it is 3-diverse, and still reveals a stomach disease. This section measures a class by its distance from the whole table's distribution, and asks what a bound on that distance guarantees.
+l-diversity counts values, but what matters is how far the adversary's belief moves, and Li, Li & Venkatasubramanian (2007) found two attacks that diversity does not see. In the **skewness attack**, 1% of the table has HIV, and a class that is half HIV is 2-diverse in every sense, yet by @lem-anon-posterior it raises the belief that a member has HIV fifty-fold. In the **similarity attack**, a class holds gastric ulcer, gastritis and stomach cancer, so it is 3-diverse, and still reveals a stomach disease. This section measures a class by its distance from the whole table's distribution.
 
 ::: {#def-anon-t name="t-closeness"}
 Let $d$ be a distance between distributions on the values of the sensitive attribute. A release is **t-close** if every class's distribution is within distance $t$ of the whole table's, that is $d(P_E, P) \le t$ for every class $E$.
 :::
 
-The first choice of distance is total variation. @thm-div-tv in [Divergences](../part01-prerequisites/03-divergences.md) proves that the **total variation (TV)** distance, half the total absolute difference between two probability tables, equals the largest difference between the probabilities the two tables give to one set of values:
+The first choice of distance is total variation. By @thm-div-tv, the **total variation (TV)** distance, half the total absolute difference between two probability tables, equals the largest difference between the probabilities the two tables give to one set of values $A$:
 $$\mathrm{TV}(P_E, P) = \frac12\sum_v\lvert P_E(v) - P(v)\rvert = \max_A\,\lvert P_E(A) - P(A)\rvert.$$
-Here the maximum is over all sets of values $A$, and $P_E(A)$ is the probability under $P_E$ that the value lands in $A$.
 
 ::: {#prp-anon-tv name="What t-closeness in total variation guarantees"}
 If a release is t-close with the total variation distance, then for every class $E$ and every set of values $A$,
@@ -232,7 +231,7 @@ In particular, guessing the most common value of the target's class is right wit
 3. *Apply it to the best guess.* Take $A = \{v\}$ for the class's most common value $v$. Then step 1 gives $P_E(v) \le P(v) + t$, and $P(v)$ is at most $\max_uP(u)$.
 :::
 
-The bound is additive, but rare values need a ratio. @eq-anon-tv lets a 1% value rise to $1\% + t$, which at $t = 0.15$ is 16%, a sixteen-fold increase. A guarantee for rare values has to bound the *ratio* of the adversary's beliefs with and without the release, not their difference, and that is the shape of differential privacy, the definition of Part 3.
+The bound is additive, but rare values need a ratio. @eq-anon-tv lets a 1% value rise to $1\% + t$, which at $t = 0.15$ is 16%, a sixteen-fold increase. A guarantee for rare values must bound the *ratio* of the adversary's beliefs with and without the release, and that is the shape of differential privacy, the definition of Part 3.
 
 Total variation treats every pair of values as equally different, so it does not see the similarity attack. The **earth mover's distance (EMD)**, the choice of Li et al., makes similar values close. Think of each distribution as piles of sand on the values, and of a ground distance between values as the cost of moving a unit of sand from one to the other.
 
@@ -253,7 +252,7 @@ $$\mathrm{EMD}(P_E, P) = \frac{1}{m - 1}\sum_{i=1}^{m-1}\Big\lvert\sum_{j \le i}
 3. *A plan that does no more.* Move exactly the net amount of step 2 across each gap, between neighbouring values. Value $i$ then gains the net mass entering through its two gaps, which is $P(i) - P_E(i)$, so the plan turns $P_E$ into $P$. So the least cost is $1/(m - 1)$ times the sum, over the $m - 1$ gaps, of the absolute net mass that crosses each one, which is @eq-anon-emd.
 :::
 
-The choice of distance is a choice of what counts as similar. EMD with a ground distance that puts diagnoses of the same organ close together treats gastritis and gastric ulcer as close, so a class full of stomach diseases is far from the table and fails the definition. On salary bands, if the table is spread evenly, a class bunched at the low end is farther from it than a class spread across the range.
+The choice of distance is a choice of what counts as similar. EMD with a ground distance that puts diagnoses of the same organ close together treats gastritis and gastric ulcer as close, so a class full of stomach diseases is far from the table and fails the definition. On three salary bands spread evenly in the table, a class all in the lowest band has cumulative differences $\frac23$ and $\frac13$, so by @eq-anon-emd its EMD is $\frac12(\frac23 + \frac13) = 0.5$. A class spread evenly across the bands has EMD 0.
 
 ::: {#exm-anon-t}
 Take total variation first. In @tbl-anon-toy, the table's distribution is $\frac49$ heart disease, $\frac39$ cancer and $\frac29$ flu. Both distributions sum to 1, so the excesses and shortfalls are equal, and the half-sum of absolute differences is the total excess of the class over the table. Alice's class is all heart disease, an excess of $1 - \frac49 = \frac59 = 0.556$. The second class is $\frac13 = \frac39$ of each value, an excess of $\frac39 - \frac29 = \frac19 = 0.111$ on flu only. Bob's class, $\frac69$ cancer and $\frac39$ flu, has excesses $\frac39$ and $\frac19$, together $\frac49 = 0.444$. So the release is $t$-close only for $t \ge 0.556$.
@@ -277,7 +276,7 @@ The bound column is $0.185 + t$, and the guess accuracy respects it, as @prp-ano
 
 ## The composition attack {#sec-anon-composition}
 
-Every definition so far is about one release, and Ganta, Kasiviswanathan & Smith (2008) asked what happens when there are two. Two hospitals in one city publish their patient tables, each properly k-anonymous or $\ell$-diverse, with no coordination, and a patient treated at both appears in a class of each.
+Every definition so far is about one release, and Ganta, Kasiviswanathan & Smith (2008) asked what happens when there are two. Two hospitals in one city publish their patient tables, each properly k-anonymous or $\ell$-diverse, with no coordination, so a patient treated at both appears in a class of each.
 
 ::: {#def-anon-composition name="The composition attack"}
 Let a target appear in two releases, in class $E_1$ of the first and class $E_2$ of the second. The attack's **candidates** are the values that appear in both classes,
@@ -285,9 +284,9 @@ $$\{v : n_{E_1}(v) > 0\} \cap \{v : n_{E_2}(v) > 0\}.$$
 The target's value is **pinned down** when a single candidate is left.
 :::
 
-The true value is always a candidate, because the target's own record carries it in each class, so a single candidate is the truth. None of the three definitions **composes**, that is, survives the combination of two releases, because each is a condition on one table, and nobody checked the intersection of two classes. To prevent it, a hospital would have to check its classes against every other release, which it cannot see, so a definition that survives must bound what two releases leak together, whatever the adversary knows. Differential privacy, the subject of Part 3, does.
+The true value is always a candidate, because the target's own record carries it in each class, so a single candidate is the truth. None of the three definitions **composes**, that is, survives the combination of two releases, because each is a condition on one table. A hospital cannot check its classes against releases it cannot see, so a definition that survives must bound what two releases leak together, whatever the adversary knows. Differential privacy, the subject of Part 3, does.
 
-To see how often the attack succeeds, model the classes as random. Let the target's class have $k_1$ records in the first release and $k_2$ in the second, and let the values of the other members be independent draws from the population, with $p_v$ the probability of value $v$. Given the true value $v$, let $W_1$ be the set of wrong values, those other than $v$, that appear among the $k_1 - 1$ other members of the first class, and $W_2$ the same for the second. These are the wrong values each release leaves open, and the target is pinned exactly when no wrong value is left open by both. Write $p(W) = \sum_{u \in W}p_u$ for the probability of a set of values $W$. The formula below fixes what the first class leaves open and asks whether the second class avoids it.
+To see how often the attack succeeds, model the classes as random. Let the target's class have $k_1$ records in the first release and $k_2$ in the second, and let the values of the other members be independent draws from the population, with $p_v$ the probability of value $v$. Given the true value $v$, let $W_1$ be the set of wrong values (those other than $v$) that appear among the $k_1 - 1$ other members of the first class, and $W_2$ the same for the second. The target is pinned exactly when no wrong value is left open by both. Write $p(W) = \sum_{u \in W}p_u$ for the probability of a set of values $W$.
 
 ::: {#prp-anon-pinned name="How often two releases pin down a value"}
 In this model, the probability that the two releases pin down the target's value is
@@ -311,7 +310,7 @@ For a single wrong value $u$, the sum has two terms,
 $$\Pr[W_1 = \{u\}] = (p_v + p_u)^{k_1 - 1} - p_v^{k_1 - 1}.$$
 That is the probability that every draw is $v$ or $u$, minus the probability that every draw is $v$, in which case $u$ was never hit.
 
-The model understates the risk, because it draws the other members of a class from the whole population. In real releases a class collects people of similar ages, who are more likely to share a diagnosis, so each class holds fewer distinct wrong values and the intersection is smaller.
+The model understates the risk, because it draws the other members of a class from the whole population. In real releases a class collects people of similar ages, who are more likely to share a diagnosis, so the intersection is smaller.
 
 The sum over subsets grows quickly with the number of values, so a simpler bound helps. The target escapes only if some wrong value turns up in both classes, and the chance of "some" is at most the sum of the chances of each.
 
@@ -326,10 +325,10 @@ $$\Pr[\text{pinned}] \ge 1 - \sum_vp_v\sum_{u \ne v}\big(1 - (1 - p_u)^{k_1 - 1}
 3. *Add over wrong values.* The expected number of wrong values in both sets is the sum of these products, because the expected count of events is the sum of their probabilities. A count that is at least 1 whenever the event happens has an expectation at least the event's probability, so the chance that there is at least one shared wrong value is at most this sum. Subtracting from 1 and averaging over $v$ gives @eq-anon-union.
 :::
 
-The union bound charges every wrong value separately, so it is accurate only when two wrong values rarely turn up in both classes at once. With classes of 2, each class holds at most one wrong value, and the bound is exact. With classes of 5, the sum in @eq-anon-union already exceeds 1, so the bound is negative and @eq-anon-pinned is needed.
+The union bound charges every wrong value separately, so it is accurate only when two wrong values rarely turn up in both classes at once. With classes of 2, each class holds at most one wrong value, and the bound is exact. With classes of 5, the sum in @eq-anon-union already exceeds 1, so the bound is negative.
 
 ::: {#exm-anon-composition}
-With the population's diagnosis distribution of the hospital table, the model's probability that two releases pin down the diagnosis is 0.8734 for classes of 2, 0.1615 for classes of 5, 0.0288 for classes of 7 and 0.0015 for classes of 10. It falls fast because a larger class contains more wrong values, and each one is another chance for the two classes to share one. Simulation agrees to within 0.001 (@fig-anon-composition, left). The union bound gives 0.8734 at $k = 2$ and is negative from $k = 5$ on.
+With the population's diagnosis distribution of the hospital table, the model's probability that two releases pin down the diagnosis is 0.8734 for classes of 2, 0.1615 for classes of 5, 0.0288 for classes of 7 and 0.0015 for classes of 10. It falls fast because a larger class contains more wrong values, each another chance for the two classes to share one. Simulation agrees to within 0.001 (@fig-anon-composition, left).
 
 The script then runs the attack. A city has 15,000 people drawn from the model of the hospital table. Two hospitals each treat a random 10,000 of them, so 6,649 people are treated at both. Each hospital publishes a 5-anonymous Mondrian release of its own patients. @tbl-anon-composition gives what the adversary learns about the 6,649.
 
@@ -340,7 +339,7 @@ The script then runs the attack. A city has 15,000 people drawn from the model o
 
 : The composition attack on two independent hospital releases, for the 6,649 people treated at both. "Pinned" is the fraction left with a single possible diagnosis. {#tbl-anon-composition}
 
-Two 5-anonymous releases pin down the diagnosis of 9.9% of the shared patients, more than three times either release alone (0.0985 against 0.0289 and 0.0262). At $k = 5$ a patient's class has 6.8 records, averaged over patients rather than over classes, so the nearest model case is classes of 7, and it predicts only 2.9%. The release does better because real classes gather similar ages, as noted after @prp-anon-pinned. With distinct 3-diversity, no single release pins anyone down, and the two together pin down 18 patients (0.27% of 6,649).
+Two 5-anonymous releases pin down the diagnosis of 9.9% of the shared patients, more than three times either release alone (0.0985 against 0.0289 and 0.0262). At $k = 5$ a patient's class has 6.8 records on average over patients, so the nearest model case is classes of 7, which predicts only 2.9%. The release does better because real classes gather similar ages. With distinct 3-diversity, no single release pins anyone down, and the two together pin down 18 patients (0.27% of 6,649).
 :::
 
 ![Left: the probability that two releases pin down the diagnosis, against the class size, when the other members of each class are drawn from the population: exact (@eq-anon-pinned), simulated, and the union bound (@eq-anon-union). Right: the number of diagnoses still possible for a patient treated at both hospitals, from either 5-anonymous release alone and from their intersection.](figures/anon_composition.svg){#fig-anon-composition}
