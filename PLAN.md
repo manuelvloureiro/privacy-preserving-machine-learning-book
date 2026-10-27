@@ -14,7 +14,7 @@ Status on 2026-10-27. Work items, largest saving first within each step. Word co
 - Steps 1 and 3 for the full edition (2026-10-27), together with a paragraph rewrite of every chapter in Parts 1–5:
   - Step 1 is done. Each claim that lost its exercise is proved on the page, quotes a number its script prints, cites a paper, or is cut. No number that a script does not print remains.
   - Step 3 is done for the proofs. Each re-proof in the table is a one-sentence restatement plus a reference to its canonical copy. `thm-dpsgd-privacy` is gone, since it was the same theorem as `thm-sub-dpsgd`. `cor-rdp-gauss-opt` is the one home of the order optimisation. The part README files are each one line that links to the part page.
-  - Step 3's symbol unification (α/β against FPR/FNR, β against κ for the Gumbel scale) is still open.
+  - Step 3's symbol unification is settled. NOTATION.md and `notation.toml` already fix α and β for a test's errors, with FPR and FNR only on a page where α or β means something else, and `make notation-check` passes everywhere. Appendix 10 now writes κ for the Gumbel scale, as the chapter does.
 - Step 2.2–2.4 for appendices 05–14 (2026-10-27), together with a paragraph rewrite of every one of them (110k → 94k words):
   - The overlaps in 11, 12, 13, 14 and 06 are now restatements that cite the chapter's theorem.
   - 11's comp-fdp keeps the adaptive proof that the chapter points to, and 05's prob-convolution is only trimmed.
