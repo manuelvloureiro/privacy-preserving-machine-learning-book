@@ -236,7 +236,7 @@ On the vote of @tbl-sel-em-votes the counts are monotone, so $b = 1$ is allowed 
 
 ## Gumbel noise: report-noisy-max is the exponential mechanism {#sec-sel-gumbel}
 
-Report-noisy-max with Laplace noise is close to the exponential mechanism but not equal to it. This section shows that Gumbel noise makes the noisy argmax give exactly the probabilities of @eq-sel-em. This is the **Gumbel-max trick**. The **Gumbel distribution** with scale $\kappa$, $\mathrm{Gumbel}(\kappa)$, has cumulative distribution function (CDF) $\Pr[G \le g] = \exp(-e^{-g/\kappa})$, and NumPy's `rng.gumbel(0, kappa)` samples it.
+Report-noisy-max with Laplace noise is close to the exponential mechanism but not equal to it. With Gumbel noise the noisy argmax gives exactly the probabilities of @eq-sel-em, which is the **Gumbel-max trick**. The **Gumbel distribution** with scale $\kappa$, $\mathrm{Gumbel}(\kappa)$, has cumulative distribution function (CDF) $\Pr[G \le g] = \exp(-e^{-g/\kappa})$, and NumPy's `rng.gumbel(0, kappa)` samples it.
 
 ::: {#thm-sel-gumbel name="The Gumbel-max trick"}
 For scores $u_r$ and independent $G_r \sim \mathrm{Gumbel}(\kappa)$,
@@ -254,7 +254,7 @@ $$\Pr[i \text{ wins}] = \int_{-\infty}^\infty H'(g)\prod_{j \ne i}H(g + u_i - u_
 $$\Pr[i \text{ wins}] = \int_0^\infty e^{-wA}\,\mathrm dw = \frac1A = \frac{e^{u_i}}{\sum_je^{u_j}}.$$
 :::
 
-So the Gumbel noisy max inherits the privacy of @thm-sel-em. It works in score units, while $e^{\varepsilon u/(2\Delta)}$ overflows for scores in the thousands. Taking the $c$ largest of $u_r + G_r$ at once has the distribution of $c$ exponential mechanisms run in turn without replacement, at $c\varepsilon$ (Durfee and Rogers 2019; @sec-apx-mech-gumbel derives it).
+So the Gumbel noisy max inherits the privacy of @thm-sel-em, and @sec-apx-mech-gumbel-shift proves it directly too, because the Gumbel tail obeys the bound of @lem-sel-shift and the bar argument of @thm-sel-rnm then applies. It works in score units, while $e^{\varepsilon u/(2\Delta)}$ overflows for scores in the thousands. Taking the $c$ largest of $u_r + G_r$ at once has the distribution of $c$ exponential mechanisms run in turn without replacement, at $c\varepsilon$ (Durfee and Rogers 2019; @sec-apx-mech-gumbel derives it).
 
 ![Selection probabilities for five candidates with scores $(4, 3, 3, 1, 0)$ and noise scale $2\Delta/\varepsilon$ with $\varepsilon = 1$: the exponential mechanism's exact probabilities, the frequencies of the Gumbel noisy max in 200,000 runs, and the exact probabilities of the Laplace noisy max.](figures/select_gumbel_em.svg){#fig-sel-gumbel-em}
 
@@ -274,7 +274,7 @@ The Gumbel frequencies are within 0.0008 of the exponential mechanism, about the
 
 ## The sparse vector technique {#sec-sel-svt}
 
-Now the queries arrive one at a time, and you care only about the first one above a threshold, such as the first statistic to cross an alarm level. Answering each with the Laplace mechanism would cost $\varepsilon$ per query. Report-noisy-max needs the whole list in advance, but here each query must be answered before the next is seen. The **sparse vector technique** (Dwork, Naor, Reingold, Rothblum and Vadhan 2009) compares each query with one noisy threshold and pays only for the one above it. Its basic form is Algorithm 1 of Dwork and Roth (2014).
+Now the queries arrive one at a time, and you care only about the first one above a threshold. Answering each with the Laplace mechanism would cost $\varepsilon$ per query. Report-noisy-max needs the whole list in advance, but here each query must be answered before the next is seen. The **sparse vector technique** (Dwork, Naor, Reingold, Rothblum and Vadhan 2009) compares each query with one noisy threshold and pays only for the one above it. Its basic form is Algorithm 1 of Dwork and Roth (2014).
 
 ::: {#def-sel-above-threshold name="AboveThreshold"}
 The input is a dataset $D$, a stream of $k$ queries $f_i$ of sensitivity $\Delta$, possibly adaptive, a threshold $\tau$ and budgets $\varepsilon_1, \varepsilon_2 > 0$. Draw $\rho \sim \mathrm{Lap}(\Delta/\varepsilon_1)$ once. For each query, draw fresh $\nu_i \sim \mathrm{Lap}(2\Delta/\varepsilon_2)$. If $f_i(D) + \nu_i \ge \tau + \rho$, output $\top$ ("above") and halt; otherwise output $\bot$ ("below"). The output $\bot^{j-1}\top$ stops at query $j$.

@@ -61,7 +61,7 @@ $$L_1(y) = \ln\big((1 - q) + q\,e^{(2y - 1)/(2\sigma^2)}\big).$$
 Let $P$ and $Q$ be as in @def-epsc-test. The **trade-off curve** $\mathrm{TPR}^*(\mathrm{FPR})$ is the largest TPR of any test whose false positive rate is at most $\mathrm{FPR}$. The **privacy profile** $\delta(\varepsilon)$ is the smallest $\delta$ with $Q(S) \le e^\varepsilon P(S) + \delta$ for every event $S$. The **privacy loss distribution (PLD)** $\omega$ is the distribution of $L(y)$ when $y$ is drawn from $Q$.
 :::
 
-The PLD fixes the other two, because the best tests compare the loss with a threshold. @thm-gdp-duality proved a version for curves that treat adding and removing the record alike; a membership test needs only adding, which the proof below handles (Dong, Roth & Su 2022).
+The PLD fixes the other two, because the best tests compare the loss with a threshold. @thm-gdp-duality proved a version for curves that treat adding and removing the record alike. A membership test needs only adding, which the proof below handles (Dong, Roth & Su 2022).
 
 ::: {#thm-epsc-curve name="The trade-off curve from the privacy loss"}
 Let $P$ and $Q$ have positive densities, privacy loss $L$ and PLD $\omega$, and write $\mathbb E_\omega[X;\ A]$ for the average of $X$ times the indicator of the event $A$. The best tests say "member" when $L$ exceeds a threshold $\tau$, and they trace the trade-off curve
@@ -333,6 +333,7 @@ A **defensible privacy statement** for a trained model gives six things.
 :::
 
 The first four items answer failures seen earlier. Without the unit, one number can mean protection of a single click or of a whole history. The threat decides where to read the curve, and the pair alone can overstate the attacker 17-fold, which tempts a reader to dismiss DP as vacuous. Whether the code runs the algorithm of the proof is an empirical fact, which audits check.
+
 The utility item matters because the accuracy curve is steeply non-linear (@fig-epsc-accuracy). Each doubling of $\varepsilon$ buys less accuracy and more risk, read as the exact TPR at an FPR of 1%. Going from $\varepsilon = 1$ to 2 gains 2.66 percentage points and moves that TPR from at most 0.01893 to at most 0.03141, while the step from 2 to 4 gains 1.07 points for a TPR of at most 0.0724. The step from 4 to 8 gains only 0.56 points yet nearly triples the TPR, to at most 0.2092. So past $\varepsilon = 4$, accuracy is bought with a much larger increase in worst-case risk. This is also why the tiers are reasonable: below 1 every mechanism is strong by @eq-epsc-pair, from 1 to 10 DP-SGD's curve lies far below the line, and above 10 even the curve allows a TPR above 0.27 at an FPR of $10^{-3}$, at $\varepsilon = 16$.
 
 ![Left: test accuracy of the running example against $\varepsilon$, with the non-private model dashed. Right: the same accuracies against the largest membership TPR at FPR 1%, from the exact curve (circles) and from the pair (squares).](figures/epsc_accuracy_risk.svg){#fig-epsc-accuracy}

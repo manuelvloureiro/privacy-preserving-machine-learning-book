@@ -1,6 +1,6 @@
 # Mechanisms and their limits
 
-This appendix proves seven results that the chapters on differential privacy (DP) state about specific mechanisms but do not derive in full. Three of them are about what the slack $\delta$ of approximate DP means. The first shows that every $(\varepsilon, \delta)$-DP pair of output distributions splits into an $\varepsilon$-DP pair and a leftover of mass $\delta$, and so is a post-processing of the worst $(\varepsilon, \delta)$-DP pair, called four-point randomized response. The second uses the same split to show that $(\varepsilon, \delta)$-DP implies an approximate form of zero-concentrated differential privacy (zCDP). The third, the stability-based histogram, shows what the slack buys: an error that does not grow with the number of bins. The other four results pin down single mechanisms. One is a lower bound for estimating means of heavy-tailed data. Two are privacy proofs for selection: the sparse vector technique with several answers above the threshold, and Gumbel top-$c$ selection. The last is a check that the "alarm" mechanism, which the group-privacy chapter uses to show its bound is tight, really is $(\varepsilon, \delta)$-DP.
+This appendix proves eight results that the chapters on differential privacy (DP) state about specific mechanisms but do not derive in full. Three of them are about what the slack $\delta$ of approximate DP means. The first shows that every $(\varepsilon, \delta)$-DP pair of output distributions splits into an $\varepsilon$-DP pair and a leftover of mass $\delta$, and so is a post-processing of the worst $(\varepsilon, \delta)$-DP pair, called four-point randomized response. The second uses the same split to show that $(\varepsilon, \delta)$-DP implies an approximate form of zero-concentrated differential privacy (zCDP). The third, the stability-based histogram, shows what the slack buys: an error that does not grow with the number of bins. The other five results pin down single mechanisms. One is a lower bound for estimating means of heavy-tailed data. Three are privacy proofs for selection. They cover the sparse vector technique with several answers above the threshold, Gumbel top-$c$ selection, and a direct proof for the Gumbel noisy max. The last is a check that the "alarm" mechanism, which the group-privacy chapter uses to show its bound is tight, really is $(\varepsilon, \delta)$-DP.
 
 The derivations share one habit. Each proof fixes a neighbouring pair, writes down the two output distributions, and then compares them directly: it splits them into parts, changes variables in the noise, or bounds them one outcome at a time. @tbl-apx-mech-map maps each derivation to the chapter section that states or uses it.
 
@@ -12,6 +12,7 @@ The derivations share one habit. Each proof fixes a neighbouring pair, writes do
 | A lower bound for heavy-tailed means | @sec-mean-heavy |
 | Sparse vector with $c$ answers above | @sec-sel-svt |
 | Gumbel top-$c$ is the exponential mechanism without replacement | @sec-sel-gumbel |
+| A Gumbel noisy max is private by the Laplace bar argument | @sec-sel-rnm, @sec-sel-gumbel |
 | The alarm mechanism is $(\varepsilon, \delta)$-DP | @sec-dpprop-group |
 
 : The derivations of this appendix and the chapter sections that rely on them. {#tbl-apx-mech-map}
@@ -285,7 +286,7 @@ The script computes the exact privacy loss of one output on one neighbouring pai
 
 ### What the chapter uses
 
-@sec-sel-gumbel proves the Gumbel-max trick @eq-sel-gumbel. Add independent Gumbel noise of scale $\kappa$ to each score $u_r$ and take the largest. Then candidate $i$ wins with probability $e^{u_i/\kappa}/\sum_r e^{u_r/\kappa}$, which is the exponential mechanism @eq-sel-em when $\kappa = 2\Delta/\varepsilon$. (The chapter writes this scale $\beta$. Here it is $\kappa$, because $\beta$ is a failure probability elsewhere on this page.) The chapter then states without proof that "taking the $c$ largest of $u_r + G_r$ gives the same distribution as running the exponential mechanism $c$ times, removing each winner (Durfee & Rogers 2019)", so its privacy is $c\varepsilon$.
+@sec-sel-gumbel proves the Gumbel-max trick @eq-sel-gumbel. Add independent Gumbel noise of scale $\kappa$ to each score $u_r$ and take the largest. Then candidate $i$ wins with probability $e^{u_i/\kappa}/\sum_r e^{u_r/\kappa}$, which is the exponential mechanism @eq-sel-em when $\kappa = 2\Delta/\varepsilon$. The chapter then states without proof that "taking the $c$ largest of $u_r + G_r$ gives the same distribution as running the exponential mechanism $c$ times, removing each winner (Durfee & Rogers 2019)", so its privacy is $c\varepsilon$.
 
 Write $\lambda_r = e^{u_r/\kappa}$ for the weight of candidate $r$. The claim is that for any distinct candidates $i_1, \dots, i_c$,
 $$\Pr\big[\text{the top } c \text{ of } u_r + G_r, \text{ in order, are } i_1, \dots, i_c\big] = \prod_{j=1}^c\frac{\lambda_{i_j}}{\sum_{r \notin \{i_1, \dots, i_{j-1}\}}\lambda_r}.$$ {#eq-apx-mech-pl}
@@ -319,6 +320,53 @@ Take six candidates with scores $(4, 3, 3, 1, 0, 0)$ and scale $\kappa = 2$, the
 ![Probabilities of the 30 ordered pairs (first, second) for six candidates with scores $(4, 3, 3, 1, 0, 0)$ and Gumbel scale 2. Grey bars: two rounds of the exponential mechanism, @eq-apx-mech-pl. Red dots: frequencies of the top two noisy scores in 200,000 runs.](figures/apx_mech_gumbel_top2.svg){#fig-apx-mech-gumbel-top2}
 
 ![The exponential race for the same six candidates. Each curve is $\Pr[E_r > s] = e^{-s\lambda_r}$ with rate $\lambda_r = e^{u_r/2}$, on a log time axis; tied candidates share a curve (one dashed). The dots are one draw of the arrival times $E_r = e^{-(u_r + G_r)/2}$, numbered in order of arrival.](figures/apx_mech_gumbel_race.svg){#fig-apx-mech-gumbel-race}
+
+## A Gumbel noisy max is private by the Laplace bar argument {#sec-apx-mech-gumbel-shift}
+
+### What the chapter uses
+
+@sec-sel-rnm proves that report-noisy-max with Laplace noise is private by a bar argument. Fix two neighbouring datasets $D$ and $D'$, a candidate $i$, and the noise of every other candidate. Then $i$ wins exactly when its own noise clears a bar $t(D)$, and moving to $D'$ moves the bar by at most $2\Delta$, or within $[-\Delta, \Delta]$ when the scores are monotone. @lem-sel-shift pays for the move: for Laplace noise $Z$ of scale $b$, $\Pr[Z > t - s] \le e^{|s|/b}\Pr[Z > t]$. @sec-sel-gumbel proves the Gumbel noisy max private in a different way. It shows that the Gumbel noisy max is the exponential mechanism (@thm-sel-gumbel), so it inherits that mechanism's privacy.
+
+This section gives a second proof, which does not need the softmax formula. The bar argument works with Gumbel noise of scale $\kappa = 2\Delta/\varepsilon$ as well, because the Gumbel tail obeys the same bound. For $G \sim \mathrm{Gumbel}(\kappa)$ and all real $t$ and $s$,
+$$\Pr[G > t - s] \le e^{|s|/\kappa}\Pr[G > t].$$ {#eq-apx-mech-gumbel-shift}
+The same proof shows that monotone scores allow the smaller scale $\kappa = \Delta/\varepsilon$.
+
+### The idea
+
+The Laplace proof compares densities: shifting the Laplace density by $s$ changes its height by at most $e^{|s|/b}$ anywhere. That fails for the Gumbel density. Its left tail falls like $\exp(-e^{-g/\kappa})$, a double exponential. So the density a fixed distance to the right of a point, divided by the density at the point, grows without bound as the point moves far to the left. But the bar argument never needs the density. It needs only the tail $\Pr[G > t]$, the chance of clearing a bar, and the Gumbel tail is well behaved.
+
+Write the tail as $1 - e^{-y}$, with $y = e^{-t/\kappa}$. Lowering the bar by $s > 0$ multiplies $y$ by $e^{s/\kappa}$. The function $1 - e^{-y}$ is zero at $y = 0$ and bends downward, so multiplying $y$ by a factor of at least 1 multiplies the function by at most that factor. For example, at $y = 1$, doubling $y$ takes $1 - e^{-y}$ from 0.6321 to 0.8647, a factor of only 1.37. Raising the bar instead only lowers the tail.
+
+### Derivation
+
+1. **The tail as a function of $y$.** The Gumbel distribution of scale $\kappa$ has $\Pr[G \le g] = \exp(-e^{-g/\kappa})$, so with $\phi(y) = 1 - e^{-y}$ and $y(t) = e^{-t/\kappa}$,
+$$\Pr[G > t] = 1 - \exp\big(-e^{-t/\kappa}\big) = \phi\big(y(t)\big).$$
+2. **Lowering the bar multiplies $y$.** Moving the bar from $t$ to $t - s$ gives $y(t - s) = e^{-(t - s)/\kappa} = e^{s/\kappa}\,y(t)$.
+3. **A raised bar.** If $s \le 0$, the bar $t - s$ is at least $t$, so the tail can only fall, and $\Pr[G > t - s] \le \Pr[G > t]$. Since $e^{|s|/\kappa} \ge 1$, @eq-apx-mech-gumbel-shift holds.
+4. **A lowered bar.** If $s > 0$, write $c = e^{s/\kappa} > 1$. The function $\phi$ is concave, because its second derivative $-e^{-y}$ is negative, so its graph lies above every chord. The point $y$ lies on the chord from $0$ to $cy$, at the fraction $1/c$ of the way, so
+$$\phi(y) \ge \frac1c\,\phi(cy) + \Big(1 - \frac1c\Big)\phi(0) = \frac{\phi(cy)}{c},$$
+using $\phi(0) = 0$. So $\phi(cy) \le c\,\phi(y)$, which by steps 1 and 2 is @eq-apx-mech-gumbel-shift.
+5. **The bar argument.** Run the proof of @thm-sel-rnm with Gumbel noise $G_i$ in place of the Laplace noise $Z_i$. Its steps 1 to 4 freeze the other candidates' noise, write the event that $i$ wins as $G_i > t(D)$, and bound the move $s = t(D') - t(D)$ of the bar. None of them uses the shape of the noise, only that it is drawn the same way on both datasets. Step 5 pays for the move with @eq-apx-mech-gumbel-shift in place of @lem-sel-shift, which gives the factor $e^{2\Delta/\kappa} = e^\varepsilon$ at $\kappa = 2\Delta/\varepsilon$. With monotone scores the move lies in $[-\Delta, \Delta]$, and the factor is $e^{\Delta/\kappa} = e^\varepsilon$ at $\kappa = \Delta/\varepsilon$.
+
+### Checking it
+
+Take $\kappa = 1$ and $s = 1$, the setting in which the chapter checks @lem-sel-shift. @tbl-apx-mech-gumbel-shift gives the ratio of the two tails at four bars.
+
+| Bar $t$ | $-2$ | 0 | 2 | 5 |
+| --- | --- | --- | --- | --- |
+| $\Pr[G > t - 1]/\Pr[G > t]$ | 1.0006 | 1.4776 | 2.4317 | 2.7026 |
+
+: The factor by which lowering the bar by 1 raises the tail of $\mathrm{Gumbel}(1)$, against the bound $e = 2.7183$. {#tbl-apx-mech-gumbel-shift}
+
+The ratio climbs towards $e$ as the bar moves right, but never reaches it. Far to the right $y$ is small, and there $1 - e^{-y}$ is nearly $y$ itself, so multiplying $y$ by $e$ nearly multiplies the tail by $e$. Far to the left both tails are close to 1, so their ratio is too. On a grid of bars from $-10$ to 20 and shifts from $-5$ to 5, the ratio never exceeds $e^{|s|}$. The Laplace tail, by contrast, reaches the factor $e$ exactly once both bars are above 0, as the chapter shows. @fig-apx-mech-gumbel-shift draws both ratios against the bar.
+
+![The factor $\Pr[\text{noise} > t - 1]/\Pr[\text{noise} > t]$ against the bar $t$, for $\mathrm{Gumbel}(1)$ noise (solid, with the four bars of @tbl-apx-mech-gumbel-shift as dots) and for $\mathrm{Lap}(1)$ noise (dashed), with the bound $e$ (dotted). The Gumbel factor rises towards $e$ without reaching it; the Laplace factor equals $e$ from $t = 1$ on.](figures/apx_mech_gumbel_shift.svg){#fig-apx-mech-gumbel-shift}
+
+The chapter's picture of the bar argument lowers the bar from 0.7 by 1. With Gumbel noise of scale 1, the winning probability rises from 0.3914 to 0.7407, a ratio of 1.8925, below $e$ as the bound requires.
+
+### What it does not cover
+
+The bar argument covers the release of one winner. Releasing the top $c$ noisy scores needs the race argument of @sec-apx-mech-gumbel, which shows that it is $c$ exponential mechanisms in a row. The argument also covers only the index of the winner, as for Laplace noise. Releasing the winning noisy score as well would publish $G_i$, the noise the proof averages over.
 
 ## The alarm mechanism is $(\varepsilon, \delta)$-DP, with one condition {#sec-apx-mech-alarm}
 
@@ -380,6 +428,9 @@ uv run python code/appendix-derivations/apx_mechanisms.py
 | Heavy-tail lower bound, $a = 0.05$ | 172.8 records for $k = 2$, 55.6 for $k = 3$, 38.4 for $k = 4$, 18.6 for bounded data; the clipped mean uses 7,616 |
 | Sparse vector, $c = 1, 2, 4$ | loss 0.9940, 0.9459, 0.7602 at $m = 10$; 1.0000 at $m = 40$; 2.5000 with noise that ignores $c$ |
 | Gumbel top two, six candidates | largest difference from @eq-apx-mech-pl 0.0003 over 30 pairs, from $10^6$ draws |
+| Gumbel tail, bar lowered by 1, at $t = -2, 0, 2, 5$ | 1.0006, 1.4776, 2.4317, 2.7026, against $e = 2.7183$ |
+| Gumbel winning probability, bar lowered from 0.7 by 1 | 0.3914 to 0.7407, a ratio of 1.8925 |
+| Gumbel tail ratio over $e^{\lvert s\rvert}$, bars $-10$ to 20, shifts $-5$ to 5 | largest 1.0000, reached at $s = 0$; never above 1 |
 | Alarm mechanism, $\varepsilon = 0.5$, $\delta = 10^{-5}$ | cap 0.6225; $a_0 = 2.272\times10^{-3}$ at $K = 10$; largest $K$ is 21; at $K = 22$ an event fails by 0.3132 |
 
 : The script's output with seed 0. {#tbl-apx-mech-code}

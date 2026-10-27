@@ -328,7 +328,7 @@ The plan is to average over the offset for item 1, read items 2 and 3 off the co
 4. *Transcripts.* Fix the kept bits and offset. A day sending the same kept bit under both sequences cancels, and a differing day has ratio at most $(1 - \kappa)/\kappa$. The flips are independent, so the ratios multiply, for every offset.
 :::
 
-So the collector learns nothing about people whose kept bits agree, and about the others only when their value crosses a secret threshold. So the guarantee protects steady behaviour, while a person whose behaviour changes reveals roughly when. Microsoft deployed the protocol in Windows 10 at $\varepsilon_0 = 1$ every six hours with $\kappa = 0.2$, where @eq-trust-op gives 0.569 per round, while the paper reports a more conservative 0.686.
+So the collector learns nothing about people whose kept bits agree, and about the others only when their value crosses a secret threshold, so the guarantee protects steady behaviour, while a person whose behaviour changes reveals roughly when. Microsoft deployed the protocol in Windows 10 at $\varepsilon_0 = 1$ every six hours with $\kappa = 0.2$, where @eq-trust-op gives 0.569 per round, while the paper reports a more conservative 0.686.
 
 ::: {#exm-trust-month}
 Fresh reports at $\varepsilon_0 = \ln 3$ leak fast. After 100 days with 75 ones the likelihood ratio is $3^{50}$, about $7.18\times10^{23}$, while a memoized report leaves the majority wrong with probability $1 - t = 0.25$ (@fig-trust-repeated).
@@ -367,7 +367,7 @@ So with probability $e^{-\varepsilon_0}$ each other person sends a **clone**, a 
 ::: {#exm-trust-clones}
 For 4-ary randomized response at $\varepsilon_0 = \ln 3$ (@fig-trust-clones), $p = \frac12$ and $q = \frac16$. Take a target with $x^0 = 1$ or $x^1 = 2$. Another person with value 3 reports $(\frac16, \frac16, \frac12, \frac16)$, the clone part is $\frac16\big(R(1) + R(2)\big) = (0.1111, 0.1111, 0.0556, 0.0556)$, and the leftover has mass $0.6667 = 1 - e^{-\varepsilon_0}$.
 
-For central $(1, 10^{-6})$, bisection on @eq-trust-fmt allows each user $\varepsilon_0 = 3.504$ at $n = 10^4$, $5.701$ at $10^5$ and $7.992$ at $10^6$. At 7.992, 8-ary randomized response keeps the truth with probability 0.998. For adding up bits as in Cheu et al. (2019), only about 676 of a million people then send a random bit, and the count has standard deviation 18.4, against 960 for local randomized response at $\varepsilon_0 = 1$.
+For central $(1, 10^{-6})$, bisection on @eq-trust-fmt allows each user $\varepsilon_0 = 3.504$ at $n = 10^4$, $5.701$ at $10^5$ and $7.992$ at $10^6$. At 7.992, 8-ary randomized response keeps the truth with probability 0.998. For adding up bits as in Cheu et al. (2019), only about 676 of a million people then send a random bit, since binary randomized response at that level sends one with probability $2/(e^{\varepsilon_0} + 1)$, and the count has standard deviation 18.4, against 960 for local randomized response at $\varepsilon_0 = 1$.
 :::
 
 ![The report distribution of value 3 under 4-ary randomized response at $\varepsilon_0 = \ln 3$, split into clones of value 1 (blue) and value 2 (orange) and a leftover (grey).](figures/trust_clones.svg){#fig-trust-clones}

@@ -190,6 +190,41 @@ def peak_ratio(n: int, p: float) -> float:
     return binomial_mode_pmf(n, p) * math.sqrt(2 * math.pi * n * p * (1 - p))
 
 
+# --- The tail of a Poisson count -------------------------------------------------------------
+
+
+def poisson_pmf_bound(mu: float, k: int) -> float:
+    """The bound (eμ/k)^k on Pr[N = k], from k! >= (k/e)^k."""
+    return (math.e * mu / k) ** k
+
+
+def poisson_tail(mu: float, k: int) -> float:
+    """Pr[N >= k] for N ~ Poisson(μ), which equals the regularized lower incomplete gamma P(k, μ)."""
+    return regularized_gamma_p(k, mu)
+
+
+def poisson_tail_bound(mu: float, k: int) -> float:
+    """The geometric-series bound q^k / (1 - q) on Pr[N >= k], with q = eμ/k < 1."""
+    q = math.e * mu / k
+    return q**k / (1 - q)
+
+
+def poisson_stirling_ratio(mu: float, k: int) -> tuple[float, float]:
+    """The ratio bound / Pr[N = k] split by Stirling: e^μ sqrt(2πk) alone, and times e^{r_k}."""
+    head = math.exp(mu) * math.sqrt(2 * math.pi * k)
+    return head, head * math.exp(stirling_remainder(k))
+
+
+def normal_upper_tail(x: float, mean: float, sd: float) -> float:
+    """Pr[X > x] for X ~ N(mean, sd^2), through erfc so that far tails keep their precision."""
+    return 0.5 * math.erfc((x - mean) / (sd * math.sqrt(2)))
+
+
+def poisson_chernoff(mu: float, k: int) -> float:
+    """The Chernoff bound e^{-μ} (eμ/k)^k on Pr[N >= k], for k > μ."""
+    return math.exp(-mu) * poisson_pmf_bound(mu, k)
+
+
 # --- Central limit theorem by Lindeberg's replacement ----------------------------------------
 
 EXP_THIRD = 12 / math.e - 2  # E|X - 1|^3 for X ~ Exp(1)
@@ -413,6 +448,22 @@ def print_table(rng: np.random.Generator) -> None:
         ratios = "  ".join(f"n={n}: {peak_ratio(n, p):.4f}" for n in (10, 100, 1000, 10000))
         print(f"[Peak p={p}] max_k p_k sqrt(2πnpq)  {ratios}")
 
+    # The tail of a Poisson count.
+    mu = 4.0
+    for k in (20, 40):
+        exact, bound = poisson_pmf(mu, k), poisson_pmf_bound(mu, k)
+        tail, tail_bound = poisson_tail(mu, k), poisson_tail_bound(mu, k)
+        head, full = poisson_stirling_ratio(mu, k)
+        print(
+            f"[Poisson μ=4 k={k}] Pr[N=k]={exact:.2e}  bound={bound:.2e}  ratio={bound / exact:.0f}  "
+            f"Pr[N>=k]={tail:.2e}  bound={tail_bound:.2e}  ratio={tail_bound / tail:.0f}"
+        )
+        print(
+            f"[Poisson μ=4 k={k}] e^μ sqrt(2πk)={head:.1f}  times e^(r_k)={full:.1f}  "
+            f"1/(1 - q)={1 / (1 - math.e * mu / k):.2f}  normal N(4, 4) tail={normal_upper_tail(k, mu, 2.0):.2e}  "
+            f"Chernoff={poisson_chernoff(mu, k):.2e} ({poisson_chernoff(mu, k) / tail:.1f} times the tail)"
+        )
+
     # Central limit theorem.
     n = 30
     final = abs(hybrid_sin_mean(n, n) - hybrid_sin_mean(0, n))
@@ -587,6 +638,35 @@ def plot_shift_tv(n: int = 10) -> Figure:
     return fig
 
 
+def plot_poisson_tail(mu: float = 4.0) -> Figure:
+    ks = list(range(1, 46))
+    far = [k for k in ks if k > math.e * mu]
+    above = [k for k in ks if k > mu]
+    fig, ax = plt.subplots(figsize=(7, 4.2))
+    ax.plot(ks, [poisson_tail(mu, k) for k in ks], "o-", color="k", markersize=3, label=r"exact $\Pr[N \geq k]$")
+    ax.plot(ks, [poisson_pmf_bound(mu, k) for k in ks], "--", color="C0", label=r"bound $(e\mu/k)^k$ on $\Pr[N = k]$")
+    ax.plot(
+        far, [poisson_tail_bound(mu, k) for k in far], "-", color="C1", label=r"tail bound $q^k/(1 - q)$, $k > e\mu$"
+    )
+    ax.plot(above, [poisson_chernoff(mu, k) for k in above], ":", color="C2", label=r"Chernoff $e^{-\mu}(e\mu/k)^k$")
+    ax.plot(
+        ks,
+        [normal_upper_tail(k, mu, math.sqrt(mu)) for k in ks],
+        "-.",
+        color="C3",
+        label="normal tail, same mean and variance",
+    )
+    ax.set(
+        yscale="log",
+        ylim=(1e-80, 10),
+        xlabel="k",
+        ylabel="probability",
+        title=f"The tail of Poisson({mu:g}) against its bounds and the normal tail",
+    )
+    ax.legend(fontsize=8, loc="lower left")
+    return fig
+
+
 def plot_lindeberg_hybrids(n: int = 30) -> Figure:
     ks = list(range(n + 1))
     base = hybrid_sin_mean(0, n)
@@ -699,6 +779,7 @@ def main() -> None:
         "apx_prob_shift_tv.svg": plot_shift_tv(),
         "apx_prob_stirling.svg": plot_stirling_error(),
         "apx_prob_peak.svg": plot_peak_height(),
+        "apx_prob_poisson_tail.svg": plot_poisson_tail(),
         "apx_prob_lindeberg.svg": plot_lindeberg_hybrids(),
         "apx_prob_smoothing.svg": plot_smoothing(),
         "apx_prob_norm_tails.svg": plot_norm_tails(),

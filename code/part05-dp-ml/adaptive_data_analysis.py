@@ -540,7 +540,7 @@ def plot_selection_bias(rng: np.random.Generator) -> Figure:
         yscale="log",
         ylim=(1e-4, 1),
         xlabel=r"$\varepsilon$ of the selection",
-        ylabel=r"bias: mean of $q_W(D) - q_W(\mathcal{D})$",
+        ylabel=r"bias: mean of $f_W(D) - f_W(\mathcal{D})$",
         title="Picking the best-looking of 1,000 null queries, $n = 1{,}000$",
     )
     ax.legend(fontsize=8)

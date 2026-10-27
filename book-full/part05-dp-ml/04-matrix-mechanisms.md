@@ -43,7 +43,8 @@ Two facts from earlier chapters price every mechanism here. The first is about p
 
 The second fact is about error. A weighted sum of independent normals is normal, with variance the sum of the variances times the weights squared (@prp-dist-normal-sums). So if $z$ has independent entries of standard deviation $sC$ and $\ell$ is a fixed row vector, each coordinate of $\ell z$ is normal with variance
 $$s^2C^2\|\ell\|^2 = s^2C^2\sum_j\ell_j^2.$$ {#eq-mfac-linear}
-The two obvious mechanisms put the noise at opposite ends, on each step's gradient sum or on each prefix sum. Neighbouring datasets $D \sim D'$ differ by adding or removing one record. The record's slot in the public order is then empty in one stream. (Under replace-one neighbours, a contribution could change by $2C$, and every sensitivity would double.)
+
+Neighbouring datasets $D \sim D'$ differ by adding or removing one record, whose slot in the public order is then empty in one stream. (Under replace-one neighbours, a contribution could change by $2C$, and every sensitivity would double.) The two obvious mechanisms put the noise at opposite ends, on each step's gradient sum or on each prefix sum.
 
 ::: {#prp-mfac-naive name="The two naive mechanisms"}
 Let a record take part in one step $\tau$, fixed in advance, and add a vector of length at most $C$ to $x_\tau$. Then each of the following is $\mu$-GDP.
@@ -234,7 +235,7 @@ so $\Delta_2 R = 1.220$, and the last prefix sum has error 1.488 per unit of pri
 
 ### The optimal factorization
 
-How much better than the square root can any factorization do? By scale invariance the best encoder may have columns of length at most 1, and it then minimizes $\|L\|_F$. Write $X = R^\top R$ for the inner products of the columns of $R$. For a given $X$ the best decoder gives $\|L\|_F^2 = \operatorname{tr}(A^\top AX^{-1})$, which is convex in $X$.
+How much better than the square root can any factorization do? By scale invariance the best encoder may have columns of length at most 1, and it then minimizes $\|L\|_F$. Write $X = R^\top R$ for the inner products of the columns of $R$. For a given $X$ the best decoder, the least-squares solution of $LR = A$, gives $\|L\|_F^2 = \operatorname{tr}(A^\top AX^{-1})$, which is convex in $X$.
 
 ::: {#thm-mfac-optimal name="The optimal factorization"}
 The problem of minimizing $\operatorname{tr}(A^\top AX^{-1})$ over positive definite $X$ with diagonal at most 1 has the solution
@@ -313,7 +314,7 @@ and its final prefix sum carries noise of standard deviation $s\|\ell_T\|$ per c
 3. *DP-SGD.* Its final prefix sum is a sum of $T$ independent noise vectors of standard deviation $\sigma$ in units of $C$, so by @eq-mfac-linear it carries $\sigma\sqrt T$.
 :::
 
-For DP-SGD, the Rényi differential privacy (RDP) accountant of [DP-SGD](02-dp-sgd.md) finds the smallest $\sigma$ for $q = 0.01$, $T$ steps and the target $\varepsilon$. Training then runs @eq-mfac-weights with each factorization's noise, which is $R^{-1}z$, a convolution in time, for the square-root and banded encoders, and the differences of consecutive tree estimates for the tree.
+For DP-SGD, the Rényi differential privacy (RDP) accountant of [DP-SGD](02-dp-sgd.md) finds the smallest $\sigma$ for $q = 0.01$, $T$ steps and the target $\varepsilon$. Training then runs @eq-mfac-weights with each factorization's noise added to the gradients. For the square-root and banded encoders that noise is $R^{-1}z$, a convolution in time, and for the tree it is the difference of consecutive tree estimates.
 
 ::: {#exm-mfac-run}
 @tbl-mfac-noise gives the noise each method needs for $\varepsilon = 2$ and 8 at $\delta = 10^{-5}$, and the noise its final prefix sum carries. @tbl-mfac-run gives the test accuracy at the better of two learning rates, 0.5 and 2, averaged over three runs.

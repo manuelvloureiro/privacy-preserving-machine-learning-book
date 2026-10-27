@@ -2,7 +2,7 @@
 
 Each attack of Part 2 was a game in which the challenger ran an algorithm on one of two datasets that differ in one person, and the adversary guessed which ([Threat models and privacy games](../part02-attacks/01-threat-models.md)). Each worked because a test could tell the two datasets apart from the output. **Differential privacy (DP)** forbids exactly that: for every pair of datasets that differ in one person, the distribution of the output barely changes. Then every attack of Part 2 fails at once, whatever the adversary knows and computes.
 
-The one idea is the **privacy loss**. For one output of a randomized algorithm, it is the logarithm of how much more likely that output was under one dataset than under its neighbour, the log-likelihood ratio of [Divergences](../part01-prerequisites/03-divergences.md). Differential privacy bounds it. Pure DP bounds it at every output, and approximate DP lets it exceed the bound on outputs of small total probability $\delta$. Every later result is that bound read through a tool of Part 1.
+The one idea is the **privacy loss**. For one output of a randomized algorithm, it is the logarithm of how much more likely that output was under one dataset than under its neighbour, the log-likelihood ratio of [Divergences](../part01-prerequisites/03-divergences.md). Differential privacy bounds it. Pure DP bounds it at every output, and approximate DP lets it exceed the bound on outputs of small total probability $\delta$.
 
 The running example is a survey. Alice, Bob and Carol are asked whether they smoke, and each answers with two coins. On heads they tell the truth, and on tails they toss again and say "yes" on heads and "no" on tails. So each person tells the truth with probability $\frac34$, and every "yes" has an excuse. This survey is $\ln 3$-DP, as @sec-dpdef-rr shows. A count released with Gaussian noise of standard deviation 2 is the contrast case, because its privacy loss is unbounded and it needs a $\delta$.
 
@@ -19,7 +19,7 @@ Datasets $D$ and $D'$ are **neighbours**, written $D \sim D'$, in one of two sen
 Both relations are symmetric: if $D \sim D'$ then $D' \sim D$.
 :::
 
-Add/remove protects participation, which is the question membership inference asks. Replace protects the value of your record and treats the dataset size as known. Separately, you choose what one record is. At **example-level** a record is one row, and at **user-level** it is all the data of one person, so example-level DP on 200 messages from one user protects each message, not the user. Neighbours also range over absurd records, such as a person aged 900, which is why mechanisms bound their inputs before adding noise.
+Add/remove protects participation, which is the question membership inference asks. Replace protects the value of your record. Separately, you choose what one record is. At **example-level** a record is one row, and at **user-level** it is all the data of one person, so example-level DP on 200 messages from one user protects each message, not the user. Neighbours also range over absurd records, such as a person aged 900, so the guarantee must hide even such a record, which is why mechanisms clip their inputs to a fixed range before adding noise.
 
 ::: {#exm-dpdef-neighbours}
 Take $D = (\text{Alice: smoker}, \text{Bob: non-smoker}, \text{Carol: smoker})$. @tbl-dpdef-neighbours checks five candidate datasets against both relations.
@@ -80,7 +80,7 @@ $$\Pr[M(D) \in S] \le e^\varepsilon\Pr[M(D') \in S] + |S|\,\delta.$$
 
 For small $\varepsilon$ the factor $e^\varepsilon$ is about $1 + \varepsilon$, so every event changes probability by at most about a fraction $\varepsilon$ of itself. Along a chain of datasets or releases the factors multiply and the exponents add, which is how group privacy and composition work in [Post-processing, group privacy and composition](02-properties.md). At $\varepsilon = 0.1$, an event of probability 0.5 under $M(D')$ has probability at most $0.5e^{0.1} = 0.553$ under $M(D)$, while at $\varepsilon = 1$ the bound is 1.36 and says nothing.
 
-In @fig-dpdef-ratio-band, Laplace noise keeps the density on $D$ inside the band that pure DP allows, while Gaussian noise leaves it in the tail, where $\delta$ must pay.
+In @fig-dpdef-ratio-band, Laplace noise added to a count keeps the density on $D$ inside the band that pure DP allows, while Gaussian noise leaves it in the tail, where $\delta$ must pay.
 
 ![The band from $e^{-\varepsilon}$ to $e^\varepsilon$ times the density on $D'$ (orange), at $\varepsilon = 1$. Left: Laplace noise keeps the density on $D$ (blue) inside. Right: Gaussian noise ($\sigma = 2$) leaves it in the tail, and the red mass is what $\delta$ covers.](figures/dpdef_ratio_band.svg){#fig-dpdef-ratio-band}
 
@@ -108,7 +108,7 @@ In the survey, take the true bits $(1, 0, 1)$ for Alice, Bob and Carol and the r
 
 ## Randomized response {#sec-dpdef-rr}
 
-You want the fraction of people who have done something embarrassing, but asked directly, people lie. Warner (1965) found the answer four decades before the definition. Each respondent tells the truth only with a known probability, so every "yes" has an excuse, yet the randomization averages out over the population. The two coins of the running example are the **forced-response** variant credited to Boruch (1971). @sec-apx-cal-rr in the appendices derives the mechanism from scratch.
+You want the fraction of people who have done something embarrassing, but asked directly, people lie. Warner (1965) found the answer four decades before the definition. Each respondent tells the truth only with a known probability, and the randomization averages out over the population. The two coins of the running example are the **forced-response** variant credited to Boruch (1971). @sec-apx-cal-rr in the appendices derives the mechanism from scratch.
 
 The idea is to tell the truth with a probability $t$ a little above $\frac12$, so that the ratio $t/(1 - t)$ of the chances of a report under the two true bits is $e^\varepsilon$.
 
@@ -143,7 +143,7 @@ The plan is to read one person's privacy off @tbl-dpdef-rr, to show that the oth
 3. *Neighbours differ in one factor.* Under replace, $D$ and $D'$ differ only in person $j$'s bit, so every other factor cancels in the ratio. The loss is person $j$'s alone, so it is $\pm\varepsilon$, and the vector is $\varepsilon$-DP by @prp-dpdef-pointwise.
 4. *The mean of the reports.* A report is 1 with probability $t$ if the true bit is 1 and $1 - t$ if it is 0. Averaging over a population in which a fraction $\bar x$ have bit 1 gives
 $$\mathbb E[\bar y] = \bar x\,t + (1 - \bar x)(1 - t) = (1 - t) + \bar x(2t - 1).$$
-Solving for $\bar x$ gives @eq-dpdef-rr-estimate, which is unbiased because it is a linear function of $\bar y$.
+Solving for $\bar x$ gives @eq-dpdef-rr-estimate, which is unbiased because it inverts this linear map and expectations pass through linear maps.
 5. *The spread.* Each report is a Bernoulli variable with variance $t(1 - t)$, whatever its true bit, and the reports are independent, so
 $$\operatorname{Var}(\bar y) = \frac{t(1 - t)}{n}.$$
 Dividing $\bar y$ by $2t - 1$ divides the variance by $(2t - 1)^2$, which gives the first form. Substituting $t = e^\varepsilon/(1 + e^\varepsilon)$ gives the closed form, because
@@ -152,7 +152,7 @@ $$t(1 - t) = \frac{e^\varepsilon}{(1 + e^\varepsilon)^2}, \qquad 2t - 1 = \frac{
 
 Deniability is the privacy, and the noise is added before the data leave each person, the **local** model of [Local, shuffle and distributed trust models](09-trust-models.md). Under add/remove the number of reports would reveal whether you took part, so the guarantee holds under replace only.
 
-Privacy costs samples: halving $\varepsilon$ doubles the error, so recovering the accuracy takes four times as many people, and much of that is the price of trusting nobody. A trusted curator can instead add Laplace noise of scale $1/\varepsilon$ to the true count once, which is $\varepsilon$-DP by [the Laplace and Gaussian mechanisms](03-laplace-gaussian.md). Its error on the fraction, $\sqrt2/(\varepsilon n)$, falls like $1/n$ rather than $1/\sqrt n$.
+Privacy costs samples: halving $\varepsilon$ doubles the error, so recovering the accuracy takes four times as many people, and much of that is the price of trusting nobody. A trusted curator can instead add Laplace noise of scale $1/\varepsilon$ to the true count once, which is $\varepsilon$-DP by [the Laplace and Gaussian mechanisms](03-laplace-gaussian.md). Its error on the fraction, the Laplace standard deviation $\sqrt2/\varepsilon$ divided by $n$, falls like $1/n$ rather than $1/\sqrt n$.
 
 ::: {#exm-dpdef-survey}
 Of $n = 1000$ respondents, a fraction $\bar x = 0.3$ smoke, so the expected fraction of "yes" reports is $0.3 \times 0.75 + 0.7 \times 0.25 = 0.4$, which @eq-dpdef-rr-estimate turns back into 0.3. The formula gives $\operatorname{sd}(\hat{\bar x}) = \sqrt{0.1875}/(0.5\sqrt{1000}) = 0.0274$, and ten thousand simulated surveys give a mean of 0.2996 and a standard deviation of 0.0278. At $\varepsilon = 0.5$ the formula gives 0.0626 (@fig-dpdef-rr). A trusted curator at $\varepsilon = \ln 3$ would reach $\sqrt2/(1000\ln 3) = 0.00129$, which is 21.3 times smaller.
@@ -162,7 +162,7 @@ Of $n = 1000$ respondents, a fraction $\bar x = 0.3$ smoke, so the expected frac
 
 ## Divergence forms and the privacy loss {#sec-dpdef-divergences}
 
-@eq-dpdef-def quantifies over all events, which is unusable for continuous outputs. A divergence turns "for all events" into one formula and shows what $\delta$ measures. The two divergences are those of [Divergences](../part01-prerequisites/03-divergences.md). The **max-divergence** $D_\infty(P\|Q) = \ln\max_y p(y)/q(y)$ is the largest privacy loss (@sec-div-renyi). The **hockey-stick divergence** $E_\gamma(P\|Q) = \sum_y(p(y) - \gamma q(y))_+$ is the mass of $P$ that sticks out above $\gamma$ times $Q$ (@sec-div-hockey), where $(x)_+ = \max\{x, 0\}$.
+@eq-dpdef-def quantifies over all events, which is unusable for continuous outputs. A divergence of [Divergences](../part01-prerequisites/03-divergences.md) turns "for all events" into one formula and shows what $\delta$ measures. The **max-divergence** $D_\infty(P\|Q) = \ln\max_y p(y)/q(y)$ is the largest privacy loss (@sec-div-renyi). The **hockey-stick divergence** $E_\gamma(P\|Q) = \sum_y(p(y) - \gamma q(y))_+$ is the mass of $P$ that sticks out above $\gamma$ times $Q$ (@sec-div-hockey), where $(x)_+ = \max\{x, 0\}$.
 
 ::: {#thm-dpdef-divergence name="Differential privacy as a divergence bound"}
 For every pair of neighbours $D \sim D'$ write $P = M(D)$ and $Q = M(D')$, with probabilities $p(y)$ and $q(y)$ (densities when the output is continuous, with sums read as integrals), and $L = L_{D,D'}$.
@@ -233,7 +233,7 @@ $$1 - \alpha \le e^\varepsilon \beta + \delta.$$
 5. *The trade-off form.* Solved for $\beta$, the two inequalities give two lower bounds on $\beta$, and $\beta \ge 0$ is a third, so the smallest $\beta$ at level $\alpha$ is at least the largest of the three.
 :::
 
-The result draws a forbidden region: every attack lies on or above the two lines of @eq-dpdef-testing (@fig-dpdef-tradeoff-region). Low FPR is where DP bites. Part 2 judged membership attacks by their TPR at a low FPR, which DP caps at $e^\varepsilon \alpha + \delta$, and as $\alpha \to 0$ the $\delta$ term dominates.
+The result draws a forbidden region: every attack lies on or above the two lines of @eq-dpdef-testing (@fig-dpdef-tradeoff-region). Part 2 judged membership attacks by their TPR at a low FPR, and that is where DP bites hardest, since it caps the TPR at $e^\varepsilon \alpha + \delta$ and as $\alpha \to 0$ the $\delta$ term dominates.
 
 Auditing runs this in reverse. Solving the cap for $\varepsilon$ at an attack's measured FPR and TPR gives the smallest $\varepsilon$ consistent with the measurement. The neighbouring pair is a training set with and without a **canary**, a record planted to be easy to detect ([Memorization and extraction](../part02-attacks/05-memorization-extraction.md)). The bound is tight for randomized response and loose for most mechanisms, and keeping a mechanism's whole trade-off curve is the idea of $f$-DP in [Gaussian differential privacy](../part04-privacy-accounting/04-gaussian-dp.md).
 
@@ -247,7 +247,7 @@ The Gaussian count is $(1, 0.00683)$-DP, so at FPR $10^{-3}$ the bound allows TP
 
 ## Bound on the membership advantage {#sec-dpdef-advantage}
 
-Part 2 measured a membership attacker by its **advantage**. In the membership game the challenger flips a fair coin to pick $D$ or $D'$ and runs $M$ on it, and the adversary guesses which. The advantage is $2\Pr[\text{correct}] - 1$, which with a fair coin equals $\mathrm{TPR} - \mathrm{FPR} = 1 - \alpha - \beta$ (@sec-ht-tv). So the adversary wants the smallest sum of errors, and the lines of @eq-dpdef-testing keep it away from the origin.
+Part 2 measured a membership attacker by its **advantage**. In the membership game the challenger flips a fair coin to pick $D$ or $D'$ and runs $M$ on it, and the adversary guesses which. The advantage is $2\Pr[\text{correct}] - 1$, which with a fair coin equals $\mathrm{TPR} - \mathrm{FPR} = 1 - \alpha - \beta$ (@sec-ht-tv).
 
 ::: {#cor-dpdef-advantage name="Membership advantage"}
 If $M$ is $(\varepsilon, \delta)$-DP, every adversary in the membership game between any two neighbours has
@@ -334,7 +334,7 @@ For the $(1, 0.0068)$-DP Gaussian count, @eq-dpdef-bad-set with $\varepsilon' = 
 
 ## Why δ must be much smaller than 1/n {#sec-dpdef-small-delta}
 
-How small must $\delta$ be? The advantage bound barely notices a small $\delta$, but a deliberately terrible mechanism shows the danger. It is DP with $\varepsilon = 0$ and yet publishes records verbatim, because over a whole dataset its small chances add up.
+How small must $\delta$ be? A deliberately terrible mechanism shows the danger. It is DP with $\varepsilon = 0$ and yet publishes records verbatim, because over a whole dataset its small chances add up.
 
 ::: {#prp-dpdef-release name="Release each record with probability δ"}
 The mechanism that publishes each record of the dataset, in full, independently with probability $\delta$ is $(0, \delta)$-DP under add/remove. On a dataset of $n$ records it publishes $n\delta$ records on average, and at least one record with probability
@@ -391,12 +391,12 @@ The definition compares two worlds that differ in one record, not the world befo
 **Tasks about one person.** Contact tracing must find whom one infected person met, so its output must depend on that person, which DP forbids. DP protects your contribution, not secrets that other people's data reveal.
 
 ::: {#exm-dpdef-household}
-A count with Laplace noise of scale $1/\varepsilon$ meets a household of $k = 5$ people who always answer alike. At $\varepsilon = 1$ the script finds a largest privacy loss of 5.0000 for the household, which is protected only as if by a 5-DP mechanism. The exact best advantage against it is $1 - e^{-5/2} = 0.9179$, under the bound 0.9866. An attacker who asks whether the household took part is right with probability up to 0.959, although each record is "protected at $\varepsilon = 1$".
+A count with Laplace noise of scale $1/\varepsilon$ meets a household of $k = 5$ people who always answer alike. At $\varepsilon = 1$ the script finds a largest privacy loss of 5.0000 for the household, which is protected only as if by a 5-DP mechanism. The exact best advantage against it is $1 - e^{-5/2} = 0.9179$, under the 5-DP bound $\tanh(5/2) = 0.9866$. An attacker who asks whether the household took part is right with probability up to 0.959, although each record is "protected at $\varepsilon = 1$".
 :::
 
 ## Is it a privacy violation? {#sec-dpdef-violation}
 
-Some reported privacy failures show that a release reveals something about the people whose data it used, and others that it reveals something true about the world, which then applies to particular people. DP is designed to stop only the first kind. Three questions, taught in Kamath's course on private data analysis, sort a claim into one kind or the other.
+Some reported privacy failures show that a release reveals something about the people whose data it used, and others that it reveals something true about the world, which then applies to particular people. DP is designed to stop only the first kind. Three questions from Kamath's course on private data analysis sort a claim into one kind or the other.
 
 1. **Does it depend on this person's record?** DP bounds an inference's probability by $e^\varepsilon$ times its probability without the record, plus $\delta$, so it has nothing against an inference that is as likely without the record.
 2. **Does the inference succeed exactly when the model is accurate?** Then it comes from patterns shared by many records, and blocking it is a decision not to learn.

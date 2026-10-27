@@ -186,7 +186,43 @@ def cocoercive_ratio_risk(rng: np.random.Generator, data: Data, pairs: int, radi
     return smallest
 
 
-# --- 3. The lower bound for convex Lipschitz optimization -----------------------------------------
+# --- 3. When to stop SGD ---------------------------------------------------------------------------
+
+# The chapter's SGD experiment: n = 100 records on the unit sphere (L = 1), θ* = (5, 0, ...), step η = 0.25.
+STOP_N = 100
+STOP_RADIUS = 5.0
+STOP_LIPSCHITZ = 1.0
+STOP_ETA = 0.25
+
+
+def optimization_term(u: float, radius: float) -> float:
+    """‖θ*‖² / (2u), the optimization error of SGD from θ_0 = 0, with u = ηT."""
+    return radius**2 / (2 * u)
+
+
+def stability_term(u: float, lipschitz: float, n: int) -> float:
+    """2L²u / n, the uniform stability of SGD, with u = ηT."""
+    return 2 * lipschitz**2 * u / n
+
+
+def early_stop_bound(u: float, eta: float, radius: float, lipschitz: float, n: int) -> float:
+    """The bound on the expected excess test loss: both terms plus the step-size term ηL²/2."""
+    return optimization_term(u, radius) + stability_term(u, lipschitz, n) + eta * lipschitz**2 / 2
+
+
+def best_training_time(radius: float, lipschitz: float, n: int) -> float:
+    """u* = ‖θ*‖ sqrt(n) / (2L), where the falling and the rising term are equal."""
+    return radius * math.sqrt(n) / (2 * lipschitz)
+
+
+def grid_best_training_time(radius: float, lipschitz: float, n: int, lo: float = 0.1, hi: float = 1000.0) -> float:
+    """The u that minimizes the two terms on a fine log-spaced grid, to check the closed form."""
+    grid = np.logspace(math.log10(lo), math.log10(hi), 200_001)
+    values = radius**2 / (2 * grid) + 2 * lipschitz**2 * grid / n
+    return float(grid[int(np.argmin(values))])
+
+
+# --- 4. The lower bound for convex Lipschitz optimization -----------------------------------------
 
 
 def hard_constants(radius: float, lipschitz: float, k: int) -> tuple[float, float]:
@@ -245,7 +281,7 @@ def subgradient_on_hard(radius: float, lipschitz: float, steps: int) -> HardRun:
     return HardRun(hard_value(avg, gamma, alpha, k) - hard_minimum(gamma, alpha, k), smallest)
 
 
-# --- 4. The 1-nearest-neighbour limit -------------------------------------------------------------
+# --- 5. The 1-nearest-neighbour limit -------------------------------------------------------------
 # The running example of the stability chapter: x uniform on the unit sphere in R^10, and
 # Pr[y = 1 | x] = σ(5 x_1).
 
@@ -328,7 +364,7 @@ def one_nn(rng: np.random.Generator, n: int, n_test: int, block: int = 500) -> N
     )
 
 
-# --- 5. M-estimators: fitted parameters are approximately Gaussian --------------------------------
+# --- 6. M-estimators: fitted parameters are approximately Gaussian --------------------------------
 # The logistic-regression toy of the property-inference chapter: x ~ N(0, I_2), majority labels
 # with σ(2x_1 + x_2), the subgroup (share t) with σ(2x_1 - x_2); the model has an intercept and a
 # ridge penalty 10^-3. Parameters are θ = (w_1, w_2, intercept).
@@ -510,7 +546,7 @@ def influence_check(rng: np.random.Generator, members: int) -> Influence:
     return Influence(np.array(measured), np.array(predicted), pool.outlier[train][chosen])
 
 
-# --- 6. Bayes-optimal membership inference under a Gibbs posterior --------------------------------
+# --- 7. Bayes-optimal membership inference under a Gibbs posterior --------------------------------
 
 
 def log_sigmoid(s: Array) -> Array:
@@ -680,7 +716,21 @@ def print_table(rng: np.random.Generator) -> None:
             f"[Gradient step η={eta:g}] largest distance ratio over the pairs={float(np.max(step_ratio(u, v, eta))):.4f}"
         )
 
-    # 3. Lower bound.
+    # 3. When to stop SGD.
+    u_star = best_training_time(STOP_RADIUS, STOP_LIPSCHITZ, STOP_N)
+    grid_u = grid_best_training_time(STOP_RADIUS, STOP_LIPSCHITZ, STOP_N)
+    opt, stab = optimization_term(u_star, STOP_RADIUS), stability_term(u_star, STOP_LIPSCHITZ, STOP_N)
+    print(
+        f"[Early stop n={STOP_N} ‖θ*‖={STOP_RADIUS:g} L={STOP_LIPSCHITZ:g} η={STOP_ETA:g}] u*={u_star:.2f}  "
+        f"grid minimum at u={grid_u:.2f}  T*={u_star / STOP_ETA:.0f} steps"
+    )
+    print(
+        f"[Early stop at u*] optimization term={opt:.4f}  stability term={stab:.4f}  "
+        f"2L‖θ*‖/sqrt(n)={2 * STOP_LIPSCHITZ * STOP_RADIUS / math.sqrt(STOP_N):.4f}  ηL²/2={STOP_ETA * STOP_LIPSCHITZ**2 / 2:.4f}  "
+        f"bound={early_stop_bound(u_star, STOP_ETA, STOP_RADIUS, STOP_LIPSCHITZ, STOP_N):.4f}"
+    )
+
+    # 4. Lower bound.
     for t in (10, 100, 1000, 10_000):
         hard = subgradient_on_hard(1.0, 1.0, t)
         print(
@@ -692,7 +742,7 @@ def print_table(rng: np.random.Generator) -> None:
     gamma, alpha = hard_constants(1.0, 1.0, 3)
     print(f"[Hard function k=3, R=L=1] γ={gamma:.4f} α={alpha:.4f} f*={hard_minimum(gamma, alpha, 3):.4f}")
 
-    # 4. 1-NN.
+    # 5. 1-NN.
     bayes, limit = bayes_and_limit()
     print(f"[1-NN] Bayes error={bayes:.3f}  limit E[2p(1-p)]={limit:.3f}")
     for n in (100, 4000, 10**6, 10**9):
@@ -704,7 +754,7 @@ def print_table(rng: np.random.Generator) -> None:
             f"median distance={res.median_distance:.3f}"
         )
 
-    # 5. M-estimators.
+    # 6. M-estimators.
     print(
         f"[Hessian Lipschitz] max |σ(1-σ)(1-2σ)|={sigmoid_curvature_slope_max():.5f}  1/(6√3)={HESSIAN_LIPSCHITZ:.5f}"
     )
@@ -743,7 +793,7 @@ def print_table(rng: np.random.Generator) -> None:
             f"mean predicted={float(np.mean(p)):.4f}  median measured/predicted={float(np.median(m / p)):.3f}"
         )
 
-    # 6. Gibbs posterior and the centroid.
+    # 7. Gibbs posterior and the centroid.
     for n in (10,):
         g = gibbs_check(rng, n=n)
         print(
@@ -886,6 +936,47 @@ def plot_cocoercive(rng: np.random.Generator) -> Figure:
     return fig
 
 
+def plot_early_stop() -> Figure:
+    us = np.logspace(0, 3, 400)
+    u_star = best_training_time(STOP_RADIUS, STOP_LIPSCHITZ, STOP_N)
+    fig, ax = plt.subplots(figsize=(6.5, 4))
+    ax.plot(
+        us,
+        [optimization_term(float(u), STOP_RADIUS) for u in us],
+        "--",
+        color="C0",
+        label=r"optimization $\|\theta^*\|^2/(2u)$",
+    )
+    ax.plot(
+        us,
+        [stability_term(float(u), STOP_LIPSCHITZ, STOP_N) for u in us],
+        "--",
+        color="C1",
+        label=r"stability $2L^2u/n$",
+    )
+    ax.plot(
+        us,
+        [early_stop_bound(float(u), STOP_ETA, STOP_RADIUS, STOP_LIPSCHITZ, STOP_N) for u in us],
+        color="k",
+        label=r"bound, with $\eta L^2/2$",
+    )
+    best = early_stop_bound(u_star, STOP_ETA, STOP_RADIUS, STOP_LIPSCHITZ, STOP_N)
+    ax.plot([u_star], [best], "o", color="C3")
+    ax.annotate(
+        f"u* = {u_star:g}, bound {best:.3f}", (u_star, best), textcoords="offset points", xytext=(8, 10), fontsize=9
+    )
+    ax.set(
+        xscale="log",
+        yscale="log",
+        ylim=(0.01, 20),
+        xlabel=r"$u = \eta T$, learning rate times number of steps",
+        ylabel="excess test loss bound",
+        title=f"n = {STOP_N}, ‖θ*‖ = {STOP_RADIUS:g}, L = {STOP_LIPSCHITZ:g}, η = {STOP_ETA:g}",
+    )
+    ax.legend(fontsize=8, loc="upper center")
+    return fig
+
+
 def plot_lower_bound() -> Figure:
     ts = [10, 20, 50, 100, 200, 500, 1000, 2000, 5000, 10_000]
     measured = [subgradient_on_hard(1.0, 1.0, t).averaged_gap for t in ts]
@@ -1014,6 +1105,7 @@ def main() -> None:
         "apx_opt_convexity.svg": plot_convexity(),
         "apx_opt_gd_linear.svg": plot_gd_linear(rng),
         "apx_opt_cocoercive.svg": plot_cocoercive(rng),
+        "apx_opt_early_stop.svg": plot_early_stop(),
         "apx_opt_lower_bound.svg": plot_lower_bound(),
         "apx_opt_nn.svg": plot_nn(rng),
         "apx_opt_mest_hist.svg": plot_mest_hist(rng),

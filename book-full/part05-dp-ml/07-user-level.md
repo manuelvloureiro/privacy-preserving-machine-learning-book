@@ -279,13 +279,15 @@ in which each user's term has length at most $C/U$, whatever their number of rec
 :::
 
 ::: {.proof}
+The plan is to average over the sampling and the noise, then bound one user's weight, then compare it with example-level training.
+
 1. *Average over the sampling.* User $u$ is in $S_t$ with probability $q$, so the expected sum of the sampled $\tilde g_u$ is $q\sum_u\tilde g_u$. The noise has mean zero.
 2. *Divide by $qU$.* The $q$ cancels, which leaves $\frac1U\sum_u\tilde g_u$. That is @eq-ulvl-expected, by the definition of $\tilde g_u$.
 3. *The weight of one user.* Clipping gives $\|\tilde g_u\| \le C$ for every user, so each term has length at most $C/U$. The share of any group of users in the update is therefore at most their share of the users.
 4. *Example-level.* The same computation for DP-SGD over records ([DP-SGD](02-dp-sgd.md#sec-dpsgd-clipping)) gives each record weight $1/n$, so user $u$'s records together have weight $n_u/n$.
 :::
 
-User-level training therefore changes the objective, not only the noise. With averaged per-user gradients, the model minimizes a clipped version of the average over users of each user's average loss, $\frac1U\sum_u\frac1{n_u}\sum_{i\in u}\ell(\theta; z_i)$, rather than the average over records. For a keyboard model, weighting people equally keeps a few very active users from defining everyone's suggestions. For a model meant to fit the overall distribution of records, it under-weights heavy users' content, which matters when heavy users differ from light ones, for example in language, topic or device.
+User-level training therefore changes the objective, not only the noise. With averaged per-user gradients, the model minimizes a clipped version of the average over users of each user's average loss, $\frac1U\sum_u\frac1{n_u}\sum_{i\in u}\ell(\theta; z_i)$, rather than the average over records. For a keyboard model, weighting people equally keeps a few very active users from defining everyone's suggestions. For a model meant to fit the overall distribution of records, it under-weights heavy users' content, which matters when heavy users differ from light ones.
 
 Clipping caps heavy users a second time. A heavy user's average gradient is a good estimate, typically short once the model fits their data. But if their data are unusual, the gradient is long and is clipped to $C$, the user-level analogue of what clipping does to records with large gradients ([Disparate impact](08-disparate-impact.md)). Summing a user's gradients before clipping sits between record weighting and user weighting. A heavy user's vector is then up to $n_u$ times longer than one record's, so their influence rises with $n_u$ until it reaches $C$.
 

@@ -1,6 +1,6 @@
 # Sums, limits and counting
 
-This appendix proves five facts about sums of random variables and about counting that the chapters use without a full proof. The first finds the distribution of a sum of two independent variables by adding up the ways the sum can arise. That replaces a theorem the book takes as given, namely that the moment generating function of a distribution pins it down. The second counts: it finds the most likely value of a binomial count, how tall that peak is, and how large $n!$ is. The third proves the central limit theorem (CLT) by swapping one term at a time for a normal one. The fourth shows that the length of a normal vector in $d$ dimensions rarely exceeds $\sqrt d$ by much. The fifth finds the tail of the difference of two Laplace variables. They sit together because each is a statement about a sum or a count. They also share their tools. The proofs add up the ways a sum can happen, compare neighbouring terms through their ratio, and apply Markov's inequality to an exponential.
+This appendix proves six facts about sums of random variables and about counting that the chapters use without a full proof. The first finds the distribution of a sum of two independent variables by adding up the ways the sum can arise. That replaces a theorem the book takes as given, namely that the moment generating function of a distribution pins it down. The second counts: it finds the most likely value of a binomial count, how tall that peak is, and how large $n!$ is. The third uses the size of $k!$ to show how fast a Poisson count becomes unlikely far above its mean. The fourth proves the central limit theorem (CLT) by swapping one term at a time for a normal one. The fifth shows that the length of a normal vector in $d$ dimensions rarely exceeds $\sqrt d$ by much. The sixth finds the tail of the difference of two Laplace variables. They sit together because each is a statement about a sum or a count. They also share their tools. The proofs add up the ways a sum can happen, compare neighbouring terms through their ratio, and apply Markov's inequality to an exponential.
 
 @tbl-apx-prob-map lists where each result is stated or used.
 
@@ -8,6 +8,7 @@ This appendix proves five facts about sums of random variables and about countin
 | --- | --- |
 | @sec-apx-prob-convolution: sums by convolution, rotation invariance of the normal | @sec-dist-mgf and the sections on the Poisson, Laplace and normal in [Probability distributions](../part01-prerequisites/01-distributions.md); @sec-div-gauss; @sec-lg-analytic; @sec-lower-packing |
 | @sec-apx-prob-stirling: Stirling's formula, the binomial mode and its height | @sec-threat-games; @sec-threat-average; @sec-prop-scaling; @sec-memo-exposure |
+| @sec-apx-prob-poisson-tail: the tail of a Poisson count | @sec-dist-poisson |
 | @sec-apx-prob-clt: the central limit theorem | The normal section of [Probability distributions](../part01-prerequisites/01-distributions.md); @sec-gdp-clt and every normal approximation in the book |
 | @sec-apx-prob-gauss-norm: the length of a normal vector | @sec-mean-multi |
 | @sec-apx-prob-laplace-diff: the difference of two Laplace variables | @sec-pate-stable; @sec-lower-packing |
@@ -177,6 +178,64 @@ For the fraction of bits recovered, @eq-apx-prob-recon gives 0.62305, 0.53979 an
 
 ![Left: the height of the binomial mode divided by the normal peak height $1/\sqrt{2\pi np\bar p}$, against $n$, for three values of $p$. Right: the absolute logarithm of that ratio against $np\bar p$, with the proved bound $3.5/(np\bar p)$.](figures/apx_prob_peak.svg){#fig-apx-prob-peak}
 
+## How fast a Poisson count falls far above its mean {#sec-apx-prob-poisson-tail}
+
+### What the chapter uses
+
+@sec-dist-poisson in [Probability distributions](../part01-prerequisites/01-distributions.md) defines a Poisson count $N \sim \mathrm{Poisson}(\mu)$ with mean $\mu > 0$. It takes each value $k = 0, 1, 2, \dots$ with probability
+$$\Pr[N = k] = e^{-\mu}\frac{\mu^k}{k!}.$$
+The chapter says that far above the mean these probabilities fall like $(e\mu/k)^k$, faster than any exponential but slower than the tail of a normal variable with the same variance, and it points here for the proof. This section proves that for every count $k \ge 1$,
+$$\Pr[N = k] \le \Big(\frac{e\mu}{k}\Big)^k.$$ {#eq-apx-prob-poisson-pmf}
+It then shows that the whole tail beyond $k$ obeys the same bound up to a constant factor, once $k$ is larger than $e\mu$:
+$$\Pr[N \ge k] \le \frac{(e\mu/k)^k}{1 - e\mu/k}.$$ {#eq-apx-prob-poisson-tail}
+
+### The idea
+
+The probability of the count $k$ has $k!$ in its denominator, so how fast the tail falls depends on how fast $k!$ grows. A lower bound on $k!$ gives an upper bound on the probability, and the lower bound comes from the power series of the exponential. That series writes $e^k$ as a sum of positive terms $k^j/j!$, one for each $j = 0, 1, 2, \dots$, and the term with $j = k$ is $k^k/k!$. A sum of positive terms is at least any one of its terms, so $k^k/k!$ is at most $e^k$. For $k = 3$, for example, the term is $27/6 = 4.5$, while the whole sum is $e^3 \approx 20.09$.
+
+For the whole tail, each probability beyond $k$ is at most the matching power of the single number $e\mu/k$. Once that number is below 1, the powers form a geometric series, and a geometric series adds up to its first term divided by one minus its ratio.
+
+### Derivation
+
+1. **A lower bound on the factorial.** The power series of the exponential at $k$ is $e^k = \sum_{j \ge 0}k^j/j!$. Every term is positive, so the sum is at least its term $j = k$, which is $k^k/k!$. Solving $k^k/k! \le e^k$ for $k!$ gives
+$$k! \ge \Big(\frac ke\Big)^k.$$
+2. **Bound one probability.** Replacing $k!$ in the denominator by this smaller number can only make the fraction larger, so
+$$\Pr[N = k] \le e^{-\mu}\mu^k\Big(\frac ek\Big)^k.$$
+3. **Drop the constant.** The mean $\mu$ is positive, so the factor $e^{-\mu}$ is below 1, and dropping it gives @eq-apx-prob-poisson-pmf.
+4. **Faster than any exponential.** To compare the bound with an exponential decay, write it as an exponential, using $x^k = e^{k\ln x}$ and $\ln(1/x) = -\ln x$:
+$$\Big(\frac{e\mu}{k}\Big)^k = e^{-k\ln(k/(e\mu))}.$$
+The exponent is $k$ times a logarithm that keeps growing with $k$. So for any constant $c > 0$, once $k > e\mu\,e^c$ the logarithm exceeds $c$ and the bound is below $e^{-ck}$. That is what "faster than any exponential" means: the exponent grows like $k\ln k$, while that of $e^{-ck}$ grows only like $k$.
+5. **A matching lower bound.** The comparison with the normal needs to know that the probabilities are not much smaller than the bound. The factorial $k! = 1 \cdot 2 \cdots k$ is a product of $k$ numbers, none larger than $k$, so $k! \le k^k$. Putting this larger number in the denominator gives
+$$\Pr[N = k] \ge e^{-\mu}\Big(\frac{\mu}{k}\Big)^k = e^{-\mu - k\ln(k/\mu)}.$$
+So the exponent of $\Pr[N = k]$ lies between $k\ln(k/(e\mu))$ and $\mu + k\ln(k/\mu)$, and both grow like $k\ln k$.
+6. **Slower than a normal.** A normal variable with mean $\mu$ and variance $\mu$, the Poisson's own mean and variance, has density proportional to $e^{-(k - \mu)^2/(2\mu)}$ at $k$. Expanding the square, the leading term of the exponent is $k^2/(2\mu)$, so far out its tail falls like $e^{-k^2/(2\mu)}$. An exponent that grows like $k^2$ eventually overtakes one that grows like $k\ln k$, so by step 5 the Poisson probabilities fall more slowly than the normal tail.
+7. **The whole tail.** Assume $k > e\mu$ and write $q = e\mu/k$, which is then below 1. The tail $\Pr[N \ge k]$ is the sum of $\Pr[N = j]$ over $j \ge k$, and by @eq-apx-prob-poisson-pmf each term is at most $(e\mu/j)^j$. For $j \ge k$ the base $e\mu/j$ is at most $q$, so each term is at most $q^j$. These terms form a geometric series with first term $q^k$ and ratio $q$, so
+$$\Pr[N \ge k] \le \sum_{j \ge k}q^j = \frac{q^k}{1 - q},$$
+which is @eq-apx-prob-poisson-tail. Once $k \ge 2e\mu$, the ratio $q$ is at most $\frac12$, and the factor $1/(1 - q)$ is at most 2.
+
+### Checking it
+
+Take $\mu = 4$, the chapter's example of a count with standard deviation 2. Then $e\mu \approx 10.87$, so the tail bound @eq-apx-prob-poisson-tail applies from $k = 11$, and its factor $1/(1 - q)$ is at most 2 from $k = 22$. @tbl-apx-prob-poisson-tail compares the bounds with the exact values at $k = 20$ and $k = 40$.
+
+| $k$ | $\Pr[N = k]$ | Bound @eq-apx-prob-poisson-pmf | Ratio | $\Pr[N \ge k]$ | Bound @eq-apx-prob-poisson-tail | Ratio |
+| --- | --- | --- | --- | --- | --- | --- |
+| 20 | $8.28 \times 10^{-9}$ | $5.09 \times 10^{-6}$ | 615 | $1.02 \times 10^{-8}$ | $1.11 \times 10^{-5}$ | 1093 |
+| 40 | $2.71 \times 10^{-26}$ | $2.35 \times 10^{-23}$ | 867 | $3.01 \times 10^{-26}$ | $3.23 \times 10^{-23}$ | 1075 |
+
+: Exact probabilities of $N \sim \mathrm{Poisson}(4)$ against the two bounds of this section. {#tbl-apx-prob-poisson-tail}
+
+The bound on one probability is loose by a factor of several hundred, and the loss is easy to account for. By Stirling's formula @eq-apx-prob-stirling, $k! = \sqrt{2\pi k}\,(k/e)^ke^{r_k}$, so step 1 drops the factor $\sqrt{2\pi k}\,e^{r_k}$ and step 3 drops $e^\mu$. Their product is exactly the ratio in the table: $e^4\sqrt{40\pi} \approx 612.0$ at $k = 20$, and the factor $e^{r_{20}}$, which is at most $e^{1/240}$, brings it to 614.6. That factor grows only like $\sqrt k$, so in the exponent it is a small constant beside $k\ln(k/(e\mu))$, and the bound has the right rate. The tail bound adds the factor $1/(1 - q)$, which is 2.19 at $k = 20$ and 1.37 at $k = 40$.
+
+The comparison with the normal is stark. Take the normal variable with the same mean 4 and standard deviation 2. It lies above 20, eight standard deviations out, with probability about $6.22 \times 10^{-16}$, while the exact Poisson tail there is $1.02 \times 10^{-8}$. Above 40 the normal gives $9.74 \times 10^{-73}$, against $3.01 \times 10^{-26}$ for the Poisson count. So a normal approximation to a count understates its far tail by many orders of magnitude. @fig-apx-prob-poisson-tail draws all of these against $k$ on a log scale. The two bounds run parallel to the exact tail, a constant factor above it, while the normal tail bends away below it.
+
+![The tail $\Pr[N \ge k]$ of $N \sim \mathrm{Poisson}(4)$ on a log scale (black), with the bound @eq-apx-prob-poisson-pmf on one probability (dashed), the tail bound @eq-apx-prob-poisson-tail from $k = 11$ (orange), the Chernoff bound $e^{-\mu}(e\mu/k)^k$ (dotted), and the tail of a normal variable with mean 4 and variance 4 (dash-dotted).](figures/apx_prob_poisson_tail.svg){#fig-apx-prob-poisson-tail}
+
+### What it does not cover
+
+The Chernoff method of [Concentration inequalities](../part01-prerequisites/02-concentration.md) gives a sharper tail bound. It bounds the tail by the moment generating function $\exp\big(\mu(e^\lambda - 1)\big)$ of the count, at the value of the free parameter $\lambda$ that makes the bound smallest. Steps 3 and 4 of the proof of @thm-conc-chernoff-bernoulli do exactly that for the Poisson MGF, and give, for every $k > \mu$,
+$$\Pr[N \ge k] \le e^{-\mu}\Big(\frac{e\mu}{k}\Big)^k.$$
+That keeps the factor $e^{-\mu}$ that step 3 here drops, and it does not need $k > e\mu$. For the count with mean 4 it gives $9.32 \times 10^{-8}$ at $k = 20$, about 9 times the exact tail. This section's bound is the simpler one, and it shows where the rate $(e\mu/k)^k$ comes from: the growth of $k!$.
+
 ## The central limit theorem, by swapping one term at a time {#sec-apx-prob-clt}
 
 ### What the chapter uses
@@ -345,6 +404,11 @@ uv run python code/appendix-derivations/apx_probability.py
 | Fraction recovered, $m = 10$, 100, 1000 | 0.62305, 0.53979, 0.51261 |
 | Shift TV of $\mathrm{Bin}(100, \frac12)$ and its mode height | both 0.0796 |
 | Largest $np\bar p\,|\ln(\text{ratio})|$ for $np\bar p \ge 4$ | 0.187 (proved: at most 3.5) |
+| $\mathrm{Poisson}(4)$ at $k = 20$ and 40: $\Pr[N = k]$ and its bound | $8.28 \times 10^{-9}$ and $5.09 \times 10^{-6}$; $2.71 \times 10^{-26}$ and $2.35 \times 10^{-23}$ |
+| $\mathrm{Poisson}(4)$ at $k = 20$ and 40: $\Pr[N \ge k]$ and its bound | $1.02 \times 10^{-8}$ and $1.11 \times 10^{-5}$; $3.01 \times 10^{-26}$ and $3.23 \times 10^{-23}$ |
+| Ratio $e^\mu\sqrt{2\pi k}\,e^{r_k}$ at $k = 20$ and 40 | 614.6 and 867.4 ($e^\mu\sqrt{2\pi k}$ alone: 612.0 and 865.6) |
+| Normal tail with mean 4 and variance 4, above 20 and 40 | $6.22 \times 10^{-16}$ and $9.74 \times 10^{-73}$ |
+| Chernoff bound on $\Pr[N \ge 20]$ | $9.32 \times 10^{-8}$, 9.1 times the exact tail |
 | Swapping 30 $\mathrm{Exp}(1)$ terms, $h = \sin$ | error 0.0365, bound 0.1220 |
 | CDF gap for 30 $\mathrm{Exp}(1)$ terms | exact 0.0243; bound 1.6201; Berry–Esseen 0.2116 |
 | Normal length tail, largest ratio to $e^{-t^2/2}$ | 0.498 |

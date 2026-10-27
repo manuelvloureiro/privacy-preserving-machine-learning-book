@@ -789,7 +789,7 @@ def plot_clone_loss(n: int = 1000, eps0: float = 2.0, delta: float = 1e-6) -> Fi
     a = np.arange(0, c + 2).astype(float)
     fig, (left, right) = plt.subplots(1, 2, figsize=(11, 4))
     loss = clone_loss(a, c, eps0)
-    left.plot(a, loss, "k.", markersize=3, label=rf"loss at $C = {c}$")
+    left.plot(a, loss, "k.", markersize=3, label=rf"loss at $N_c = {c}$")
     half = math.sqrt(c * math.log(2 / delta) / 2) + 0.5
     left.axvspan((c + 1) / 2 - half, (c + 1) / 2 + half, color="C0", alpha=0.2, label="Hoeffding window")
     left.axhline(eps_mine, color="C3", linestyle="--", label=rf"$\varepsilon = {eps_mine:.3f}$ (closed form)")
@@ -797,7 +797,7 @@ def plot_clone_loss(n: int = 1000, eps0: float = 2.0, delta: float = 1e-6) -> Fi
         xlabel=r"first count $a$",
         ylabel="privacy loss of the clone pair",
         ylim=(-eps0 - 0.2, eps0 + 0.2),
-        title=rf"$n = {n}$, $\varepsilon_0 = {eps0:g}$: loss given $C$",
+        title=rf"$n = {n}$, $\varepsilon_0 = {eps0:g}$: loss given $N_c$",
     )
     left.legend(fontsize=8, loc="upper left")
     cs = np.arange(max(1, int(mu - 5 * math.sqrt(mu))), int(mu + 5 * math.sqrt(mu)))
@@ -808,10 +808,10 @@ def plot_clone_loss(n: int = 1000, eps0: float = 2.0, delta: float = 1e-6) -> Fi
         )
         for k in cs
     ]
-    right.bar(cs, pmf, 1.0, color="C7", label=r"law of the clone count $C$")
-    right.axvline(c_min, color="C3", linestyle="--", label=rf"$c_{{\min}} = {c_min:.1f}$")
+    right.bar(cs, pmf, 1.0, color="C7", label=r"law of the clone count $N_c$")
+    right.axvline(c_min, color="C3", linestyle="--", label=rf"$n_{{c,\min}} = {c_min:.1f}$")
     right.axvline(mu, color="k", linestyle=":", label=rf"$\mu = {mu:.1f}$")
-    right.set(xlabel="number of clones $c$", ylabel="probability", title="Chernoff: fewer clones is rare")
+    right.set(xlabel="number of clones $n_c$", ylabel="probability", title="Chernoff: fewer clones is rare")
     right.legend(fontsize=8)
     return fig
 

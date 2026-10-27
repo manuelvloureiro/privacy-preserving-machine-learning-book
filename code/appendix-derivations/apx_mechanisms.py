@@ -430,7 +430,39 @@ def exponential_race_means(rng: np.random.Generator, scores: Sequence[float], sc
     return e.mean(axis=0) * np.exp(u / scale)
 
 
-# --- 7. The alarm mechanism -----------------------------------------------------------------------
+# --- 7. A Gumbel noisy max is private by the bar argument ------------------------------------------
+
+GUMBEL_BARS: list[float] = [-2.0, 0.0, 2.0, 5.0]
+
+
+def gumbel_sf(t: float, scale: float = 1.0) -> float:
+    """Pr[G > t] = 1 - exp(-e^{-t/scale}) for G ~ Gumbel(scale), via expm1 so that far right tails keep precision."""
+    return -math.expm1(-math.exp(-t / scale))
+
+
+def gumbel_shift_ratio(t: float, s: float, scale: float = 1.0) -> float:
+    """Pr[G > t - s] / Pr[G > t]: the factor by which moving the bar from t to t - s changes the tail."""
+    return gumbel_sf(t - s, scale) / gumbel_sf(t, scale)
+
+
+def laplace_shift_ratio(t: float, s: float, scale: float = 1.0) -> float:
+    """The same factor for Laplace noise of the same scale."""
+    return (1 - laplace_cdf(t - s, scale)) / (1 - laplace_cdf(t, scale))
+
+
+def gumbel_shift_worst(bars: FloatArray, shifts: FloatArray, scale: float = 1.0) -> float:
+    """Largest ratio / e^{|s|/scale} over a grid of bars and shifts; the lemma says it is at most 1."""
+    return max(
+        gumbel_shift_ratio(float(t), float(s), scale) / math.exp(abs(float(s)) / scale) for t in bars for s in shifts
+    )
+
+
+def concave_tail(y: float) -> float:
+    """φ(y) = 1 - e^{-y}, the Gumbel tail written as a function of y = e^{-t/scale}."""
+    return -math.expm1(-y)
+
+
+# --- 8. The alarm mechanism -----------------------------------------------------------------------
 
 
 def alarm_probability(eps: float, delta: float, size: int, count: int) -> float:
@@ -599,7 +631,21 @@ def print_table(rng: np.random.Generator) -> None:
     means = exponential_race_means(rng, SIX_SCORES, scale, trials=1_000_000)
     print(f"  rate times mean arrival time: {np.round(means, 3).tolist()}")
 
-    # 7. The alarm mechanism.
+    # 7. The Gumbel tail under a shifted bar.
+    print(
+        f"[Gumbel shift idea] φ(1)={concave_tail(1.0):.4f}  φ(2)={concave_tail(2.0):.4f}  "
+        f"ratio={concave_tail(2.0) / concave_tail(1.0):.4f}"
+    )
+    ratios = "  ".join(f"t={t:g}: {gumbel_shift_ratio(t, 1.0):.4f}" for t in GUMBEL_BARS)
+    print(f"[Gumbel shift scale=1 s=1] Pr[G > t - 1]/Pr[G > t]  {ratios}  bound e={math.e:.4f}")
+    before, after = gumbel_sf(0.7), gumbel_sf(0.7 - 1.0)
+    print(f"[Gumbel shift bar 0.7 -> -0.3] Pr before={before:.4f}  after={after:.4f}  ratio={after / before:.4f}")
+    worst = gumbel_shift_worst(np.linspace(-10.0, 20.0, 301), np.linspace(-5.0, 5.0, 101))
+    print(
+        f"[Gumbel shift grid t in [-10, 20], s in [-5, 5]] largest ratio / e^|s| = {worst:.4f} (1 at s = 0)  above 1 anywhere: {worst > 1}"
+    )
+
+    # 8. The alarm mechanism.
     eps, delta = 0.5, 1e-5
     print(
         f"[Alarm eps={eps:g} delta={delta:g}] cap (e^eps+delta)/(e^eps+1)={alarm_cap(eps, delta):.4f}  "
@@ -889,6 +935,23 @@ def plot_gumbel_top2(rng: np.random.Generator, scale: float = 2.0) -> Figure:
     return fig
 
 
+def plot_gumbel_shift() -> Figure:
+    ts = np.linspace(-4.0, 8.0, 481)
+    fig, ax = plt.subplots(figsize=(6.5, 4))
+    ax.plot(ts, [gumbel_shift_ratio(float(t), 1.0) for t in ts], color="C0", label="Gumbel(1)")
+    ax.plot(ts, [laplace_shift_ratio(float(t), 1.0) for t in ts], "--", color="C1", label="Laplace(1)")
+    ax.plot(GUMBEL_BARS, [gumbel_shift_ratio(t, 1.0) for t in GUMBEL_BARS], "o", color="C0", label="bars in the table")
+    ax.axhline(math.e, color="k", linestyle=":", label=r"bound $e^{|s|} = e$")
+    ax.set(
+        ylim=(0.9, 3.0),
+        xlabel=r"bar $t$",
+        ylabel=r"$\Pr[\,\mathrm{noise} > t - 1\,] \,/\, \Pr[\,\mathrm{noise} > t\,]$",
+        title="Lowering the bar by 1 raises the tail by at most a factor e",
+    )
+    ax.legend(fontsize=8, loc="lower right")
+    return fig
+
+
 def plot_gumbel_race(rng: np.random.Generator, scale: float = 2.0) -> Figure:
     u = np.asarray(SIX_SCORES)
     rates = np.exp(u / scale)
@@ -942,6 +1005,7 @@ def main() -> None:
         "apx_mech_svt_losses.svg": plot_svt_losses(),
         "apx_mech_gumbel_top2.svg": plot_gumbel_top2(rng),
         "apx_mech_gumbel_race.svg": plot_gumbel_race(rng),
+        "apx_mech_gumbel_shift.svg": plot_gumbel_shift(),
     }
     for name, fig in figures.items():
         fig.tight_layout()

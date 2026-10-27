@@ -1,14 +1,14 @@
 # Information theory
 
-You observe something, such as a word in an email, and you want to know how much it tells you about something you cannot see, such as whether the email is spam. Information theory turns "how much" into a number in two ways, because there are two questions you might be asking. The first is how many bits, on average, the observation saves you when you describe the hidden value, and Shannon entropy and mutual information answer it. The second is how much more likely a single best guess is to be right once you have seen the observation, and min-entropy answers that one. Later parts measure what an observation reveals about a hidden value, and they need both views and the places where the two disagree.
+You observe something, such as a word in an email, and you want to know how much it tells you about something you cannot see, such as whether the email is spam. Information theory turns "how much" into a number in two ways, because there are two questions you might be asking. The first is how many bits, on average, the observation saves you when you describe the hidden value, and Shannon entropy and mutual information answer it. The second is how much more likely a single best guess is to be right once you have seen the observation, and min-entropy answers that one. Later parts need both views, and the places where they disagree.
 
-The idea that organizes the chapter is that every quantity here is built from the logarithm of a probability, either averaged over the outcomes or taken at the most likely one. So almost every proof either compares the average of a logarithm with the logarithm of an average, or takes logarithms of the product rule for probabilities to turn it into a sum. Logarithms are base 2, so quantities are in **bits**. [Divergences](03-divergences.md) uses the natural logarithm $\ln$, whose unit is the nat, so its divergences are this chapter's multiplied by $\ln 2$.
+The idea that organizes the chapter is that every quantity here is built from the logarithm of a probability, either averaged over the outcomes or taken at the most likely one. So almost every proof either compares the average of a logarithm with the logarithm of an average, which Jensen's inequality does because the logarithm is concave, or takes logarithms of the product rule for probabilities to turn it into a sum. Logarithms are base 2, so quantities are in **bits**. [Divergences](03-divergences.md) uses the natural logarithm $\ln$, whose unit is the nat, so a value in nats is this chapter's value in bits times $\ln 2$.
 
-The running example is a spam filter's keyword. One email in eight is spam, every spam email contains the word "offer", and so does one legitimate (ham) email in seven. The first two sections measure what the keyword says about the label, and @sec-min-capacity shows that it does not help someone who must guess the label.
+The running example is a spam filter's keyword. One email in eight is spam, every spam email contains the word "offer", and so does one in seven legitimate (ham) emails. The first two sections measure what the keyword says about the label, and @sec-min-capacity shows that it does not help someone who must guess the label.
 
 ## Shannon entropy {#sec-min-shannon-entropy}
 
-How uncertain is a random variable? A fair coin should count as one unit of uncertainty, two fair coins as two, and a coin that always lands heads as zero. Shannon entropy is the measure with these properties, and the next three sections are built from it. The rarer an outcome, the more it tells you when it happens, so the definition gives each outcome a number that grows as its probability shrinks, and averages it.
+How uncertain is a random variable? A fair coin should count as one unit of uncertainty, two fair coins as two, and a coin that always lands heads as zero. Shannon entropy is the measure with these properties. The rarer an outcome, the more it tells you when it happens, so the definition gives each outcome a number that grows as its probability shrinks, and averages it.
 
 ::: {#def-min-shannon-entropy name="Entropy"}
 Let $X$ be a discrete random variable with distribution $p$. The **surprisal** of an outcome $x$ is $\log_2(1/p(x))$ bits, so an outcome of probability $\frac14$ carries 2 bits. The **entropy** of $X$ is its average surprisal,
@@ -17,7 +17,7 @@ with the convention $0\log_2 0 = 0$, so that impossible outcomes contribute noth
 $$h(t) = -t\log_2 t - (1 - t)\log_2(1 - t).$$
 :::
 
-Entropy cannot be negative, because no surprisal is, and it should be largest when no outcome is favoured. The proof of the upper bound measures how far the distribution is from uniform. For two distributions $p$ and $q$ on the same finite set, the **Kullback–Leibler (KL) divergence** is
+Entropy cannot be negative, because no surprisal is, and it should be largest when no outcome is favoured. The proof of the upper bound measures how far the distribution is from uniform. For two distributions $p$ and $q$ on the same finite set, with $q$ positive wherever $p$ is, the **Kullback–Leibler (KL) divergence** is
 $$D_{\mathrm{KL}}(p\,\|\,q) = \sum_x p(x)\log_2\frac{p(x)}{q(x)},$$
 the average, over outcomes drawn from $p$, of the log of how much more likely each outcome is under $p$ than under the other distribution $q$. [Divergences](03-divergences.md) proves Gibbs' inequality for it: the divergence is never negative, and it is zero only when $p = q$.
 
@@ -55,11 +55,11 @@ $$\log_2\frac{1}{p(x, y)} = \log_2\frac{1}{p(y)} + \log_2\frac{1}{p(x \mid y)}.$
 3. *Swap the roles.* Starting from $p(x, y) = p(x)\,p(y \mid x)$ instead, the same two steps give the second form.
 :::
 
-Applying @eq-min-chain-rule repeatedly, one variable at a time, extends the chain rule to any number of variables. @fig-min-binary-entropy shows the binary entropy, which is 1 bit for a fair coin, zero for a certain one, and steep near the ends: a coin with an 11% chance of heads keeps $h(0.11) = 0.4999$ bits.
+Applying @eq-min-chain-rule repeatedly, one variable at a time, extends the chain rule to any number of variables. @fig-min-binary-entropy shows the binary entropy, which is 1 bit for a fair coin and zero for a certain one. It rises steeply near the ends, so a coin with only an 11% chance of heads already keeps $h(0.11) = 0.4999$ bits, half the fair coin's.
 
 Learning something should not make you more uncertain on average, as @sec-min-mutual-information proves, but a rare observation can push you from a confident belief into a toss-up.
 
-![The binary entropy $h(t)$ against the min-entropy $-\log_2\max(t, 1 - t)$ of the same Bernoulli variable. Both are 1 bit at $t = \frac12$; the min-entropy is lower everywhere else.](figures/information_theory_binary_entropy.svg){#fig-min-binary-entropy}
+![The binary entropy $h(t)$ against the min-entropy $-\log_2\max(t, 1 - t)$ of the same Bernoulli variable. Both are 1 bit at $t = \frac12$; the min-entropy, defined in @sec-min-entropy, is lower everywhere else.](figures/information_theory_binary_entropy.svg){#fig-min-binary-entropy}
 
 ::: {#exm-min-spam}
 Let $X$ be the label of an email, ham or spam, and $Y$ whether it contains the word "offer". Ham emails are $\frac78$ of the total and one in seven of them contains the word, so ham emails with the word are $\frac18$ of all emails and those without it are $\frac34$ (@tbl-min-spam).
@@ -81,12 +81,12 @@ On average, though, the word helps. It is absent with probability $\frac34$, so 
 
 ## Mutual information {#sec-min-mutual-information}
 
-How much does observing $Y$ tell you about $X$? A natural answer is the drop in uncertainty it causes on average, the **information gain** that a decision tree uses to choose a split. The spam example showed that one observation can raise the uncertainty, so you need to know that the average drop is never negative. It turns out to be a KL divergence, which makes it non-negative, and one that treats $X$ and $Y$ alike, and it obeys a rule that much of the book relies on: processing cannot create information.
+How much does observing $Y$ tell you about $X$? A natural answer is the drop in uncertainty it causes on average, the **information gain**. The spam example showed that one observation can raise the uncertainty, so you need to know that the average drop is never negative. It turns out to be a KL divergence, which makes it non-negative and symmetric in $X$ and $Y$. It also obeys a rule that much of the book relies on, that processing cannot create information.
 
 ::: {#def-min-mutual-information name="Mutual information"}
 The **mutual information** between two discrete random variables $X$ and $Y$ is the average drop in uncertainty about $X$ from seeing $Y$,
 $$I(X; Y) = H(X) - H(X \mid Y).$$
-Given a third variable $Z$, the **conditional mutual information** $I(X; Y \mid Z) = H(X \mid Z) - H(X \mid Y, Z)$ is what $Y$ adds about $X$ beyond what $Z$ already told you.
+Given a third variable $Z$, the **conditional mutual information** $I(X; Y \mid Z) = H(X \mid Z) - H(X \mid Y, Z)$, where conditioning on $Y, Z$ means conditioning on the pair, is what $Y$ adds about $X$ beyond what $Z$ already told you.
 :::
 
 Mutual information can also be read as a measure of dependence, by comparing the joint table with the product of its marginals, the table that $X$ and $Y$ would have if they were independent.
@@ -94,7 +94,7 @@ Mutual information can also be read as a measure of dependence, by comparing the
 ::: {#thm-min-mi-kl name="Mutual information is a KL divergence"}
 Let $X$ and $Y$ be discrete, write $P_{XY}$ for their joint distribution and $P_XP_Y$ for the product of its marginals. Then
 $$I(X; Y) = D_{\mathrm{KL}}\big(P_{XY}\,\big\|\,P_XP_Y\big) = \sum_{x, y}p(x, y)\log_2\frac{p(x, y)}{p(x)\,p(y)}.$$ {#eq-min-mi-kl}
-So mutual information is symmetric, $I(X; Y) = I(Y; X) = H(Y) - H(Y \mid X)$. It is non-negative, and it is zero if and only if $X$ and $Y$ are independent. Conditional mutual information is an average of such divergences between the distributions given $Z = z$, written with a subscript $z$, so it is non-negative too:
+So mutual information is symmetric, $I(X; Y) = I(Y; X) = H(Y) - H(Y \mid X)$. It is non-negative, and it is zero if and only if $X$ and $Y$ are independent. Conditional mutual information is the average over $z$ of the same divergence computed from the distributions given $Z = z$, marked with a subscript $z$, so it is non-negative too:
 $$I(X; Y \mid Z) = \sum_z p(z)\,D_{\mathrm{KL}}\big(P_{XY\mid z}\,\big\|\,P_{X\mid z}P_{Y\mid z}\big) \ge 0.$$
 :::
 
@@ -107,10 +107,10 @@ $$H(X) = \sum_{x, y}p(x, y)\log_2\frac{1}{p(x)}, \qquad H(X \mid Y) = \sum_{x, y
 $$I(X; Y) = \sum_{x, y}p(x, y)\log_2\frac{p(x \mid y)}{p(x)}.$$
 3. *Bring in the joint.* Multiply the fraction by $p(y)/p(y)$. The product rule $p(x \mid y)\,p(y) = p(x, y)$ turns it into $\frac{p(x, y)}{p(x)\,p(y)}$, which gives @eq-min-mi-kl.
 4. *Read off the properties.* The sum in @eq-min-mi-kl does not change when $X$ and $Y$ swap roles, and steps 1 to 3 with the roles swapped give $H(Y) - H(Y \mid X)$. Gibbs' inequality makes the divergence non-negative, and zero only if the joint table equals the product of its marginals, which is the definition of independence.
-5. *Condition on $Z$.* Both entropies in $I(X; Y \mid Z)$ are averages over $z$ of entropies computed from the distribution given $Z = z$. So it is the average over $z$ of a mutual information, and steps 1 to 4 make each one a non-negative divergence.
+5. *Condition on $Z$.* Both entropies in $I(X; Y \mid Z)$ are averages over $z$ of entropies computed from the distribution given $Z = z$. For $H(X \mid Y, Z)$ this is @def-min-conditional-entropy with the pair's values grouped by $z$. So it is the average over $z$ of a mutual information, and steps 1 to 4 make each one a non-negative divergence.
 :::
 
-The theorem settles the question the spam example left open. It also bounds the uncertainty of a pair by the sum of the two uncertainties, which @sec-min-fano needs.
+The theorem settles the question the spam example left open, whether the average drop in uncertainty can be negative. Its corollary also bounds the uncertainty of a pair by the sum of the two uncertainties, which @sec-min-fano needs.
 
 ::: {#cor-min-conditioning name="Conditioning reduces entropy on average"}
 For any two discrete random variables $X$ and $Y$,
@@ -140,7 +140,7 @@ $$I(X; Y, Z) = \big[H(X) - H(X \mid Y)\big] + \big[H(X \mid Y) - H(X \mid Y, Z)\
 Denoising, feature extraction and training a model all compute something from data. If the result $Z$ is computed from $Y$ alone, it should not know more about $X$ than $Y$ does.
 
 ::: {#thm-min-dpi name="Data-processing inequality"}
-Let $X$, $Y$ and $Z$ be discrete random variables such that $X$ and $Z$ are independent given $Y$. This is called a **Markov chain**, written $X \to Y \to Z$, and it holds whenever $Z$ is computed from $Y$ alone, possibly with randomness independent of $X$. Then
+Let $X$, $Y$ and $Z$ be discrete random variables such that $X$ and $Z$ are independent given $Y$. This is called a **Markov chain**, written $X \to Y \to Z$, and it holds whenever $Z$ is computed from $Y$ alone, possibly with randomness independent of $X$ and $Y$. Then
 $$I(X; Z) \le I(X; Y),$$
 with equality if and only if $I(X; Y \mid Z) = 0$.
 :::
@@ -154,19 +154,19 @@ $$I(X; Z) + I(X; Y \mid Z) = I(X; Y, Z) = I(X; Y) + I(X; Z \mid Y).$$
 3. *Drop a non-negative term.* Hence $I(X; Z) = I(X; Y) - I(X; Y \mid Z)$. The subtracted term is non-negative by @thm-min-mi-kl, and it is zero exactly in the case of equality.
 :::
 
-In the case of equality, $Z$ has kept everything in $Y$ that matters for $X$, and it is called a **sufficient statistic** for $X$. An invertible function of $Y$ is one, because $Y$ can be computed back from it, so @thm-min-dpi also gives $I(X; Y) \le I(X; Z)$.
+In the case of equality, $Z$ has kept everything in $Y$ that matters for $X$, and it is called a **sufficient statistic** for $X$. An invertible function $Z$ of $Y$ is one. Since $Y$ can be computed back from $Z$, the chain $X \to Z \to Y$ is also Markov, so @thm-min-dpi also gives $I(X; Y) \le I(X; Z)$, and the two are equal.
 
 Mutual information is an average over both $x$ and $y$. So a small value can hide a few outcomes in which $Y$ reveals $X$ completely, and @sec-min-shannon-vs-min shows how far apart the average and the worst case can be.
 
 ::: {#exm-min-spam-mi}
-In the spam table, the keyword reduced the uncertainty from 0.5436 bits to 0.25 bits on average, so $I(X; Y) = 0.2936$ bits. The chapter's script (@sec-min-code) gets the same value from the KL form @eq-min-mi-kl and from $H(Y) - H(Y \mid X)$.
+In the spam table, the keyword reduced the uncertainty from 0.5436 bits to 0.25 bits on average, so $I(X; Y) = 0.2936$ bits. The script (@sec-min-code) gets the same value from @eq-min-mi-kl and from $H(Y) - H(Y \mid X)$.
 
-Now suppose the keyword is detected by a sloppy tokenizer that gets the answer wrong with probability 0.1, and call its output $Z$. The tokenizer looks only at the word, so $X \to Y \to Z$ is a Markov chain, and the script finds $I(X; Z) = 0.1668$ bits, below $I(X; Y)$ as @thm-min-dpi predicts. The noisy feature carries 57% of the information of the clean one, so a 10% error rate in the detector costs over 40% of the information.
+Now suppose the keyword is detected by a sloppy tokenizer that gets the answer wrong with probability 0.1, and call its output $Z$. The tokenizer looks only at the word, so $X \to Y \to Z$ is a Markov chain, and the script finds $I(X; Z) = 0.1668$ bits, below $I(X; Y)$ as @thm-min-dpi predicts. The noisy feature carries 57% of the information of the clean one, so a 10% error rate costs over 40% of the information.
 :::
 
 ## Channels and capacity {#sec-min-channels}
 
-The sloppy tokenizer is a channel, which turns an input into a random output, and so is a noisy storage device. You control how often each input is sent, but not the noise. How much information can one use of the channel carry at best? That maximum is the **capacity**, and Shannon's channel coding theorem, not proved here, says that it is the rate at which data can be sent with an error probability as small as you like. The guessing sections reuse these channels.
+The sloppy tokenizer is a channel, which turns an input into a random output, and so is a noisy storage device. You control how often each input is sent, but not the noise. How much information can one use of the channel carry at best? That maximum is the **capacity**, and Shannon's channel coding theorem, not proved here, says that it is the largest number of data bits per use of the channel that long codes can send with an error probability as small as you like.
 
 ::: {#def-min-channel name="Channel and capacity"}
 A **channel** from $X$ to $Y$ is a table $K$ whose entry $K[x, y] = p(y \mid x)$ says how likely the output $y$ is given the input $x$. Each row sums to 1, because some output must occur. A **prior** $\pi(x)$ says how likely each input is, and the product rule gives the joint table $p(x, y) = \pi(x)\,K[x, y]$.
@@ -195,14 +195,14 @@ $$\Pr[Y = 1] = \pi_1(1 - p) + (1 - \pi_1)p.$$
 At $\pi_1 = \frac12$ this is $\frac12$, so the uniform input makes the output uniform, and the largest information is $1 - h(p)$.
 :::
 
-@fig-min-bsc (left) shows the information as a function of the input prior, a hump that peaks at the uniform input for every $p$. Away from the peak you lose a lot. At $p = 0.11$ and $\pi_1 = 0.2$, the output is 1 with probability 0.266, so the channel carries only $h(0.266) - h(0.11) = 0.3358$ bits, against 0.5001 at the uniform input. The right panel shows that the capacity is zero at $p = \frac12$, where the output is a fair coin whatever the input. It is symmetric about $\frac12$, because a receiver can flip every output of a channel that almost always flips.
+@fig-min-bsc (left) shows the information as a function of the input prior, a hump that peaks at the uniform input for every $p$ and falls fast away from it. At $p = 0.11$ and $\pi_1 = 0.2$, the output is 1 with probability 0.266, so the channel carries only $h(0.266) - h(0.11) = 0.3358$ bits, against 0.5001 at the uniform input. The right panel shows that the capacity is zero at $p = \frac12$, where the output is a fair coin whatever the input. The capacity is symmetric about $\frac12$, because a receiver can flip every output of a channel that almost always flips, which turns it into one that rarely flips.
 
 For channels without this symmetry, the maximum over priors has no closed form. The **Blahut–Arimoto** algorithm computes it numerically, by alternately choosing the best posterior over inputs for the current prior and the best prior for that posterior, which never lowers the information. The script uses it to check @eq-min-bsc-capacity.
 
 ![Left: mutual information of a binary symmetric channel as a function of the input prior, for several flip probabilities; every curve peaks at $\pi_1 = \frac12$. Right: the capacity $1 - h(p)$ against $p$, with the min-capacity of @sec-min-capacity for comparison.](figures/information_theory_bsc.svg){#fig-min-bsc}
 
 ::: {#exm-min-storage}
-A cheap storage medium flips each stored bit independently with probability 0.11. Its capacity is $1 - h(0.11) = 0.5001$ bits per stored bit. So good error-correcting codes can store about one bit of data per two raw bits, with an error rate as small as you like, and by the channel coding theorem no code can do better. At a flip probability of 0.25 the capacity drops to $1 - h(0.25) = 0.1887$, about five raw bits per data bit.
+A cheap storage medium flips each stored bit independently with probability 0.11. Its capacity is $1 - h(0.11) = 0.5001$ bits per stored bit. So codes that add redundant bits to correct errors can store about one bit of data per two raw bits, with an error rate as small as you like, and by the channel coding theorem no code can do better. At a flip probability of 0.25 the capacity drops to $1 - h(0.25) = 0.1887$, about five raw bits per data bit.
 :::
 
 ## Min-entropy and guessing {#sec-min-entropy}
@@ -230,14 +230,16 @@ with equality in the first inequality if and only if $X$ is uniform on its **sup
 
 Min-entropy has a direct reading: a value with a min-entropy of $r$ bits is exactly as hard to guess in one try as a uniform string of $r$ bits, however large its Shannon entropy is. For a coin, @fig-min-binary-entropy shows the gap, with a kink in the min-entropy where the most likely outcome switches.
 
-Both entropies belong to one family. The **Rényi entropy** of order $\alpha$ is
+Both entropies are the ends of one family, so a result proved for the family covers both. The **Rényi entropy** of order $\alpha$ is
 $$H_\alpha(X) = \frac{1}{1 - \alpha}\log_2\sum_x p(x)^\alpha.$$
-As $\alpha$ grows, the sum is dominated more and more by the largest probability, and as $\alpha \to \infty$ the formula tends to $H_\infty$. As $\alpha \to 1$ the formula becomes $0/0$, and its limit is Shannon's $H$. @sec-apx-tail-renyi-kl in the appendices derives both limits, and the family parallels the Rényi divergences of [Divergences](03-divergences.md).
+As $\alpha$ grows, the sum is dominated more and more by the largest probability, and as $\alpha \to \infty$ the formula tends to $H_\infty$. As $\alpha \to 1$ the formula becomes $0/0$, and its limit is Shannon's $H$. @sec-apx-tail-renyi-kl derives both limits, and the family parallels the Rényi divergences of [Divergences](03-divergences.md).
 
 ::: {#exm-min-pin}
-The spam label has only two values, so its two entropies cannot differ much, and a password shows the gap better. A uniform 4-digit PIN has $H = H_\infty = \log_2 10{,}000 = 13.2877$ bits. Now suppose 10% of people choose 1234 and the rest choose uniformly among the other 9,999 PINs.
+A password shows the gap between the two entropies better than the two-valued spam label. A uniform 4-digit PIN has $H = H_\infty = \log_2 10{,}000 = 13.2877$ bits. Now suppose 10% of people choose 1234 and the rest choose uniformly among the other 9,999 PINs.
 
-The Shannon entropy is $H = 12.4278$ bits, less than a bit below the uniform case. The chain rule shows where it comes from. Revealing whether the PIN is 1234 costs $h(0.1) = 0.4690$ bits, and then, in the 90% of cases where it is not, revealing which of the others it is costs $\log_2 9{,}999$ bits, or $0.9\log_2 9{,}999$ on average. That gives $0.4690 + 11.9588 = 12.4278$.
+The Shannon entropy is $H = 12.4278$ bits, less than a bit below the uniform case. The chain rule shows where it comes from, applied to $X$ and the indicator $B$ of "the PIN is 1234". Since $B$ is a function of $X$,
+$$H(X) = H(X, B) = H(B) + H(X \mid B).$$
+Revealing whether the PIN is 1234 costs $h(0.1) = 0.4690$ bits, and then, in the 90% of cases where it is not, revealing which of the others it is costs $\log_2 9{,}999$ bits, or $0.9\log_2 9{,}999$ on average. That gives $0.4690 + 11.9588 = 12.4278$.
 
 The min-entropy is $H_\infty = \log_2 10 = 3.3219$ bits, because the best guess, 1234, succeeds with probability $0.1$. So the Shannon entropy says that this PIN distribution is almost as good as uniform, while the min-entropy says that one guess in ten succeeds.
 :::
@@ -286,7 +288,7 @@ $$\max_x\pi(x)K[x, y] \le V(X)\max_x K[x, y].$$
 4. *The range.* Each column maximum is at most 1, so the sum is at most $\lvert\mathcal Y\rvert$. Each is also at most its column sum, so the sum is at most the total of all entries, which is $\lvert\mathcal X\rvert$ because each row sums to 1. Finally, the column maxima are at least the entries of any one row, so the sum is at least 1.
 :::
 
-A leakage of 1 bit means that the observation doubles the chance of a correct first guess. That is a statement an engineer can act on, and it is why min-entropy is the usual measure in quantitative information flow, the field that studies what a program's outputs reveal about its secret inputs. The min-capacity bounds the leakage for every prior with one number computed from the channel alone. For $\mathrm{BSC}(p)$ both column maxima are $\max(p, 1 - p)$, which at $p = 0.11$ gives 0.8319 bits against a Shannon capacity of 0.5001 (@fig-min-bsc, right).
+A leakage of 1 bit means that the observation doubles the chance of a correct first guess. This is why min-entropy is the usual measure in quantitative information flow, the field that studies what a program's outputs reveal about its secret inputs. The min-capacity bounds the leakage for every prior with one number computed from the channel alone. For $\mathrm{BSC}(p)$ both column maxima are $\max(p, 1 - p)$, so at $p = 0.11$ the min-capacity is $\log_2(2 \times 0.89) = 0.8319$ bits against a Shannon capacity of 0.5001 (@fig-min-bsc, right).
 
 A natural alternative would average the min-entropy $H_\infty(X \mid Y = y)$ left after each observation. Smith's value takes minus the logarithm of the averaged vulnerability instead, and because $-\log_2$ is convex, Jensen's inequality makes Smith's value never larger than the alternative. Only Smith's is the logarithm of an actual success probability.
 
@@ -316,7 +318,7 @@ A table where guessing does improve shows each step. A secret $X$ takes four val
 
 Without the observation, the best guess is $x_1$, right with probability $V(X) = 0.4$. With it, the MAP guesser picks the bold cell in each column and succeeds with probability $0.32 + 0.24 + 0.10 = 0.66$, so $H_\infty(X \mid Y) = 0.5995$ bits. On $y_3$ it picks $x_3$ although the channel entry for $x_4$ is larger, because $x_3$ is twice as likely a priori. A million simulated draws give a success rate of 0.6594.
 
-The leakage is $\log_2(0.66/0.4) = 0.7225$ bits, while the mutual information of the same table is 0.6865 bits. Every column of the channel has maximum 0.8, so by @eq-min-capacity the min-capacity is $\log_2 2.4 = 1.2630$ bits, against a Shannon capacity of 0.8269 from Blahut–Arimoto. The alternative average of $H_\infty(X \mid Y = y)$ is 0.6548 bits, above Smith's 0.5995, as Jensen's inequality predicts.
+The leakage is $\log_2(0.66/0.4) = 0.7225$ bits, while the mutual information of the same table is 0.6865 bits, so here the two measures nearly agree. Every column of the channel has maximum 0.8, so by @eq-min-capacity the min-capacity is $\log_2 2.4 = 1.2630$ bits, against a Shannon capacity of 0.8269 from Blahut–Arimoto. The alternative average of $H_\infty(X \mid Y = y)$ is 0.6548 bits, above Smith's 0.5995, as Jensen's inequality predicts.
 :::
 
 ![The joint distribution $p(x, y) = \pi(x)K[x, y]$ of the walk-through. The MAP guesser picks the boxed cell in each column, and its success probability is their sum $V(X \mid Y) = 0.66$.](figures/information_theory_guessing.svg){#fig-min-guessing}
@@ -364,7 +366,7 @@ On a 64-bit secret, compare reveal-if-zero(3), which outputs the whole secret on
 
 By Shannon leakage, reveal-low(9) is the leakier channel. By one-guess success, reveal-if-zero(3) is worse by a factor of $0.125/(2.78\times10^{-17}) \approx 4.5\times10^{15}$. Smith (2009) used a pair of programs like these to argue that Shannon leakage is the wrong measure for one-try guessing.
 
-The extreme case is $j = w$, a channel that reveals the secret only if it is all zeros. For a 4-bit secret the Shannon leakage is $h(1/16) = 0.3373$ bits, and the min-entropy leakage is exactly 1 bit, because the guesser wins on seeing 0000 and otherwise picks one of 15 values, so its success doubles to $\frac1{16} + \frac{15}{16}\cdot\frac1{15}$. For a 32-bit secret the Shannon leakage falls to $7.786\times10^{-9}$ bits, while the min-entropy leakage stays at 1 bit. Both numbers are small, and both miss that for the one secret value 0000 the channel reveals everything. Any measure that averages over the secret can hide a fully exposed value, so a worst-case question needs a worst-case measure, which later parts build.
+The extreme case is $j = w$, a channel that reveals the secret only if it is all zeros. For a 4-bit secret the Shannon leakage is $h(1/16) = 0.3373$ bits, and the min-entropy leakage is exactly 1 bit, because the guesser wins on seeing 0000 and otherwise picks one of 15 values, so its success doubles to $\frac1{16} + \frac{15}{16}\cdot\frac1{15}$. For a 32-bit secret the Shannon leakage falls to $7.786\times10^{-9}$ bits, while the min-entropy leakage stays at 1 bit. Both numbers are small next to the 4 or 32 bits of the secret, and both miss that for the one secret value 0000 the channel reveals everything. Any measure that averages over the secret can hide a fully exposed value, so a worst-case question needs a worst-case measure, which later parts build.
 :::
 
 ## Fano's inequality {#sec-min-fano}
@@ -372,7 +374,7 @@ The extreme case is $j = w$, a channel that reveals the secret only if it is all
 Mutual information also gives **lower bounds**, statements that *no* estimator can do better than some error rate, which you need to show that a problem is hard rather than that a method is good. Fano's inequality is the basic tool. It says that if $X$ is still uncertain after seeing $Y$, every guess of $X$ from $Y$ must often be wrong. The reason is that describing $X$ once the guess is known takes only two pieces: whether the guess was right, and, when it was wrong, which other value $X$ is.
 
 ::: {#thm-min-fano name="Fano's inequality"}
-Let $X$ take values in a finite set of $k$ elements, and let $\hat X$ be any estimate of $X$ computed from $Y$, possibly with extra randomness independent of $X$. Write $P_e$ for its error probability,
+Let $X$ take values in a finite set of $k$ elements, and let $\hat X$ be any estimate of $X$ computed from $Y$, possibly with extra randomness independent of $X$ and $Y$. Write $P_e$ for its error probability,
 $$P_e = \Pr[\hat X \ne X].$$
 Then
 $$H(X \mid Y) \le h(P_e) + P_e\log_2(k - 1),$$ {#eq-min-fano}
@@ -381,9 +383,9 @@ $$P_e \ge \frac{H(X \mid Y) - 1}{\log_2 k}.$$ {#eq-min-fano-weak}
 :::
 
 ::: {.proof}
-The plan is to expand the uncertainty of the error together with $X$ in two orders, bound the pieces of one order, carry the bound from $\hat X$ to $Y$, and weaken it. Write $E = \mathbf 1[\hat X \ne X]$ for the error indicator, which is 1 when the guess is wrong. Every entropy in steps 1 to 4 is conditioned on $\hat X$, and @eq-min-chain-rule holds for each distribution given a value of $\hat X$, so it holds for their average.
+The plan is to expand the uncertainty of the error together with $X$ in two orders, bound the pieces of one order, carry the bound from $\hat X$ to $Y$, and weaken it. Write $E = \mathbf 1[\hat X \ne X]$ for the error indicator, which is 1 when the guess is wrong.
 
-1. *Expand in two orders.* Revealing $X$ first and $E$ first, the chain rule gives
+1. *Expand in two orders.* Every entropy in steps 1 to 4 is conditioned on $\hat X$. The chain rule @eq-min-chain-rule holds given each value of $\hat X$, so it also holds for the average over $\hat X$, and revealing $X$ first or $E$ first gives
 $$H(X \mid \hat X) + H(E \mid X, \hat X) = H(E, X \mid \hat X) = H(E \mid \hat X) + H(X \mid E, \hat X).$$
 Given both $X$ and $\hat X$ you know whether they differ, so $H(E \mid X, \hat X) = 0$.
 2. *Bound the error's uncertainty.* By @cor-min-conditioning, $H(E \mid \hat X) \le H(E)$, which is $h(P_e)$ because $E$ is 1 with probability $P_e$.
@@ -398,11 +400,11 @@ The right side of @eq-min-fano increases with $P_e$ on $[0, (k - 1)/k]$, the ran
 $$\frac{\mathrm d}{\mathrm dP_e}\Big(h(P_e) + P_e\log_2(k - 1)\Big) = \log_2\frac{(1 - P_e)(k - 1)}{P_e} > 0.$$
 So the **Fano bound**, the smallest $P_e$ that satisfies it, can be found by bisection. The bound is tight when step 3 is, that is when the true value after a wrong guess is uniform over the other values. The $k$-ary **symmetric channel** keeps its input with probability $1 - p$ and otherwise outputs one of the other symbols uniformly. It has exactly this structure, and Fano's inequality is an equality for it (@fig-min-fano, left).
 
-If errors go to a few wrong values, the bound is loose, because little uncertainty is left after a wrong guess. The **shift channel** outputs $x + 1 \bmod k$ instead of $x$ with probability $p$, and given the output the input is one of only two values. With uniform $X$, $k = 8$ and $p = 0.2$, both channels have MAP error 0.2000. The Fano bound matches it for the symmetric channel but is only 0.0954 for the shift channel (@fig-min-fano, right). The weak form @eq-min-fano-weak gives 0.0945 for the symmetric channel and 0 for the shift channel, whose $H(X \mid Y)$ is below 1.
+If errors go to a few wrong values, the bound is loose, because little uncertainty is left after a wrong guess. The **shift channel** outputs $x + 1 \bmod k$ instead of $x$ with probability $p$, and given the output the input is one of only two values. With uniform $X$, $k = 8$ and $p = 0.2$, both channels have MAP error 0.2000, because the best guess is the input that keeps the output unchanged, which is wrong with probability $p$. The Fano bound matches it for the symmetric channel but is only 0.0954 for the shift channel (@fig-min-fano, right). The weak form @eq-min-fano-weak gives 0.0945 for the symmetric channel and 0 for the shift channel, whose $H(X \mid Y)$ is below 1.
 
 ![MAP error against Fano's lower bound, for $k = 8$ and a uniform $X$, as the noise level $p$ grows. Left: on the symmetric channel the bound is exact. Right: on the shift channel, where errors go to a single wrong value, the bound is loose and the weak form is zero.](figures/information_theory_fano.svg){#fig-min-fano}
 
-The same idea shows that estimating a parameter needs many samples, by turning estimation into identification. Pick candidate parameter values far apart, so that estimating the parameter well would identify the candidate. If the samples carry little information about which candidate produced them, no estimator can identify it.
+The same idea shows that estimating a parameter needs many samples, by turning estimation into identification. Pick candidate parameter values far apart, so that estimating the parameter well would identify the candidate, yet with sample distributions close together. If the samples carry little information about which candidate produced them, no estimator can identify it.
 
 ::: {#prp-min-fano-method name="Fano's method"}
 Let $\theta_1, \dots, \theta_k$ be candidate parameter values, with distributions $P_{\theta_x}$ for the samples. Let the index $X$ be uniform on $\{1, \dots, k\}$, and given $X$ let the $n$ samples $Y^n = (Y_1, \dots, Y_n)$ be independent draws from $P_{\theta_X}$. Suppose that a number $\kappa$ bounds the divergence between any two candidates,
@@ -418,13 +420,13 @@ The plan is to bound the information in $n$ samples by $n$ times the information
 $$I(X; Y^n) \le \sum_i I(X; Y_i) = n\,I(X; Y_1).$$
 2. *Write one sample's information as an average divergence.* Let $\bar P = \frac1k\sum_x P_{\theta_x}$ be the average of the candidate distributions, which is the distribution of $Y_1$ when the index is random. With $p(x, y) = P_{\theta_x}(y)/k$ and $p(y) = \bar P(y)$, @eq-min-mi-kl reads
 $$I(X; Y_1) = \frac1k\sum_x D_{\mathrm{KL}}(P_{\theta_x}\,\|\,\bar P).$$
-3. *Bound it by $\kappa$.* For any distribution $Q$, splitting $\log_2\frac{P_{\theta_x}}{Q} = \log_2\frac{P_{\theta_x}}{\bar P} + \log_2\frac{\bar P}{Q}$ and averaging over $x$ gives
+3. *Bound it by $\kappa$.* For any distribution $Q$, and later for $Q = P_{\theta_{x'}}$, splitting $\log_2\frac{P_{\theta_x}}{Q} = \log_2\frac{P_{\theta_x}}{\bar P} + \log_2\frac{\bar P}{Q}$ and averaging over $x$ gives
 $$\frac1k\sum_x D_{\mathrm{KL}}(P_{\theta_x}\,\|\,Q) = \frac1k\sum_x D_{\mathrm{KL}}(P_{\theta_x}\,\|\,\bar P) + D_{\mathrm{KL}}(\bar P\,\|\,Q),$$
 and the last term is non-negative. So the average divergence to $\bar P$ is at most the average divergence to any single candidate $P_{\theta_{x'}}$, which is at most $\kappa$.
 4. *Apply Fano.* The index is uniform, so $H(X) = \log_2 k$, and steps 1 to 3 give $H(X \mid Y^n) = \log_2 k - I(X; Y^n) \ge \log_2 k - n\kappa$. Putting this into @eq-min-fano-weak gives the bound.
 :::
 
-The bound fades as $n\kappa$ approaches $\log_2 k$, the number of bits needed to name the candidate. Choosing candidates that are many and far apart yet hard to tell apart is the art of the method, and Wainwright (2019) works through many cases.
+The bound fades as $n\kappa$ approaches $\log_2 k$, the number of bits needed to name the candidate. Choosing the candidates is the art of the method, and Wainwright (2019) works through many cases.
 
 ::: {#exm-min-classification}
 A label is uniform over $k = 8$ classes, so it has 3 bits of entropy, and the features carry at most 1 bit about it. Then $H(X \mid Y) \ge 2$ bits, so every classifier, however it is trained, errs at least as often as the $P_e$ that solves $h(P_e) + P_e\log_2 7 = 2$, which is 0.3730. The weak form gives $(2 - 1)/3 = 0.3333$.
@@ -434,7 +436,7 @@ For estimation, take $k = 1024$ candidates, so $\log_2 k = 10$ bits, within $\ka
 
 ## Code {#sec-min-code}
 
-The script [code/information_theory.py](../../code/part01-prerequisites/information_theory.py) computes every number quoted in this chapter and draws its figures. Each quantity is a small typed function of a joint table or a channel matrix. The script computes mutual information in two ways, checks the capacity formula with Blahut–Arimoto and the posterior vulnerability with a simulated guesser, and checks the leakage formulas against explicit channel tables. From the repository root:
+The script [code/part01-prerequisites/information_theory.py](../../code/part01-prerequisites/information_theory.py) computes every number quoted in this chapter and draws its figures. The script computes mutual information in two ways, checks the capacity formula with Blahut–Arimoto and the posterior vulnerability with a simulated guesser, and checks the leakage formulas against explicit channel tables. From the repository root:
 
 ```bash
 uv run python code/part01-prerequisites/information_theory.py
@@ -457,13 +459,13 @@ uv run python code/part01-prerequisites/information_theory.py
 
 | Result | Statement | Use |
 | --- | --- | --- |
-| @def-min-shannon-entropy | $H(X) = -\sum_x p(x)\log_2 p(x)$ | Average uncertainty; $h(0.11) \approx \frac12$ |
+| @def-min-shannon-entropy | $H(X) = -\sum_x p(x)\log_2 p(x)$ | Average uncertainty in bits |
 | @thm-min-entropy-bounds | $0 \le H(X) \le \log_2\lvert\mathcal X\rvert$ | The scale of every other quantity |
 | @thm-min-chain-rule | $H(X, Y) = H(Y) + H(X \mid Y)$ | Splitting uncertainty into pieces |
 | @thm-min-mi-kl | $I(X; Y) = D_{\mathrm{KL}}(P_{XY}\Vert P_XP_Y)$ | Information gain; symmetric, zero iff independent |
 | @cor-min-conditioning | $H(X \mid Y) \le H(X)$ | On average only: one observation can raise it |
 | @prp-min-mi-chain | $I(X; Y, Z) = I(X; Y) + I(X; Z \mid Y)$ | Information gathered in stages |
-| @thm-min-dpi | $I(X; Z) \le I(X; Y)$ if $X \to Y \to Z$ | Bound the raw observation; the bound holds for all processing |
+| @thm-min-dpi | $I(X; Z) \le I(X; Y)$ if $X \to Y \to Z$ | Processing cannot add information |
 | @thm-min-bsc | $\mathcal C_{\mathrm{BSC}}(p) = 1 - h(p)$ | Other channels need Blahut–Arimoto |
 | @prp-min-min-vs-shannon | $H_\infty(X) \le H(X)$ | Password strength; a high $H$ can hide a guessable value |
 | @prp-min-map | $V(X \mid Y) = \sum_y\max_x p(x, y)$ | Success of the best guesser |
@@ -476,10 +478,10 @@ uv run python code/part01-prerequisites/information_theory.py
 
 ## References {#sec-min-references}
 
-- Cover & Thomas, *Elements of Information Theory* (2nd ed., 2006), ch. 2 (entropy, mutual information, the chain rules in §2.5, Jensen and its consequences in §2.6, the data-processing inequality in §2.8, Fano's inequality in §2.10) and ch. 7 (channel capacity, the binary symmetric channel in §7.1, the channel coding theorem in §7.7): the standard textbook for every Shannon result here.
+- Cover & Thomas, *Elements of Information Theory* (2nd ed., 2006), ch. 2 (entropy, mutual information, data processing, Fano) and ch. 7 (channel capacity and the coding theorem): the standard textbook for every Shannon result here.
 - MacKay, *Information Theory, Inference, and Learning Algorithms* (2003), ch. 2 and 8–10: the same material with a machine-learning slant, free online.
-- Smith, "On the Foundations of Quantitative Information Flow" (FoSSaCS 2009): vulnerability, conditional min-entropy $V(X \mid Y) = \sum_y\max_x p(x, y)$, and the argument against Shannon leakage for one-try guessing.
+- Smith, "On the Foundations of Quantitative Information Flow" (FoSSaCS 2009): vulnerability, conditional min-entropy, and the argument against Shannon leakage for one-try guessing.
 - Braun, Chatzikokolakis & Palamidessi, "Quantitative Notions of Leakage for One-try Attacks" (MFPS 2009): min-capacity and the fact that the uniform prior attains it.
-- Alvim, Chatzikokolakis, McIver, Morgan, Palamidessi & Smith, *The Science of Quantitative Information Flow* (2020): the full theory of vulnerability, leakage and capacity, including gain functions that generalize the one-guess adversary.
-- Wainwright, *High-Dimensional Statistics* (2019), ch. 15: minimax lower bounds, including Fano's method, worked through for many estimation problems.
+- Alvim, Chatzikokolakis, McIver, Morgan, Palamidessi & Smith, *The Science of Quantitative Information Flow* (2020): the full theory of vulnerability, leakage and capacity.
+- Wainwright, *High-Dimensional Statistics* (2019), ch. 15: minimax lower bounds, including Fano's method.
 - Yu, "Assouad, Fano, and Le Cam" (1997): the three classical lower-bound methods side by side.

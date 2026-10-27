@@ -252,7 +252,7 @@ $$\mathbb E\,r_t \le \Big(1 - \frac1n\Big)\mathbb E\,r_{t-1} + \frac1n\big(\math
 5. *From weights to losses.* The loss is $L$-Lipschitz, so at every test point the loss difference is at most $L\,r_T$ in absolute value, and its expectation is at most $L\,\mathbb E\,r_T$, which is @eq-stability-hrs.
 :::
 
-So stability degrades linearly with training time (@fig-stability-sgd-divergence). With a constant step $\eta$ and $m$ epochs (passes over the data), so $T = mn$ steps, the bound is $\gamma \le 2L^2\eta m$, and for a fixed number of epochs it does not improve with more data. Training longer lowers the training loss but raises $\gamma$, so the test loss, which is the training loss plus the gap, eventually rises: that is the case for stopping early.
+So stability degrades linearly with training time (@fig-stability-sgd-divergence). With a constant step $\eta$ and $m$ epochs (passes over the data), so $T = mn$ steps, the bound is $\gamma \le 2L^2\eta m$, and for a fixed number of epochs it does not improve with more data. Training longer lowers the training loss but raises $\gamma$, and the test loss is the training loss plus the gap, so there is a case for stopping early. @sec-apx-opt-early-stop in the appendices finds the training time that balances the two.
 
 The bound is loose because step 1 only uses that a step does not expand distances. A step on a curved loss often contracts them, and a strongly convex loss makes the bound independent of $T$.
 

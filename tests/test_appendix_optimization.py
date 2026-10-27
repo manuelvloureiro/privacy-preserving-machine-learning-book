@@ -23,6 +23,10 @@ def test_appendix_optimization_matches_page(tmp_path: Path) -> None:
         "[Gradient step η=4] largest distance ratio over the pairs=0.9993",
         "[Gradient step η=8] largest distance ratio over the pairs=0.9988",
         "[Gradient step η=10] largest distance ratio over the pairs=1.4985",
+        # When to stop SGD.
+        "[Early stop n=100 ‖θ*‖=5 L=1 η=0.25] u*=25.00  grid minimum at u=25.00  T*=100 steps",
+        "[Early stop at u*] optimization term=0.5000  stability term=0.5000  2L‖θ*‖/sqrt(n)=1.0000",
+        "ηL²/2=0.1250  bound=1.1250",
         # The lower bound.
         "[Lower bound T=10] lower=0.1158  subgradient method=0.1285  upper=0.3162  min f(w_t)=0.0000",
         "[Lower bound T=100] lower=0.0452  subgradient method=0.0519  upper=0.1000  min f(w_t)=0.0000",
@@ -63,6 +67,7 @@ def test_appendix_optimization_matches_page(tmp_path: Path) -> None:
         "apx_opt_convexity.svg",
         "apx_opt_gd_linear.svg",
         "apx_opt_cocoercive.svg",
+        "apx_opt_early_stop.svg",
         "apx_opt_lower_bound.svg",
         "apx_opt_nn.svg",
         "apx_opt_mest_hist.svg",

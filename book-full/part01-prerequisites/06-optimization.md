@@ -1,10 +1,10 @@
 # Optimization
 
-Training a model means minimizing an average loss over the training set, and two questions come up every time. The first is **how fast the optimizer gets there**: how many steps gradient descent (GD) and stochastic gradient descent (SGD) need, and which learning rate to pick. SGD estimates the gradient from a few random records, so it also pays for noise. The second is **how much the answer depends on any one training record**, which the next chapter turns into a guarantee that the model works on new data.
+Training a model means minimizing an average loss over the training set, and two questions come up every time. The first is **how fast the optimizer gets there**: how many steps gradient descent (GD) and stochastic gradient descent (SGD) need, and which learning rate to pick. SGD estimates the gradient from a few random records, so its steps are noisy and it needs more of them. The second is **how much the answer depends on any one training record**, which the next chapter turns into a guarantee that the model works on new data.
 
-Both questions have the same kind of answer, because **a few constants of the loss decide everything**: how steep it can be, how sharply it can curve, how much it must curve, and how noisy SGD's gradient estimates are. Every rate and bound in this chapter combines these four.
+Both questions have the same kind of answer, because **a few constants of the loss decide everything**: how steep it can be, how sharply it can curve at most, how much it must curve at least, and how noisy SGD's gradient estimates are. Every rate and bound in this chapter combines these four.
 
-The running example is logistic regression, a linear classifier, trained on 1,000 records with five features. Each result of the chapter is checked on it. For example, after 10,000 steps of SGD its loss is within $7.71\times10^{-4}$ of the minimum, while the guarantee proved here only promises 0.050, and the chapter explains why the guarantee is so cautious. @tbl-opt-symbols lists the symbols.
+The running example is logistic regression, a linear classifier, trained on 1,000 records with five features, and each result of the chapter is checked on it. For example, after 10,000 steps of SGD its loss is within $7.71\times10^{-4}$ of the minimum, while the guarantee of @thm-opt-sgd-convex only promises 0.050, and the chapter explains why the guarantee is so cautious. @tbl-opt-symbols lists the symbols.
 
 | Symbol | Meaning |
 | --- | --- |
@@ -13,13 +13,13 @@ The running example is logistic regression, a linear classifier, trained on 1,00
 | $L$, $\beta$, $\lambda$; $\kappa = \beta/\lambda$ | Lipschitz, smoothness, strong convexity constants; condition number |
 | $\eta$, $\eta_t$; $T$ | learning rate (step size); number of steps |
 | $g_t$; $G^2$; $\sigma^2$ | random gradient at step $t$; bound on its mean squared length; its variance |
-| $\mathcal W$, $\Pi$; $R$ | set SGD stays in, projection onto it; starting distance to $\theta^*$ |
+| $\mathcal W$, $\Pi$; $R$ | set SGD stays in, projection onto it; bound on the starting distance to $\theta^*$, or the radius of a ball $\mathcal W$ around 0 |
 
 : The symbols of this chapter. {#tbl-opt-symbols}
 
 ## Convexity, Lipschitz continuity and smoothness {#sec-opt-definitions}
 
-To say anything about an optimizer, you need assumptions on the loss, and four properties are enough for this chapter. Lipschitz continuity bounds the slope and smoothness the curvature from above, while convexity and strong convexity bound the curvature from below. Mixing them up is the most common mistake in reading optimization results, so this section defines each, relates them, and checks them on the logistic loss.
+Every guarantee below rests on assumptions about the loss, and four properties are enough. Lipschitz continuity bounds the slope and smoothness the curvature from above, while convexity and strong convexity bound the curvature from below. This section defines each, relates them, and checks them on the logistic loss.
 
 ::: {#def-opt-convex name="Convex function"}
 A function $f\colon \mathbb R^d \to \mathbb R$ is **convex** when the straight segment (the chord) between any two points of its graph never dips below the graph. That is, for all $\theta, \theta'$ and every mixing weight $s \in [0, 1]$,
@@ -39,7 +39,7 @@ $$\frac{f(\theta + s(\theta' - \theta)) - f(\theta)}{s} \le f(\theta') - f(\thet
 2. *Let the step vanish.* The left side is the average slope over a short step towards $\theta'$. As $s \to 0$ it becomes the slope in that direction, which for a differentiable $f$ is the inner product $\langle\nabla f(\theta), \theta' - \theta\rangle$, and this gives @eq-opt-first-order.
 :::
 
-Every convex convergence proof below uses the lemma with $\theta' = \theta^*$. Moving the inner product to the other side and flipping its sign, it says that $\langle\nabla f(\theta), \theta - \theta^*\rangle$ is at least the current error $f(\theta) - f(\theta^*)$. So the gradient points away from the minimizer, and a step against it brings you closer to $\theta^*$ in proportion to how far from optimal you are. The converse, from tangents to chords, is derived in @sec-apx-opt-convexity.
+Every convex convergence proof below uses the lemma with $\theta' = \theta^*$. Moving the inner product to the other side and flipping its sign, it says that $\langle\nabla f(\theta), \theta - \theta^*\rangle$ is at least the current error $f(\theta) - f(\theta^*)$. So the gradient points away from the minimizer, and the further $\theta$ is from optimal, the more a small step against the gradient shortens the distance to $\theta^*$. @sec-apx-opt-convexity derives the converse, from tangents to chords.
 
 ::: {#def-opt-constants name="Lipschitz, smooth and strongly convex functions"}
 Let $f\colon \mathbb R^d \to \mathbb R$ be differentiable.
@@ -49,7 +49,7 @@ Let $f\colon \mathbb R^d \to \mathbb R$ be differentiable.
 - $f$ is **$\lambda$-strongly convex**, for some $\lambda > 0$, when it lies above each tangent by at least a bowl of curvature $\lambda$:
 $$f(\theta') \ge f(\theta) + \langle\nabla f(\theta), \theta' - \theta\rangle + \frac\lambda2\|\theta' - \theta\|^2.$$
 
-For a function that is both smooth and strongly convex, $\kappa = \beta/\lambda$ is its **condition number**.
+For a function that is both smooth and strongly convex, $\kappa = \beta/\lambda$ is its **condition number**, which @sec-opt-gd shows sets how slowly gradient descent converges.
 :::
 
 The next result collects the working forms of these definitions, with a test of smoothness by the **Hessian** $\nabla^2 f$, the matrix of second derivatives, whose eigenvalues are the curvatures of $f$. The proof bounds inner products by the Cauchy–Schwarz inequality $|\langle a, b\rangle| \le \|a\|\,\|b\|$: an inner product is the product of the lengths times a cosine.
@@ -81,14 +81,14 @@ At position $s$ you are a distance $s\|\theta' - \theta\|$ from $\theta$, so by 
 4. *A bounded Hessian gives smoothness.* The change of the gradient is the integral of the Hessian applied to the direction of travel,
 $$\nabla f(\theta') - \nabla f(\theta) = \int_0^1\nabla^2 f(\theta_s)(\theta' - \theta)\,\mathrm ds.$$
 A symmetric matrix with eigenvalues in $[-\beta, \beta]$ stretches no vector by more than $\beta$, and an integral is no longer than the integral of the lengths, so it has length at most $\beta\|\theta' - \theta\|$.
-5. *Strong convexity gives strong monotonicity.* Write the strong convexity inequality from $\theta$ to $\theta'$ and from $\theta'$ to $\theta$, and add the two. The function values cancel, which leaves
+5. *Strong convexity gives strong monotonicity.* Write the strong convexity inequality from $\theta$ to $\theta'$ and from $\theta'$ to $\theta$, and add the two. The function values cancel and the two bowl terms add up to $\lambda\|\theta - \theta'\|^2$, which leaves
 $$0 \ge \langle\nabla f(\theta) - \nabla f(\theta'), \theta' - \theta\rangle + \lambda\|\theta - \theta'\|^2,$$
 and moving the inner product to the left gives @eq-opt-strong-monotone.
 :::
 
-The converses hold too: a $\beta$-smooth $f$ has no curvature above $\beta$, and $f$ is $\lambda$-strongly convex exactly when every eigenvalue of $\nabla^2 f$ is at least $\lambda$ (Nesterov 2018, §2.1; @sec-apx-opt-convexity). So the two constants sandwich the curvature, and $\kappa \ge 1$.
+The converses hold too, for twice-differentiable $f$: a $\beta$-smooth $f$ has no Hessian eigenvalue above $\beta$, and $f$ is $\lambda$-strongly convex exactly when every eigenvalue of $\nabla^2 f$ is at least $\lambda$ (Nesterov 2018, §2.1; @sec-apx-opt-convexity). A Hessian with no negative eigenvalue likewise makes $f$ convex. So the two constants sandwich the curvature, and $\kappa \ge 1$.
 
-Two consequences of strong convexity are used later, the first in @sec-opt-erm and the second whenever a ridge term is added.
+Two consequences of strong convexity are used later, the first in @sec-opt-erm and the second whenever a ridge term $\frac\lambda2\|\theta\|^2$ is added.
 
 ::: {#cor-opt-strong name="Two consequences of strong convexity"}
 Let $\lambda > 0$.
@@ -104,17 +104,17 @@ and in particular the minimizer is unique.
 1. *Part (a).* The gradient of a differentiable function on all of $\mathbb R^d$ vanishes at its minimizer. Put $\theta' = \theta^*$ in @eq-opt-strong-monotone and bound its left side by Cauchy–Schwarz:
 $$\lambda\|\theta - \theta^*\|^2 \le \|\nabla f(\theta)\|\,\|\theta - \theta^*\|.$$
 Divide by $\lambda\|\theta - \theta^*\|$, or note that there is nothing to prove when $\theta = \theta^*$. A second point with zero gradient would be at distance 0 from $\theta^*$, so the minimizer is unique.
-2. *Part (b).* Expanding a square gives $\|\theta'\|^2 = \|\theta\|^2 + 2\langle\theta, \theta' - \theta\rangle + \|\theta' - \theta\|^2$. Multiplied by $\frac\lambda2$, this says that $\frac\lambda2\|\theta\|^2$, whose gradient is $\lambda\theta$, meets the strong convexity inequality with equality. Adding it to the tangent inequality @eq-opt-first-order of $f$ gives that inequality for the sum.
+2. *Part (b).* Expanding a square gives $\|\theta'\|^2 = \|\theta\|^2 + 2\langle\theta, \theta' - \theta\rangle + \|\theta' - \theta\|^2$. Multiplied by $\frac\lambda2$, this says that $\frac\lambda2\|\theta\|^2$, whose gradient is $\lambda\theta$, meets the strong convexity inequality with equality, term by term. Adding it to the tangent inequality @eq-opt-first-order of $f$ gives that inequality for the sum.
 :::
 
-Neither of Lipschitz and smooth implies the other: $|\theta|$ is 1-Lipschitz but not smooth, and $\theta^2/2$ is 1-smooth but not Lipschitz (@fig-opt-lipschitz-smooth). By part (a) of @cor-opt-strong the gradient of a strongly convex function grows at least like $\lambda$ times the distance to the minimizer, so **no strongly convex function is Lipschitz on all of $\mathbb R^d$**, and the strongly convex results below use the projection of @sec-opt-gd to stay in a bounded set.
+Neither of Lipschitz and smooth implies the other: $|\theta|$ is 1-Lipschitz but not smooth, and $\theta^2/2$ is 1-smooth but not Lipschitz (@fig-opt-lipschitz-smooth). By part (a) of @cor-opt-strong the gradient of a strongly convex function grows at least like $\lambda$ times the distance to the minimizer, so **no strongly convex function is Lipschitz on all of $\mathbb R^d$**, and the strongly convex results below stay in a bounded set by the projection defined in @sec-opt-gd.
 
 ![Left: the slopes of $|\theta|$ (bounded, jumps), $\theta^2/2$ (unbounded) and the logistic loss (bounded, continuous). Right: the curvatures of the logistic loss and of the sigmoid loss of @sec-opt-nonconvex.](figures/optimization_lipschitz_smooth.svg){#fig-opt-lipschitz-smooth}
 
 ::: {#exm-opt-logistic}
-In the running example, features have $\|x\| \le 1$ and labels $y \in \{-1, +1\}$. The **margin** $m = y\langle\theta, x\rangle$ is positive when a record is classified correctly, and the logistic loss is $\ln(1 + e^{-m})$. Write $\operatorname{sig}(m) = 1/(1 + e^{-m})$ for the logistic function, whose derivative is $\operatorname{sig}(1 - \operatorname{sig})$.
+In the running example, features have $\|x\| \le 1$ and labels $y \in \{-1, +1\}$. The **margin** $m = y\langle\theta, x\rangle$ is positive when a record is classified correctly, and the logistic loss is $\ln(1 + e^{-m})$. Write $\operatorname{sig}(m) = 1/(1 + e^{-m})$ for the logistic function.
 
-By the chain rule the gradient is $-\operatorname{sig}(-m)\,y\,x$, of length at most 1, so the loss is 1-Lipschitz by part (a) of @prp-opt-constants. The Hessian is $\operatorname{sig}(m)(1 - \operatorname{sig}(m))\,xx^\top$. Here $xx^\top$ has eigenvalue $\|x\|^2 \le 1$ along $x$ and 0 across it, and the factor in front, $p(1 - p)$ with $p$ in $(0, 1)$, is at most $\frac14$. So the loss is convex and $\frac14$-smooth by part (c), but not strongly convex.
+The derivative of $\ln(1 + e^{-m})$ in $m$ is $-\operatorname{sig}(-m)$, so by the chain rule the gradient is $-\operatorname{sig}(-m)\,y\,x$, of length at most 1, so the loss is 1-Lipschitz by part (a) of @prp-opt-constants. Differentiating again, with $\operatorname{sig}'(-m) = \operatorname{sig}(m)(1 - \operatorname{sig}(m))$, the Hessian is $\operatorname{sig}(m)(1 - \operatorname{sig}(m))\,xx^\top$. Here $xx^\top$ has eigenvalue $\|x\|^2 \le 1$ along $x$ and 0 across it, and the factor in front, $p(1 - p)$ with $p$ in $(0, 1)$, is at most $\frac14$. So the loss is convex and $\frac14$-smooth by part (c), but not strongly convex, because its curvature is 0 across $x$ and tends to 0 as the margin grows.
 
 For $x = (0.6, 0.8)$ and $y = +1$, the loss, gradient norm and curvature are 0.6931, 0.5000 and 0.2500 at $\theta = 0$, but 0.0067, 0.0067 and 0.0066 at $\theta = (3, 4)$, where the margin is 5. Confidently classified records add almost no curvature, and at the minimizer most records are classified confidently. So on the running dataset, with features drawn on the unit sphere and labels from a logistic model, the Hessian of the average loss at $\theta^*$ has smallest eigenvalue only 0.0233.
 :::
@@ -134,7 +134,7 @@ With a **minibatch** of $B$ indices, $g_t$ is the average gradient over the batc
 With one record or a batch, the estimate is right on average. Write "past" for the random choices made before step $t$, which fix $\theta_t$; a uniform index averages to the full gradient, so
 $$\mathbb E[g_t \mid \text{past}] = \nabla\mathcal L(\theta_t).$$
 
-On a quadratic risk, such as the one in the next theorem, the gradient is linear in the error $\theta - \theta^*$, so each GD step multiplies the error by a fixed matrix. With $\eta = 1/\beta$, the error along a principal direction (an eigenvector of the Hessian) with curvature $h$ shrinks by the factor $1 - h/\beta$, and the flattest direction shrinks slowest, by $1 - 1/\kappa$.
+On a quadratic risk the gradient is linear in the error $\theta - \theta^*$, so each GD step multiplies the error by a fixed matrix, and the next theorem reads the rate off its eigenvalues.
 
 ::: {#thm-opt-gd-quadratic name="Gradient descent on a strongly convex quadratic"}
 Let $\mathcal L(\theta) = \mathcal L^* + \frac12(\theta - \theta^*)^\top H(\theta - \theta^*)$, where the symmetric matrix $H$ has eigenvalues in $[\lambda, \beta]$ with $0 < \lambda \le \beta$, and let $\kappa = \beta/\lambda$. Then GD with $\eta = 1/\beta$ from any $\theta_0$ satisfies
@@ -144,11 +144,11 @@ $$\|\theta_t - \theta^*\| \le \left(1 - \frac1\kappa\right)^t\|\theta_0 - \theta
 ::: {.proof}
 1. *One step multiplies the error by a matrix.* The gradient is $H(\theta - \theta^*)$, so subtracting $\theta^*$ from both sides of the update gives
 $$\theta_{t+1} - \theta^* = (I - H/\beta)(\theta_t - \theta^*).$$
-2. *Find the factor in each direction.* The matrix $I - H/\beta$ has the principal directions of $H$, and turns a curvature $h \in [\lambda, \beta]$ into the factor $1 - h/\beta \in [0, 1 - 1/\kappa]$.
+2. *Find the factor in each direction.* The matrix $I - H/\beta$ has the principal directions (eigenvectors) of $H$, and turns a curvature $h \in [\lambda, \beta]$ into the factor $1 - h/\beta \in [0, 1 - 1/\kappa]$.
 3. *Bound the shrinkage, then repeat.* In the orthonormal basis of principal directions, each coordinate of the error is multiplied by its own factor, so the length is multiplied by at most $1 - 1/\kappa$. Applying this $t$ times gives @eq-opt-gd-linear.
 :::
 
-For every $\beta$-smooth risk a weaker statement holds, about the risk's value rather than the distance, and @sec-opt-nonconvex and @sec-apx-opt-convexity start from it. The descent lemma puts the risk below a parabola, so a step down the tangent cannot go past the bottom of that parabola by enough to undo its gain.
+For any $\beta$-smooth risk, convex or not, a weaker statement holds, about the risk's value rather than the distance, and @sec-opt-nonconvex starts from it. The descent lemma puts the risk below a parabola that touches it at $\theta_t$, and a step of $1/\beta$ lands at that parabola's lowest point, so the risk falls at least as much as the parabola does.
 
 ::: {#prp-opt-gd-descent name="One gradient step lowers a smooth function"}
 If $\mathcal L$ is $\beta$-smooth, one GD step with $\eta = 1/\beta$ satisfies
@@ -160,23 +160,25 @@ $$\mathcal L(\theta_{t+1}) \le \mathcal L(\theta_t) - \frac{1}{2\beta}\|\nabla\m
 2. *Add them.* Their sum is $-\frac{1}{2\beta}\|\nabla\mathcal L(\theta_t)\|^2$: the overshoot eats half of the progress.
 :::
 
-So GD converges **linearly**, by a constant factor per step, and @sec-apx-opt-convexity extends @eq-opt-gd-linear to every twice-differentiable strongly convex smooth risk. Since $1 - x \le e^{-x}$, the factor after $t$ steps is at most $e^{-t/\kappa}$, so shrinking the error to a fraction $\tau$ takes about $\kappa\ln(1/\tau)$ steps. A large $\kappa$ makes GD slow, because the step must stay small for the steepest direction, where the error is multiplied by $1 - \eta\beta$.
+@thm-opt-gd-quadratic says that GD converges **linearly**, by a constant factor per step, and @sec-apx-opt-convexity extends @eq-opt-gd-linear to every twice-differentiable strongly convex smooth risk. Since $1 - x \le e^{-x}$, the factor after $t$ steps is at most $e^{-t/\kappa}$, so shrinking the error to a fraction $\tau$ takes about $\kappa\ln(1/\tau)$ steps. A large $\kappa$ makes GD slow, because the step must stay small for the steepest direction, where the error is multiplied by $1 - \eta\beta$, which must stay between $-1$ and 1.
 
 SGD with a constant step cannot do this: near $\theta^*$ the gradients of single records do not vanish, so its iterates keep jumping around $\theta^*$.
 
 ::: {#exm-opt-least-squares}
-The logistic risk is not a quadratic, so this example uses least squares, whose risk is a quadratic with $H$ the average of the $x_ix_i^\top$. The chapter's script (@sec-opt-code) draws 200 records with $x \sim \mathcal N(0, \mathrm{diag}(1, 0.1))$ and $y = x_1 + x_2$ plus noise, and $H$ has eigenvalues $\lambda = 0.101$ and $\beta = 0.969$, so $\kappa = 9.58$.
+The logistic risk is not a quadratic, so this example uses least squares, whose risk $\frac1{2n}\sum_i(y_i - \langle\theta, x_i\rangle)^2$ is a quadratic with $H$ the average of the $x_ix_i^\top$. The script draws 200 records with $x \sim \mathcal N(0, \mathrm{diag}(1, 0.1))$ and $y = x_1 + x_2$ plus noise, and $H$ has eigenvalues $\lambda = 0.101$ and $\beta = 0.969$, so $\kappa = 9.58$.
 
-From $\theta_0 = (-1, 3)$, @eq-opt-gd-linear predicts that GD needs at most 126 steps to shrink $\|\theta - \theta^*\|$ by $10^6$, since $(1 - 1/9.58)^t \le 10^{-6}$ needs $t \ge \ln(10^6)/(-\ln(1 - 1/9.58)) = 13.8155/0.11024 = 125.3$. GD takes 122, close to the bound, because the starting error lies largely along the flat direction, which shrinks at exactly the worst-case rate. @fig-opt-gd-sgd-paths shows GD crawling along the flat valley and SGD jittering around $\theta^*$.
+From $\theta_0 = (-1, 3)$, @eq-opt-gd-linear predicts that GD needs at most 126 steps to shrink $\|\theta - \theta^*\|$ by $10^6$, since $(1 - 1/9.58)^t \le 10^{-6}$ needs
+$$t \ge \frac{\ln(10^6)}{-\ln(1 - 1/9.58)} = \frac{13.8155}{0.11024} = 125.3.$$
+GD takes 122, close to the bound, because the starting error lies largely along the flat direction, which shrinks at exactly the worst-case rate. GD crawls along the flat valley while SGD jitters around $\theta^*$ (@fig-opt-gd-sgd-paths).
 :::
 
 ![Gradient descent (step $1/\beta$) and single-record SGD (step 0.1) on the least-squares risk of @exm-opt-least-squares, over its contours.](figures/optimization_gd_sgd_paths.svg){#fig-opt-gd-sgd-paths}
 
 ## SGD for convex Lipschitz objectives {#sec-opt-sgd-convex}
 
-The cleanest guarantee for SGD needs only convexity and bounded gradients, so it covers the logistic loss and, with subgradients, losses with kinks. Its proof, the template for the rest of the chapter, follows the squared distance to the minimizer. It needs two tools first: the projection never undoes progress, and a random gradient behaves like the true one in a cross term but not in a square.
+The cleanest guarantee for SGD needs only convexity and bounded gradients, so it covers the logistic loss and, with the subgradients defined after the proof, losses with kinks. Its proof, the template for the rest of the chapter, follows the squared distance to the minimizer. It needs two tools first: the projection never undoes progress, and a random gradient behaves like the true one in the cross term $\langle g_t, \theta_t - \theta^*\rangle$ but not in its squared length.
 
-The first tool is used where the new point is pulled back into $\mathcal W$. Seen from $\Pi(u)$, the directions to $u$ and to any $\theta$ in the set make an angle of at least $90°$, so, as in a right-angled triangle, $u$ is farther from $\theta$.
+The first tool is used where the new point is pulled back into $\mathcal W$. Seen from $\Pi(u)$, the directions to $u$ and to any $\theta$ in the set make an angle of at least $90°$, so, as in a right-angled triangle, $u$ is farther from $\theta$ than $\Pi(u)$ is.
 
 ::: {#lem-opt-projection name="Projection never moves a point away from the points of the set"}
 Let $\mathcal W \subseteq \mathbb R^d$ be convex and closed, so that a nearest point exists, and let $\Pi(u)$ be its point nearest to $u$. Then for every $u$ and every $\theta \in \mathcal W$,
@@ -210,7 +212,7 @@ Averaging this over the past gives the first claim.
 
 For three records $z = (1, 2, 6)$ with the loss $\frac12(\theta - z)^2$, at $\theta = 4$ the single-record gradients $\theta - z_i$ are 3, 2 and $-2$. They average to the true gradient 1, but their squares average to $17/3 = 1^2 + 14/3$, where $14/3$ is the variance.
 
-The guarantee has two costs: travelling the distance $R$ takes long with small steps, while each step's random error grows with $\eta$, so the right step balances them.
+The guarantee below is for the average of the iterates, as step 7 of its proof explains, and it has two costs. Travelling the distance $R$ takes long with small steps, while each step's random error grows with $\eta$, so the right step balances them.
 
 ::: {#thm-opt-sgd-convex name="SGD on convex objectives"}
 Let $\mathcal L$ be convex, and let projected SGD run in a closed convex set $\mathcal W$ that contains $\theta^*$, starting at $\theta_1 \in \mathcal W$ with $\|\theta_1 - \theta^*\| \le R$. Let the random gradients be unbiased with $\mathbb E\|g_t\|^2 \le G^2$. With a constant step $\eta$ for $T$ steps, the averaged iterate $\bar\theta_T = \frac1T\sum_{t=1}^T\theta_t$ satisfies
@@ -238,7 +240,7 @@ $$\sum_{t=1}^T\mathbb E[\mathcal L(\theta_t) - \mathcal L^*] \le \frac{R^2}{2\et
 
 For a loss with kinks, a **subgradient** replaces the gradient: any vector $g$ such that the linear function $\mathcal L(\theta) + \langle g, \theta' - \theta\rangle$ stays below the graph. Step 5 then holds by this definition. The rate cannot be improved, since some convex $L$-Lipschitz functions force every method that only sees gradients to an error of order $RL/\sqrt T$ after $T$ of them (Bubeck 2015, §3.5; @sec-apx-opt-lower).
 
-The guarantee is for the averaged model, because Jensen passes the bound only to the average of the iterates. It is also a worst case: when the risk curves near the optimum, SGD does much better.
+The guarantee is also a worst case. When the risk curves near the optimum, SGD does much better.
 
 ::: {#exm-opt-sgd-convex}
 On the running example the exact minimizer, found by Newton's method, has $\|\theta^*\| = 3.152$ and $\mathcal L^* = 0.5198$. Projected SGD runs on the ball of radius 5 from $\theta_1 = 0$, so $\theta^*$ is inside and $R = 5$. With $L = 1$ the step is $\eta = R/(L\sqrt T)$, 0.5 at $T = 100$. @tbl-opt-sgd-convex gives the mean over 20 runs.
@@ -251,14 +253,16 @@ On the running example the exact minimizer, found by Newton's method, has $\|\th
 
 : Projected SGD on logistic regression against the convex Lipschitz bound @eq-opt-sgd-convex. {#tbl-opt-sgd-convex}
 
-The bound holds, loose by a factor of 11 at $T = 100$ ($0.500/0.0444 = 11.3$) and 65 at $T = 10{,}000$ ($0.050/0.000771 = 64.9$). The gap grows because the error falls by $0.0444/0.000771 = 57.6$, nearer the factor 100 of a $1/T$ rate than the 10 of $1/\sqrt T$. The risk curves near $\theta^*$, with the curvature 0.0233 of @exm-opt-logistic, and the next section shows what curvature buys (@fig-opt-sgd-convex, left).
+The bound holds, loose by a factor of 11 at $T = 100$ and 65 at $T = 10{,}000$,
+$$\frac{0.500}{0.0444} = 11.3, \qquad \frac{0.050}{0.000771} = 64.9.$$
+The gap grows because, as $T$ grows 100-fold, the error falls by $0.0444/0.000771 = 57.6$, nearer the 100 of a $1/T$ rate than the 10 of $1/\sqrt T$. The risk curves near $\theta^*$, with the curvature 0.0233 of @exm-opt-logistic, and the next section shows what curvature buys (@fig-opt-sgd-convex, left).
 :::
 
 ![Left: projected SGD on logistic regression, averaged iterate, against $RL/\sqrt T$. Right: with a ridge term $\lambda = 0.1$, the uniform and the $t$-weighted averages and the last iterate, against the two bounds of @thm-opt-sgd-strong.](figures/optimization_sgd_convex.svg){#fig-opt-sgd-convex}
 
 ## Strongly convex objectives {#sec-opt-strong}
 
-A convex loss plus a ridge term is strongly convex (@cor-opt-strong), and strong convexity pulls the iterates towards $\theta^*$, harder the farther they are. With matched steps and averaging, that turns the $1/\sqrt T$ rate of @sec-opt-sgd-convex into $1/T$. Both choices below shrink the step like $1/(\lambda t)$, and the second gives later iterates more weight.
+A convex loss plus a ridge term is strongly convex (@cor-opt-strong), and strong convexity pulls the iterates towards $\theta^*$, harder the farther they are. With steps that shrink like $1/(\lambda t)$ and an average of the iterates, that turns the $1/\sqrt T$ rate of @sec-opt-sgd-convex into $1/T$. The two choices below differ in how much weight the average gives to later iterates.
 
 ::: {#thm-opt-sgd-strong name="SGD on strongly convex objectives"}
 Let $\mathcal L$ be $\lambda$-strongly convex, let projected SGD run in a closed convex set $\mathcal W$ that contains $\theta^*$, and let the random gradients be unbiased with $\mathbb E\|g_t\|^2 \le G^2$.
@@ -275,18 +279,22 @@ This is the proof of @thm-opt-sgd-convex with a better step 5, whose extra dista
 
 1. *The per-step inequality.* Steps 1 to 4 of that proof hold with a step $\eta_t$ that changes over time:
 $$\mathbb E\langle\nabla\mathcal L(\theta_t), \theta_t - \theta^*\rangle \le \frac{\mathbb E a_t - \mathbb E a_{t+1}}{2\eta_t} + \frac{\eta_t G^2}{2}.$$
-2. *Strong convexity adds a distance term.* Strong convexity at $\theta = \theta_t$, $\theta' = \theta^*$ says that the inner product is at least $\mathcal L(\theta_t) - \mathcal L^* + \frac\lambda2 a_t$. Using this and moving the distance term to the right,
+2. *Strong convexity adds a distance term.* Strong convexity at $\theta = \theta_t$, $\theta' = \theta^*$, rearranged as after @lem-opt-tangent, says that the inner product is at least $\mathcal L(\theta_t) - \mathcal L^* + \frac\lambda2 a_t$. Using this and moving the distance term to the right,
 $$\mathbb E[\mathcal L(\theta_t) - \mathcal L^*] \le \Big(\frac{1}{2\eta_t} - \frac\lambda2\Big)\mathbb E a_t - \frac{1}{2\eta_t}\mathbb E a_{t+1} + \frac{\eta_t G^2}{2}.$$
 3. *Uniform schedule.* With $\eta_t = 1/(\lambda t)$ the two coefficients are $\frac{1}{2\eta_t} - \frac\lambda2 = \frac{\lambda(t - 1)}{2}$ and $\frac{1}{2\eta_t} = \frac{\lambda t}{2}$, so the distance terms are $\frac\lambda2[(t - 1)\mathbb E a_t - t\,\mathbb E a_{t+1}]$. Summed over $t$, each term subtracted at step $t$ is added back at step $t + 1$, leaving $\frac\lambda2[0\cdot a_1 - T\,\mathbb E a_{T+1}] \le 0$. The noise terms $\frac{G^2}{2\lambda t}$ sum to at most $\frac{G^2(1 + \ln T)}{2\lambda}$, because $\sum_{t \le T}1/t$ is at most $1 + \int_1^T\mathrm ds/s = 1 + \ln T$. Dividing by $T$ and applying Jensen gives (a).
-4. *Weighted schedule.* With $\eta_t = 2/(\lambda(t + 1))$ the coefficients are $\frac{\lambda(t - 1)}{4}$ and $\frac{\lambda(t + 1)}{4}$. Multiply the inequality of step 2 by $t$, and the distance terms become $\frac\lambda4[(t - 1)t\,\mathbb E a_t - t(t + 1)\mathbb E a_{t+1}]$ and telescope in the same way. The noise term becomes $\frac{t}{t + 1}\cdot\frac{G^2}{\lambda} \le \frac{G^2}{\lambda}$, so no harmonic sum appears and the total is at most $TG^2/\lambda$. Dividing by $\sum_t t = T(T + 1)/2$ and applying Jensen with the weights $2t/(T(T + 1))$, which also average to a convex combination, gives (b).
+4. *Weighted schedule.* With $\eta_t = 2/(\lambda(t + 1))$ the coefficients are $\frac{\lambda(t - 1)}{4}$ and $\frac{\lambda(t + 1)}{4}$. Multiply the inequality of step 2 by $t$, which turns the coefficients into the consecutive products $(t - 1)t$ and $t(t + 1)$, so the distance terms become $\frac\lambda4[(t - 1)t\,\mathbb E a_t - t(t + 1)\mathbb E a_{t+1}]$ and telescope in the same way. The noise term becomes $\frac{t}{t + 1}\cdot\frac{G^2}{\lambda} \le \frac{G^2}{\lambda}$, so no harmonic sum appears and the total is at most $TG^2/\lambda$. Dividing by $\sum_t t = T(T + 1)/2$ and applying Jensen with the weights $2t/(T(T + 1))$, which are non-negative and sum to 1, gives (b).
 :::
 
 The harmonic sum of step 3 is where the $\ln T$ comes from: the early iterates, taken with huge steps, are bad, and the uniform average gives them full weight. The bound is divided by $\lambda$, so with a weak regularizer it beats $RG/\sqrt T$ only after many steps. The $1/(\lambda T)$ rate is not an artefact of the proof. On the risk $\frac\lambda2\|\theta\|^2$ with gradient noise of variance $\sigma^2$, the last iterate of schedule (a) is minus the average noise divided by $\lambda$, and its error is exactly $\sigma^2/(2\lambda T)$.
 
-The constant $G$ depends on the set $\mathcal W$, since a strongly convex risk has unbounded gradients on $\mathbb R^d$. For $\ell + \frac\lambda2\|\theta\|^2$ with $\ell$ $L$-Lipschitz, the gradient on the ball of radius $R$ is at most $L + \lambda R$.
+The constant $G$ depends on the set $\mathcal W$. For $\ell + \frac\lambda2\|\theta\|^2$ with $\ell$ $L$-Lipschitz, the gradient on the ball of radius $R$ is at most $L + \lambda R$.
 
 ::: {#exm-opt-ridge}
-On the running example with $\lambda = 0.1$, the minimizer has $\|\theta^*\| = 0.839$, inside the ball of radius 5, and $G = 1 + 0.1 \times 5 = 1.5$. After $T = 10{,}000$ steps, averaged over 20 runs, the uniform average has error $9.09\times10^{-5}$ against the bound $1.15\times10^{-2}$ of part (a), which is $G^2(1 + \ln T)/(2\lambda T) = 2.25 \times 10.21/2000$. The weighted average has $7.85\times10^{-5}$ against $4.50\times10^{-3}$, which is $2G^2/(\lambda(T + 1)) = 2 \times 2.25/(0.1 \times 10{,}001)$. The bounds are loose by factors of about 130 and 60 ($0.0115/0.0000909 = 127$ and $0.0045/0.0000785 = 57$), mainly because $G$ is the worst case over the whole ball (@fig-opt-sgd-convex, right).
+On the running example with $\lambda = 0.1$, the minimizer has $\|\theta^*\| = 0.839$, inside the ball of radius 5, and $G = 1 + 0.1 \times 5 = 1.5$. After $T = 10{,}000$ steps, averaged over 20 runs, the uniform average has error $9.09\times10^{-5}$ and the weighted average $7.85\times10^{-5}$, against the bounds of parts (a) and (b),
+$$\frac{G^2(1 + \ln T)}{2\lambda T} = \frac{2.25 \times 10.21}{2000} = 1.15\times10^{-2}, \qquad \frac{2G^2}{\lambda(T + 1)} = \frac{2 \times 2.25}{0.1 \times 10{,}001} = 4.50\times10^{-3}.$$
+The bounds are loose by factors of about 130 and 60,
+$$\frac{0.0115}{0.0000909} = 127, \qquad \frac{0.0045}{0.0000785} = 57,$$
+mainly because $G$ is the worst case over the whole ball (@fig-opt-sgd-convex, right).
 :::
 
 ## Gradient noise and minibatches {#sec-opt-noise}
@@ -328,7 +336,7 @@ So noisier gradients call for smaller steps and longer runs. Setting the bound $
 ::: {#exm-opt-noise}
 At the logistic minimizer of the running example, $\sigma_1^2 = 0.1722$. The script measures the variance of the average gradient over 4,000 batches of each size from 1 to 500, and @eq-opt-minibatch matches it within the Monte Carlo error (@fig-opt-minibatch-variance). At $B = 500 = n/2$, for example, it measures $3.47\times10^{-4}$ with replacement against $3.44\times10^{-4}$ predicted. Without replacement it measures $1.74\times10^{-4}$ against $1.72\times10^{-4}$, half as much.
 
-The script then adds Gaussian noise to every per-record gradient and runs projected SGD for $T = 10{,}000$ steps, 10 runs per setting, over 17 values of $\eta$ from $10^{-3}$ to 10. With $R = 5$ and $L = 1$ the recommended step is $\eta^* = 5/\sqrt{(1 + \sigma^2)\cdot 10^4}$ (@tbl-opt-noise).
+The script then adds Gaussian noise to every per-record gradient and runs projected SGD for $T = 10{,}000$ steps, 10 runs per setting (against 20 in @tbl-opt-sgd-convex), over 17 values of $\eta$ from $10^{-3}$ to 10. With $R = 5$ and $L = 1$ the recommended step is $\eta^* = 5/\sqrt{(1 + \sigma^2)\cdot 10^4}$ (@tbl-opt-noise).
 
 | Noise $\sigma$ | $\eta^*$ from the bound | Bound at $\eta^*$ | Observed at $\eta^*$ | Best $\eta$ on the grid | Observed there |
 | --- | --- | --- | --- | --- | --- |
@@ -347,7 +355,7 @@ At the recommended step the error grows about 20-fold from $\sigma = 0$ to $\sig
 
 ## Non-convex objectives {#sec-opt-nonconvex}
 
-Neural network losses are not convex, and no gradient method can promise their global minimum. SGD can still guarantee a point with a small gradient, an **approximate stationary point**. As in @prp-opt-gd-descent, the descent lemma shows that each step lowers $\mathcal L$ in proportion to the squared gradient, and with random gradients a penalty for the noise is subtracted. If the risk is bounded below, as the theorem assumes, it cannot fall forever, so the squared gradients must be small on average.
+Neural network losses are not convex, and no gradient method can promise their global minimum. SGD can still guarantee a point with a small gradient, an **approximate stationary point**. As in @prp-opt-gd-descent, the descent lemma shows that each step lowers $\mathcal L$ in proportion to the squared gradient, minus a penalty for the noise when the gradients are random. If the risk is bounded below, as the theorem assumes, it cannot fall forever, so the squared gradients must be small on average.
 
 ::: {#thm-opt-nonconvex name="SGD on smooth non-convex objectives"}
 Let $\mathcal L$ be $\beta$-smooth and bounded below by $\mathcal L_{\inf}$, and let $\Gamma = \mathcal L(\theta_1) - \mathcal L_{\inf}$ be the most it can fall. Let the random gradients be unbiased with $\mathbb E[\|g_t - \nabla\mathcal L(\theta_t)\|^2 \mid \text{past}] \le \sigma^2$. SGD without projection, with a constant step $\eta \le 1/\beta$, satisfies
@@ -366,7 +374,7 @@ $$\mathbb E\mathcal L(\theta_{t+1}) \le \mathbb E\mathcal L(\theta_t) - \eta\Big
 $$\frac\eta2\mathbb E\|\nabla\mathcal L(\theta_t)\|^2 \le \mathbb E\mathcal L(\theta_t) - \mathbb E\mathcal L(\theta_{t+1}) + \frac{\beta\eta^2\sigma^2}{2}.$$
 4. *Sum and telescope.* Over $t = 1, \dots, T$ the differences of $\mathcal L$ add up to $\mathcal L(\theta_1) - \mathbb E\mathcal L(\theta_{T+1}) \le \Gamma$, and the noise terms to $T\beta\eta^2\sigma^2/2$.
 5. *Divide by $\eta T/2$.* This gives the average in @eq-opt-nonconvex, and the minimum is at most the average.
-6. *Choose $\eta$.* If $\sqrt{2\Gamma/(\beta\sigma^2T)} \le 1/\beta$, that step makes both terms equal to $\sqrt{2\beta\Gamma\sigma^2/T}$. Otherwise $\eta = 1/\beta$ and the first term is $2\beta\Gamma/T$. The failure of the condition, squared, says $\sigma^2 < 2\beta\Gamma/T$, so the second term, $\sigma^2$, is below $2\beta\Gamma/T$ too, and the sum is below $4\beta\Gamma/T$.
+6. *Choose $\eta$.* If $\sqrt{2\Gamma/(\beta\sigma^2T)} \le 1/\beta$, that step makes both terms equal to $\sqrt{2\beta\Gamma\sigma^2/T}$. Otherwise $\eta = 1/\beta$, the first term is $2\beta\Gamma/T$, and the second, $\beta\eta\sigma^2$, is $\sigma^2$. Squaring the failed condition $\sqrt{2\Gamma/(\beta\sigma^2T)} > 1/\beta$ gives $\sigma^2 < 2\beta\Gamma/T$, so the sum is below $4\beta\Gamma/T$.
 :::
 
 This is the argument of Ghadimi and Lan (2013). Without noise the rate is of order $\beta\Gamma/T$, that of GD, while with noise the $\sqrt{\sigma^2/T}$ term dominates for large $T$. The squared gradient then falls like $1/\sqrt T$, so the gradient itself only like $T^{-1/4}$.
@@ -416,7 +424,7 @@ $$\|\theta' - \theta\| \le \frac{\|\nabla\mathcal L_\lambda(\theta'; D)\|}{\lamb
 5. *Tightness.* For the linear loss the objective is $\bar z\theta + \frac\lambda2\theta^2$, with $\bar z$ the mean label, so $\theta^*(D) = -\bar z/\lambda$. Changing one label from $+1$ to $-1$ lowers $\bar z$ by $2/n$ and moves the minimizer by exactly $2/(\lambda n)$: the two gradients, $+1$ and $-1$, are opposite and of full length, and the loss adds no curvature, so neither step 1 nor step 4 loses anything.
 :::
 
-The move shrinks like $1/n$, because one record carries weight $1/n$. Each loss is $L$-Lipschitz, so the trained model's loss on any record changes by at most $\frac{2L^2}{\lambda n}$, a bound called **uniform stability**, which the next chapter turns into a generalization bound.
+The move shrinks like $1/n$, because one record carries weight $1/n$. Each loss is $L$-Lipschitz, so the trained model's loss on any record changes by at most $L$ times the move, $\frac{2L^2}{\lambda n}$, a bound called **uniform stability**, which the next chapter turns into a generalization bound.
 
 The bound is loose in two places. It uses only the regularizer's curvature, while real data add their own, and it uses the worst case $2L$ for the gradient difference.
 
@@ -431,7 +439,7 @@ The script solves regularized logistic regression exactly with Newton's method, 
 
 : Largest movement of the regularized logistic minimizer over 20 single-record replacements, against $2L/(\lambda n)$ with $L = 1$. {#tbl-opt-erm}
 
-Down each column the move shrinks tenfold, as $1/n$ predicts, and the ratio of observed to bound stays put: 0.39–0.43 at $\lambda = 1$ (for example $8.55\times10^{-3}/0.0200 = 0.43$), 0.30–0.33 at $\lambda = 0.1$ and 0.10–0.13 at $\lambda = 0.01$. At $\lambda = 1$ the regularizer supplies nearly all the curvature, and the remaining factor of about 2 comes from two records' gradients rarely pointing in opposite directions. At $\lambda = 0.01$ the data supply more curvature than the regularizer, about 0.0233 as in @exm-opt-logistic, so as $\lambda \to 0$ the bound blows up while the observed move levels off (@fig-opt-erm-sensitivity).
+Down each column the move shrinks tenfold, as $1/n$ predicts, and the ratio of observed to bound stays put: 0.39–0.43 at $\lambda = 1$, 0.30–0.33 at $\lambda = 0.1$ and 0.10–0.13 at $\lambda = 0.01$. At $\lambda = 1$ the regularizer supplies nearly all the curvature, and the remaining factor of about 2.5 ($1/0.4$) comes from two records' gradients rarely pointing in opposite directions. At $\lambda = 0.01$ the data supply more curvature than the regularizer, about 0.0233 as in @exm-opt-logistic, so as $\lambda \to 0$ the bound blows up while the observed move levels off (@fig-opt-erm-sensitivity).
 :::
 
 ![Left: largest observed move of the regularized logistic minimizer (solid) against $2L/(\lambda n)$ (dashed), for three values of $\lambda$. Right: the same at $n = 1000$ against $\lambda$.](figures/optimization_erm_sensitivity.svg){#fig-opt-erm-sensitivity}
@@ -451,13 +459,13 @@ Let $\ell(\theta; z) = |\theta - z|$, which is convex and 1-Lipschitz, and let $
 
 With $\frac\lambda2\theta^2$ added, @eq-opt-erm-sensitivity caps the move at $2/(\lambda n)$, with subgradients in place of gradients. The actual move is half of that, $1/(\lambda n)$, where the new subgradient $-1/n + \lambda\theta$ vanishes.
 
-For a non-convex loss even a regularizer may not help. With labels $z \in \{-1, +1\}$, the double-well loss $\frac14(\theta^2 - 1)^2 - z\theta$ has the risk $\frac14(\theta^2 - 1)^2 - \bar z\theta$: two valleys near $\pm1$, tilted towards the sign of the mean label $\bar z$. With 11 records, six labelled $+1$, replacing one $+1$ by $-1$ flips that sign and moves the minimizer from $1.0427$ to $-1.0427$ (@fig-opt-nonconvex-jump), and with 1,001 records the move is still 2.0010. A ridge term fixes this only if it makes the objective convex, as step 3 of the proof of @thm-opt-erm-sensitivity needs. A fixed number of SGD steps from a fixed start, by contrast, changes continuously with the data, so for non-convex models one studies the influence of a record on the *algorithm*.
+For a non-convex loss even a regularizer may not help. With labels $z \in \{-1, +1\}$, the double-well loss $\frac14(\theta^2 - 1)^2 - z\theta$ has the risk $\frac14(\theta^2 - 1)^2 - \bar z\theta$: two valleys near $\pm1$, tilted towards the sign of the mean label $\bar z$. With 11 records, six labelled $+1$, replacing one $+1$ by $-1$ flips that sign and moves the minimizer from $1.0427$ to $-1.0427$ (@fig-opt-nonconvex-jump), and with 1,001 records the move is still 2.0010. A ridge term fixes this only if it makes the objective convex, as step 3 of the proof of @thm-opt-erm-sensitivity needs. A fixed number of SGD steps from a fixed start, by contrast, is a composition of smooth maps of the records, so for fixed random indices it changes continuously with the data. That is why, for non-convex models, one studies the influence of a record on the *algorithm*.
 
 ![A double-well empirical risk on 11 records before ($D$, six labels $+1$) and after ($D'$, five labels $+1$) one label changes. The dots mark the global minimizers, which jump from one well to the other.](figures/optimization_nonconvex_jump.svg){#fig-opt-nonconvex-jump}
 
 ## Code {#sec-opt-code}
 
-The script [code/optimization.py](../../code/part01-prerequisites/optimization.py) computes every number and figure in this chapter, checking each bound by simulation. From the repository root:
+The script [code/part01-prerequisites/optimization.py](../../code/part01-prerequisites/optimization.py) computes every number and figure in this chapter, checking each bound by simulation. From the repository root:
 
 ```bash
 uv run python code/part01-prerequisites/optimization.py
@@ -485,13 +493,13 @@ uv run python code/part01-prerequisites/optimization.py
 | --- | --- | --- |
 | @lem-opt-tangent | A convex $f$ lies above its tangents | Every convex proof |
 | @prp-opt-constants | Bounded gradient; descent lemma; Hessian test; strong monotonicity | Lipschitz governs SGD; smoothness governs learning rates |
-| @cor-opt-strong | $\Vert\theta - \theta^*\Vert \le \Vert\nabla f(\theta)\Vert/\lambda$; ridge adds strong convexity | ERM sensitivity; project onto a ball |
+| @cor-opt-strong | $\Vert\theta - \theta^*\Vert \le \Vert\nabla f(\theta)\Vert/\lambda$; ridge adds strong convexity | ERM sensitivity; uniqueness of the minimizer |
 | @exm-opt-logistic | 1-Lipschitz, $\frac14$-smooth, convex | Ridge: $G = 1 + \lambda R$ |
 | @thm-opt-gd-quadratic | Error shrinks by $1 - 1/\kappa$ per step | About $\kappa\ln(1/\tau)$ steps |
 | @prp-opt-gd-descent | A step gains $\Vert\nabla\mathcal L\Vert^2/(2\beta)$ | Non-convex analysis |
 | @lem-opt-projection | Projection never increases distances to the set | Free if $\theta^* \in \mathcal W$ |
 | @lem-opt-unbiased | Square gains the variance | Every SGD rate pays for it |
-| @thm-opt-sgd-convex | $RG/\sqrt T$ at $\eta = R/(G\sqrt T)$ | Logistic and hinge loss; average the iterates |
+| @thm-opt-sgd-convex | $RG/\sqrt T$ at $\eta = R/(G\sqrt T)$ | Average the iterates |
 | @thm-opt-sgd-strong | $G^2(1 + \ln T)/(2\lambda T)$; $2G^2/(\lambda(T + 1))$ weighted | Regularized models |
 | @prp-opt-minibatch | $\sigma_1^2/B$, times $\frac{n - B}{n - 1}$ without replacement | Batches save nothing per evaluation |
 | @prp-opt-noisy | $G^2 = L^2 + \sigma^2$ | Noise multiplies steps by $1 + \sigma^2/L^2$ |
@@ -503,8 +511,8 @@ uv run python code/part01-prerequisites/optimization.py
 
 ## References {#sec-opt-references}
 
-- Shalev-Shwartz & Ben-David, *Understanding Machine Learning* (2014), ch. 12 (convexity, Lipschitzness, smoothness), ch. 13 (regularization and stability), ch. 14 (SGD, including Theorem 14.8 for the convex Lipschitz case and Theorem 14.11 for the strongly convex case): the closest match to this chapter, at the same level.
-- Bubeck, "Convex Optimization: Algorithms and Complexity" (2015), ch. 3 and §6.1: gradient methods for each combination of the assumptions, with lower bounds (§3.5) and SGD.
+- Shalev-Shwartz & Ben-David, *Understanding Machine Learning* (2014), ch. 12–14 (convexity, regularization and stability, SGD): the closest match to this chapter, at the same level.
+- Bubeck, "Convex Optimization: Algorithms and Complexity" (2015), ch. 3 and §6.1: gradient methods under each set of assumptions, with lower bounds (§3.5).
 - Nesterov, *Lectures on Convex Optimization* (2018), §2.1: the equivalent forms of smoothness and strong convexity, with proofs.
 - Ghadimi & Lan, "Stochastic First- and Zeroth-Order Methods for Nonconvex Stochastic Programming" (SIAM J. Optim. 2013): the non-convex SGD rate.
 - Lacoste-Julien, Schmidt & Bach, "A Simpler Approach to Obtaining an O(1/t) Convergence Rate for the Projected Stochastic Subgradient Method" (2012); Rakhlin, Shamir & Sridharan, "Making Gradient Descent Optimal for Strongly Convex Stochastic Optimization" (ICML 2012): averaging schemes without the $\ln T$.

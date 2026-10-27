@@ -41,6 +41,11 @@ def test_appendix_mechanisms_matches_page(tmp_path: Path) -> None:
         "c=4 with noise Lap(2/eps2), m=40: 2.5000",
         # Gumbel top-2.
         "Pr[(0,1)] exact=0.1313  simulated=0.1313  largest difference=0.0003  TV=0.0017",
+        # The Gumbel tail under a shifted bar.
+        "[Gumbel shift idea] φ(1)=0.6321  φ(2)=0.8647  ratio=1.3679",
+        "t=-2: 1.0006  t=0: 1.4776  t=2: 2.4317  t=5: 2.7026  bound e=2.7183",
+        "[Gumbel shift bar 0.7 -> -0.3] Pr before=0.3914  after=0.7407  ratio=1.8925",
+        "largest ratio / e^|s| = 1.0000 (1 at s = 0)  above 1 anywhere: False",
         # Alarm mechanism.
         "cap (e^eps+delta)/(e^eps+1)=0.6225  a_0 at K=10=2.272e-03  largest K=21",
         "K=22: a_0=0.9229  a_1=0.5598  largest slack=3.132e-01",
@@ -56,4 +61,5 @@ def test_appendix_mechanisms_matches_page(tmp_path: Path) -> None:
         "apx_mech_svt_losses.svg",
         "apx_mech_gumbel_top2.svg",
         "apx_mech_gumbel_race.svg",
+        "apx_mech_gumbel_shift.svg",
     }

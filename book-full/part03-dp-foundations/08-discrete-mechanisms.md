@@ -4,7 +4,7 @@ Every privacy proof so far was a statement about real numbers, such as the proof
 
 The one idea of this chapter is that **differential privacy (DP) is a property of the output distribution the code actually produces**, so the code must produce exactly the distribution the proof is about. One way there keeps floating point and rounds the output to a coarse grid, so that every output is reachable from every input. The other way samples integer noise for integer-valued queries exactly, from uniform random integers, which gives the discrete Laplace and the discrete Gaussian mechanisms.
 
-The running example is a hospital's count of patients with a rare diagnosis, with sensitivity $\Delta_1 f = 1$ under add/remove neighbours, released at $\varepsilon = 1$. In a toy floating-point model of the Laplace mechanism, almost half of the outputs name the true count with certainty. The discrete Laplace releases the exact count with probability 0.4621, yet no output identifies the count, and the discrete Gaussian at $\sigma = 1$ has $\delta = 0.1414$ at $\varepsilon = 1$, close to the continuous Gaussian's 0.1269.
+The running example is a hospital's count of patients with a rare diagnosis, with sensitivity $\Delta_1 f = 1$ under add/remove neighbours, released at $\varepsilon = 1$. In a toy floating-point model of the Laplace mechanism, almost half of the releases name the true count with certainty. The discrete Laplace releases the exact count with probability 0.4621, yet no output identifies the count, and the discrete Gaussian at $\sigma = 1$ has $\delta = 0.1414$ at $\varepsilon = 1$, close to the continuous Gaussian's 0.1269.
 
 ## Floating-point Laplace breaks differential privacy {#sec-discrete-float}
 

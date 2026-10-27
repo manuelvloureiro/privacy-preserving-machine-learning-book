@@ -143,6 +143,7 @@ If, for every neighbouring pair taken in either order, the privacy loss of $M$ l
 2. *The exponential moments.* The lemma with $\lambda = \alpha - 1$ adds $(\alpha - 1)^2\varepsilon^2/8$ to $(\alpha - 1)\mathbb E_P[L]$.
 3. *Combine.* With step 1 the sum is at most $(\alpha - 1)\alpha\,\varepsilon^2/8$, which by @eq-cdp-psi is $D_\alpha \le \alpha\varepsilon^2/8$.
 :::
+
 ::: {#exm-cdp-rr}
 Randomized response at $\varepsilon = 1$ reports the truth with probability $e/(1 + e) = 0.7311$. @tbl-cdp-rr compares its exact curve with the bounds. The third column puts the sharp mean bound $\varepsilon\tanh(1/2) = 0.4621$, which holds for every $\varepsilon$-DP pair (@thm-comp-tanh-mean), into step 4 of the Hoeffding proof in place of $\varepsilon^2/2$. That line starts lower but keeps the slope $0.5$, which comes from Hoeffding's variance term, so it sits $0.5 - 0.4621 = 0.0379$ below the zCDP line at every order.
 
@@ -245,9 +246,9 @@ The proof is by induction on $m$, and the case $m = 1$ is the definition.
 4. *Tightness.* For the Gaussian mechanism a group of $m$ shifts the mean by $m\Delta_2 f$, so @eq-div-gauss-renyi gives exactly $\alpha m^2(\Delta_2 f)^2/(2\sigma^2) = m^2\rho\alpha$.
 :::
 
-The bound is quadratic in $m$, which matches pure DP: with $\rho \approx \varepsilon^2/2$, the group's $m^2\rho$ is about $(m\varepsilon)^2/2$. The RDP route gives a slope of $6^c\rho$ instead of $4^c\rho$ (@tbl-cdp-group). The induction can raise the order at each step only because zCDP controls every order; a bound known only up to some order would run out.
+The bound is quadratic in $m$, which matches pure DP: with $\rho \approx \varepsilon^2/2$, the group's $m^2\rho$ is about $(m\varepsilon)^2/2$. The RDP route multiplies $\varepsilon$ by $3^c$ while dividing the order by $2^c$, so its slope is $6^c\rho$ instead of $m^2\rho = 4^c\rho$ (@tbl-cdp-group). The induction can raise the order at each step only because zCDP controls every order; a bound known only up to some order would run out.
 
-Strong group privacy is also a weakness. Bun and Steinke use it to prove lower bounds on the sample size of zCDP algorithms as strong as those for pure DP, which rule out stability-based algorithms, and @sec-cdp-approx weakens the definition to escape them.
+Strong group privacy is also a weakness. Bun and Steinke use it to prove lower bounds on the sample size of zCDP algorithms as strong as those for pure DP. These rule out **stability-based** algorithms, which release an exact answer when the data are far from any dataset where it would change, and @sec-cdp-approx weakens the definition to escape them.
 
 ::: {#exm-cdp-group}
 @tbl-cdp-group takes the Gaussian mechanism with $\sigma = 1$ ($\rho = 0.5$) and groups of size $m$. The RDP route starts from a high order, 64, where $\varepsilon(64) = 0.5 \times 64 = 32$. For $m = 2^c$ it gives order $64/2^c$, $\varepsilon = 3^c \times 32$ and slope $6^c \times 0.5$. The triangle-like inequality is an equality along the chain of normals with means 0, 1 and 2, where both sides of @eq-cdp-triangle are 6 at $\alpha = 3$ and $m = 2$.
@@ -265,7 +266,7 @@ Strong group privacy is also a weakness. Bun and Steinke use it to prove lower b
 
 ## Approximate zCDP {#sec-cdp-approx}
 
-Some useful mechanisms are $(\varepsilon, \delta)$-DP but not zCDP at all. Propose-test-release and stability-based histograms release an exact answer when the data are far from any dataset where it would change, and fail with probability about $\delta$. The lower bounds of @sec-cdp-group rule them out of zCDP, yet you still want them in one budget with Gaussian steps. Bun and Steinke's answer is to let zCDP fail on an event of small probability.
+Some useful mechanisms are $(\varepsilon, \delta)$-DP but not zCDP at all. Propose-test-release and stability-based histograms are of this kind: they fail with probability about $\delta$. The lower bounds of @sec-cdp-group rule them out of zCDP, yet you still want them in one budget with Gaussian steps. Bun and Steinke's answer is to let zCDP fail on an event of small probability.
 
 ::: {#def-cdp-approx name="Approximate zCDP"}
 A mechanism $M$ is **$\delta$-approximately $\rho$-zCDP** if, for all neighbours $D \sim D'$, there are events $E$ and $E'$ of probability at least $1 - \delta$, for the runs on $D$ and on $D'$, such that for every $\alpha > 1$

@@ -1,11 +1,12 @@
 # Optimization and estimation
 
-This appendix proves six results that the chapters on optimization, generalization and attacks use without deriving them in full. The first four are about gradient methods on convex functions. Convexity can be recognized in three ways, and on a strongly convex function gradient descent (GD) closes the gap to the minimum by a constant factor per step. On a convex smooth function, a small enough gradient step never pushes two points apart. And on functions whose slope is bounded (Lipschitz functions), no gradient method can beat the rate of stochastic gradient descent (SGD), one over the square root of the number of steps. The other results treat a trained model as a random object, random because its training set is. Here the appendix finds the limit of the error of the 1-nearest-neighbour rule, and shows that the parameters fitted by logistic regression are approximately Gaussian, with a formula for how much one record moves them. It ends by showing when the best attack on the membership of a target record looks at the parameters only through that record's loss. @tbl-apx-opt-map lists where each result is stated or used.
+This appendix proves seven results that the chapters on optimization, generalization and attacks use without deriving them in full. The first five are about gradient methods on convex functions. Convexity can be recognized in three ways, and on a strongly convex function gradient descent (GD) closes the gap to the minimum by a constant factor per step. On a convex smooth function, a small enough gradient step never pushes two points apart. On functions whose slope is bounded (Lipschitz functions), no gradient method can beat the rate of stochastic gradient descent (SGD), one over the square root of the number of steps. And when SGD trains a model, the best time to stop balances that rate against the stability that the non-expanding step gives. The other results treat a trained model as a random object, random because its training set is. Here the appendix finds the limit of the error of the 1-nearest-neighbour rule, and shows that the parameters fitted by logistic regression are approximately Gaussian, with a formula for how much one record moves them. It ends by showing when the best attack on the membership of a target record looks at the parameters only through that record's loss. @tbl-apx-opt-map lists where each result is stated or used.
 
 | Derivation | Where the book states or uses it |
 | --- | --- |
 | Three tests for convexity; linear convergence of GD | @sec-opt-definitions and the GD section of [Optimization](../part01-prerequisites/06-optimization.md) |
 | Co-coercivity of the gradient | The proof of @lem-stability-nonexpansive; @sec-shuf-iteration |
+| Early stopping balances optimization error against stability | The SGD section of [Algorithmic stability and generalization](../part01-prerequisites/07-stability-generalization.md) |
 | Lower bound $RL/\sqrt T$ for convex Lipschitz optimization | The section on SGD for convex Lipschitz objectives in [Optimization](../part01-prerequisites/06-optimization.md) |
 | Limit of the 1-nearest-neighbour error | @prp-stability-nn |
 | Fitted parameters are approximately Gaussian; influence of one record | @sec-prop-meta, @sec-mia-lira, @sec-mia-outliers, @sec-attr-inversion |
@@ -104,6 +105,60 @@ The non-expansive step behaves as step 5 says. Over the 500 pairs, the largest r
 ### What it does not cover
 
 Both convexity and smoothness are needed. Without convexity, step 1 fails, because a zero gradient no longer marks a minimum. A gradient step can then expand distances by up to the factor $1 + \eta\beta$, as on the concave function $-\frac\beta2\theta^2$, whose step multiplies every distance by exactly $1 + \eta\beta$. Without smoothness there is no descent lemma, and the gradient of a function with a kink, such as $|\theta|$, jumps by 2 between points arbitrarily close together, so no constant $\beta$ can work.
+
+## When to stop SGD: balancing optimization against stability {#sec-apx-opt-early-stop}
+
+### What the chapter uses
+
+@thm-stability-sgd in [Algorithmic stability and generalization](../part01-prerequisites/07-stability-generalization.md) bounds the stability of SGD. Two runs on training sets that differ in one record drift apart by at most $2L/n$ times the sum of the learning rates, so with a constant step $\eta$ and $T$ steps the uniform stability is
+$$\gamma \le \frac{2L^2\eta T}{n},$$
+where $n$ is the number of training records and $L$ bounds the slope of the loss. The chapter concludes that training longer lowers the training loss but raises $\gamma$, which makes a case for stopping early, and points here for the balance. This section makes that precise. For a loss that is convex, smooth and $L$-Lipschitz, a constant step small enough for that theorem, and SGD started at $\theta_0 = 0$, it shows that the expected excess test loss of the averaged weights $\bar\theta$ over the best weights $\theta^*$ is at most
+$$\frac{\|\theta^*\|^2}{2\eta T} + \frac{2L^2\eta T}{n} + \frac{\eta L^2}{2}.$$ {#eq-apx-opt-early-stop}
+The first term falls with training time and the second rises with it. Their sum is smallest when $\eta T = \|\theta^*\|\sqrt n/(2L)$, and there the excess test loss is at most $2L\|\theta^*\|/\sqrt n$, plus the term $\eta L^2/2$.
+
+### The idea
+
+The test loss of the trained weights is worse than that of the best weights for two separate reasons. SGD has not finished minimizing the training loss, which is the optimization error, and the training loss of the trained weights is an optimistic estimate of their test loss, which is the generalization gap. Each step of training shrinks the first and can grow the second. So there is a best training time, and finding it is a matter of adding the two bounds and minimizing the sum.
+
+The two bounds come from two chapters. [Optimization](../part01-prerequisites/06-optimization.md) bounds the optimization error by a term that falls like $1/(\eta T)$, the cost of travelling from the starting point to $\theta^*$ with steps of size $\eta$. The stability chapter bounds the expected gap by $\gamma$, which grows like $\eta T$. A sum $a/u + bu$ of a falling and a rising term is smallest where the two terms are equal, which is the whole calculation.
+
+### Derivation
+
+The plan is to split the excess test loss into three pieces, bound each piece by a result the chapters prove, and then choose the training time that minimizes the sum of the bounds. Write $\mathcal L_{\mathcal D}(\theta)$ for the test loss of weights $\theta$, the average loss on a new record, and $\mathcal L(\theta; D)$ for the training loss, the average loss on the training set $D$. Let $\theta^*$ be weights that minimize the test loss. They are fixed in advance, so they do not depend on $D$.
+
+1. **Split the excess loss.** Add and subtract the training loss of $\bar\theta$ and of $\theta^*$:
+$$\mathcal L_{\mathcal D}(\bar\theta) - \mathcal L_{\mathcal D}(\theta^*) = \big[\mathcal L_{\mathcal D}(\bar\theta) - \mathcal L(\bar\theta; D)\big] + \big[\mathcal L(\bar\theta; D) - \mathcal L(\theta^*; D)\big] + \big[\mathcal L(\theta^*; D) - \mathcal L_{\mathcal D}(\theta^*)\big].$$
+The first bracket is the generalization gap of $\bar\theta$, the second is its optimization error on the training set, and the third compares a fixed model's training loss with its test loss.
+
+2. **The third piece has mean zero.** The weights $\theta^*$ do not depend on $D$, so by @prp-stability-fixed-model their training loss is an unbiased estimate of their test loss, and the third bracket averages to zero over $D$.
+
+3. **The averaged weights are as stable as the last ones.** Let $\theta_0, \theta_1, \dots$ be the iterates of SGD on $D$, and $\theta_t'$ those of the coupled run on the neighbouring set $D^{(i)}$, as in the proof of @thm-stability-sgd. That proof shows that the distance $r_t = \|\theta_t - \theta_t'\|$ has $\mathbb E\,r_t \le 2L\eta t/n$, which is at most $2L\eta T/n$ for every $t \le T$. The averaged weights are $\bar\theta = \frac1T\sum_{t=0}^{T-1}\theta_t$. The distance between two averages is at most the average of the distances, by the triangle inequality, so $\mathbb E\|\bar\theta - \bar\theta'\|$ is also at most $2L\eta T/n$. The loss is $L$-Lipschitz, so the averaged weights are uniformly stable with $\gamma \le 2L^2\eta T/n$, as in step 5 of that proof.
+
+4. **The first piece.** By @eq-stability-expected, a $\gamma$-uniformly stable algorithm has expected gap at most $\gamma$. With step 3, the first bracket averages to at most $2L^2\eta T/n$.
+
+5. **The second piece.** @thm-opt-sgd-convex bounds the optimization error of SGD with constant step $\eta$, run on a convex objective whose random gradients are unbiased and have mean squared length at most $G^2$, from a start at distance at most $R$ from $\theta^*$. Here the objective is the training loss $\mathcal L(\cdot; D)$, and the set is all of $\mathbb R^d$, so there is no projection. A step that picks a record uniformly at random has a gradient whose average is the gradient of the training loss, so it is unbiased, and an $L$-Lipschitz loss gives $G = L$. Starting at $\theta_0 = 0$ makes that distance $R = \|\theta^*\|$. The theorem compares with a minimizer of the objective, but its proof never uses that $\theta^*$ minimizes anything: the convexity step holds for any fixed point. So, averaged over the steps' random choices,
+$$\mathbb E\big[\mathcal L(\bar\theta; D) - \mathcal L(\theta^*; D)\big] \le \frac{\|\theta^*\|^2}{2\eta T} + \frac{\eta L^2}{2}.$$
+
+6. **Add the three pieces.** Taking expectations in step 1 and using steps 2, 4 and 5 gives @eq-apx-opt-early-stop.
+
+7. **Choose the training time.** For a fixed step $\eta$, training time enters @eq-apx-opt-early-stop only through $u = \eta T$, the total distance the learning rates allow. The part that depends on it is
+$$h(u) = \frac{\|\theta^*\|^2}{2u} + \frac{2L^2u}{n}.$$
+Its derivative $-\frac{\|\theta^*\|^2}{2u^2} + \frac{2L^2}{n}$ is negative for small $u$ and positive for large $u$, and it is zero at
+$$u^* = \frac{\|\theta^*\|\sqrt n}{2L}.$$
+
+8. **The value at the balance.** Substituting $u^*$, each of the two terms of $h$ equals $L\|\theta^*\|/\sqrt n$, so the excess test loss is at most $2L\|\theta^*\|/\sqrt n$, plus the term $\eta L^2/2$. Training much longer than $u^*$ buys optimization accuracy that the growing stability term gives back, because past $u^*$ the rising term of $h$ grows faster than the falling term shrinks.
+
+### Checking it
+
+The chapter's SGD experiment, @exm-stability-sgd, gives a concrete case. Its loss is the logistic loss on $n = 100$ records of the running example, with features on the unit sphere, so $L = 1$, and with step $\eta = 0.25$. In the running example a label is $+1$ with probability $\sigma(5x_1)$, where $\sigma$ is the logistic function and $x_1$ the first feature. The logistic loss of weights $\theta$ is the negative log-likelihood of a model that says $+1$ with probability $\sigma(\langle\theta, x\rangle)$. At every $x$, the expected negative log-likelihood is smallest when the model's probability equals the true one, so the best weights are $\theta^* = (5, 0, \dots, 0)$, with $\|\theta^*\| = 5$.
+
+Step 7 then gives $u^* = 5\sqrt{100}/2 = 25$. At $\eta = 0.25$ that is $T = 100$ steps, one pass over the 100 records, so the bound says to stop after one epoch. Its value there is $2 \cdot 5/10 = 1$, plus $\eta L^2/2 = 0.125$. @fig-apx-opt-early-stop draws the two terms and their sum against $u$: they cross at $u^* = 25$, where each is 0.5, and the sum has its minimum there. In the experiment, though, the test loss keeps falling after one epoch, from 0.596 to 0.557 after five, and rises only after that (@tbl-stability-sgd). So the bound stops too early, because its stability term is too pessimistic. After one epoch that term allows a gap of 0.5, while the measured gap is 0.036, and the measured gap grows far more slowly than linearly. The balance has the right form, but the true best time lies later than the bound says. The experiment measures the last iterate rather than the average, so the comparison is a check of the shape, not of the constant.
+
+![The bound @eq-apx-opt-early-stop against $u = \eta T$, the learning rate times the number of steps, for $n = 100$, $\|\theta^*\| = 5$, $L = 1$ and $\eta = 0.25$, on log axes: the falling optimization term $\|\theta^*\|^2/(2u)$, the rising stability term $2L^2u/n$ (both dashed), and their sum plus $\eta L^2/2$ (solid), smallest at $u^* = 25$.](figures/apx_opt_early_stop.svg){#fig-apx-opt-early-stop}
+
+### What it does not cover
+
+The bound needs a convex loss, so it does not cover neural networks. Hardt, Recht & Singer (2016) also bound the stability of SGD on smooth non-convex losses, with steps that shrink like $1/t$. Their stability term then grows like a power of $T$ below 1. But the optimization error of a non-convex loss has no bound of the kind step 5 uses, so there is nothing to balance it against. The bound also uses a constant step. With a step that shrinks over time, the sum of the learning rates replaces $\eta T$ in the stability term, and the balance is found the same way.
 
 ## No gradient method beats $RL/\sqrt T$ on every convex Lipschitz function {#sec-apx-opt-lower}
 
@@ -351,6 +406,8 @@ uv run python code/appendix-derivations/apx_optimization.py
 | GD gap after 50 steps, against @eq-apx-opt-gd-values | $2.59\times10^{-9}$ against $1.99\times10^{-2}$ |
 | Co-coercivity, smallest ratio of the two sides | 1.0006 (logistic loss), 5.3704 (logistic risk) |
 | Worst distance ratio after one step, $\eta = 8$ and $\eta = 10$ | 0.9988 and 1.4985 |
+| Early stopping, $n = 100$, $\Vert\theta^*\Vert = 5$, $L = 1$, $\eta = 0.25$: $u^*$ and $T^*$ | 25 (also the grid minimum) and 100 steps |
+| Early stopping: the two terms at $u^*$, and the bound | 0.5 each; $1 + 0.125 = 1.125$ |
 | Hard function, $T = 10{,}000$: lower bound, method, SGD bound | 0.0050, 0.0058, 0.0100 |
 | 1-NN limit and Bayes error | 0.338 and 0.250 |
 | 1-NN error and plug-in average at $n = 4{,}000$ | 0.356 and 0.358 |
@@ -368,6 +425,8 @@ Every bound holds where it should, and the checks also show how loose each one i
 
 - Yurii Nesterov, *Lectures on Convex Optimization*, 2nd ed. (2018), §2.1. The characterizations of convex and strongly convex functions, co-coercivity (Theorem 2.1.5), and the inequality that gives the distance rate of GD without second derivatives (Theorem 2.1.12).
 - Boris Polyak, "Gradient methods for minimizing functionals" (1963), and Hamed Karimi, Julie Nutini & Mark Schmidt, "Linear convergence of gradient and proximal-gradient methods under the Polyak–Łojasiewicz condition" (2016). The inequality of step 5 in @sec-apx-opt-convexity and how far it reaches beyond convexity.
+- Moritz Hardt, Benjamin Recht & Yoram Singer, "Train faster, generalize better: Stability of stochastic gradient descent" (2016). The stability of SGD on convex and non-convex losses, which @sec-apx-opt-early-stop balances against its optimization error.
+- Shai Shalev-Shwartz & Shai Ben-David, *Understanding Machine Learning* (2014), ch. 14. The optimization error of SGD on convex Lipschitz losses, used in @sec-apx-opt-early-stop.
 - Sébastien Bubeck, "Convex Optimization: Algorithms and Complexity" (2015), Theorem 3.13. The hard function of @sec-apx-opt-lower, and the cutting-plane methods of ch. 2.
 - Arkadi Nemirovski & David Yudin, *Problem Complexity and Method Efficiency in Optimization* (1983). The lower bound for every gradient method, not only span-restricted ones.
 - Thomas Cover & Peter Hart, "Nearest neighbor pattern classification" (1967). The original 1-NN limit.

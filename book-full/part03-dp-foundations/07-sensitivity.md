@@ -93,7 +93,7 @@ $S^*_{f,\beta}$ is a $\beta$-smooth upper bound on $\mathrm{LS}_f$, and every $\
 
 The smooth sensitivity is positive even where the local sensitivity is 0. On the degenerate pair of @prp-sens-leak it is already $100e^{-\beta}$ at $D$, the discounted local sensitivity of its neighbour $D'$.
 
-You cannot enumerate all datasets, but all those at distance $k$ get the same discount, so you need only the largest local sensitivity within each distance (a closer dataset counted again gets a smaller weight, which changes nothing):
+You cannot enumerate all datasets, but all those at distance $k$ get the same discount, so you need only the largest local sensitivity within each distance (a dataset closer than $k$ also enters $A^{(k)}$, with too small a weight, but the term for its own distance already counts it at full weight):
 $$S^*_{f,\beta}(D) = \max_{k = 0, \dots, n} e^{-k\beta}A^{(k)}(D), \qquad A^{(k)}(D) = \max_{D'':\ d(D, D'') \le k}\mathrm{LS}_f(D'').$$ {#eq-sens-smooth-by-k}
 For the median, $A^{(k)}$ is the widest gap that $k$ changes can open next to the median. You open one by moving the $k$ values between two order statistics $k + 1$ ranks apart out to 0 or $\Lambda$, so that the emptied window ends up next to the median.
 
@@ -175,7 +175,7 @@ $$\ln\frac{h(z)}{h(z')} \le e^\beta(|z| + \alpha) - |z| = (e^\beta - 1)|z| + e^\
 3. *The rare draws pay $\delta$.* A $\mathrm{Lap}(1)$ variable exceeds $\ln(1/\delta)$ in absolute value with probability exactly $\delta$. Outside that event the loss is at most the left side of @eq-sens-laplace-cond, hence at most $\varepsilon$. By @lem-lg-bad-event the smallest $\delta$ that works for a pair is at most the probability that the loss exceeds $\varepsilon$, so the mechanism is $(\varepsilon, \delta)$-DP.
 :::
 
-Nissim, Raskhodnikova & Smith (2007, Lemma 2.9) split the budget as $\alpha = \varepsilon/2$ and $\beta = \varepsilon/(2\ln(2/\delta))$. With either split $\beta$ must shrink like $1/\ln(1/\delta)$, because Laplace noise cannot give pure DP. Pure DP needs $h$ at a point and at a stretched point to stay within a bounded ratio however far out the point is, and applying that repeatedly shows that $h$ can decay at most like a power. A density that tolerates the shift and the rescaling is called **admissible**.
+Nissim, Raskhodnikova & Smith (2007, Lemma 2.9) split the budget as $\alpha = \varepsilon/2$ and $\beta = \varepsilon/(2\ln(2/\delta))$. With either split $\beta$ must shrink like $1/\ln(1/\delta)$, because the term $(e^\beta - 1)\ln(1/\delta)$ of @eq-sens-laplace-cond must stay below $\varepsilon$. That term is there because Laplace noise cannot give pure DP. Pure DP needs $h$ at a point and at a stretched point to stay within a bounded ratio however far out the point is, and applying that repeatedly shows that $h$ can decay at most like a power. A density that tolerates the shift and the rescaling is called **admissible**.
 
 Heavy tails have a price. A standard Cauchy variable has $\Pr[|Z| \le t] = \frac2\pi\arctan t$, so $|Z|$ has median 1, but about one release in 16 is off by more than ten times that ($\Pr[|Z| > 10] = 0.0635$, against $e^{-10} \approx 4.5\times10^{-5}$ for Laplace noise).
 

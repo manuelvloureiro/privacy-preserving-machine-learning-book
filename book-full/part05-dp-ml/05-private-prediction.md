@@ -35,7 +35,7 @@ With the shards fixed in advance, adding or removing one record changes at most 
 :::
 
 ::: {.proof}
-1. The record lands in the one shard its hash points to, and every other shard, and so every other teacher, is unchanged. Shards cut by position would not do, since one inserted record would shift every later record into the next shard; the script cuts by position only because, on its one fixed dataset, that is the same as a fixed assignment.
+1. The record lands in the one shard its hash points to, and every other shard, and so every other teacher, is unchanged. Shards cut by position would not do, since one inserted record would shift every later record into the next shard. The script cuts by position only because, on its one fixed dataset, that is the same as a fixed assignment.
 2. The changed teacher may vote differently, so one count goes down by 1 and another goes up by 1, or nothing changes. One vote is replaced, so this is the change of a histogram under replace in @prp-lg-standard-queries, with $\ell_1$ norm $1 + 1 = 2$ and $\ell_2$ norm $\sqrt{1^2 + 1^2} = \sqrt2$.
 :::
 
@@ -125,7 +125,7 @@ Take $k = 100$ teachers and the noise for 1,000 answers at $\varepsilon = 4$, $\
 
 : Teachers on the running example, on the evaluation set: mean teacher accuracy, noiseless plurality accuracy, and the median gap as a fraction of $k$. {#tbl-pate-teachers}
 
-The teachers get much worse as their shards shrink, from 0.8954 to 0.6459, but the plurality vote stays between 0.9336 and 0.9403, because their errors are close to independent. The absolute median gap grows, from 25 to $0.276 \times 500 = 138$, so more teachers win here (@tbl-pate-answers).
+The teachers get much worse as their shards shrink, from 0.8954 to 0.6459, but the plurality vote stays between 0.9336 and 0.9403, because their errors are close to independent. The absolute median gap grows, from 25 to $0.276 \times 500 = 138$, so here larger ensembles give more accurate noisy answers (@tbl-pate-answers).
 
 | Budget | Answers $Q$ | $\sigma$ | $k = 25$ | $k = 50$ | $k = 100$ | $k = 250$ | $k = 500$ |
 | --- | --- | --- | --- | --- | --- | --- | --- |
@@ -257,9 +257,9 @@ Each answer is charged the smaller of this and $\alpha/\sigma^2$, and the charge
 
 <!-- proof: cited -->
 
-It follows the plan of @thm-pate-dd-pure, and its proof is in Papernot et al. (2018, Appendix A). Appendix @sec-apx-learn-pate derives it step by step.
+The Gaussian form follows the plan of @thm-pate-dd-pure, and its proof is in Papernot et al. (2018, Appendix A). Appendix @sec-apx-learn-pate derives it step by step.
 
-@fig-pate-dd-cost draws the cost of one GNMax answer with $\sigma = 40$ at order 8 against the gap. Up to gaps of 100 the bound is no better than the data-independent $\alpha/\sigma^2 = 0.005$, and then it falls steeply, to $1.23 \times 10^{-3}$ at a gap of 150 and $8.37 \times 10^{-5}$ at 200. The exact cost on two labels is five times lower at a gap of 150 ($2.42 \times 10^{-4}$), although it takes the worse of the two directions and the bounds cover only $D_\alpha(M(D)\|M(D'))$. So @thm-pate-dd-gauss is valid but not tight.
+@fig-pate-dd-cost draws the cost of one GNMax answer with $\sigma = 40$ at order 8 against the gap. Up to gaps of 100 the bound is no better than the data-independent $\alpha/\sigma^2 = 0.005$, and then it falls steeply, to $1.23 \times 10^{-3}$ at a gap of 150 and $8.37 \times 10^{-5}$ at 200. The exact cost on two labels is five times lower at a gap of 150 ($2.42 \times 10^{-4}$), even though the exact cost takes the worse of the two directions while the bound covers only $D_\alpha(M(D)\|M(D'))$. So @thm-pate-dd-gauss is valid but not tight.
 
 ![The RDP cost at order 8 of one GNMax answer with $\sigma = 40$ against the gap, log scale: data-independent, the bound of @eq-pate-dd-gauss, and the exact cost on two labels (dashed).](figures/pate_dd_cost.svg){#fig-pate-dd-cost}
 

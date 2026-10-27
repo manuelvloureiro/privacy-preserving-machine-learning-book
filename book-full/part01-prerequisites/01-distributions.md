@@ -160,7 +160,7 @@ A better classifier, with $p = 0.001$, makes 2 errors on average, with standard 
 
 ## Poisson {#sec-dist-poisson}
 
-In the running example at $p = 0.001$, the classifier makes about 2 errors in 2,000 records: many trials, each unlikely. In that regime the binomial depends on $n$ and $p$ only through the mean $np$, and its limit is the Poisson distribution, the law of rare events. The same law describes the size of a minibatch when each of many records is included independently with a small probability.
+In the running example at $p = 0.001$, the classifier makes about 2 errors in 2,000 records: many trials, each unlikely. In that regime the binomial depends on $n$ and $p$ only through the mean $np$, and its limit is the Poisson distribution, the law of rare events.
 
 ::: {#def-dist-poisson name="Poisson distribution"}
 A **Poisson** variable $N \sim \mathrm{Poisson}(\mu)$ with mean $\mu > 0$ takes the values $k = 0, 1, 2, \dots$ with probabilities

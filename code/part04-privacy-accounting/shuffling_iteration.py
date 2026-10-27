@@ -247,10 +247,10 @@ def clone_split(
 def clone_pair(eps0: float, n: int) -> tuple[FloatArray, FloatArray, FloatArray, float]:
     """The pair of Theorem 3.2 (Feldman, McMillan & Talwar 2021), flattened over (c, k).
 
-    C ~ Bin(n - 1, e^{-ε0}), A ~ Bin(C, 1/2), Δ ~ Bern(e^ε0/(e^ε0 + 1)); P = (A + Δ, C - A + 1 - Δ),
-    Q = (A + 1 - Δ, C - A + Δ). Given C = c both are fixed by their first coordinate k, so
-    P(c, k) = Pr[C = c] (pd·b_c(k - 1) + (1 - pd)·b_c(k)) and Q swaps pd and 1 - pd, b_c = Bin(c, 1/2).
-    Returns (Pr[C = c] per entry, P(k | c), Q(k | c), probability mass of C outside the window).
+    N_c ~ Bin(n - 1, e^{-ε0}), A ~ Bin(N_c, 1/2), F ~ Bern(e^ε0/(e^ε0 + 1)); P = (A + F, N_c - A + 1 - F),
+    Q = (A + 1 - F, N_c - A + F). Given N_c = c both are fixed by their first coordinate k, so
+    P(c, k) = Pr[N_c = c] (pd·b_c(k - 1) + (1 - pd)·b_c(k)) and Q swaps pd and 1 - pd, b_c = Bin(c, 1/2).
+    Returns (Pr[N_c = c] per entry, P(k | c), Q(k | c), probability mass of N_c outside the window).
     """
     pd = rr_truth_prob(eps0)
     clone = math.exp(-eps0)
