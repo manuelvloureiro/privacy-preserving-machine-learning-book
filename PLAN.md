@@ -140,6 +140,8 @@ Delete the part `README.md` files. Readers never see them, and they repeat the p
 
 ## Step 7. Study notes (about 2.5k words)
 
+*Done (2026-10-28):* 7.1 merged the two trade-off notes into `notes/privacy-utility-tradeoff/` (9.2k → 7.3k words), with the synthetic route's outputs staged into its `figures/synthetic/` (`NOTE_ROUTES_<name>` in the Makefile). 7.2's enforcement is `opening_tables` in `skeletons.note`. 7.3 was done earlier.
+
 1. **Merge the two trade-off notes** into one note with shared Steps 1–3, a model route and a synthetic-data route, and one decision.
    - About 1.2k words of the synthetic note repeat the first.
    - It refers to "the companion note" 10 times, which breaks the rule that notes stand alone.
@@ -152,6 +154,8 @@ Delete the part `README.md` files. Readers never see them, and they repeat the p
    - aim's "This section says…" paragraphs repeat its map table, and "What the note proves and cites" repeats Sources (about 300 words).
 
 ## Step 8. Guards so it stays consistent
+
+*Done (2026-10-28):* `make duplicates-check` (tools/duplicates.py, with its allow-list in tools/duplicates.toml) runs in `make check`; `tests/test_constants.py` checks the shared constants and the table of homes; AGENTS.md has that table under "One home per result".
 
 - **`make duplicates`:** flag paragraph pairs with high word-shingle overlap within a book and across books (the script used for these reviews), and run it in `make check` with an allow-list.
 - **A constants check:** test that the course and the full edition quote the same values for shared constants, such as the classic Gaussian σ, the advanced-composition bound and the moments-accountant bound. The course cannot link, so drift is the risk.

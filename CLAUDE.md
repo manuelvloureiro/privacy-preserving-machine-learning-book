@@ -63,6 +63,7 @@ make terms-check        # acronyms expanded and listed (BOOK= for one book or no
 make notation-check     # the notation NOTATION.md fixes (notation.toml)
 make prose-check        # readability within the book's limits (tools/prose.toml); see PROSE.md
 make structure-check    # every page in its kind's shape (tools/structure.toml); see AGENTS.md
+make duplicates-check   # no paragraph repeats another, in or across books, unless tools/duplicates.toml allows it
 make website            # a chapter that fails to render, or warns, is a broken chapter
 ```
 

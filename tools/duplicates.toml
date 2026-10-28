@@ -1,0 +1,40 @@
+# Settings for tools/duplicates.py (PLAN step 8): which paragraphs count as repeats, and which
+# repeats stay. A result has one home; every other page cites it (AGENTS.md).
+
+shingle = 7        # words in a run that two paragraphs must share
+min_words = 40     # shorter paragraphs are skipped: they repeat a definition or a caveat by design
+threshold = 0.35   # share of the shorter paragraph's runs found in the other one
+max_holders = 30   # a run in more paragraphs than this is a stock phrase, not a repeat
+
+# Each allowed repeat names its two pages and says why it stays.
+# [[allow]]
+# pages = ["book-full/…", "book-practitioner/…"]
+# reason = "…"
+
+[[allow]]
+pages = ["book-full/part04-privacy-accounting/01-renyi-dp.md", "book-full/appendix-derivations/02-composition.md"]
+reason = "the appendix redoes the composition step from scratch, which a core appendix is for"
+
+[[allow]]
+pages = ["book-full/part01-prerequisites/00-introduction.md", "book-full/part03-dp-foundations/00-introduction.md"]
+reason = "each part page tells its reader how a chapter is laid out, since a reader can start at any part"
+
+[[allow]]
+pages = ["book-opendp/part02-tabular-data/03-essential-statistics.md", "book-opendp/part02-tabular-data/06-preparing-microdata.md"]
+reason = "every OpenDP chapter's Code section says which values change between runs"
+
+[[allow]]
+pages = ["book-opendp/part02-tabular-data/03-essential-statistics.md", "book-opendp/part02-tabular-data/05-identifier-truncation.md"]
+reason = "every OpenDP chapter's Code section says which values change between runs"
+
+[[allow]]
+pages = ["book-opendp/part02-tabular-data/04-grouping.md", "book-opendp/part02-tabular-data/05-identifier-truncation.md"]
+reason = "every OpenDP chapter's Code section says which values change between runs"
+
+[[allow]]
+pages = ["book-practitioner/part05-dp-ml/13-train-dp-sgd.md", "book-practitioner/part05-dp-ml/03-hyperparameter-tuning.md"]
+reason = "the workflow quotes the tuning result it acts on, and links to its home"
+
+[[allow]]
+pages = ["book-full/part03-dp-foundations/11-mean-estimation.md"]
+reason = "the known-range and coarse-then-fine theorems are stated in the same form on purpose, to compare them"

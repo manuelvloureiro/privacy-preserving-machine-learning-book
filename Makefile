@@ -40,7 +40,7 @@ TEX_PKGS  := svg imakeidx makeindex trimspaces catchfile transparent caption kom
 
 .DEFAULT_GOAL := help
 .PHONY: help setup hooks tex-deps datasets test-fast figures figures-force full full-pdf practitioner practitioner-pdf course course-pdf opendp opendp-pdf \
-        website pdf book notes note preview publish terms-check acronyms index-candidates prose ste prose-check notation notation-check \
+        website pdf book notes note preview publish terms-check acronyms index-candidates prose ste prose-check duplicates duplicates-check notation notation-check \
         structure structure-check format test typecheck check all clean
 
 help: ## List the targets
@@ -161,14 +161,20 @@ notes: ## Build the study notes in notes/ into _book/notes/
 	@for dir in notes/*/; do name=$$(basename $$dir); \
 	  $(MAKE) --no-print-directory note NOTE=$$name || exit 1; done
 
+# A note whose page has more than one route can have a script per route: NOTE_ROUTES_<name> lists
+# them, each route's script is code/notes/<name>_<route>.py, and its output is staged into figures/<route>/.
 NOTE_SCRIPT = code/notes/$(subst -,_,$(NOTE)).py
+NOTE_ROUTES_privacy-utility-tradeoff := synthetic
 
 note:
-	@if [ -f $(NOTE_SCRIPT) ]; then \
-	  $(MAKE) --no-print-directory $(patsubst code/%.py,$(BUILD)/logs/%.log,$(NOTE_SCRIPT)) || exit 1; fi
+	@for script in $(NOTE_SCRIPT) $(foreach r,$(NOTE_ROUTES_$(NOTE)),code/notes/$(subst -,_,$(NOTE))_$(r).py); do \
+	  if [ -f $$script ]; then \
+	    $(MAKE) --no-print-directory $$(echo $$script | sed 's|^code/\(.*\)\.py$$|$(BUILD)/logs/\1.log|') || exit 1; fi; done
 	$(call STAGE,notes/$(NOTE),notes-$(NOTE))
 	@if [ -d $(BUILD)/figures/notes/$(NOTE) ]; then \
 	  rsync -a $(BUILD)/figures/notes/$(NOTE)/ $(BUILD)/notes-$(NOTE)/figures/; fi
+	@for r in $(NOTE_ROUTES_$(NOTE)); do \
+	  rsync -a --exclude runs/ $(BUILD)/figures/notes/$(NOTE)-$$r/ $(BUILD)/notes-$(NOTE)/figures/$$r/ || exit 1; done
 	$(call RENDER,notes-$(NOTE),all)
 	@mkdir -p $(OUT)/notes/$(NOTE)
 	@rsync -a --delete $(BUILD)/notes-$(NOTE)/_site/ $(OUT)/notes/$(NOTE)/
@@ -220,6 +226,12 @@ ste: ## Report departures from ASD-STE100 Simplified Technical English with stel
 prose-check: ## Fail if a page's prose is past its book's limits in tools/prose.toml (BOOK=)
 	@for b in $(CHECKED); do echo "== $$b"; uv run python tools/prose.py check --book $$b || exit 1; done
 
+duplicates: ## Report paragraphs that repeat another paragraph, in every book and note (tools/duplicates.toml)
+	uv run python tools/duplicates.py report
+
+duplicates-check: ## Fail on a repeated paragraph that tools/duplicates.toml does not allow
+	uv run python tools/duplicates.py check
+
 notation-check: ## Fail on notation that NOTATION.md forbids, in every book and note (notation.toml)
 	uv run python tools/notation.py check
 
@@ -245,7 +257,7 @@ test-fast: ## Run the tests without the practitioner libraries' (no torch, Opacu
 typecheck: ## Run strict pyright
 	uv run pyright
 
-check: test typecheck terms-check notation-check prose-check structure-check website ## Tests, types, acronyms, notation, prose, structure, and a clean render of every website
+check: test typecheck terms-check notation-check prose-check duplicates-check structure-check website ## Tests, types, acronyms, notation, prose, repeats, structure, and a clean render of every website
 
 all: check pdf ## Check everything, then build the PDFs too
 

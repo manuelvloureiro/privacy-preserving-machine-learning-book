@@ -3,7 +3,8 @@
 A ```{.python excerpt="name"} block in notes/<note>/index.md must equal, line for line, the region of a script in
 code/notes/ between a `# excerpt: name` line and the next `# end excerpt` line, after removing the region's common
 indentation, the same rule as tests/test_practitioner_excerpts.py applies to the practitioner edition. A ```bash
-block shows a command and a ```text block shows output.
+block shows a command and a ```text block shows output. A raw block (```{=latex}, ```{=html}) is page layout for one
+output format, not code, and is not checked.
 """
 
 import re
@@ -16,6 +17,7 @@ ROOT = Path(__file__).resolve().parent.parent
 FENCE = re.compile(r"^```([^\n]*?)[ \t]*\n(.*?)^```[ \t]*$", re.DOTALL | re.MULTILINE)
 EXCERPT_INFO = re.compile(r'^\{\.python\s+excerpt="([\w-]+)"\}$')
 REGION = re.compile(r"^[ \t]*# excerpt: ([\w-]+)[ \t]*\n(.*?)^[ \t]*# end excerpt[ \t]*$", re.DOTALL | re.MULTILINE)
+RAW = re.compile(r"^\{=\w+\}$")
 MAX_LINES = 22
 
 
@@ -39,6 +41,8 @@ def blocks() -> list[tuple[str, str, str]]:
 
 @pytest.mark.parametrize(("name", "info", "body"), blocks(), ids=[name for name, _, _ in blocks()])
 def test_block_is_excerpt_or_command(name: str, info: str, body: str) -> None:
+    if RAW.match(info):
+        return
     if m := EXCERPT_INFO.match(info):
         known = regions()
         assert m.group(1) in known, f"{name}: no script in code/notes/ marks an excerpt named {m.group(1)!r}"

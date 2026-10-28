@@ -55,6 +55,7 @@ class Skeleton:
     forbid_bold_results: bool = False
     tables_captioned: bool = False
     summary_table: str = ""
+    opening_tables: list[str] = field(default_factory=list[str])  # table ids the page shows before its first heading
     max_words: int = 0
     max_section_words: int = 0
     warn_below_words: int = 0
@@ -363,6 +364,11 @@ def check_tables(page: Page, skel: Skeleton, prefix: str | None) -> list[Finding
                 ids = [t.caption_id for t in page.tables if start < t.line <= end]
                 if ids != [want]:
                     out.append(Finding(page.path, h.line, f"## Summary holds exactly one table, captioned {{#{want}}}"))
+    first = min((h.line for h in page.headings if h.level <= 2), default=len(page.lines))
+    opening = {t.caption_id for t in page.tables if t.line < first}
+    for want in skel.opening_tables:
+        if want not in opening:
+            out.append(Finding(page.path, first, f"the opening, before the first section, needs the table {{#{want}}}"))
     return out
 
 

@@ -84,6 +84,36 @@ The reader is a person reading one page at a time, not someone who holds the who
 - **Captions** are full sentences that say what is plotted. Use matplotlib mathtext for math in labels (`r"$e^{-t^2/2}$"`), not raw `^{...}`.
 - **Look at every figure** before handing over a change that draws one. Check that labels are rendered, titles are not cut off, and the axis ranges show the point.
 
+### One home per result
+
+These results are used on many pages and are proved once, on the page below. Another page states the result in one sentence and cites it (`@thm-…` within the book, a link to the section across books). It never proves the result again. A new result that several pages use gets a row here. `tests/test_constants.py` checks that each label is defined on its page.
+
+| Result | Label | Home |
+|---|---|---|
+| Laplace mechanism | `thm-lg-laplace` | `book-full/part03-dp-foundations/03-laplace-gaussian.md` |
+| Classic Gaussian calibration | `thm-lg-classic` | `book-full/part03-dp-foundations/03-laplace-gaussian.md` |
+| Analytic Gaussian calibration | `thm-lg-analytic` | `book-full/part03-dp-foundations/03-laplace-gaussian.md` |
+| Basic composition | `thm-dpprop-basic` | `book-full/part03-dp-foundations/02-properties.md` |
+| Advanced composition | `thm-comp-advanced` | `book-full/part03-dp-foundations/04-composition.md` |
+| Exponential mechanism | `thm-sel-em` | `book-full/part03-dp-foundations/05-selection.md` |
+| Properties of Rényi divergence | `thm-div-renyi` | `book-full/part01-prerequisites/03-divergences.md` |
+| RDP composition | `thm-rdp-composition` | `book-full/part04-privacy-accounting/01-renyi-dp.md` |
+| Best order for a Gaussian curve | `cor-rdp-gauss-opt` | `book-full/part04-privacy-accounting/01-renyi-dp.md` |
+| f-DP composition | `thm-gdp-composition` | `book-full/part04-privacy-accounting/04-gaussian-dp.md` |
+| Poisson subsampling | `thm-sub-poisson` | `book-full/part04-privacy-accounting/05-subsampling.md` |
+| RDP accountant for DP-SGD | `thm-sub-dpsgd` | `book-full/part04-privacy-accounting/05-subsampling.md` |
+| Clone reduction for shuffling | `thm-shuf-clone-reduction` | `book-full/part04-privacy-accounting/07-shuffling-iteration.md` |
+| Sensitivity of the clipped sum | `lem-dpsgd-sensitivity` | `book-full/part05-dp-ml/02-dp-sgd.md` |
+| Rényi moment of a user with k records | `prp-ulvl-pair-moment` | `book-full/part05-dp-ml/07-user-level.md` |
+| A group's noise floor | `thm-fair-floor` | `book-full/part05-dp-ml/08-disparate-impact.md` |
+| One-run auditing | `thm-audit-onerun` | `book-full/part05-dp-ml/10-auditing.md` |
+| The [0,1]-functions fact (course) | `lem-rr-functions` | `book-course/part02-dp-basics/01-randomized-response.md` |
+| The same fact with δ (course) | `lem-adp-functions` | `book-course/part02-dp-basics/03-approximate-dp.md` |
+| Adaptive composition, defined (course) | `def-lap-adaptive` | `book-course/part02-dp-basics/02-laplace-mechanism.md` |
+| Simulation by the four-outcome pair (course) | `thm-ac-simulation` | `book-course/part02-dp-basics/04-advanced-composition.md` |
+
+: Each shared result and the one page that proves it. {#tbl-agents-homes}
+
 ## Checks before handing over
 
 ```bash

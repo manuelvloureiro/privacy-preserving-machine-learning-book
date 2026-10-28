@@ -1,4 +1,4 @@
-"""The worked example of the study note notes/privacy-utility-tradeoff-synthetic/: a privacy-utility frontier for
+"""The synthetic-data route of the study note notes/privacy-utility-tradeoff/: a privacy-utility frontier for
 differentially private synthetic data on Adult.
 
     uv run python code/notes/privacy_utility_tradeoff_synthetic.py [--seeds 5] [--out DIR]
@@ -34,7 +34,7 @@ one-way tables, then chooses a tree of two-way tables with the exponential mecha
 (McKenna, Mullins, Sheldon & Miklau, 2022) spends the budget in rounds, each time choosing the table its current
 model gets most wrong among the two-way tables and measuring it, with the noise scale adapting as it goes. The
 noise is accounted in zero-concentrated DP and converted to (epsilon, 1e-5)-DP, so the generators share an axis
-with the companion note's DP-SGD model, which the script also trains on the same attributes for comparison.
+with the note's model route, a DP-SGD model, which the script also trains on the same attributes for comparison.
 
 Nothing is tuned on the private data. The bands and category lists come from the codebook, the generators use the
 settings of their reference implementations (github.com/ryan112358/private-pgm) and the classifier its library
@@ -42,8 +42,8 @@ defaults. The offer capacity uses the share of high earners, which the Census Bu
 from the campaign file only to state it.
 
 Output: four SVG figures and four Markdown snippets (_frontier.md, _menu.md, _sizes.md, _decision.md) that the
-note includes, written to _build/figures/notes/privacy-utility-tradeoff-synthetic/ (or --out), and the results
-printed as a table. Each run (one generator, epsilon, size and seed) is saved as JSON under runs/ in the output
+note includes, written to _build/figures/notes/privacy-utility-tradeoff-synthetic/ (or --out), which the build
+stages into the note's figures/synthetic/, and the results printed as a table. Each run (one generator, epsilon, size and seed) is saved as JSON under runs/ in the output
 folder, keyed by a hash of the experiment's code, so that a rerun after a change to the figures or the text only
 generates what the cache lacks.
 
@@ -108,7 +108,7 @@ TRAIN_ROWS = 32_561  # adult.data; the remaining 16,281 rows are adult.test
 EPSILONS = [0.03, 0.05, 0.1, 0.2, 0.3, 0.5, 1.0, 2.0, 3.0, 10.0]
 SIZES = [2_000, 8_000, TRAIN_ROWS]  # customer records the bank generates from, for the data-size sweep (AIM only)
 MENU_EPSILONS = [0.1, 0.3, 1.0, 3.0]
-DELTA = 1e-5  # as in the companion note: below 1/n for n = 32,561 customers
+DELTA = 1e-5  # as in the model route: below 1/n for n = 32,561 customers
 CEILING_BELIEF = 0.75  # the policy: an attacker at even odds must stay at or below 75%
 FPR = 0.01  # the false-positive rate at which membership attacks are judged
 LABEL = "income"
@@ -766,7 +766,7 @@ def frontier_table(summaries: list[Summary], eligible: int, eligible_records: in
             f"{s.misplaced:,.0f} of {eligible_records:,} | {s.reached:,.0f} of {eligible:,} ({s.reached / eligible:.0%}) | "
             f"{'yes' if i in on else ''} |"
         )
-    return "\n".join(rows) + "\n\n: Every synthetic configuration, averaged over the seeds. {#tbl-frontier}\n"
+    return "\n".join(rows) + "\n\n: Every synthetic configuration, averaged over the seeds. {#tbl-syn-frontier}\n"
 
 
 def menu_table(summaries: list[Summary], eligible: int, eligible_records: int, baseline: float) -> str:
@@ -796,7 +796,7 @@ def menu_table(summaries: list[Summary], eligible: int, eligible_records: int, b
     )
     caption = (
         f": The options menu for one campaign of {eligible:,} offers: the best generator at each option, "
-        "and the companion note's model route at the same privacy level. {#tbl-menu}"
+        "and the model route at the same privacy level. {#tbl-syn-menu}"
     )
     return "\n".join(rows) + "\n\n" + caption + "\n"
 
@@ -818,7 +818,7 @@ def size_table(summaries: list[Summary], ceiling: float) -> str:
         rows.append(f"| {n:,} | {real.reached:,.0f} | {cells} |")
     caption = (
         ": Eligible customers missed because of privacy with an AIM table, by the number of customer records "
-        "it is generated from. {#tbl-sizes}"
+        "it is generated from. {#tbl-syn-sizes}"
     )
     return "\n".join(rows) + "\n\n" + caption + "\n"
 
@@ -841,8 +841,8 @@ def decision_text(
         f"offers reach {baseline:,.0f}. So privacy costs about {missed:,.0f} eligible customers per campaign, while "
         f"the synthetic table is still worth about {gained:,.0f} customers more than no data. In money, with $V$ the "
         f"value to the bank of reaching one eligible customer, the cost of privacy is about ${missed:,.0f}\\,V$ per "
-        f"campaign and the value of the table over no data about ${gained:,.0f}\\,V$. The model route of the "
-        f"companion note, a DP-SGD model at the same $\\varepsilon$, reaches {model.reached:,.0f}, so the table costs "
+        f"campaign and the value of the table over no data about ${gained:,.0f}\\,V$. The model route, a DP-SGD "
+        f"model on the same attributes at the same $\\varepsilon$, reaches {model.reached:,.0f}, so the table costs "
         f"about {model.reached - s.reached:,.0f} more customers per campaign than the model, and in return it answers "
         f"the planning question and any other the agency asks.\n"
     )
@@ -884,7 +884,7 @@ def main() -> None:
     df = practitioner_datasets.adult()
     records, customers = encode(df.head(TRAIN_ROWS)), encode(df.slice(TRAIN_ROWS))
     data: Data = (records, one_hot(customers), labels(customers))
-    eligible = int(data[2].sum())  # offers = eligible customers in the campaign, as in the companion note
+    eligible = int(data[2].sum())  # offers = eligible customers in the campaign, as in the model route
     baseline = eligible * eligible / customers.records  # random offers reach them at the base rate
     eligible_records = int(labels(records).sum())  # the eligible customers the plan distributes over segments
     # end excerpt
