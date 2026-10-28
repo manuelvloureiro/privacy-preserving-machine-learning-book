@@ -296,9 +296,26 @@ class PrivateRun:
     secure_mode: bool  # read from the engine: False here, so that the noise is seeded and the numbers repeat
 
 
-def train_private(train: Split, *, sigma: float, delta: float, epochs: int, lr: float, seed: int) -> PrivateRun:
-    """DP-SGD with Opacus: Poisson sampling, per-example clipping at CLIP, noise sigma * CLIP, virtual batches."""
-    model = make_model(train.x.shape[1], seed)
+def train_private(
+    train: Split,
+    *,
+    sigma: float,
+    delta: float,
+    epochs: int,
+    lr: float,
+    seed: int,
+    clip: float = CLIP,
+    model: nn.Module | None = None,
+) -> PrivateRun:
+    """DP-SGD with Opacus: Poisson sampling, per-example clipping at clip, noise sigma * clip, virtual batches.
+
+    A model passed in (pretrained, or with frozen weights) is trained instead of a fresh one; Opacus trains only
+    the weights that require gradients.
+    """
+    if model is None:
+        model = make_model(train.x.shape[1], seed)
+    else:
+        torch.manual_seed(seed)
     data_loader = loader(train)
     # excerpt: dpsgd-setup
     engine = PrivacyEngine(accountant="prv")
@@ -308,7 +325,7 @@ def train_private(train: Split, *, sigma: float, delta: float, epochs: int, lr: 
         optimizer=optimizer,
         data_loader=data_loader,
         noise_multiplier=sigma,
-        max_grad_norm=CLIP,
+        max_grad_norm=clip,
     )  # Poisson sampling is the default: each row joins each batch with probability q
     # end excerpt
     criterion = nn.CrossEntropyLoss()

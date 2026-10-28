@@ -12,11 +12,11 @@ Which weights you train leaves $\varepsilon$ unchanged, because DP-SGD's guarant
 
 The noise grows with the number $d$ of trainable weights. Write $\sigma$ for the noise multiplier and $B$ for the expected batch size, expected because DP-SGD's Poisson sampling draws batches of random size. Then the noise on the averaged gradient has length about
 $$\text{noise length} \approx \frac{\sigma C\sqrt d}{B}.$$ {#eq-pub-noise-length}
-The signal, the average clipped gradient, is at most $C$ long whatever $d$ is. It can even get longer when fewer weights train, because clipping then cuts each record's gradient less.
+The signal, the average clipped gradient, is at most $C$ long whatever $d$ is. When fewer weights train it loses the frozen weights' part of the gradient, though clipping then cuts the rest less.
 
-Take the running example of [DP-SGD](02-dp-sgd.md), a small network with 3,329 weights, pretrained on a similar public task and fine-tuned on the 10,000 private records. At $\varepsilon = 1$ and the pretrained weights, the noise is 92.0 times longer than the signal when all weights train. It is only 6.7 times longer when the 65 weights of the last layer train. That gap is wider than the formula predicts, because the signal is longer when only the last layer trains (0.0250 against 0.0130).
+Take the running example of [DP-SGD](02-dp-sgd.md), the Adult network with 6,018 weights. Pretrain it without privacy on the 1,500 public stand-in rows of [Train a model with DP-SGD](13-train-dp-sgd.md), then fine-tune it on the 30,000 private rows. At $\varepsilon = 1$ and the pretrained weights, the noise is 1.6 times longer than the signal when all weights train. It is only 0.4 times as long when the 130 weights of the last layer train. That gap is narrower than the formula's factor of 6.8, because the signal is shorter when only the last layer trains (0.0726 against 0.1137).
 
-But counting weights overstates the cost of training them all. Noise does harm only along the directions in which the loss is curved, because a step along a flat direction barely changes the loss. Near a pretrained model, few directions are curved (Li, Liu et al. 2022). So on the running example, full fine-tuning trains 51 times as many weights as the last layer, but its noise should raise the loss only 7.5 times as much. A larger learning rate lets the noise into more of the nearly flat directions, so private fine-tuning wants smaller steps than training from scratch.
+But counting weights overstates the cost of training them all. Noise does harm only along the directions in which the loss is curved, because a step along a flat direction barely changes the loss. Near a pretrained model, few directions are curved (Li, Liu et al. 2022). So on the running example, full fine-tuning trains 46 times as many weights as the last layer, but its noise should raise the loss only 16 times as much. A larger learning rate lets the noise into more of the nearly flat directions, so private fine-tuning wants smaller steps than training from scratch.
 
 Training fewer weights has its own cost, a **bias**, because no private data can move the model along a frozen direction that the task needs.
 
@@ -24,7 +24,7 @@ Training fewer weights has its own cost, a **bias**, because no private data can
 
 The simplest option freezes everything but the last layer and trains a linear classifier on the frozen features, which is **linear probing**. Because the features are fixed, the probe's loss is convex. So linear probing turns private deep learning back into [Private empirical risk minimization](01-dp-erm.md), which makes it the safe first baseline.
 
-A private probe's error has two parts. One is the error that privacy adds to convex empirical risk minimization (ERM), which grows with the number $d$ of features. The other is the **feature gap**, how far the best linear model on the features falls short of the best model of any kind, which no number of records or size of $\varepsilon$ closes. For example, the running example's probe without privacy, its ceiling, has a test accuracy of 0.9536, while a non-private network trained from scratch reaches 0.9606. The private probe stays within 0.006 of that ceiling, but never passes it.
+A private probe's error has two parts. One is the error that privacy adds to convex empirical risk minimization (ERM), which grows with the number $d$ of features. The other is the **feature gap**, how far the best linear model on the features falls short of the best model of any kind, which no number of records or size of $\varepsilon$ closes. For example, the running example's probe without privacy, its ceiling, has a test accuracy of 0.8431, while a non-private network trained from scratch reaches 0.8498. At every budget of @sec-pub-run the private probe stays within 0.002 of that ceiling, on either side, which is the spread between runs.
 
 So measure the probe's ceiling first, by fitting it without privacy on labelled public data that resemble the task. If it already meets your target, stop there. To train the probe privately, feed the frozen features to diffprivlib's `LogisticRegression` ([Private empirical risk minimization](01-dp-erm.md)), or run DP-SGD on the one layer.
 
@@ -33,20 +33,20 @@ So measure the probe's ceiling first, by fitting it without privacy on labelled 
 When the probe's ceiling is below your target, only changing the earlier layers can lift it. **Low-rank adaptation** (LoRA, Hu et al. 2022) freezes each pretrained matrix and learns a small correction to it. The correction is the product of two thin matrices that each have $r$ columns, where $r$ is the rank. A matrix with $d_{\text{in}}$ inputs and $d_{\text{out}}$ outputs has $d_{\text{in}}d_{\text{out}}$ weights, while its adapter has only
 $$d = r(d_{\text{in}} + d_{\text{out}}).$$ {#eq-pub-lora-count}
 
-The adapter comes from Hugging Face's `peft` library. This snippet puts a rank-4 adapter on the first layer of a network shaped like the running example, and trains its last layer in full.
+The adapter comes from Hugging Face's `peft` library. This snippet puts a rank-4 adapter on the first layer of the running example's network, and trains its last layer in full.
 
 ```python
 import torch
 from peft import LoraConfig, get_peft_model
 
-model = torch.nn.Sequential(torch.nn.Linear(50, 64), torch.nn.Tanh(), torch.nn.Linear(64, 1))
-print(sum(p.numel() for p in model.parameters()))  # 3329
+model = torch.nn.Sequential(torch.nn.Linear(91, 64), torch.nn.ReLU(), torch.nn.Linear(64, 2))
+print(sum(p.numel() for p in model.parameters()))  # 6018
 config = LoraConfig(r=4, lora_alpha=8, target_modules=["0"], modules_to_save=["2"], lora_dropout=0.0)
 adapted = get_peft_model(model, config)  # freezes every pretrained weight
-print(sum(p.numel() for p in adapted.parameters() if p.requires_grad))  # 521
+print(sum(p.numel() for p in adapted.parameters() if p.requires_grad))  # 750
 ```
 
-In the snippet, `target_modules` and `modules_to_save` name layers by their index in the `Sequential`, and `lora_alpha` scales the correction. It trains 521 weights, the adapter's $4 \times (50 + 64) = 456$ and the last layer's 65. The run in @sec-pub-run treats the first layer's biases as a 51st input, which gives 525. Opacus's `PrivacyEngine` computes per-example gradients only for the parameters that require them, so the frozen weights cost nothing. Call `model.train()` before `make_private`, because Opacus rejects a model in evaluation mode, as a pretrained model often is after you measure it.
+In the snippet, `target_modules` and `modules_to_save` name layers by their index in the `Sequential`, and `lora_alpha` scales the correction. It trains 750 weights, the adapter's $4 \times (91 + 64) = 620$ and the last layer's 130. Opacus's `PrivacyEngine` computes per-example gradients only for the parameters that require them, so the frozen weights cost nothing. Call `model.train()` before `make_private`, because Opacus rejects a model in evaluation mode, as a pretrained model often is after you measure it.
 
 The adapter's second factor starts at zero, so training begins exactly at the pretrained model. The first factor starts random, and that draw must not depend on the private data.
 
@@ -54,24 +54,24 @@ Yu et al. (2022) showed that private fine-tuning of language models with LoRA ma
 
 ## Which method at which budget {#sec-pub-run}
 
-The numbers in this section come from the full edition's synthetic running example. No practitioner script reproduces them, so treat them as one task's evidence. DP-SGD fine-tunes the last layer, a rank-4 adapter plus the last layer, or all weights, against a model trained privately from scratch. Each method's learning rate was chosen at $\varepsilon = 1$ on half of the private test set, and accuracy comes from the other half. That choice looked at private data without paying, so the table shows each method at its best, not what a real run could claim ([Hyperparameter tuning](03-hyperparameter-tuning.md)).
+The script [practitioner_adult_studies.py](../../code/part05-dp-ml/practitioner_adult_studies.py) pretrains the running example on the public stand-in rows, then fine-tunes it with Opacus on the private rows, for the workflow's 300 steps. DP-SGD fine-tunes the last layer, a rank-4 adapter plus the last layer, or all weights, against a model trained privately from scratch. Each method's learning rate was chosen at $\varepsilon = 1$ from 0.1, 0.3, 1 and 3, on half of the test rows, and accuracy comes from the other half. That choice looked at private data without paying, so the table shows each method at its best, not what a real run could claim ([Hyperparameter tuning](03-hyperparameter-tuning.md)).
 
 | | Scratch | Full | Last layer | Adapter, rank 4 |
 | --- | --- | --- | --- | --- |
-| Trainable weights $d$ | 3,329 | 3,329 | 65 | 525 |
-| Learning rate | 0.25 | 0.1 | 0.3 | 0.1 |
-| $\varepsilon = 0.5$ | 0.8589 | 0.9395 | 0.9478 | 0.9464 |
-| $\varepsilon = 1$ | 0.9246 | 0.9599 | 0.9497 | 0.9616 |
-| $\varepsilon = 2$ | 0.9518 | 0.9663 | 0.9519 | 0.9653 |
-| $\varepsilon = 8$ | 0.9611 | 0.9677 | 0.9514 | 0.9655 |
+| Trainable weights $d$ | 6,018 | 6,018 | 130 | 750 |
+| Learning rate | 1 | 1 | 1 | 0.3 |
+| $\varepsilon = 0.25$ | 0.8260 | 0.8233 | 0.8416 | 0.8396 |
+| $\varepsilon = 0.5$ | 0.8402 | 0.8404 | 0.8432 | 0.8456 |
+| $\varepsilon = 1$ | 0.8434 | 0.8459 | 0.8440 | 0.8469 |
+| $\varepsilon = 4$ | 0.8450 | 0.8491 | 0.8435 | 0.8468 |
 
-: Test accuracy (mean of two runs), $\delta = 10^{-5}$. The pretrained model without fine-tuning has 0.9035. {#tbl-pub-run}
+: Accuracy on half of the Adult test rows (mean of two runs), $\delta = 10^{-5}$. The pretrained model without fine-tuning scores 0.8383. {#tbl-pub-run}
 
-Here pretraining is worth about a factor of eight in $\varepsilon$, since the adapter at $\varepsilon = 1$ matches training from scratch at $\varepsilon = 8$.
+Adult is an easy task, so every gap here is under two points, but the pattern is the one larger tasks show. Pretraining is worth about a factor of eight in $\varepsilon$, since the adapter at $\varepsilon = 0.5$ matches training from scratch at $\varepsilon = 4$.
 
-At $\varepsilon = 0.5$ the last layer is best, because its noise is 7.2 times shorter than full fine-tuning's, and its ceiling does not yet bind. From $\varepsilon = 1$ on, it is stuck near its ceiling while the others keep improving. The adapter is never more than 0.0022 below the best method, so it is the robust middle choice here. But a public task further from the private one can reverse the ranking even when the probe's ceiling looks fine, so rerun the comparison on a public stand-in for your task.
+At $\varepsilon = 0.25$ the last layer is best, because its noise is 6.8 times shorter than full fine-tuning's, and its ceiling does not yet bind. From $\varepsilon = 0.5$ on it stays near its ceiling, while first the adapter and then full fine-tuning pass it. The adapter is never more than 0.0023 below the best method, so it is the robust middle choice here. But a public task further from the private one can reverse the ranking even when the probe's ceiling looks fine, so rerun the comparison on a public stand-in for your task.
 
-The learning rate matters as much as the method, since a step three times too large costs full fine-tuning 1.3 percentage points of accuracy. The adapter's rank matters little, since at $\varepsilon = 1$ ranks 1, 4 and 16 differ by about the run-to-run spread.
+The learning rate matters as much as the method, since a step three times too large costs full fine-tuning 1.1 percentage points of accuracy at $\varepsilon = 1$. The adapter's rank matters little, since at $\varepsilon = 1$ ranks 1, 4 and 16 differ by about the run-to-run spread.
 
 ## What public data does not buy {#sec-pub-caveats}
 

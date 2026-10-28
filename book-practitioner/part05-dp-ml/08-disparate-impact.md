@@ -53,27 +53,31 @@ The script [practitioner_dp_sgd.py](../../code/part05-dp-ml/practitioner_dp_sgd.
 
 : Accuracy on Adult by sex, with exact 95% intervals, for one training run of each model. {#tbl-fair-adult}
 
-Here DP has no measurable disparate impact. Each group loses at most 0.002 in one private run, well inside its intervals. The large gap between the groups is there without privacy too, so DP is not responsible for it. Adult is easy, because both groups are large and the whole model loses almost nothing at this budget.
+Here DP has no measurable disparate impact. Each group loses at most 0.002 in one private run, well inside its intervals. The large gap between the groups is there without privacy too, so DP is not responsible for it. Both groups are large, and the whole model loses almost nothing at this budget.
 
-A small group tells a different story. The full edition's running example is a synthetic task with 10,000 training records, labelled by a fixed random network, and 500 of them form a minority whose inputs come from a different region and follow a different labelling rule (@tbl-fair-eps).
+Small groups tell a different story at a smaller budget. Adult's `race` column has three groups with under 1,000 of the 30,000 training rows. The script [practitioner_adult_studies.py](../../code/part05-dp-ml/practitioner_adult_studies.py) trains the same model three times each without privacy, with clipping only, and at $\varepsilon = 4$ and 1, and scores every group (@tbl-fair-eps).
 
-| Training | Majority accuracy | Minority accuracy | Majority's privacy cost | Minority's privacy cost |
-| --- | --- | --- | --- | --- |
-| Non-private SGD | 0.9529 | 0.9411 | — | — |
-| Clipping only, $\sigma = 0$ | 0.9581 | 0.9007 | $-0.0051$ | 0.0404 |
-| $\varepsilon = 4$, $\sigma = 1.36$ | 0.9470 | 0.8477 | 0.0059 | 0.0934 |
+| Group | Training rows | Test rows | Non-private | Clipping only | $\varepsilon = 4$ | $\varepsilon = 1$ | Privacy cost at $\varepsilon = 1$ |
+| --- | --- | --- | --- | --- | --- | --- | --- |
+| White | 25,670 | 14,352 | 0.8368 | 0.8376 | 0.8363 | 0.8331 | 0.0037 |
+| Black | 2,876 | 1,650 | 0.9042 | 0.9046 | 0.9079 | 0.9038 | 0.0004 |
+| Asian-Pac-Islander | 926 | 532 | 0.8346 | 0.8289 | 0.8315 | 0.8045 | 0.0301 |
+| Amer-Indian-Eskimo | 283 | 167 | 0.9281 | 0.9361 | 0.9361 | 0.9281 | 0.0000 |
+| Other | 245 | 141 | 0.9149 | 0.9031 | 0.9031 | 0.8936 | 0.0213 |
 
-: Test accuracy of each group of the full edition's running example with a 5% minority, averaged over 3 runs ($\delta = 10^{-5}$, noise multiplier $\sigma$). Costs are fractions of accuracy, and a negative cost is a gain. {#tbl-fair-eps}
+: Test accuracy on Adult by race, averaged over 3 runs ($\delta = 10^{-5}$, noise multiplier 0.973 at $\varepsilon = 4$ and 2.383 at $\varepsilon = 1$). Costs are fractions of accuracy. {#tbl-fair-eps}
 
-The minority pays almost all of the cost. At $\varepsilon = 4$ the majority loses 0.59 points, while the minority loses 9.34. The cost also depends steeply on the group's share of the data. For example, at the same budget a minority with 1% of the training records loses 34.88 points, and one with 20% loses only 2.80. So check every small group, whatever the overall accuracy says.
+At $\varepsilon = 4$ no group loses more than 1.2 points. At $\varepsilon = 1$ the White group loses 0.37 points, while the Asian-Pac-Islander group loses 3.01 and the Other group 2.13. Black and Amer-Indian-Eskimo people lose nothing, although the second is one of the smallest groups. Nor does the share of high incomes explain it: about 12% of the Black, Amer-Indian-Eskimo and Other groups earn above \$50K, yet only the Other group pays. So no simple feature of a group predicts its cost, and every small group must be checked, whatever the overall accuracy says.
+
+These numbers are only suggestive. At an accuracy of 0.85 the exact interval for 532 test rows is $[0.816, 0.879]$, three points on each side, and for 141 rows it is six. Three training runs do not remove that spread either, so a real check uses the paired interval of @eq-fair-paired and more runs.
 
 ## Why small groups pay: clipping and noise {#sec-fair-clipping}
 
-DP-SGD loses accuracy through two steps, clipping and noise, and both treat every record alike. Yet the clipping row of @tbl-fair-eps, which adds no noise and so gives no privacy, already costs the minority 4.04 points. So clipping by itself treats the groups unequally.
+DP-SGD loses accuracy through two steps, clipping and noise, and both treat every record alike. Yet the clipping column of @tbl-fair-eps, which adds no noise and so gives no privacy, already costs the Asian-Pac-Islander group 0.57 points and the Other group 1.18, while the White group gains 0.08. So clipping by itself can treat the groups unequally.
 
 Clipping caps every record's pull on the update at the clipping norm $C$, so it cuts back the groups with long gradients hardest. A group's gradients are long where the model fits it badly, as it does a rare pattern the rest of the data does not teach. So training gives such a group less weight than its share of the records.
 
-The noise is the same for every group, while a group's signal grows with its size. So a small group's signal is the weakest against the noise, and its privacy cost grows roughly like one over its share of the training records. The two causes compound, because the noise acts on the weight that clipping has already shrunk. A group whose gradients clipping halves pays like a group half its size.
+The noise is the same for every group, while a group's signal grows with its size. So a small group's signal is the weakest against the noise, and when the group needs a rule of its own, its privacy cost can grow like one over its share of the training records. On Adult, cutting the Asian-Pac-Islander group from 3.1% to 1% of the training rows leaves its cost at $\varepsilon = 1$ at 3.13 points, within the spread of three runs, so measure the cost instead of predicting it from the share. The two causes compound, because the noise acts on the weight that clipping has already shrunk. A group whose gradients clipping halves pays like a group half its size.
 
 To see which cause hurts your model, measure per-example gradient norms by group. Opacus's `GradSampleModule`, the wrapper DP-SGD training already uses, keeps one gradient per row in each parameter's `grad_sample`, so one backward pass gives the norms.
 
@@ -94,7 +98,7 @@ At a fixed budget, a change to the training recipe only moves the cost between t
 | Fix | What happens | Use it? |
 | --- | --- | --- |
 | Upweight the group's loss, or use a smaller clipping norm | Clipping cuts an upweighted gradient back to $C$, and a smaller norm clips more of the group | No |
-| Larger clipping norm, with learning rate times $C$ held fixed | Less clipping, but more noise relative to short gradients | Rarely, since it did not help the running example |
+| Larger clipping norm, with learning rate times $C$ held fixed | Less clipping, but more noise relative to short gradients | Rarely, since it trades one cause for the other |
 | Clipping norm set to the largest gradient seen in the data | Breaks the privacy proof, which assumes $C$ is fixed in advance | Only if chosen privately and charged |
 | Oversample the group | Its records' $\varepsilon$ is set by their higher sampling rate, so $\sigma$ must rise | Only with that accounting |
 | Global scaling with an adaptive bound (Esipova et al. 2023), one shared scale for every gradient | Keeps the update's direction and needs no group labels | Worth a try |
@@ -102,7 +106,7 @@ At a fixed budget, a change to the training recipe only moves the cost between t
 
 : Mitigations for disparate impact, and when to use them. {#tbl-fair-mitigation-guide}
 
-Oversampling costs the group's privacy, because a record's guarantee depends on its own chance of being sampled ([Amplification by subsampling](../part04-privacy-accounting/05-subsampling.md)). So run the accountant at the oversampled rate. In the running example, sampling the minority four times as often at $\varepsilon = 4$ raises the noise multiplier from 1.36 to 4.71. The gap between the groups' accuracies then narrows from 9.93 points to 3.99, but by **levelling down**, since the majority loses 8.01 points.
+Oversampling costs the group's privacy, because a record's guarantee depends on its own chance of being sampled ([Amplification by subsampling](../part04-privacy-accounting/05-subsampling.md)). So run the accountant at the oversampled rate. On Adult, sampling the Asian-Pac-Islander rows four times as often at $\varepsilon = 1$ raises the noise multiplier from 2.383 to 8.828. Every group then loses, the oversampled group most: it falls from 0.8145 to 0.7657, and the White group from 0.8310 to 0.7860, against the same DP-SGD at the ordinary rate. That is **levelling down** with no gain for anyone.
 
 No algorithm avoids some of the cost. Learning a small group's own rule means estimating it privately from that group's few records, and private estimation from few records has an error floor that no mechanism beats ([Lower bounds](../part03-dp-foundations/10-lower-bounds.md)).
 

@@ -107,7 +107,7 @@ model, optimizer, data_loader = engine.make_private(
     optimizer=optimizer,
     data_loader=data_loader,
     noise_multiplier=sigma,
-    max_grad_norm=CLIP,
+    max_grad_norm=clip,
 )  # Poisson sampling is the default: each row joins each batch with probability q
 ```
 
@@ -190,7 +190,7 @@ Train at several budgets with everything else fixed, and compare against the bas
 
 Privacy costs almost nothing on Adult down to $\varepsilon = 1$. Only at $\varepsilon = 0.25$ does accuracy drop, by about five points, and the other differences are too small to read on one seed.
 
-Adult is easy. Its training set is large, so a batch of 1,000 still has a small sampling rate and divides the noise by 1,000. Its model is small, and the noise's total length grows with the square root of the number of trained weights. So expect a steeper curve with millions of weights trained from scratch, a few thousand records, a rare class or many more epochs. The running example of [DP-SGD](02-dp-sgd.md#sec-dpsgd-run) already loses several points at $\varepsilon = 1$, and public pretraining is the usual remedy ([Public data and private fine-tuning](06-public-data.md)).
+Adult is easy. Its training set is large, so a batch of 1,000 still has a small sampling rate and divides the noise by 1,000. Its model is small, and the noise's total length grows with the square root of the number of trained weights. So expect a steeper curve with millions of weights trained from scratch, a few thousand records, a rare class or many more epochs. Even here, five points are lost at $\varepsilon = 0.25$ (@tbl-trainwf-utility), and public pretraining is the usual remedy: on the 1,500 public stand-in rows it wins most of them back ([Public data and private fine-tuning](06-public-data.md#sec-pub-run)).
 
 An average can hide a group that pays. So check accuracy by group with exact (Clopper–Pearson) intervals, which stay valid for small groups ([Disparate impact](08-disparate-impact.md)).
 
