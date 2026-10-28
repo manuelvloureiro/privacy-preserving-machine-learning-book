@@ -7,7 +7,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
 
-<title>34&nbsp; Rényi differential privacy – Privacy-Preserving Machine Learning for Practitioners</title>
+<title>28&nbsp; Rényi differential privacy – Privacy-Preserving Machine Learning for Practitioners</title>
 <style>
 /* Default styles provided by pandoc.
 ** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
@@ -82,7 +82,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <link href="../site_libs/quarto-html/quarto-syntax-highlighting-bf27225e3a48a9273f3daa8f8e829971.css" rel="stylesheet" id="quarto-text-highlighting-styles">
 <script src="../site_libs/bootstrap/bootstrap.min.js"></script>
 <link href="../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
-<link href="../site_libs/bootstrap/bootstrap-c76bce1ab0818eb3e57b6c28e4057b54.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
+<link href="../site_libs/bootstrap/bootstrap-78f503ea39f784e8964cd205807fbe37.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
 <script id="quarto-search-options" type="application/json">{
   "location": "sidebar",
   "copy-button": false,
@@ -152,7 +152,7 @@ window.Quarto = {
       <button type="button" class="quarto-btn-toggle btn" data-bs-toggle="collapse" role="button" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
         <i class="bi bi-layout-text-sidebar-reverse"></i>
       </button>
-        <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../part04-privacy-accounting/00-introduction.html">Privacy accounting</a></li><li class="breadcrumb-item"><a href="../part04-privacy-accounting/01-renyi-dp.html"><span class="chapter-number">34</span>&nbsp; <span class="chapter-title">Rényi differential privacy</span></a></li></ol></nav>
+        <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../part04-privacy-accounting/00-introduction.html">Privacy accounting</a></li><li class="breadcrumb-item"><a href="../part04-privacy-accounting/01-renyi-dp.html"><span class="chapter-number">28</span>&nbsp; <span class="chapter-title">Rényi differential privacy</span></a></li></ol></nav>
         <a class="flex-grow-1" role="navigation" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">      
         </a>
       <button type="button" class="btn quarto-search-button" aria-label="Search" onclick="window.quartoOpenSearch();">
@@ -194,50 +194,14 @@ window.Quarto = {
       <ul id="quarto-sidebar-section-1" class="collapse list-unstyled sidebar-section depth1 show">  
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
-  <a href="../part01-prerequisites/01-distributions.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">1</span>&nbsp; <span class="chapter-title">Probability distributions</span></span></a>
-  </div>
-</li>
-          <li class="sidebar-item">
-  <div class="sidebar-item-container"> 
-  <a href="../part01-prerequisites/02-concentration.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">2</span>&nbsp; <span class="chapter-title">Concentration inequalities</span></span></a>
-  </div>
-</li>
-          <li class="sidebar-item">
-  <div class="sidebar-item-container"> 
   <a href="../part01-prerequisites/03-divergences.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">3</span>&nbsp; <span class="chapter-title">Divergences</span></span></a>
+ <span class="menu-text"><span class="chapter-number">1</span>&nbsp; <span class="chapter-title">Divergences</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../part01-prerequisites/04-hypothesis-testing.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">4</span>&nbsp; <span class="chapter-title">Hypothesis testing</span></span></a>
-  </div>
-</li>
-          <li class="sidebar-item">
-  <div class="sidebar-item-container"> 
-  <a href="../part01-prerequisites/05-information-theory.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">5</span>&nbsp; <span class="chapter-title">Information theory</span></span></a>
-  </div>
-</li>
-          <li class="sidebar-item">
-  <div class="sidebar-item-container"> 
-  <a href="../part01-prerequisites/06-optimization.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">6</span>&nbsp; <span class="chapter-title">Optimization</span></span></a>
-  </div>
-</li>
-          <li class="sidebar-item">
-  <div class="sidebar-item-container"> 
-  <a href="../part01-prerequisites/07-stability-generalization.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">7</span>&nbsp; <span class="chapter-title">Algorithmic stability and generalization</span></span></a>
-  </div>
-</li>
-          <li class="sidebar-item">
-  <div class="sidebar-item-container"> 
-  <a href="../part01-prerequisites/08-crypto-basics.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">8</span>&nbsp; <span class="chapter-title">Cryptography basics</span></span></a>
+ <span class="menu-text"><span class="chapter-number">2</span>&nbsp; <span class="chapter-title">Hypothesis testing</span></span></a>
   </div>
 </li>
       </ul>
@@ -254,61 +218,61 @@ window.Quarto = {
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../part02-attacks/01-threat-models.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">9</span>&nbsp; <span class="chapter-title">Threat models and privacy games</span></span></a>
+ <span class="menu-text"><span class="chapter-number">3</span>&nbsp; <span class="chapter-title">Threat models and privacy games</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../part02-attacks/02-membership-inference.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">10</span>&nbsp; <span class="chapter-title">Membership inference</span></span></a>
+ <span class="menu-text"><span class="chapter-number">4</span>&nbsp; <span class="chapter-title">Membership inference</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../part02-attacks/03-attribute-inference.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">11</span>&nbsp; <span class="chapter-title">Attribute inference and model inversion</span></span></a>
+ <span class="menu-text"><span class="chapter-number">5</span>&nbsp; <span class="chapter-title">Attribute inference and model inversion</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../part02-attacks/04-property-inference.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">12</span>&nbsp; <span class="chapter-title">Property inference</span></span></a>
+ <span class="menu-text"><span class="chapter-number">6</span>&nbsp; <span class="chapter-title">Property inference</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../part02-attacks/05-memorization-extraction.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">13</span>&nbsp; <span class="chapter-title">Memorization and training-data extraction</span></span></a>
+ <span class="menu-text"><span class="chapter-number">7</span>&nbsp; <span class="chapter-title">Memorization and training-data extraction</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../part02-attacks/06-gradient-inversion.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">14</span>&nbsp; <span class="chapter-title">Gradient inversion</span></span></a>
+ <span class="menu-text"><span class="chapter-number">8</span>&nbsp; <span class="chapter-title">Gradient inversion</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../part02-attacks/07-linkage-reidentification.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">15</span>&nbsp; <span class="chapter-title">Linkage and re-identification</span></span></a>
+ <span class="menu-text"><span class="chapter-number">9</span>&nbsp; <span class="chapter-title">Linkage and re-identification</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../part02-attacks/08-syntactic-anonymity.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">16</span>&nbsp; <span class="chapter-title">Syntactic anonymity and how it breaks</span></span></a>
+ <span class="menu-text"><span class="chapter-number">10</span>&nbsp; <span class="chapter-title">Syntactic anonymity and how it breaks</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../part02-attacks/09-reconstruction.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">17</span>&nbsp; <span class="chapter-title">Reconstruction attacks</span></span></a>
+ <span class="menu-text"><span class="chapter-number">11</span>&nbsp; <span class="chapter-title">Reconstruction attacks</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../part02-attacks/10-risk-assessment.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">18</span>&nbsp; <span class="chapter-title">Pre-release privacy risk assessment</span></span></a>
+ <span class="menu-text"><span class="chapter-number">12</span>&nbsp; <span class="chapter-title">Pre-release privacy risk assessment</span></span></a>
   </div>
 </li>
       </ul>
@@ -325,73 +289,73 @@ window.Quarto = {
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../part03-dp-foundations/01-definition.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">19</span>&nbsp; <span class="chapter-title">The definition of differential privacy</span></span></a>
+ <span class="menu-text"><span class="chapter-number">13</span>&nbsp; <span class="chapter-title">The definition of differential privacy</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../part03-dp-foundations/02-properties.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">20</span>&nbsp; <span class="chapter-title">Post-processing, group privacy and composition</span></span></a>
+ <span class="menu-text"><span class="chapter-number">14</span>&nbsp; <span class="chapter-title">Post-processing, group privacy and composition</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../part03-dp-foundations/03-laplace-gaussian.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">21</span>&nbsp; <span class="chapter-title">The Laplace and Gaussian mechanisms</span></span></a>
+ <span class="menu-text"><span class="chapter-number">15</span>&nbsp; <span class="chapter-title">The Laplace and Gaussian mechanisms</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../part03-dp-foundations/04-composition.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">22</span>&nbsp; <span class="chapter-title">Advanced and optimal composition</span></span></a>
+ <span class="menu-text"><span class="chapter-number">16</span>&nbsp; <span class="chapter-title">Advanced and optimal composition</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../part03-dp-foundations/05-selection.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">23</span>&nbsp; <span class="chapter-title">Selection: exponential mechanism, report-noisy-max, sparse vector</span></span></a>
+ <span class="menu-text"><span class="chapter-number">17</span>&nbsp; <span class="chapter-title">Selection: exponential mechanism, report-noisy-max, sparse vector</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../part03-dp-foundations/06-query-release.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">24</span>&nbsp; <span class="chapter-title">Query release and private multiplicative weights</span></span></a>
+ <span class="menu-text"><span class="chapter-number">18</span>&nbsp; <span class="chapter-title">Query release and private multiplicative weights</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../part03-dp-foundations/07-sensitivity.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">25</span>&nbsp; <span class="chapter-title">Beyond global sensitivity</span></span></a>
+ <span class="menu-text"><span class="chapter-number">19</span>&nbsp; <span class="chapter-title">Beyond global sensitivity</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../part03-dp-foundations/08-discrete-mechanisms.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">26</span>&nbsp; <span class="chapter-title">Discrete and floating-point-safe mechanisms</span></span></a>
+ <span class="menu-text"><span class="chapter-number">20</span>&nbsp; <span class="chapter-title">Discrete and floating-point-safe mechanisms</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../part03-dp-foundations/09-trust-models.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">27</span>&nbsp; <span class="chapter-title">Local, shuffle and distributed trust models</span></span></a>
+ <span class="menu-text"><span class="chapter-number">21</span>&nbsp; <span class="chapter-title">Local, shuffle and distributed trust models</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../part03-dp-foundations/10-lower-bounds.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">28</span>&nbsp; <span class="chapter-title">Lower bounds: what privacy costs</span></span></a>
+ <span class="menu-text"><span class="chapter-number">22</span>&nbsp; <span class="chapter-title">Lower bounds: what privacy costs</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../part03-dp-foundations/11-mean-estimation.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">29</span>&nbsp; <span class="chapter-title">Private mean estimation</span></span></a>
+ <span class="menu-text"><span class="chapter-number">23</span>&nbsp; <span class="chapter-title">Private mean estimation</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../part03-dp-foundations/12-release-statistics.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">30</span>&nbsp; <span class="chapter-title">Release statistics with a library</span></span></a>
+ <span class="menu-text"><span class="chapter-number">24</span>&nbsp; <span class="chapter-title">Release statistics with a library</span></span></a>
   </div>
 </li>
       </ul>
@@ -408,61 +372,61 @@ window.Quarto = {
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../part04-privacy-accounting/09-choosing-an-accountant.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">31</span>&nbsp; <span class="chapter-title">Choosing an accountant</span></span></a>
+ <span class="menu-text"><span class="chapter-number">25</span>&nbsp; <span class="chapter-title">Choosing an accountant</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../part04-privacy-accounting/10-calibrate-dp-sgd.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">32</span>&nbsp; <span class="chapter-title">Calibrate and account a DP-SGD run</span></span></a>
+ <span class="menu-text"><span class="chapter-number">26</span>&nbsp; <span class="chapter-title">Calibrate and account a DP-SGD run</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../part04-privacy-accounting/05-subsampling.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">33</span>&nbsp; <span class="chapter-title">Amplification by subsampling</span></span></a>
+ <span class="menu-text"><span class="chapter-number">27</span>&nbsp; <span class="chapter-title">Amplification by subsampling</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../part04-privacy-accounting/01-renyi-dp.html" class="sidebar-item-text sidebar-link active">
- <span class="menu-text"><span class="chapter-number">34</span>&nbsp; <span class="chapter-title">Rényi differential privacy</span></span></a>
+ <span class="menu-text"><span class="chapter-number">28</span>&nbsp; <span class="chapter-title">Rényi differential privacy</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../part04-privacy-accounting/02-rdp-conversions.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">35</span>&nbsp; <span class="chapter-title">From Rényi DP to (ε, δ) and to tests</span></span></a>
+ <span class="menu-text"><span class="chapter-number">29</span>&nbsp; <span class="chapter-title">From Rényi DP to (ε, δ) and to tests</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../part04-privacy-accounting/06-numerical-accounting.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">36</span>&nbsp; <span class="chapter-title">Numerical accounting with privacy loss distributions</span></span></a>
+ <span class="menu-text"><span class="chapter-number">30</span>&nbsp; <span class="chapter-title">Numerical accounting with privacy loss distributions</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../part04-privacy-accounting/04-gaussian-dp.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">37</span>&nbsp; <span class="chapter-title">f-DP and Gaussian differential privacy</span></span></a>
+ <span class="menu-text"><span class="chapter-number">31</span>&nbsp; <span class="chapter-title">f-DP and Gaussian differential privacy</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../part04-privacy-accounting/08-adaptive-composition.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">38</span>&nbsp; <span class="chapter-title">Adaptive composition: filters, odometers and individual accounting</span></span></a>
+ <span class="menu-text"><span class="chapter-number">32</span>&nbsp; <span class="chapter-title">Adaptive composition: filters, odometers and individual accounting</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../part04-privacy-accounting/03-concentrated-dp.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">39</span>&nbsp; <span class="chapter-title">Concentrated differential privacy</span></span></a>
+ <span class="menu-text"><span class="chapter-number">33</span>&nbsp; <span class="chapter-title">Concentrated differential privacy</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../part04-privacy-accounting/07-shuffling-iteration.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">40</span>&nbsp; <span class="chapter-title">Amplification by shuffling and by iteration</span></span></a>
+ <span class="menu-text"><span class="chapter-number">34</span>&nbsp; <span class="chapter-title">Amplification by shuffling and by iteration</span></span></a>
   </div>
 </li>
       </ul>
@@ -479,85 +443,85 @@ window.Quarto = {
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../part05-dp-ml/01-dp-erm.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">41</span>&nbsp; <span class="chapter-title">Private empirical risk minimization</span></span></a>
+ <span class="menu-text"><span class="chapter-number">35</span>&nbsp; <span class="chapter-title">Private empirical risk minimization</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../part05-dp-ml/02-dp-sgd.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">42</span>&nbsp; <span class="chapter-title">DP-SGD</span></span></a>
+ <span class="menu-text"><span class="chapter-number">36</span>&nbsp; <span class="chapter-title">DP-SGD</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../part05-dp-ml/13-train-dp-sgd.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">43</span>&nbsp; <span class="chapter-title">Train a model with DP-SGD</span></span></a>
+ <span class="menu-text"><span class="chapter-number">37</span>&nbsp; <span class="chapter-title">Train a model with DP-SGD</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../part05-dp-ml/03-hyperparameter-tuning.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">44</span>&nbsp; <span class="chapter-title">Hyperparameter tuning and private selection</span></span></a>
+ <span class="menu-text"><span class="chapter-number">38</span>&nbsp; <span class="chapter-title">Hyperparameter tuning and private selection</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../part05-dp-ml/07-user-level.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">45</span>&nbsp; <span class="chapter-title">User-level differential privacy</span></span></a>
+ <span class="menu-text"><span class="chapter-number">39</span>&nbsp; <span class="chapter-title">User-level differential privacy</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../part05-dp-ml/09-choosing-epsilon.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">46</span>&nbsp; <span class="chapter-title">Choosing ε</span></span></a>
+ <span class="menu-text"><span class="chapter-number">40</span>&nbsp; <span class="chapter-title">Choosing ε</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../part05-dp-ml/06-public-data.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">47</span>&nbsp; <span class="chapter-title">Public data and private fine-tuning</span></span></a>
+ <span class="menu-text"><span class="chapter-number">41</span>&nbsp; <span class="chapter-title">Public data and private fine-tuning</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../part05-dp-ml/14-private-llm-finetuning.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">48</span>&nbsp; <span class="chapter-title">Fine-tune a language model privately with LoRA</span></span></a>
+ <span class="menu-text"><span class="chapter-number">42</span>&nbsp; <span class="chapter-title">Fine-tune a language model privately with LoRA</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../part05-dp-ml/05-private-prediction.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">49</span>&nbsp; <span class="chapter-title">Private prediction: PATE and in-context learning</span></span></a>
+ <span class="menu-text"><span class="chapter-number">43</span>&nbsp; <span class="chapter-title">Private prediction: PATE and in-context learning</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../part05-dp-ml/04-matrix-mechanisms.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">50</span>&nbsp; <span class="chapter-title">DP-FTRL and matrix factorization</span></span></a>
+ <span class="menu-text"><span class="chapter-number">44</span>&nbsp; <span class="chapter-title">DP-FTRL and matrix factorization</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../part05-dp-ml/08-disparate-impact.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">51</span>&nbsp; <span class="chapter-title">Disparate impact</span></span></a>
+ <span class="menu-text"><span class="chapter-number">45</span>&nbsp; <span class="chapter-title">Disparate impact</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../part05-dp-ml/10-auditing.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">52</span>&nbsp; <span class="chapter-title">Auditing private training</span></span></a>
+ <span class="menu-text"><span class="chapter-number">46</span>&nbsp; <span class="chapter-title">Auditing private training</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../part05-dp-ml/11-adaptive-data-analysis.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">53</span>&nbsp; <span class="chapter-title">Adaptive data analysis</span></span></a>
+ <span class="menu-text"><span class="chapter-number">47</span>&nbsp; <span class="chapter-title">Adaptive data analysis</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../part05-dp-ml/12-release-governance.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">54</span>&nbsp; <span class="chapter-title">Release and governance</span></span></a>
+ <span class="menu-text"><span class="chapter-number">48</span>&nbsp; <span class="chapter-title">Release and governance</span></span></a>
   </div>
 </li>
       </ul>
@@ -595,25 +559,25 @@ window.Quarto = {
     <h2 id="toc-title">Table of contents</h2>
    
   <ul>
-  <li><a href="#why-this-matters" id="toc-why-this-matters" class="nav-link active" data-scroll-target="#why-this-matters"><span class="header-section-number">34.1</span> Why this matters</a></li>
-  <li><a href="#sec-rdp-definition" id="toc-sec-rdp-definition" class="nav-link" data-scroll-target="#sec-rdp-definition"><span class="header-section-number">34.2</span> The RDP curve</a></li>
-  <li><a href="#sec-rdp-curves" id="toc-sec-rdp-curves" class="nav-link" data-scroll-target="#sec-rdp-curves"><span class="header-section-number">34.3</span> RDP curves of the basic mechanisms</a></li>
-  <li><a href="#sec-rdp-composition" id="toc-sec-rdp-composition" class="nav-link" data-scroll-target="#sec-rdp-composition"><span class="header-section-number">34.4</span> Composition adds curves</a></li>
-  <li><a href="#sec-rdp-properties" id="toc-sec-rdp-properties" class="nav-link" data-scroll-target="#sec-rdp-properties"><span class="header-section-number">34.5</span> Post-processing and group privacy</a></li>
-  <li><a href="#sec-rdp-conversion" id="toc-sec-rdp-conversion" class="nav-link" data-scroll-target="#sec-rdp-conversion"><span class="header-section-number">34.6</span> Compose, then convert once</a></li>
-  <li><a href="#sec-rdp-orders" id="toc-sec-rdp-orders" class="nav-link" data-scroll-target="#sec-rdp-orders"><span class="header-section-number">34.7</span> Check the order grid</a></li>
-  <li><a href="#sec-rdp-library" id="toc-sec-rdp-library" class="nav-link" data-scroll-target="#sec-rdp-library"><span class="header-section-number">34.8</span> Accounting with a library</a></li>
-  <li><a href="#cheat-sheet" id="toc-cheat-sheet" class="nav-link" data-scroll-target="#cheat-sheet"><span class="header-section-number">34.9</span> Cheat sheet</a></li>
-  <li><a href="#references" id="toc-references" class="nav-link" data-scroll-target="#references"><span class="header-section-number">34.10</span> References</a></li>
+  <li><a href="#why-this-matters" id="toc-why-this-matters" class="nav-link active" data-scroll-target="#why-this-matters"><span class="header-section-number">28.1</span> Why this matters</a></li>
+  <li><a href="#sec-rdp-definition" id="toc-sec-rdp-definition" class="nav-link" data-scroll-target="#sec-rdp-definition"><span class="header-section-number">28.2</span> The RDP curve</a></li>
+  <li><a href="#sec-rdp-curves" id="toc-sec-rdp-curves" class="nav-link" data-scroll-target="#sec-rdp-curves"><span class="header-section-number">28.3</span> RDP curves of the basic mechanisms</a></li>
+  <li><a href="#sec-rdp-composition" id="toc-sec-rdp-composition" class="nav-link" data-scroll-target="#sec-rdp-composition"><span class="header-section-number">28.4</span> Composition adds curves</a></li>
+  <li><a href="#sec-rdp-properties" id="toc-sec-rdp-properties" class="nav-link" data-scroll-target="#sec-rdp-properties"><span class="header-section-number">28.5</span> Post-processing and group privacy</a></li>
+  <li><a href="#sec-rdp-conversion" id="toc-sec-rdp-conversion" class="nav-link" data-scroll-target="#sec-rdp-conversion"><span class="header-section-number">28.6</span> Compose, then convert once</a></li>
+  <li><a href="#sec-rdp-orders" id="toc-sec-rdp-orders" class="nav-link" data-scroll-target="#sec-rdp-orders"><span class="header-section-number">28.7</span> Check the order grid</a></li>
+  <li><a href="#sec-rdp-library" id="toc-sec-rdp-library" class="nav-link" data-scroll-target="#sec-rdp-library"><span class="header-section-number">28.8</span> Accounting with a library</a></li>
+  <li><a href="#cheat-sheet" id="toc-cheat-sheet" class="nav-link" data-scroll-target="#cheat-sheet"><span class="header-section-number">28.9</span> Cheat sheet</a></li>
+  <li><a href="#references" id="toc-references" class="nav-link" data-scroll-target="#references"><span class="header-section-number">28.10</span> References</a></li>
   </ul>
 </nav>
     </div>
 <!-- main -->
 <main class="content" id="quarto-document-content">
 
-<header id="title-block-header" class="quarto-title-block default"><nav class="quarto-page-breadcrumbs quarto-title-breadcrumbs d-none d-lg-block" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../part04-privacy-accounting/00-introduction.html">Privacy accounting</a></li><li class="breadcrumb-item"><a href="../part04-privacy-accounting/01-renyi-dp.html"><span class="chapter-number">34</span>&nbsp; <span class="chapter-title">Rényi differential privacy</span></a></li></ol></nav>
+<header id="title-block-header" class="quarto-title-block default"><nav class="quarto-page-breadcrumbs quarto-title-breadcrumbs d-none d-lg-block" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../part04-privacy-accounting/00-introduction.html">Privacy accounting</a></li><li class="breadcrumb-item"><a href="../part04-privacy-accounting/01-renyi-dp.html"><span class="chapter-number">28</span>&nbsp; <span class="chapter-title">Rényi differential privacy</span></a></li></ol></nav>
 <div class="quarto-title">
-<h1 class="title"><span class="chapter-number">34</span>&nbsp; <span class="chapter-title">Rényi differential privacy</span></h1>
+<h1 class="title"><span class="chapter-number">28</span>&nbsp; <span class="chapter-title">Rényi differential privacy</span></h1>
 </div>
 
 
@@ -630,23 +594,23 @@ window.Quarto = {
 </header>
 
 
-<section id="why-this-matters" class="level2" data-number="34.1">
-<h2 data-number="34.1" class="anchored" data-anchor-id="why-this-matters"><span class="header-section-number">34.1</span> Why this matters</h2>
+<section id="why-this-matters" class="level2" data-number="28.1">
+<h2 data-number="28.1" class="anchored" data-anchor-id="why-this-matters"><span class="header-section-number">28.1</span> Why this matters</h2>
 <p>Training a model runs thousands of private steps, but you report one differential privacy (DP) guarantee for all of them, a privacy level <span class="math inline">\(\varepsilon\)</span> with a small slack <span class="math inline">\(\delta\)</span>. The advanced composition of Part 3 adds up the pairs of the steps, and the result is far too pessimistic (<a href="../part03-dp-foundations/04-composition.html">Composition</a>). Take 1000 steps of full-batch noisy gradient descent, each with Gaussian noise whose standard deviation is 20 times the most one record can move the gradient. At <span class="math inline">\(\delta = 10^{-5}\)</span>, advanced composition gives <span class="math inline">\(\varepsilon = 68.01\)</span>, nine times the exact 7.51. So a run calibrated to it adds more noise than it needs.</p>
-<p><strong>Rényi differential privacy (RDP)</strong> fixes this, because it keeps a whole curve of privacy costs for each step instead of one point. The curves of the steps add, with no <span class="math inline">\(\delta\)</span> spent along the way, and you convert the total into <span class="math inline">\((\varepsilon, \delta)\)</span> once, at the end. Even with Mironov’s original conversion (<a href="#sec-rdp-conversion" class="quarto-xref"><span>Section 34.6</span></a>), the same run then costs 8.84, only 18% above the exact value. Opacus and Google’s <code>dp_accounting</code> both have an RDP accountant.</p>
+<p><strong>Rényi differential privacy (RDP)</strong> fixes this, because it keeps a whole curve of privacy costs for each step instead of one point. The curves of the steps add, with no <span class="math inline">\(\delta\)</span> spent along the way, and you convert the total into <span class="math inline">\((\varepsilon, \delta)\)</span> once, at the end. Even with Mironov’s original conversion (<a href="#sec-rdp-conversion" class="quarto-xref"><span>Section 28.6</span></a>), the same run then costs 8.84, only 18% above the exact value. Opacus and Google’s <code>dp_accounting</code> both have an RDP accountant.</p>
 </section>
-<section id="sec-rdp-definition" class="level2" data-number="34.2">
-<h2 data-number="34.2" class="anchored" data-anchor-id="sec-rdp-definition"><span class="header-section-number">34.2</span> The RDP curve</h2>
+<section id="sec-rdp-definition" class="level2" data-number="28.2">
+<h2 data-number="28.2" class="anchored" data-anchor-id="sec-rdp-definition"><span class="header-section-number">28.2</span> The RDP curve</h2>
 <p>A DP guarantee compares the outputs of a mechanism on two neighbouring datasets, which differ in one person’s record. RDP measures the distance between those two output distributions with the <strong>Rényi divergence</strong> of <a href="../part01-prerequisites/03-divergences.html">Divergences</a>. That divergence has a dial, the <strong>order</strong> <span class="math inline">\(\alpha\)</span>, which is any number above 1. A small order looks at the typical output. A large order gives more weight to the rare outputs that are much more likely on one dataset than on the other.</p>
 <p>A mechanism is <strong><span class="math inline">\((\alpha, \varepsilon)\)</span>-RDP</strong> if, at order <span class="math inline">\(\alpha\)</span>, the divergence is at most <span class="math inline">\(\varepsilon\)</span> for every pair of neighbours. The smallest such <span class="math inline">\(\varepsilon\)</span> at each order gives the <strong>RDP curve</strong> <span class="math inline">\(\varepsilon(\alpha)\)</span> of the mechanism, and a higher curve means less privacy. The curve never decreases with the order. At order infinity, it is the largest privacy loss of any output, which is what pure DP, the case <span class="math inline">\(\delta = 0\)</span>, bounds. You never compute the divergence yourself, because accountants know the curves of the standard mechanisms on a grid of orders.</p>
 </section>
-<section id="sec-rdp-curves" class="level2" data-number="34.3">
-<h2 data-number="34.3" class="anchored" data-anchor-id="sec-rdp-curves"><span class="header-section-number">34.3</span> RDP curves of the basic mechanisms</h2>
-<p>To account for a mechanism, you need its curve, and the basic mechanisms have one in closed form (Mironov 2017). For the <strong>Gaussian mechanism</strong>, write <span class="math inline">\(\sigma\)</span> for its noise multiplier. That is the standard deviation of the noise in units of the <span class="math inline">\(\ell_2\)</span> sensitivity, the most one record can move the answer. Its curve is the straight line <span id="eq-auto-01renyidp-1"><span class="math display">\[\varepsilon(\alpha) = \frac{\alpha}{2\sigma^2}. \tag{34.1}\]</span></span> <a href="#tbl-rdp-curves" class="quarto-xref">Table&nbsp;<span>34.1</span></a> gives the curves of the Gaussian, Laplace and randomized-response mechanisms at a few orders, each at sensitivity 1.</p>
+<section id="sec-rdp-curves" class="level2" data-number="28.3">
+<h2 data-number="28.3" class="anchored" data-anchor-id="sec-rdp-curves"><span class="header-section-number">28.3</span> RDP curves of the basic mechanisms</h2>
+<p>To account for a mechanism, you need its curve, and the basic mechanisms have one in closed form (Mironov 2017). For the <strong>Gaussian mechanism</strong>, write <span class="math inline">\(\sigma\)</span> for its noise multiplier. That is the standard deviation of the noise in units of the <span class="math inline">\(\ell_2\)</span> sensitivity, the most one record can move the answer. Its curve is the straight line <span id="eq-auto-01renyidp-1"><span class="math display">\[\varepsilon(\alpha) = \frac{\alpha}{2\sigma^2}. \tag{28.1}\]</span></span> <a href="#tbl-rdp-curves" class="quarto-xref">Table&nbsp;<span>28.1</span></a> gives the curves of the Gaussian, Laplace and randomized-response mechanisms at a few orders, each at sensitivity 1.</p>
 <div id="tbl-rdp-curves" class="quarto-float quarto-figure quarto-figure-center anchored">
 <figure class="quarto-float quarto-float-tbl figure">
 <figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl" id="tbl-rdp-curves-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-Table&nbsp;34.1: RDP curves of the three basic mechanisms with sensitivity 1.
+Table&nbsp;28.1: RDP curves of the three basic mechanisms with sensitivity 1.
 </figcaption>
 <div aria-describedby="tbl-rdp-curves-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
 <table class="caption-top table">
@@ -700,29 +664,29 @@ Table&nbsp;34.1: RDP curves of the three basic mechanisms with sensitivity 1.
 </div>
 <p>The Laplace and randomized-response curves level off at their pure DP level. The Gaussian curve has no limit, so the Gaussian mechanism is not <span class="math inline">\(\varepsilon\)</span>-DP for any <span class="math inline">\(\varepsilon\)</span>. But an accountant converts only at finite orders, where the curve is finite. These curves are for steps on the whole dataset. The private form of stochastic gradient descent (SGD), called DP-SGD, runs each step on a random batch, and libraries compute its much smaller curves for you (<a href="../part04-privacy-accounting/05-subsampling.html">Amplification by subsampling</a>).</p>
 </section>
-<section id="sec-rdp-composition" class="level2" data-number="34.4">
-<h2 data-number="34.4" class="anchored" data-anchor-id="sec-rdp-composition"><span class="header-section-number">34.4</span> Composition adds curves</h2>
-<p>Training runs thousands of mechanisms in sequence, and each may depend on what the earlier ones released, as a gradient step depends on the current model. RDP composes these mechanisms by adding their curves, order by order. Write <span class="math inline">\(\varepsilon_i\)</span> for the curve of the <span class="math inline">\(i\)</span>-th step. Then a whole run of <span class="math inline">\(k\)</span> steps has a curve <span class="math inline">\(\varepsilon_M\)</span> with <span id="eq-auto-01renyidp-2"><span class="math display">\[\varepsilon_M(\alpha) \le \sum_{i=1}^k \varepsilon_i(\alpha) \qquad\text{for every order } \alpha. \tag{34.2}\]</span></span> Different mechanisms mix freely, because you only add numbers at the same order.</p>
+<section id="sec-rdp-composition" class="level2" data-number="28.4">
+<h2 data-number="28.4" class="anchored" data-anchor-id="sec-rdp-composition"><span class="header-section-number">28.4</span> Composition adds curves</h2>
+<p>Training runs thousands of mechanisms in sequence, and each may depend on what the earlier ones released, as a gradient step depends on the current model. RDP composes these mechanisms by adding their curves, order by order. Write <span class="math inline">\(\varepsilon_i\)</span> for the curve of the <span class="math inline">\(i\)</span>-th step. Then a whole run of <span class="math inline">\(k\)</span> steps has a curve <span class="math inline">\(\varepsilon_M\)</span> with <span id="eq-auto-01renyidp-2"><span class="math display">\[\varepsilon_M(\alpha) \le \sum_{i=1}^k \varepsilon_i(\alpha) \qquad\text{for every order } \alpha. \tag{28.2}\]</span></span> Different mechanisms mix freely, because you only add numbers at the same order.</p>
 <p>Two conditions come with the sum. First, every curve must describe the same neighbouring relation, such as add/remove or replace-one, and the same unit of privacy, such as one record or one user. Second, the curve of each step must be fixed before the run. Steps may adapt to earlier outputs, but if the data choose the noise level or the number of steps, the curves depend on the data too. An early stop when a validation metric looks good is such a choice, and it needs <a href="../part04-privacy-accounting/08-adaptive-composition.html">Adaptive composition</a> instead.</p>
 <p>The sum is simplest for Gaussian steps, because their curve is the straight line <span class="math inline">\(\alpha/(2\sigma^2)\)</span>. Adding <span class="math inline">\(k\)</span> such lines multiplies the slope by <span class="math inline">\(k\)</span>, which gives the line of one step with noise multiplier <span class="math inline">\(\sigma/\sqrt k\)</span>. So <span class="math inline">\(k\)</span> Gaussian steps cost as much privacy as one step with <span class="math inline">\(\sqrt k\)</span> times less noise, which is bad news for training. If 10,000 steps with noise multiplier 1 each used the whole dataset, they would cost as much as one step with noise multiplier <span class="math inline">\(1/\sqrt{10{,}000} = 0.01\)</span>, whose <span class="math inline">\(\varepsilon\)</span> at <span class="math inline">\(\delta = 10^{-5}\)</span> is 5425.5, no guarantee at all. DP-SGD escapes this by running each step on a small random sample. This part’s running example is such a run: 10,000 steps with noise multiplier 1, each on a random 1% of the data.</p>
 </section>
-<section id="sec-rdp-properties" class="level2" data-number="34.5">
-<h2 data-number="34.5" class="anchored" data-anchor-id="sec-rdp-properties"><span class="header-section-number">34.5</span> Post-processing and group privacy</h2>
+<section id="sec-rdp-properties" class="level2" data-number="28.5">
+<h2 data-number="28.5" class="anchored" data-anchor-id="sec-rdp-properties"><span class="header-section-number">28.5</span> Post-processing and group privacy</h2>
 <p>Post-processing is free in RDP, because a computation on the output that does not look at the data again cannot make the curve larger. So the release of the trained model or its predictions costs nothing beyond the training run.</p>
-<p>Groups of records are harder, and the generic group rule of RDP is loose. So when one user gives <span class="math inline">\(m\)</span> records and the noise is Gaussian, use the sensitivity of the group instead, which is at most <span class="math inline">\(m\)</span> times that of one record. The curve becomes <span id="eq-auto-01renyidp-3"><span class="math display">\[\varepsilon_{\mathrm{group}}(\alpha) = \frac{m^2\alpha}{2\sigma^2}, \tag{34.3}\]</span></span> which is <span class="math inline">\(m^2\)</span> times the curve of one record, so ten records per user cost a hundred times as much. The fix is to clip the whole contribution of each user to one clipping norm and to account per user (<a href="../part05-dp-ml/07-user-level.html">User-level privacy</a>).</p>
+<p>Groups of records are harder, and the generic group rule of RDP is loose. So when one user gives <span class="math inline">\(m\)</span> records and the noise is Gaussian, use the sensitivity of the group instead, which is at most <span class="math inline">\(m\)</span> times that of one record. The curve becomes <span id="eq-auto-01renyidp-3"><span class="math display">\[\varepsilon_{\mathrm{group}}(\alpha) = \frac{m^2\alpha}{2\sigma^2}, \tag{28.3}\]</span></span> which is <span class="math inline">\(m^2\)</span> times the curve of one record, so ten records per user cost a hundred times as much. The fix is to clip the whole contribution of each user to one clipping norm and to account per user (<a href="../part05-dp-ml/07-user-level.html">User-level privacy</a>).</p>
 </section>
-<section id="sec-rdp-conversion" class="level2" data-number="34.6">
-<h2 data-number="34.6" class="anchored" data-anchor-id="sec-rdp-conversion"><span class="header-section-number">34.6</span> Compose, then convert once</h2>
-<p>After composition, you have a curve, but you report an <span class="math inline">\((\varepsilon, \delta)\)</span> pair. Both libraries turn the curve into a pair with the <strong>improved conversion</strong> (Balle et al.&nbsp;2020, and independently Canonne, Kamath and Steinke 2020). From the value <span class="math inline">\(\varepsilon(\alpha)\)</span> of the curve at one order and a target <span class="math inline">\(\delta\)</span>, it gives the privacy level <span id="eq-auto-01renyidp-4"><span class="math display">\[\varepsilon' = \varepsilon(\alpha) + \ln\frac{\alpha - 1}{\alpha} - \frac{\ln\delta + \ln\alpha}{\alpha - 1}. \tag{34.4}\]</span></span> Report the smallest <span class="math inline">\(\varepsilon'\)</span> over the grid of orders, or 0 if that is negative. Libraries call the order that gave it the best order.</p>
+<section id="sec-rdp-conversion" class="level2" data-number="28.6">
+<h2 data-number="28.6" class="anchored" data-anchor-id="sec-rdp-conversion"><span class="header-section-number">28.6</span> Compose, then convert once</h2>
+<p>After composition, you have a curve, but you report an <span class="math inline">\((\varepsilon, \delta)\)</span> pair. Both libraries turn the curve into a pair with the <strong>improved conversion</strong> (Balle et al.&nbsp;2020, and independently Canonne, Kamath and Steinke 2020). From the value <span class="math inline">\(\varepsilon(\alpha)\)</span> of the curve at one order and a target <span class="math inline">\(\delta\)</span>, it gives the privacy level <span id="eq-auto-01renyidp-4"><span class="math display">\[\varepsilon' = \varepsilon(\alpha) + \ln\frac{\alpha - 1}{\alpha} - \frac{\ln\delta + \ln\alpha}{\alpha - 1}. \tag{28.4}\]</span></span> Report the smallest <span class="math inline">\(\varepsilon'\)</span> over the grid of orders, or 0 if that is negative. Libraries call the order that gave it the best order.</p>
 <p>Older papers and code use Mironov’s original conversion, which gives 7.43 instead of 6.71 on the DP-SGD running example. The <strong>moments accountant</strong> of the original DP-SGD paper (Abadi et al.&nbsp;2016) is the RDP curve with that conversion, so its <span class="math inline">\(\varepsilon\)</span> is loose but not wrong (<a href="../part04-privacy-accounting/02-rdp-conversions.html">From Rényi DP to (ε, δ) and to tests</a>).</p>
 </section>
-<section id="sec-rdp-orders" class="level2" data-number="34.7">
-<h2 data-number="34.7" class="anchored" data-anchor-id="sec-rdp-orders"><span class="header-section-number">34.7</span> Check the order grid</h2>
+<section id="sec-rdp-orders" class="level2" data-number="28.7">
+<h2 data-number="28.7" class="anchored" data-anchor-id="sec-rdp-orders"><span class="header-section-number">28.7</span> Check the order grid</h2>
 <p>A conversion can use only the orders on the grid of the accountant, so the grid must contain the best order. That order moves with the run, towards 1 for long runs with little noise and up for short runs with much noise. For the noisy gradient descent at the start of the chapter, it falls from 128 after one step to 4 after 1000.</p>
 <p>The default grid of Opacus, <code>RDPAccountant.DEFAULT_ALPHAS</code>, stops at order 63, and that of <code>dp_accounting</code>, <code>DEFAULT_RDP_ORDERS</code>, at 1024. A best order at either end of the grid means that the true optimum is outside it, so give a longer list, with <code>alphas=[...]</code> in Opacus or <code>orders=[...]</code> in <code>dp_accounting</code>. Opacus warns you, but <code>dp_accounting</code> does not, so compare the returned order with the ends of the list yourself.</p>
 </section>
-<section id="sec-rdp-library" class="level2" data-number="34.8">
-<h2 data-number="34.8" class="anchored" data-anchor-id="sec-rdp-library"><span class="header-section-number">34.8</span> Accounting with a library</h2>
+<section id="sec-rdp-library" class="level2" data-number="28.8">
+<h2 data-number="28.8" class="anchored" data-anchor-id="sec-rdp-library"><span class="header-section-number">28.8</span> Accounting with a library</h2>
 <p>In practice, you describe each step to a library, and it composes and converts. In <code>dp_accounting</code>, a DP-SGD step is a <code>GaussianDpEvent</code> inside a <code>PoissonSampledDpEvent</code>, which samples each record independently, with probability 0.01 in the running example. This snippet composes the 10,000 steps and prints <span class="math inline">\(\varepsilon\)</span> with the best order.</p>
 <div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb1"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> dp_accounting</span>
 <span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a></span>
@@ -742,12 +706,12 @@ Table&nbsp;34.1: RDP curves of the three basic mechanisms with sensitivity 1.
 <p>Opacus’s defaults mix two accountants, so name the one that you want. In Opacus 1.6.0, <code>PrivacyEngine</code> uses <code>"prv"</code>, a <a href="../part04-privacy-accounting/06-numerical-accounting.html">numerical accountant</a>, by default, and <code>accountant="rdp"</code> selects this class. But <code>get_noise_multiplier</code>, which solves for the noise multiplier <span class="math inline">\(\sigma\)</span>, uses RDP by default. Both give valid upper bounds, but different ones, and the numerical accountant gives 6.19 for the running example.</p>
 <p>Two more checks catch most mistakes. The event must match the sampler of your data loader, because shuffled batches of fixed size get none of the amplification of a Poisson event (<a href="../part04-privacy-accounting/05-subsampling.html#sec-sub-schemes">Amplification by subsampling</a>). And a manual call to <code>step</code> on top of the optimizer’s own call charges each update twice.</p>
 </section>
-<section id="cheat-sheet" class="level2" data-number="34.9">
-<h2 data-number="34.9" class="anchored" data-anchor-id="cheat-sheet"><span class="header-section-number">34.9</span> Cheat sheet</h2>
+<section id="cheat-sheet" class="level2" data-number="28.9">
+<h2 data-number="28.9" class="anchored" data-anchor-id="cheat-sheet"><span class="header-section-number">28.9</span> Cheat sheet</h2>
 <div id="tbl-rdp-cheat" class="quarto-float quarto-figure quarto-figure-center anchored">
 <figure class="quarto-float quarto-float-tbl figure">
 <figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl" id="tbl-rdp-cheat-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-Table&nbsp;34.2: The results of this chapter.
+Table&nbsp;28.2: The results of this chapter.
 </figcaption>
 <div aria-describedby="tbl-rdp-cheat-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
 <table class="caption-top table">
@@ -795,8 +759,8 @@ Table&nbsp;34.2: The results of this chapter.
 </figure>
 </div>
 </section>
-<section id="references" class="level2" data-number="34.10">
-<h2 data-number="34.10" class="anchored" data-anchor-id="references"><span class="header-section-number">34.10</span> References</h2>
+<section id="references" class="level2" data-number="28.10">
+<h2 data-number="28.10" class="anchored" data-anchor-id="references"><span class="header-section-number">28.10</span> References</h2>
 <ul>
 <li>Mironov, “Rényi Differential Privacy” (IEEE CSF 2017): the definition, composition, the curves of the basic mechanisms and group privacy.</li>
 <li>Abadi et al., “Deep Learning with Differential Privacy” (CCS 2016): DP-SGD and the moments accountant.</li>
@@ -1210,12 +1174,12 @@ Table&nbsp;34.2: The results of this chapter.
 <nav class="page-navigation">
   <div class="nav-page nav-page-previous">
       <a href="../part04-privacy-accounting/05-subsampling.html" class="pagination-link" aria-label="Amplification by subsampling">
-        <i class="bi bi-arrow-left-short"></i> <span class="nav-page-text"><span class="chapter-number">33</span>&nbsp; <span class="chapter-title">Amplification by subsampling</span></span>
+        <i class="bi bi-arrow-left-short"></i> <span class="nav-page-text"><span class="chapter-number">27</span>&nbsp; <span class="chapter-title">Amplification by subsampling</span></span>
       </a>          
   </div>
   <div class="nav-page nav-page-next">
       <a href="../part04-privacy-accounting/02-rdp-conversions.html" class="pagination-link" aria-label="From Rényi DP to (ε, δ) and to tests">
-        <span class="nav-page-text"><span class="chapter-number">35</span>&nbsp; <span class="chapter-title">From Rényi DP to (ε, δ) and to tests</span></span> <i class="bi bi-arrow-right-short"></i>
+        <span class="nav-page-text"><span class="chapter-number">29</span>&nbsp; <span class="chapter-title">From Rényi DP to (ε, δ) and to tests</span></span> <i class="bi bi-arrow-right-short"></i>
       </a>
   </div>
 </nav>

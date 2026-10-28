@@ -7,7 +7,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
 
-<title>14&nbsp; Gradient inversion – Privacy-Preserving Machine Learning for Practitioners</title>
+<title>8&nbsp; Gradient inversion – Privacy-Preserving Machine Learning for Practitioners</title>
 <style>
 /* Default styles provided by pandoc.
 ** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
@@ -82,7 +82,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <link href="../site_libs/quarto-html/quarto-syntax-highlighting-bf27225e3a48a9273f3daa8f8e829971.css" rel="stylesheet" id="quarto-text-highlighting-styles">
 <script src="../site_libs/bootstrap/bootstrap.min.js"></script>
 <link href="../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
-<link href="../site_libs/bootstrap/bootstrap-c76bce1ab0818eb3e57b6c28e4057b54.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
+<link href="../site_libs/bootstrap/bootstrap-78f503ea39f784e8964cd205807fbe37.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
 <script id="quarto-search-options" type="application/json">{
   "location": "sidebar",
   "copy-button": false,
@@ -152,7 +152,7 @@ window.Quarto = {
       <button type="button" class="quarto-btn-toggle btn" data-bs-toggle="collapse" role="button" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
         <i class="bi bi-layout-text-sidebar-reverse"></i>
       </button>
-        <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../part02-attacks/00-introduction.html">Threat models and attacks</a></li><li class="breadcrumb-item"><a href="../part02-attacks/06-gradient-inversion.html"><span class="chapter-number">14</span>&nbsp; <span class="chapter-title">Gradient inversion</span></a></li></ol></nav>
+        <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../part02-attacks/00-introduction.html">Threat models and attacks</a></li><li class="breadcrumb-item"><a href="../part02-attacks/06-gradient-inversion.html"><span class="chapter-number">8</span>&nbsp; <span class="chapter-title">Gradient inversion</span></a></li></ol></nav>
         <a class="flex-grow-1" role="navigation" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">      
         </a>
       <button type="button" class="btn quarto-search-button" aria-label="Search" onclick="window.quartoOpenSearch();">
@@ -194,50 +194,14 @@ window.Quarto = {
       <ul id="quarto-sidebar-section-1" class="collapse list-unstyled sidebar-section depth1 show">  
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
-  <a href="../part01-prerequisites/01-distributions.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">1</span>&nbsp; <span class="chapter-title">Probability distributions</span></span></a>
-  </div>
-</li>
-          <li class="sidebar-item">
-  <div class="sidebar-item-container"> 
-  <a href="../part01-prerequisites/02-concentration.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">2</span>&nbsp; <span class="chapter-title">Concentration inequalities</span></span></a>
-  </div>
-</li>
-          <li class="sidebar-item">
-  <div class="sidebar-item-container"> 
   <a href="../part01-prerequisites/03-divergences.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">3</span>&nbsp; <span class="chapter-title">Divergences</span></span></a>
+ <span class="menu-text"><span class="chapter-number">1</span>&nbsp; <span class="chapter-title">Divergences</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../part01-prerequisites/04-hypothesis-testing.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">4</span>&nbsp; <span class="chapter-title">Hypothesis testing</span></span></a>
-  </div>
-</li>
-          <li class="sidebar-item">
-  <div class="sidebar-item-container"> 
-  <a href="../part01-prerequisites/05-information-theory.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">5</span>&nbsp; <span class="chapter-title">Information theory</span></span></a>
-  </div>
-</li>
-          <li class="sidebar-item">
-  <div class="sidebar-item-container"> 
-  <a href="../part01-prerequisites/06-optimization.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">6</span>&nbsp; <span class="chapter-title">Optimization</span></span></a>
-  </div>
-</li>
-          <li class="sidebar-item">
-  <div class="sidebar-item-container"> 
-  <a href="../part01-prerequisites/07-stability-generalization.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">7</span>&nbsp; <span class="chapter-title">Algorithmic stability and generalization</span></span></a>
-  </div>
-</li>
-          <li class="sidebar-item">
-  <div class="sidebar-item-container"> 
-  <a href="../part01-prerequisites/08-crypto-basics.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">8</span>&nbsp; <span class="chapter-title">Cryptography basics</span></span></a>
+ <span class="menu-text"><span class="chapter-number">2</span>&nbsp; <span class="chapter-title">Hypothesis testing</span></span></a>
   </div>
 </li>
       </ul>
@@ -254,61 +218,61 @@ window.Quarto = {
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../part02-attacks/01-threat-models.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">9</span>&nbsp; <span class="chapter-title">Threat models and privacy games</span></span></a>
+ <span class="menu-text"><span class="chapter-number">3</span>&nbsp; <span class="chapter-title">Threat models and privacy games</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../part02-attacks/02-membership-inference.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">10</span>&nbsp; <span class="chapter-title">Membership inference</span></span></a>
+ <span class="menu-text"><span class="chapter-number">4</span>&nbsp; <span class="chapter-title">Membership inference</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../part02-attacks/03-attribute-inference.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">11</span>&nbsp; <span class="chapter-title">Attribute inference and model inversion</span></span></a>
+ <span class="menu-text"><span class="chapter-number">5</span>&nbsp; <span class="chapter-title">Attribute inference and model inversion</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../part02-attacks/04-property-inference.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">12</span>&nbsp; <span class="chapter-title">Property inference</span></span></a>
+ <span class="menu-text"><span class="chapter-number">6</span>&nbsp; <span class="chapter-title">Property inference</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../part02-attacks/05-memorization-extraction.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">13</span>&nbsp; <span class="chapter-title">Memorization and training-data extraction</span></span></a>
+ <span class="menu-text"><span class="chapter-number">7</span>&nbsp; <span class="chapter-title">Memorization and training-data extraction</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../part02-attacks/06-gradient-inversion.html" class="sidebar-item-text sidebar-link active">
- <span class="menu-text"><span class="chapter-number">14</span>&nbsp; <span class="chapter-title">Gradient inversion</span></span></a>
+ <span class="menu-text"><span class="chapter-number">8</span>&nbsp; <span class="chapter-title">Gradient inversion</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../part02-attacks/07-linkage-reidentification.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">15</span>&nbsp; <span class="chapter-title">Linkage and re-identification</span></span></a>
+ <span class="menu-text"><span class="chapter-number">9</span>&nbsp; <span class="chapter-title">Linkage and re-identification</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../part02-attacks/08-syntactic-anonymity.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">16</span>&nbsp; <span class="chapter-title">Syntactic anonymity and how it breaks</span></span></a>
+ <span class="menu-text"><span class="chapter-number">10</span>&nbsp; <span class="chapter-title">Syntactic anonymity and how it breaks</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../part02-attacks/09-reconstruction.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">17</span>&nbsp; <span class="chapter-title">Reconstruction attacks</span></span></a>
+ <span class="menu-text"><span class="chapter-number">11</span>&nbsp; <span class="chapter-title">Reconstruction attacks</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../part02-attacks/10-risk-assessment.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">18</span>&nbsp; <span class="chapter-title">Pre-release privacy risk assessment</span></span></a>
+ <span class="menu-text"><span class="chapter-number">12</span>&nbsp; <span class="chapter-title">Pre-release privacy risk assessment</span></span></a>
   </div>
 </li>
       </ul>
@@ -325,73 +289,73 @@ window.Quarto = {
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../part03-dp-foundations/01-definition.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">19</span>&nbsp; <span class="chapter-title">The definition of differential privacy</span></span></a>
+ <span class="menu-text"><span class="chapter-number">13</span>&nbsp; <span class="chapter-title">The definition of differential privacy</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../part03-dp-foundations/02-properties.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">20</span>&nbsp; <span class="chapter-title">Post-processing, group privacy and composition</span></span></a>
+ <span class="menu-text"><span class="chapter-number">14</span>&nbsp; <span class="chapter-title">Post-processing, group privacy and composition</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../part03-dp-foundations/03-laplace-gaussian.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">21</span>&nbsp; <span class="chapter-title">The Laplace and Gaussian mechanisms</span></span></a>
+ <span class="menu-text"><span class="chapter-number">15</span>&nbsp; <span class="chapter-title">The Laplace and Gaussian mechanisms</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../part03-dp-foundations/04-composition.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">22</span>&nbsp; <span class="chapter-title">Advanced and optimal composition</span></span></a>
+ <span class="menu-text"><span class="chapter-number">16</span>&nbsp; <span class="chapter-title">Advanced and optimal composition</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../part03-dp-foundations/05-selection.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">23</span>&nbsp; <span class="chapter-title">Selection: exponential mechanism, report-noisy-max, sparse vector</span></span></a>
+ <span class="menu-text"><span class="chapter-number">17</span>&nbsp; <span class="chapter-title">Selection: exponential mechanism, report-noisy-max, sparse vector</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../part03-dp-foundations/06-query-release.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">24</span>&nbsp; <span class="chapter-title">Query release and private multiplicative weights</span></span></a>
+ <span class="menu-text"><span class="chapter-number">18</span>&nbsp; <span class="chapter-title">Query release and private multiplicative weights</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../part03-dp-foundations/07-sensitivity.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">25</span>&nbsp; <span class="chapter-title">Beyond global sensitivity</span></span></a>
+ <span class="menu-text"><span class="chapter-number">19</span>&nbsp; <span class="chapter-title">Beyond global sensitivity</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../part03-dp-foundations/08-discrete-mechanisms.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">26</span>&nbsp; <span class="chapter-title">Discrete and floating-point-safe mechanisms</span></span></a>
+ <span class="menu-text"><span class="chapter-number">20</span>&nbsp; <span class="chapter-title">Discrete and floating-point-safe mechanisms</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../part03-dp-foundations/09-trust-models.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">27</span>&nbsp; <span class="chapter-title">Local, shuffle and distributed trust models</span></span></a>
+ <span class="menu-text"><span class="chapter-number">21</span>&nbsp; <span class="chapter-title">Local, shuffle and distributed trust models</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../part03-dp-foundations/10-lower-bounds.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">28</span>&nbsp; <span class="chapter-title">Lower bounds: what privacy costs</span></span></a>
+ <span class="menu-text"><span class="chapter-number">22</span>&nbsp; <span class="chapter-title">Lower bounds: what privacy costs</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../part03-dp-foundations/11-mean-estimation.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">29</span>&nbsp; <span class="chapter-title">Private mean estimation</span></span></a>
+ <span class="menu-text"><span class="chapter-number">23</span>&nbsp; <span class="chapter-title">Private mean estimation</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../part03-dp-foundations/12-release-statistics.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">30</span>&nbsp; <span class="chapter-title">Release statistics with a library</span></span></a>
+ <span class="menu-text"><span class="chapter-number">24</span>&nbsp; <span class="chapter-title">Release statistics with a library</span></span></a>
   </div>
 </li>
       </ul>
@@ -408,61 +372,61 @@ window.Quarto = {
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../part04-privacy-accounting/09-choosing-an-accountant.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">31</span>&nbsp; <span class="chapter-title">Choosing an accountant</span></span></a>
+ <span class="menu-text"><span class="chapter-number">25</span>&nbsp; <span class="chapter-title">Choosing an accountant</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../part04-privacy-accounting/10-calibrate-dp-sgd.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">32</span>&nbsp; <span class="chapter-title">Calibrate and account a DP-SGD run</span></span></a>
+ <span class="menu-text"><span class="chapter-number">26</span>&nbsp; <span class="chapter-title">Calibrate and account a DP-SGD run</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../part04-privacy-accounting/05-subsampling.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">33</span>&nbsp; <span class="chapter-title">Amplification by subsampling</span></span></a>
+ <span class="menu-text"><span class="chapter-number">27</span>&nbsp; <span class="chapter-title">Amplification by subsampling</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../part04-privacy-accounting/01-renyi-dp.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">34</span>&nbsp; <span class="chapter-title">Rényi differential privacy</span></span></a>
+ <span class="menu-text"><span class="chapter-number">28</span>&nbsp; <span class="chapter-title">Rényi differential privacy</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../part04-privacy-accounting/02-rdp-conversions.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">35</span>&nbsp; <span class="chapter-title">From Rényi DP to (ε, δ) and to tests</span></span></a>
+ <span class="menu-text"><span class="chapter-number">29</span>&nbsp; <span class="chapter-title">From Rényi DP to (ε, δ) and to tests</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../part04-privacy-accounting/06-numerical-accounting.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">36</span>&nbsp; <span class="chapter-title">Numerical accounting with privacy loss distributions</span></span></a>
+ <span class="menu-text"><span class="chapter-number">30</span>&nbsp; <span class="chapter-title">Numerical accounting with privacy loss distributions</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../part04-privacy-accounting/04-gaussian-dp.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">37</span>&nbsp; <span class="chapter-title">f-DP and Gaussian differential privacy</span></span></a>
+ <span class="menu-text"><span class="chapter-number">31</span>&nbsp; <span class="chapter-title">f-DP and Gaussian differential privacy</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../part04-privacy-accounting/08-adaptive-composition.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">38</span>&nbsp; <span class="chapter-title">Adaptive composition: filters, odometers and individual accounting</span></span></a>
+ <span class="menu-text"><span class="chapter-number">32</span>&nbsp; <span class="chapter-title">Adaptive composition: filters, odometers and individual accounting</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../part04-privacy-accounting/03-concentrated-dp.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">39</span>&nbsp; <span class="chapter-title">Concentrated differential privacy</span></span></a>
+ <span class="menu-text"><span class="chapter-number">33</span>&nbsp; <span class="chapter-title">Concentrated differential privacy</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../part04-privacy-accounting/07-shuffling-iteration.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">40</span>&nbsp; <span class="chapter-title">Amplification by shuffling and by iteration</span></span></a>
+ <span class="menu-text"><span class="chapter-number">34</span>&nbsp; <span class="chapter-title">Amplification by shuffling and by iteration</span></span></a>
   </div>
 </li>
       </ul>
@@ -479,85 +443,85 @@ window.Quarto = {
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../part05-dp-ml/01-dp-erm.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">41</span>&nbsp; <span class="chapter-title">Private empirical risk minimization</span></span></a>
+ <span class="menu-text"><span class="chapter-number">35</span>&nbsp; <span class="chapter-title">Private empirical risk minimization</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../part05-dp-ml/02-dp-sgd.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">42</span>&nbsp; <span class="chapter-title">DP-SGD</span></span></a>
+ <span class="menu-text"><span class="chapter-number">36</span>&nbsp; <span class="chapter-title">DP-SGD</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../part05-dp-ml/13-train-dp-sgd.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">43</span>&nbsp; <span class="chapter-title">Train a model with DP-SGD</span></span></a>
+ <span class="menu-text"><span class="chapter-number">37</span>&nbsp; <span class="chapter-title">Train a model with DP-SGD</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../part05-dp-ml/03-hyperparameter-tuning.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">44</span>&nbsp; <span class="chapter-title">Hyperparameter tuning and private selection</span></span></a>
+ <span class="menu-text"><span class="chapter-number">38</span>&nbsp; <span class="chapter-title">Hyperparameter tuning and private selection</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../part05-dp-ml/07-user-level.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">45</span>&nbsp; <span class="chapter-title">User-level differential privacy</span></span></a>
+ <span class="menu-text"><span class="chapter-number">39</span>&nbsp; <span class="chapter-title">User-level differential privacy</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../part05-dp-ml/09-choosing-epsilon.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">46</span>&nbsp; <span class="chapter-title">Choosing ε</span></span></a>
+ <span class="menu-text"><span class="chapter-number">40</span>&nbsp; <span class="chapter-title">Choosing ε</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../part05-dp-ml/06-public-data.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">47</span>&nbsp; <span class="chapter-title">Public data and private fine-tuning</span></span></a>
+ <span class="menu-text"><span class="chapter-number">41</span>&nbsp; <span class="chapter-title">Public data and private fine-tuning</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../part05-dp-ml/14-private-llm-finetuning.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">48</span>&nbsp; <span class="chapter-title">Fine-tune a language model privately with LoRA</span></span></a>
+ <span class="menu-text"><span class="chapter-number">42</span>&nbsp; <span class="chapter-title">Fine-tune a language model privately with LoRA</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../part05-dp-ml/05-private-prediction.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">49</span>&nbsp; <span class="chapter-title">Private prediction: PATE and in-context learning</span></span></a>
+ <span class="menu-text"><span class="chapter-number">43</span>&nbsp; <span class="chapter-title">Private prediction: PATE and in-context learning</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../part05-dp-ml/04-matrix-mechanisms.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">50</span>&nbsp; <span class="chapter-title">DP-FTRL and matrix factorization</span></span></a>
+ <span class="menu-text"><span class="chapter-number">44</span>&nbsp; <span class="chapter-title">DP-FTRL and matrix factorization</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../part05-dp-ml/08-disparate-impact.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">51</span>&nbsp; <span class="chapter-title">Disparate impact</span></span></a>
+ <span class="menu-text"><span class="chapter-number">45</span>&nbsp; <span class="chapter-title">Disparate impact</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../part05-dp-ml/10-auditing.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">52</span>&nbsp; <span class="chapter-title">Auditing private training</span></span></a>
+ <span class="menu-text"><span class="chapter-number">46</span>&nbsp; <span class="chapter-title">Auditing private training</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../part05-dp-ml/11-adaptive-data-analysis.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">53</span>&nbsp; <span class="chapter-title">Adaptive data analysis</span></span></a>
+ <span class="menu-text"><span class="chapter-number">47</span>&nbsp; <span class="chapter-title">Adaptive data analysis</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../part05-dp-ml/12-release-governance.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">54</span>&nbsp; <span class="chapter-title">Release and governance</span></span></a>
+ <span class="menu-text"><span class="chapter-number">48</span>&nbsp; <span class="chapter-title">Release and governance</span></span></a>
   </div>
 </li>
       </ul>
@@ -595,24 +559,24 @@ window.Quarto = {
     <h2 id="toc-title">Table of contents</h2>
    
   <ul>
-  <li><a href="#why-this-matters" id="toc-why-this-matters" class="nav-link active" data-scroll-target="#why-this-matters"><span class="header-section-number">14.1</span> Why this matters</a></li>
-  <li><a href="#sec-gradinv-setting" id="toc-sec-gradinv-setting" class="nav-link" data-scroll-target="#sec-gradinv-setting"><span class="header-section-number">14.2</span> The attacker and what it sees</a></li>
-  <li><a href="#sec-gradinv-exact" id="toc-sec-gradinv-exact" class="nav-link" data-scroll-target="#sec-gradinv-exact"><span class="header-section-number">14.3</span> Exact recovery from a fully connected layer</a></li>
-  <li><a href="#sec-gradinv-labels" id="toc-sec-gradinv-labels" class="nav-link" data-scroll-target="#sec-gradinv-labels"><span class="header-section-number">14.4</span> Label recovery from the last layer</a></li>
-  <li><a href="#sec-gradinv-dlg" id="toc-sec-gradinv-dlg" class="nav-link" data-scroll-target="#sec-gradinv-dlg"><span class="header-section-number">14.5</span> Deep Leakage from Gradients</a></li>
-  <li><a href="#sec-gradinv-batch" id="toc-sec-gradinv-batch" class="nav-link" data-scroll-target="#sec-gradinv-batch"><span class="header-section-number">14.6</span> Batches and averaging</a></li>
-  <li><a href="#sec-gradinv-defences" id="toc-sec-gradinv-defences" class="nav-link" data-scroll-target="#sec-gradinv-defences"><span class="header-section-number">14.7</span> What to do as a deployer</a></li>
-  <li><a href="#cheat-sheet" id="toc-cheat-sheet" class="nav-link" data-scroll-target="#cheat-sheet"><span class="header-section-number">14.8</span> Cheat sheet</a></li>
-  <li><a href="#references" id="toc-references" class="nav-link" data-scroll-target="#references"><span class="header-section-number">14.9</span> References</a></li>
+  <li><a href="#why-this-matters" id="toc-why-this-matters" class="nav-link active" data-scroll-target="#why-this-matters"><span class="header-section-number">8.1</span> Why this matters</a></li>
+  <li><a href="#sec-gradinv-setting" id="toc-sec-gradinv-setting" class="nav-link" data-scroll-target="#sec-gradinv-setting"><span class="header-section-number">8.2</span> The attacker and what it sees</a></li>
+  <li><a href="#sec-gradinv-exact" id="toc-sec-gradinv-exact" class="nav-link" data-scroll-target="#sec-gradinv-exact"><span class="header-section-number">8.3</span> Exact recovery from a fully connected layer</a></li>
+  <li><a href="#sec-gradinv-labels" id="toc-sec-gradinv-labels" class="nav-link" data-scroll-target="#sec-gradinv-labels"><span class="header-section-number">8.4</span> Label recovery from the last layer</a></li>
+  <li><a href="#sec-gradinv-dlg" id="toc-sec-gradinv-dlg" class="nav-link" data-scroll-target="#sec-gradinv-dlg"><span class="header-section-number">8.5</span> Deep Leakage from Gradients</a></li>
+  <li><a href="#sec-gradinv-batch" id="toc-sec-gradinv-batch" class="nav-link" data-scroll-target="#sec-gradinv-batch"><span class="header-section-number">8.6</span> Batches and averaging</a></li>
+  <li><a href="#sec-gradinv-defences" id="toc-sec-gradinv-defences" class="nav-link" data-scroll-target="#sec-gradinv-defences"><span class="header-section-number">8.7</span> What to do as a deployer</a></li>
+  <li><a href="#cheat-sheet" id="toc-cheat-sheet" class="nav-link" data-scroll-target="#cheat-sheet"><span class="header-section-number">8.8</span> Cheat sheet</a></li>
+  <li><a href="#references" id="toc-references" class="nav-link" data-scroll-target="#references"><span class="header-section-number">8.9</span> References</a></li>
   </ul>
 </nav>
     </div>
 <!-- main -->
 <main class="content" id="quarto-document-content">
 
-<header id="title-block-header" class="quarto-title-block default"><nav class="quarto-page-breadcrumbs quarto-title-breadcrumbs d-none d-lg-block" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../part02-attacks/00-introduction.html">Threat models and attacks</a></li><li class="breadcrumb-item"><a href="../part02-attacks/06-gradient-inversion.html"><span class="chapter-number">14</span>&nbsp; <span class="chapter-title">Gradient inversion</span></a></li></ol></nav>
+<header id="title-block-header" class="quarto-title-block default"><nav class="quarto-page-breadcrumbs quarto-title-breadcrumbs d-none d-lg-block" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../part02-attacks/00-introduction.html">Threat models and attacks</a></li><li class="breadcrumb-item"><a href="../part02-attacks/06-gradient-inversion.html"><span class="chapter-number">8</span>&nbsp; <span class="chapter-title">Gradient inversion</span></a></li></ol></nav>
 <div class="quarto-title">
-<h1 class="title"><span class="chapter-number">14</span>&nbsp; <span class="chapter-title">Gradient inversion</span></h1>
+<h1 class="title"><span class="chapter-number">8</span>&nbsp; <span class="chapter-title">Gradient inversion</span></h1>
 </div>
 
 
@@ -629,19 +593,19 @@ window.Quarto = {
 </header>
 
 
-<section id="why-this-matters" class="level2" data-number="14.1">
-<h2 data-number="14.1" class="anchored" data-anchor-id="why-this-matters"><span class="header-section-number">14.1</span> Why this matters</h2>
+<section id="why-this-matters" class="level2" data-number="8.1">
+<h2 data-number="8.1" class="anchored" data-anchor-id="why-this-matters"><span class="header-section-number">8.1</span> Why this matters</h2>
 <p>In <strong>federated learning (FL)</strong>, a server sends the current model to each phone or other client. The client computes the gradient of the loss on its own few records and sends back only that gradient. The server averages the gradients and takes a training step. People often call this private because “the data stay on the device”.</p>
-<p>Yet one client’s gradient can give back all of that client’s data, because many of its derivatives are simple functions of the input. An average over a batch protects much less than people expect (<a href="#sec-gradinv-batch" class="quarto-xref"><span>Section 14.6</span></a>). So treat each client’s update as being as sensitive as the data it came from.</p>
+<p>Yet one client’s gradient can give back all of that client’s data, because many of its derivatives are simple functions of the input. An average over a batch protects much less than people expect (<a href="#sec-gradinv-batch" class="quarto-xref"><span>Section 8.6</span></a>). So treat each client’s update as being as sensitive as the data it came from.</p>
 </section>
-<section id="sec-gradinv-setting" class="level2" data-number="14.2">
-<h2 data-number="14.2" class="anchored" data-anchor-id="sec-gradinv-setting"><span class="header-section-number">14.2</span> The attacker and what it sees</h2>
-<p>The attacker is the server, which knows every parameter because it sent the model out, and which also sees each client’s own update. So its access is the <strong>transcript</strong> of <a href="../part02-attacks/01-threat-models.html">Threat models and privacy games</a>, everything that training exposes. Assume first that the server is <strong>honest-but-curious</strong>, so that it only analyses what it receives. Each client holds a batch of <span class="math inline">\(B\)</span> records and sends the average of their gradients. Write <span class="math inline">\(\ell_i\)</span> for the loss on record <span class="math inline">\(i\)</span>, which depends on all the parameters <span class="math inline">\(\theta\)</span>. The client then sends <span id="eq-auto-06gradientinversion-1"><span class="math display">\[g = \frac1B\sum_{i=1}^B\nabla_\theta\ell_i. \tag{14.1}\]</span></span></p>
+<section id="sec-gradinv-setting" class="level2" data-number="8.2">
+<h2 data-number="8.2" class="anchored" data-anchor-id="sec-gradinv-setting"><span class="header-section-number">8.2</span> The attacker and what it sees</h2>
+<p>The attacker is the server, which knows every parameter because it sent the model out, and which also sees each client’s own update. So its access is the <strong>transcript</strong> of <a href="../part02-attacks/01-threat-models.html">Threat models and privacy games</a>, everything that training exposes. Assume first that the server is <strong>honest-but-curious</strong>, so that it only analyses what it receives. Each client holds a batch of <span class="math inline">\(B\)</span> records and sends the average of their gradients. Write <span class="math inline">\(\ell_i\)</span> for the loss on record <span class="math inline">\(i\)</span>, which depends on all the parameters <span class="math inline">\(\theta\)</span>. The client then sends <span id="eq-auto-06gradientinversion-1"><span class="math display">\[g = \frac1B\sum_{i=1}^B\nabla_\theta\ell_i. \tag{8.1}\]</span></span></p>
 </section>
-<section id="sec-gradinv-exact" class="level2" data-number="14.3">
-<h2 data-number="14.3" class="anchored" data-anchor-id="sec-gradinv-exact"><span class="header-section-number">14.3</span> Exact recovery from a fully connected layer</h2>
-<p>The most common first layer, a fully connected layer with a bias, gives its input back by one division. Write <span class="math inline">\(W_1\)</span> and <span class="math inline">\(b_1\)</span> for its weights and bias. Each unit <span class="math inline">\(j\)</span> multiplies the input <span class="math inline">\(x\)</span> by its row of weights and adds its bias. Its backward signal <span class="math inline">\(u_j\)</span> is how fast the loss responds to the unit’s output. The chain rule turns this signal into the weight and bias gradients <span id="eq-gradinv-outer"><span class="math display">\[\nabla_{W_1}\ell = u\,x^\top, \qquad \nabla_{b_1}\ell = u. \tag{14.2}\]</span></span> So row <span class="math inline">\(j\)</span> of the weight gradient is the input scaled by <span class="math inline">\(u_j\)</span>, and the bias gradient of unit <span class="math inline">\(j\)</span> is that same scale. For a single record, divide one by the other. This gives the input exactly, for every unit whose bias gradient is not zero: <span id="eq-gradinv-ratio"><span class="math display">\[x = \frac{(\nabla_{W_1}\ell)_{j,:}}{(\nabla_{b_1}\ell)_j}. \tag{14.3}\]</span></span></p>
-<p>Everything above the layer, including the network’s depth, the loss and the label, sits inside <span class="math inline">\(u_j\)</span> and cancels. So the attack needs no optimization and no knowledge of the data. The snippet below plays one client with one image of scikit-learn’s digits in PyTorch. Its last line reads the label, as <a href="#sec-gradinv-labels" class="quarto-xref"><span>Section 14.4</span></a> explains.</p>
+<section id="sec-gradinv-exact" class="level2" data-number="8.3">
+<h2 data-number="8.3" class="anchored" data-anchor-id="sec-gradinv-exact"><span class="header-section-number">8.3</span> Exact recovery from a fully connected layer</h2>
+<p>The most common first layer, a fully connected layer with a bias, gives its input back by one division. Write <span class="math inline">\(W_1\)</span> and <span class="math inline">\(b_1\)</span> for its weights and bias. Each unit <span class="math inline">\(j\)</span> multiplies the input <span class="math inline">\(x\)</span> by its row of weights and adds its bias. Its backward signal <span class="math inline">\(u_j\)</span> is how fast the loss responds to the unit’s output. The chain rule turns this signal into the weight and bias gradients <span id="eq-gradinv-outer"><span class="math display">\[\nabla_{W_1}\ell = u\,x^\top, \qquad \nabla_{b_1}\ell = u. \tag{8.2}\]</span></span> So row <span class="math inline">\(j\)</span> of the weight gradient is the input scaled by <span class="math inline">\(u_j\)</span>, and the bias gradient of unit <span class="math inline">\(j\)</span> is that same scale. For a single record, divide one by the other. This gives the input exactly, for every unit whose bias gradient is not zero: <span id="eq-gradinv-ratio"><span class="math display">\[x = \frac{(\nabla_{W_1}\ell)_{j,:}}{(\nabla_{b_1}\ell)_j}. \tag{8.3}\]</span></span></p>
+<p>Everything above the layer, including the network’s depth, the loss and the label, sits inside <span class="math inline">\(u_j\)</span> and cancels. So the attack needs no optimization and no knowledge of the data. The snippet below plays one client with one image of scikit-learn’s digits in PyTorch. Its last line reads the label, as <a href="#sec-gradinv-labels" class="quarto-xref"><span>Section 8.4</span></a> explains.</p>
 <div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb1"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> torch</span>
 <span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> torch.nn.functional <span class="im">as</span> F</span>
 <span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> sklearn.datasets <span class="im">import</span> load_digits</span>
@@ -658,26 +622,26 @@ window.Quarto = {
 <span id="cb1-14"><a href="#cb1-14" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"image recovered: </span><span class="sc">{</span>torch<span class="sc">.</span>allclose(recovered, x[<span class="dv">0</span>], atol<span class="op">=</span><span class="fl">1e-6</span>)<span class="sc">}</span><span class="ss">"</span>)  <span class="co"># image recovered: True</span></span>
 <span id="cb1-15"><a href="#cb1-15" aria-hidden="true" tabindex="-1"></a><span class="co"># Only the true label's logit has a negative gradient (softmax minus one-hot).</span></span>
 <span id="cb1-16"><a href="#cb1-16" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"recovered label </span><span class="sc">{</span><span class="bu">int</span>(last.bias.grad.argmin())<span class="sc">}</span><span class="ss">, true label </span><span class="sc">{</span><span class="bu">int</span>(y)<span class="sc">}</span><span class="ss">"</span>)  <span class="co"># recovered label 7, true label 7</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-<p>The snippet divides at the unit whose bias gradient is largest, because a ReLU unit that is off has a zero gradient. One active unit is enough. But a convolutional first layer stops the division. It uses the same filter at every position of the image, so its gradient is a sum of one product per image patch. No division can separate them. The attacker then has to search (<a href="#sec-gradinv-dlg" class="quarto-xref"><span>Section 14.5</span></a>).</p>
+<p>The snippet divides at the unit whose bias gradient is largest, because a ReLU unit that is off has a zero gradient. One active unit is enough. But a convolutional first layer stops the division. It uses the same filter at every position of the image, so its gradient is a sum of one product per image patch. No division can separate them. The attacker then has to search (<a href="#sec-gradinv-dlg" class="quarto-xref"><span>Section 8.5</span></a>).</p>
 </section>
-<section id="sec-gradinv-labels" class="level2" data-number="14.4">
-<h2 data-number="14.4" class="anchored" data-anchor-id="sec-gradinv-labels"><span class="header-section-number">14.4</span> Label recovery from the last layer</h2>
-<p>The label is often the most sensitive part of an example, such as a diagnosis. The attacker can read it off the last layer without search (Zhao, Mopuri &amp; Bilen 2020). The condition is that the layer has a bias and feeds the softmax and cross-entropy loss. Write <span class="math inline">\(p\)</span> for the predicted probabilities and <span class="math inline">\(e_y\)</span> for the vector with a 1 at the position of the label <span class="math inline">\(y\)</span>. The gradient of the last layer’s bias <span class="math inline">\(b_2\)</span> is then <span class="math inline">\(p - e_y\)</span>. Every entry of <span class="math inline">\(p\)</span> lies between 0 and 1, so only the entry at the true label is negative, and for a single record <span id="eq-gradinv-labels"><span class="math display">\[y = \arg\min_k(\nabla_{b_2}\ell)_k, \tag{14.4}\]</span></span> which is the snippet’s <code>argmin</code>. It fails only for a very confident model. If the true label’s probability <span class="math inline">\(p_y\)</span> rounds to 1, that entry becomes zero, and no entry is negative.</p>
+<section id="sec-gradinv-labels" class="level2" data-number="8.4">
+<h2 data-number="8.4" class="anchored" data-anchor-id="sec-gradinv-labels"><span class="header-section-number">8.4</span> Label recovery from the last layer</h2>
+<p>The label is often the most sensitive part of an example, such as a diagnosis. The attacker can read it off the last layer without search (Zhao, Mopuri &amp; Bilen 2020). The condition is that the layer has a bias and feeds the softmax and cross-entropy loss. Write <span class="math inline">\(p\)</span> for the predicted probabilities and <span class="math inline">\(e_y\)</span> for the vector with a 1 at the position of the label <span class="math inline">\(y\)</span>. The gradient of the last layer’s bias <span class="math inline">\(b_2\)</span> is then <span class="math inline">\(p - e_y\)</span>. Every entry of <span class="math inline">\(p\)</span> lies between 0 and 1, so only the entry at the true label is negative, and for a single record <span id="eq-gradinv-labels"><span class="math display">\[y = \arg\min_k(\nabla_{b_2}\ell)_k, \tag{8.4}\]</span></span> which is the snippet’s <code>argmin</code>. It fails only for a very confident model. If the true label’s probability <span class="math inline">\(p_y\)</span> rounds to 1, that entry becomes zero, and no entry is negative.</p>
 <p>A batch hides which record has which label, but not how many records each class has. Each entry of the bias gradient is then the class’s average predicted probability minus its share of the batch. So a server that estimates the average prediction can read off each class’s count. In the full edition’s experiment, this gave every count exactly in all batches of 4, and in 52.5% of batches of 64.</p>
 </section>
-<section id="sec-gradinv-dlg" class="level2" data-number="14.5">
-<h2 data-number="14.5" class="anchored" data-anchor-id="sec-gradinv-dlg"><span class="header-section-number">14.5</span> Deep Leakage from Gradients</h2>
-<p>When the division does not apply, the attacker searches. <strong>Deep Leakage from Gradients (DLG)</strong>, from Zhu, Liu &amp; Han (2019), guesses inputs and computes the gradient they would produce. It then moves the guesses until that gradient matches the observed gradient <span class="math inline">\(g\)</span>. Write <span class="math inline">\(x_i'\)</span> for the guessed inputs, <span class="math inline">\(y_i\)</span> for their labels, read first from the last layer, and <span class="math inline">\(\ell(\theta; x', y)\)</span> for the loss of one guess. The attack minimizes the <strong>matching loss</strong> <span class="math inline">\(R\)</span>, the squared distance between the guesses’ average gradient and <span class="math inline">\(g\)</span>: <span id="eq-gradinv-dlg"><span class="math display">\[\hat x_1, \dots, \hat x_B = \arg\min_{x_1', \dots, x_B'}R(x'), \qquad R(x') = \Big\|\frac1B\sum_{i=1}^B\nabla_\theta\ell(\theta; x_i', y_i) - g\Big\|^2. \tag{14.5}\]</span></span> In PyTorch, <code>create_graph=True</code> in <code>torch.autograd.grad</code> makes the guess’s gradient differentiable, so an optimizer such as Adam can follow the slope of <span class="math inline">\(R\)</span> back to the input.</p>
+<section id="sec-gradinv-dlg" class="level2" data-number="8.5">
+<h2 data-number="8.5" class="anchored" data-anchor-id="sec-gradinv-dlg"><span class="header-section-number">8.5</span> Deep Leakage from Gradients</h2>
+<p>When the division does not apply, the attacker searches. <strong>Deep Leakage from Gradients (DLG)</strong>, from Zhu, Liu &amp; Han (2019), guesses inputs and computes the gradient they would produce. It then moves the guesses until that gradient matches the observed gradient <span class="math inline">\(g\)</span>. Write <span class="math inline">\(x_i'\)</span> for the guessed inputs, <span class="math inline">\(y_i\)</span> for their labels, read first from the last layer, and <span class="math inline">\(\ell(\theta; x', y)\)</span> for the loss of one guess. The attack minimizes the <strong>matching loss</strong> <span class="math inline">\(R\)</span>, the squared distance between the guesses’ average gradient and <span class="math inline">\(g\)</span>: <span id="eq-gradinv-dlg"><span class="math display">\[\hat x_1, \dots, \hat x_B = \arg\min_{x_1', \dots, x_B'}R(x'), \qquad R(x') = \Big\|\frac1B\sum_{i=1}^B\nabla_\theta\ell(\theta; x_i', y_i) - g\Big\|^2. \tag{8.5}\]</span></span> In PyTorch, <code>create_graph=True</code> in <code>torch.autograd.grad</code> makes the guess’s gradient differentiable, so an optimizer such as Adam can follow the slope of <span class="math inline">\(R\)</span> back to the input.</p>
 <p>Two things decide whether the search works. First, the activation’s slope must vary, because the search differentiates a gradient. The ReLU’s slope is constant on each side of zero, so Zhu et al.&nbsp;used the sigmoid. Second, <span class="math inline">\(R\)</span> is not convex, so the search can get stuck. Run it until <span class="math inline">\(R\)</span> stops falling, and compare the final value with the squared size <span class="math inline">\(\|g\|^2\)</span> of the observed gradient. In double precision, a successful run in the full edition ends near <span class="math inline">\(10^{-27}\)</span> and a stuck one near <span class="math inline">\(10^{-5}\)</span>. Another input can also give a small <span class="math inline">\(R\)</span>, so restart from several random guesses, and trust an image only when the restarts agree on it.</p>
 </section>
-<section id="sec-gradinv-batch" class="level2" data-number="14.6">
-<h2 data-number="14.6" class="anchored" data-anchor-id="sec-gradinv-batch"><span class="header-section-number">14.6</span> Batches and averaging</h2>
+<section id="sec-gradinv-batch" class="level2" data-number="8.6">
+<h2 data-number="8.6" class="anchored" data-anchor-id="sec-gradinv-batch"><span class="header-section-number">8.6</span> Batches and averaging</h2>
 <p>Clients usually send the average over a batch, or the change in their parameters after several training steps on the device (<strong>local steps</strong>). The average breaks the division and slows the search, but much of the structure survives. Each record adds one outer product to the gradient of the first layer, so every row of that gradient is a combination of the <span class="math inline">\(B\)</span> inputs. So the server learns their <strong>span</strong>, the set of all such combinations, which contains every record.</p>
-<p>The division still recovers a record exactly when some ReLU unit is on for that record only. The other records then add nothing to that unit’s row. Such a unit <strong>isolates</strong> the record. Isolation is far more common than a count of random units suggests. On images that resemble one another, a unit fires on many records or on few. In the full edition’s network with 1,024 hidden units, a naive count predicts that 1.6% of a batch of 16 is exposed. But 69.1% was, as <a href="#tbl-gradinv-isolation" class="quarto-xref">Table&nbsp;<span>14.1</span></a> shows. The share falls with a larger batch and rises with a wider first layer. So measure at your own width and batch size, and treat any isolated record as a breach.</p>
+<p>The division still recovers a record exactly when some ReLU unit is on for that record only. The other records then add nothing to that unit’s row. Such a unit <strong>isolates</strong> the record. Isolation is far more common than a count of random units suggests. On images that resemble one another, a unit fires on many records or on few. In the full edition’s network with 1,024 hidden units, a naive count predicts that 1.6% of a batch of 16 is exposed. But 69.1% was, as <a href="#tbl-gradinv-isolation" class="quarto-xref">Table&nbsp;<span>8.1</span></a> shows. The share falls with a larger batch and rises with a wider first layer. So measure at your own width and batch size, and treat any isolated record as a breach.</p>
 <div id="tbl-gradinv-isolation" class="quarto-float quarto-figure quarto-figure-center anchored">
 <figure class="quarto-float quarto-float-tbl figure">
 <figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl" id="tbl-gradinv-isolation-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-Table&nbsp;14.1: Isolation attack on synthetic images, from the full edition.
+Table&nbsp;8.1: Isolation attack on synthetic images, from the full edition.
 </figcaption>
 <div aria-describedby="tbl-gradinv-isolation-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
 <table class="caption-top table">
@@ -716,13 +680,13 @@ Table&nbsp;14.1: Isolation attack on synthetic images, from the full edition.
 </div>
 <p>Batches hurt DLG more: on the full edition’s sigmoid network, the median run on a batch of 4 gets stuck. The search is harder, but the information is still there, because the isolation attack recovered all four images of such a batch. Local steps do not protect a single record either. The gradient of the first layer at each step is an outer product with the same input, so the division still works on the total change. A <strong>malicious</strong> server that chooses the weights can do more. It plants units that fire only on rare inputs, so that each unit isolates one record. It then recovers most records of a batch of any size (Boenisch et al.&nbsp;2023, Fowl et al.&nbsp;2022).</p>
 </section>
-<section id="sec-gradinv-defences" class="level2" data-number="14.7">
-<h2 data-number="14.7" class="anchored" data-anchor-id="sec-gradinv-defences"><span class="header-section-number">14.7</span> What to do as a deployer</h2>
-<p>The risk of an FL deployment depends on who can see one client’s update, as <a href="#tbl-gradinv-decisions" class="quarto-xref">Table&nbsp;<span>14.2</span></a> shows.</p>
+<section id="sec-gradinv-defences" class="level2" data-number="8.7">
+<h2 data-number="8.7" class="anchored" data-anchor-id="sec-gradinv-defences"><span class="header-section-number">8.7</span> What to do as a deployer</h2>
+<p>The risk of an FL deployment depends on who can see one client’s update, as <a href="#tbl-gradinv-decisions" class="quarto-xref">Table&nbsp;<span>8.2</span></a> shows.</p>
 <div id="tbl-gradinv-decisions" class="quarto-float quarto-figure quarto-figure-center anchored">
 <figure class="quarto-float quarto-float-tbl figure">
 <figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl" id="tbl-gradinv-decisions-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-Table&nbsp;14.2: Gradient leakage by FL setting, and the response.
+Table&nbsp;8.2: Gradient leakage by FL setting, and the response.
 </figcaption>
 <div aria-describedby="tbl-gradinv-decisions-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
 <table class="caption-top table">
@@ -768,12 +732,12 @@ Table&nbsp;14.2: Gradient leakage by FL setting, and the response.
 <p>Secure aggregation alone is not enough. The sum is still a batch average that the attacks above can read, and a malicious server can still choose its weights. For a guarantee, add DP with the client as the unit of privacy. Clip each client’s update to a fixed maximum norm and add noise to the sum. That bounds what any one client’s data can change (<a href="../part05-dp-ml/07-user-level.html">User-level privacy</a>). Flower and TensorFlow Federated offer both protections. Gradient pruning and similar defences make the search harder but give no guarantee.</p>
 <p>To assess your deployment, first find out whether the server sees single updates or only sums, and with what minimum cohort. Then run the attacks on your own architecture, batch size and number of local steps. Geiping’s open-source <code>breaching</code> framework for PyTorch runs them. If the server can see one client’s update on its own, block the deployment until secure aggregation or client-level DP is in place. Record the verdict in the <a href="../part02-attacks/10-risk-assessment.html">Pre-release privacy risk assessment</a>.</p>
 </section>
-<section id="cheat-sheet" class="level2" data-number="14.8">
-<h2 data-number="14.8" class="anchored" data-anchor-id="cheat-sheet"><span class="header-section-number">14.8</span> Cheat sheet</h2>
+<section id="cheat-sheet" class="level2" data-number="8.8">
+<h2 data-number="8.8" class="anchored" data-anchor-id="cheat-sheet"><span class="header-section-number">8.8</span> Cheat sheet</h2>
 <div id="tbl-gradinv-cheat" class="quarto-float quarto-figure quarto-figure-center anchored">
 <figure class="quarto-float quarto-float-tbl figure">
 <figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl" id="tbl-gradinv-cheat-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-Table&nbsp;14.3: The results of this chapter.
+Table&nbsp;8.3: The results of this chapter.
 </figcaption>
 <div aria-describedby="tbl-gradinv-cheat-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
 <table class="caption-top table">
@@ -826,8 +790,8 @@ Table&nbsp;14.3: The results of this chapter.
 <li>Secure aggregation needs a minimum cohort, and only client-level DP bounds what any update reveals.</li>
 </ul>
 </section>
-<section id="references" class="level2" data-number="14.9">
-<h2 data-number="14.9" class="anchored" data-anchor-id="references"><span class="header-section-number">14.9</span> References</h2>
+<section id="references" class="level2" data-number="8.9">
+<h2 data-number="8.9" class="anchored" data-anchor-id="references"><span class="header-section-number">8.9</span> References</h2>
 <ul>
 <li>Zhu, Liu &amp; Han, “Deep Leakage from Gradients” (NeurIPS 2019): the gradient-matching attack.</li>
 <li>Geiping, Bauermeister, Dröge &amp; Moeller, “Inverting Gradients — How easy is it to break privacy in federated learning?” (NeurIPS 2020): cosine matching with an image prior, on trained networks, local steps and batches.</li>
@@ -1241,12 +1205,12 @@ Table&nbsp;14.3: The results of this chapter.
 <nav class="page-navigation">
   <div class="nav-page nav-page-previous">
       <a href="../part02-attacks/05-memorization-extraction.html" class="pagination-link" aria-label="Memorization and training-data extraction">
-        <i class="bi bi-arrow-left-short"></i> <span class="nav-page-text"><span class="chapter-number">13</span>&nbsp; <span class="chapter-title">Memorization and training-data extraction</span></span>
+        <i class="bi bi-arrow-left-short"></i> <span class="nav-page-text"><span class="chapter-number">7</span>&nbsp; <span class="chapter-title">Memorization and training-data extraction</span></span>
       </a>          
   </div>
   <div class="nav-page nav-page-next">
       <a href="../part02-attacks/07-linkage-reidentification.html" class="pagination-link" aria-label="Linkage and re-identification">
-        <span class="nav-page-text"><span class="chapter-number">15</span>&nbsp; <span class="chapter-title">Linkage and re-identification</span></span> <i class="bi bi-arrow-right-short"></i>
+        <span class="nav-page-text"><span class="chapter-number">9</span>&nbsp; <span class="chapter-title">Linkage and re-identification</span></span> <i class="bi bi-arrow-right-short"></i>
       </a>
   </div>
 </nav>

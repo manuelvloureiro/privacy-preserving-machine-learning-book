@@ -7,7 +7,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
 
-<title>16&nbsp; Syntactic anonymity and how it breaks – Privacy-Preserving Machine Learning for Practitioners</title>
+<title>10&nbsp; Syntactic anonymity and how it breaks – Privacy-Preserving Machine Learning for Practitioners</title>
 <style>
 /* Default styles provided by pandoc.
 ** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
@@ -82,7 +82,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <link href="../site_libs/quarto-html/quarto-syntax-highlighting-bf27225e3a48a9273f3daa8f8e829971.css" rel="stylesheet" id="quarto-text-highlighting-styles">
 <script src="../site_libs/bootstrap/bootstrap.min.js"></script>
 <link href="../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
-<link href="../site_libs/bootstrap/bootstrap-c76bce1ab0818eb3e57b6c28e4057b54.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
+<link href="../site_libs/bootstrap/bootstrap-78f503ea39f784e8964cd205807fbe37.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
 <script id="quarto-search-options" type="application/json">{
   "location": "sidebar",
   "copy-button": false,
@@ -152,7 +152,7 @@ window.Quarto = {
       <button type="button" class="quarto-btn-toggle btn" data-bs-toggle="collapse" role="button" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
         <i class="bi bi-layout-text-sidebar-reverse"></i>
       </button>
-        <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../part02-attacks/00-introduction.html">Threat models and attacks</a></li><li class="breadcrumb-item"><a href="../part02-attacks/08-syntactic-anonymity.html"><span class="chapter-number">16</span>&nbsp; <span class="chapter-title">Syntactic anonymity and how it breaks</span></a></li></ol></nav>
+        <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../part02-attacks/00-introduction.html">Threat models and attacks</a></li><li class="breadcrumb-item"><a href="../part02-attacks/08-syntactic-anonymity.html"><span class="chapter-number">10</span>&nbsp; <span class="chapter-title">Syntactic anonymity and how it breaks</span></a></li></ol></nav>
         <a class="flex-grow-1" role="navigation" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">      
         </a>
       <button type="button" class="btn quarto-search-button" aria-label="Search" onclick="window.quartoOpenSearch();">
@@ -194,50 +194,14 @@ window.Quarto = {
       <ul id="quarto-sidebar-section-1" class="collapse list-unstyled sidebar-section depth1 show">  
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
-  <a href="../part01-prerequisites/01-distributions.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">1</span>&nbsp; <span class="chapter-title">Probability distributions</span></span></a>
-  </div>
-</li>
-          <li class="sidebar-item">
-  <div class="sidebar-item-container"> 
-  <a href="../part01-prerequisites/02-concentration.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">2</span>&nbsp; <span class="chapter-title">Concentration inequalities</span></span></a>
-  </div>
-</li>
-          <li class="sidebar-item">
-  <div class="sidebar-item-container"> 
   <a href="../part01-prerequisites/03-divergences.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">3</span>&nbsp; <span class="chapter-title">Divergences</span></span></a>
+ <span class="menu-text"><span class="chapter-number">1</span>&nbsp; <span class="chapter-title">Divergences</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../part01-prerequisites/04-hypothesis-testing.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">4</span>&nbsp; <span class="chapter-title">Hypothesis testing</span></span></a>
-  </div>
-</li>
-          <li class="sidebar-item">
-  <div class="sidebar-item-container"> 
-  <a href="../part01-prerequisites/05-information-theory.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">5</span>&nbsp; <span class="chapter-title">Information theory</span></span></a>
-  </div>
-</li>
-          <li class="sidebar-item">
-  <div class="sidebar-item-container"> 
-  <a href="../part01-prerequisites/06-optimization.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">6</span>&nbsp; <span class="chapter-title">Optimization</span></span></a>
-  </div>
-</li>
-          <li class="sidebar-item">
-  <div class="sidebar-item-container"> 
-  <a href="../part01-prerequisites/07-stability-generalization.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">7</span>&nbsp; <span class="chapter-title">Algorithmic stability and generalization</span></span></a>
-  </div>
-</li>
-          <li class="sidebar-item">
-  <div class="sidebar-item-container"> 
-  <a href="../part01-prerequisites/08-crypto-basics.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">8</span>&nbsp; <span class="chapter-title">Cryptography basics</span></span></a>
+ <span class="menu-text"><span class="chapter-number">2</span>&nbsp; <span class="chapter-title">Hypothesis testing</span></span></a>
   </div>
 </li>
       </ul>
@@ -254,61 +218,61 @@ window.Quarto = {
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../part02-attacks/01-threat-models.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">9</span>&nbsp; <span class="chapter-title">Threat models and privacy games</span></span></a>
+ <span class="menu-text"><span class="chapter-number">3</span>&nbsp; <span class="chapter-title">Threat models and privacy games</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../part02-attacks/02-membership-inference.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">10</span>&nbsp; <span class="chapter-title">Membership inference</span></span></a>
+ <span class="menu-text"><span class="chapter-number">4</span>&nbsp; <span class="chapter-title">Membership inference</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../part02-attacks/03-attribute-inference.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">11</span>&nbsp; <span class="chapter-title">Attribute inference and model inversion</span></span></a>
+ <span class="menu-text"><span class="chapter-number">5</span>&nbsp; <span class="chapter-title">Attribute inference and model inversion</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../part02-attacks/04-property-inference.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">12</span>&nbsp; <span class="chapter-title">Property inference</span></span></a>
+ <span class="menu-text"><span class="chapter-number">6</span>&nbsp; <span class="chapter-title">Property inference</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../part02-attacks/05-memorization-extraction.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">13</span>&nbsp; <span class="chapter-title">Memorization and training-data extraction</span></span></a>
+ <span class="menu-text"><span class="chapter-number">7</span>&nbsp; <span class="chapter-title">Memorization and training-data extraction</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../part02-attacks/06-gradient-inversion.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">14</span>&nbsp; <span class="chapter-title">Gradient inversion</span></span></a>
+ <span class="menu-text"><span class="chapter-number">8</span>&nbsp; <span class="chapter-title">Gradient inversion</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../part02-attacks/07-linkage-reidentification.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">15</span>&nbsp; <span class="chapter-title">Linkage and re-identification</span></span></a>
+ <span class="menu-text"><span class="chapter-number">9</span>&nbsp; <span class="chapter-title">Linkage and re-identification</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../part02-attacks/08-syntactic-anonymity.html" class="sidebar-item-text sidebar-link active">
- <span class="menu-text"><span class="chapter-number">16</span>&nbsp; <span class="chapter-title">Syntactic anonymity and how it breaks</span></span></a>
+ <span class="menu-text"><span class="chapter-number">10</span>&nbsp; <span class="chapter-title">Syntactic anonymity and how it breaks</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../part02-attacks/09-reconstruction.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">17</span>&nbsp; <span class="chapter-title">Reconstruction attacks</span></span></a>
+ <span class="menu-text"><span class="chapter-number">11</span>&nbsp; <span class="chapter-title">Reconstruction attacks</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../part02-attacks/10-risk-assessment.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">18</span>&nbsp; <span class="chapter-title">Pre-release privacy risk assessment</span></span></a>
+ <span class="menu-text"><span class="chapter-number">12</span>&nbsp; <span class="chapter-title">Pre-release privacy risk assessment</span></span></a>
   </div>
 </li>
       </ul>
@@ -325,73 +289,73 @@ window.Quarto = {
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../part03-dp-foundations/01-definition.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">19</span>&nbsp; <span class="chapter-title">The definition of differential privacy</span></span></a>
+ <span class="menu-text"><span class="chapter-number">13</span>&nbsp; <span class="chapter-title">The definition of differential privacy</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../part03-dp-foundations/02-properties.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">20</span>&nbsp; <span class="chapter-title">Post-processing, group privacy and composition</span></span></a>
+ <span class="menu-text"><span class="chapter-number">14</span>&nbsp; <span class="chapter-title">Post-processing, group privacy and composition</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../part03-dp-foundations/03-laplace-gaussian.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">21</span>&nbsp; <span class="chapter-title">The Laplace and Gaussian mechanisms</span></span></a>
+ <span class="menu-text"><span class="chapter-number">15</span>&nbsp; <span class="chapter-title">The Laplace and Gaussian mechanisms</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../part03-dp-foundations/04-composition.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">22</span>&nbsp; <span class="chapter-title">Advanced and optimal composition</span></span></a>
+ <span class="menu-text"><span class="chapter-number">16</span>&nbsp; <span class="chapter-title">Advanced and optimal composition</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../part03-dp-foundations/05-selection.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">23</span>&nbsp; <span class="chapter-title">Selection: exponential mechanism, report-noisy-max, sparse vector</span></span></a>
+ <span class="menu-text"><span class="chapter-number">17</span>&nbsp; <span class="chapter-title">Selection: exponential mechanism, report-noisy-max, sparse vector</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../part03-dp-foundations/06-query-release.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">24</span>&nbsp; <span class="chapter-title">Query release and private multiplicative weights</span></span></a>
+ <span class="menu-text"><span class="chapter-number">18</span>&nbsp; <span class="chapter-title">Query release and private multiplicative weights</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../part03-dp-foundations/07-sensitivity.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">25</span>&nbsp; <span class="chapter-title">Beyond global sensitivity</span></span></a>
+ <span class="menu-text"><span class="chapter-number">19</span>&nbsp; <span class="chapter-title">Beyond global sensitivity</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../part03-dp-foundations/08-discrete-mechanisms.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">26</span>&nbsp; <span class="chapter-title">Discrete and floating-point-safe mechanisms</span></span></a>
+ <span class="menu-text"><span class="chapter-number">20</span>&nbsp; <span class="chapter-title">Discrete and floating-point-safe mechanisms</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../part03-dp-foundations/09-trust-models.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">27</span>&nbsp; <span class="chapter-title">Local, shuffle and distributed trust models</span></span></a>
+ <span class="menu-text"><span class="chapter-number">21</span>&nbsp; <span class="chapter-title">Local, shuffle and distributed trust models</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../part03-dp-foundations/10-lower-bounds.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">28</span>&nbsp; <span class="chapter-title">Lower bounds: what privacy costs</span></span></a>
+ <span class="menu-text"><span class="chapter-number">22</span>&nbsp; <span class="chapter-title">Lower bounds: what privacy costs</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../part03-dp-foundations/11-mean-estimation.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">29</span>&nbsp; <span class="chapter-title">Private mean estimation</span></span></a>
+ <span class="menu-text"><span class="chapter-number">23</span>&nbsp; <span class="chapter-title">Private mean estimation</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../part03-dp-foundations/12-release-statistics.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">30</span>&nbsp; <span class="chapter-title">Release statistics with a library</span></span></a>
+ <span class="menu-text"><span class="chapter-number">24</span>&nbsp; <span class="chapter-title">Release statistics with a library</span></span></a>
   </div>
 </li>
       </ul>
@@ -408,61 +372,61 @@ window.Quarto = {
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../part04-privacy-accounting/09-choosing-an-accountant.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">31</span>&nbsp; <span class="chapter-title">Choosing an accountant</span></span></a>
+ <span class="menu-text"><span class="chapter-number">25</span>&nbsp; <span class="chapter-title">Choosing an accountant</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../part04-privacy-accounting/10-calibrate-dp-sgd.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">32</span>&nbsp; <span class="chapter-title">Calibrate and account a DP-SGD run</span></span></a>
+ <span class="menu-text"><span class="chapter-number">26</span>&nbsp; <span class="chapter-title">Calibrate and account a DP-SGD run</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../part04-privacy-accounting/05-subsampling.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">33</span>&nbsp; <span class="chapter-title">Amplification by subsampling</span></span></a>
+ <span class="menu-text"><span class="chapter-number">27</span>&nbsp; <span class="chapter-title">Amplification by subsampling</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../part04-privacy-accounting/01-renyi-dp.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">34</span>&nbsp; <span class="chapter-title">Rényi differential privacy</span></span></a>
+ <span class="menu-text"><span class="chapter-number">28</span>&nbsp; <span class="chapter-title">Rényi differential privacy</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../part04-privacy-accounting/02-rdp-conversions.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">35</span>&nbsp; <span class="chapter-title">From Rényi DP to (ε, δ) and to tests</span></span></a>
+ <span class="menu-text"><span class="chapter-number">29</span>&nbsp; <span class="chapter-title">From Rényi DP to (ε, δ) and to tests</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../part04-privacy-accounting/06-numerical-accounting.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">36</span>&nbsp; <span class="chapter-title">Numerical accounting with privacy loss distributions</span></span></a>
+ <span class="menu-text"><span class="chapter-number">30</span>&nbsp; <span class="chapter-title">Numerical accounting with privacy loss distributions</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../part04-privacy-accounting/04-gaussian-dp.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">37</span>&nbsp; <span class="chapter-title">f-DP and Gaussian differential privacy</span></span></a>
+ <span class="menu-text"><span class="chapter-number">31</span>&nbsp; <span class="chapter-title">f-DP and Gaussian differential privacy</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../part04-privacy-accounting/08-adaptive-composition.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">38</span>&nbsp; <span class="chapter-title">Adaptive composition: filters, odometers and individual accounting</span></span></a>
+ <span class="menu-text"><span class="chapter-number">32</span>&nbsp; <span class="chapter-title">Adaptive composition: filters, odometers and individual accounting</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../part04-privacy-accounting/03-concentrated-dp.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">39</span>&nbsp; <span class="chapter-title">Concentrated differential privacy</span></span></a>
+ <span class="menu-text"><span class="chapter-number">33</span>&nbsp; <span class="chapter-title">Concentrated differential privacy</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../part04-privacy-accounting/07-shuffling-iteration.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">40</span>&nbsp; <span class="chapter-title">Amplification by shuffling and by iteration</span></span></a>
+ <span class="menu-text"><span class="chapter-number">34</span>&nbsp; <span class="chapter-title">Amplification by shuffling and by iteration</span></span></a>
   </div>
 </li>
       </ul>
@@ -479,85 +443,85 @@ window.Quarto = {
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../part05-dp-ml/01-dp-erm.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">41</span>&nbsp; <span class="chapter-title">Private empirical risk minimization</span></span></a>
+ <span class="menu-text"><span class="chapter-number">35</span>&nbsp; <span class="chapter-title">Private empirical risk minimization</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../part05-dp-ml/02-dp-sgd.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">42</span>&nbsp; <span class="chapter-title">DP-SGD</span></span></a>
+ <span class="menu-text"><span class="chapter-number">36</span>&nbsp; <span class="chapter-title">DP-SGD</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../part05-dp-ml/13-train-dp-sgd.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">43</span>&nbsp; <span class="chapter-title">Train a model with DP-SGD</span></span></a>
+ <span class="menu-text"><span class="chapter-number">37</span>&nbsp; <span class="chapter-title">Train a model with DP-SGD</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../part05-dp-ml/03-hyperparameter-tuning.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">44</span>&nbsp; <span class="chapter-title">Hyperparameter tuning and private selection</span></span></a>
+ <span class="menu-text"><span class="chapter-number">38</span>&nbsp; <span class="chapter-title">Hyperparameter tuning and private selection</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../part05-dp-ml/07-user-level.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">45</span>&nbsp; <span class="chapter-title">User-level differential privacy</span></span></a>
+ <span class="menu-text"><span class="chapter-number">39</span>&nbsp; <span class="chapter-title">User-level differential privacy</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../part05-dp-ml/09-choosing-epsilon.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">46</span>&nbsp; <span class="chapter-title">Choosing ε</span></span></a>
+ <span class="menu-text"><span class="chapter-number">40</span>&nbsp; <span class="chapter-title">Choosing ε</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../part05-dp-ml/06-public-data.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">47</span>&nbsp; <span class="chapter-title">Public data and private fine-tuning</span></span></a>
+ <span class="menu-text"><span class="chapter-number">41</span>&nbsp; <span class="chapter-title">Public data and private fine-tuning</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../part05-dp-ml/14-private-llm-finetuning.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">48</span>&nbsp; <span class="chapter-title">Fine-tune a language model privately with LoRA</span></span></a>
+ <span class="menu-text"><span class="chapter-number">42</span>&nbsp; <span class="chapter-title">Fine-tune a language model privately with LoRA</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../part05-dp-ml/05-private-prediction.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">49</span>&nbsp; <span class="chapter-title">Private prediction: PATE and in-context learning</span></span></a>
+ <span class="menu-text"><span class="chapter-number">43</span>&nbsp; <span class="chapter-title">Private prediction: PATE and in-context learning</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../part05-dp-ml/04-matrix-mechanisms.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">50</span>&nbsp; <span class="chapter-title">DP-FTRL and matrix factorization</span></span></a>
+ <span class="menu-text"><span class="chapter-number">44</span>&nbsp; <span class="chapter-title">DP-FTRL and matrix factorization</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../part05-dp-ml/08-disparate-impact.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">51</span>&nbsp; <span class="chapter-title">Disparate impact</span></span></a>
+ <span class="menu-text"><span class="chapter-number">45</span>&nbsp; <span class="chapter-title">Disparate impact</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../part05-dp-ml/10-auditing.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">52</span>&nbsp; <span class="chapter-title">Auditing private training</span></span></a>
+ <span class="menu-text"><span class="chapter-number">46</span>&nbsp; <span class="chapter-title">Auditing private training</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../part05-dp-ml/11-adaptive-data-analysis.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">53</span>&nbsp; <span class="chapter-title">Adaptive data analysis</span></span></a>
+ <span class="menu-text"><span class="chapter-number">47</span>&nbsp; <span class="chapter-title">Adaptive data analysis</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../part05-dp-ml/12-release-governance.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">54</span>&nbsp; <span class="chapter-title">Release and governance</span></span></a>
+ <span class="menu-text"><span class="chapter-number">48</span>&nbsp; <span class="chapter-title">Release and governance</span></span></a>
   </div>
 </li>
       </ul>
@@ -595,25 +559,25 @@ window.Quarto = {
     <h2 id="toc-title">Table of contents</h2>
    
   <ul>
-  <li><a href="#why-this-matters" id="toc-why-this-matters" class="nav-link active" data-scroll-target="#why-this-matters"><span class="header-section-number">16.1</span> Why this matters</a></li>
-  <li><a href="#sec-anon-posterior" id="toc-sec-anon-posterior" class="nav-link" data-scroll-target="#sec-anon-posterior"><span class="header-section-number">16.2</span> What the adversary believes about a class</a></li>
-  <li><a href="#sec-anon-k" id="toc-sec-anon-k" class="nav-link" data-scroll-target="#sec-anon-k"><span class="header-section-number">16.3</span> k-anonymity and what it costs</a></li>
-  <li><a href="#sec-anon-l" id="toc-sec-anon-l" class="nav-link" data-scroll-target="#sec-anon-l"><span class="header-section-number">16.4</span> Homogeneity, background knowledge and l-diversity</a></li>
-  <li><a href="#sec-anon-baseline" id="toc-sec-anon-baseline" class="nav-link" data-scroll-target="#sec-anon-baseline"><span class="header-section-number">16.5</span> Measuring what a release teaches</a></li>
-  <li><a href="#sec-anon-t" id="toc-sec-anon-t" class="nav-link" data-scroll-target="#sec-anon-t"><span class="header-section-number">16.6</span> Skewness, similarity and t-closeness</a></li>
-  <li><a href="#sec-anon-composition" id="toc-sec-anon-composition" class="nav-link" data-scroll-target="#sec-anon-composition"><span class="header-section-number">16.7</span> The composition attack</a></li>
-  <li><a href="#sec-anon-workflow" id="toc-sec-anon-workflow" class="nav-link" data-scroll-target="#sec-anon-workflow"><span class="header-section-number">16.8</span> Choosing and running an anonymization</a></li>
-  <li><a href="#cheat-sheet" id="toc-cheat-sheet" class="nav-link" data-scroll-target="#cheat-sheet"><span class="header-section-number">16.9</span> Cheat sheet</a></li>
-  <li><a href="#references" id="toc-references" class="nav-link" data-scroll-target="#references"><span class="header-section-number">16.10</span> References</a></li>
+  <li><a href="#why-this-matters" id="toc-why-this-matters" class="nav-link active" data-scroll-target="#why-this-matters"><span class="header-section-number">10.1</span> Why this matters</a></li>
+  <li><a href="#sec-anon-posterior" id="toc-sec-anon-posterior" class="nav-link" data-scroll-target="#sec-anon-posterior"><span class="header-section-number">10.2</span> What the adversary believes about a class</a></li>
+  <li><a href="#sec-anon-k" id="toc-sec-anon-k" class="nav-link" data-scroll-target="#sec-anon-k"><span class="header-section-number">10.3</span> k-anonymity and what it costs</a></li>
+  <li><a href="#sec-anon-l" id="toc-sec-anon-l" class="nav-link" data-scroll-target="#sec-anon-l"><span class="header-section-number">10.4</span> Homogeneity, background knowledge and l-diversity</a></li>
+  <li><a href="#sec-anon-baseline" id="toc-sec-anon-baseline" class="nav-link" data-scroll-target="#sec-anon-baseline"><span class="header-section-number">10.5</span> Measuring what a release teaches</a></li>
+  <li><a href="#sec-anon-t" id="toc-sec-anon-t" class="nav-link" data-scroll-target="#sec-anon-t"><span class="header-section-number">10.6</span> Skewness, similarity and t-closeness</a></li>
+  <li><a href="#sec-anon-composition" id="toc-sec-anon-composition" class="nav-link" data-scroll-target="#sec-anon-composition"><span class="header-section-number">10.7</span> The composition attack</a></li>
+  <li><a href="#sec-anon-workflow" id="toc-sec-anon-workflow" class="nav-link" data-scroll-target="#sec-anon-workflow"><span class="header-section-number">10.8</span> Choosing and running an anonymization</a></li>
+  <li><a href="#cheat-sheet" id="toc-cheat-sheet" class="nav-link" data-scroll-target="#cheat-sheet"><span class="header-section-number">10.9</span> Cheat sheet</a></li>
+  <li><a href="#references" id="toc-references" class="nav-link" data-scroll-target="#references"><span class="header-section-number">10.10</span> References</a></li>
   </ul>
 </nav>
     </div>
 <!-- main -->
 <main class="content" id="quarto-document-content">
 
-<header id="title-block-header" class="quarto-title-block default"><nav class="quarto-page-breadcrumbs quarto-title-breadcrumbs d-none d-lg-block" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../part02-attacks/00-introduction.html">Threat models and attacks</a></li><li class="breadcrumb-item"><a href="../part02-attacks/08-syntactic-anonymity.html"><span class="chapter-number">16</span>&nbsp; <span class="chapter-title">Syntactic anonymity and how it breaks</span></a></li></ol></nav>
+<header id="title-block-header" class="quarto-title-block default"><nav class="quarto-page-breadcrumbs quarto-title-breadcrumbs d-none d-lg-block" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../part02-attacks/00-introduction.html">Threat models and attacks</a></li><li class="breadcrumb-item"><a href="../part02-attacks/08-syntactic-anonymity.html"><span class="chapter-number">10</span>&nbsp; <span class="chapter-title">Syntactic anonymity and how it breaks</span></a></li></ol></nav>
 <div class="quarto-title">
-<h1 class="title"><span class="chapter-number">16</span>&nbsp; <span class="chapter-title">Syntactic anonymity and how it breaks</span></h1>
+<h1 class="title"><span class="chapter-number">10</span>&nbsp; <span class="chapter-title">Syntactic anonymity and how it breaks</span></h1>
 </div>
 
 
@@ -630,18 +594,18 @@ window.Quarto = {
 </header>
 
 
-<section id="why-this-matters" class="level2" data-number="16.1">
-<h2 data-number="16.1" class="anchored" data-anchor-id="why-this-matters"><span class="header-section-number">16.1</span> Why this matters</h2>
+<section id="why-this-matters" class="level2" data-number="10.1">
+<h2 data-number="10.1" class="anchored" data-anchor-id="why-this-matters"><span class="header-section-number">10.1</span> Why this matters</h2>
 <p><a href="../part02-attacks/07-linkage-reidentification.html">Linkage and re-identification</a> showed that a table without names is not anonymous. Quasi-identifiers such as age, postcode and sex single out many people. The classic answer is to coarsen the table until every person hides in a crowd. The definitions of this answer are <strong>syntactic</strong>, because you check each one by reading the published table. You will meet them in audits, because statistics offices and tools such as ARX and sdcMicro still use them. But each one holds for one table and for an adversary whose knowledge is fixed in advance. One unexpected fact, or a second release of the same people, breaks it.</p>
 </section>
-<section id="sec-anon-posterior" class="level2" data-number="16.2">
-<h2 data-number="16.2" class="anchored" data-anchor-id="sec-anon-posterior"><span class="header-section-number">16.2</span> What the adversary believes about a class</h2>
+<section id="sec-anon-posterior" class="level2" data-number="10.2">
+<h2 data-number="10.2" class="anchored" data-anchor-id="sec-anon-posterior"><span class="header-section-number">10.2</span> What the adversary believes about a class</h2>
 <p>To anonymize a table, the custodian, the organization that holds the data, applies a <strong>generalization</strong>. It turns an age into a range or a postcode into a prefix. Records with the same generalized quasi-identifiers form an <strong>equivalence class</strong>. An adversary who knows the target’s quasi-identifiers finds the target’s class <span class="math inline">\(E\)</span> but cannot tell its records apart. So its belief about the target’s sensitive value, its <strong>posterior</strong>, is the share of the class with that value. Write <span class="math inline">\(\lvert E\rvert\)</span> for the size of the class and <span class="math inline">\(n_E(v)\)</span> for the number of its records with a sensitive value <span class="math inline">\(v\)</span>. Then the posterior that the target’s sensitive value, written <span class="math inline">\(S_{\text{target}}\)</span>, equals <span class="math inline">\(v\)</span> is</p>
-<p><span id="eq-anon-posterior"><span class="math display">\[\Pr[S_{\text{target}} = v \mid \text{release}] = \frac{n_E(v)}{\lvert E\rvert}. \tag{16.1}\]</span></span> The adversary’s background knowledge about the target works by elimination. A fact that rules out a value crosses out its records, and the adversary computes the posterior again over the records that remain. Every attack in this chapter is this calculation.</p>
+<p><span id="eq-anon-posterior"><span class="math display">\[\Pr[S_{\text{target}} = v \mid \text{release}] = \frac{n_E(v)}{\lvert E\rvert}. \tag{10.1}\]</span></span> The adversary’s background knowledge about the target works by elimination. A fact that rules out a value crosses out its records, and the adversary computes the posterior again over the records that remain. Every attack in this chapter is this calculation.</p>
 </section>
-<section id="sec-anon-k" class="level2" data-number="16.3">
-<h2 data-number="16.3" class="anchored" data-anchor-id="sec-anon-k"><span class="header-section-number">16.3</span> k-anonymity and what it costs</h2>
-<p><strong>k-anonymity</strong> (Sweeney and Samarati, 1998) asks that every class hold at least <span class="math inline">\(k\)</span> records, for a crowd size <span class="math inline">\(k\)</span> that the custodian chooses. Generalization gets there, together with <strong>suppression</strong>, which deletes the records that still stand out. In the previous chapter, an adversary who knows the target is in the release links it with probability <span class="math inline">\(J/n\)</span>, the number of classes <span class="math inline">\(J\)</span> over the number of records <span class="math inline">\(n\)</span>. So with at least <span class="math inline">\(k\)</span> records per class, there are at most <span class="math inline">\(n/k\)</span> classes, and <span id="eq-anon-k-link"><span class="math display">\[\Pr[\text{win}] = \frac{J}{n} \le \frac1k. \tag{16.2}\]</span></span> The guarantee covers names only, and only against an adversary who knows nothing beyond the quasi-identifiers. The choice of <span class="math inline">\(k\)</span> is a policy, and 5 is a common minimum.</p>
+<section id="sec-anon-k" class="level2" data-number="10.3">
+<h2 data-number="10.3" class="anchored" data-anchor-id="sec-anon-k"><span class="header-section-number">10.3</span> k-anonymity and what it costs</h2>
+<p><strong>k-anonymity</strong> (Sweeney and Samarati, 1998) asks that every class hold at least <span class="math inline">\(k\)</span> records, for a crowd size <span class="math inline">\(k\)</span> that the custodian chooses. Generalization gets there, together with <strong>suppression</strong>, which deletes the records that still stand out. In the previous chapter, an adversary who knows the target is in the release links it with probability <span class="math inline">\(J/n\)</span>, the number of classes <span class="math inline">\(J\)</span> over the number of records <span class="math inline">\(n\)</span>. So with at least <span class="math inline">\(k\)</span> records per class, there are at most <span class="math inline">\(n/k\)</span> classes, and <span id="eq-anon-k-link"><span class="math display">\[\Pr[\text{win}] = \frac{J}{n} \le \frac1k. \tag{10.2}\]</span></span> The guarantee covers names only, and only against an adversary who knows nothing beyond the quasi-identifiers. The choice of <span class="math inline">\(k\)</span> is a policy, and 5 is a common minimum.</p>
 <p>Anonymizers such as <strong>Mondrian</strong> search for a generalization that loses little, but you can also generalize by hand and check again. The script <a href="https://github.com/manuelvloureiro/privacy-preserving-machine-learning-book/blob/main/code/part02-attacks/practitioner_table_risk.py">practitioner_table_risk.py</a> takes the previous chapter’s Adult census extract and its six quasi-identifiers. It puts age into 10-year bands, native country into US or other, and education into four levels. Then it counts the records alone in their class, and the different occupations in each class, with occupation as the sensitive attribute. Both are Polars counts, because no maintained Python package computes k-anonymity or distinct <span class="math inline">\(\ell\)</span>.</p>
 <div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb1" data-excerpt="generalize-and-check"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a>general <span class="op">=</span> df.with_columns(</span>
 <span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a>    (pl.col(<span class="st">"age"</span>) <span class="op">//</span> <span class="dv">10</span> <span class="op">*</span> <span class="dv">10</span>).alias(<span class="st">"age"</span>),  <span class="co"># 10-year bands: 30 stands for 30-39</span></span>
@@ -666,39 +630,39 @@ age + sex + race + native-country + marital-status + education + hours-per-week:
   records in classes of size &gt;=5 with l=1: 0.03%</code></pre>
 <p>Generalization cut the unique share to 0.94%, from 14.64% before. Yet the smallest class still holds one record. So suppress the 3.31% of records in classes smaller than 5, or make the bands coarser. The result is fragile, because an adversary who also knows the hours worked finds 10.09% of the records unique again.</p>
 </section>
-<section id="sec-anon-l" class="level2" data-number="16.4">
-<h2 data-number="16.4" class="anchored" data-anchor-id="sec-anon-l"><span class="header-section-number">16.4</span> Homogeneity, background knowledge and l-diversity</h2>
+<section id="sec-anon-l" class="level2" data-number="10.4">
+<h2 data-number="10.4" class="anchored" data-anchor-id="sec-anon-l"><span class="header-section-number">10.4</span> Homogeneity, background knowledge and l-diversity</h2>
 <p>k-anonymity hides who a record belongs to, but not what it says (Machanavajjhala and colleagues, 2006). In the <strong>homogeneity attack</strong>, all three records of Alice’s class say heart disease. Her posterior is then 1, and nobody has to find her record. In the <strong>background knowledge attack</strong>, Bob’s class says cancer, cancer and flu. A neighbour who knows that Bob did not have flu crosses out that record and learns that Bob has cancer.</p>
 <p><strong>l-diversity</strong> asks each class to hold enough different sensitive values. The distinct version asks for at least <span class="math inline">\(\ell\)</span> different values. It does not cap the most common value’s share, so a class can be 3-diverse with one value in most of its records. The recursive version adds that cap, with a constant <span class="math inline">\(c\)</span> that the custodian picks. An adversary who rules out <span class="math inline">\(\ell - 2\)</span> values then keeps a posterior below <span class="math inline">\(c/(1 + c)\)</span>. That cap is already one half at <span class="math inline">\(c = 1\)</span>, so even this version protects against certainty, not likelihood.</p>
 <p>Suppression of the small classes also removes most homogeneous ones. On Adult, 1.20% of the generalized records sit in a class where everyone has the same occupation. Only 0.03% sit in such a class of 5 or more. On a synthetic hospital table of the full edition, distinct 3-diversity removed the certain disclosures at little cost. The recursive version forced some classes to grow to 641 patients.</p>
 </section>
-<section id="sec-anon-baseline" class="level2" data-number="16.5">
-<h2 data-number="16.5" class="anchored" data-anchor-id="sec-anon-baseline"><span class="header-section-number">16.5</span> Measuring what a release teaches</h2>
+<section id="sec-anon-baseline" class="level2" data-number="10.5">
+<h2 data-number="10.5" class="anchored" data-anchor-id="sec-anon-baseline"><span class="header-section-number">10.5</span> Measuring what a release teaches</h2>
 <p>Compare every posterior with the <strong>imputation baseline</strong> of <a href="../part02-attacks/03-attribute-inference.html">Attribute inference and model inversion</a>, the best guess of a sensitive value from the population alone. Only the success beyond it is about the individual. On the hospital table, a guess of each patient’s diagnosis from age alone is right for 53.6% of patients, and a 5-anonymous release raises that to 59.3%. Most of that gain is the link between age and diagnosis, which any useful study reports. Only the excess of 5.7 percentage points is a leak.</p>
 </section>
-<section id="sec-anon-t" class="level2" data-number="16.6">
-<h2 data-number="16.6" class="anchored" data-anchor-id="sec-anon-t"><span class="header-section-number">16.6</span> Skewness, similarity and t-closeness</h2>
+<section id="sec-anon-t" class="level2" data-number="10.6">
+<h2 data-number="10.6" class="anchored" data-anchor-id="sec-anon-t"><span class="header-section-number">10.6</span> Skewness, similarity and t-closeness</h2>
 <p>l-diversity misses two attacks (Li, Li and Venkatasubramanian, 2007). In the <strong>skewness attack</strong>, a class that is half HIV is 2-diverse, yet in a table where 1% have HIV it raises its members’ posterior fifty-fold. In the <strong>similarity attack</strong>, a class of three different stomach diseases is 3-diverse but still reveals a stomach disease.</p>
-<p><strong>t-closeness</strong> answers both. It asks that the distribution of values in every class <span class="math inline">\(E\)</span> be within a distance <span class="math inline">\(t\)</span> of the whole table’s. Write <span class="math inline">\(P_E(A)\)</span> and <span class="math inline">\(P(A)\)</span> for the chance that a value drawn from the class, or from the table, lands in a set <span class="math inline">\(A\)</span> of values. With the <strong>total variation (TV)</strong> distance, no such chance, and so no belief, moves by more than <span class="math inline">\(t\)</span>, <span id="eq-anon-tv"><span class="math display">\[\lvert P_E(A) - P(A)\rvert \le t. \tag{16.3}\]</span></span> The bound is a difference, not a ratio, so it protects rare values badly. At <span class="math inline">\(t = 0.15\)</span>, a value held by 1% of the table may rise to 16%. Against the similarity attack, Li and colleagues used the earth mover’s distance instead, which counts similar values as close.</p>
+<p><strong>t-closeness</strong> answers both. It asks that the distribution of values in every class <span class="math inline">\(E\)</span> be within a distance <span class="math inline">\(t\)</span> of the whole table’s. Write <span class="math inline">\(P_E(A)\)</span> and <span class="math inline">\(P(A)\)</span> for the chance that a value drawn from the class, or from the table, lands in a set <span class="math inline">\(A\)</span> of values. With the <strong>total variation (TV)</strong> distance, no such chance, and so no belief, moves by more than <span class="math inline">\(t\)</span>, <span id="eq-anon-tv"><span class="math display">\[\lvert P_E(A) - P(A)\rvert \le t. \tag{10.3}\]</span></span> The bound is a difference, not a ratio, so it protects rare values badly. At <span class="math inline">\(t = 0.15\)</span>, a value held by 1% of the table may rise to 16%. Against the similarity attack, Li and colleagues used the earth mover’s distance instead, which counts similar values as close.</p>
 <p>t-closeness costs a lot. At <span class="math inline">\(t = 0.15\)</span>, a guess of diagnoses from the hospital release was right for only 22.2% of patients, below the 53.6% from age alone. So the release told less about the population than no release.</p>
 </section>
-<section id="sec-anon-composition" class="level2" data-number="16.7">
-<h2 data-number="16.7" class="anchored" data-anchor-id="sec-anon-composition"><span class="header-section-number">16.7</span> The composition attack</h2>
-<p>Ganta, Kasiviswanathan and Smith (2008) asked what happens when two hospitals each publish a k-anonymous or l-diverse table. A patient treated at both sits in a class <span class="math inline">\(E_A\)</span> of one release and a class <span class="math inline">\(E_B\)</span> of the other. The adversary keeps only the diagnoses that appear in both classes, <span id="eq-auto-08syntacticanonymity-1"><span class="math display">\[\{v : n_{E_A}(v) &gt; 0\} \cap \{v : n_{E_B}(v) &gt; 0\}. \tag{16.4}\]</span></span> When one candidate is left, the diagnosis is <strong>pinned down</strong>.</p>
+<section id="sec-anon-composition" class="level2" data-number="10.7">
+<h2 data-number="10.7" class="anchored" data-anchor-id="sec-anon-composition"><span class="header-section-number">10.7</span> The composition attack</h2>
+<p>Ganta, Kasiviswanathan and Smith (2008) asked what happens when two hospitals each publish a k-anonymous or l-diverse table. A patient treated at both sits in a class <span class="math inline">\(E_A\)</span> of one release and a class <span class="math inline">\(E_B\)</span> of the other. The adversary keeps only the diagnoses that appear in both classes, <span id="eq-auto-08syntacticanonymity-1"><span class="math display">\[\{v : n_{E_A}(v) &gt; 0\} \cap \{v : n_{E_B}(v) &gt; 0\}. \tag{10.4}\]</span></span> When one candidate is left, the diagnosis is <strong>pinned down</strong>.</p>
 <p>In the full edition’s simulation, two hospitals share 6,649 patients. Together, their two 5-anonymous releases pin down the diagnosis of 9.9% of them, over three times what either pins alone. With distinct 3-diversity, neither release pins anyone, yet together they pin 18.</p>
 <p>No definition for a single table can stop this, because the intersection of two tables is a table that neither custodian checked. A definition that survives must compose across releases and hold whatever the adversary knows. It must also bound the ratio of beliefs, so that it protects rare values. <a href="../part03-dp-foundations/01-definition.html">The definition of differential privacy</a> meets these needs, and statistics offices such as the US Census Bureau have moved towards it (<a href="../part02-attacks/09-reconstruction.html">Reconstruction attacks</a>).</p>
 </section>
-<section id="sec-anon-workflow" class="level2" data-number="16.8">
-<h2 data-number="16.8" class="anchored" data-anchor-id="sec-anon-workflow"><span class="header-section-number">16.8</span> Choosing and running an anonymization</h2>
+<section id="sec-anon-workflow" class="level2" data-number="10.8">
+<h2 data-number="10.8" class="anchored" data-anchor-id="sec-anon-workflow"><span class="header-section-number">10.8</span> Choosing and running an anonymization</h2>
 <p>Start from the quasi-identifiers of <a href="../part02-attacks/07-linkage-reidentification.html">Linkage and re-identification</a>, because a list that is too short is the most common failure. Use k-anonymity against linkage. Add distinct l-diversity when a class with one sensitive value is a disclosure. Use t-closeness, the costliest, only when the sensitive attribute is skewed or has similar values.</p>
 <p>Then audit the anonymizer’s output yourself, in Polars as the excerpt does, or with pycanon, which reports <span class="math inline">\(k\)</span>, <span class="math inline">\(\ell\)</span> and <span class="math inline">\(t\)</span> for a pandas table. <a href="../part02-attacks/10-risk-assessment.html">Pre-release privacy risk assessment</a> turns these checks into a release decision. Move to differential privacy if other releases of the same people exist, if the sensitive attribute is rare, or if the data are sparse. For tables of counts and sums, <a href="../part03-dp-foundations/12-release-statistics.html">Release statistics with a library</a> does the job end to end.</p>
 </section>
-<section id="cheat-sheet" class="level2" data-number="16.9">
-<h2 data-number="16.9" class="anchored" data-anchor-id="cheat-sheet"><span class="header-section-number">16.9</span> Cheat sheet</h2>
+<section id="cheat-sheet" class="level2" data-number="10.9">
+<h2 data-number="10.9" class="anchored" data-anchor-id="cheat-sheet"><span class="header-section-number">10.9</span> Cheat sheet</h2>
 <div id="tbl-anon-cheat" class="quarto-float quarto-figure quarto-figure-center anchored">
 <figure class="quarto-float quarto-float-tbl figure">
 <figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl" id="tbl-anon-cheat-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-Table&nbsp;16.1: The syntactic definitions and the attacks on them.
+Table&nbsp;10.1: The syntactic definitions and the attacks on them.
 </figcaption>
 <div aria-describedby="tbl-anon-cheat-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
 <table class="caption-top table">
@@ -751,8 +715,8 @@ Table&nbsp;16.1: The syntactic definitions and the attacks on them.
 <li>Assume another release exists, because a guarantee about one table is not a guarantee about a person.</li>
 </ul>
 </section>
-<section id="references" class="level2" data-number="16.10">
-<h2 data-number="16.10" class="anchored" data-anchor-id="references"><span class="header-section-number">16.10</span> References</h2>
+<section id="references" class="level2" data-number="10.10">
+<h2 data-number="10.10" class="anchored" data-anchor-id="references"><span class="header-section-number">10.10</span> References</h2>
 <ul>
 <li>Machanavajjhala and colleagues, “l-Diversity” (2006), and Li, Li &amp; Venkatasubramanian, “t-Closeness” (2007): the attacks and the definitions that answer them.</li>
 <li>Ganta, Kasiviswanathan &amp; Smith, “Composition Attacks and Auxiliary Information in Data Privacy” (2008): the intersection attack.</li>
@@ -1166,12 +1130,12 @@ Table&nbsp;16.1: The syntactic definitions and the attacks on them.
 <nav class="page-navigation">
   <div class="nav-page nav-page-previous">
       <a href="../part02-attacks/07-linkage-reidentification.html" class="pagination-link" aria-label="Linkage and re-identification">
-        <i class="bi bi-arrow-left-short"></i> <span class="nav-page-text"><span class="chapter-number">15</span>&nbsp; <span class="chapter-title">Linkage and re-identification</span></span>
+        <i class="bi bi-arrow-left-short"></i> <span class="nav-page-text"><span class="chapter-number">9</span>&nbsp; <span class="chapter-title">Linkage and re-identification</span></span>
       </a>          
   </div>
   <div class="nav-page nav-page-next">
       <a href="../part02-attacks/09-reconstruction.html" class="pagination-link" aria-label="Reconstruction attacks">
-        <span class="nav-page-text"><span class="chapter-number">17</span>&nbsp; <span class="chapter-title">Reconstruction attacks</span></span> <i class="bi bi-arrow-right-short"></i>
+        <span class="nav-page-text"><span class="chapter-number">11</span>&nbsp; <span class="chapter-title">Reconstruction attacks</span></span> <i class="bi bi-arrow-right-short"></i>
       </a>
   </div>
 </nav>

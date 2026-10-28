@@ -7,7 +7,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
 
-<title>46&nbsp; Choosing ε – Privacy-Preserving Machine Learning for Practitioners</title>
+<title>40&nbsp; Choosing ε – Privacy-Preserving Machine Learning for Practitioners</title>
 <style>
 /* Default styles provided by pandoc.
 ** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
@@ -82,7 +82,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <link href="../site_libs/quarto-html/quarto-syntax-highlighting-bf27225e3a48a9273f3daa8f8e829971.css" rel="stylesheet" id="quarto-text-highlighting-styles">
 <script src="../site_libs/bootstrap/bootstrap.min.js"></script>
 <link href="../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
-<link href="../site_libs/bootstrap/bootstrap-c76bce1ab0818eb3e57b6c28e4057b54.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
+<link href="../site_libs/bootstrap/bootstrap-78f503ea39f784e8964cd205807fbe37.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
 <script id="quarto-search-options" type="application/json">{
   "location": "sidebar",
   "copy-button": false,
@@ -152,7 +152,7 @@ window.Quarto = {
       <button type="button" class="quarto-btn-toggle btn" data-bs-toggle="collapse" role="button" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
         <i class="bi bi-layout-text-sidebar-reverse"></i>
       </button>
-        <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../part05-dp-ml/00-introduction.html">Differential privacy in machine learning</a></li><li class="breadcrumb-item"><a href="../part05-dp-ml/09-choosing-epsilon.html"><span class="chapter-number">46</span>&nbsp; <span class="chapter-title">Choosing ε</span></a></li></ol></nav>
+        <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../part05-dp-ml/00-introduction.html">Differential privacy in machine learning</a></li><li class="breadcrumb-item"><a href="../part05-dp-ml/09-choosing-epsilon.html"><span class="chapter-number">40</span>&nbsp; <span class="chapter-title">Choosing ε</span></a></li></ol></nav>
         <a class="flex-grow-1" role="navigation" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">      
         </a>
       <button type="button" class="btn quarto-search-button" aria-label="Search" onclick="window.quartoOpenSearch();">
@@ -194,50 +194,14 @@ window.Quarto = {
       <ul id="quarto-sidebar-section-1" class="collapse list-unstyled sidebar-section depth1 show">  
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
-  <a href="../part01-prerequisites/01-distributions.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">1</span>&nbsp; <span class="chapter-title">Probability distributions</span></span></a>
-  </div>
-</li>
-          <li class="sidebar-item">
-  <div class="sidebar-item-container"> 
-  <a href="../part01-prerequisites/02-concentration.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">2</span>&nbsp; <span class="chapter-title">Concentration inequalities</span></span></a>
-  </div>
-</li>
-          <li class="sidebar-item">
-  <div class="sidebar-item-container"> 
   <a href="../part01-prerequisites/03-divergences.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">3</span>&nbsp; <span class="chapter-title">Divergences</span></span></a>
+ <span class="menu-text"><span class="chapter-number">1</span>&nbsp; <span class="chapter-title">Divergences</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../part01-prerequisites/04-hypothesis-testing.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">4</span>&nbsp; <span class="chapter-title">Hypothesis testing</span></span></a>
-  </div>
-</li>
-          <li class="sidebar-item">
-  <div class="sidebar-item-container"> 
-  <a href="../part01-prerequisites/05-information-theory.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">5</span>&nbsp; <span class="chapter-title">Information theory</span></span></a>
-  </div>
-</li>
-          <li class="sidebar-item">
-  <div class="sidebar-item-container"> 
-  <a href="../part01-prerequisites/06-optimization.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">6</span>&nbsp; <span class="chapter-title">Optimization</span></span></a>
-  </div>
-</li>
-          <li class="sidebar-item">
-  <div class="sidebar-item-container"> 
-  <a href="../part01-prerequisites/07-stability-generalization.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">7</span>&nbsp; <span class="chapter-title">Algorithmic stability and generalization</span></span></a>
-  </div>
-</li>
-          <li class="sidebar-item">
-  <div class="sidebar-item-container"> 
-  <a href="../part01-prerequisites/08-crypto-basics.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">8</span>&nbsp; <span class="chapter-title">Cryptography basics</span></span></a>
+ <span class="menu-text"><span class="chapter-number">2</span>&nbsp; <span class="chapter-title">Hypothesis testing</span></span></a>
   </div>
 </li>
       </ul>
@@ -254,61 +218,61 @@ window.Quarto = {
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../part02-attacks/01-threat-models.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">9</span>&nbsp; <span class="chapter-title">Threat models and privacy games</span></span></a>
+ <span class="menu-text"><span class="chapter-number">3</span>&nbsp; <span class="chapter-title">Threat models and privacy games</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../part02-attacks/02-membership-inference.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">10</span>&nbsp; <span class="chapter-title">Membership inference</span></span></a>
+ <span class="menu-text"><span class="chapter-number">4</span>&nbsp; <span class="chapter-title">Membership inference</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../part02-attacks/03-attribute-inference.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">11</span>&nbsp; <span class="chapter-title">Attribute inference and model inversion</span></span></a>
+ <span class="menu-text"><span class="chapter-number">5</span>&nbsp; <span class="chapter-title">Attribute inference and model inversion</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../part02-attacks/04-property-inference.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">12</span>&nbsp; <span class="chapter-title">Property inference</span></span></a>
+ <span class="menu-text"><span class="chapter-number">6</span>&nbsp; <span class="chapter-title">Property inference</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../part02-attacks/05-memorization-extraction.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">13</span>&nbsp; <span class="chapter-title">Memorization and training-data extraction</span></span></a>
+ <span class="menu-text"><span class="chapter-number">7</span>&nbsp; <span class="chapter-title">Memorization and training-data extraction</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../part02-attacks/06-gradient-inversion.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">14</span>&nbsp; <span class="chapter-title">Gradient inversion</span></span></a>
+ <span class="menu-text"><span class="chapter-number">8</span>&nbsp; <span class="chapter-title">Gradient inversion</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../part02-attacks/07-linkage-reidentification.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">15</span>&nbsp; <span class="chapter-title">Linkage and re-identification</span></span></a>
+ <span class="menu-text"><span class="chapter-number">9</span>&nbsp; <span class="chapter-title">Linkage and re-identification</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../part02-attacks/08-syntactic-anonymity.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">16</span>&nbsp; <span class="chapter-title">Syntactic anonymity and how it breaks</span></span></a>
+ <span class="menu-text"><span class="chapter-number">10</span>&nbsp; <span class="chapter-title">Syntactic anonymity and how it breaks</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../part02-attacks/09-reconstruction.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">17</span>&nbsp; <span class="chapter-title">Reconstruction attacks</span></span></a>
+ <span class="menu-text"><span class="chapter-number">11</span>&nbsp; <span class="chapter-title">Reconstruction attacks</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../part02-attacks/10-risk-assessment.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">18</span>&nbsp; <span class="chapter-title">Pre-release privacy risk assessment</span></span></a>
+ <span class="menu-text"><span class="chapter-number">12</span>&nbsp; <span class="chapter-title">Pre-release privacy risk assessment</span></span></a>
   </div>
 </li>
       </ul>
@@ -325,73 +289,73 @@ window.Quarto = {
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../part03-dp-foundations/01-definition.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">19</span>&nbsp; <span class="chapter-title">The definition of differential privacy</span></span></a>
+ <span class="menu-text"><span class="chapter-number">13</span>&nbsp; <span class="chapter-title">The definition of differential privacy</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../part03-dp-foundations/02-properties.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">20</span>&nbsp; <span class="chapter-title">Post-processing, group privacy and composition</span></span></a>
+ <span class="menu-text"><span class="chapter-number">14</span>&nbsp; <span class="chapter-title">Post-processing, group privacy and composition</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../part03-dp-foundations/03-laplace-gaussian.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">21</span>&nbsp; <span class="chapter-title">The Laplace and Gaussian mechanisms</span></span></a>
+ <span class="menu-text"><span class="chapter-number">15</span>&nbsp; <span class="chapter-title">The Laplace and Gaussian mechanisms</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../part03-dp-foundations/04-composition.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">22</span>&nbsp; <span class="chapter-title">Advanced and optimal composition</span></span></a>
+ <span class="menu-text"><span class="chapter-number">16</span>&nbsp; <span class="chapter-title">Advanced and optimal composition</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../part03-dp-foundations/05-selection.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">23</span>&nbsp; <span class="chapter-title">Selection: exponential mechanism, report-noisy-max, sparse vector</span></span></a>
+ <span class="menu-text"><span class="chapter-number">17</span>&nbsp; <span class="chapter-title">Selection: exponential mechanism, report-noisy-max, sparse vector</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../part03-dp-foundations/06-query-release.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">24</span>&nbsp; <span class="chapter-title">Query release and private multiplicative weights</span></span></a>
+ <span class="menu-text"><span class="chapter-number">18</span>&nbsp; <span class="chapter-title">Query release and private multiplicative weights</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../part03-dp-foundations/07-sensitivity.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">25</span>&nbsp; <span class="chapter-title">Beyond global sensitivity</span></span></a>
+ <span class="menu-text"><span class="chapter-number">19</span>&nbsp; <span class="chapter-title">Beyond global sensitivity</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../part03-dp-foundations/08-discrete-mechanisms.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">26</span>&nbsp; <span class="chapter-title">Discrete and floating-point-safe mechanisms</span></span></a>
+ <span class="menu-text"><span class="chapter-number">20</span>&nbsp; <span class="chapter-title">Discrete and floating-point-safe mechanisms</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../part03-dp-foundations/09-trust-models.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">27</span>&nbsp; <span class="chapter-title">Local, shuffle and distributed trust models</span></span></a>
+ <span class="menu-text"><span class="chapter-number">21</span>&nbsp; <span class="chapter-title">Local, shuffle and distributed trust models</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../part03-dp-foundations/10-lower-bounds.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">28</span>&nbsp; <span class="chapter-title">Lower bounds: what privacy costs</span></span></a>
+ <span class="menu-text"><span class="chapter-number">22</span>&nbsp; <span class="chapter-title">Lower bounds: what privacy costs</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../part03-dp-foundations/11-mean-estimation.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">29</span>&nbsp; <span class="chapter-title">Private mean estimation</span></span></a>
+ <span class="menu-text"><span class="chapter-number">23</span>&nbsp; <span class="chapter-title">Private mean estimation</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../part03-dp-foundations/12-release-statistics.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">30</span>&nbsp; <span class="chapter-title">Release statistics with a library</span></span></a>
+ <span class="menu-text"><span class="chapter-number">24</span>&nbsp; <span class="chapter-title">Release statistics with a library</span></span></a>
   </div>
 </li>
       </ul>
@@ -408,61 +372,61 @@ window.Quarto = {
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../part04-privacy-accounting/09-choosing-an-accountant.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">31</span>&nbsp; <span class="chapter-title">Choosing an accountant</span></span></a>
+ <span class="menu-text"><span class="chapter-number">25</span>&nbsp; <span class="chapter-title">Choosing an accountant</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../part04-privacy-accounting/10-calibrate-dp-sgd.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">32</span>&nbsp; <span class="chapter-title">Calibrate and account a DP-SGD run</span></span></a>
+ <span class="menu-text"><span class="chapter-number">26</span>&nbsp; <span class="chapter-title">Calibrate and account a DP-SGD run</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../part04-privacy-accounting/05-subsampling.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">33</span>&nbsp; <span class="chapter-title">Amplification by subsampling</span></span></a>
+ <span class="menu-text"><span class="chapter-number">27</span>&nbsp; <span class="chapter-title">Amplification by subsampling</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../part04-privacy-accounting/01-renyi-dp.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">34</span>&nbsp; <span class="chapter-title">Rényi differential privacy</span></span></a>
+ <span class="menu-text"><span class="chapter-number">28</span>&nbsp; <span class="chapter-title">Rényi differential privacy</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../part04-privacy-accounting/02-rdp-conversions.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">35</span>&nbsp; <span class="chapter-title">From Rényi DP to (ε, δ) and to tests</span></span></a>
+ <span class="menu-text"><span class="chapter-number">29</span>&nbsp; <span class="chapter-title">From Rényi DP to (ε, δ) and to tests</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../part04-privacy-accounting/06-numerical-accounting.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">36</span>&nbsp; <span class="chapter-title">Numerical accounting with privacy loss distributions</span></span></a>
+ <span class="menu-text"><span class="chapter-number">30</span>&nbsp; <span class="chapter-title">Numerical accounting with privacy loss distributions</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../part04-privacy-accounting/04-gaussian-dp.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">37</span>&nbsp; <span class="chapter-title">f-DP and Gaussian differential privacy</span></span></a>
+ <span class="menu-text"><span class="chapter-number">31</span>&nbsp; <span class="chapter-title">f-DP and Gaussian differential privacy</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../part04-privacy-accounting/08-adaptive-composition.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">38</span>&nbsp; <span class="chapter-title">Adaptive composition: filters, odometers and individual accounting</span></span></a>
+ <span class="menu-text"><span class="chapter-number">32</span>&nbsp; <span class="chapter-title">Adaptive composition: filters, odometers and individual accounting</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../part04-privacy-accounting/03-concentrated-dp.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">39</span>&nbsp; <span class="chapter-title">Concentrated differential privacy</span></span></a>
+ <span class="menu-text"><span class="chapter-number">33</span>&nbsp; <span class="chapter-title">Concentrated differential privacy</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../part04-privacy-accounting/07-shuffling-iteration.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">40</span>&nbsp; <span class="chapter-title">Amplification by shuffling and by iteration</span></span></a>
+ <span class="menu-text"><span class="chapter-number">34</span>&nbsp; <span class="chapter-title">Amplification by shuffling and by iteration</span></span></a>
   </div>
 </li>
       </ul>
@@ -479,85 +443,85 @@ window.Quarto = {
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../part05-dp-ml/01-dp-erm.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">41</span>&nbsp; <span class="chapter-title">Private empirical risk minimization</span></span></a>
+ <span class="menu-text"><span class="chapter-number">35</span>&nbsp; <span class="chapter-title">Private empirical risk minimization</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../part05-dp-ml/02-dp-sgd.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">42</span>&nbsp; <span class="chapter-title">DP-SGD</span></span></a>
+ <span class="menu-text"><span class="chapter-number">36</span>&nbsp; <span class="chapter-title">DP-SGD</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../part05-dp-ml/13-train-dp-sgd.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">43</span>&nbsp; <span class="chapter-title">Train a model with DP-SGD</span></span></a>
+ <span class="menu-text"><span class="chapter-number">37</span>&nbsp; <span class="chapter-title">Train a model with DP-SGD</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../part05-dp-ml/03-hyperparameter-tuning.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">44</span>&nbsp; <span class="chapter-title">Hyperparameter tuning and private selection</span></span></a>
+ <span class="menu-text"><span class="chapter-number">38</span>&nbsp; <span class="chapter-title">Hyperparameter tuning and private selection</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../part05-dp-ml/07-user-level.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">45</span>&nbsp; <span class="chapter-title">User-level differential privacy</span></span></a>
+ <span class="menu-text"><span class="chapter-number">39</span>&nbsp; <span class="chapter-title">User-level differential privacy</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../part05-dp-ml/09-choosing-epsilon.html" class="sidebar-item-text sidebar-link active">
- <span class="menu-text"><span class="chapter-number">46</span>&nbsp; <span class="chapter-title">Choosing ε</span></span></a>
+ <span class="menu-text"><span class="chapter-number">40</span>&nbsp; <span class="chapter-title">Choosing ε</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../part05-dp-ml/06-public-data.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">47</span>&nbsp; <span class="chapter-title">Public data and private fine-tuning</span></span></a>
+ <span class="menu-text"><span class="chapter-number">41</span>&nbsp; <span class="chapter-title">Public data and private fine-tuning</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../part05-dp-ml/14-private-llm-finetuning.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">48</span>&nbsp; <span class="chapter-title">Fine-tune a language model privately with LoRA</span></span></a>
+ <span class="menu-text"><span class="chapter-number">42</span>&nbsp; <span class="chapter-title">Fine-tune a language model privately with LoRA</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../part05-dp-ml/05-private-prediction.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">49</span>&nbsp; <span class="chapter-title">Private prediction: PATE and in-context learning</span></span></a>
+ <span class="menu-text"><span class="chapter-number">43</span>&nbsp; <span class="chapter-title">Private prediction: PATE and in-context learning</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../part05-dp-ml/04-matrix-mechanisms.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">50</span>&nbsp; <span class="chapter-title">DP-FTRL and matrix factorization</span></span></a>
+ <span class="menu-text"><span class="chapter-number">44</span>&nbsp; <span class="chapter-title">DP-FTRL and matrix factorization</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../part05-dp-ml/08-disparate-impact.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">51</span>&nbsp; <span class="chapter-title">Disparate impact</span></span></a>
+ <span class="menu-text"><span class="chapter-number">45</span>&nbsp; <span class="chapter-title">Disparate impact</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../part05-dp-ml/10-auditing.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">52</span>&nbsp; <span class="chapter-title">Auditing private training</span></span></a>
+ <span class="menu-text"><span class="chapter-number">46</span>&nbsp; <span class="chapter-title">Auditing private training</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../part05-dp-ml/11-adaptive-data-analysis.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">53</span>&nbsp; <span class="chapter-title">Adaptive data analysis</span></span></a>
+ <span class="menu-text"><span class="chapter-number">47</span>&nbsp; <span class="chapter-title">Adaptive data analysis</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../part05-dp-ml/12-release-governance.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">54</span>&nbsp; <span class="chapter-title">Release and governance</span></span></a>
+ <span class="menu-text"><span class="chapter-number">48</span>&nbsp; <span class="chapter-title">Release and governance</span></span></a>
   </div>
 </li>
       </ul>
@@ -595,23 +559,23 @@ window.Quarto = {
     <h2 id="toc-title">Table of contents</h2>
    
   <ul>
-  <li><a href="#why-this-matters" id="toc-why-this-matters" class="nav-link active" data-scroll-target="#why-this-matters"><span class="header-section-number">46.1</span> Why this matters</a></li>
-  <li><a href="#sec-epsc-justify" id="toc-sec-epsc-justify" class="nav-link" data-scroll-target="#sec-epsc-justify"><span class="header-section-number">46.2</span> Justifying a choice</a></li>
-  <li><a href="#sec-epsc-curve" id="toc-sec-epsc-curve" class="nav-link" data-scroll-target="#sec-epsc-curve"><span class="header-section-number">46.3</span> The pair and the whole curve</a></li>
-  <li><a href="#sec-epsc-bayes" id="toc-sec-epsc-bayes" class="nav-link" data-scroll-target="#sec-epsc-bayes"><span class="header-section-number">46.4</span> What an attacker can believe</a></li>
-  <li><a href="#sec-epsc-delta" id="toc-sec-epsc-delta" class="nav-link" data-scroll-target="#sec-epsc-delta"><span class="header-section-number">46.5</span> How small δ must be</a></li>
-  <li><a href="#sec-epsc-deployed" id="toc-sec-epsc-deployed" class="nav-link" data-scroll-target="#sec-epsc-deployed"><span class="header-section-number">46.6</span> Comparing with deployed values</a></li>
-  <li><a href="#cheat-sheet" id="toc-cheat-sheet" class="nav-link" data-scroll-target="#cheat-sheet"><span class="header-section-number">46.7</span> Cheat sheet</a></li>
-  <li><a href="#references" id="toc-references" class="nav-link" data-scroll-target="#references"><span class="header-section-number">46.8</span> References</a></li>
+  <li><a href="#why-this-matters" id="toc-why-this-matters" class="nav-link active" data-scroll-target="#why-this-matters"><span class="header-section-number">40.1</span> Why this matters</a></li>
+  <li><a href="#sec-epsc-justify" id="toc-sec-epsc-justify" class="nav-link" data-scroll-target="#sec-epsc-justify"><span class="header-section-number">40.2</span> Justifying a choice</a></li>
+  <li><a href="#sec-epsc-curve" id="toc-sec-epsc-curve" class="nav-link" data-scroll-target="#sec-epsc-curve"><span class="header-section-number">40.3</span> The pair and the whole curve</a></li>
+  <li><a href="#sec-epsc-bayes" id="toc-sec-epsc-bayes" class="nav-link" data-scroll-target="#sec-epsc-bayes"><span class="header-section-number">40.4</span> What an attacker can believe</a></li>
+  <li><a href="#sec-epsc-delta" id="toc-sec-epsc-delta" class="nav-link" data-scroll-target="#sec-epsc-delta"><span class="header-section-number">40.5</span> How small δ must be</a></li>
+  <li><a href="#sec-epsc-deployed" id="toc-sec-epsc-deployed" class="nav-link" data-scroll-target="#sec-epsc-deployed"><span class="header-section-number">40.6</span> Comparing with deployed values</a></li>
+  <li><a href="#cheat-sheet" id="toc-cheat-sheet" class="nav-link" data-scroll-target="#cheat-sheet"><span class="header-section-number">40.7</span> Cheat sheet</a></li>
+  <li><a href="#references" id="toc-references" class="nav-link" data-scroll-target="#references"><span class="header-section-number">40.8</span> References</a></li>
   </ul>
 </nav>
     </div>
 <!-- main -->
 <main class="content" id="quarto-document-content">
 
-<header id="title-block-header" class="quarto-title-block default"><nav class="quarto-page-breadcrumbs quarto-title-breadcrumbs d-none d-lg-block" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../part05-dp-ml/00-introduction.html">Differential privacy in machine learning</a></li><li class="breadcrumb-item"><a href="../part05-dp-ml/09-choosing-epsilon.html"><span class="chapter-number">46</span>&nbsp; <span class="chapter-title">Choosing ε</span></a></li></ol></nav>
+<header id="title-block-header" class="quarto-title-block default"><nav class="quarto-page-breadcrumbs quarto-title-breadcrumbs d-none d-lg-block" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../part05-dp-ml/00-introduction.html">Differential privacy in machine learning</a></li><li class="breadcrumb-item"><a href="../part05-dp-ml/09-choosing-epsilon.html"><span class="chapter-number">40</span>&nbsp; <span class="chapter-title">Choosing ε</span></a></li></ol></nav>
 <div class="quarto-title">
-<h1 class="title"><span class="chapter-number">46</span>&nbsp; <span class="chapter-title">Choosing ε</span></h1>
+<h1 class="title"><span class="chapter-number">40</span>&nbsp; <span class="chapter-title">Choosing ε</span></h1>
 </div>
 
 
@@ -628,27 +592,27 @@ window.Quarto = {
 </header>
 
 
-<section id="why-this-matters" class="level2" data-number="46.1">
-<h2 data-number="46.1" class="anchored" data-anchor-id="why-this-matters"><span class="header-section-number">46.1</span> Why this matters</h2>
+<section id="why-this-matters" class="level2" data-number="40.1">
+<h2 data-number="40.1" class="anchored" data-anchor-id="why-this-matters"><span class="header-section-number">40.1</span> Why this matters</h2>
 <p>Every model trained with differential privacy (DP) ships with a privacy budget <span class="math inline">\(\varepsilon\)</span>. The chapter on private stochastic gradient descent (SGD), <a href="../part05-dp-ml/02-dp-sgd.html">DP-SGD</a>, showed what each budget costs in accuracy. This chapter adds what it means for the people in the data, so that <span class="math inline">\(\varepsilon\)</span> is not chosen by habit (“everyone uses 8”).</p>
 <p>An attacker who wants to know whether a record was used for training runs a membership test. The test catches real members, its true positives, and wrongly flags non-members, its false positives. The budget <span class="math inline">\(\varepsilon\)</span> and its small slack <span class="math inline">\(\delta\)</span> cap the first rate in terms of the second (<a href="../part03-dp-foundations/01-definition.html">The definition of differential privacy</a>). But each training run also has its own curve of the best rates an attacker can reach, usually far below the cap. So compute that curve, read it at the false positive rate of your threat, and set it beside the accuracy each budget buys.</p>
 </section>
-<section id="sec-epsc-justify" class="level2" data-number="46.2">
-<h2 data-number="46.2" class="anchored" data-anchor-id="sec-epsc-justify"><span class="header-section-number">46.2</span> Justifying a choice</h2>
+<section id="sec-epsc-justify" class="level2" data-number="40.2">
+<h2 data-number="40.2" class="anchored" data-anchor-id="sec-epsc-justify"><span class="header-section-number">40.2</span> Justifying a choice</h2>
 <p>A defensible choice says what the budget protects before it picks the number.</p>
 <ol type="1">
 <li><strong>Unit and period.</strong> Say whether one unit is a record, a user or a device, and whether neighbouring datasets differ by adding or removing one unit or by replacing one. Say which runs the budget covers, since every tuning run spends budget too (<a href="../part05-dp-ml/03-hyperparameter-tuning.html">Hyperparameter tuning</a>).</li>
 <li><strong>Threat.</strong> Say whether the concern is membership, reconstruction or attribute inference, and what the attacker knows and sees. This sets the false positive rate at which you read the curve, a low one for an attacker who must rarely accuse a non-member.</li>
-<li><strong>Whole guarantee.</strong> Choose <span class="math inline">\(\delta\)</span> by the book’s rule (<a href="#sec-epsc-delta" class="quarto-xref"><span>Section 46.5</span></a>), then compute the trade-off curve (<a href="#sec-epsc-curve" class="quarto-xref"><span>Section 46.3</span></a>) and read it there.</li>
+<li><strong>Whole guarantee.</strong> Choose <span class="math inline">\(\delta\)</span> by the book’s rule (<a href="#sec-epsc-delta" class="quarto-xref"><span>Section 40.5</span></a>), then compute the trade-off curve (<a href="#sec-epsc-curve" class="quarto-xref"><span>Section 40.3</span></a>) and read it there.</li>
 <li><strong>Evidence.</strong> The curve is a theorem about an algorithm, not about your code, so run an audit that could refute it (<a href="../part05-dp-ml/10-auditing.html">Auditing private training</a>).</li>
 <li><strong>Utility.</strong> Put accuracy against <span class="math inline">\(\varepsilon\)</span> next to the risk, and pick the smallest budget past the bend, where accuracy stops improving. Draw it on public or proxy data, because private runs that choose <span class="math inline">\(\varepsilon\)</span> are a search whose cost the reported <span class="math inline">\(\varepsilon\)</span> leaves out.</li>
-<li><strong>Comparison.</strong> Only now compare with deployments (<a href="#sec-epsc-deployed" class="quarto-xref"><span>Section 46.6</span></a>) and with the tiers in the rules of thumb.</li>
+<li><strong>Comparison.</strong> Only now compare with deployments (<a href="#sec-epsc-deployed" class="quarto-xref"><span>Section 40.6</span></a>) and with the tiers in the rules of thumb.</li>
 </ol>
-<p>Adult, a public census survey, shows step 5 on a real run. <a href="../part05-dp-ml/13-train-dp-sgd.html">Train a model with DP-SGD</a> trains a small network on 30,000 of its people at five budgets, each with <span class="math inline">\(\delta = 10^{-5}\)</span>. <a href="#tbl-epsc-adult" class="quarto-xref">Table&nbsp;<span>46.1</span></a> sets their test accuracies beside a risk measure from <a href="#sec-epsc-curve" class="quarto-xref"><span>Section 46.3</span></a>. It is the largest true positive rate (TPR) that any membership test can reach at a false positive rate (FPR) of <span class="math inline">\(10^{-3}\)</span>.</p>
+<p>Adult, a public census survey, shows step 5 on a real run. <a href="../part05-dp-ml/13-train-dp-sgd.html">Train a model with DP-SGD</a> trains a small network on 30,000 of its people at five budgets, each with <span class="math inline">\(\delta = 10^{-5}\)</span>. <a href="#tbl-epsc-adult" class="quarto-xref">Table&nbsp;<span>40.1</span></a> sets their test accuracies beside a risk measure from <a href="#sec-epsc-curve" class="quarto-xref"><span>Section 40.3</span></a>. It is the largest true positive rate (TPR) that any membership test can reach at a false positive rate (FPR) of <span class="math inline">\(10^{-3}\)</span>.</p>
 <div id="tbl-epsc-adult" class="quarto-float quarto-figure quarto-figure-center anchored">
 <figure class="quarto-float quarto-float-tbl figure">
 <figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl" id="tbl-epsc-adult-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-Table&nbsp;46.1: Accuracy and worst-case membership risk on Adult, one seed.
+Table&nbsp;40.1: Accuracy and worst-case membership risk on Adult, one seed.
 </figcaption>
 <div aria-describedby="tbl-epsc-adult-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
 <table class="caption-top table">
@@ -710,15 +674,15 @@ Table&nbsp;46.1: Accuracy and worst-case membership risk on Adult, one seed.
 </div>
 <p>Accuracy rises by five points from <span class="math inline">\(\varepsilon = 0.25\)</span> to 1, then stays within a few thousandths of the non-private model, which is noise on one seed. The risk grows faster with each doubling of the budget, from 0.0023 at <span class="math inline">\(\varepsilon = 1\)</span> to 0.0445 at <span class="math inline">\(\varepsilon = 8\)</span>. So on Adult the bend sits at <span class="math inline">\(\varepsilon = 1\)</span>, and a budget of 1 or 2 is the defensible choice. The script scored these runs on private rows, so the table only illustrates step 5. A real choice reads it from a public stand-in, and on a harder task, a larger model or a smaller dataset, expect the bend further right.</p>
 </section>
-<section id="sec-epsc-curve" class="level2" data-number="46.3">
-<h2 data-number="46.3" class="anchored" data-anchor-id="sec-epsc-curve"><span class="header-section-number">46.3</span> The pair and the whole curve</h2>
-<p>A membership test says “member” or “non-member” about one target record. Its TPR is the chance that it says “member” when the target was in the training set, and its FPR the chance when it was not. Every test against an <span class="math inline">\((\varepsilon, \delta)\)</span>-DP mechanism satisfies <span id="eq-epsc-pair"><span class="math display">\[\mathrm{TPR} \le \min\big\{1,\ e^\varepsilon\,\mathrm{FPR} + \delta,\ 1 - e^{-\varepsilon}(1 - \delta - \mathrm{FPR})\big\}. \tag{46.1}\]</span></span> The middle term is the one that binds at low FPR, and the last applies the same cap to the members a test misses. Attacks are judged at a low FPR, because an attack that rarely flags a non-member identifies people with confidence (<a href="../part02-attacks/02-membership-inference.html">Membership inference</a>). Yet at <span class="math inline">\(\varepsilon = 8\)</span> and an FPR of <span class="math inline">\(10^{-3}\)</span>, the pair caps the TPR at 0.9997, which constrains almost nothing.</p>
-<p>A real training run satisfies DP for a whole range of pairs, one <span class="math inline">\(\delta(\varepsilon)\)</span> for each <span class="math inline">\(\varepsilon\)</span>, because its accountant can trade <span class="math inline">\(\varepsilon\)</span> for <span class="math inline">\(\delta\)</span>. Each pair gives a line, the middle term of <a href="#eq-epsc-pair" class="quarto-xref">Equation&nbsp;<span>46.1</span></a>, and every test must stay under all of these lines at once. The best test reaches the lowest line exactly, which is called the <strong>trade-off curve</strong>: <span id="eq-epsc-duality"><span class="math display">\[\mathrm{TPR}^*(\mathrm{FPR}) = \min_{\varepsilon}\big(e^\varepsilon\,\mathrm{FPR} + \delta(\varepsilon)\big). \tag{46.2}\]</span></span> For DP-SGD, a privacy loss distribution (PLD) accountant computes this curve. It can round the privacy loss up or down, and the two curves it gets bracket the true one (<a href="../part04-privacy-accounting/06-numerical-accounting.html">Numerical accounting</a>).</p>
-<p><a href="#tbl-epsc-curve" class="quarto-xref">Table&nbsp;<span>46.2</span></a> compares the pair with the curve for this part’s running example from <a href="../part05-dp-ml/02-dp-sgd.html">DP-SGD</a>, a synthetic run sampled at rate 0.01 for 10,000 steps.</p>
+<section id="sec-epsc-curve" class="level2" data-number="40.3">
+<h2 data-number="40.3" class="anchored" data-anchor-id="sec-epsc-curve"><span class="header-section-number">40.3</span> The pair and the whole curve</h2>
+<p>A membership test says “member” or “non-member” about one target record. Its TPR is the chance that it says “member” when the target was in the training set, and its FPR the chance when it was not. Every test against an <span class="math inline">\((\varepsilon, \delta)\)</span>-DP mechanism satisfies <span id="eq-epsc-pair"><span class="math display">\[\mathrm{TPR} \le \min\big\{1,\ e^\varepsilon\,\mathrm{FPR} + \delta,\ 1 - e^{-\varepsilon}(1 - \delta - \mathrm{FPR})\big\}. \tag{40.1}\]</span></span> The middle term is the one that binds at low FPR, and the last applies the same cap to the members a test misses. Attacks are judged at a low FPR, because an attack that rarely flags a non-member identifies people with confidence (<a href="../part02-attacks/02-membership-inference.html">Membership inference</a>). Yet at <span class="math inline">\(\varepsilon = 8\)</span> and an FPR of <span class="math inline">\(10^{-3}\)</span>, the pair caps the TPR at 0.9997, which constrains almost nothing.</p>
+<p>A real training run satisfies DP for a whole range of pairs, one <span class="math inline">\(\delta(\varepsilon)\)</span> for each <span class="math inline">\(\varepsilon\)</span>, because its accountant can trade <span class="math inline">\(\varepsilon\)</span> for <span class="math inline">\(\delta\)</span>. Each pair gives a line, the middle term of <a href="#eq-epsc-pair" class="quarto-xref">Equation&nbsp;<span>40.1</span></a>, and every test must stay under all of these lines at once. The best test reaches the lowest line exactly, which is called the <strong>trade-off curve</strong>: <span id="eq-epsc-duality"><span class="math display">\[\mathrm{TPR}^*(\mathrm{FPR}) = \min_{\varepsilon}\big(e^\varepsilon\,\mathrm{FPR} + \delta(\varepsilon)\big). \tag{40.2}\]</span></span> For DP-SGD, a privacy loss distribution (PLD) accountant computes this curve. It can round the privacy loss up or down, and the two curves it gets bracket the true one (<a href="../part04-privacy-accounting/06-numerical-accounting.html">Numerical accounting</a>).</p>
+<p><a href="#tbl-epsc-curve" class="quarto-xref">Table&nbsp;<span>40.2</span></a> compares the pair with the curve for two of the Adult runs of <a href="#tbl-epsc-adult" class="quarto-xref">Table&nbsp;<span>40.1</span></a>, each sampled at rate 1/30 for 300 steps.</p>
 <div id="tbl-epsc-curve" class="quarto-float quarto-figure quarto-figure-center anchored">
 <figure class="quarto-float quarto-float-tbl figure">
 <figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl" id="tbl-epsc-curve-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-Table&nbsp;46.2: Largest TPR of a membership test against the running example at <span class="math inline">\(\delta = 10^{-5}\)</span>, from the pair and from the curve.
+Table&nbsp;40.2: Largest TPR of a membership test against two Adult runs at <span class="math inline">\(\delta = 10^{-5}\)</span>, from the pair and from the curve.
 </figcaption>
 <div aria-describedby="tbl-epsc-curve-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
 <table class="caption-top table">
@@ -741,25 +705,25 @@ Table&nbsp;46.2: Largest TPR of a membership test against the running example at
 <tbody>
 <tr class="odd">
 <td>4</td>
-<td>1.36</td>
+<td>0.973</td>
 <td>0.05461</td>
-<td>[0.01215, 0.01312]</td>
-<td>[0.06739, 0.0724]</td>
+<td>[0.01221, 0.01234]</td>
+<td>[0.06447, 0.06515]</td>
 </tr>
 <tr class="even">
 <td>8</td>
-<td>0.917</td>
+<td>0.722</td>
 <td>0.9997</td>
-<td>[0.05555, 0.0589]</td>
-<td>[0.1987, 0.2092]</td>
+<td>[0.04414, 0.04452]</td>
+<td>[0.155, 0.1563]</td>
 </tr>
 </tbody>
 </table>
 </div>
 </figure>
 </div>
-<p>So a budget of 8 means little as a bare pair, while its curve caps the TPR at 0.0589 at an FPR of <span class="math inline">\(10^{-3}\)</span>.</p>
-<p>To compute the curve with Google’s <code>dp_accounting</code>, build the run’s PLD, ask it for <span class="math inline">\(\delta\)</span> on a grid of <span class="math inline">\(\varepsilon\)</span>, and take the lowest line. The snippet’s first print falls inside the bracket of <a href="#tbl-epsc-curve" class="quarto-xref">Table&nbsp;<span>46.2</span></a>, and its second gives the last column of <a href="#tbl-epsc-adult" class="quarto-xref">Table&nbsp;<span>46.1</span></a>.</p>
+<p>So a budget of 8 means little as a bare pair, while its curve caps the TPR at 0.0445 at an FPR of <span class="math inline">\(10^{-3}\)</span>.</p>
+<p>To compute the curve with Google’s <code>dp_accounting</code>, build the run’s PLD, ask it for <span class="math inline">\(\delta\)</span> on a grid of <span class="math inline">\(\varepsilon\)</span>, and take the lowest line. The snippet’s first print is the upper end of a bracket in <a href="#tbl-epsc-curve" class="quarto-xref">Table&nbsp;<span>40.2</span></a>, and its second gives the last column of <a href="#tbl-epsc-adult" class="quarto-xref">Table&nbsp;<span>40.1</span></a>.</p>
 <div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb1"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> numpy <span class="im">as</span> np</span>
 <span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> dp_accounting.pld <span class="im">import</span> privacy_loss_distribution <span class="im">as</span> pld</span>
 <span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a></span>
@@ -772,35 +736,35 @@ Table&nbsp;46.2: Largest TPR of a membership test against the running example at
 <span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> <span class="bu">float</span>(np.<span class="bu">min</span>(np.exp(EPS_GRID) <span class="op">*</span> fpr <span class="op">+</span> deltas))</span>
 <span id="cb1-11"><a href="#cb1-11" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb1-12"><a href="#cb1-12" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-13"><a href="#cb1-13" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"</span><span class="sc">{</span>tpr_at(<span class="fl">1.36</span>, <span class="fl">0.01</span>, <span class="dv">10_000</span>, <span class="fl">1e-3</span>)<span class="sc">:.4f}</span><span class="ss">"</span>)  <span class="co"># 0.0126</span></span>
+<span id="cb1-13"><a href="#cb1-13" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"</span><span class="sc">{</span>tpr_at(<span class="fl">0.722</span>, <span class="dv">1</span> <span class="op">/</span> <span class="dv">30</span>, <span class="dv">300</span>, <span class="fl">1e-2</span>)<span class="sc">:.4f}</span><span class="ss">"</span>)  <span class="co"># 0.1563</span></span>
 <span id="cb1-14"><a href="#cb1-14" aria-hidden="true" tabindex="-1"></a>adult <span class="op">=</span> [tpr_at(sigma, <span class="dv">1</span> <span class="op">/</span> <span class="dv">30</span>, <span class="dv">300</span>, <span class="fl">1e-3</span>) <span class="cf">for</span> sigma <span class="kw">in</span> (<span class="fl">8.125</span>, <span class="fl">2.383</span>, <span class="fl">1.431</span>, <span class="fl">0.973</span>, <span class="fl">0.722</span>)]</span>
 <span id="cb1-15"><a href="#cb1-15" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">" "</span>.join(<span class="ss">f"</span><span class="sc">{</span>tpr<span class="sc">:.4f}</span><span class="ss">"</span> <span class="cf">for</span> tpr <span class="kw">in</span> adult))  <span class="co"># 0.0013 0.0023 0.0046 0.0123 0.0445</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <p>The library’s default PLD rounds the loss up, so its curve is a valid upper bound. A Rényi differential privacy (RDP) accountant gives a valid but looser curve. The Gaussian differential privacy (GDP) approximation is quick but not a bound, so use it to explain and the PLD to certify.</p>
 <p>The curve is a worst case, for an attacker who sees every intermediate model, so a typical record attacked through the final model alone is much safer. The curve bounds reconstruction too, since a guess among <span class="math inline">\(m\)</span> equally likely records is a membership test at an FPR of <span class="math inline">\(1/m\)</span> (<a href="../part02-attacks/09-reconstruction.html">Reconstruction attacks</a>).</p>
 </section>
-<section id="sec-epsc-bayes" class="level2" data-number="46.4">
-<h2 data-number="46.4" class="anchored" data-anchor-id="sec-epsc-bayes"><span class="header-section-number">46.4</span> What an attacker can believe</h2>
-<p>Most people ask how sure an attacker can become that a person was in the data. Write <span class="math inline">\(p\)</span> for the attacker’s <strong>prior</strong>, its probability of “member” before it sees the model. A privacy loss of at most <span class="math inline">\(\varepsilon\)</span> means that no output is more than <span class="math inline">\(e^\varepsilon\)</span> times as likely with the person’s record as without it. So the attacker’s belief afterwards is at most <span id="eq-epsc-posterior"><span class="math display">\[\Pr[\text{member} \mid \text{output}] \le \frac{p\,e^\varepsilon}{p\,e^\varepsilon + 1 - p}. \tag{46.3}\]</span></span> So DP bounds the change of belief, not the belief itself.</p>
+<section id="sec-epsc-bayes" class="level2" data-number="40.4">
+<h2 data-number="40.4" class="anchored" data-anchor-id="sec-epsc-bayes"><span class="header-section-number">40.4</span> What an attacker can believe</h2>
+<p>Most people ask how sure an attacker can become that a person was in the data. Write <span class="math inline">\(p\)</span> for the attacker’s <strong>prior</strong>, its probability of “member” before it sees the model. A privacy loss of at most <span class="math inline">\(\varepsilon\)</span> means that no output is more than <span class="math inline">\(e^\varepsilon\)</span> times as likely with the person’s record as without it. So the attacker’s belief afterwards is at most <span id="eq-epsc-posterior"><span class="math display">\[\Pr[\text{member} \mid \text{output}] \le \frac{p\,e^\varepsilon}{p\,e^\varepsilon + 1 - p}. \tag{40.3}\]</span></span> So DP bounds the change of belief, not the belief itself.</p>
 <p>For example, an attacker who starts at 1% can end at 35.55% when <span class="math inline">\(\varepsilon = 4\)</span>. That is for the worst output, and in DP-SGD the privacy loss of the released model is usually far below <span class="math inline">\(\varepsilon\)</span>.</p>
-<p>Base rates matter as much as the loss. An attacker who accuses every person its test flags as a member is right with probability <span id="eq-epsc-precision"><span class="math display">\[\Pr[\text{member} \mid \text{flag}] = \frac{p\,\mathrm{TPR}}{p\,\mathrm{TPR} + (1 - p)\,\mathrm{FPR}}. \tag{46.4}\]</span></span> Take the running example’s <span class="math inline">\(\varepsilon = 8\)</span> run and an attacker with a 1% prior who flags at an FPR of <span class="math inline">\(10^{-2}\)</span>. The curve caps its TPR there at 0.2092 (<a href="#tbl-epsc-curve" class="quarto-xref">Table&nbsp;<span>46.2</span></a>), so at most 0.1744 of its flags are right, and five out of six are false. An insider with a prior of 0.5 would be right far more often, so a statement about beliefs must name the attacker.</p>
+<p>Base rates matter as much as the loss. An attacker who accuses every person its test flags as a member is right with probability <span id="eq-epsc-precision"><span class="math display">\[\Pr[\text{member} \mid \text{flag}] = \frac{p\,\mathrm{TPR}}{p\,\mathrm{TPR} + (1 - p)\,\mathrm{FPR}}. \tag{40.4}\]</span></span> Take the Adult run at <span class="math inline">\(\varepsilon = 8\)</span> and an attacker with a 1% prior who flags at an FPR of <span class="math inline">\(10^{-2}\)</span>. The curve caps its TPR there at 0.1563 (<a href="#tbl-epsc-curve" class="quarto-xref">Table&nbsp;<span>40.2</span></a>), so at most 0.1363 of its flags are right, and more than six out of seven are false. An insider with a prior of 0.5 would be right far more often, so a statement about beliefs must name the attacker.</p>
 </section>
-<section id="sec-epsc-delta" class="level2" data-number="46.5">
-<h2 data-number="46.5" class="anchored" data-anchor-id="sec-epsc-delta"><span class="header-section-number">46.5</span> How small δ must be</h2>
-<p>For <span class="math inline">\(n\)</span> privacy units, the book’s rule sets <span class="math inline">\(\delta \le 1/n^{1.1}\)</span>, rounded down to a power of ten (<a href="../part03-dp-foundations/01-definition.html#sec-dpdef-small-delta">How small δ must be</a>). The units are people when one person has many records (<a href="../part05-dp-ml/07-user-level.html">User-level differential privacy</a>). The rule gives <span class="math inline">\(10^{-5}\)</span> for both of this page’s runs. When <span class="math inline">\(n\)</span> is just above a power of ten, as with Adult’s 30,000 people, that <span class="math inline">\(\delta\)</span> is not far below <span class="math inline">\(1/n\)</span>. NIST SP 800-226, the US guidelines for evaluating DP claims, calls a <span class="math inline">\(\delta\)</span> above <span class="math inline">\(10^{-5}\)</span> suspicious unless justified.</p>
-<p>For DP-SGD a smaller <span class="math inline">\(\delta\)</span> is cheap. The RDP accountant that set the running example’s <span class="math inline">\(\varepsilon = 4\)</span> run puts it at only 5.209 when <span class="math inline">\(\delta\)</span> falls to <span class="math inline">\(10^{-8}\)</span>. So report <span class="math inline">\(\varepsilon\)</span> at a second, smaller <span class="math inline">\(\delta\)</span> too, and never quote a <span class="math inline">\(\delta\)</span> as large as one over the number of units.</p>
+<section id="sec-epsc-delta" class="level2" data-number="40.5">
+<h2 data-number="40.5" class="anchored" data-anchor-id="sec-epsc-delta"><span class="header-section-number">40.5</span> How small δ must be</h2>
+<p>For <span class="math inline">\(n\)</span> privacy units, the book’s rule sets <span class="math inline">\(\delta \le 1/n^{1.1}\)</span>, rounded down to a power of ten (<a href="../part03-dp-foundations/01-definition.html#sec-dpdef-small-delta">How small δ must be</a>). The units are people when one person has many records (<a href="../part05-dp-ml/07-user-level.html">User-level differential privacy</a>). For Adult’s 30,000 people it gives <span class="math inline">\(10^{-5}\)</span>. That is not far below <span class="math inline">\(1/n\)</span>, as always when <span class="math inline">\(n\)</span> is just above a power of ten. NIST SP 800-226, the US guidelines for evaluating DP claims, calls a <span class="math inline">\(\delta\)</span> above <span class="math inline">\(10^{-5}\)</span> suspicious unless justified.</p>
+<p>For DP-SGD a smaller <span class="math inline">\(\delta\)</span> is cheap. Take the Adult run at <span class="math inline">\(\varepsilon = 4\)</span>. When <span class="math inline">\(\delta\)</span> falls to <span class="math inline">\(10^{-8}\)</span>, the PLD accountant puts it at only 5.763. So report <span class="math inline">\(\varepsilon\)</span> at a second, smaller <span class="math inline">\(\delta\)</span> too, and never quote a <span class="math inline">\(\delta\)</span> as large as one over the number of units.</p>
 </section>
-<section id="sec-epsc-deployed" class="level2" data-number="46.6">
-<h2 data-number="46.6" class="anchored" data-anchor-id="sec-epsc-deployed"><span class="header-section-number">46.6</span> Comparing with deployed values</h2>
+<section id="sec-epsc-deployed" class="level2" data-number="40.6">
+<h2 data-number="40.6" class="anchored" data-anchor-id="sec-epsc-deployed"><span class="header-section-number">40.6</span> Comparing with deployed values</h2>
 <p>“Industry uses <span class="math inline">\(\varepsilon\)</span> between 1 and 10” hides what every <span class="math inline">\(\varepsilon\)</span> needs, its <strong>privacy unit</strong> and the <strong>period</strong> over which it is spent. The Census Bureau’s 2020 redistricting data used zero-concentrated differential privacy (zCDP), which states the guarantee as one number, written <span class="math inline">\(\rho\)</span>, that converts to <span class="math inline">\((\varepsilon, \delta)\)</span> pairs. Its unit was one person’s record under the replace-one relation, and persons got <span class="math inline">\(\rho = 2.56\)</span>, reported as <span class="math inline">\(\varepsilon = 17.14\)</span> at <span class="math inline">\(\delta = 10^{-10}\)</span>.</p>
-<p>So before you compare, convert both budgets to the same unit, neighbouring relation and <span class="math inline">\(\delta\)</span>. A zCDP parameter <span class="math inline">\(\rho\)</span> converts to a pair by <span id="eq-epsc-zcdp"><span class="math display">\[\varepsilon = \rho + 2\sqrt{\rho\ln(1/\delta)}. \tag{46.5}\]</span></span> For the Census figures this formula gives 17.92, and the Bureau’s 17.14 comes from a tighter conversion. Since a replacement is a removal followed by an addition, an add/remove guarantee <span class="math inline">\((\varepsilon, \delta)\)</span> implies only the replace-one guarantee <span class="math inline">\((2\varepsilon, (1 + e^\varepsilon)\delta)\)</span> (<a href="../part03-dp-foundations/01-definition.html">The definition of differential privacy</a>). And a budget stated per day adds up over time by composition, to 365 a year at <span class="math inline">\(\varepsilon = 1\)</span> per day.</p>
-<p>So it would be wrong to call the running example’s <span class="math inline">\(\varepsilon = 8\)</span> run “less than half the Census budget”. At the Census’s <span class="math inline">\(\delta = 10^{-10}\)</span> it is at 11.627, and under the Census’s replace-one relation that can double.</p>
+<p>So before you compare, convert both budgets to the same unit, neighbouring relation and <span class="math inline">\(\delta\)</span>. A zCDP parameter <span class="math inline">\(\rho\)</span> converts to a pair by <span id="eq-epsc-zcdp"><span class="math display">\[\varepsilon = \rho + 2\sqrt{\rho\ln(1/\delta)}. \tag{40.5}\]</span></span> For the Census figures this formula gives 17.92, and the Bureau’s 17.14 comes from a tighter conversion. Since a replacement is a removal followed by an addition, an add/remove guarantee <span class="math inline">\((\varepsilon, \delta)\)</span> implies only the replace-one guarantee <span class="math inline">\((2\varepsilon, (1 + e^\varepsilon)\delta)\)</span> (<a href="../part03-dp-foundations/01-definition.html">The definition of differential privacy</a>). And a budget stated per day adds up over time by composition, to 365 a year at <span class="math inline">\(\varepsilon = 1\)</span> per day.</p>
+<p>So it would be wrong to call the Adult run at <span class="math inline">\(\varepsilon = 8\)</span> “less than half the Census budget”. At the Census’s <span class="math inline">\(\delta = 10^{-10}\)</span> it is at 13.812, and under the Census’s replace-one relation that can double.</p>
 </section>
-<section id="cheat-sheet" class="level2" data-number="46.7">
-<h2 data-number="46.7" class="anchored" data-anchor-id="cheat-sheet"><span class="header-section-number">46.7</span> Cheat sheet</h2>
+<section id="cheat-sheet" class="level2" data-number="40.7">
+<h2 data-number="40.7" class="anchored" data-anchor-id="cheat-sheet"><span class="header-section-number">40.7</span> Cheat sheet</h2>
 <div id="tbl-epsc-cheat" class="quarto-float quarto-figure quarto-figure-center anchored">
 <figure class="quarto-float quarto-float-tbl figure">
 <figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl" id="tbl-epsc-cheat-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-Table&nbsp;46.3: Which tool answers which question when choosing <span class="math inline">\(\varepsilon\)</span>.
+Table&nbsp;40.3: Which tool answers which question when choosing <span class="math inline">\(\varepsilon\)</span>.
 </figcaption>
 <div aria-describedby="tbl-epsc-cheat-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
 <table class="caption-top table">
@@ -819,22 +783,22 @@ Table&nbsp;46.3: Which tool answers which question when choosing <span class="ma
 <tbody>
 <tr class="odd">
 <td>What does DP-SGD allow?</td>
-<td>The trade-off curve, <a href="#eq-epsc-duality" class="quarto-xref">Equation&nbsp;<span>46.2</span></a></td>
+<td>The trade-off curve, <a href="#eq-epsc-duality" class="quarto-xref">Equation&nbsp;<span>40.2</span></a></td>
 <td>Certify with the PLD, not with GDP</td>
 </tr>
 <tr class="even">
 <td>How sure can an attacker become?</td>
-<td><a href="#eq-epsc-posterior" class="quarto-xref">Equation&nbsp;<span>46.3</span></a> and <a href="#eq-epsc-precision" class="quarto-xref">Equation&nbsp;<span>46.4</span></a></td>
+<td><a href="#eq-epsc-posterior" class="quarto-xref">Equation&nbsp;<span>40.3</span></a> and <a href="#eq-epsc-precision" class="quarto-xref">Equation&nbsp;<span>40.4</span></a></td>
 <td>Name the prior; base rates dominate</td>
 </tr>
 <tr class="odd">
 <td>How small a <span class="math inline">\(\delta\)</span>?</td>
-<td>The book’s rule, <a href="#sec-epsc-delta" class="quarto-xref"><span>Section 46.5</span></a></td>
+<td>The book’s rule, <a href="#sec-epsc-delta" class="quarto-xref"><span>Section 40.5</span></a></td>
 <td><span class="math inline">\(n\)</span> counts privacy units</td>
 </tr>
 <tr class="even">
 <td>Comparing with a deployment?</td>
-<td><a href="#eq-epsc-zcdp" class="quarto-xref">Equation&nbsp;<span>46.5</span></a>; replace-one doubles <span class="math inline">\(\varepsilon\)</span></td>
+<td><a href="#eq-epsc-zcdp" class="quarto-xref">Equation&nbsp;<span>40.5</span></a>; replace-one doubles <span class="math inline">\(\varepsilon\)</span></td>
 <td>Same unit and <span class="math inline">\(\delta\)</span></td>
 </tr>
 </tbody>
@@ -848,8 +812,8 @@ Table&nbsp;46.3: Which tool answers which question when choosing <span class="ma
 <li>Never quote <span class="math inline">\(\varepsilon\)</span> without its unit, <span class="math inline">\(\delta\)</span> and period.</li>
 </ul>
 </section>
-<section id="references" class="level2" data-number="46.8">
-<h2 data-number="46.8" class="anchored" data-anchor-id="references"><span class="header-section-number">46.8</span> References</h2>
+<section id="references" class="level2" data-number="40.8">
+<h2 data-number="40.8" class="anchored" data-anchor-id="references"><span class="header-section-number">40.8</span> References</h2>
 <ul>
 <li>Near, Darais, Lefkovitz &amp; Howarth, <em>Guidelines for Evaluating Differential Privacy Guarantees</em> (NIST SP 800-226, 2025): privacy units, <span class="math inline">\(\delta\)</span>, and the hazards of large budgets.</li>
 <li>Ponomareva et al., “How to DP-fy ML: A Practical Guide to Machine Learning with Differential Privacy” (JAIR 2023): tiers and reporting.</li>
@@ -1263,12 +1227,12 @@ Table&nbsp;46.3: Which tool answers which question when choosing <span class="ma
 <nav class="page-navigation">
   <div class="nav-page nav-page-previous">
       <a href="../part05-dp-ml/07-user-level.html" class="pagination-link" aria-label="User-level differential privacy">
-        <i class="bi bi-arrow-left-short"></i> <span class="nav-page-text"><span class="chapter-number">45</span>&nbsp; <span class="chapter-title">User-level differential privacy</span></span>
+        <i class="bi bi-arrow-left-short"></i> <span class="nav-page-text"><span class="chapter-number">39</span>&nbsp; <span class="chapter-title">User-level differential privacy</span></span>
       </a>          
   </div>
   <div class="nav-page nav-page-next">
       <a href="../part05-dp-ml/06-public-data.html" class="pagination-link" aria-label="Public data and private fine-tuning">
-        <span class="nav-page-text"><span class="chapter-number">47</span>&nbsp; <span class="chapter-title">Public data and private fine-tuning</span></span> <i class="bi bi-arrow-right-short"></i>
+        <span class="nav-page-text"><span class="chapter-number">41</span>&nbsp; <span class="chapter-title">Public data and private fine-tuning</span></span> <i class="bi bi-arrow-right-short"></i>
       </a>
   </div>
 </nav>

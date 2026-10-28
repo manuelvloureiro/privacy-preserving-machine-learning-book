@@ -7,7 +7,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
 
-<title>27&nbsp; Local, shuffle and distributed trust models – Privacy-Preserving Machine Learning for Practitioners</title>
+<title>21&nbsp; Local, shuffle and distributed trust models – Privacy-Preserving Machine Learning for Practitioners</title>
 <style>
 /* Default styles provided by pandoc.
 ** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
@@ -82,7 +82,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <link href="../site_libs/quarto-html/quarto-syntax-highlighting-bf27225e3a48a9273f3daa8f8e829971.css" rel="stylesheet" id="quarto-text-highlighting-styles">
 <script src="../site_libs/bootstrap/bootstrap.min.js"></script>
 <link href="../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
-<link href="../site_libs/bootstrap/bootstrap-c76bce1ab0818eb3e57b6c28e4057b54.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
+<link href="../site_libs/bootstrap/bootstrap-78f503ea39f784e8964cd205807fbe37.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
 <script id="quarto-search-options" type="application/json">{
   "location": "sidebar",
   "copy-button": false,
@@ -152,7 +152,7 @@ window.Quarto = {
       <button type="button" class="quarto-btn-toggle btn" data-bs-toggle="collapse" role="button" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
         <i class="bi bi-layout-text-sidebar-reverse"></i>
       </button>
-        <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../part03-dp-foundations/00-introduction.html">Differential privacy foundations</a></li><li class="breadcrumb-item"><a href="../part03-dp-foundations/09-trust-models.html"><span class="chapter-number">27</span>&nbsp; <span class="chapter-title">Local, shuffle and distributed trust models</span></a></li></ol></nav>
+        <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../part03-dp-foundations/00-introduction.html">Differential privacy foundations</a></li><li class="breadcrumb-item"><a href="../part03-dp-foundations/09-trust-models.html"><span class="chapter-number">21</span>&nbsp; <span class="chapter-title">Local, shuffle and distributed trust models</span></a></li></ol></nav>
         <a class="flex-grow-1" role="navigation" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">      
         </a>
       <button type="button" class="btn quarto-search-button" aria-label="Search" onclick="window.quartoOpenSearch();">
@@ -194,50 +194,14 @@ window.Quarto = {
       <ul id="quarto-sidebar-section-1" class="collapse list-unstyled sidebar-section depth1 show">  
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
-  <a href="../part01-prerequisites/01-distributions.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">1</span>&nbsp; <span class="chapter-title">Probability distributions</span></span></a>
-  </div>
-</li>
-          <li class="sidebar-item">
-  <div class="sidebar-item-container"> 
-  <a href="../part01-prerequisites/02-concentration.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">2</span>&nbsp; <span class="chapter-title">Concentration inequalities</span></span></a>
-  </div>
-</li>
-          <li class="sidebar-item">
-  <div class="sidebar-item-container"> 
   <a href="../part01-prerequisites/03-divergences.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">3</span>&nbsp; <span class="chapter-title">Divergences</span></span></a>
+ <span class="menu-text"><span class="chapter-number">1</span>&nbsp; <span class="chapter-title">Divergences</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../part01-prerequisites/04-hypothesis-testing.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">4</span>&nbsp; <span class="chapter-title">Hypothesis testing</span></span></a>
-  </div>
-</li>
-          <li class="sidebar-item">
-  <div class="sidebar-item-container"> 
-  <a href="../part01-prerequisites/05-information-theory.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">5</span>&nbsp; <span class="chapter-title">Information theory</span></span></a>
-  </div>
-</li>
-          <li class="sidebar-item">
-  <div class="sidebar-item-container"> 
-  <a href="../part01-prerequisites/06-optimization.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">6</span>&nbsp; <span class="chapter-title">Optimization</span></span></a>
-  </div>
-</li>
-          <li class="sidebar-item">
-  <div class="sidebar-item-container"> 
-  <a href="../part01-prerequisites/07-stability-generalization.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">7</span>&nbsp; <span class="chapter-title">Algorithmic stability and generalization</span></span></a>
-  </div>
-</li>
-          <li class="sidebar-item">
-  <div class="sidebar-item-container"> 
-  <a href="../part01-prerequisites/08-crypto-basics.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">8</span>&nbsp; <span class="chapter-title">Cryptography basics</span></span></a>
+ <span class="menu-text"><span class="chapter-number">2</span>&nbsp; <span class="chapter-title">Hypothesis testing</span></span></a>
   </div>
 </li>
       </ul>
@@ -254,61 +218,61 @@ window.Quarto = {
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../part02-attacks/01-threat-models.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">9</span>&nbsp; <span class="chapter-title">Threat models and privacy games</span></span></a>
+ <span class="menu-text"><span class="chapter-number">3</span>&nbsp; <span class="chapter-title">Threat models and privacy games</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../part02-attacks/02-membership-inference.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">10</span>&nbsp; <span class="chapter-title">Membership inference</span></span></a>
+ <span class="menu-text"><span class="chapter-number">4</span>&nbsp; <span class="chapter-title">Membership inference</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../part02-attacks/03-attribute-inference.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">11</span>&nbsp; <span class="chapter-title">Attribute inference and model inversion</span></span></a>
+ <span class="menu-text"><span class="chapter-number">5</span>&nbsp; <span class="chapter-title">Attribute inference and model inversion</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../part02-attacks/04-property-inference.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">12</span>&nbsp; <span class="chapter-title">Property inference</span></span></a>
+ <span class="menu-text"><span class="chapter-number">6</span>&nbsp; <span class="chapter-title">Property inference</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../part02-attacks/05-memorization-extraction.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">13</span>&nbsp; <span class="chapter-title">Memorization and training-data extraction</span></span></a>
+ <span class="menu-text"><span class="chapter-number">7</span>&nbsp; <span class="chapter-title">Memorization and training-data extraction</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../part02-attacks/06-gradient-inversion.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">14</span>&nbsp; <span class="chapter-title">Gradient inversion</span></span></a>
+ <span class="menu-text"><span class="chapter-number">8</span>&nbsp; <span class="chapter-title">Gradient inversion</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../part02-attacks/07-linkage-reidentification.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">15</span>&nbsp; <span class="chapter-title">Linkage and re-identification</span></span></a>
+ <span class="menu-text"><span class="chapter-number">9</span>&nbsp; <span class="chapter-title">Linkage and re-identification</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../part02-attacks/08-syntactic-anonymity.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">16</span>&nbsp; <span class="chapter-title">Syntactic anonymity and how it breaks</span></span></a>
+ <span class="menu-text"><span class="chapter-number">10</span>&nbsp; <span class="chapter-title">Syntactic anonymity and how it breaks</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../part02-attacks/09-reconstruction.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">17</span>&nbsp; <span class="chapter-title">Reconstruction attacks</span></span></a>
+ <span class="menu-text"><span class="chapter-number">11</span>&nbsp; <span class="chapter-title">Reconstruction attacks</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../part02-attacks/10-risk-assessment.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">18</span>&nbsp; <span class="chapter-title">Pre-release privacy risk assessment</span></span></a>
+ <span class="menu-text"><span class="chapter-number">12</span>&nbsp; <span class="chapter-title">Pre-release privacy risk assessment</span></span></a>
   </div>
 </li>
       </ul>
@@ -325,73 +289,73 @@ window.Quarto = {
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../part03-dp-foundations/01-definition.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">19</span>&nbsp; <span class="chapter-title">The definition of differential privacy</span></span></a>
+ <span class="menu-text"><span class="chapter-number">13</span>&nbsp; <span class="chapter-title">The definition of differential privacy</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../part03-dp-foundations/02-properties.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">20</span>&nbsp; <span class="chapter-title">Post-processing, group privacy and composition</span></span></a>
+ <span class="menu-text"><span class="chapter-number">14</span>&nbsp; <span class="chapter-title">Post-processing, group privacy and composition</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../part03-dp-foundations/03-laplace-gaussian.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">21</span>&nbsp; <span class="chapter-title">The Laplace and Gaussian mechanisms</span></span></a>
+ <span class="menu-text"><span class="chapter-number">15</span>&nbsp; <span class="chapter-title">The Laplace and Gaussian mechanisms</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../part03-dp-foundations/04-composition.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">22</span>&nbsp; <span class="chapter-title">Advanced and optimal composition</span></span></a>
+ <span class="menu-text"><span class="chapter-number">16</span>&nbsp; <span class="chapter-title">Advanced and optimal composition</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../part03-dp-foundations/05-selection.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">23</span>&nbsp; <span class="chapter-title">Selection: exponential mechanism, report-noisy-max, sparse vector</span></span></a>
+ <span class="menu-text"><span class="chapter-number">17</span>&nbsp; <span class="chapter-title">Selection: exponential mechanism, report-noisy-max, sparse vector</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../part03-dp-foundations/06-query-release.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">24</span>&nbsp; <span class="chapter-title">Query release and private multiplicative weights</span></span></a>
+ <span class="menu-text"><span class="chapter-number">18</span>&nbsp; <span class="chapter-title">Query release and private multiplicative weights</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../part03-dp-foundations/07-sensitivity.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">25</span>&nbsp; <span class="chapter-title">Beyond global sensitivity</span></span></a>
+ <span class="menu-text"><span class="chapter-number">19</span>&nbsp; <span class="chapter-title">Beyond global sensitivity</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../part03-dp-foundations/08-discrete-mechanisms.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">26</span>&nbsp; <span class="chapter-title">Discrete and floating-point-safe mechanisms</span></span></a>
+ <span class="menu-text"><span class="chapter-number">20</span>&nbsp; <span class="chapter-title">Discrete and floating-point-safe mechanisms</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../part03-dp-foundations/09-trust-models.html" class="sidebar-item-text sidebar-link active">
- <span class="menu-text"><span class="chapter-number">27</span>&nbsp; <span class="chapter-title">Local, shuffle and distributed trust models</span></span></a>
+ <span class="menu-text"><span class="chapter-number">21</span>&nbsp; <span class="chapter-title">Local, shuffle and distributed trust models</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../part03-dp-foundations/10-lower-bounds.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">28</span>&nbsp; <span class="chapter-title">Lower bounds: what privacy costs</span></span></a>
+ <span class="menu-text"><span class="chapter-number">22</span>&nbsp; <span class="chapter-title">Lower bounds: what privacy costs</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../part03-dp-foundations/11-mean-estimation.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">29</span>&nbsp; <span class="chapter-title">Private mean estimation</span></span></a>
+ <span class="menu-text"><span class="chapter-number">23</span>&nbsp; <span class="chapter-title">Private mean estimation</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../part03-dp-foundations/12-release-statistics.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">30</span>&nbsp; <span class="chapter-title">Release statistics with a library</span></span></a>
+ <span class="menu-text"><span class="chapter-number">24</span>&nbsp; <span class="chapter-title">Release statistics with a library</span></span></a>
   </div>
 </li>
       </ul>
@@ -408,61 +372,61 @@ window.Quarto = {
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../part04-privacy-accounting/09-choosing-an-accountant.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">31</span>&nbsp; <span class="chapter-title">Choosing an accountant</span></span></a>
+ <span class="menu-text"><span class="chapter-number">25</span>&nbsp; <span class="chapter-title">Choosing an accountant</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../part04-privacy-accounting/10-calibrate-dp-sgd.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">32</span>&nbsp; <span class="chapter-title">Calibrate and account a DP-SGD run</span></span></a>
+ <span class="menu-text"><span class="chapter-number">26</span>&nbsp; <span class="chapter-title">Calibrate and account a DP-SGD run</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../part04-privacy-accounting/05-subsampling.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">33</span>&nbsp; <span class="chapter-title">Amplification by subsampling</span></span></a>
+ <span class="menu-text"><span class="chapter-number">27</span>&nbsp; <span class="chapter-title">Amplification by subsampling</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../part04-privacy-accounting/01-renyi-dp.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">34</span>&nbsp; <span class="chapter-title">Rényi differential privacy</span></span></a>
+ <span class="menu-text"><span class="chapter-number">28</span>&nbsp; <span class="chapter-title">Rényi differential privacy</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../part04-privacy-accounting/02-rdp-conversions.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">35</span>&nbsp; <span class="chapter-title">From Rényi DP to (ε, δ) and to tests</span></span></a>
+ <span class="menu-text"><span class="chapter-number">29</span>&nbsp; <span class="chapter-title">From Rényi DP to (ε, δ) and to tests</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../part04-privacy-accounting/06-numerical-accounting.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">36</span>&nbsp; <span class="chapter-title">Numerical accounting with privacy loss distributions</span></span></a>
+ <span class="menu-text"><span class="chapter-number">30</span>&nbsp; <span class="chapter-title">Numerical accounting with privacy loss distributions</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../part04-privacy-accounting/04-gaussian-dp.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">37</span>&nbsp; <span class="chapter-title">f-DP and Gaussian differential privacy</span></span></a>
+ <span class="menu-text"><span class="chapter-number">31</span>&nbsp; <span class="chapter-title">f-DP and Gaussian differential privacy</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../part04-privacy-accounting/08-adaptive-composition.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">38</span>&nbsp; <span class="chapter-title">Adaptive composition: filters, odometers and individual accounting</span></span></a>
+ <span class="menu-text"><span class="chapter-number">32</span>&nbsp; <span class="chapter-title">Adaptive composition: filters, odometers and individual accounting</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../part04-privacy-accounting/03-concentrated-dp.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">39</span>&nbsp; <span class="chapter-title">Concentrated differential privacy</span></span></a>
+ <span class="menu-text"><span class="chapter-number">33</span>&nbsp; <span class="chapter-title">Concentrated differential privacy</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../part04-privacy-accounting/07-shuffling-iteration.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">40</span>&nbsp; <span class="chapter-title">Amplification by shuffling and by iteration</span></span></a>
+ <span class="menu-text"><span class="chapter-number">34</span>&nbsp; <span class="chapter-title">Amplification by shuffling and by iteration</span></span></a>
   </div>
 </li>
       </ul>
@@ -479,85 +443,85 @@ window.Quarto = {
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../part05-dp-ml/01-dp-erm.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">41</span>&nbsp; <span class="chapter-title">Private empirical risk minimization</span></span></a>
+ <span class="menu-text"><span class="chapter-number">35</span>&nbsp; <span class="chapter-title">Private empirical risk minimization</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../part05-dp-ml/02-dp-sgd.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">42</span>&nbsp; <span class="chapter-title">DP-SGD</span></span></a>
+ <span class="menu-text"><span class="chapter-number">36</span>&nbsp; <span class="chapter-title">DP-SGD</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../part05-dp-ml/13-train-dp-sgd.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">43</span>&nbsp; <span class="chapter-title">Train a model with DP-SGD</span></span></a>
+ <span class="menu-text"><span class="chapter-number">37</span>&nbsp; <span class="chapter-title">Train a model with DP-SGD</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../part05-dp-ml/03-hyperparameter-tuning.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">44</span>&nbsp; <span class="chapter-title">Hyperparameter tuning and private selection</span></span></a>
+ <span class="menu-text"><span class="chapter-number">38</span>&nbsp; <span class="chapter-title">Hyperparameter tuning and private selection</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../part05-dp-ml/07-user-level.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">45</span>&nbsp; <span class="chapter-title">User-level differential privacy</span></span></a>
+ <span class="menu-text"><span class="chapter-number">39</span>&nbsp; <span class="chapter-title">User-level differential privacy</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../part05-dp-ml/09-choosing-epsilon.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">46</span>&nbsp; <span class="chapter-title">Choosing ε</span></span></a>
+ <span class="menu-text"><span class="chapter-number">40</span>&nbsp; <span class="chapter-title">Choosing ε</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../part05-dp-ml/06-public-data.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">47</span>&nbsp; <span class="chapter-title">Public data and private fine-tuning</span></span></a>
+ <span class="menu-text"><span class="chapter-number">41</span>&nbsp; <span class="chapter-title">Public data and private fine-tuning</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../part05-dp-ml/14-private-llm-finetuning.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">48</span>&nbsp; <span class="chapter-title">Fine-tune a language model privately with LoRA</span></span></a>
+ <span class="menu-text"><span class="chapter-number">42</span>&nbsp; <span class="chapter-title">Fine-tune a language model privately with LoRA</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../part05-dp-ml/05-private-prediction.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">49</span>&nbsp; <span class="chapter-title">Private prediction: PATE and in-context learning</span></span></a>
+ <span class="menu-text"><span class="chapter-number">43</span>&nbsp; <span class="chapter-title">Private prediction: PATE and in-context learning</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../part05-dp-ml/04-matrix-mechanisms.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">50</span>&nbsp; <span class="chapter-title">DP-FTRL and matrix factorization</span></span></a>
+ <span class="menu-text"><span class="chapter-number">44</span>&nbsp; <span class="chapter-title">DP-FTRL and matrix factorization</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../part05-dp-ml/08-disparate-impact.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">51</span>&nbsp; <span class="chapter-title">Disparate impact</span></span></a>
+ <span class="menu-text"><span class="chapter-number">45</span>&nbsp; <span class="chapter-title">Disparate impact</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../part05-dp-ml/10-auditing.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">52</span>&nbsp; <span class="chapter-title">Auditing private training</span></span></a>
+ <span class="menu-text"><span class="chapter-number">46</span>&nbsp; <span class="chapter-title">Auditing private training</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../part05-dp-ml/11-adaptive-data-analysis.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">53</span>&nbsp; <span class="chapter-title">Adaptive data analysis</span></span></a>
+ <span class="menu-text"><span class="chapter-number">47</span>&nbsp; <span class="chapter-title">Adaptive data analysis</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../part05-dp-ml/12-release-governance.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">54</span>&nbsp; <span class="chapter-title">Release and governance</span></span></a>
+ <span class="menu-text"><span class="chapter-number">48</span>&nbsp; <span class="chapter-title">Release and governance</span></span></a>
   </div>
 </li>
       </ul>
@@ -595,25 +559,25 @@ window.Quarto = {
     <h2 id="toc-title">Table of contents</h2>
    
   <ul>
-  <li><a href="#why-this-matters" id="toc-why-this-matters" class="nav-link active" data-scroll-target="#why-this-matters"><span class="header-section-number">27.1</span> Why this matters</a></li>
-  <li><a href="#sec-trust-compare" id="toc-sec-trust-compare" class="nav-link" data-scroll-target="#sec-trust-compare"><span class="header-section-number">27.2</span> Choosing a trust model</a></li>
-  <li><a href="#sec-trust-local" id="toc-sec-trust-local" class="nav-link" data-scroll-target="#sec-trust-local"><span class="header-section-number">27.3</span> Central and local differential privacy</a></li>
-  <li><a href="#sec-trust-frequency" id="toc-sec-trust-frequency" class="nav-link" data-scroll-target="#sec-trust-frequency"><span class="header-section-number">27.4</span> Frequency estimation: <span class="math inline">\(k\)</span>-ary randomized response and unary encoding</a></li>
-  <li><a href="#sec-trust-mean" id="toc-sec-trust-mean" class="nav-link" data-scroll-target="#sec-trust-mean"><span class="header-section-number">27.5</span> Numbers in one bit: local mean estimation</a></li>
-  <li><a href="#sec-trust-repeated" id="toc-sec-trust-repeated" class="nav-link" data-scroll-target="#sec-trust-repeated"><span class="header-section-number">27.6</span> Collecting every day: memoization</a></li>
-  <li><a href="#sec-trust-shuffle" id="toc-sec-trust-shuffle" class="nav-link" data-scroll-target="#sec-trust-shuffle"><span class="header-section-number">27.7</span> The shuffle model and amplification by shuffling</a></li>
-  <li><a href="#sec-trust-distributed" id="toc-sec-trust-distributed" class="nav-link" data-scroll-target="#sec-trust-distributed"><span class="header-section-number">27.8</span> Distributed DP: splitting the noise</a></li>
-  <li><a href="#cheat-sheet" id="toc-cheat-sheet" class="nav-link" data-scroll-target="#cheat-sheet"><span class="header-section-number">27.9</span> Cheat sheet</a></li>
-  <li><a href="#references" id="toc-references" class="nav-link" data-scroll-target="#references"><span class="header-section-number">27.10</span> References</a></li>
+  <li><a href="#why-this-matters" id="toc-why-this-matters" class="nav-link active" data-scroll-target="#why-this-matters"><span class="header-section-number">21.1</span> Why this matters</a></li>
+  <li><a href="#sec-trust-compare" id="toc-sec-trust-compare" class="nav-link" data-scroll-target="#sec-trust-compare"><span class="header-section-number">21.2</span> Choosing a trust model</a></li>
+  <li><a href="#sec-trust-local" id="toc-sec-trust-local" class="nav-link" data-scroll-target="#sec-trust-local"><span class="header-section-number">21.3</span> Central and local differential privacy</a></li>
+  <li><a href="#sec-trust-frequency" id="toc-sec-trust-frequency" class="nav-link" data-scroll-target="#sec-trust-frequency"><span class="header-section-number">21.4</span> Frequency estimation: <span class="math inline">\(k\)</span>-ary randomized response and unary encoding</a></li>
+  <li><a href="#sec-trust-mean" id="toc-sec-trust-mean" class="nav-link" data-scroll-target="#sec-trust-mean"><span class="header-section-number">21.5</span> Numbers in one bit: local mean estimation</a></li>
+  <li><a href="#sec-trust-repeated" id="toc-sec-trust-repeated" class="nav-link" data-scroll-target="#sec-trust-repeated"><span class="header-section-number">21.6</span> Collecting every day: memoization</a></li>
+  <li><a href="#sec-trust-shuffle" id="toc-sec-trust-shuffle" class="nav-link" data-scroll-target="#sec-trust-shuffle"><span class="header-section-number">21.7</span> The shuffle model and amplification by shuffling</a></li>
+  <li><a href="#sec-trust-distributed" id="toc-sec-trust-distributed" class="nav-link" data-scroll-target="#sec-trust-distributed"><span class="header-section-number">21.8</span> Distributed DP: splitting the noise</a></li>
+  <li><a href="#cheat-sheet" id="toc-cheat-sheet" class="nav-link" data-scroll-target="#cheat-sheet"><span class="header-section-number">21.9</span> Cheat sheet</a></li>
+  <li><a href="#references" id="toc-references" class="nav-link" data-scroll-target="#references"><span class="header-section-number">21.10</span> References</a></li>
   </ul>
 </nav>
     </div>
 <!-- main -->
 <main class="content" id="quarto-document-content">
 
-<header id="title-block-header" class="quarto-title-block default"><nav class="quarto-page-breadcrumbs quarto-title-breadcrumbs d-none d-lg-block" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../part03-dp-foundations/00-introduction.html">Differential privacy foundations</a></li><li class="breadcrumb-item"><a href="../part03-dp-foundations/09-trust-models.html"><span class="chapter-number">27</span>&nbsp; <span class="chapter-title">Local, shuffle and distributed trust models</span></a></li></ol></nav>
+<header id="title-block-header" class="quarto-title-block default"><nav class="quarto-page-breadcrumbs quarto-title-breadcrumbs d-none d-lg-block" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../part03-dp-foundations/00-introduction.html">Differential privacy foundations</a></li><li class="breadcrumb-item"><a href="../part03-dp-foundations/09-trust-models.html"><span class="chapter-number">21</span>&nbsp; <span class="chapter-title">Local, shuffle and distributed trust models</span></a></li></ol></nav>
 <div class="quarto-title">
-<h1 class="title"><span class="chapter-number">27</span>&nbsp; <span class="chapter-title">Local, shuffle and distributed trust models</span></h1>
+<h1 class="title"><span class="chapter-number">21</span>&nbsp; <span class="chapter-title">Local, shuffle and distributed trust models</span></h1>
 </div>
 
 
@@ -630,20 +594,20 @@ window.Quarto = {
 </header>
 
 
-<section id="why-this-matters" class="level2" data-number="27.1">
-<h2 data-number="27.1" class="anchored" data-anchor-id="why-this-matters"><span class="header-section-number">27.1</span> Why this matters</h2>
+<section id="why-this-matters" class="level2" data-number="21.1">
+<h2 data-number="21.1" class="anchored" data-anchor-id="why-this-matters"><span class="header-section-number">21.1</span> Why this matters</h2>
 <p>Every mechanism so far in this part assumed a <strong>trusted curator</strong>, which holds the raw data and releases only the output of the mechanism. In this <strong>central model</strong>, the differential privacy (DP) guarantee protects what the curator publishes. It does not protect against a breach of its database, a curious engineer or a court order. A browser vendor that collects usage statistics often does not have that much trust.</p>
 <p>Three other models trust less. In the <strong>local model</strong>, you trust nobody, and each person randomizes their own record before it leaves their device. The <strong>shuffle model</strong> trusts a shuffler only to cut the link between each report and its sender. The <strong>distributed model</strong> trusts cryptography that shows only a sum, run by enough honest participants. The closer to each person you add the noise, the fewer parties you trust, and the more noise reaches the answer.</p>
 </section>
-<section id="sec-trust-compare" class="level2" data-number="27.2">
-<h2 data-number="27.2" class="anchored" data-anchor-id="sec-trust-compare"><span class="header-section-number">27.2</span> Choosing a trust model</h2>
+<section id="sec-trust-compare" class="level2" data-number="21.2">
+<h2 data-number="21.2" class="anchored" data-anchor-id="sec-trust-compare"><span class="header-section-number">21.2</span> Choosing a trust model</h2>
 <p>Less trust costs more noise. As the population grows, the noise on a private count stays fixed in the central model, but grows with its square root in the local model. The shuffle and distributed models close most of that gap.</p>
-<p>So use the central model when you can trust a curator with the raw data, as <a href="../part03-dp-foundations/12-release-statistics.html">Release statistics with a library</a> does end to end. Choose local only when nobody can see a raw record and the population is large enough, which you check with the standard deviation of <a href="#sec-trust-local" class="quarto-xref"><span>Section 27.3</span></a>. In all cases, state the trust model next to the privacy parameters, because the same <span class="math inline">\(\varepsilon\)</span> protects against a different adversary in each model.</p>
+<p>So use the central model when you can trust a curator with the raw data, as <a href="../part03-dp-foundations/12-release-statistics.html">Release statistics with a library</a> does end to end. Choose local only when nobody can see a raw record and the population is large enough, which you check with the standard deviation of <a href="#sec-trust-local" class="quarto-xref"><span>Section 21.3</span></a>. In all cases, state the trust model next to the privacy parameters, because the same <span class="math inline">\(\varepsilon\)</span> protects against a different adversary in each model.</p>
 </section>
-<section id="sec-trust-local" class="level2" data-number="27.3">
-<h2 data-number="27.3" class="anchored" data-anchor-id="sec-trust-local"><span class="header-section-number">27.3</span> Central and local differential privacy</h2>
-<p>In the local model, each person sends only a <strong>report</strong>, the output of a <strong>local randomizer</strong> <span class="math inline">\(R\)</span> on their own record. Write <span class="math inline">\(\varepsilon_0\)</span> for the privacy level of one report. The randomizer is <span class="math inline">\(\varepsilon_0\)</span>-DP when no set of possible reports becomes more than <span class="math inline">\(e^{\varepsilon_0}\)</span> times as likely when the record changes. That is, all sets of reports <span class="math inline">\(S\)</span> and all pairs of records <span class="math inline">\(x\)</span> and <span class="math inline">\(x'\)</span> satisfy <span id="eq-trust-ldp"><span class="math display">\[\Pr[R(x) \in S] \le e^{\varepsilon_0}\Pr[R(x') \in S]. \tag{27.1}\]</span></span> A change to one person’s record changes only their own report, so the whole collection is <span class="math inline">\(\varepsilon_0\)</span>-DP in the central sense, with neighbours that differ in one replaced record. The guarantee covers only the randomized value, so a network address stored with a report links the report back to the person.</p>
-<p>The basic local randomizer is <a href="../part03-dp-foundations/01-definition.html">randomized response</a> on one bit. Each person reports their true bit with a probability <span class="math inline">\(p = e^{\varepsilon_0}/(1 + e^{\varepsilon_0})\)</span>, and the flipped bit otherwise. To remove the expected flips, the analyst subtracts <span class="math inline">\(1 - p\)</span> from the share of reported ones and divides by <span class="math inline">\(2p - 1\)</span>. The standard deviation of the estimate then depends only on the level and the number of people <span class="math inline">\(n\)</span>: <span id="eq-auto-09trustmodels-1"><span class="math display">\[\operatorname{sd}(\hat\pi) = \frac{e^{\varepsilon_0/2}}{(e^{\varepsilon_0} - 1)\sqrt n}. \tag{27.2}\]</span></span></p>
+<section id="sec-trust-local" class="level2" data-number="21.3">
+<h2 data-number="21.3" class="anchored" data-anchor-id="sec-trust-local"><span class="header-section-number">21.3</span> Central and local differential privacy</h2>
+<p>In the local model, each person sends only a <strong>report</strong>, the output of a <strong>local randomizer</strong> <span class="math inline">\(R\)</span> on their own record. Write <span class="math inline">\(\varepsilon_0\)</span> for the privacy level of one report. The randomizer is <span class="math inline">\(\varepsilon_0\)</span>-DP when no set of possible reports becomes more than <span class="math inline">\(e^{\varepsilon_0}\)</span> times as likely when the record changes. That is, all sets of reports <span class="math inline">\(S\)</span> and all pairs of records <span class="math inline">\(x\)</span> and <span class="math inline">\(x'\)</span> satisfy <span id="eq-trust-ldp"><span class="math display">\[\Pr[R(x) \in S] \le e^{\varepsilon_0}\Pr[R(x') \in S]. \tag{21.1}\]</span></span> A change to one person’s record changes only their own report, so the whole collection is <span class="math inline">\(\varepsilon_0\)</span>-DP in the central sense, with neighbours that differ in one replaced record. The guarantee covers only the randomized value, so a network address stored with a report links the report back to the person.</p>
+<p>The basic local randomizer is <a href="../part03-dp-foundations/01-definition.html">randomized response</a> on one bit. Each person reports their true bit with a probability <span class="math inline">\(p = e^{\varepsilon_0}/(1 + e^{\varepsilon_0})\)</span>, and the flipped bit otherwise. To remove the expected flips, the analyst subtracts <span class="math inline">\(1 - p\)</span> from the share of reported ones and divides by <span class="math inline">\(2p - 1\)</span>. The standard deviation of the estimate then depends only on the level and the number of people <span class="math inline">\(n\)</span>: <span id="eq-auto-09trustmodels-1"><span class="math display">\[\operatorname{sd}(\hat\pi) = \frac{e^{\varepsilon_0/2}}{(e^{\varepsilon_0} - 1)\sqrt n}. \tag{21.2}\]</span></span></p>
 <p>The script <a href="https://github.com/manuelvloureiro/privacy-preserving-machine-learning-book/blob/main/code/part03-dp-foundations/practitioner_adult_statistics.py">practitioner_adult_statistics.py</a> runs the two models at <span class="math inline">\(\varepsilon_0 = \ln 3\)</span> on the 48,842 people of the Adult census data. Each bit says whether a person’s income is more than $50K. In the local model, diffprivlib’s <code>Binary</code> mechanism randomizes each bit, and the analyst sees only the reports.</p>
 <div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb1" data-excerpt="adult-local-rr"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a>answers <span class="op">=</span> (adult[<span class="st">"income"</span>] <span class="op">==</span> <span class="st">"&gt;50K"</span>).cast(pl.Int8).cast(pl.String).to_list()  <span class="co"># "1" or "0"</span></span>
 <span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a>n, eps <span class="op">=</span> <span class="bu">len</span>(answers), log(<span class="dv">3</span>)</span>
@@ -667,40 +631,40 @@ central estimate: 0.2393  sd 0.000026
 local sd / central sd: 149</code></pre>
 <p>So at the same guarantee, the local estimate is 149 times noisier, and the factor grows like the square root of the population. This cost comes from the model, not from randomized response, because no local protocol can estimate a fraction with an error below order <span class="math inline">\(1/((e^{\varepsilon_0} - 1)\sqrt n)\)</span>, and randomized response reaches that order. That is why Apple, Google and Microsoft use local DP only for the most frequent items in very large populations.</p>
 </section>
-<section id="sec-trust-frequency" class="level2" data-number="27.4">
-<h2 data-number="27.4" class="anchored" data-anchor-id="sec-trust-frequency"><span class="header-section-number">27.4</span> Frequency estimation: <span class="math inline">\(k\)</span>-ary randomized response and unary encoding</h2>
-<p>Most deployed local DP does <strong>frequency estimation</strong>. Each person has one value from a known list, such as an emoji, and the analyst wants the share of people with each value. A report votes for a value with some probability <span class="math inline">\(p_1\)</span> if the person has it, and with a smaller probability <span class="math inline">\(p_0\)</span> otherwise. Suppose that <span class="math inline">\(c_v\)</span> of the <span class="math inline">\(n\)</span> reports vote for a value <span class="math inline">\(v\)</span>. When you remove the false votes on average, you get the unbiased estimate <span id="eq-auto-09trustmodels-2"><span class="math display">\[\hat f_v = \frac{c_v/n - p_0}{p_1 - p_0}. \tag{27.3}\]</span></span></p>
+<section id="sec-trust-frequency" class="level2" data-number="21.4">
+<h2 data-number="21.4" class="anchored" data-anchor-id="sec-trust-frequency"><span class="header-section-number">21.4</span> Frequency estimation: <span class="math inline">\(k\)</span>-ary randomized response and unary encoding</h2>
+<p>Most deployed local DP does <strong>frequency estimation</strong>. Each person has one value from a known list, such as an emoji, and the analyst wants the share of people with each value. A report votes for a value with some probability <span class="math inline">\(p_1\)</span> if the person has it, and with a smaller probability <span class="math inline">\(p_0\)</span> otherwise. Suppose that <span class="math inline">\(c_v\)</span> of the <span class="math inline">\(n\)</span> reports vote for a value <span class="math inline">\(v\)</span>. When you remove the false votes on average, you get the unbiased estimate <span id="eq-auto-09trustmodels-2"><span class="math display">\[\hat f_v = \frac{c_v/n - p_0}{p_1 - p_0}. \tag{21.3}\]</span></span></p>
 <p>Two designs set <span class="math inline">\(p_1\)</span> and <span class="math inline">\(p_0\)</span> for a list of <span class="math inline">\(k\)</span> values. In <strong><span class="math inline">\(k\)</span>-ary randomized response</strong>, each person reports their true value with probability <span class="math inline">\(e^{\varepsilon_0}/(e^{\varepsilon_0} + k - 1)\)</span>, and another value otherwise. <strong>Optimized unary encoding</strong> sends one bit per value, and keeps the 1 of the person’s value only half the time, but almost never changes a 0 into a 1. The variance for a rare value sets the smallest share that you can see, so compare the designs by it. Use <span class="math inline">\(k\)</span>-ary randomized response when <span class="math inline">\(k &lt; 3e^{\varepsilon_0} + 2\)</span>, and unary encoding otherwise, at the cost of a <span class="math inline">\(k\)</span>-bit report. The pure-ldp Python package has the two designs.</p>
 <p>Take a keyboard app that wants the share of each of 128 emoji from a million users at <span class="math inline">\(\varepsilon_0 = 1\)</span>. The estimate for a rare emoji has a standard deviation of 0.0019 under unary encoding, against 0.0066 under <span class="math inline">\(k\)</span>-ary randomized response. By convention, an estimate must be three standard deviations above zero before you can tell it from noise. So even the better design loses all emoji that fewer than about <span class="math inline">\(3 \times 0.0019\)</span>, or 0.6%, of users choose. Size the population from that floor before you collect. For lists too large to send, local hashing and heavy-hitter protocols send a few bits per report (Wang et al.&nbsp;2017; Bassily et al.&nbsp;2017).</p>
 </section>
-<section id="sec-trust-mean" class="level2" data-number="27.5">
-<h2 data-number="27.5" class="anchored" data-anchor-id="sec-trust-mean"><span class="header-section-number">27.5</span> Numbers in one bit: local mean estimation</h2>
+<section id="sec-trust-mean" class="level2" data-number="21.5">
+<h2 data-number="21.5" class="anchored" data-anchor-id="sec-trust-mean"><span class="header-section-number">21.5</span> Numbers in one bit: local mean estimation</h2>
 <p>For numbers between 0 and a known bound, such as minutes in an app, one bit per person is enough (Ding, Kulkarni &amp; Yekhanin 2017). The chance of a 1 increases in a straight line with the value, so the analyst inverts that line to get an unbiased mean. For a million users, a bound of 1,440 minutes and <span class="math inline">\(\varepsilon_0 = 1\)</span>, the mean has a standard deviation of 1.420 minutes. Fix the bound before collection and clip to it on the device. A bound from the reports would let one person’s value change the randomizer of all users.</p>
 </section>
-<section id="sec-trust-repeated" class="level2" data-number="27.6">
-<h2 data-number="27.6" class="anchored" data-anchor-id="sec-trust-repeated"><span class="header-section-number">27.6</span> Collecting every day: memoization</h2>
+<section id="sec-trust-repeated" class="level2" data-number="21.6">
+<h2 data-number="21.6" class="anchored" data-anchor-id="sec-trust-repeated"><span class="header-section-number">21.6</span> Collecting every day: memoization</h2>
 <p>Telemetry asks the same question every day. If a value does not change, an analyst can average its daily reports to remove their fresh noise. <a href="../part03-dp-foundations/02-properties.html">Composition</a> counts that leak as the sum of the <span class="math inline">\(\varepsilon_0\)</span> of each report. The fix is <strong>memoization</strong>. The device draws one permanent randomized response per value and sends it each day, so an unchanged value costs only the level of that response, written <span class="math inline">\(\varepsilon_\infty\)</span>. RAPPOR, Google’s collection of the homepages of Chrome users, has <span class="math inline">\(\varepsilon_\infty = 2.043\)</span>.</p>
 <p>Memoization fails when the value changes, because each new value costs another <span class="math inline">\(\varepsilon_\infty\)</span>. A user who changes their homepage every month gets to <span class="math inline">\(12 \times 2.043 = 24.5\)</span> in a year.</p>
 </section>
-<section id="sec-trust-shuffle" class="level2" data-number="27.7">
-<h2 data-number="27.7" class="anchored" data-anchor-id="sec-trust-shuffle"><span class="header-section-number">27.7</span> The shuffle model and amplification by shuffling</h2>
-<p>In the <strong>shuffle model</strong> (Cheu et al.&nbsp;2019), each person sends a local report to a <strong>shuffler</strong>. The shuffler removes identifiers and timing, and sends the reports on in random order. Each report then hides among the others, so the collection meets central <span class="math inline">\((\varepsilon, \delta)\)</span>-DP at an <span class="math inline">\(\varepsilon\)</span> far below <span class="math inline">\(\varepsilon_0\)</span> (<a href="../part04-privacy-accounting/07-shuffling-iteration.html">Amplification by shuffling and by iteration</a>). The closed-form bound of Feldman, McMillan &amp; Talwar (2021) gives that <span class="math inline">\(\varepsilon\)</span> only when there are enough people to hide among: <span id="eq-auto-09trustmodels-3"><span class="math display">\[\varepsilon_0 \le \ln\frac{n}{16\ln(2/\delta)}. \tag{27.4}\]</span></span></p>
+<section id="sec-trust-shuffle" class="level2" data-number="21.7">
+<h2 data-number="21.7" class="anchored" data-anchor-id="sec-trust-shuffle"><span class="header-section-number">21.7</span> The shuffle model and amplification by shuffling</h2>
+<p>In the <strong>shuffle model</strong> (Cheu et al.&nbsp;2019), each person sends a local report to a <strong>shuffler</strong>. The shuffler removes identifiers and timing, and sends the reports on in random order. Each report then hides among the others, so the collection meets central <span class="math inline">\((\varepsilon, \delta)\)</span>-DP at an <span class="math inline">\(\varepsilon\)</span> far below <span class="math inline">\(\varepsilon_0\)</span> (<a href="../part04-privacy-accounting/07-shuffling-iteration.html">Amplification by shuffling and by iteration</a>). The closed-form bound of Feldman, McMillan &amp; Talwar (2021) gives that <span class="math inline">\(\varepsilon\)</span> only when there are enough people to hide among: <span id="eq-auto-09trustmodels-3"><span class="math display">\[\varepsilon_0 \le \ln\frac{n}{16\ln(2/\delta)}. \tag{21.4}\]</span></span></p>
 <p>In practice, you fix the central target and solve for the largest <span class="math inline">\(\varepsilon_0\)</span> that it allows. For a central <span class="math inline">\((1, 10^{-6})\)</span>, ten thousand people can each randomize at <span class="math inline">\(\varepsilon_0 = 3.504\)</span>. But at a thousand people, the condition above limits it to 1.460. These targets use a <span class="math inline">\(\delta\)</span> below the book’s default (<a href="../part03-dp-foundations/01-definition.html#sec-dpdef-small-delta">How small δ must be</a>). At ten thousand people, the closed form gives an <span class="math inline">\(\varepsilon\)</span> 2.6 to 4.6 times too large, so plan with it, but deploy with the paper’s numerical bound.</p>
 <p>Three things remove the amplification. A shuffler that colludes with the analyst leaves each report at <span class="math inline">\(\varepsilon_0\)</span>. So choose an <span class="math inline">\(\varepsilon_0\)</span> that you can defend on its own, within the tiers of <a href="../part03-dp-foundations/01-definition.html#sec-dpdef-testing">the definition</a>. Fake senders give no cover, so count only honest ones in <span class="math inline">\(n\)</span>. And timing and sizes can leak, so real shufflers batch and pad their traffic.</p>
 </section>
-<section id="sec-trust-distributed" class="level2" data-number="27.8">
-<h2 data-number="27.8" class="anchored" data-anchor-id="sec-trust-distributed"><span class="header-section-number">27.8</span> Distributed DP: splitting the noise</h2>
-<p>In the <strong>distributed model</strong>, each client adds a small share of the central noise, and <strong>secure aggregation</strong> shows only the sum to the server (<a href="../part01-prerequisites/08-crypto-basics.html">Cryptography basics</a>). Gaussian noise splits cleanly, because the variances of independent shares add. If each of <span class="math inline">\(n\)</span> clients adds normal noise of variance <span class="math inline">\(\sigma^2/n\)</span>, the sum has noise with standard deviation <span class="math inline">\(\sigma\)</span>. That is as private as the central <a href="../part03-dp-foundations/03-laplace-gaussian.html">Gaussian mechanism</a>.</p>
-<p>But the small shares are also the weakness. A client that colludes with the server can show its share, and a client that drops out adds none. With <span class="math inline">\(t\)</span> such clients, only the noise of the honest clients is left, with standard deviation <span id="eq-auto-09trustmodels-4"><span class="math display">\[\sigma\sqrt{\frac{n - t}{n}}. \tag{27.5}\]</span></span> So fix in advance the largest fraction <span class="math inline">\(\rho\)</span> of clients that may collude or drop out, and have each client add variance <span class="math inline">\(\sigma^2/(n(1 - \rho))\)</span>. The honest clients alone then supply the full noise.</p>
+<section id="sec-trust-distributed" class="level2" data-number="21.8">
+<h2 data-number="21.8" class="anchored" data-anchor-id="sec-trust-distributed"><span class="header-section-number">21.8</span> Distributed DP: splitting the noise</h2>
+<p>In the <strong>distributed model</strong>, each client adds a small share of the central noise, and <strong>secure aggregation</strong> shows only the sum to the server (<a href="../../book-full/part01-prerequisites/08-crypto-basics.html">Cryptography basics</a>). Gaussian noise splits cleanly, because the variances of independent shares add. If each of <span class="math inline">\(n\)</span> clients adds normal noise of variance <span class="math inline">\(\sigma^2/n\)</span>, the sum has noise with standard deviation <span class="math inline">\(\sigma\)</span>. That is as private as the central <a href="../part03-dp-foundations/03-laplace-gaussian.html">Gaussian mechanism</a>.</p>
+<p>But the small shares are also the weakness. A client that colludes with the server can show its share, and a client that drops out adds none. With <span class="math inline">\(t\)</span> such clients, only the noise of the honest clients is left, with standard deviation <span id="eq-auto-09trustmodels-4"><span class="math display">\[\sigma\sqrt{\frac{n - t}{n}}. \tag{21.5}\]</span></span> So fix in advance the largest fraction <span class="math inline">\(\rho\)</span> of clients that may collude or drop out, and have each client add variance <span class="math inline">\(\sigma^2/(n(1 - \rho))\)</span>. The honest clients alone then supply the full noise.</p>
 <p>For example, a server sums a histogram of about a hundred thousand users through 100 clients, at <span class="math inline">\((1, 10^{-6})\)</span>. A user who changes value moves one count down and another up, so the <span class="math inline">\(\ell_2\)</span> sensitivity is <span class="math inline">\(\sqrt 2\)</span>. The analytic Gaussian calibration of <a href="../part03-dp-foundations/03-laplace-gaussian.html">the Laplace and Gaussian mechanisms</a> gives a total <span class="math inline">\(\sigma\)</span> of 5.975. That is <span class="math inline">\(5.975/\sqrt{100} = 0.597\)</span> per client. Without over-provisioning, if a fifth of the clients collude, the guarantee weakens to <span class="math inline">\(\varepsilon = 1.128\)</span> at the same <span class="math inline">\(\delta\)</span>.</p>
 <p>Secure aggregation works on integers, so clients add integer noise. This noise is Skellam or the distributed discrete Gaussian of <a href="../part03-dp-foundations/08-discrete-mechanisms.html">Discrete mechanisms</a>, as in TensorFlow Federated’s <code>tff.aggregators.DistributedDpSumFactory</code>. Secure aggregation also does not check inputs, so a malicious client can still send any vector.</p>
 </section>
-<section id="cheat-sheet" class="level2" data-number="27.9">
-<h2 data-number="27.9" class="anchored" data-anchor-id="cheat-sheet"><span class="header-section-number">27.9</span> Cheat sheet</h2>
+<section id="cheat-sheet" class="level2" data-number="21.9">
+<h2 data-number="21.9" class="anchored" data-anchor-id="cheat-sheet"><span class="header-section-number">21.9</span> Cheat sheet</h2>
 <div id="tbl-trust-cheat" class="quarto-float quarto-figure quarto-figure-center anchored">
 <figure class="quarto-float quarto-float-tbl figure">
 <figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl" id="tbl-trust-cheat-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-Table&nbsp;27.1: Which trust model and protocol to use, by situation.
+Table&nbsp;21.1: Which trust model and protocol to use, by situation.
 </figcaption>
 <div aria-describedby="tbl-trust-cheat-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
 <table class="caption-top table">
@@ -757,8 +721,8 @@ Table&nbsp;27.1: Which trust model and protocol to use, by situation.
 <li>Local noise exceeds central noise by a factor that grows like <span class="math inline">\(\sqrt n\)</span>, 149 on Adult at <span class="math inline">\(\ln 3\)</span>.</li>
 </ul>
 </section>
-<section id="references" class="level2" data-number="27.10">
-<h2 data-number="27.10" class="anchored" data-anchor-id="references"><span class="header-section-number">27.10</span> References</h2>
+<section id="references" class="level2" data-number="21.10">
+<h2 data-number="21.10" class="anchored" data-anchor-id="references"><span class="header-section-number">21.10</span> References</h2>
 <ul>
 <li>Wang, Blocki, Li &amp; Jha, “Locally Differentially Private Protocols for Frequency Estimation” (USENIX Security 2017): frequency oracles and local hashing, compared.</li>
 <li>Feldman, McMillan &amp; Talwar, “Hiding Among the Clones” (FOCS 2021): the shuffling bounds, closed form and numerical.</li>
@@ -1172,12 +1136,12 @@ Table&nbsp;27.1: Which trust model and protocol to use, by situation.
 <nav class="page-navigation">
   <div class="nav-page nav-page-previous">
       <a href="../part03-dp-foundations/08-discrete-mechanisms.html" class="pagination-link" aria-label="Discrete and floating-point-safe mechanisms">
-        <i class="bi bi-arrow-left-short"></i> <span class="nav-page-text"><span class="chapter-number">26</span>&nbsp; <span class="chapter-title">Discrete and floating-point-safe mechanisms</span></span>
+        <i class="bi bi-arrow-left-short"></i> <span class="nav-page-text"><span class="chapter-number">20</span>&nbsp; <span class="chapter-title">Discrete and floating-point-safe mechanisms</span></span>
       </a>          
   </div>
   <div class="nav-page nav-page-next">
       <a href="../part03-dp-foundations/10-lower-bounds.html" class="pagination-link" aria-label="Lower bounds: what privacy costs">
-        <span class="nav-page-text"><span class="chapter-number">28</span>&nbsp; <span class="chapter-title">Lower bounds: what privacy costs</span></span> <i class="bi bi-arrow-right-short"></i>
+        <span class="nav-page-text"><span class="chapter-number">22</span>&nbsp; <span class="chapter-title">Lower bounds: what privacy costs</span></span> <i class="bi bi-arrow-right-short"></i>
       </a>
   </div>
 </nav>

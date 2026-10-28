@@ -7,7 +7,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
 
-<title>15&nbsp; Linkage and re-identification – Privacy-Preserving Machine Learning for Practitioners</title>
+<title>9&nbsp; Linkage and re-identification – Privacy-Preserving Machine Learning for Practitioners</title>
 <style>
 /* Default styles provided by pandoc.
 ** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
@@ -82,7 +82,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <link href="../site_libs/quarto-html/quarto-syntax-highlighting-bf27225e3a48a9273f3daa8f8e829971.css" rel="stylesheet" id="quarto-text-highlighting-styles">
 <script src="../site_libs/bootstrap/bootstrap.min.js"></script>
 <link href="../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
-<link href="../site_libs/bootstrap/bootstrap-c76bce1ab0818eb3e57b6c28e4057b54.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
+<link href="../site_libs/bootstrap/bootstrap-78f503ea39f784e8964cd205807fbe37.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
 <script id="quarto-search-options" type="application/json">{
   "location": "sidebar",
   "copy-button": false,
@@ -152,7 +152,7 @@ window.Quarto = {
       <button type="button" class="quarto-btn-toggle btn" data-bs-toggle="collapse" role="button" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
         <i class="bi bi-layout-text-sidebar-reverse"></i>
       </button>
-        <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../part02-attacks/00-introduction.html">Threat models and attacks</a></li><li class="breadcrumb-item"><a href="../part02-attacks/07-linkage-reidentification.html"><span class="chapter-number">15</span>&nbsp; <span class="chapter-title">Linkage and re-identification</span></a></li></ol></nav>
+        <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../part02-attacks/00-introduction.html">Threat models and attacks</a></li><li class="breadcrumb-item"><a href="../part02-attacks/07-linkage-reidentification.html"><span class="chapter-number">9</span>&nbsp; <span class="chapter-title">Linkage and re-identification</span></a></li></ol></nav>
         <a class="flex-grow-1" role="navigation" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">      
         </a>
       <button type="button" class="btn quarto-search-button" aria-label="Search" onclick="window.quartoOpenSearch();">
@@ -194,50 +194,14 @@ window.Quarto = {
       <ul id="quarto-sidebar-section-1" class="collapse list-unstyled sidebar-section depth1 show">  
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
-  <a href="../part01-prerequisites/01-distributions.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">1</span>&nbsp; <span class="chapter-title">Probability distributions</span></span></a>
-  </div>
-</li>
-          <li class="sidebar-item">
-  <div class="sidebar-item-container"> 
-  <a href="../part01-prerequisites/02-concentration.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">2</span>&nbsp; <span class="chapter-title">Concentration inequalities</span></span></a>
-  </div>
-</li>
-          <li class="sidebar-item">
-  <div class="sidebar-item-container"> 
   <a href="../part01-prerequisites/03-divergences.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">3</span>&nbsp; <span class="chapter-title">Divergences</span></span></a>
+ <span class="menu-text"><span class="chapter-number">1</span>&nbsp; <span class="chapter-title">Divergences</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../part01-prerequisites/04-hypothesis-testing.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">4</span>&nbsp; <span class="chapter-title">Hypothesis testing</span></span></a>
-  </div>
-</li>
-          <li class="sidebar-item">
-  <div class="sidebar-item-container"> 
-  <a href="../part01-prerequisites/05-information-theory.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">5</span>&nbsp; <span class="chapter-title">Information theory</span></span></a>
-  </div>
-</li>
-          <li class="sidebar-item">
-  <div class="sidebar-item-container"> 
-  <a href="../part01-prerequisites/06-optimization.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">6</span>&nbsp; <span class="chapter-title">Optimization</span></span></a>
-  </div>
-</li>
-          <li class="sidebar-item">
-  <div class="sidebar-item-container"> 
-  <a href="../part01-prerequisites/07-stability-generalization.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">7</span>&nbsp; <span class="chapter-title">Algorithmic stability and generalization</span></span></a>
-  </div>
-</li>
-          <li class="sidebar-item">
-  <div class="sidebar-item-container"> 
-  <a href="../part01-prerequisites/08-crypto-basics.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">8</span>&nbsp; <span class="chapter-title">Cryptography basics</span></span></a>
+ <span class="menu-text"><span class="chapter-number">2</span>&nbsp; <span class="chapter-title">Hypothesis testing</span></span></a>
   </div>
 </li>
       </ul>
@@ -254,61 +218,61 @@ window.Quarto = {
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../part02-attacks/01-threat-models.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">9</span>&nbsp; <span class="chapter-title">Threat models and privacy games</span></span></a>
+ <span class="menu-text"><span class="chapter-number">3</span>&nbsp; <span class="chapter-title">Threat models and privacy games</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../part02-attacks/02-membership-inference.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">10</span>&nbsp; <span class="chapter-title">Membership inference</span></span></a>
+ <span class="menu-text"><span class="chapter-number">4</span>&nbsp; <span class="chapter-title">Membership inference</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../part02-attacks/03-attribute-inference.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">11</span>&nbsp; <span class="chapter-title">Attribute inference and model inversion</span></span></a>
+ <span class="menu-text"><span class="chapter-number">5</span>&nbsp; <span class="chapter-title">Attribute inference and model inversion</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../part02-attacks/04-property-inference.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">12</span>&nbsp; <span class="chapter-title">Property inference</span></span></a>
+ <span class="menu-text"><span class="chapter-number">6</span>&nbsp; <span class="chapter-title">Property inference</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../part02-attacks/05-memorization-extraction.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">13</span>&nbsp; <span class="chapter-title">Memorization and training-data extraction</span></span></a>
+ <span class="menu-text"><span class="chapter-number">7</span>&nbsp; <span class="chapter-title">Memorization and training-data extraction</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../part02-attacks/06-gradient-inversion.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">14</span>&nbsp; <span class="chapter-title">Gradient inversion</span></span></a>
+ <span class="menu-text"><span class="chapter-number">8</span>&nbsp; <span class="chapter-title">Gradient inversion</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../part02-attacks/07-linkage-reidentification.html" class="sidebar-item-text sidebar-link active">
- <span class="menu-text"><span class="chapter-number">15</span>&nbsp; <span class="chapter-title">Linkage and re-identification</span></span></a>
+ <span class="menu-text"><span class="chapter-number">9</span>&nbsp; <span class="chapter-title">Linkage and re-identification</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../part02-attacks/08-syntactic-anonymity.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">16</span>&nbsp; <span class="chapter-title">Syntactic anonymity and how it breaks</span></span></a>
+ <span class="menu-text"><span class="chapter-number">10</span>&nbsp; <span class="chapter-title">Syntactic anonymity and how it breaks</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../part02-attacks/09-reconstruction.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">17</span>&nbsp; <span class="chapter-title">Reconstruction attacks</span></span></a>
+ <span class="menu-text"><span class="chapter-number">11</span>&nbsp; <span class="chapter-title">Reconstruction attacks</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../part02-attacks/10-risk-assessment.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">18</span>&nbsp; <span class="chapter-title">Pre-release privacy risk assessment</span></span></a>
+ <span class="menu-text"><span class="chapter-number">12</span>&nbsp; <span class="chapter-title">Pre-release privacy risk assessment</span></span></a>
   </div>
 </li>
       </ul>
@@ -325,73 +289,73 @@ window.Quarto = {
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../part03-dp-foundations/01-definition.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">19</span>&nbsp; <span class="chapter-title">The definition of differential privacy</span></span></a>
+ <span class="menu-text"><span class="chapter-number">13</span>&nbsp; <span class="chapter-title">The definition of differential privacy</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../part03-dp-foundations/02-properties.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">20</span>&nbsp; <span class="chapter-title">Post-processing, group privacy and composition</span></span></a>
+ <span class="menu-text"><span class="chapter-number">14</span>&nbsp; <span class="chapter-title">Post-processing, group privacy and composition</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../part03-dp-foundations/03-laplace-gaussian.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">21</span>&nbsp; <span class="chapter-title">The Laplace and Gaussian mechanisms</span></span></a>
+ <span class="menu-text"><span class="chapter-number">15</span>&nbsp; <span class="chapter-title">The Laplace and Gaussian mechanisms</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../part03-dp-foundations/04-composition.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">22</span>&nbsp; <span class="chapter-title">Advanced and optimal composition</span></span></a>
+ <span class="menu-text"><span class="chapter-number">16</span>&nbsp; <span class="chapter-title">Advanced and optimal composition</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../part03-dp-foundations/05-selection.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">23</span>&nbsp; <span class="chapter-title">Selection: exponential mechanism, report-noisy-max, sparse vector</span></span></a>
+ <span class="menu-text"><span class="chapter-number">17</span>&nbsp; <span class="chapter-title">Selection: exponential mechanism, report-noisy-max, sparse vector</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../part03-dp-foundations/06-query-release.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">24</span>&nbsp; <span class="chapter-title">Query release and private multiplicative weights</span></span></a>
+ <span class="menu-text"><span class="chapter-number">18</span>&nbsp; <span class="chapter-title">Query release and private multiplicative weights</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../part03-dp-foundations/07-sensitivity.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">25</span>&nbsp; <span class="chapter-title">Beyond global sensitivity</span></span></a>
+ <span class="menu-text"><span class="chapter-number">19</span>&nbsp; <span class="chapter-title">Beyond global sensitivity</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../part03-dp-foundations/08-discrete-mechanisms.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">26</span>&nbsp; <span class="chapter-title">Discrete and floating-point-safe mechanisms</span></span></a>
+ <span class="menu-text"><span class="chapter-number">20</span>&nbsp; <span class="chapter-title">Discrete and floating-point-safe mechanisms</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../part03-dp-foundations/09-trust-models.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">27</span>&nbsp; <span class="chapter-title">Local, shuffle and distributed trust models</span></span></a>
+ <span class="menu-text"><span class="chapter-number">21</span>&nbsp; <span class="chapter-title">Local, shuffle and distributed trust models</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../part03-dp-foundations/10-lower-bounds.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">28</span>&nbsp; <span class="chapter-title">Lower bounds: what privacy costs</span></span></a>
+ <span class="menu-text"><span class="chapter-number">22</span>&nbsp; <span class="chapter-title">Lower bounds: what privacy costs</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../part03-dp-foundations/11-mean-estimation.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">29</span>&nbsp; <span class="chapter-title">Private mean estimation</span></span></a>
+ <span class="menu-text"><span class="chapter-number">23</span>&nbsp; <span class="chapter-title">Private mean estimation</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../part03-dp-foundations/12-release-statistics.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">30</span>&nbsp; <span class="chapter-title">Release statistics with a library</span></span></a>
+ <span class="menu-text"><span class="chapter-number">24</span>&nbsp; <span class="chapter-title">Release statistics with a library</span></span></a>
   </div>
 </li>
       </ul>
@@ -408,61 +372,61 @@ window.Quarto = {
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../part04-privacy-accounting/09-choosing-an-accountant.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">31</span>&nbsp; <span class="chapter-title">Choosing an accountant</span></span></a>
+ <span class="menu-text"><span class="chapter-number">25</span>&nbsp; <span class="chapter-title">Choosing an accountant</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../part04-privacy-accounting/10-calibrate-dp-sgd.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">32</span>&nbsp; <span class="chapter-title">Calibrate and account a DP-SGD run</span></span></a>
+ <span class="menu-text"><span class="chapter-number">26</span>&nbsp; <span class="chapter-title">Calibrate and account a DP-SGD run</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../part04-privacy-accounting/05-subsampling.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">33</span>&nbsp; <span class="chapter-title">Amplification by subsampling</span></span></a>
+ <span class="menu-text"><span class="chapter-number">27</span>&nbsp; <span class="chapter-title">Amplification by subsampling</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../part04-privacy-accounting/01-renyi-dp.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">34</span>&nbsp; <span class="chapter-title">Rényi differential privacy</span></span></a>
+ <span class="menu-text"><span class="chapter-number">28</span>&nbsp; <span class="chapter-title">Rényi differential privacy</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../part04-privacy-accounting/02-rdp-conversions.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">35</span>&nbsp; <span class="chapter-title">From Rényi DP to (ε, δ) and to tests</span></span></a>
+ <span class="menu-text"><span class="chapter-number">29</span>&nbsp; <span class="chapter-title">From Rényi DP to (ε, δ) and to tests</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../part04-privacy-accounting/06-numerical-accounting.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">36</span>&nbsp; <span class="chapter-title">Numerical accounting with privacy loss distributions</span></span></a>
+ <span class="menu-text"><span class="chapter-number">30</span>&nbsp; <span class="chapter-title">Numerical accounting with privacy loss distributions</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../part04-privacy-accounting/04-gaussian-dp.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">37</span>&nbsp; <span class="chapter-title">f-DP and Gaussian differential privacy</span></span></a>
+ <span class="menu-text"><span class="chapter-number">31</span>&nbsp; <span class="chapter-title">f-DP and Gaussian differential privacy</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../part04-privacy-accounting/08-adaptive-composition.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">38</span>&nbsp; <span class="chapter-title">Adaptive composition: filters, odometers and individual accounting</span></span></a>
+ <span class="menu-text"><span class="chapter-number">32</span>&nbsp; <span class="chapter-title">Adaptive composition: filters, odometers and individual accounting</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../part04-privacy-accounting/03-concentrated-dp.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">39</span>&nbsp; <span class="chapter-title">Concentrated differential privacy</span></span></a>
+ <span class="menu-text"><span class="chapter-number">33</span>&nbsp; <span class="chapter-title">Concentrated differential privacy</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../part04-privacy-accounting/07-shuffling-iteration.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">40</span>&nbsp; <span class="chapter-title">Amplification by shuffling and by iteration</span></span></a>
+ <span class="menu-text"><span class="chapter-number">34</span>&nbsp; <span class="chapter-title">Amplification by shuffling and by iteration</span></span></a>
   </div>
 </li>
       </ul>
@@ -479,85 +443,85 @@ window.Quarto = {
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../part05-dp-ml/01-dp-erm.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">41</span>&nbsp; <span class="chapter-title">Private empirical risk minimization</span></span></a>
+ <span class="menu-text"><span class="chapter-number">35</span>&nbsp; <span class="chapter-title">Private empirical risk minimization</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../part05-dp-ml/02-dp-sgd.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">42</span>&nbsp; <span class="chapter-title">DP-SGD</span></span></a>
+ <span class="menu-text"><span class="chapter-number">36</span>&nbsp; <span class="chapter-title">DP-SGD</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../part05-dp-ml/13-train-dp-sgd.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">43</span>&nbsp; <span class="chapter-title">Train a model with DP-SGD</span></span></a>
+ <span class="menu-text"><span class="chapter-number">37</span>&nbsp; <span class="chapter-title">Train a model with DP-SGD</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../part05-dp-ml/03-hyperparameter-tuning.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">44</span>&nbsp; <span class="chapter-title">Hyperparameter tuning and private selection</span></span></a>
+ <span class="menu-text"><span class="chapter-number">38</span>&nbsp; <span class="chapter-title">Hyperparameter tuning and private selection</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../part05-dp-ml/07-user-level.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">45</span>&nbsp; <span class="chapter-title">User-level differential privacy</span></span></a>
+ <span class="menu-text"><span class="chapter-number">39</span>&nbsp; <span class="chapter-title">User-level differential privacy</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../part05-dp-ml/09-choosing-epsilon.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">46</span>&nbsp; <span class="chapter-title">Choosing ε</span></span></a>
+ <span class="menu-text"><span class="chapter-number">40</span>&nbsp; <span class="chapter-title">Choosing ε</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../part05-dp-ml/06-public-data.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">47</span>&nbsp; <span class="chapter-title">Public data and private fine-tuning</span></span></a>
+ <span class="menu-text"><span class="chapter-number">41</span>&nbsp; <span class="chapter-title">Public data and private fine-tuning</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../part05-dp-ml/14-private-llm-finetuning.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">48</span>&nbsp; <span class="chapter-title">Fine-tune a language model privately with LoRA</span></span></a>
+ <span class="menu-text"><span class="chapter-number">42</span>&nbsp; <span class="chapter-title">Fine-tune a language model privately with LoRA</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../part05-dp-ml/05-private-prediction.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">49</span>&nbsp; <span class="chapter-title">Private prediction: PATE and in-context learning</span></span></a>
+ <span class="menu-text"><span class="chapter-number">43</span>&nbsp; <span class="chapter-title">Private prediction: PATE and in-context learning</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../part05-dp-ml/04-matrix-mechanisms.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">50</span>&nbsp; <span class="chapter-title">DP-FTRL and matrix factorization</span></span></a>
+ <span class="menu-text"><span class="chapter-number">44</span>&nbsp; <span class="chapter-title">DP-FTRL and matrix factorization</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../part05-dp-ml/08-disparate-impact.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">51</span>&nbsp; <span class="chapter-title">Disparate impact</span></span></a>
+ <span class="menu-text"><span class="chapter-number">45</span>&nbsp; <span class="chapter-title">Disparate impact</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../part05-dp-ml/10-auditing.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">52</span>&nbsp; <span class="chapter-title">Auditing private training</span></span></a>
+ <span class="menu-text"><span class="chapter-number">46</span>&nbsp; <span class="chapter-title">Auditing private training</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../part05-dp-ml/11-adaptive-data-analysis.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">53</span>&nbsp; <span class="chapter-title">Adaptive data analysis</span></span></a>
+ <span class="menu-text"><span class="chapter-number">47</span>&nbsp; <span class="chapter-title">Adaptive data analysis</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../part05-dp-ml/12-release-governance.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">54</span>&nbsp; <span class="chapter-title">Release and governance</span></span></a>
+ <span class="menu-text"><span class="chapter-number">48</span>&nbsp; <span class="chapter-title">Release and governance</span></span></a>
   </div>
 </li>
       </ul>
@@ -595,24 +559,24 @@ window.Quarto = {
     <h2 id="toc-title">Table of contents</h2>
    
   <ul>
-  <li><a href="#why-this-matters" id="toc-why-this-matters" class="nav-link active" data-scroll-target="#why-this-matters"><span class="header-section-number">15.1</span> Why this matters</a></li>
-  <li><a href="#sec-link-quasi" id="toc-sec-link-quasi" class="nav-link" data-scroll-target="#sec-link-quasi"><span class="header-section-number">15.2</span> Quasi-identifiers and the linkage attack</a></li>
-  <li><a href="#sec-link-pseudonyms" id="toc-sec-link-pseudonyms" class="nav-link" data-scroll-target="#sec-link-pseudonyms"><span class="header-section-number">15.3</span> Pseudonyms and hashed identifiers</a></li>
-  <li><a href="#sec-link-unique" id="toc-sec-link-unique" class="nav-link" data-scroll-target="#sec-link-unique"><span class="header-section-number">15.4</span> How many people are unique?</a></li>
-  <li><a href="#sec-link-sparse" id="toc-sec-link-sparse" class="nav-link" data-scroll-target="#sec-link-sparse"><span class="header-section-number">15.5</span> Sparse data: the Netflix attack</a></li>
-  <li><a href="#sec-link-sampling" id="toc-sec-link-sampling" class="nav-link" data-scroll-target="#sec-link-sampling"><span class="header-section-number">15.6</span> Does releasing a sample protect?</a></li>
-  <li><a href="#sec-link-check" id="toc-sec-link-check" class="nav-link" data-scroll-target="#sec-link-check"><span class="header-section-number">15.7</span> A pre-release risk check</a></li>
-  <li><a href="#cheat-sheet" id="toc-cheat-sheet" class="nav-link" data-scroll-target="#cheat-sheet"><span class="header-section-number">15.8</span> Cheat sheet</a></li>
-  <li><a href="#references" id="toc-references" class="nav-link" data-scroll-target="#references"><span class="header-section-number">15.9</span> References</a></li>
+  <li><a href="#why-this-matters" id="toc-why-this-matters" class="nav-link active" data-scroll-target="#why-this-matters"><span class="header-section-number">9.1</span> Why this matters</a></li>
+  <li><a href="#sec-link-quasi" id="toc-sec-link-quasi" class="nav-link" data-scroll-target="#sec-link-quasi"><span class="header-section-number">9.2</span> Quasi-identifiers and the linkage attack</a></li>
+  <li><a href="#sec-link-pseudonyms" id="toc-sec-link-pseudonyms" class="nav-link" data-scroll-target="#sec-link-pseudonyms"><span class="header-section-number">9.3</span> Pseudonyms and hashed identifiers</a></li>
+  <li><a href="#sec-link-unique" id="toc-sec-link-unique" class="nav-link" data-scroll-target="#sec-link-unique"><span class="header-section-number">9.4</span> How many people are unique?</a></li>
+  <li><a href="#sec-link-sparse" id="toc-sec-link-sparse" class="nav-link" data-scroll-target="#sec-link-sparse"><span class="header-section-number">9.5</span> Sparse data: the Netflix attack</a></li>
+  <li><a href="#sec-link-sampling" id="toc-sec-link-sampling" class="nav-link" data-scroll-target="#sec-link-sampling"><span class="header-section-number">9.6</span> Does releasing a sample protect?</a></li>
+  <li><a href="#sec-link-check" id="toc-sec-link-check" class="nav-link" data-scroll-target="#sec-link-check"><span class="header-section-number">9.7</span> A pre-release risk check</a></li>
+  <li><a href="#cheat-sheet" id="toc-cheat-sheet" class="nav-link" data-scroll-target="#cheat-sheet"><span class="header-section-number">9.8</span> Cheat sheet</a></li>
+  <li><a href="#references" id="toc-references" class="nav-link" data-scroll-target="#references"><span class="header-section-number">9.9</span> References</a></li>
   </ul>
 </nav>
     </div>
 <!-- main -->
 <main class="content" id="quarto-document-content">
 
-<header id="title-block-header" class="quarto-title-block default"><nav class="quarto-page-breadcrumbs quarto-title-breadcrumbs d-none d-lg-block" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../part02-attacks/00-introduction.html">Threat models and attacks</a></li><li class="breadcrumb-item"><a href="../part02-attacks/07-linkage-reidentification.html"><span class="chapter-number">15</span>&nbsp; <span class="chapter-title">Linkage and re-identification</span></a></li></ol></nav>
+<header id="title-block-header" class="quarto-title-block default"><nav class="quarto-page-breadcrumbs quarto-title-breadcrumbs d-none d-lg-block" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../part02-attacks/00-introduction.html">Threat models and attacks</a></li><li class="breadcrumb-item"><a href="../part02-attacks/07-linkage-reidentification.html"><span class="chapter-number">9</span>&nbsp; <span class="chapter-title">Linkage and re-identification</span></a></li></ol></nav>
 <div class="quarto-title">
-<h1 class="title"><span class="chapter-number">15</span>&nbsp; <span class="chapter-title">Linkage and re-identification</span></h1>
+<h1 class="title"><span class="chapter-number">9</span>&nbsp; <span class="chapter-title">Linkage and re-identification</span></h1>
 </div>
 
 
@@ -629,15 +593,15 @@ window.Quarto = {
 </header>
 
 
-<section id="why-this-matters" class="level2" data-number="15.1">
-<h2 data-number="15.1" class="anchored" data-anchor-id="why-this-matters"><span class="header-section-number">15.1</span> Why this matters</h2>
+<section id="why-this-matters" class="level2" data-number="9.1">
+<h2 data-number="9.1" class="anchored" data-anchor-id="why-this-matters"><span class="header-section-number">9.1</span> Why this matters</h2>
 <p>A hospital deletes the names from its discharge records and shares them with researchers. It keeps the postcode, the date of birth, the sex and the diagnosis. A voter roll lists names next to the same three columns. Anyone who has one can join the two tables and put a name back on most rows. This is a <strong>linkage attack</strong>, and putting a name back on a “de-identified” record is <strong>re-identification</strong>.</p>
 <p>To judge whether a table can be linked, count its identifying information in bits. Each bit halves the candidates. So it takes <span class="math inline">\(\log_2 n\)</span> bits to single out one person in a population of <span class="math inline">\(n\)</span> people. For the United States of 1990, that is 27.9 bits. Almost everyone is unique once the attributes an adversary knows carry a few bits more than that, and a unique record can be linked.</p>
 </section>
-<section id="sec-link-quasi" class="level2" data-number="15.2">
-<h2 data-number="15.2" class="anchored" data-anchor-id="sec-link-quasi"><span class="header-section-number">15.2</span> Quasi-identifiers and the linkage attack</h2>
+<section id="sec-link-quasi" class="level2" data-number="9.2">
+<h2 data-number="9.2" class="anchored" data-anchor-id="sec-link-quasi"><span class="header-section-number">9.2</span> Quasi-identifiers and the linkage attack</h2>
 <p><strong>Direct identifiers</strong>, like a name or an email address, name a person on their own. <strong>Sensitive attributes</strong>, such as a diagnosis, are what the release is about. <strong>Quasi-identifiers</strong> sit in between. None of them names anyone alone, but together they often single out one person, and they appear next to names in other datasets.</p>
-<p>To score a release you hold, group its <span class="math inline">\(n\)</span> records into <strong>equivalence classes</strong>. A class is a set of records with identical quasi-identifiers. Write <span class="math inline">\(J\)</span> for the number of classes. Suppose an adversary knows the target’s quasi-identifiers and knows that the target is in the release. If the target’s class holds <span class="math inline">\(k\)</span> records, the adversary names the right one with probability <span class="math inline">\(1/k\)</span>. The class holds <span class="math inline">\(k\)</span> possible targets, so every class adds one win whatever its size. Over all <span class="math inline">\(n\)</span> targets, the chance of naming the right record is therefore <span id="eq-link-success"><span class="math display">\[\Pr[\text{win}] = \frac{J}{n}, \tag{15.1}\]</span></span> and no adversary that sees only the quasi-identifiers can do better. This is the <strong>prosecutor model</strong>, the worst case, because it assumes the adversary knows the target is in the data.</p>
+<p>To score a release you hold, group its <span class="math inline">\(n\)</span> records into <strong>equivalence classes</strong>. A class is a set of records with identical quasi-identifiers. Write <span class="math inline">\(J\)</span> for the number of classes. Suppose an adversary knows the target’s quasi-identifiers and knows that the target is in the release. If the target’s class holds <span class="math inline">\(k\)</span> records, the adversary names the right one with probability <span class="math inline">\(1/k\)</span>. The class holds <span class="math inline">\(k\)</span> possible targets, so every class adds one win whatever its size. Over all <span class="math inline">\(n\)</span> targets, the chance of naming the right record is therefore <span id="eq-link-success"><span class="math display">\[\Pr[\text{win}] = \frac{J}{n}, \tag{9.1}\]</span></span> and no adversary that sees only the quasi-identifiers can do better. This is the <strong>prosecutor model</strong>, the worst case, because it assumes the adversary knows the target is in the data.</p>
 <p>The script <a href="https://github.com/manuelvloureiro/privacy-preserving-machine-learning-book/blob/main/code/part02-attacks/practitioner_table_risk.py">practitioner_table_risk.py</a> shows how fast uniqueness grows on a real table. The table is Adult, the 48,842 people of the 1994 US Current Population Survey in the UCI repository. Adult has no ZIP code or birth date, so the script starts from age, sex and race and adds one quasi-identifier at a time. For each set it prints the share of unique records, the share in classes smaller than 5, the smallest class size and <span class="math inline">\(J/n\)</span>.</p>
 <div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb1" data-excerpt="qi-uniqueness"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a>n <span class="op">=</span> df.height</span>
 <span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> qis <span class="kw">in</span> QI_SETS:</span>
@@ -658,8 +622,8 @@ age + sex + race + native-country + marital-status + education: unique=14.64%  i
 age + sex + race + native-country + marital-status + education + hours-per-week: unique=36.55%  in classes &lt;5=57.05%  min k=1  J/n=0.480</code></pre>
 <p>Three columns that look harmless leave 0.12% of the records unique, and six leave 14.64%. The hours worked per week, which nobody would list as an identifier, then make 36.55% unique. So add every column an adversary could know to the test, one at a time. The column that breaks the table may be one that nobody suspected. A minimum class size of 5 is a common rule, yet every set here has classes of a single record.</p>
 </section>
-<section id="sec-link-pseudonyms" class="level2" data-number="15.3">
-<h2 data-number="15.3" class="anchored" data-anchor-id="sec-link-pseudonyms"><span class="header-section-number">15.3</span> Pseudonyms and hashed identifiers</h2>
+<section id="sec-link-pseudonyms" class="level2" data-number="9.3">
+<h2 data-number="9.3" class="anchored" data-anchor-id="sec-link-pseudonyms"><span class="header-section-number">9.3</span> Pseudonyms and hashed identifiers</h2>
 <p>Many releases replace each identifier by a <strong>pseudonym</strong>, a code that stays the same across a person’s records. Such codes fail in two ways. First, an adversary can reverse a hash without a secret key, such as plain MD5, whenever the possible identifiers can be listed. It hashes every candidate and looks each pseudonym up. New York City hashed its taxi drivers’ licences this way in its 2013 trip release. There were only about 2 million possible licences, so in 2014 Vijay Pandurangan hashed them all in minutes and named each driver.</p>
 <p>The second failure survives any key. The pseudonym ties a person’s records together, so a link to any one of them reveals all the others. In the taxi data, a passenger who knows the pickup minute and place can find one trip and its driver. The driver’s pseudonym, even a random one, then reveals every trip that driver made. For this reason the General Data Protection Regulation (GDPR) still counts pseudonymized data as personal data.</p>
 <p>If you must keep a join key, make it with a keyed hash, a hash-based message authentication code (HMAC). Keep the key away from the data.</p>
@@ -680,32 +644,32 @@ age + sex + race + native-country + marital-status + education + hours-per-week:
 <span id="cb3-15"><a href="#cb3-15" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(keyed <span class="kw">in</span> lookup)  <span class="co"># False</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <p>The key stops the dictionary attack but not the second failure, because each person’s records still form an identifying history. The same key in two releases would join that history across them, so draw a new key for each release.</p>
 </section>
-<section id="sec-link-unique" class="level2" data-number="15.4">
-<h2 data-number="15.4" class="anchored" data-anchor-id="sec-link-unique"><span class="header-section-number">15.4</span> How many people are unique?</h2>
-<p>When you design a release, there is no table to count yet, so estimate uniqueness by adding bits. An attribute with <span class="math inline">\(v\)</span> equally likely values carries <span class="math inline">\(\log_2 v\)</span> bits, and the bits of independent attributes add. Attributes that carry <span class="math inline">\(b\)</span> bits in total split people into <span class="math inline">\(2^b\)</span> cells. Suppose each person lands in a random cell, every cell equally likely. Then the expected share of the <span class="math inline">\(n\)</span> people who are alone in their cell is about <span id="eq-link-uniform"><span class="math display">\[\frac{\text{unique people}}{n} \approx \exp\big(-2^{\log_2 n - b}\big). \tag{15.2}\]</span></span> The share depends only on the bits beyond <span class="math inline">\(\log_2 n\)</span>, and it rises steeply with them. Half the people are unique at only 0.53 bits beyond <span class="math inline">\(\log_2 n\)</span>.</p>
+<section id="sec-link-unique" class="level2" data-number="9.4">
+<h2 data-number="9.4" class="anchored" data-anchor-id="sec-link-unique"><span class="header-section-number">9.4</span> How many people are unique?</h2>
+<p>When you design a release, there is no table to count yet, so estimate uniqueness by adding bits. An attribute with <span class="math inline">\(v\)</span> equally likely values carries <span class="math inline">\(\log_2 v\)</span> bits, and the bits of independent attributes add. Attributes that carry <span class="math inline">\(b\)</span> bits in total split people into <span class="math inline">\(2^b\)</span> cells. Suppose each person lands in a random cell, every cell equally likely. Then the expected share of the <span class="math inline">\(n\)</span> people who are alone in their cell is about <span id="eq-link-uniform"><span class="math display">\[\frac{\text{unique people}}{n} \approx \exp\big(-2^{\log_2 n - b}\big). \tag{9.2}\]</span></span> The share depends only on the bits beyond <span class="math inline">\(\log_2 n\)</span>, and it rises steeply with them. Half the people are unique at only 0.53 bits beyond <span class="math inline">\(\log_2 n\)</span>.</p>
 <p>For example, ZIP code, birth date and sex carry 31.1 bits, a few more than the 27.9 bits that single out one American. The formula then predicts that 0.899 of Americans are unique, close to the 87% that Latanya Sweeney estimated from the 1990 census. Real attributes are skewed and correlated, which usually lowers uniqueness, so the estimate is cautious.</p>
 </section>
-<section id="sec-link-sparse" class="level2" data-number="15.5">
-<h2 data-number="15.5" class="anchored" data-anchor-id="sec-link-sparse"><span class="header-section-number">15.5</span> Sparse data: the Netflix attack</h2>
+<section id="sec-link-sparse" class="level2" data-number="9.5">
+<h2 data-number="9.5" class="anchored" data-anchor-id="sec-link-sparse"><span class="header-section-number">9.5</span> Sparse data: the Netflix attack</h2>
 <p>Ratings, purchases and locations have no quasi-identifier columns, yet they identify people even better. In 2006 Netflix released about 100 million movie ratings, with random numbers in place of the subscribers’ names. Narayanan and Shmatikov (2008) matched its records to public reviews. Their score adds up the items on which a record agrees with what the adversary knows. It weights each item by its rarity, because an obscure film says more than a hit. Eight ratings with dates known to within 14 days identified 99% of the records, even when two of them were wrong.</p>
 <p>The best score always points at some record, even when the target is not in the release. So the <strong>eccentricity test</strong> declares a match only if the best score beats the second best by a margin. It counts the margin in standard deviations of all the scores. Set that margin on people who are not in the data. On the full edition’s simulated ratings, the original attack’s margin also matched 26.3% of such outsiders. So report the attack’s success at a stated false positive rate (<a href="../part01-prerequisites/04-hypothesis-testing.html">Hypothesis testing</a>).</p>
 </section>
-<section id="sec-link-sampling" class="level2" data-number="15.6">
-<h2 data-number="15.6" class="anchored" data-anchor-id="sec-link-sampling"><span class="header-section-number">15.6</span> Does releasing a sample protect?</h2>
-<p>Agencies often release a sample, as Adult is, because a record unique in the sample may share its attributes with someone left out. This protects less than it seems. Suppose the release holds a share <span class="math inline">\(q\)</span> of the population, the <strong>sampling rate</strong>, and the adversary finds exactly one record that matches a person. Write <span class="math inline">\(\lambda\)</span> for the expected number of other people in the population who share the target’s cell. The record can be a look-alike’s only if the target was left out, which happens with probability <span class="math inline">\(1 - q\)</span>. So for a rare cell, the probability <span class="math inline">\(\kappa\)</span> that the match is right is about <span id="eq-link-kappa"><span class="math display">\[\kappa \approx \frac{1}{1 + \lambda(1 - q)}. \tag{15.3}\]</span></span></p>
+<section id="sec-link-sampling" class="level2" data-number="9.6">
+<h2 data-number="9.6" class="anchored" data-anchor-id="sec-link-sampling"><span class="header-section-number">9.6</span> Does releasing a sample protect?</h2>
+<p>Agencies often release a sample, as Adult is, because a record unique in the sample may share its attributes with someone left out. This protects less than it seems. Suppose the release holds a share <span class="math inline">\(q\)</span> of the population, the <strong>sampling rate</strong>, and the adversary finds exactly one record that matches a person. Write <span class="math inline">\(\lambda\)</span> for the expected number of other people in the population who share the target’s cell. The record can be a look-alike’s only if the target was left out, which happens with probability <span class="math inline">\(1 - q\)</span>. So for a rare cell, the probability <span class="math inline">\(\kappa\)</span> that the match is right is about <span id="eq-link-kappa"><span class="math display">\[\kappa \approx \frac{1}{1 + \lambda(1 - q)}. \tag{9.3}\]</span></span></p>
 <p>For example, take a cell expected to hold <span class="math inline">\(\lambda = 0.1\)</span> other people. Even in a 1% sample, a match is right with probability 0.910. The sample size enters only through <span class="math inline">\(1 - q\)</span>, which can never exceed 1. So the chance of a right match never falls below <span class="math inline">\(1/(1 + \lambda)\)</span>, and a smaller sample barely helps. A sample protects only people whose cells are crowded anyway.</p>
 <p>So the Adult figures above are <strong>sample uniqueness</strong>, exact when the adversary knows the target is in the release. The <strong>population uniqueness</strong> behind them is lower, but not by much for rare cells. Estimate it with a model, and do not assume the risk away. ARX and sdcMicro offer such estimates, and Rocher, Hendrickx and de Montjoye (2019) model correlated attributes for it.</p>
 </section>
-<section id="sec-link-check" class="level2" data-number="15.7">
-<h2 data-number="15.7" class="anchored" data-anchor-id="sec-link-check"><span class="header-section-number">15.7</span> A pre-release risk check</h2>
+<section id="sec-link-check" class="level2" data-number="9.7">
+<h2 data-number="9.7" class="anchored" data-anchor-id="sec-link-check"><span class="header-section-number">9.7</span> A pre-release risk check</h2>
 <p>First list every column an adversary could find next to a name elsewhere, such as a date, a location or a rare event. No tool knows what other data exist, so no tool can make this list. To lower the risk, coarsen geography and dates first, because they carry the most bits. Then suppress the records that remain unique (<a href="../part02-attacks/08-syntactic-anonymity.html">Syntactic anonymity and how it breaks</a>). If the analysis needs fine-grained or sparse data, release a differentially private output instead (<a href="../part03-dp-foundations/12-release-statistics.html">Release statistics with a library</a>). <a href="../part02-attacks/10-risk-assessment.html">Pre-release privacy risk assessment</a> runs this check with thresholds fixed before the counts are seen.</p>
 </section>
-<section id="cheat-sheet" class="level2" data-number="15.8">
-<h2 data-number="15.8" class="anchored" data-anchor-id="cheat-sheet"><span class="header-section-number">15.8</span> Cheat sheet</h2>
+<section id="cheat-sheet" class="level2" data-number="9.8">
+<h2 data-number="9.8" class="anchored" data-anchor-id="cheat-sheet"><span class="header-section-number">9.8</span> Cheat sheet</h2>
 <div id="tbl-link-cheat" class="quarto-float quarto-figure quarto-figure-center anchored">
 <figure class="quarto-float quarto-float-tbl figure">
 <figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl" id="tbl-link-cheat-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-Table&nbsp;15.1: The results of this chapter.
+Table&nbsp;9.1: The results of this chapter.
 </figcaption>
 <div aria-describedby="tbl-link-cheat-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
 <table class="caption-top table">
@@ -754,8 +718,8 @@ Table&nbsp;15.1: The results of this chapter.
 <li>Hashing an identifier is not anonymization. Key the hash, and use a new key for each release.</li>
 </ul>
 </section>
-<section id="references" class="level2" data-number="15.9">
-<h2 data-number="15.9" class="anchored" data-anchor-id="references"><span class="header-section-number">15.9</span> References</h2>
+<section id="references" class="level2" data-number="9.9">
+<h2 data-number="9.9" class="anchored" data-anchor-id="references"><span class="header-section-number">9.9</span> References</h2>
 <ul>
 <li>Sweeney, “Simple Demographics Often Identify People Uniquely” (2000): the 87% estimate and its variants with coarser geography.</li>
 <li>Narayanan &amp; Shmatikov, “Robust De-anonymization of Large Sparse Datasets” (2008): the Netflix attack.</li>
@@ -1170,12 +1134,12 @@ Table&nbsp;15.1: The results of this chapter.
 <nav class="page-navigation">
   <div class="nav-page nav-page-previous">
       <a href="../part02-attacks/06-gradient-inversion.html" class="pagination-link" aria-label="Gradient inversion">
-        <i class="bi bi-arrow-left-short"></i> <span class="nav-page-text"><span class="chapter-number">14</span>&nbsp; <span class="chapter-title">Gradient inversion</span></span>
+        <i class="bi bi-arrow-left-short"></i> <span class="nav-page-text"><span class="chapter-number">8</span>&nbsp; <span class="chapter-title">Gradient inversion</span></span>
       </a>          
   </div>
   <div class="nav-page nav-page-next">
       <a href="../part02-attacks/08-syntactic-anonymity.html" class="pagination-link" aria-label="Syntactic anonymity and how it breaks">
-        <span class="nav-page-text"><span class="chapter-number">16</span>&nbsp; <span class="chapter-title">Syntactic anonymity and how it breaks</span></span> <i class="bi bi-arrow-right-short"></i>
+        <span class="nav-page-text"><span class="chapter-number">10</span>&nbsp; <span class="chapter-title">Syntactic anonymity and how it breaks</span></span> <i class="bi bi-arrow-right-short"></i>
       </a>
   </div>
 </nav>
