@@ -58,7 +58,7 @@ The clipping norm $C$ does not change $\varepsilon$, but it costs accuracy eithe
 
 When every gradient is clipped, each has length exactly $C$ and the noise is proportional to $C$ too. So the step depends only on the product $\eta C$ of the learning rate and the clipping norm. Clip hard, and tune that one number. On the running example, holding $\eta C$ at 0.25 keeps test accuracy at 0.9599 or above for every $C$ up to 0.3. Holding $\eta$ at 0.5 instead, $C = 10$ drops it to 0.8347.
 
-Noise and clipping also move the best learning rate. Noise lowers it ([Optimization](../part01-prerequisites/06-optimization.md)), while clipping raises it, because clipped gradients are shorter. The two do not cancel predictably, so search the step again whenever $\sigma$ or $C$ changes, and count the search's runs in $\varepsilon$.
+Noise and clipping also move the best learning rate. Noise lowers it ([Optimization](../../book-full/part01-prerequisites/06-optimization.md)), while clipping raises it, because clipped gradients are shorter. The two do not cancel predictably, so search the step again whenever $\sigma$ or $C$ changes, and count the search's runs in $\varepsilon$.
 
 Gradient norms also drift. The running example's median per-example norm falls from 3.592 to 0.006 in a thousand steps, so a $C$ that clips everything early clips only a minority later. Adaptive clipping moves $C$ toward a quantile of the norms, measured by a small private count, and Opacus offers it with `clipping="adaptive"`. The count spends part of the budget, so the gradient gets more noise at the same $\sigma$.
 
