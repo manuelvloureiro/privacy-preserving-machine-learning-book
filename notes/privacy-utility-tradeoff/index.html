@@ -7,7 +7,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
 <meta name="author" content="Study notes">
-<meta name="dcterms.date" content="2026-10-23">
+<meta name="dcterms.date" content="2026-10-28">
 
 <title>The Privacy–Utility Trade-off, Worked Through</title>
 <style>
@@ -76,7 +76,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <link href="index_files/libs/quarto-html/quarto-syntax-highlighting-bf27225e3a48a9273f3daa8f8e829971.css" rel="stylesheet" id="quarto-text-highlighting-styles">
 <script src="index_files/libs/bootstrap/bootstrap.min.js"></script>
 <link href="index_files/libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
-<link href="index_files/libs/bootstrap/bootstrap-2c349596fb9422ad11ec58e8b26885a2.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
+<link href="index_files/libs/bootstrap/bootstrap-483b4800c370d4d4f1470a598cec4fa3.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
 
   <script src="https://cdnjs.cloudflare.com/polyfill/v3/polyfill.min.js?features=es6"></script>
   <script defer="" src="https://cdn.jsdelivr.net/npm/mathjax@4/tex-chtml.js" type="text/javascript"></script>
@@ -119,12 +119,23 @@ window.Quarto = {
    
   <ul>
   <li><a href="#sec-case" id="toc-sec-case" class="nav-link active" data-scroll-target="#sec-case"><span class="header-section-number">1</span> The use case</a></li>
-  <li><a href="#sec-goal" id="toc-sec-goal" class="nav-link" data-scroll-target="#sec-goal"><span class="header-section-number">2</span> Step 1: state the business goal as a count</a></li>
+  <li><a href="#sec-goal" id="toc-sec-goal" class="nav-link" data-scroll-target="#sec-goal"><span class="header-section-number">2</span> Step 1: state the business goal as counts</a></li>
   <li><a href="#sec-policy" id="toc-sec-policy" class="nav-link" data-scroll-target="#sec-policy"><span class="header-section-number">3</span> Step 2: turn the privacy setting into a sentence</a></li>
   <li><a href="#sec-fixed" id="toc-sec-fixed" class="nav-link" data-scroll-target="#sec-fixed"><span class="header-section-number">4</span> Step 3: fix everything that must not be tuned on private data</a></li>
-  <li><a href="#sec-results" id="toc-sec-results" class="nav-link" data-scroll-target="#sec-results"><span class="header-section-number">5</span> Step 4: read the results, technical first</a></li>
-  <li><a href="#sec-size" id="toc-sec-size" class="nav-link" data-scroll-target="#sec-size"><span class="header-section-number">6</span> Step 5: check how much the data size matters</a></li>
-  <li><a href="#sec-decision" id="toc-sec-decision" class="nav-link" data-scroll-target="#sec-decision"><span class="header-section-number">7</span> Step 6: present the menu and decide</a></li>
+  <li><a href="#sec-model" id="toc-sec-model" class="nav-link" data-scroll-target="#sec-model"><span class="header-section-number">5</span> Step 4: the model route</a>
+  <ul class="collapse">
+  <li><a href="#sec-model-fixed" id="toc-sec-model-fixed" class="nav-link" data-scroll-target="#sec-model-fixed"><span class="header-section-number">5.1</span> Train a private model</a></li>
+  <li><a href="#sec-results" id="toc-sec-results" class="nav-link" data-scroll-target="#sec-results"><span class="header-section-number">5.2</span> Read the results, technical first</a></li>
+  <li><a href="#sec-size" id="toc-sec-size" class="nav-link" data-scroll-target="#sec-size"><span class="header-section-number">5.3</span> Check how much the data size matters</a></li>
+  </ul></li>
+  <li><a href="#sec-synthetic" id="toc-sec-synthetic" class="nav-link" data-scroll-target="#sec-synthetic"><span class="header-section-number">6</span> Step 5: the synthetic-data route</a>
+  <ul class="collapse">
+  <li><a href="#sec-syn-budget" id="toc-sec-syn-budget" class="nav-link" data-scroll-target="#sec-syn-budget"><span class="header-section-number">6.1</span> Give the generators a privacy budget</a></li>
+  <li><a href="#sec-syn-fixed" id="toc-sec-syn-fixed" class="nav-link" data-scroll-target="#sec-syn-fixed"><span class="header-section-number">6.2</span> Fix three generators</a></li>
+  <li><a href="#sec-syn-results" id="toc-sec-syn-results" class="nav-link" data-scroll-target="#sec-syn-results"><span class="header-section-number">6.3</span> Read the results, technical first</a></li>
+  <li><a href="#sec-syn-size" id="toc-sec-syn-size" class="nav-link" data-scroll-target="#sec-syn-size"><span class="header-section-number">6.4</span> Check how much the data size matters</a></li>
+  </ul></li>
+  <li><a href="#sec-decision" id="toc-sec-decision" class="nav-link" data-scroll-target="#sec-decision"><span class="header-section-number">7</span> Step 6: compare the routes and decide</a></li>
   <li><a href="#sec-other" id="toc-sec-other" class="nav-link" data-scroll-target="#sec-other"><span class="header-section-number">8</span> Doing this in another business</a></li>
   <li><a href="#sec-sources" id="toc-sec-sources" class="nav-link" data-scroll-target="#sec-sources"><span class="header-section-number">9</span> Sources</a></li>
   </ul>
@@ -137,7 +148,7 @@ window.Quarto = {
 <header id="title-block-header" class="quarto-title-block default">
 <div class="quarto-title">
 <h1 class="title">The Privacy–Utility Trade-off, Worked Through</h1>
-<p class="subtitle lead">One use case, from the business question to a signed-off privacy setting</p>
+<p class="subtitle lead">One use case and two routes, a private model or a private synthetic table, from the business question to a signed-off decision</p>
 </div>
 
 
@@ -154,7 +165,7 @@ window.Quarto = {
     <div>
     <div class="quarto-title-meta-heading">Published</div>
     <div class="quarto-title-meta-contents">
-      <p class="date">October 23, 2026</p>
+      <p class="date">October 28, 2026</p>
     </div>
   </div>
   
@@ -164,7 +175,7 @@ window.Quarto = {
 <div>
   <div class="abstract">
     <div class="block-title">Abstract</div>
-    <p>A bank must train a targeting model with differential privacy (DP), and someone other than the engineer has to choose how much privacy to buy. This note works through that choice on a public dataset, from a business count and a sentence a privacy officer can sign to a short menu of options and a decision.</p>
+    <p>A bank’s outside agency wants either a targeting model or the customer table itself, and the bank’s policy requires differential privacy (DP) for anything that leaves. Someone other than the engineer has to choose how much privacy to buy and what to release. This note works through that choice on a public dataset, from a business count and a sentence a privacy officer can sign to one decision between a private model and a private synthetic table.</p>
   </div>
 </div>
 
@@ -172,7 +183,7 @@ window.Quarto = {
 </header>
 
 
-<p>How strict should a differential privacy (DP) guarantee be, and who decides? This note answers it for one use case, a bank that trains a targeting model, and ends with a decision that three people sign. You need basic probability to follow it, such as odds, averages and percentiles. <a href="#tbl-map" class="quarto-xref">Table&nbsp;1</a> gives the question each section answers, and <a href="#tbl-symbols" class="quarto-xref">Table&nbsp;2</a> lists the symbols.</p>
+<p>How strict should a differential privacy (DP) guarantee be, what form should the private release take, and who decides? This note answers these questions for one use case, a bank’s credit-card campaign, and ends with a decision that the people who own the risk and the revenue sign. You need basic probability to follow it, such as odds, averages and percentiles. <a href="#tbl-map" class="quarto-xref">Table&nbsp;1</a> gives the question each section answers, and <a href="#tbl-symbols" class="quarto-xref">Table&nbsp;2</a> lists the symbols.</p>
 <div id="tbl-map" class="quarto-float quarto-figure quarto-figure-center anchored">
 <figure class="quarto-float quarto-float-tbl figure">
 <figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl" id="tbl-map-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
@@ -193,11 +204,11 @@ Table&nbsp;1: The question each section answers.
 <tbody>
 <tr class="odd">
 <td style="text-align: left;"><a href="#sec-case" class="quarto-xref">Section&nbsp;1</a></td>
-<td style="text-align: left;">What does the bank want, and which public data stands in for its records?</td>
+<td style="text-align: left;">What does the bank want, what can it release, and which public data stands in for its records?</td>
 </tr>
 <tr class="even">
 <td style="text-align: left;"><a href="#sec-goal" class="quarto-xref">Section&nbsp;2</a></td>
-<td style="text-align: left;">Which count does the business care about, and what must a model beat?</td>
+<td style="text-align: left;">Which counts does the business care about, and what must a release beat?</td>
 </tr>
 <tr class="odd">
 <td style="text-align: left;"><a href="#sec-policy" class="quarto-xref">Section&nbsp;3</a></td>
@@ -205,25 +216,45 @@ Table&nbsp;1: The question each section answers.
 </tr>
 <tr class="even">
 <td style="text-align: left;"><a href="#sec-fixed" class="quarto-xref">Section&nbsp;4</a></td>
-<td style="text-align: left;">Which choices must be fixed before training, so that they leak nothing?</td>
+<td style="text-align: left;">Which choices must be fixed before anyone touches the records, so that they leak nothing?</td>
 </tr>
 <tr class="odd">
-<td style="text-align: left;"><a href="#sec-results" class="quarto-xref">Section&nbsp;5</a></td>
-<td style="text-align: left;">Which technique is best at each privacy level, and what does privacy cost in customers?</td>
+<td style="text-align: left;"><a href="#sec-model" class="quarto-xref">Section&nbsp;5</a></td>
+<td style="text-align: left;">How does the bank train a private model?</td>
 </tr>
 <tr class="even">
-<td style="text-align: left;"><a href="#sec-size" class="quarto-xref">Section&nbsp;6</a></td>
+<td style="text-align: left;"><a href="#sec-results" class="quarto-xref">Section&nbsp;5.2</a></td>
+<td style="text-align: left;">Which model technique is best at each privacy level, and what does privacy cost in customers?</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;"><a href="#sec-size" class="quarto-xref">Section&nbsp;5.3</a></td>
 <td style="text-align: left;">How does that cost change with the number of customers?</td>
 </tr>
+<tr class="even">
+<td style="text-align: left;"><a href="#sec-syn-budget" class="quarto-xref">Section&nbsp;6.1</a></td>
+<td style="text-align: left;">How does a generator of synthetic data account for its privacy?</td>
+</tr>
 <tr class="odd">
-<td style="text-align: left;"><a href="#sec-decision" class="quarto-xref">Section&nbsp;7</a></td>
-<td style="text-align: left;">Which option does the policy pick, and who signs it?</td>
+<td style="text-align: left;"><a href="#sec-syn-fixed" class="quarto-xref">Section&nbsp;6.2</a></td>
+<td style="text-align: left;">Which three generators are compared, and how do they differ?</td>
 </tr>
 <tr class="even">
+<td style="text-align: left;"><a href="#sec-syn-results" class="quarto-xref">Section&nbsp;6.3</a></td>
+<td style="text-align: left;">Which generator is best for the plan and for the campaign?</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;"><a href="#sec-syn-size" class="quarto-xref">Section&nbsp;6.4</a></td>
+<td style="text-align: left;">How does the synthetic table’s cost change with the number of customers?</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;"><a href="#sec-decision" class="quarto-xref">Section&nbsp;7</a></td>
+<td style="text-align: left;">Which route and which option does the policy pick, and who signs it?</td>
+</tr>
+<tr class="odd">
 <td style="text-align: left;"><a href="#sec-other" class="quarto-xref">Section&nbsp;8</a></td>
 <td style="text-align: left;">How do the steps carry over to another business?</td>
 </tr>
-<tr class="odd">
+<tr class="even">
 <td style="text-align: left;"><a href="#sec-sources" class="quarto-xref">Section&nbsp;9</a></td>
 <td style="text-align: left;">Where do the data, the methods and the arguments come from?</td>
 </tr>
@@ -256,11 +287,19 @@ Table&nbsp;2: The symbols the note uses. Each is also explained where it first a
 </tr>
 <tr class="even">
 <td style="text-align: left;"><span class="math inline">\(e^{\varepsilon}\)</span></td>
-<td style="text-align: left;">the most that seeing the model can multiply an attacker’s odds by</td>
+<td style="text-align: left;">the most that seeing the release can multiply an attacker’s odds by</td>
 </tr>
 <tr class="odd">
 <td style="text-align: left;"><span class="math inline">\(\delta\)</span></td>
 <td style="text-align: left;">the small probability that the guarantee fails outright</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;"><span class="math inline">\(\rho\)</span></td>
+<td style="text-align: left;">the privacy budget of a generator, in zero-concentrated DP</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;"><span class="math inline">\(\sigma\)</span></td>
+<td style="text-align: left;">the standard deviation of the noise that a generator adds to each count</td>
 </tr>
 <tr class="even">
 <td style="text-align: left;"><span class="math inline">\(V\)</span></td>
@@ -277,14 +316,17 @@ Table&nbsp;2: The symbols the note uses. Each is also explained where it first a
 </div>
 <section id="sec-case" class="level1" data-number="1">
 <h1 data-number="1"><span class="header-section-number">1</span> The use case</h1>
-<p>A retail bank is about to launch a premium credit card for customers who earn more than $50,000 a year, and it wants to send the offer to them alone. The bank does not record income, but it holds other facts about each customer, such as age, education, occupation, hours worked and marital status. So the marketing team wants a model that predicts from those facts who is likely to be eligible.</p>
-<p>An outside agency runs the campaign, so the model will leave the bank’s secure environment. For that reason the bank’s privacy policy requires DP training, so that nobody can use the model to learn much about any one customer. The policy does not say how strict the guarantee must be, and that choice is the subject of this note.</p>
-<p>The bank’s records are private, so we use a public dataset like them, called Adult. Adult holds 48,842 people from the 1994 US Current Population Survey. Each has these attributes and a label for income above $50,000 (<a href="https://archive.ics.uci.edu/dataset/2/adult">UCI Machine Learning Repository</a>). Its training file of 32,561 people plays the bank’s customer records, which the model learns from. Its test file of 16,281 people plays the customers of the next campaign. One script computes every number below, <a href="https://github.com/manuelvloureiro/privacy-preserving-machine-learning-book/blob/main/code/notes/privacy_utility_tradeoff.py">code/notes/privacy_utility_tradeoff.py</a>, and each step shows its lines. It runs in a few minutes on all of a machine’s processor cores:</p>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb1"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="ex">uv</span> run python code/notes/privacy_utility_tradeoff.py</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>A retail bank is about to launch a premium credit card for customers who earn more than $50,000 a year, and an outside agency will run the campaign. The bank does not record income, but it holds other facts about each customer, such as age, education, occupation, hours worked and marital status. So the campaign needs a model that predicts from those facts who is likely to be eligible. The agency would also like to plan the campaign, which means to count the eligible customers in each segment it might target.</p>
+<p>The bank’s privacy policy does not let customer records leave its secure environment. Anything that does leave must be trained or generated with DP, so that nobody can use it to learn much about any one customer. The bank can meet the policy in two ways. On the <em>model route</em>, it trains the targeting model itself with DP and hands over the model alone. On the <em>synthetic-data route</em>, it hands over a <em>synthetic table</em>, which has the same columns as the records but rows that a DP procedure generates.</p>
+<p>The agency can count, plot and train on a synthetic table as it likes, because anything computed from a DP release has the same guarantee. The policy does not say how strict the guarantee must be, nor which route to take. Those two choices are the subject of this note.</p>
+<p>The bank’s records are private, so we use a public dataset like them, called Adult. Adult holds 48,842 people from the 1994 US Current Population Survey. Each has these attributes and a label for income above $50,000 (<a href="https://archive.ics.uci.edu/dataset/2/adult">UCI Machine Learning Repository</a>). Its training file of 32,561 people plays the bank’s customer records, which the model or the synthetic table comes from. Its test file of 16,281 people plays the customers of the next campaign.</p>
+<p>Two scripts compute every number below, one for each route, and each step shows their lines. <a href="https://github.com/manuelvloureiro/privacy-preserving-machine-learning-book/blob/main/code/notes/privacy_utility_tradeoff.py">code/notes/privacy_utility_tradeoff.py</a> trains the private models in a few minutes on all of a machine’s processor cores. <a href="https://github.com/manuelvloureiro/privacy-preserving-machine-learning-book/blob/main/code/notes/privacy_utility_tradeoff_synthetic.py">code/notes/privacy_utility_tradeoff_synthetic.py</a> runs the generators. It runs four processes at a time, because each loads JAX and PyTorch, and <code>PRIVACY_WORKERS</code> changes that number:</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb1"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="ex">uv</span> run python code/notes/privacy_utility_tradeoff.py</span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="ex">uv</span> run python code/notes/privacy_utility_tradeoff_synthetic.py</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </section>
 <section id="sec-goal" class="level1" data-number="2">
-<h1 data-number="2"><span class="header-section-number">2</span> Step 1: state the business goal as a count</h1>
-<p>Engineers usually measure a model by its accuracy or its area under the curve (AUC), but neither tells the marketing team what it will get. The team cares about how many offers reach eligible customers, so this step fixes the number of offers and counts how many land well.</p>
+<h1 data-number="2"><span class="header-section-number">2</span> Step 1: state the business goal as counts</h1>
+<p>Engineers usually measure a model by its accuracy or its area under the curve (AUC), and a synthetic table by how closely its statistics match the records. Neither tells the marketing team what it will get. The team cares about how many offers reach eligible customers, so this step fixes the number of offers and counts how many land well.</p>
 <p>The bank can choose the number of offers from public data. The Census Bureau publishes the share of people who earn more than $50,000, about 24% in Adult. If the bank sends as many offers as it expects eligible customers, a perfect model wastes none. For the 16,281 campaign customers this rule gives 3,846 offers, the number of eligible customers among them, when the published share holds for the bank.</p>
 <p>The bank sends the 3,846 offers to the customers with the highest scores. The business metric is the number of eligible customers among them, and every other offer is wasted. The script computes it with a short function:</p>
 <div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb2" data-excerpt="put-reached"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> reached(scores: Array, y: npt.NDArray[np.int64], offers: <span class="bu">int</span>) <span class="op">-&gt;</span> <span class="bu">int</span>:</span>
@@ -293,84 +335,120 @@ Table&nbsp;2: The symbols the note uses. Each is also explained where it first a
 <span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> <span class="bu">int</span>(y[top].<span class="bu">sum</span>())</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <p>The metric needs a baseline, and the natural one is no model at all. If the bank sent the offers to customers picked at random, each would reach an eligible customer with probability 3,846 / 16,281, about 24%. So the expected number reached would be</p>
 <p><span id="eq-auto-index-1"><span class="math display">\[3{,}846 \times \frac{3{,}846}{16{,}281} \approx 909. \tag{1}\]</span></span></p>
-<p>Any model, private or not, has to beat 909 to be worth having. The script sets up the campaign in the same way:</p>
+<p>Any release, a private model or a synthetic table, has to beat 909 to be worth having. The script sets up the campaign in the same way:</p>
 <div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb3" data-excerpt="put-campaign"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a>df <span class="op">=</span> practitioner_datasets.adult()</span>
 <span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>train, test <span class="op">=</span> df.head(TRAIN_ROWS), df.<span class="bu">slice</span>(TRAIN_ROWS)</span>
 <span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a>data <span class="op">=</span> (features(train), labels(train), features(test), labels(test))</span>
 <span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a>eligible <span class="op">=</span> <span class="bu">int</span>(data[<span class="dv">3</span>].<span class="bu">sum</span>())</span>
 <span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a><span class="co"># Random offers reach an eligible customer at the base rate, eligible / campaign customers.</span></span>
 <span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a>baseline <span class="op">=</span> eligible <span class="op">*</span> eligible <span class="op">/</span> <span class="bu">len</span>(data[<span class="dv">3</span>])</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-<p>The count also gives the money. Write <span class="math inline">\(V\)</span> for what the bank gains when it reaches one eligible customer instead of an ineligible one. It is the chance that an eligible customer takes up the card times the card’s margin, and the finance team estimates it. Every comparison below is a difference of <span class="math inline">\(k\)</span> eligible customers reached, worth <span class="math inline">\(k\,V\)</span> to the bank. So the note never needs a value for <span class="math inline">\(V\)</span>, because the decision in <a href="#sec-decision" class="quarto-xref">Section&nbsp;7</a> only compares <span class="math inline">\(k\,V\)</span> with what the policy protects.</p>
+<p>A synthetic table also serves the agency’s plan, and that gives a second count. The agency divides the customers into segments by age band and occupation, six age bands times fifteen occupations, which makes 90 segments. The records hold 7,841 eligible customers, and the plan says how many of them each segment holds. A synthetic table gives a different spread, so its error is the number of eligible customers it puts in the wrong segment. We count that as half the sum, over the segments, of the absolute difference between the synthetic count and the real count. When the two tables hold the same number of eligible customers, it is the number of customers that must move between segments to turn one plan into the other.</p>
+<p>The second script computes this count, and also the error on the two-way tables that <a href="#sec-syn-results" class="quarto-xref">Section&nbsp;6.3</a> uses for the technical view:</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb4" data-excerpt="syn-metrics"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> workload_error(real: Dataset, synth: Dataset) <span class="op">-&gt;</span> <span class="bu">float</span>:</span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>    <span class="co">"""Average over the two-way tables of the total variation distance between real and synthetic proportions."""</span></span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a>    errors: <span class="bu">list</span>[<span class="bu">float</span>] <span class="op">=</span> []</span>
+<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> pair <span class="kw">in</span> pairs(real.domain):</span>
+<span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a>        x <span class="op">=</span> np.asarray(real.project(pair).datavector(), dtype<span class="op">=</span>np.float64)</span>
+<span id="cb4-6"><a href="#cb4-6" aria-hidden="true" tabindex="-1"></a>        y <span class="op">=</span> np.asarray(synth.project(pair).datavector(), dtype<span class="op">=</span>np.float64)</span>
+<span id="cb4-7"><a href="#cb4-7" aria-hidden="true" tabindex="-1"></a>        errors.append(<span class="fl">0.5</span> <span class="op">*</span> <span class="bu">float</span>(np.<span class="bu">abs</span>(x <span class="op">/</span> x.<span class="bu">sum</span>() <span class="op">-</span> y <span class="op">/</span> y.<span class="bu">sum</span>()).<span class="bu">sum</span>()))</span>
+<span id="cb4-8"><a href="#cb4-8" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> <span class="bu">float</span>(np.mean(errors))</span>
+<span id="cb4-9"><a href="#cb4-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-10"><a href="#cb4-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-11"><a href="#cb4-11" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> misplaced(real: Dataset, synth: Dataset) <span class="op">-&gt;</span> <span class="bu">float</span>:</span>
+<span id="cb4-12"><a href="#cb4-12" aria-hidden="true" tabindex="-1"></a>    <span class="co">"""Eligible customers the synthetic plan puts in the wrong segment: half the L1 distance between the plans."""</span></span>
+<span id="cb4-13"><a href="#cb4-13" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> <span class="fl">0.5</span> <span class="op">*</span> <span class="bu">float</span>(np.<span class="bu">abs</span>(plan(real) <span class="op">-</span> plan(synth)).<span class="bu">sum</span>())</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>The counts also give the money. Write <span class="math inline">\(V\)</span> for what the bank gains when it reaches one eligible customer instead of an ineligible one. It is the chance that an eligible customer takes up the card times the card’s margin, and the finance team estimates it. Every comparison below is a difference of <span class="math inline">\(k\)</span> eligible customers reached, worth <span class="math inline">\(k\,V\)</span> to the bank. So the note never needs a value for <span class="math inline">\(V\)</span>, because the decision in <a href="#sec-decision" class="quarto-xref">Section&nbsp;7</a> only compares <span class="math inline">\(k\,V\)</span> with what the policy protects.</p>
+<p>A misplaced customer is harder to price, because it costs the bank only when the agency sizes a segment wrongly. So we report the plan’s error as a count and as a share of the 7,841, and the agency says what share it accepts.</p>
 </section>
 <section id="sec-policy" class="level1" data-number="3">
 <h1 data-number="3"><span class="header-section-number">3</span> Step 2: turn the privacy setting into a sentence</h1>
-<p>DP is set by one number, <span class="math inline">\(\varepsilon\)</span>, and a smaller <span class="math inline">\(\varepsilon\)</span> means stronger privacy. A privacy officer cannot sign a bare number, so this step translates <span class="math inline">\(\varepsilon\)</span> into an attacker’s question. Suppose an attacker wants to know whether one person, say Alice, is a customer of the bank, and starts with some belief about it. DP guarantees that seeing the model can multiply the attacker’s odds by at most <span class="math inline">\(e^{\varepsilon}\)</span>.</p>
-<p>The simplest case is an attacker who starts at even odds, a belief of 50%. The odds are then 1 to 1, and after the attacker sees the model they are at most <span class="math inline">\(e^\varepsilon\)</span> to 1. Odds of <span class="math inline">\(e^\varepsilon\)</span> to 1 are a probability of <span class="math inline">\(e^\varepsilon\)</span> out of <span class="math inline">\(1 + e^\varepsilon\)</span>, so the attacker’s belief can rise to at most</p>
+<p>DP is set by one number, <span class="math inline">\(\varepsilon\)</span>, and a smaller <span class="math inline">\(\varepsilon\)</span> means stronger privacy. A privacy officer cannot sign a bare number, so this step translates <span class="math inline">\(\varepsilon\)</span> into an attacker’s question. Suppose an attacker wants to know whether one person, say Alice, is a customer of the bank, and starts with some belief about it. DP guarantees that seeing the release, the model or the table, can multiply the attacker’s odds by at most <span class="math inline">\(e^{\varepsilon}\)</span>.</p>
+<p>The simplest case is an attacker who starts at even odds, a belief of 50%. The odds are then 1 to 1, and after the attacker sees the release they are at most <span class="math inline">\(e^\varepsilon\)</span> to 1. Odds of <span class="math inline">\(e^\varepsilon\)</span> to 1 are a probability of <span class="math inline">\(e^\varepsilon\)</span> out of <span class="math inline">\(1 + e^\varepsilon\)</span>, so the attacker’s belief can rise to at most</p>
 <p><span id="eq-auto-index-2"><span class="math display">\[\text{belief ceiling} = \frac{e^{\varepsilon}}{1 + e^{\varepsilon}}. \tag{2}\]</span></span></p>
-<p>At <span class="math inline">\(\varepsilon = 1\)</span> the ceiling is <span class="math inline">\(e/(1+e)\)</span>, about 73%. At <span class="math inline">\(\varepsilon = 0.1\)</span> it is about 52.5%, so the model teaches the attacker almost nothing. At <span class="math inline">\(\varepsilon = 3\)</span> it is about 95%, a guarantee that still holds but is weak.</p>
-<p>The privacy officer signs this sentence, and in our use case they choose a ceiling of 75%. In other words, an attacker who thinks it is a coin flip whether Alice is a customer must not end up more than 75% sure. To turn the sentence into a number, multiply out the fraction to get a bound on <span class="math inline">\(e^{\varepsilon}\)</span>, then take the logarithm:</p>
+<p>At <span class="math inline">\(\varepsilon = 1\)</span> the ceiling is <span class="math inline">\(e/(1+e)\)</span>, about 73%. At <span class="math inline">\(\varepsilon = 0.1\)</span> it is about 52.5%, so the release teaches the attacker almost nothing. At <span class="math inline">\(\varepsilon = 3\)</span> it is about 95%, a guarantee that still holds but is weak.</p>
+<p>The privacy officer signs this sentence, and in our use case they choose a ceiling of 75% for both routes. In other words, an attacker who thinks it is a coin flip whether Alice is a customer must not end up more than 75% sure. To turn the sentence into a number, multiply out the fraction to get a bound on <span class="math inline">\(e^{\varepsilon}\)</span>, then take the logarithm:</p>
 <p><span id="eq-auto-index-3"><span class="math display">\[\frac{e^{\varepsilon}}{1+e^{\varepsilon}} \le 0.75 \quad\Longleftrightarrow\quad e^{\varepsilon} \le 3 \quad\Longleftrightarrow\quad \varepsilon \le \ln 3 \approx 1.10. \tag{3}\]</span></span></p>
-<p>The script holds both directions of this translation. The first function labels the top axis of every figure below with the ceiling, and <code>epsilon_for_belief(0.75)</code> returns the policy’s limit of 1.10:</p>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb4" data-excerpt="put-belief"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> belief_ceiling(eps: <span class="bu">float</span>, prior: <span class="bu">float</span> <span class="op">=</span> <span class="fl">0.5</span>) <span class="op">-&gt;</span> <span class="bu">float</span>:</span>
-<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>    <span class="co">"""Highest posterior that epsilon-DP allows an attacker who starts at `prior` that one customer is in the data."""</span></span>
-<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a>    odds <span class="op">=</span> math.exp(eps) <span class="op">*</span> prior <span class="op">/</span> (<span class="dv">1</span> <span class="op">-</span> prior)</span>
-<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> odds <span class="op">/</span> (<span class="dv">1</span> <span class="op">+</span> odds)</span>
-<span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb4-6"><a href="#cb4-6" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb4-7"><a href="#cb4-7" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> epsilon_for_belief(belief: <span class="bu">float</span>, prior: <span class="bu">float</span> <span class="op">=</span> <span class="fl">0.5</span>) <span class="op">-&gt;</span> <span class="bu">float</span>:</span>
-<span id="cb4-8"><a href="#cb4-8" aria-hidden="true" tabindex="-1"></a>    <span class="co">"""The largest epsilon whose belief ceiling, from `prior`, is `belief`."""</span></span>
-<span id="cb4-9"><a href="#cb4-9" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> math.log((belief <span class="op">/</span> (<span class="dv">1</span> <span class="op">-</span> belief)) <span class="op">/</span> (prior <span class="op">/</span> (<span class="dv">1</span> <span class="op">-</span> prior)))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-<p>The officer fixes the ceiling before anyone sees the model’s results, because a ceiling chosen afterwards would drift to wherever the model does well. The training method below adds a second parameter, <span class="math inline">\(\delta\)</span>, the small probability that the guarantee fails outright. A common rule sets <span class="math inline">\(\delta\)</span> below one over the number of people, so that the guarantee is not expected to fail for anyone. For 32,561 customers this gives <span class="math inline">\(\delta = 10^{-5}\)</span>, and we use that value throughout.</p>
+<p>The scripts hold both directions of this translation. The first function labels the top axis of every figure below with the ceiling, and <code>epsilon_for_belief(0.75)</code> returns the policy’s limit of 1.10:</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb5" data-excerpt="put-belief"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> belief_ceiling(eps: <span class="bu">float</span>, prior: <span class="bu">float</span> <span class="op">=</span> <span class="fl">0.5</span>) <span class="op">-&gt;</span> <span class="bu">float</span>:</span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a>    <span class="co">"""Highest posterior that epsilon-DP allows an attacker who starts at `prior` that one customer is in the data."""</span></span>
+<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a>    odds <span class="op">=</span> math.exp(eps) <span class="op">*</span> prior <span class="op">/</span> (<span class="dv">1</span> <span class="op">-</span> prior)</span>
+<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> odds <span class="op">/</span> (<span class="dv">1</span> <span class="op">+</span> odds)</span>
+<span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-6"><a href="#cb5-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-7"><a href="#cb5-7" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> epsilon_for_belief(belief: <span class="bu">float</span>, prior: <span class="bu">float</span> <span class="op">=</span> <span class="fl">0.5</span>) <span class="op">-&gt;</span> <span class="bu">float</span>:</span>
+<span id="cb5-8"><a href="#cb5-8" aria-hidden="true" tabindex="-1"></a>    <span class="co">"""The largest epsilon whose belief ceiling, from `prior`, is `belief`."""</span></span>
+<span id="cb5-9"><a href="#cb5-9" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> math.log((belief <span class="op">/</span> (<span class="dv">1</span> <span class="op">-</span> belief)) <span class="op">/</span> (prior <span class="op">/</span> (<span class="dv">1</span> <span class="op">-</span> prior)))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>The officer fixes the ceiling before anyone sees the results, because a ceiling chosen afterwards would drift to wherever the release does well. Both routes also have a second parameter, <span class="math inline">\(\delta\)</span>, the small probability that the guarantee fails outright. A common rule sets <span class="math inline">\(\delta\)</span> below one over the number of people, so that the guarantee is not expected to fail for anyone. For 32,561 customers this gives <span class="math inline">\(\delta = 10^{-5}\)</span>, and we use that value throughout.</p>
 </section>
 <section id="sec-fixed" class="level1" data-number="4">
 <h1 data-number="4"><span class="header-section-number">4</span> Step 3: fix everything that must not be tuned on private data</h1>
-<p>A DP guarantee covers what the training run does with the data, but not choices made earlier by looking at it. If an engineer tried twenty settings on the customer records and kept the best one, that choice would itself leak information. So every choice outside the training run comes from public information.</p>
-<p>The preprocessing comes from the survey’s public codebook, not from the data. It scales ages within 17 to 90 and years of education within 1 to 16. It scales weekly hours within 1 to 99, and capital gains and losses on a log scale up to the survey’s published cap of 99,999. Each category, such as an occupation, becomes a 0-or-1 column taken from the codebook’s list. So every customer’s row lies in a known range, which DP needs, because that range bounds how much one customer can change the training.</p>
+<p>A DP guarantee covers what the training run or the generator does with the data, but not choices made earlier by looking at it. If an engineer tried twenty settings on the customer records and kept the best one, that choice would itself leak information. So every choice outside the private run comes from public information.</p>
+<p>For the model route, the preprocessing comes from the survey’s public codebook, not from the data. It scales ages within 17 to 90 and years of education within 1 to 16. It scales weekly hours within 1 to 99, and capital gains and losses on a log scale up to the survey’s published cap of 99,999. Each category, such as an occupation, becomes a 0-or-1 column taken from the codebook’s list. So every customer’s row lies in a known range, which DP needs, because that range bounds how much one customer can change the training.</p>
 <p>The preprocessing function reads only these public ranges and lists, never a statistic of the data:</p>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb5" data-excerpt="put-features"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> features(df: pl.DataFrame) <span class="op">-&gt;</span> Array:</span>
-<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a>    <span class="co">"""Map each row to [0, 1]^d using only the codebook; a missing category is a row of zeros."""</span></span>
-<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a>    cols: <span class="bu">list</span>[Array] <span class="op">=</span> []</span>
-<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> name, (lo, hi) <span class="kw">in</span> LINEAR_BOUNDS.items():</span>
-<span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a>        x <span class="op">=</span> df[name].cast(pl.Float64).to_numpy()</span>
-<span id="cb5-6"><a href="#cb5-6" aria-hidden="true" tabindex="-1"></a>        cols.append(np.clip((x <span class="op">-</span> lo) <span class="op">/</span> (hi <span class="op">-</span> lo), <span class="fl">0.0</span>, <span class="fl">1.0</span>))</span>
-<span id="cb5-7"><a href="#cb5-7" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> name <span class="kw">in</span> LOG_COLUMNS:</span>
-<span id="cb5-8"><a href="#cb5-8" aria-hidden="true" tabindex="-1"></a>        x <span class="op">=</span> df[name].cast(pl.Float64).to_numpy()</span>
-<span id="cb5-9"><a href="#cb5-9" aria-hidden="true" tabindex="-1"></a>        cols.append(np.clip(np.log1p(np.clip(x, <span class="dv">0</span>, TOP_CODE)) <span class="op">/</span> math.log1p(TOP_CODE), <span class="fl">0.0</span>, <span class="fl">1.0</span>))</span>
-<span id="cb5-10"><a href="#cb5-10" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> name, values <span class="kw">in</span> CATEGORIES.items():</span>
-<span id="cb5-11"><a href="#cb5-11" aria-hidden="true" tabindex="-1"></a>        column <span class="op">=</span> df[name].to_list()</span>
-<span id="cb5-12"><a href="#cb5-12" aria-hidden="true" tabindex="-1"></a>        <span class="cf">for</span> value <span class="kw">in</span> values:</span>
-<span id="cb5-13"><a href="#cb5-13" aria-hidden="true" tabindex="-1"></a>            cols.append(np.array([<span class="fl">1.0</span> <span class="cf">if</span> v <span class="op">==</span> value <span class="cf">else</span> <span class="fl">0.0</span> <span class="cf">for</span> v <span class="kw">in</span> column]))</span>
-<span id="cb5-14"><a href="#cb5-14" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> np.column_stack(cols)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-<p>The two techniques we compare are also fixed in advance. The first is private stochastic gradient descent (SGD), known as <strong>DP-SGD</strong>, the standard way to train a model with DP. It trains a logistic regression, as a bank would without DP, on small random batches. At each step it caps how much each customer can move the model, which is called <em>clipping</em>, and it adds random noise to the update (<a href="https://opacus.ai/">Opacus</a>).</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb6" data-excerpt="put-features"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> features(df: pl.DataFrame) <span class="op">-&gt;</span> Array:</span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a>    <span class="co">"""Map each row to [0, 1]^d using only the codebook; a missing category is a row of zeros."""</span></span>
+<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a>    cols: <span class="bu">list</span>[Array] <span class="op">=</span> []</span>
+<span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> name, (lo, hi) <span class="kw">in</span> LINEAR_BOUNDS.items():</span>
+<span id="cb6-5"><a href="#cb6-5" aria-hidden="true" tabindex="-1"></a>        x <span class="op">=</span> df[name].cast(pl.Float64).to_numpy()</span>
+<span id="cb6-6"><a href="#cb6-6" aria-hidden="true" tabindex="-1"></a>        cols.append(np.clip((x <span class="op">-</span> lo) <span class="op">/</span> (hi <span class="op">-</span> lo), <span class="fl">0.0</span>, <span class="fl">1.0</span>))</span>
+<span id="cb6-7"><a href="#cb6-7" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> name <span class="kw">in</span> LOG_COLUMNS:</span>
+<span id="cb6-8"><a href="#cb6-8" aria-hidden="true" tabindex="-1"></a>        x <span class="op">=</span> df[name].cast(pl.Float64).to_numpy()</span>
+<span id="cb6-9"><a href="#cb6-9" aria-hidden="true" tabindex="-1"></a>        cols.append(np.clip(np.log1p(np.clip(x, <span class="dv">0</span>, TOP_CODE)) <span class="op">/</span> math.log1p(TOP_CODE), <span class="fl">0.0</span>, <span class="fl">1.0</span>))</span>
+<span id="cb6-10"><a href="#cb6-10" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> name, values <span class="kw">in</span> CATEGORIES.items():</span>
+<span id="cb6-11"><a href="#cb6-11" aria-hidden="true" tabindex="-1"></a>        column <span class="op">=</span> df[name].to_list()</span>
+<span id="cb6-12"><a href="#cb6-12" aria-hidden="true" tabindex="-1"></a>        <span class="cf">for</span> value <span class="kw">in</span> values:</span>
+<span id="cb6-13"><a href="#cb6-13" aria-hidden="true" tabindex="-1"></a>            cols.append(np.array([<span class="fl">1.0</span> <span class="cf">if</span> v <span class="op">==</span> value <span class="cf">else</span> <span class="fl">0.0</span> <span class="cf">for</span> v <span class="kw">in</span> column]))</span>
+<span id="cb6-14"><a href="#cb6-14" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> np.column_stack(cols)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>The synthetic-data route needs a table of discrete attributes, so the numbers go into bands and the categories again come from the codebook. Age goes into six bands, from 17 to 24 up to 65 and over, and hours worked into five. Capital gains and losses, which are zero for most people, go into four bands each. The eight categorical attributes keep the codebook’s lists, with a “missing” category where the survey allows a blank. With the income label that makes 13 attributes, and the survey weight and the numeric copy of education are dropped.</p>
+<p>The product of the 13 attributes’ sizes is about 37 billion, so each row is one cell of a table with 37 billion cells. That is why no generator can simply add noise to the count in every cell. The encoding function reads only the bands and the lists:</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb7" data-excerpt="syn-encode"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> encode(df: pl.DataFrame) <span class="op">-&gt;</span> Dataset:</span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a>    <span class="co">"""Map each row to one integer per attribute: its band, or its category's position in the codebook's list."""</span></span>
+<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a>    columns: <span class="bu">dict</span>[<span class="bu">str</span>, Ints] <span class="op">=</span> {}</span>
+<span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> name, limits <span class="kw">in</span> BANDS.items():</span>
+<span id="cb7-5"><a href="#cb7-5" aria-hidden="true" tabindex="-1"></a>        x <span class="op">=</span> df[name].cast(pl.Int64).to_numpy()</span>
+<span id="cb7-6"><a href="#cb7-6" aria-hidden="true" tabindex="-1"></a>        columns[name] <span class="op">=</span> np.searchsorted(np.array(limits), x, side<span class="op">=</span><span class="st">"left"</span>).astype(np.int64)</span>
+<span id="cb7-7"><a href="#cb7-7" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> name, values <span class="kw">in</span> CATEGORIES.items():</span>
+<span id="cb7-8"><a href="#cb7-8" aria-hidden="true" tabindex="-1"></a>        index <span class="op">=</span> {v: i <span class="cf">for</span> i, v <span class="kw">in</span> <span class="bu">enumerate</span>(values)}</span>
+<span id="cb7-9"><a href="#cb7-9" aria-hidden="true" tabindex="-1"></a>        missing <span class="op">=</span> index.get(<span class="st">"missing"</span>, <span class="op">-</span><span class="dv">1</span>)</span>
+<span id="cb7-10"><a href="#cb7-10" aria-hidden="true" tabindex="-1"></a>        columns[name] <span class="op">=</span> np.array([index[v] <span class="cf">if</span> v <span class="kw">is</span> <span class="kw">not</span> <span class="va">None</span> <span class="cf">else</span> missing <span class="cf">for</span> v <span class="kw">in</span> df[name].to_list()], dtype<span class="op">=</span>np.int64)</span>
+<span id="cb7-11"><a href="#cb7-11" aria-hidden="true" tabindex="-1"></a>        <span class="cf">assert</span> columns[name].<span class="bu">min</span>() <span class="op">&gt;=</span> <span class="dv">0</span>, <span class="ss">f"a value of </span><span class="sc">{</span>name<span class="sc">}</span><span class="ss"> is not in the codebook"</span></span>
+<span id="cb7-12"><a href="#cb7-12" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> Dataset(columns, domain())</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>Each route’s techniques and their settings are also fixed in advance, and the next two steps describe them.</p>
+</section>
+<section id="sec-model" class="level1" data-number="5">
+<h1 data-number="5"><span class="header-section-number">5</span> Step 4: the model route</h1>
+<section id="sec-model-fixed" class="level2" data-number="5.1">
+<h2 data-number="5.1" class="anchored" data-anchor-id="sec-model-fixed"><span class="header-section-number">5.1</span> Train a private model</h2>
+<p>The model route compares two techniques. The first is private stochastic gradient descent (SGD), known as <strong>DP-SGD</strong>, the standard way to train a model with DP. It trains a logistic regression, as a bank would without DP, on small random batches. At each step it caps how much each customer can move the model, which is called <em>clipping</em>, and it adds random noise to the update (<a href="https://opacus.ai/">Opacus</a>).</p>
 <p>Opacus’s privacy accountant sets the noise so that the whole run meets the target <span class="math inline">\(\varepsilon\)</span> at <span class="math inline">\(\delta = 10^{-5}\)</span>. From <span class="math inline">\(\varepsilon\)</span>, <span class="math inline">\(\delta\)</span>, the share of customers in each batch and the number of passes, it returns the noise multiplier, the size of the noise relative to the clipping norm:</p>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb6" data-excerpt="put-calibrate"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> noise_multiplier(eps: <span class="bu">float</span>, n: <span class="bu">int</span>) <span class="op">-&gt;</span> <span class="bu">float</span>:</span>
-<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a>    <span class="co">"""The noise multiplier that makes DP-SGD with these settings (eps, DELTA)-DP, by Opacus's PRV accountant."""</span></span>
-<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> <span class="bu">float</span>(</span>
-<span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a>        get_noise_multiplier(</span>
-<span id="cb6-5"><a href="#cb6-5" aria-hidden="true" tabindex="-1"></a>            target_epsilon<span class="op">=</span>eps, target_delta<span class="op">=</span>DELTA, sample_rate<span class="op">=</span>BATCH <span class="op">/</span> n, epochs<span class="op">=</span>EPOCHS, accountant<span class="op">=</span><span class="st">"prv"</span></span>
-<span id="cb6-6"><a href="#cb6-6" aria-hidden="true" tabindex="-1"></a>        )</span>
-<span id="cb6-7"><a href="#cb6-7" aria-hidden="true" tabindex="-1"></a>    )</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb8" data-excerpt="put-calibrate"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> noise_multiplier(eps: <span class="bu">float</span>, n: <span class="bu">int</span>) <span class="op">-&gt;</span> <span class="bu">float</span>:</span>
+<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a>    <span class="co">"""The noise multiplier that makes DP-SGD with these settings (eps, DELTA)-DP, by Opacus's PRV accountant."""</span></span>
+<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> <span class="bu">float</span>(</span>
+<span id="cb8-4"><a href="#cb8-4" aria-hidden="true" tabindex="-1"></a>        get_noise_multiplier(</span>
+<span id="cb8-5"><a href="#cb8-5" aria-hidden="true" tabindex="-1"></a>            target_epsilon<span class="op">=</span>eps, target_delta<span class="op">=</span>DELTA, sample_rate<span class="op">=</span>BATCH <span class="op">/</span> n, epochs<span class="op">=</span>EPOCHS, accountant<span class="op">=</span><span class="st">"prv"</span></span>
+<span id="cb8-6"><a href="#cb8-6" aria-hidden="true" tabindex="-1"></a>        )</span>
+<span id="cb8-7"><a href="#cb8-7" aria-hidden="true" tabindex="-1"></a>    )</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <p>Opacus then wraps the model, the optimizer and the data loader, so that every step draws a random batch, clips each customer’s contribution and adds that noise. The rest of the loop is the same as without DP:</p>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb7" data-excerpt="put-private"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a>optimizer <span class="op">=</span> torch.optim.SGD(layer.parameters(), lr<span class="op">=</span>LR, momentum<span class="op">=</span>MOMENTUM)</span>
-<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a>engine: PrivacyEngine <span class="op">|</span> <span class="va">None</span> <span class="op">=</span> <span class="va">None</span></span>
-<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a>model: nn.Module <span class="op">=</span> layer</span>
-<span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span> sigma <span class="kw">is</span> <span class="kw">not</span> <span class="va">None</span>:</span>
-<span id="cb7-5"><a href="#cb7-5" aria-hidden="true" tabindex="-1"></a>    engine <span class="op">=</span> PrivacyEngine(accountant<span class="op">=</span><span class="st">"prv"</span>)</span>
-<span id="cb7-6"><a href="#cb7-6" aria-hidden="true" tabindex="-1"></a>    model, optimizer, loader <span class="op">=</span> engine.make_private(  <span class="co"># Poisson sampling, per-example clipping, Gaussian noise</span></span>
-<span id="cb7-7"><a href="#cb7-7" aria-hidden="true" tabindex="-1"></a>        module<span class="op">=</span>layer, optimizer<span class="op">=</span>optimizer, data_loader<span class="op">=</span>loader, noise_multiplier<span class="op">=</span>sigma, max_grad_norm<span class="op">=</span>CLIP</span>
-<span id="cb7-8"><a href="#cb7-8" aria-hidden="true" tabindex="-1"></a>    )</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb9" data-excerpt="put-private"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a>optimizer <span class="op">=</span> torch.optim.SGD(layer.parameters(), lr<span class="op">=</span>LR, momentum<span class="op">=</span>MOMENTUM)</span>
+<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a>engine: PrivacyEngine <span class="op">|</span> <span class="va">None</span> <span class="op">=</span> <span class="va">None</span></span>
+<span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a>model: nn.Module <span class="op">=</span> layer</span>
+<span id="cb9-4"><a href="#cb9-4" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span> sigma <span class="kw">is</span> <span class="kw">not</span> <span class="va">None</span>:</span>
+<span id="cb9-5"><a href="#cb9-5" aria-hidden="true" tabindex="-1"></a>    engine <span class="op">=</span> PrivacyEngine(accountant<span class="op">=</span><span class="st">"prv"</span>)</span>
+<span id="cb9-6"><a href="#cb9-6" aria-hidden="true" tabindex="-1"></a>    model, optimizer, loader <span class="op">=</span> engine.make_private(  <span class="co"># Poisson sampling, per-example clipping, Gaussian noise</span></span>
+<span id="cb9-7"><a href="#cb9-7" aria-hidden="true" tabindex="-1"></a>        module<span class="op">=</span>layer, optimizer<span class="op">=</span>optimizer, data_loader<span class="op">=</span>loader, noise_multiplier<span class="op">=</span>sigma, max_grad_norm<span class="op">=</span>CLIP</span>
+<span id="cb9-8"><a href="#cb9-8" aria-hidden="true" tabindex="-1"></a>    )</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <p>DP-SGD’s settings were fixed in advance, with batches of about 1,000 customers, 10 passes over the data, a clipping norm of 1 and a learning rate of 0.5. The second technique is a <strong>private naive Bayes</strong> classifier from IBM’s diffprivlib, which adds noise to simple averages per class (<a href="https://github.com/IBM/differential-privacy-library">diffprivlib</a>). It gives the stronger pure <span class="math inline">\(\varepsilon\)</span> guarantee, with no <span class="math inline">\(\delta\)</span>. A pure guarantee also meets the <span class="math inline">\((\varepsilon, 10^{-5})\)</span> standard, so both techniques sit on the same axis.</p>
 <p>The experiment trains each technique at ten values of <span class="math inline">\(\varepsilon\)</span> from 0.01 to 10. DP training is random, and one run can be lucky or unlucky, so each setting runs with 20 random seeds. Each model is also trained without DP, with the same settings, so that the figures show the cost of privacy directly. The script spreads these runs over the processor cores:</p>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb8" data-excerpt="put-sweep"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a>jobs: <span class="bu">list</span>[<span class="bu">tuple</span>[<span class="bu">str</span>, <span class="bu">float</span> <span class="op">|</span> <span class="va">None</span>, <span class="bu">int</span>, <span class="bu">int</span>]] <span class="op">=</span> []</span>
-<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> technique <span class="kw">in</span> COLOURS:</span>
-<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a>    jobs <span class="op">+=</span> [(technique, eps, TRAIN_ROWS, seed) <span class="cf">for</span> eps <span class="kw">in</span> [<span class="va">None</span>, <span class="op">*</span>EPSILONS] <span class="cf">for</span> seed <span class="kw">in</span> <span class="bu">range</span>(seeds)]</span>
-<span id="cb8-4"><a href="#cb8-4" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> n <span class="kw">in</span> SIZES[:<span class="op">-</span><span class="dv">1</span>]:</span>
-<span id="cb8-5"><a href="#cb8-5" aria-hidden="true" tabindex="-1"></a>    jobs <span class="op">+=</span> [(<span class="st">"DP-SGD"</span>, eps, n, seed) <span class="cf">for</span> eps <span class="kw">in</span> [<span class="va">None</span>, <span class="op">*</span>EPSILONS] <span class="cf">for</span> seed <span class="kw">in</span> <span class="bu">range</span>(size_seeds)]</span>
-<span id="cb8-6"><a href="#cb8-6" aria-hidden="true" tabindex="-1"></a><span class="cf">with</span> ProcessPoolExecutor(max_workers<span class="op">=</span>WORKERS, initializer<span class="op">=</span>_init, initargs<span class="op">=</span>(data,)) <span class="im">as</span> pool:</span>
-<span id="cb8-7"><a href="#cb8-7" aria-hidden="true" tabindex="-1"></a>    runs <span class="op">=</span> <span class="bu">list</span>(pool.<span class="bu">map</span>(evaluate, jobs, chunksize<span class="op">=</span><span class="dv">4</span>))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb10" data-excerpt="put-sweep"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a>jobs: <span class="bu">list</span>[<span class="bu">tuple</span>[<span class="bu">str</span>, <span class="bu">float</span> <span class="op">|</span> <span class="va">None</span>, <span class="bu">int</span>, <span class="bu">int</span>]] <span class="op">=</span> []</span>
+<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> technique <span class="kw">in</span> COLOURS:</span>
+<span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a>    jobs <span class="op">+=</span> [(technique, eps, TRAIN_ROWS, seed) <span class="cf">for</span> eps <span class="kw">in</span> [<span class="va">None</span>, <span class="op">*</span>EPSILONS] <span class="cf">for</span> seed <span class="kw">in</span> <span class="bu">range</span>(seeds)]</span>
+<span id="cb10-4"><a href="#cb10-4" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> n <span class="kw">in</span> SIZES[:<span class="op">-</span><span class="dv">1</span>]:</span>
+<span id="cb10-5"><a href="#cb10-5" aria-hidden="true" tabindex="-1"></a>    jobs <span class="op">+=</span> [(<span class="st">"DP-SGD"</span>, eps, n, seed) <span class="cf">for</span> eps <span class="kw">in</span> [<span class="va">None</span>, <span class="op">*</span>EPSILONS] <span class="cf">for</span> seed <span class="kw">in</span> <span class="bu">range</span>(size_seeds)]</span>
+<span id="cb10-6"><a href="#cb10-6" aria-hidden="true" tabindex="-1"></a><span class="cf">with</span> ProcessPoolExecutor(max_workers<span class="op">=</span>WORKERS, initializer<span class="op">=</span>_init, initargs<span class="op">=</span>(data,)) <span class="im">as</span> pool:</span>
+<span id="cb10-7"><a href="#cb10-7" aria-hidden="true" tabindex="-1"></a>    runs <span class="op">=</span> <span class="bu">list</span>(pool.<span class="bu">map</span>(evaluate, jobs, chunksize<span class="op">=</span><span class="dv">4</span>))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </section>
-<section id="sec-results" class="level1" data-number="5">
-<h1 data-number="5"><span class="header-section-number">5</span> Step 4: read the results, technical first</h1>
+<section id="sec-results" class="level2" data-number="5.2">
+<h2 data-number="5.2" class="anchored" data-anchor-id="sec-results"><span class="header-section-number">5.2</span> Read the results, technical first</h2>
 <p><a href="#fig-technical" class="quarto-xref">Figure&nbsp;1</a> shows the results in the engineer’s terms. Its vertical axis is the AUC, the probability that the model scores a randomly chosen eligible customer above a randomly chosen ineligible one, so 0.5 is guessing and 1 is perfect. The bottom axis is <span class="math inline">\(\varepsilon\)</span>, and the top axis gives the attacker’s belief ceiling from <a href="#sec-policy" class="quarto-xref">Section&nbsp;3</a>. The shaded bands run from the 10th to the 90th percentile over the seeds.</p>
 <div id="fig-technical" class="quarto-float quarto-figure quarto-figure-center anchored">
 <figure class="quarto-float quarto-float-fig figure">
@@ -396,16 +474,16 @@ Figure&nbsp;2: Eligible customers reached by the campaign against the privacy se
 </div>
 <p>The gap between a DP curve and the upper dashed line is the cost of privacy, counted in customers. The gap between the curve and the dotted line is what the model is worth compared with random offers. <a href="#tbl-frontier" class="quarto-xref">Table&nbsp;3</a> lists every private configuration. A configuration is on the <em>frontier</em> when no other configuration is at least as private and reaches more customers, so only the frontier is worth considering. Here the frontier is DP-SGD at every level from <span class="math inline">\(\varepsilon = 0.02\)</span> up, with naive Bayes only at <span class="math inline">\(\varepsilon = 0.01\)</span>.</p>
 <p>The script finds the frontier with a short filter:</p>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb9" data-excerpt="put-frontier"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> non_dominated(points: <span class="bu">list</span>[<span class="bu">tuple</span>[<span class="bu">float</span>, <span class="bu">float</span>]]) <span class="op">-&gt;</span> <span class="bu">list</span>[<span class="bu">int</span>]:</span>
-<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a>    <span class="co">"""Indices of the (privacy loss, utility) points that no other point dominates."""</span></span>
-<span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a>    order <span class="op">=</span> <span class="bu">sorted</span>(<span class="bu">range</span>(<span class="bu">len</span>(points)), key<span class="op">=</span><span class="kw">lambda</span> i: (points[i][<span class="dv">0</span>], <span class="op">-</span>points[i][<span class="dv">1</span>]))</span>
-<span id="cb9-4"><a href="#cb9-4" aria-hidden="true" tabindex="-1"></a>    frontier: <span class="bu">list</span>[<span class="bu">int</span>] <span class="op">=</span> []</span>
-<span id="cb9-5"><a href="#cb9-5" aria-hidden="true" tabindex="-1"></a>    best <span class="op">=</span> <span class="bu">float</span>(<span class="st">"-inf"</span>)</span>
-<span id="cb9-6"><a href="#cb9-6" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> i <span class="kw">in</span> order:</span>
-<span id="cb9-7"><a href="#cb9-7" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span> points[i][<span class="dv">1</span>] <span class="op">&gt;</span> best:</span>
-<span id="cb9-8"><a href="#cb9-8" aria-hidden="true" tabindex="-1"></a>            frontier.append(i)</span>
-<span id="cb9-9"><a href="#cb9-9" aria-hidden="true" tabindex="-1"></a>            best <span class="op">=</span> points[i][<span class="dv">1</span>]</span>
-<span id="cb9-10"><a href="#cb9-10" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> frontier</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb11" data-excerpt="put-frontier"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> non_dominated(points: <span class="bu">list</span>[<span class="bu">tuple</span>[<span class="bu">float</span>, <span class="bu">float</span>]]) <span class="op">-&gt;</span> <span class="bu">list</span>[<span class="bu">int</span>]:</span>
+<span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a>    <span class="co">"""Indices of the (privacy loss, utility) points that no other point dominates."""</span></span>
+<span id="cb11-3"><a href="#cb11-3" aria-hidden="true" tabindex="-1"></a>    order <span class="op">=</span> <span class="bu">sorted</span>(<span class="bu">range</span>(<span class="bu">len</span>(points)), key<span class="op">=</span><span class="kw">lambda</span> i: (points[i][<span class="dv">0</span>], <span class="op">-</span>points[i][<span class="dv">1</span>]))</span>
+<span id="cb11-4"><a href="#cb11-4" aria-hidden="true" tabindex="-1"></a>    frontier: <span class="bu">list</span>[<span class="bu">int</span>] <span class="op">=</span> []</span>
+<span id="cb11-5"><a href="#cb11-5" aria-hidden="true" tabindex="-1"></a>    best <span class="op">=</span> <span class="bu">float</span>(<span class="st">"-inf"</span>)</span>
+<span id="cb11-6"><a href="#cb11-6" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> i <span class="kw">in</span> order:</span>
+<span id="cb11-7"><a href="#cb11-7" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span> points[i][<span class="dv">1</span>] <span class="op">&gt;</span> best:</span>
+<span id="cb11-8"><a href="#cb11-8" aria-hidden="true" tabindex="-1"></a>            frontier.append(i)</span>
+<span id="cb11-9"><a href="#cb11-9" aria-hidden="true" tabindex="-1"></a>            best <span class="op">=</span> points[i][<span class="dv">1</span>]</span>
+<span id="cb11-10"><a href="#cb11-10" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> frontier</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div id="tbl-frontier" class="quarto-float quarto-figure quarto-figure-center anchored">
 <figure class="quarto-float quarto-float-tbl figure">
 <figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl" id="tbl-frontier-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
@@ -598,8 +676,8 @@ Table&nbsp;3: Every private configuration, averaged over the seeds.
 </figure>
 </div>
 </section>
-<section id="sec-size" class="level1" data-number="6">
-<h1 data-number="6"><span class="header-section-number">6</span> Step 5: check how much the data size matters</h1>
+<section id="sec-size" class="level2" data-number="5.3">
+<h2 data-number="5.3" class="anchored" data-anchor-id="sec-size"><span class="header-section-number">5.3</span> Check how much the data size matters</h2>
 <p>The flat curve in <a href="#fig-business" class="quarto-xref">Figure&nbsp;2</a> depends on the bank having many customers. DP hides each person with noise, and the more customers there are, the less that noise matters next to their combined signal. So a bank with fewer customers, or a campaign aimed at one region, pays more for the same guarantee. To measure how much, the script trains DP-SGD again on the first 2,000 and the first 8,000 customers, and <a href="#fig-sizes" class="quarto-xref">Figure&nbsp;3</a> compares the three sizes.</p>
 <div id="fig-sizes" class="quarto-float quarto-figure quarto-figure-center anchored">
 <figure class="quarto-float quarto-float-fig figure">
@@ -611,7 +689,7 @@ Figure&nbsp;3: Eligible customers reached by DP-SGD trained on 2,000, 8,000 and 
 </figcaption>
 </figure>
 </div>
-<p>With fewer customers the curve bends down at a larger <span class="math inline">\(\varepsilon\)</span>. The gap to the model without DP is also wider at every setting, as <a href="#tbl-sizes" class="quarto-xref">Table&nbsp;4</a> shows in numbers. For the smallest base the gap stays open even at <span class="math inline">\(\varepsilon = 10\)</span>, where the noise is negligible. That part of the cost comes from the clipping settings, which suit the full dataset. So a bank in that position would first tune them on public or synthetic data. For a business this is often the most useful finding. It says whether the guarantee is cheap for this dataset, and whether more data would make a stricter policy affordable.</p>
+<p>With fewer customers the curve bends down at a larger <span class="math inline">\(\varepsilon\)</span>, and the gap to the model without DP is wider at every setting, as <a href="#tbl-sizes" class="quarto-xref">Table&nbsp;4</a> shows in numbers. For the smallest base the gap stays open even at <span class="math inline">\(\varepsilon = 10\)</span>, where the noise is negligible. That part of the cost comes from the clipping settings, which suit the full dataset. So a bank in that position would first tune them on public or synthetic data. For a business this is often the most useful finding. It says whether the guarantee is cheap for this dataset, and whether more data would make a stricter policy affordable.</p>
 <div id="tbl-sizes" class="quarto-float quarto-figure quarto-figure-center anchored">
 <figure class="quarto-float quarto-float-tbl figure">
 <figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl" id="tbl-sizes-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
@@ -663,15 +741,564 @@ Table&nbsp;4: Eligible customers missed because of privacy, by the number of cus
 </figure>
 </div>
 </section>
-<section id="sec-decision" class="level1" data-number="7">
-<h1 data-number="7"><span class="header-section-number">7</span> Step 6: present the menu and decide</h1>
-<p>The decision maker needs a few options, each with a privacy sentence and its business effect, and <a href="#tbl-menu" class="quarto-xref">Table&nbsp;5</a> gives them. The options are the best technique at a few privacy levels, plus the two reference points, no model and no DP. The membership column gives a second privacy sentence. It bounds how often an attack can correctly identify a real customer, for any attack that wrongly accuses 1% of non-customers (<a href="https://arxiv.org/abs/1311.0776">Kairouz et al., 2015</a>).</p>
-<div id="tbl-menu" class="quarto-float quarto-figure quarto-figure-center anchored">
+</section>
+<section id="sec-synthetic" class="level1" data-number="6">
+<h1 data-number="6"><span class="header-section-number">6</span> Step 5: the synthetic-data route</h1>
+<section id="sec-syn-budget" class="level2" data-number="6.1">
+<h2 data-number="6.1" class="anchored" data-anchor-id="sec-syn-budget"><span class="header-section-number">6.1</span> Give the generators a privacy budget</h2>
+<p>The generators of this route add Gaussian noise many times over, and the natural way to add up Gaussian noise is not in <span class="math inline">\(\varepsilon\)</span>. So each Gaussian measurement is accounted in <em>zero-concentrated differential privacy</em> (zCDP), which has one parameter, the budget <span class="math inline">\(\rho\)</span>, and in which the costs of measurements simply add. Write <span class="math inline">\(\sigma\)</span> for the standard deviation of the noise added to a count that one customer changes by one. That measurement costs <span class="math inline">\(\rho = 1 / (2\sigma^2)\)</span>, and two measurements cost the sum of their <span class="math inline">\(\rho\)</span>.</p>
+<p>A total budget <span class="math inline">\(\rho\)</span> converts to <span class="math inline">\((\varepsilon, \delta)\)</span> by a formula that gives the smallest <span class="math inline">\(\delta\)</span> for each <span class="math inline">\(\varepsilon\)</span>. The script runs that conversion backwards, by bisection, and finds the largest <span class="math inline">\(\rho\)</span> that the policy’s <span class="math inline">\(\varepsilon\)</span> and <span class="math inline">\(\delta\)</span> allow:</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb12" data-excerpt="syn-zcdp"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> zcdp_delta(rho: <span class="bu">float</span>, eps: <span class="bu">float</span>) <span class="op">-&gt;</span> <span class="bu">float</span>:</span>
+<span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a>    <span class="co">"""The smallest delta for which rho-zCDP implies (eps, delta)-DP (Canonne, Kamath &amp; Steinke, 2020, Prop. 7)."""</span></span>
+<span id="cb12-3"><a href="#cb12-3" aria-hidden="true" tabindex="-1"></a>    lo, hi <span class="op">=</span> <span class="fl">1.01</span>, (eps <span class="op">+</span> <span class="dv">1</span>) <span class="op">/</span> (<span class="dv">2</span> <span class="op">*</span> rho) <span class="op">+</span> <span class="dv">2</span>  <span class="co"># the best order alpha lies in this range</span></span>
+<span id="cb12-4"><a href="#cb12-4" aria-hidden="true" tabindex="-1"></a>    alpha <span class="op">=</span> (lo <span class="op">+</span> hi) <span class="op">/</span> <span class="dv">2</span></span>
+<span id="cb12-5"><a href="#cb12-5" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> _ <span class="kw">in</span> <span class="bu">range</span>(<span class="dv">100</span>):</span>
+<span id="cb12-6"><a href="#cb12-6" aria-hidden="true" tabindex="-1"></a>        alpha <span class="op">=</span> (lo <span class="op">+</span> hi) <span class="op">/</span> <span class="dv">2</span></span>
+<span id="cb12-7"><a href="#cb12-7" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span> (<span class="dv">2</span> <span class="op">*</span> alpha <span class="op">-</span> <span class="dv">1</span>) <span class="op">*</span> rho <span class="op">-</span> eps <span class="op">+</span> math.log1p(<span class="op">-</span><span class="dv">1</span> <span class="op">/</span> alpha) <span class="op">&lt;</span> <span class="dv">0</span>:</span>
+<span id="cb12-8"><a href="#cb12-8" aria-hidden="true" tabindex="-1"></a>            lo <span class="op">=</span> alpha</span>
+<span id="cb12-9"><a href="#cb12-9" aria-hidden="true" tabindex="-1"></a>        <span class="cf">else</span>:</span>
+<span id="cb12-10"><a href="#cb12-10" aria-hidden="true" tabindex="-1"></a>            hi <span class="op">=</span> alpha</span>
+<span id="cb12-11"><a href="#cb12-11" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> <span class="bu">min</span>(<span class="fl">1.0</span>, math.exp((alpha <span class="op">-</span> <span class="dv">1</span>) <span class="op">*</span> (alpha <span class="op">*</span> rho <span class="op">-</span> eps) <span class="op">+</span> alpha <span class="op">*</span> math.log1p(<span class="op">-</span><span class="dv">1</span> <span class="op">/</span> alpha)) <span class="op">/</span> (alpha <span class="op">-</span> <span class="dv">1</span>))</span>
+<span id="cb12-12"><a href="#cb12-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-13"><a href="#cb12-13" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-14"><a href="#cb12-14" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> rho_for_epsilon(eps: <span class="bu">float</span>, delta: <span class="bu">float</span> <span class="op">=</span> DELTA) <span class="op">-&gt;</span> <span class="bu">float</span>:</span>
+<span id="cb12-15"><a href="#cb12-15" aria-hidden="true" tabindex="-1"></a>    <span class="co">"""The largest zCDP budget rho that (eps, delta)-DP allows, found by bisection."""</span></span>
+<span id="cb12-16"><a href="#cb12-16" aria-hidden="true" tabindex="-1"></a>    lo, hi <span class="op">=</span> <span class="fl">0.0</span>, eps <span class="op">+</span> <span class="dv">1</span></span>
+<span id="cb12-17"><a href="#cb12-17" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> _ <span class="kw">in</span> <span class="bu">range</span>(<span class="dv">100</span>):</span>
+<span id="cb12-18"><a href="#cb12-18" aria-hidden="true" tabindex="-1"></a>        rho <span class="op">=</span> (lo <span class="op">+</span> hi) <span class="op">/</span> <span class="dv">2</span></span>
+<span id="cb12-19"><a href="#cb12-19" aria-hidden="true" tabindex="-1"></a>        lo, hi <span class="op">=</span> (rho, hi) <span class="cf">if</span> zcdp_delta(rho, eps) <span class="op">&lt;=</span> delta <span class="cf">else</span> (lo, rho)</span>
+<span id="cb12-20"><a href="#cb12-20" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> lo</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p><a href="#tbl-budgets" class="quarto-xref">Table&nbsp;5</a> lists the budgets for three values of <span class="math inline">\(\varepsilon\)</span> at <span class="math inline">\(\delta = 10^{-5}\)</span>. Every generator receives <span class="math inline">\(\rho\)</span> and spends it, so each is <span class="math inline">\((\varepsilon, 10^{-5})\)</span>-DP by construction, on the same axis as the model route.</p>
+<div id="tbl-budgets" class="quarto-float quarto-figure quarto-figure-center anchored">
 <figure class="quarto-float quarto-float-tbl figure">
-<figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl" id="tbl-menu-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-Table&nbsp;5: The options menu for one campaign of 3,846 offers, best technique at each option.
+<figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl" id="tbl-budgets-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Table&nbsp;5: The zero-concentrated budget that the policy’s <span class="math inline">\((\varepsilon, 10^{-5})\)</span> allows.
 </figcaption>
-<div aria-describedby="tbl-menu-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<div aria-describedby="tbl-budgets-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<table class="caption-top table">
+<thead>
+<tr class="header">
+<th><span class="math inline">\(\varepsilon\)</span></th>
+<th>Attacker’s belief ceiling</th>
+<th>Budget <span class="math inline">\(\rho\)</span></th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>0.1</td>
+<td>52.5%</td>
+<td>0.00043</td>
+</tr>
+<tr class="even">
+<td>1</td>
+<td>73.1%</td>
+<td>0.031</td>
+</tr>
+<tr class="odd">
+<td>3</td>
+<td>95.3%</td>
+<td>0.22</td>
+</tr>
+</tbody>
+</table>
+</div>
+</figure>
+</div>
+</section>
+<section id="sec-syn-fixed" class="level2" data-number="6.2">
+<h2 data-number="6.2" class="anchored" data-anchor-id="sec-syn-fixed"><span class="header-section-number">6.2</span> Fix three generators</h2>
+<p>All three generators measure <em>marginal tables</em>. A one-way table counts the customers with each value of one attribute. A two-way table counts them for each pair of values of two attributes, such as each combination of age band and occupation. The 13 attributes give 78 two-way tables, the largest of which, country by education, has 672 cells. One customer sits in exactly one cell of each table, so adding or removing a customer changes one count by one. So noise of standard deviation <span class="math inline">\(\sigma\)</span> on every cell costs <span class="math inline">\(\rho = 1 / (2\sigma^2)\)</span>, whatever the table’s number of cells.</p>
+<p>The noisy tables then go to Private-PGM (<a href="https://arxiv.org/abs/1901.09136">McKenna, Sheldon &amp; Miklau, 2019</a>). It finds the probability distribution over whole rows whose marginals best match the noisy tables, and it samples synthetic rows from it. Everything after the measurements is computation on noisy numbers, so it costs no privacy.</p>
+<p>The script measures a table with one function and chooses among candidate tables with another. The second is the <em>exponential mechanism</em>. It draws a candidate with probability proportional to <span class="math inline">\(e^{\varepsilon \cdot \text{score} / 2}\)</span>, so a candidate with a higher score is more likely but never certain, and that keeps the choice private when the scores depend on the data:</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb13" data-excerpt="syn-measure"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> measure(data: Dataset, clique: Clique, sigma: <span class="bu">float</span>, rng: np.random.Generator) <span class="op">-&gt;</span> LinearMeasurement:</span>
+<span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a>    <span class="co">"""The table of counts over `clique`, with Gaussian noise of scale sigma on every cell: rho = 1 / (2 sigma^2)."""</span></span>
+<span id="cb13-3"><a href="#cb13-3" aria-hidden="true" tabindex="-1"></a>    counts <span class="op">=</span> np.asarray(data.project(clique).datavector(), dtype<span class="op">=</span>np.float64)</span>
+<span id="cb13-4"><a href="#cb13-4" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> LinearMeasurement(counts <span class="op">+</span> rng.normal(<span class="fl">0.0</span>, sigma, counts.size), clique, stddev<span class="op">=</span>sigma)</span>
+<span id="cb13-5"><a href="#cb13-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-6"><a href="#cb13-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-7"><a href="#cb13-7" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> exponential_mechanism(scores: <span class="bu">dict</span>[Clique, <span class="bu">float</span>], eps: <span class="bu">float</span>, rng: np.random.Generator) <span class="op">-&gt;</span> Clique:</span>
+<span id="cb13-8"><a href="#cb13-8" aria-hidden="true" tabindex="-1"></a>    <span class="co">"""One candidate, drawn with probability proportional to exp(eps * score / 2); each score has sensitivity 1."""</span></span>
+<span id="cb13-9"><a href="#cb13-9" aria-hidden="true" tabindex="-1"></a>    cliques <span class="op">=</span> <span class="bu">list</span>(scores)</span>
+<span id="cb13-10"><a href="#cb13-10" aria-hidden="true" tabindex="-1"></a>    logits <span class="op">=</span> np.array([eps <span class="op">*</span> scores[c] <span class="op">/</span> <span class="dv">2</span> <span class="cf">for</span> c <span class="kw">in</span> cliques])</span>
+<span id="cb13-11"><a href="#cb13-11" aria-hidden="true" tabindex="-1"></a>    weights <span class="op">=</span> np.exp(logits <span class="op">-</span> logits.<span class="bu">max</span>())</span>
+<span id="cb13-12"><a href="#cb13-12" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> cliques[rng.choice(<span class="bu">len</span>(cliques), p<span class="op">=</span>weights <span class="op">/</span> weights.<span class="bu">sum</span>())]</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>The generators differ only in which tables they measure. A table costs the same whether it is one-way or two-way, but there are far more two-way tables, so each generator must choose. The first, which we call <strong>Independent</strong>, measures the 13 one-way tables with equal shares of the budget, and nothing else. Its rows have the right share of each age band and each occupation, but every attribute varies independently of the others, income included. It shows what the other two generators buy.</p>
+<p>The second is <strong>MST</strong>, which won the 2018 synthetic data competition of the US National Institute of Standards and Technology (<a href="https://arxiv.org/abs/2108.04978">McKenna, Miklau &amp; Sheldon, 2021</a>). It splits the budget in three.</p>
+<p>One third of MST’s budget measures the one-way tables. One third chooses twelve two-way tables. For that, MST fits a model to the one-way tables and scores each pair of attributes by how badly that model gets their two-way table wrong. It then picks twelve pairs one at a time with the exponential mechanism, so that they form a tree over the 13 attributes. The last third measures those twelve tables. A tree is the largest set of pairs that Private-PGM can always fit cheaply, so MST stops there.</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb14" data-excerpt="syn-mst"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> mst(data: Dataset, rho: <span class="bu">float</span>, rng: np.random.Generator) <span class="op">-&gt;</span> Dataset:</span>
+<span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a>    <span class="co">"""MST: one-way tables, then a spanning tree of the two-way tables that a one-way model gets most wrong."""</span></span>
+<span id="cb14-3"><a href="#cb14-3" aria-hidden="true" tabindex="-1"></a>    d <span class="op">=</span> <span class="bu">len</span>(data.domain)  <span class="co"># a third of the budget each: the one-way tables, the choice of tree, the tree's tables</span></span>
+<span id="cb14-4"><a href="#cb14-4" aria-hidden="true" tabindex="-1"></a>    one_way <span class="op">=</span> [measure(data, (a,), math.sqrt(<span class="dv">3</span> <span class="op">*</span> d <span class="op">/</span> (<span class="dv">2</span> <span class="op">*</span> rho)), rng) <span class="cf">for</span> a <span class="kw">in</span> data.domain]</span>
+<span id="cb14-5"><a href="#cb14-5" aria-hidden="true" tabindex="-1"></a>    model <span class="op">=</span> fit(data.domain, one_way, iters<span class="op">=</span><span class="dv">2500</span>)</span>
+<span id="cb14-6"><a href="#cb14-6" aria-hidden="true" tabindex="-1"></a>    scores <span class="op">=</span> {</span>
+<span id="cb14-7"><a href="#cb14-7" aria-hidden="true" tabindex="-1"></a>        pair: <span class="bu">float</span>(np.<span class="bu">abs</span>(data.project(pair).datavector() <span class="op">-</span> model.project(pair).datavector()).<span class="bu">sum</span>())</span>
+<span id="cb14-8"><a href="#cb14-8" aria-hidden="true" tabindex="-1"></a>        <span class="cf">for</span> pair <span class="kw">in</span> pairs(data.domain)</span>
+<span id="cb14-9"><a href="#cb14-9" aria-hidden="true" tabindex="-1"></a>    }</span>
+<span id="cb14-10"><a href="#cb14-10" aria-hidden="true" tabindex="-1"></a>    tree: <span class="bu">list</span>[Clique] <span class="op">=</span> []</span>
+<span id="cb14-11"><a href="#cb14-11" aria-hidden="true" tabindex="-1"></a>    component <span class="op">=</span> {a: a <span class="cf">for</span> a <span class="kw">in</span> data.domain}  <span class="co"># which tree component each attribute belongs to</span></span>
+<span id="cb14-12"><a href="#cb14-12" aria-hidden="true" tabindex="-1"></a>    eps_round <span class="op">=</span> math.sqrt(<span class="dv">8</span> <span class="op">*</span> (rho <span class="op">/</span> <span class="dv">3</span>) <span class="op">/</span> (d <span class="op">-</span> <span class="dv">1</span>))</span>
+<span id="cb14-13"><a href="#cb14-13" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> _ <span class="kw">in</span> <span class="bu">range</span>(d <span class="op">-</span> <span class="dv">1</span>):</span>
+<span id="cb14-14"><a href="#cb14-14" aria-hidden="true" tabindex="-1"></a>        joining <span class="op">=</span> {p: s <span class="cf">for</span> p, s <span class="kw">in</span> scores.items() <span class="cf">if</span> component[p[<span class="dv">0</span>]] <span class="op">!=</span> component[p[<span class="dv">1</span>]]}</span>
+<span id="cb14-15"><a href="#cb14-15" aria-hidden="true" tabindex="-1"></a>        a, b <span class="op">=</span> exponential_mechanism(joining, eps_round, rng)</span>
+<span id="cb14-16"><a href="#cb14-16" aria-hidden="true" tabindex="-1"></a>        tree.append((a, b))</span>
+<span id="cb14-17"><a href="#cb14-17" aria-hidden="true" tabindex="-1"></a>        component <span class="op">=</span> {x: component[a] <span class="cf">if</span> c <span class="op">==</span> component[b] <span class="cf">else</span> c <span class="cf">for</span> x, c <span class="kw">in</span> component.items()}</span>
+<span id="cb14-18"><a href="#cb14-18" aria-hidden="true" tabindex="-1"></a>    two_way <span class="op">=</span> [measure(data, edge, math.sqrt(<span class="dv">3</span> <span class="op">*</span> (d <span class="op">-</span> <span class="dv">1</span>) <span class="op">/</span> (<span class="dv">2</span> <span class="op">*</span> rho)), rng) <span class="cf">for</span> edge <span class="kw">in</span> tree]</span>
+<span id="cb14-19"><a href="#cb14-19" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> fit(data.domain, one_way <span class="op">+</span> two_way, iters<span class="op">=</span><span class="dv">5000</span>).synthetic_data()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>The third is <strong>AIM</strong>, an adaptive and iterative mechanism that does best on the public benchmarks (<a href="https://arxiv.org/abs/2201.12677">McKenna, Mullins, Sheldon &amp; Miklau, 2022</a>). It is told which tables matter, here all 78 two-way tables, and it spends the budget in rounds, 16 per attribute. Nine tenths of each round’s share go to measuring and one tenth to choosing. In each round, AIM scores every candidate table by how far its model’s answer is from the real one, minus the error that the noise alone would cause. The candidates are the one-way and two-way tables, weighted by how many of the 78 tables they inform, and only tables that keep the model small enough to fit are allowed.</p>
+<p>AIM then picks a table with the exponential mechanism, measures it and refits the model. If the measurement did not improve the model’s answer by more than the noise explains, the noise is too large to be useful. So AIM halves <span class="math inline">\(\sigma\)</span> for the remaining rounds, each of which then costs four times more, and the run ends sooner. When the budget cannot cover another full round, the last round spends what is left.</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb15" data-excerpt="syn-aim"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a>measurements <span class="op">=</span> [measure(data, (a,), sigma, rng) <span class="cf">for</span> a <span class="kw">in</span> dom]</span>
+<span id="cb15-2"><a href="#cb15-2" aria-hidden="true" tabindex="-1"></a>spent <span class="op">=</span> <span class="bu">len</span>(dom) <span class="op">*</span> <span class="fl">0.5</span> <span class="op">/</span> sigma<span class="op">**</span><span class="dv">2</span></span>
+<span id="cb15-3"><a href="#cb15-3" aria-hidden="true" tabindex="-1"></a>model <span class="op">=</span> fit(dom, measurements, iters<span class="op">=</span><span class="dv">1000</span>)</span>
+<span id="cb15-4"><a href="#cb15-4" aria-hidden="true" tabindex="-1"></a>last <span class="op">=</span> <span class="va">False</span></span>
+<span id="cb15-5"><a href="#cb15-5" aria-hidden="true" tabindex="-1"></a><span class="cf">while</span> <span class="kw">not</span> last:</span>
+<span id="cb15-6"><a href="#cb15-6" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> rho <span class="op">-</span> spent <span class="op">&lt;</span> <span class="dv">2</span> <span class="op">*</span> (<span class="fl">0.5</span> <span class="op">/</span> sigma<span class="op">**</span><span class="dv">2</span> <span class="op">+</span> eps<span class="op">**</span><span class="dv">2</span> <span class="op">/</span> <span class="dv">8</span>):  <span class="co"># the next round would overspend: make it the last</span></span>
+<span id="cb15-7"><a href="#cb15-7" aria-hidden="true" tabindex="-1"></a>        sigma, eps, last <span class="op">=</span> math.sqrt(<span class="dv">1</span> <span class="op">/</span> (<span class="dv">2</span> <span class="op">*</span> <span class="fl">0.9</span> <span class="op">*</span> (rho <span class="op">-</span> spent))), math.sqrt(<span class="dv">8</span> <span class="op">*</span> <span class="fl">0.1</span> <span class="op">*</span> (rho <span class="op">-</span> spent)), <span class="va">True</span></span>
+<span id="cb15-8"><a href="#cb15-8" aria-hidden="true" tabindex="-1"></a>    spent <span class="op">+=</span> eps<span class="op">**</span><span class="dv">2</span> <span class="op">/</span> <span class="dv">8</span> <span class="op">+</span> <span class="fl">0.5</span> <span class="op">/</span> sigma<span class="op">**</span><span class="dv">2</span></span>
+<span id="cb15-9"><a href="#cb15-9" aria-hidden="true" tabindex="-1"></a>    allowed <span class="op">=</span> allowed_cliques(candidates, model, max_model_size <span class="op">*</span> spent <span class="op">/</span> rho)</span>
+<span id="cb15-10"><a href="#cb15-10" aria-hidden="true" tabindex="-1"></a>    tables <span class="op">=</span> model_tables(model, allowed)  <span class="co"># the model's answer to every candidate, without the library's compiler</span></span>
+<span id="cb15-11"><a href="#cb15-11" aria-hidden="true" tabindex="-1"></a>    scores <span class="op">=</span> {c: candidates[c] <span class="op">*</span> (l1(answers[c], tables[c]) <span class="op">-</span> bias(sigma, dom, c)) <span class="cf">for</span> c <span class="kw">in</span> allowed}</span>
+<span id="cb15-12"><a href="#cb15-12" aria-hidden="true" tabindex="-1"></a>    clique <span class="op">=</span> exponential_mechanism(scores, eps, rng)</span>
+<span id="cb15-13"><a href="#cb15-13" aria-hidden="true" tabindex="-1"></a>    measurements.append(measure(data, clique, sigma, rng))</span>
+<span id="cb15-14"><a href="#cb15-14" aria-hidden="true" tabindex="-1"></a>    before <span class="op">=</span> error(answers[clique], model, clique)</span>
+<span id="cb15-15"><a href="#cb15-15" aria-hidden="true" tabindex="-1"></a>    measured <span class="op">=</span> <span class="bu">list</span>(<span class="bu">dict</span>.fromkeys(m.clique <span class="cf">for</span> m <span class="kw">in</span> measurements))  <span class="co"># a table can be measured twice</span></span>
+<span id="cb15-16"><a href="#cb15-16" aria-hidden="true" tabindex="-1"></a>    model <span class="op">=</span> fit(dom, measurements, iters<span class="op">=</span><span class="dv">1000</span>, warm<span class="op">=</span>model.potentials.expand(measured))</span>
+<span id="cb15-17"><a href="#cb15-17" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> before <span class="op">-</span> error(answers[clique], model, clique) <span class="op">&lt;=</span> bias(sigma, dom, clique):  <span class="co"># too noisy to help</span></span>
+<span id="cb15-18"><a href="#cb15-18" aria-hidden="true" tabindex="-1"></a>        sigma, eps <span class="op">=</span> sigma <span class="op">/</span> <span class="dv">2</span>, eps <span class="op">*</span> <span class="dv">2</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>The generators’ settings are those of the reference implementations, such as AIM’s limit of 80 megabytes on the model. We made one change to MST. The reference MST first merges the rare values of each attribute, such as countries with a handful of customers, but we keep the codebook’s lists for all three generators, so that they are compared on the same table. The script also computes AIM’s model answers itself, in plain numpy, which is faster than the library and gives the same tables.</p>
+<p>The agency trains a logistic regression on whatever table it gets, with the library’s default settings, on the 12 attributes other than income as 0-or-1 columns. The same model trained on the real table is the campaign’s reference point. For a fair comparison of the two routes, the script also trains DP-SGD on these 12 attributes, with the settings of <a href="#sec-model-fixed" class="quarto-xref">Section&nbsp;5.1</a>.</p>
+<p>The experiment runs each generator at ten values of <span class="math inline">\(\varepsilon\)</span> from 0.03 to 10, with five random seeds each. Each run is one job, made of a technique, a value of <span class="math inline">\(\varepsilon\)</span>, a number of customer records and a seed. The script lists the jobs, the slow ones first, and spreads them over the processor cores:</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb16" data-excerpt="syn-sweep"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a>jobs: <span class="bu">list</span>[<span class="bu">tuple</span>[<span class="bu">str</span>, <span class="bu">float</span> <span class="op">|</span> <span class="va">None</span>, <span class="bu">int</span>, <span class="bu">int</span>, Path <span class="op">|</span> <span class="va">None</span>]] <span class="op">=</span> [(<span class="st">"Real table"</span>, <span class="va">None</span>, TRAIN_ROWS, <span class="dv">0</span>, cache)]</span>
+<span id="cb16-2"><a href="#cb16-2" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> technique <span class="kw">in</span> [<span class="op">*</span>GENERATORS, <span class="st">"DP-SGD"</span>]:</span>
+<span id="cb16-3"><a href="#cb16-3" aria-hidden="true" tabindex="-1"></a>    jobs <span class="op">+=</span> [(technique, eps, TRAIN_ROWS, seed, cache) <span class="cf">for</span> eps <span class="kw">in</span> epsilons <span class="cf">for</span> seed <span class="kw">in</span> <span class="bu">range</span>(seeds)]</span>
+<span id="cb16-4"><a href="#cb16-4" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> n <span class="kw">in</span> SIZES[:<span class="op">-</span><span class="dv">1</span>]:</span>
+<span id="cb16-5"><a href="#cb16-5" aria-hidden="true" tabindex="-1"></a>    jobs <span class="op">+=</span> [(<span class="st">"Real table"</span>, <span class="va">None</span>, n, <span class="dv">0</span>, cache)]</span>
+<span id="cb16-6"><a href="#cb16-6" aria-hidden="true" tabindex="-1"></a>    jobs <span class="op">+=</span> [(<span class="st">"AIM"</span>, eps, n, seed, cache) <span class="cf">for</span> eps <span class="kw">in</span> epsilons <span class="cf">for</span> seed <span class="kw">in</span> <span class="bu">range</span>(size_seeds)]</span>
+<span id="cb16-7"><a href="#cb16-7" aria-hidden="true" tabindex="-1"></a>jobs.sort(key<span class="op">=</span><span class="kw">lambda</span> j: (j[<span class="dv">0</span>] <span class="op">!=</span> <span class="st">"AIM"</span>, <span class="op">-</span>(j[<span class="dv">1</span>] <span class="kw">or</span> <span class="fl">0.0</span>)))  <span class="co"># the slow jobs first, so the cores stay busy</span></span>
+<span id="cb16-8"><a href="#cb16-8" aria-hidden="true" tabindex="-1"></a>context <span class="op">=</span> multiprocessing.get_context(<span class="st">"spawn"</span>)  <span class="co"># jax must start fresh in each worker</span></span>
+<span id="cb16-9"><a href="#cb16-9" aria-hidden="true" tabindex="-1"></a><span class="co"># A worker's memory grows with every program jax compiles, so each job gets a fresh process.</span></span>
+<span id="cb16-10"><a href="#cb16-10" aria-hidden="true" tabindex="-1"></a>pool <span class="op">=</span> ProcessPoolExecutor(WORKERS, mp_context<span class="op">=</span>context, initializer<span class="op">=</span>_init, initargs<span class="op">=</span>(data,), max_tasks_per_child<span class="op">=</span><span class="dv">1</span>)</span>
+<span id="cb16-11"><a href="#cb16-11" aria-hidden="true" tabindex="-1"></a><span class="cf">with</span> pool:</span>
+<span id="cb16-12"><a href="#cb16-12" aria-hidden="true" tabindex="-1"></a>    runs <span class="op">=</span> <span class="bu">list</span>(pool.<span class="bu">map</span>(evaluate, jobs))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</section>
+<section id="sec-syn-results" class="level2" data-number="6.3">
+<h2 data-number="6.3" class="anchored" data-anchor-id="sec-syn-results"><span class="header-section-number">6.3</span> Read the results, technical first</h2>
+<p><a href="#fig-syn-technical" class="quarto-xref">Figure&nbsp;4</a> shows the engineer’s view, which is how the literature on synthetic data judges a generator. Its vertical axis is the average, over the 78 two-way tables, of the <em>total variation distance</em> between the synthetic and the real proportions. That distance is half the sum of the absolute differences of the proportions. It is the largest error the synthetic table can make on any question about that pair of attributes, as a share of the customers.</p>
+<div id="fig-syn-technical" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-syn-technical-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="figures/synthetic/technical.svg" class="img-fluid figure-img">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-syn-technical-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;4: Error on the two-way tables against the privacy setting. Each line is a generator, averaged over five seeds; the vertical axis is logarithmic.
+</figcaption>
+</figure>
+</div>
+<p>AIM’s error falls steadily as the budget grows, from 0.151 at <span class="math inline">\(\varepsilon = 0.03\)</span> to 0.057 at <span class="math inline">\(\varepsilon = 1\)</span> and 0.013 at <span class="math inline">\(\varepsilon = 10\)</span>, because a larger budget buys more rounds and less noise in each. MST’s error stops falling at about 0.11 from <span class="math inline">\(\varepsilon = 0.2\)</span> on. It measures only the 12 two-way tables of its tree, so the other 66 are guesses from the model, and no budget improves a guess. Independent measures no two-way table, and its error settles at 0.076, the error of treating every pair of attributes as unrelated. Up to <span class="math inline">\(\varepsilon = 0.3\)</span> that guess beats both other generators, which spread too little budget over too many tables. From <span class="math inline">\(\varepsilon = 0.5\)</span> on, AIM has the smallest error.</p>
+<p><a href="#fig-syn-plan" class="quarto-xref">Figure&nbsp;5</a> shows the first business count, the eligible customers that the synthetic plan puts in the wrong segment, out of 7,841. The shaded bands run from the 10th to the 90th percentile over the seeds. The plan is a three-way table, age band by occupation by income, and no generator measures it directly.</p>
+<div id="fig-syn-plan" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-syn-plan-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="figures/synthetic/plan.svg" class="img-fluid figure-img">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-syn-plan-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;5: Eligible customers placed in the wrong segment of the campaign plan, out of 7,841, against the privacy setting. The vertical axis is logarithmic.
+</figcaption>
+</figure>
+</div>
+<p>The plan tells a different story from the average error. Independent misplaces about 3,000 of the 7,841 at every budget, because it treats income as unrelated to age and occupation. MST and AIM do worse than that below <span class="math inline">\(\varepsilon = 1\)</span>, misplacing between 3,290 and 5,690. Their models link income to the segment attributes, but through noisy or indirect tables, which can be worse than no link.</p>
+<p>At <span class="math inline">\(\varepsilon = 1\)</span> AIM’s error drops to 484 misplaced customers, 6.2% of them, and it stays below 400 from <span class="math inline">\(\varepsilon = 2\)</span> on. With that budget AIM can afford the tables that tie income to age and to occupation. So a synthetic plan is usable only from about <span class="math inline">\(\varepsilon = 1\)</span>, and only with AIM.</p>
+<p><a href="#fig-syn-business" class="quarto-xref">Figure&nbsp;6</a> shows the campaign count. The upper dashed line is the agency’s model trained on the real table, and the dotted line is no data at all. The dashed line with square markers is the model route, DP-SGD trained inside the bank on the same 12 attributes at the same <span class="math inline">\(\varepsilon\)</span>.</p>
+<div id="fig-syn-business" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-syn-business-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="figures/synthetic/business.svg" class="img-fluid figure-img">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-syn-business-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;6: Eligible customers reached by the campaign against the privacy setting, for a model trained on each synthetic table and for a DP-SGD model trained on the records directly. The shaded region is ruled out by the policy ceiling.
+</figcaption>
+</figure>
+</div>
+<p>AIM’s table gives the best campaign at most budgets. It reaches about 1,900 to 2,240 of the 3,846 eligible customers up to <span class="math inline">\(\varepsilon = 0.1\)</span>, about 1,830 to 2,030 between 0.2 and 0.5, and 2,245 at <span class="math inline">\(\varepsilon = 1\)</span>, rising to 2,513 at <span class="math inline">\(\varepsilon = 10\)</span>. In the middle AIM does worse than at <span class="math inline">\(\varepsilon = 0.1\)</span>, beyond the spread over seeds, and at <span class="math inline">\(\varepsilon = 0.2\)</span> MST beats it, 2,081 to 1,828. A larger budget makes AIM measure more tables, and the extra tables do not always help the campaign. Independent stays near random offers, between 631 and 1,125, because a table without links between attributes gives a model nothing to learn. The DP-SGD model beats every synthetic table at every budget. It reaches 2,620 at <span class="math inline">\(\varepsilon = 1\)</span>, within 5 of the model trained on the real table, while AIM’s table at <span class="math inline">\(\varepsilon = 1\)</span> is 380 short.</p>
+<p><a href="#tbl-syn-frontier" class="quarto-xref">Table&nbsp;6</a> lists every synthetic configuration, with the frontier defined as in <a href="#sec-results" class="quarto-xref">Section&nbsp;5.2</a>.</p>
+<div id="tbl-syn-frontier" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-tbl figure">
+<figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl" id="tbl-syn-frontier-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Table&nbsp;6: Every synthetic configuration, averaged over the seeds.
+</figcaption>
+<div aria-describedby="tbl-syn-frontier-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<table class="caption-top table">
+<colgroup>
+<col style="width: 14%">
+<col style="width: 14%">
+<col style="width: 14%">
+<col style="width: 14%">
+<col style="width: 14%">
+<col style="width: 14%">
+<col style="width: 14%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>Generator</th>
+<th><span class="math inline">\(\varepsilon\)</span></th>
+<th>Attacker’s belief ceiling</th>
+<th>Two-way error</th>
+<th>Eligible misplaced in the plan</th>
+<th>Eligible reached</th>
+<th>On the frontier</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>Independent</td>
+<td>0.03</td>
+<td>50.7%</td>
+<td>0.101</td>
+<td>3,048 of 7,841</td>
+<td>944 of 3,846 (25%)</td>
+<td></td>
+</tr>
+<tr class="even">
+<td>MST</td>
+<td>0.03</td>
+<td>50.7%</td>
+<td>0.151</td>
+<td>5,690 of 7,841</td>
+<td>1,288 of 3,846 (33%)</td>
+<td></td>
+</tr>
+<tr class="odd">
+<td>AIM</td>
+<td>0.03</td>
+<td>50.7%</td>
+<td>0.151</td>
+<td>5,092 of 7,841</td>
+<td>1,906 of 3,846 (50%)</td>
+<td>yes</td>
+</tr>
+<tr class="even">
+<td>Independent</td>
+<td>0.05</td>
+<td>51.2%</td>
+<td>0.094</td>
+<td>3,004 of 7,841</td>
+<td>1,026 of 3,846 (27%)</td>
+<td></td>
+</tr>
+<tr class="odd">
+<td>MST</td>
+<td>0.05</td>
+<td>51.2%</td>
+<td>0.131</td>
+<td>4,091 of 7,841</td>
+<td>1,573 of 3,846 (41%)</td>
+<td></td>
+</tr>
+<tr class="even">
+<td>AIM</td>
+<td>0.05</td>
+<td>51.2%</td>
+<td>0.134</td>
+<td>3,901 of 7,841</td>
+<td>2,191 of 3,846 (57%)</td>
+<td>yes</td>
+</tr>
+<tr class="odd">
+<td>Independent</td>
+<td>0.1</td>
+<td>52.5%</td>
+<td>0.085</td>
+<td>3,007 of 7,841</td>
+<td>694 of 3,846 (18%)</td>
+<td></td>
+</tr>
+<tr class="even">
+<td>MST</td>
+<td>0.1</td>
+<td>52.5%</td>
+<td>0.112</td>
+<td>3,599 of 7,841</td>
+<td>1,938 of 3,846 (50%)</td>
+<td></td>
+</tr>
+<tr class="odd">
+<td>AIM</td>
+<td>0.1</td>
+<td>52.5%</td>
+<td>0.118</td>
+<td>3,919 of 7,841</td>
+<td>2,237 of 3,846 (58%)</td>
+<td>yes</td>
+</tr>
+<tr class="even">
+<td>Independent</td>
+<td>0.2</td>
+<td>55.0%</td>
+<td>0.080</td>
+<td>2,991 of 7,841</td>
+<td>1,005 of 3,846 (26%)</td>
+<td></td>
+</tr>
+<tr class="odd">
+<td>MST</td>
+<td>0.2</td>
+<td>55.0%</td>
+<td>0.106</td>
+<td>3,290 of 7,841</td>
+<td>2,081 of 3,846 (54%)</td>
+<td></td>
+</tr>
+<tr class="even">
+<td>AIM</td>
+<td>0.2</td>
+<td>55.0%</td>
+<td>0.085</td>
+<td>4,334 of 7,841</td>
+<td>1,828 of 3,846 (48%)</td>
+<td></td>
+</tr>
+<tr class="odd">
+<td>Independent</td>
+<td>0.3</td>
+<td>57.4%</td>
+<td>0.078</td>
+<td>2,978 of 7,841</td>
+<td>968 of 3,846 (25%)</td>
+<td></td>
+</tr>
+<tr class="even">
+<td>MST</td>
+<td>0.3</td>
+<td>57.4%</td>
+<td>0.107</td>
+<td>3,536 of 7,841</td>
+<td>1,961 of 3,846 (51%)</td>
+<td></td>
+</tr>
+<tr class="odd">
+<td>AIM</td>
+<td>0.3</td>
+<td>57.4%</td>
+<td>0.080</td>
+<td>4,396 of 7,841</td>
+<td>2,027 of 3,846 (53%)</td>
+<td></td>
+</tr>
+<tr class="even">
+<td>Independent</td>
+<td>0.5</td>
+<td>62.2%</td>
+<td>0.077</td>
+<td>2,990 of 7,841</td>
+<td>741 of 3,846 (19%)</td>
+<td></td>
+</tr>
+<tr class="odd">
+<td>MST</td>
+<td>0.5</td>
+<td>62.2%</td>
+<td>0.108</td>
+<td>4,255 of 7,841</td>
+<td>1,863 of 3,846 (48%)</td>
+<td></td>
+</tr>
+<tr class="even">
+<td>AIM</td>
+<td>0.5</td>
+<td>62.2%</td>
+<td>0.063</td>
+<td>4,141 of 7,841</td>
+<td>1,991 of 3,846 (52%)</td>
+<td></td>
+</tr>
+<tr class="odd">
+<td>Independent</td>
+<td>1</td>
+<td>73.1%</td>
+<td>0.077</td>
+<td>2,998 of 7,841</td>
+<td>631 of 3,846 (16%)</td>
+<td></td>
+</tr>
+<tr class="even">
+<td>MST</td>
+<td>1</td>
+<td>73.1%</td>
+<td>0.108</td>
+<td>4,570 of 7,841</td>
+<td>1,713 of 3,846 (45%)</td>
+<td></td>
+</tr>
+<tr class="odd">
+<td>AIM</td>
+<td>1</td>
+<td>73.1%</td>
+<td>0.057</td>
+<td>484 of 7,841</td>
+<td>2,245 of 3,846 (58%)</td>
+<td>yes</td>
+</tr>
+<tr class="even">
+<td>Independent</td>
+<td>2</td>
+<td>88.1%</td>
+<td>0.076</td>
+<td>3,004 of 7,841</td>
+<td>1,125 of 3,846 (29%)</td>
+<td></td>
+</tr>
+<tr class="odd">
+<td>MST</td>
+<td>2</td>
+<td>88.1%</td>
+<td>0.108</td>
+<td>4,783 of 7,841</td>
+<td>1,613 of 3,846 (42%)</td>
+<td></td>
+</tr>
+<tr class="even">
+<td>AIM</td>
+<td>2</td>
+<td>88.1%</td>
+<td>0.036</td>
+<td>374 of 7,841</td>
+<td>2,318 of 3,846 (60%)</td>
+<td>yes</td>
+</tr>
+<tr class="odd">
+<td>Independent</td>
+<td>3</td>
+<td>95.3%</td>
+<td>0.076</td>
+<td>2,994 of 7,841</td>
+<td>952 of 3,846 (25%)</td>
+<td></td>
+</tr>
+<tr class="even">
+<td>MST</td>
+<td>3</td>
+<td>95.3%</td>
+<td>0.107</td>
+<td>4,786 of 7,841</td>
+<td>1,661 of 3,846 (43%)</td>
+<td></td>
+</tr>
+<tr class="odd">
+<td>AIM</td>
+<td>3</td>
+<td>95.3%</td>
+<td>0.028</td>
+<td>372 of 7,841</td>
+<td>2,464 of 3,846 (64%)</td>
+<td>yes</td>
+</tr>
+<tr class="even">
+<td>Independent</td>
+<td>10</td>
+<td>100.0%</td>
+<td>0.076</td>
+<td>2,964 of 7,841</td>
+<td>989 of 3,846 (26%)</td>
+<td></td>
+</tr>
+<tr class="odd">
+<td>MST</td>
+<td>10</td>
+<td>100.0%</td>
+<td>0.106</td>
+<td>4,775 of 7,841</td>
+<td>1,638 of 3,846 (43%)</td>
+<td></td>
+</tr>
+<tr class="even">
+<td>AIM</td>
+<td>10</td>
+<td>100.0%</td>
+<td>0.013</td>
+<td>301 of 7,841</td>
+<td>2,513 of 3,846 (65%)</td>
+<td>yes</td>
+</tr>
+</tbody>
+</table>
+</div>
+</figure>
+</div>
+</section>
+<section id="sec-syn-size" class="level2" data-number="6.4">
+<h2 data-number="6.4" class="anchored" data-anchor-id="sec-syn-size"><span class="header-section-number">6.4</span> Check how much the data size matters</h2>
+<p>A measured table carries noise of a fixed size whatever the number of customers, so with fewer customers the same noise is a larger share of every count. To measure the effect, the script runs AIM again on the first 2,000 and the first 8,000 customer records, and <a href="#fig-syn-sizes" class="quarto-xref">Figure&nbsp;7</a> compares the three sizes on the campaign count.</p>
+<div id="fig-syn-sizes" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-syn-sizes-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="figures/synthetic/sizes.svg" class="img-fluid figure-img">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-syn-sizes-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;7: Eligible customers reached by the campaign with an AIM table generated from 2,000, 8,000 and 32,561 customer records. Each dashed line is the agency’s model trained on the real records of that size.
+</figcaption>
+</figure>
+</div>
+<p>Fewer records cost more at the smallest budget. At <span class="math inline">\(\varepsilon = 0.1\)</span> AIM’s table misses 784 eligible customers when it comes from 2,000 records, 709 from 8,000 and 388 from all 32,561, as <a href="#tbl-syn-sizes" class="quarto-xref">Table&nbsp;7</a> shows. At larger budgets the pattern is less clear, because the smaller sizes ran with two seeds each, and one run can be far from the average. The 767 missed at 8,000 records and <span class="math inline">\(\varepsilon = 1\)</span>, more than the 460 at 2,000, is that kind of noise. So a bank with a few thousand customers should expect to pay about twice as much for the same guarantee, and it should run the sweep at its own size before it promises anything.</p>
+<div id="tbl-syn-sizes" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-tbl figure">
+<figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl" id="tbl-syn-sizes-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Table&nbsp;7: Eligible customers missed because of privacy with an AIM table, by the number of customer records it is generated from.
+</figcaption>
+<div aria-describedby="tbl-syn-sizes-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<table class="caption-top table">
+<colgroup>
+<col style="width: 20%">
+<col style="width: 20%">
+<col style="width: 20%">
+<col style="width: 20%">
+<col style="width: 20%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>Customers in the records</th>
+<th>Reached with the real table</th>
+<th>Missed at <span class="math inline">\(\varepsilon\)</span> = 0.1</th>
+<th>Missed at <span class="math inline">\(\varepsilon\)</span> = 0.3</th>
+<th>Missed at <span class="math inline">\(\varepsilon\)</span> = 1</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>2,000</td>
+<td>2,598</td>
+<td>784</td>
+<td>799</td>
+<td>460</td>
+</tr>
+<tr class="even">
+<td>8,000</td>
+<td>2,626</td>
+<td>709</td>
+<td>378</td>
+<td>767</td>
+</tr>
+<tr class="odd">
+<td>32,561</td>
+<td>2,625</td>
+<td>388</td>
+<td>598</td>
+<td>380</td>
+</tr>
+</tbody>
+</table>
+</div>
+</figure>
+</div>
+</section>
+</section>
+<section id="sec-decision" class="level1" data-number="7">
+<h1 data-number="7"><span class="header-section-number">7</span> Step 6: compare the routes and decide</h1>
+<p>The decision maker needs a few options, each with a privacy sentence and its business effect, and <a href="#tbl-syn-menu" class="quarto-xref">Table&nbsp;8</a> gives them. Each option is AIM’s table at a privacy level, next to the DP-SGD model at the same level, and the two reference points are no data and the real table. Here DP-SGD is trained on the synthetic route’s 12 banded attributes, not on the features of <a href="#sec-model-fixed" class="quarto-xref">Section&nbsp;5.1</a>, so its rows differ a little from <a href="#sec-results" class="quarto-xref">Section&nbsp;5.2</a>, for example 2,620 instead of 2,552 at <span class="math inline">\(\varepsilon = 1\)</span>. The membership column gives a second privacy sentence. It bounds how often an attack can correctly identify a real customer, for any attack that wrongly accuses 1% of non-customers (<a href="https://arxiv.org/abs/1311.0776">Kairouz et al., 2015</a>).</p>
+<div id="tbl-syn-menu" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-tbl figure">
+<figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl" id="tbl-syn-menu-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Table&nbsp;8: The options menu for one campaign of 3,846 offers: the best generator at each option, and the model route at the same privacy level.
+</figcaption>
+<div aria-describedby="tbl-syn-menu-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
 <table class="caption-top table">
 <colgroup>
 <col style="width: 14%">
@@ -687,80 +1314,118 @@ Table&nbsp;5: The options menu for one campaign of 3,846 offers, best technique 
 <th>Option</th>
 <th>Attacker’s belief ceiling</th>
 <th>Membership TPR bound at 1% FPR</th>
+<th>Eligible misplaced in the plan</th>
 <th>Eligible reached</th>
-<th>Offers wasted</th>
-<th>Missed vs.&nbsp;no DP</th>
-<th>Gained vs.&nbsp;no model</th>
+<th>Missed vs.&nbsp;the real table</th>
+<th>Gained vs.&nbsp;no data</th>
 </tr>
 </thead>
 <tbody>
 <tr class="odd">
-<td>No model (random offers)</td>
+<td>No data (random offers)</td>
+<td>—</td>
 <td>—</td>
 <td>—</td>
 <td>909</td>
-<td>2,937</td>
-<td>1,659</td>
+<td>1,716</td>
 <td>0</td>
 </tr>
 <tr class="even">
-<td><span class="math inline">\(\varepsilon\)</span> = 0.1 (DP-SGD)</td>
+<td><span class="math inline">\(\varepsilon\)</span> = 0.1, AIM table</td>
 <td>52.5%</td>
 <td>1.1%</td>
-<td>2,463</td>
-<td>1,383</td>
-<td>105</td>
-<td>1,554</td>
+<td>3,919 of 7,841</td>
+<td>2,237</td>
+<td>388</td>
+<td>1,329</td>
 </tr>
 <tr class="odd">
-<td><span class="math inline">\(\varepsilon\)</span> = 0.3 (DP-SGD)</td>
+<td><span class="math inline">\(\varepsilon\)</span> = 0.1, DP-SGD model</td>
+<td>52.5%</td>
+<td>1.1%</td>
+<td>no plan</td>
+<td>2,483</td>
+<td>142</td>
+<td>1,575</td>
+</tr>
+<tr class="even">
+<td><span class="math inline">\(\varepsilon\)</span> = 0.3, AIM table</td>
 <td>57.4%</td>
 <td>1.4%</td>
-<td>2,544</td>
-<td>1,302</td>
-<td>24</td>
-<td>1,635</td>
-</tr>
-<tr class="even">
-<td><span class="math inline">\(\varepsilon\)</span> = 1 (DP-SGD)</td>
-<td>73.1%</td>
-<td>2.7%</td>
-<td>2,552</td>
-<td>1,294</td>
-<td>16</td>
-<td>1,643</td>
+<td>4,396 of 7,841</td>
+<td>2,027</td>
+<td>598</td>
+<td>1,118</td>
 </tr>
 <tr class="odd">
-<td><span class="math inline">\(\varepsilon\)</span> = 3 (DP-SGD)</td>
-<td>95.3%</td>
-<td>20.1%</td>
-<td>2,552</td>
-<td>1,294</td>
-<td>16</td>
-<td>1,643</td>
+<td><span class="math inline">\(\varepsilon\)</span> = 0.3, DP-SGD model</td>
+<td>57.4%</td>
+<td>1.4%</td>
+<td>no plan</td>
+<td>2,610</td>
+<td>15</td>
+<td>1,701</td>
 </tr>
 <tr class="even">
-<td>No DP (the same logistic regression, no clipping or noise)</td>
+<td><span class="math inline">\(\varepsilon\)</span> = 1, AIM table</td>
+<td>73.1%</td>
+<td>2.7%</td>
+<td>484 of 7,841</td>
+<td>2,245</td>
+<td>380</td>
+<td>1,337</td>
+</tr>
+<tr class="odd">
+<td><span class="math inline">\(\varepsilon\)</span> = 1, DP-SGD model</td>
+<td>73.1%</td>
+<td>2.7%</td>
+<td>no plan</td>
+<td>2,620</td>
+<td>5</td>
+<td>1,712</td>
+</tr>
+<tr class="even">
+<td><span class="math inline">\(\varepsilon\)</span> = 3, AIM table</td>
+<td>95.3%</td>
+<td>20.1%</td>
+<td>372 of 7,841</td>
+<td>2,464</td>
+<td>161</td>
+<td>1,555</td>
+</tr>
+<tr class="odd">
+<td><span class="math inline">\(\varepsilon\)</span> = 3, DP-SGD model</td>
+<td>95.3%</td>
+<td>20.1%</td>
+<td>no plan</td>
+<td>2,622</td>
+<td>3</td>
+<td>1,714</td>
+</tr>
+<tr class="even">
+<td>The real table, no DP</td>
 <td>no limit</td>
 <td>no limit</td>
-<td>2,568</td>
-<td>1,278</td>
 <td>0</td>
-<td>1,659</td>
+<td>2,625</td>
+<td>0</td>
+<td>1,716</td>
 </tr>
 </tbody>
 </table>
 </div>
 </figure>
 </div>
-<p>The policy ceiling from <a href="#sec-policy" class="quarto-xref">Section&nbsp;3</a>, <span class="math inline">\(\varepsilon \le 1.10\)</span>, picks the option.</p>
+<p>The policy ceiling from <a href="#sec-policy" class="quarto-xref">Section&nbsp;3</a>, <span class="math inline">\(\varepsilon \le 1.10\)</span>, picks the option on each route. On the model route it gives this result:</p>
 <p>The largest value on the grid below the ceiling is <span class="math inline">\(\varepsilon = 1\)</span>, and at that value the DP-SGD model is on the frontier. Across the seeds it reaches between 2,544 and 2,557 of the 3,846 eligible customers, 2,552 on average. The model without DP reaches 2,568, and random offers reach 909. So privacy costs about 16 eligible customers per campaign, while the private model still reaches about 1,643 more than sending the offers at random. In money, with <span class="math inline">\(V\)</span> the value to the bank of reaching one eligible customer, the cost of privacy is about <span class="math inline">\(16\,V\)</span> per campaign and the value of the private model over no model is about <span class="math inline">\(1,643\,V\)</span>. Even at <span class="math inline">\(\varepsilon = 10\)</span>, where the noise is small, the private model reaches 2,552. So almost all of the cost at the ceiling comes from clipping each customer’s influence, which DP-SGD does at every <span class="math inline">\(\varepsilon\)</span>, and almost none from the noise that the stricter policy adds.</p>
-<p>The decision then comes down to one comparison. The finance team supplies <span class="math inline">\(V\)</span>, the value of one eligible customer reached, so the cost of privacy in money is <span class="math inline">\(V\)</span> times the customers it loses. The bank compares that cost with what the policy buys. The bank can hand the model to an outside agency, and it can answer a regulator or a customer who asks what the model reveals. Here the cost is small, so the comparison is easy, but <a href="#tbl-sizes" class="quarto-xref">Table&nbsp;4</a> shows how quickly that changes with fewer customers.</p>
-<p>Three people sign the decision. The privacy officer signs the ceiling, fixed before the results were known. The engineer signs that the configuration meets the ceiling, with the accountant’s <span class="math inline">\(\varepsilon\)</span> and <span class="math inline">\(\delta\)</span> and the settings of <a href="#sec-fixed" class="quarto-xref">Section&nbsp;4</a>. The business owner signs the cost in customers, and so in money. A release record keeps all of this with the script, so that anyone can check the decision and revisit it when the data or the policy changes.</p>
+<p>On the synthetic-data route it gives this result:</p>
+<p>The largest value on the grid below the ceiling is <span class="math inline">\(\varepsilon = 1\)</span>, and at that value the AIM table is on the frontier. Across the seeds its campaign reaches between 2,047 and 2,364 of the 3,846 eligible customers, 2,245 on average, and its plan puts 484 of the 7,841 eligible customers in the records into the wrong segment, 6.2% of them. The real table reaches 2,625 and random offers reach 909. So privacy costs about 380 eligible customers per campaign, while the synthetic table is still worth about 1,337 customers more than no data. In money, with <span class="math inline">\(V\)</span> the value to the bank of reaching one eligible customer, the cost of privacy is about <span class="math inline">\(380\,V\)</span> per campaign and the value of the table over no data about <span class="math inline">\(1,337\,V\)</span>. The model route, a DP-SGD model on the same attributes at the same <span class="math inline">\(\varepsilon\)</span>, reaches 2,620, so the table costs about 375 more customers per campaign than the model, and in return it answers the planning question and any other the agency asks.</p>
+<p>If the agency needs only the targeting model, the model route wins outright, because at the same guarantee it reaches 2,620 eligible customers to the table’s 2,245. The table is worth its extra cost only because it also answers the planning question, and at <span class="math inline">\(\varepsilon = 1\)</span> it answers it well, with 6.2% of the eligible customers misplaced. Below <span class="math inline">\(\varepsilon = 1\)</span> the synthetic plan misplaces more than 40% of them, so the table is then hard to justify over the model. So the bank releases the AIM table at <span class="math inline">\(\varepsilon = 1\)</span> if the agency’s plan matters to it, and the DP-SGD model if it does not. In money, the table costs about <span class="math inline">\(375\,V\)</span> more per campaign than the model, and the bank compares that with the value of the plan.</p>
+<p>Several people sign the decision, each for their own part. The privacy officer signs the ceiling, fixed before the results were known. The engineer signs that the release meets the ceiling: for a model, with the accountant’s <span class="math inline">\(\varepsilon\)</span> and <span class="math inline">\(\delta\)</span>, and for a table, with the budget <span class="math inline">\(\rho\)</span> and its conversion. The business owner signs the cost in customers, and so in money, and on the synthetic route the agency signs the share of the plan it accepts. A release record keeps all of this with the scripts, so that anyone can check the decision and revisit it when the data or the policy changes.</p>
 </section>
 <section id="sec-other" class="level1" data-number="8">
 <h1 data-number="8"><span class="header-section-number">8</span> Doing this in another business</h1>
-<p>The six steps carry over to any use case, and only their contents change. The metric is whatever count the decision turns on, such as fraud caught at a fixed number of reviews, and the baseline is what the business does without the model. The ceiling is still a sentence about an attacker’s belief, fixed before anyone sees the results. The output is still a short menu with a cost in the business’s own units, for the people who own the risk and the revenue to sign.</p>
+<p>The six steps carry over to any use case, and only their contents change. The counts are whatever the decision turns on, such as fraud caught at a fixed number of reviews, or the segment sizes and forecasts that a recipient will compute from a table. The baseline is what the business does without the release. The ceiling is still a sentence about an attacker’s belief, fixed before anyone sees the results, and a generator’s budget follows from it. The output is still a short menu with a cost in the business’s own units, which puts a model and a table side by side for the people who own the risk and the revenue to sign.</p>
 </section>
 <section id="sec-sources" class="level1" data-number="9">
 <h1 data-number="9"><span class="header-section-number">9</span> Sources</h1>
@@ -769,6 +1434,12 @@ Table&nbsp;5: The options menu for one campaign of 3,846 offers, best technique 
 <li>Abadi, M. et al.&nbsp;(2016). <a href="https://arxiv.org/abs/1607.00133">Deep Learning with Differential Privacy</a>. <em>ACM CCS 2016</em>. The DP-SGD algorithm.</li>
 <li>Yousefpour, A. et al.&nbsp;(2021). <a href="https://arxiv.org/abs/2109.12298">Opacus: User-Friendly Differential Privacy Library in PyTorch</a>. The library and its privacy accountant.</li>
 <li>Holohan, N., Braghin, S., Mac Aonghusa, P. and Levacher, K. (2019). <a href="https://arxiv.org/abs/1907.02444">Diffprivlib: The IBM Differential Privacy Library</a>.</li>
+<li>McKenna, R., Mullins, B., Sheldon, D. and Miklau, G. (2022). <a href="https://arxiv.org/abs/2201.12677">AIM: An Adaptive and Iterative Mechanism for Differentially Private Synthetic Data</a>. <em>Proceedings of the VLDB Endowment</em> 15(11).</li>
+<li>McKenna, R., Miklau, G. and Sheldon, D. (2021). <a href="https://arxiv.org/abs/2108.04978">Winning the NIST Contest: A Scalable and General Approach to Differentially Private Synthetic Data</a>. <em>Journal of Privacy and Confidentiality</em> 11(3). The MST generator.</li>
+<li>McKenna, R., Sheldon, D. and Miklau, G. (2019). <a href="https://arxiv.org/abs/1901.09136">Graphical-model based estimation and inference for differential privacy</a>. <em>ICML 2019</em>. Private-PGM, the inference engine behind MST and AIM, released as the <code>mbi</code> library (<a href="https://github.com/ryan112358/private-pgm">github.com/ryan112358/private-pgm</a>), whose reference implementations of both generators this note follows.</li>
+<li>Bun, M. and Steinke, T. (2016). <a href="https://arxiv.org/abs/1605.02065">Concentrated Differential Privacy: Simplifications, Extensions, and Lower Bounds</a>. <em>TCC 2016</em>. Zero-concentrated DP, the accounting the generators use.</li>
+<li>Canonne, C., Kamath, G. and Steinke, T. (2020). <a href="https://arxiv.org/abs/2004.00010">The Discrete Gaussian for Differential Privacy</a>. <em>NeurIPS 2020</em>. The conversion from <span class="math inline">\(\rho\)</span> to <span class="math inline">\((\varepsilon, \delta)\)</span> in <a href="#sec-syn-budget" class="quarto-xref">Section&nbsp;6.1</a>.</li>
+<li>Tao, Y., McKenna, R., Hay, M., Machanavajjhala, A. and Miklau, G. (2021). <a href="https://arxiv.org/abs/2112.09238">Benchmarking Differentially Private Synthetic Data Generation Algorithms</a>. Why marginal-based generators lead the benchmarks.</li>
 <li>Kairouz, P., Oh, S. and Viswanath, P. (2015). <a href="https://arxiv.org/abs/1311.0776">The Composition Theorem for Differential Privacy</a>. <em>ICML 2015</em>. The hypothesis-testing reading of <span class="math inline">\((\varepsilon,\delta)\)</span> behind the membership bound.</li>
 <li>Nanayakkara, P. et al.&nbsp;(2023). <a href="https://www.usenix.org/conference/usenixsecurity23/presentation/nanayakkara">What Are the Chances? Explaining the Epsilon Parameter in Differential Privacy</a>. <em>USENIX Security 2023</em>. Evidence that odds-based explanations of <span class="math inline">\(\varepsilon\)</span> work best.</li>
 <li>Papernot, N. and Steinke, T. (2022). <a href="https://arxiv.org/abs/2110.03620">Hyperparameter Tuning with Rényi Differential Privacy</a>. <em>ICLR 2022</em>. Why tuning on private data leaks.</li>
