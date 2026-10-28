@@ -116,7 +116,7 @@ Delete the part `README.md` files. Readers never see them, and they repeat the p
    - Three of its eight pages have no incoming link, and 06-optimization is rate theory.
    - Keep `04-hypothesis-testing`, perhaps as a Part 2 page. Fold the few divergence facts into `01-definition` and `01-renyi-dp`, and link to the full edition's Part 1 for the rest.
    - This needs AGENTS.md's "every topic appears" rule relaxed first.
-6. **Later:** rewrite the topic chapters in job order (decision → default → call → pitfall) instead of the full edition's teaching order.
+6. **Later:** rewrite the topic chapters in job order (decision → default → call → pitfall) instead of the full edition's teaching order. *Dropped (2026-10-28):* seven full chapters already put the decision first (05-selection, 06-query-release, 09-trust-models, 05-subsampling, 09-choosing-an-accountant, 03-hyperparameter-tuning, 10-auditing), and every chapter's opening names the decision the reader faces. Moving the decision sections of the others (03-laplace-gaussian, 11-mean-estimation, 01-renyi-dp, 06–08 of Part 2) ahead of the mechanisms would state conclusions before the terms they use, against PROSE.md rule 22.
 
 ## Step 5. Course (about 10k words)
 
