@@ -86,7 +86,7 @@ Three things remove the amplification. A shuffler that colludes with the analyst
 
 ## Distributed DP: splitting the noise {#sec-trust-distributed}
 
-In the **distributed model**, each client adds a small share of the central noise, and **secure aggregation** shows only the sum to the server ([Cryptography basics](../part01-prerequisites/08-crypto-basics.md)). Gaussian noise splits cleanly, because the variances of independent shares add. If each of $n$ clients adds normal noise of variance $\sigma^2/n$, the sum has noise with standard deviation $\sigma$. That is as private as the central [Gaussian mechanism](03-laplace-gaussian.md).
+In the **distributed model**, each client adds a small share of the central noise, and **secure aggregation** shows only the sum to the server ([Cryptography basics](../../book-full/part01-prerequisites/08-crypto-basics.md)). Gaussian noise splits cleanly, because the variances of independent shares add. If each of $n$ clients adds normal noise of variance $\sigma^2/n$, the sum has noise with standard deviation $\sigma$. That is as private as the central [Gaussian mechanism](03-laplace-gaussian.md).
 
 But the small shares are also the weakness. A client that colludes with the server can show its share, and a client that drops out adds none. With $t$ such clients, only the noise of the honest clients is left, with standard deviation
 $$\sigma\sqrt{\frac{n - t}{n}}.$$

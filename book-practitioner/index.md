@@ -8,7 +8,7 @@ You need some Python and NumPy, basic probability, and enough machine learning t
 
 ## How this book is organized {.unnumbered}
 
-1. **Prerequisites** is a mathematical reference to dip into when a later chapter cites it.
+1. **Prerequisites** covers hypothesis testing and divergences, the two pieces of mathematics a later chapter cites most. The rest of the mathematics stays in the full edition's Part 1.
 2. **Threat models and attacks** shows how models and data leak, and assesses a model's risk before release.
 3. **Differential privacy foundations** defines the guarantee, builds its mechanisms, and releases statistics with them.
 4. **Privacy accounting** tracks the guarantee through private training, and calibrates and reports a run.

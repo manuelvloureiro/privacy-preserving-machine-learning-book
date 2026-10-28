@@ -128,7 +128,7 @@ Write to the rules and to [AGENTS.md](AGENTS.md). Read the reference chapter of 
 ### 2. Measure: `tools/prose.py`
 
 ```bash
-make prose BOOK=book-practitioner PAGE=part01-prerequisites/02-concentration.md   # report, worst paragraphs first
+make prose BOOK=book-practitioner PAGE=part01-prerequisites/03-divergences.md      # report, worst paragraphs first
 make prose-check BOOK=book-practitioner                                             # pass or fail, per page
 uv run python tools/prose.py text "A sentence to try out, with $x$ in it."          # test a rewrite
 ```

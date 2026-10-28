@@ -112,7 +112,7 @@ Delete the part `README.md` files. Readers never see them, and they repeat the p
    - The δ ≤ 1/n^1.1 rule gets one home, `01-definition#sec-dpdef-small-delta`, and a clause plus a link everywhere else.
    - Fix the stale link text "Report and review an ε claim" on six pages.
 4. **One running example for DP-SGD.** `02-dp-sgd` still uses the synthetic 10,000 records while the workflows use Adult. *Not done:* only 02's budget table has an Adult counterpart. Its clipping, norm-drift, microbatching and fixed-batch numbers, and pages 06–09, would need new Adult runs in `code/`.
-5. **Part 1.**
+5. **Part 1.** *Done (2026-10-28):* Part 1 keeps `03-divergences` and `04-hypothesis-testing`; the six other pages are gone (about 5.2k words), their links point to the full edition's Part 1, and AGENTS.md makes Part 1 the one exception to "every topic appears". `02-dp-sgd`'s link to `06-optimization` moves with step 4.4.
    - Three of its eight pages have no incoming link, and 06-optimization is rate theory.
    - Keep `04-hypothesis-testing`, perhaps as a Part 2 page. Fold the few divergence facts into `01-definition` and `01-renyi-dp`, and link to the full edition's Part 1 for the rest.
    - This needs AGENTS.md's "every topic appears" rule relaxed first.
