@@ -1,8 +1,6 @@
 ---
 title: "From Differential Privacy to Concentrated Privacy"
 subtitle: "How the privacy cost of many releases adds up, derived from first principles"
-author: "Technical study notes"
-date: "23 October 2026"
 abstract: |
   When you publish many statistics about the same people, how much privacy do they lose in total? For a reader who knows basic probability and nothing about privacy, this note derives why many small privacy losses add up to much less than their worst case, and how concentrated and zero-concentrated differential privacy make that saving easy to compute.
 ---

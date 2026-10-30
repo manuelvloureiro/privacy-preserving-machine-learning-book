@@ -1,4 +1,4 @@
-# Approximate Differential Privacy
+# Approximate differential privacy
 
 Pure differential privacy (DP) bounds the ratio of two output probabilities by $e^\varepsilon$ on every event. This chapter adds a small additive slack $\delta$ to that bound. The relaxed definition, $(\varepsilon,\delta)$-DP, lets a mechanism fail with probability about $\delta$, and the examples of the chapter show that $\delta$ must be much smaller than $1/n$. In exchange, the relaxation admits the Gaussian mechanism, which adds less noise than the Laplace mechanism to statistics with many coordinates, and the advanced composition of the next chapter.
 

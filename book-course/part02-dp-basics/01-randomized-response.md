@@ -1,4 +1,4 @@
-# Randomized Response and the Definition
+# Randomized response and the definition
 
 A group of people each hold one sensitive bit, and an analyst wants the fraction of ones without learning anyone's bit. This chapter solves the problem with a biased coin, the oldest private algorithm. It then turns the idea behind the coin, plausible deniability, into the definition of differential privacy (DP), on which the rest of the course builds.
 

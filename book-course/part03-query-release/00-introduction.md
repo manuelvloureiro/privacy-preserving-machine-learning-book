@@ -1,4 +1,4 @@
-# Query Release and Its Limits
+# Query release and its limits
 
 The second part built mechanisms that answer one question, or a few, under differential privacy (DP). This part asks what happens when an analyst wants many answers from the same dataset. Its first two chapters answer many queries for far less than one budget share per query. The third chapter lets the noise follow the dataset at hand instead of the worst case. The last proves that, under pure DP, no mechanism can do much better than the simple ones on marginals and histograms.
 

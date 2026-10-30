@@ -1,4 +1,4 @@
-# What Differential Privacy Protects
+# What differential privacy protects
 
 Machine learning on sensitive data often gives results that feel invasive, but not each of them is a privacy violation. This chapter gives a test that separates the inferences that differential privacy (DP) must prevent from those it allows. Two facts support the test. A private learner can still find a rule that predicts a person's sensitive label, but it cannot memorize a secret that is only in one person's records.
 

@@ -4,6 +4,11 @@
 # renders from _build/<name>/, never from a source folder), so a project's _quarto.yml refers to it
 # as `_common.yml` even though it does not sit in the project's folder in the repository.
 
+# Every book and note shows the same author and the date it was built as its version.
+author: "Manuel V. Loureiro"
+date: today
+date-format: "[Version] YYYY-MM-DD"
+
 format:
   html:
     theme: cosmo
@@ -13,6 +18,7 @@ format:
     papersize: a4
     fontsize: 11pt
     fig-pos: "htbp"  # let figures float to the top of a page instead of leaving gaps
+    colorlinks: false  # links stay black, as in the contents, and remain clickable
     include-in-header:
       text: |
         % New Computer Modern: Latin Modern's successor, which also has Greek, so ε and δ in
@@ -26,6 +32,11 @@ format:
         \setmonofont{NewCMMono10-Regular.otf}[RawFeature={fallback=textfallback}, BoldFont=NewCMMono10-Bold.otf,
           ItalicFont=NewCMMono10-Italic.otf, BoldItalicFont=NewCMMono10-BoldOblique.otf]
         \setmathfont{NewCMMath-Regular.otf}
+        % Wrap long code lines at the margin instead of letting them run off the page. Every code
+        % block, highlighted or not, is a Highlighting environment.
+        \usepackage{fvextra}
+        \AtBeginDocument{\ifdefined\Highlighting
+          \RecustomVerbatimEnvironment{Highlighting}{Verbatim}{commandchars=\\\{\},breaklines,breakanywhere,fontsize=\small}\fi}
         \usepackage{imakeidx}
         \makeindex[title={}]
         \indexsetup{level=\relax, noclearpage}  % term-index.md supplies the heading

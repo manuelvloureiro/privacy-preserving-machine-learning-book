@@ -1,4 +1,4 @@
-# Reconstruction Attacks
+# Reconstruction attacks
 
 This chapter asks when answers to counting questions about a dataset, each only slightly wrong, let an attacker rebuild almost the whole dataset. It does not yet define privacy. Instead it defines a failure so flagrant that nobody would call it private, and shows that a wide class of algorithms fails in this way. If a curator answers every possible counting query, it must make errors of order $n$, the number of people, to stop the attack. If it answers only about $n$ random queries, errors of order $\sqrt n$ are needed.
 ## Reconstruction from exact statistics {#sec-rec-census}

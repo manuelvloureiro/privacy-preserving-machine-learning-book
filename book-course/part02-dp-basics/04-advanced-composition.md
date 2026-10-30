@@ -1,4 +1,4 @@
-# Advanced Composition
+# Advanced composition
 
 When you run $k$ private analyses on the same data, basic composition says that their privacy costs add up. This chapter shows that the total cost grows much more slowly, about as $\sqrt{k}$, if you accept a small extra failure probability. The proof turns each step into one simple pair of outputs with four outcomes. Then it bounds $k$ copies of that pair with Hoeffding's inequality.
 

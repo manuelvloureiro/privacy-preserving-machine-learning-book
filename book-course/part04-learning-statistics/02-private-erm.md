@@ -1,4 +1,4 @@
-# Private Empirical Risk Minimization
+# Private empirical risk minimization
 
 Most of machine learning fits a model by minimizing its average loss on a training set. This chapter asks how to do that under differential privacy (DP) when the loss is convex. Noise can go into the output of a non-private solver, into the objective that the solver minimizes, or into each step of gradient descent. The chapter proves a privacy guarantee for each of the three methods. It also proves an accuracy guarantee for the third, which the next chapter scales to neural networks.
 

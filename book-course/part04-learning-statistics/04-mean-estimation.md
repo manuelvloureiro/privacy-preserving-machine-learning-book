@@ -1,4 +1,4 @@
-# Private Mean Estimation
+# Private mean estimation
 
 Earlier chapters estimated properties of a fixed dataset. In statistics, the dataset is a sample, and the goal is a property of the distribution that generated it. This chapter asks how many samples an algorithm with differential privacy (DP) needs to estimate the mean of a distribution to within $\alpha$. It also asks how much more that is than without privacy.
 

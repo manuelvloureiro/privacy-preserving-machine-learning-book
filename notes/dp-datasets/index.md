@@ -1,8 +1,6 @@
 ---
 title: "Datasets for Differentially Private Machine Learning"
 subtitle: "Which public data DP papers use, what each dataset can test, and where to get it"
-author: "Study notes"
-date: "23 October 2026"
 abstract: |
   Every experiment with differential privacy (DP) runs on some dataset, and the choice decides what the experiment can show. This note catalogues the public datasets that DP papers use, by kind of data: tables, images, text, data with user identifiers, locations, graphs and clinical records. For each it gives the size, the licence, what one record is, and the results it is known for. One section covers the datasets and benchmarks of DP synthetic data. The note starts with what a dataset's size and shape mean for DP, with numbers from a script, and ends with how to choose a dataset for a study of the privacy-utility trade-off.
 ---

@@ -1,4 +1,4 @@
-# Sparse Vector
+# Sparse vector
 
 Queries often arrive one at a time, and each must be answered before the next is seen. Under differential privacy (DP), answering each of them with its own noise makes the error grow polynomially with the number of queries. But often the analyst only needs to know which queries exceed a threshold, and few of them do. This chapter shows, with the sparse vector technique, that the cost then depends on the number of large queries and only logarithmically on the total. Its privacy proof rests on noise on the threshold as well as on the queries. At the end, the technique turns private multiplicative weights into an algorithm that answers queries as they arrive.
 

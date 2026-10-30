@@ -1,8 +1,6 @@
 ---
 title: "Privacy Libraries for Python, Compared"
 subtitle: "What each package does, what it assumes, and the same three jobs run in four of them"
-author: "Technical study notes"
-date: "23 October 2026"
 abstract: |
   You hold records about people and want to publish a few statistics, train a model, or check how much a model leaks. Which Python package should do the privacy part, and what does each one quietly assume? This note surveys the packages for differential privacy, privacy auditing, encrypted computation, federated learning and anonymization, as they stood on 23 October 2026, and runs the same three jobs in four of them. The libraries agree on the arithmetic. They differ in what they make you declare, what they refuse to do, and what they let you get wrong.
 ---

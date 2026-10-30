@@ -4,6 +4,7 @@
     uv run python tools/terms.py candidates      # suggest index terms not yet in terms.toml
     uv run python tools/terms.py check           # exit 1 on any acronym or index problem
     uv run python tools/terms.py build           # write glossary.md, term-index.md, _terms.json
+    uv run python tools/terms.py unused --books book-full book-course notes/aim   # dead entries in terms.toml
     uv run python tools/terms.py check --book book-course               # another book, or notes/<name>
     uv run python tools/terms.py build --book _build/full-pdf --profile pdf   # into a staged copy
 
@@ -12,7 +13,8 @@ book-practitioner/) or a staged copy of one; build writes its three files into t
 targets build from staged copies in _build/, so generated files never land among the sources.
 --profile picks the Quarto profile (_quarto-<profile>.yml) whose appendices count as part of the
 book; the default is the website profile. A book whose chapters and appendices don't list
-term-index.md has no index, so check skips the index terms for it.
+term-index.md has no index. Since every book and note shares terms.toml, check looks only at the
+book it reads, and unused reports the acronyms and index terms that no book or note uses.
 
 The curated list, shared by every book and note, is terms.toml at the repository's root:
 
@@ -359,8 +361,6 @@ def check_acronyms(pages: list[Page], acronyms: dict[str, Acronym]) -> list[Prob
                 problems.append(
                     Problem("warning", f"{page}: {name}", f"expanded {len(expansions)}× on one page; once is enough")
                 )
-    for name in sorted(set(acronyms) - set(uses)):
-        problems.append(Problem("warning", name, "in terms.toml but never used"))
     return problems
 
 
@@ -415,12 +415,19 @@ def locate_terms(pages: list[Page], index: dict[str, list[str]]) -> dict[str, li
     return found
 
 
-def check_index(pages: list[Page], index: dict[str, list[str]]) -> list[Problem]:
+def check_unused(books: list[Path], acronyms: dict[str, Acronym], index: dict[str, list[str]]) -> list[Problem]:
+    """terms.toml is shared, so an entry is dead only when no book or note uses it."""
+    used: set[str] = set()
+    indexed: set[str] = set()
+    for book in books:
+        layout.book = book.resolve()
+        pages = read_book()
+        used |= set(find_acronym_uses(pages))
+        if "term-index.md" in book_files(include_generated=True):
+            indexed |= {term for term, locations in locate_terms(pages, index).items() if locations}
     return [
-        Problem("warning", term, "index term not found in the book")
-        for term, locations in locate_terms(pages, index).items()
-        if not locations
-    ]
+        Problem("warning", name, "in terms.toml but used in no book or note") for name in sorted(set(acronyms) - used)
+    ] + [Problem("warning", term, "index term found in no book") for term in sorted(set(index) - indexed)]
 
 
 def candidates(pages: list[Page], acronyms: dict[str, Acronym], index: dict[str, list[str]]) -> None:
@@ -496,22 +503,28 @@ def write_index(pages: list[Page], index: dict[str, list[str]]) -> None:
 
 def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
-    parser.add_argument("command", choices=["acronyms", "candidates", "check", "build"])
+    parser.add_argument("command", choices=["acronyms", "candidates", "check", "build", "unused"])
     parser.add_argument("--book", type=Path, default=layout.book, help="the copy of the book to read and write")
     parser.add_argument("--profile", default=layout.profile, help="the Quarto profile whose appendices count")
+    parser.add_argument("--books", type=Path, nargs="+", default=[], help="unused: every book and note to read")
     args = parser.parse_args()
     command: str = args.command
     layout.book, layout.profile = cast(Path, args.book).resolve(), cast(str, args.profile)
 
-    pages = read_book()
     acronyms, index = load_terms()
+    if command == "unused":
+        problems = check_unused(cast(list[Path], args.books), acronyms, index)
+        for problem in problems:
+            print(problem)
+        print(f"{len(problems)} unused entries in terms.toml")
+        return
+    pages = read_book()
     if command == "acronyms":
         report_acronyms(pages, acronyms)
     elif command == "candidates":
         candidates(pages, acronyms, index)
     elif command == "check":
-        has_index = "term-index.md" in book_files(include_generated=True)
-        problems = check_acronyms(pages, acronyms) + (check_index(pages, index) if has_index else [])
+        problems = check_acronyms(pages, acronyms)
         for problem in problems:
             print(problem)
         errors = sum(p.level == "error" for p in problems)

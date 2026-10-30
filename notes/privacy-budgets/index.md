@@ -1,8 +1,6 @@
 ---
 title: "Four Definitions of Differential Privacy and Their Budgets"
 subtitle: "Pure, approximate, concentrated and zero-concentrated differential privacy, each budgeted to the same reference"
-author: "Technical study notes"
-date: "27 October 2026"
 abstract: |
   Differential privacy comes in several definitions, and each one keeps its privacy budget in its own unit. This note explains four of them: pure, approximate, concentrated and zero-concentrated differential privacy. Each gets the same treatment: the reasoning behind it, its definition, the mechanism that goes with it, how its budget adds up over many releases, and how to spend a budget so that the whole release meets one common reference guarantee. A running example of a hundred published counts puts a number on each answer, and a final section weighs the four against each other. The main text states each result with the idea of its proof, and the appendices give every proof in full.
 ---

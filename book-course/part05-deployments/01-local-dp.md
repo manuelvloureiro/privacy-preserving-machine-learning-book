@@ -1,4 +1,4 @@
-# Local Differential Privacy
+# Local differential privacy
 
 Almost every mechanism so far ran on a trusted curator who saw the raw data. This chapter drops that trust, so that each person randomizes their own record before it leaves their device. We define this local model and show that, with $n$ people, it costs a factor of about $\sqrt n$ in accuracy on the simplest task. No noninteractive protocol can escape that cost.
 

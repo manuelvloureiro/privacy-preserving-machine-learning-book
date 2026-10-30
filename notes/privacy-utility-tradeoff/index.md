@@ -1,8 +1,6 @@
 ---
 title: "The Privacy–Utility Trade-off, Worked Through"
 subtitle: "One use case and two routes, a private model or a private synthetic table, from the business question to a signed-off decision"
-author: "Study notes"
-date: "28 October 2026"
 abstract: |
   A bank's outside agency wants either a targeting model or the customer table itself, and the bank's policy requires differential privacy (DP) for anything that leaves. Someone other than the engineer has to choose how much privacy to buy and what to release. This note works through that choice on a public dataset, from a business count and a sentence a privacy officer can sign to one decision between a private model and a private synthetic table.
 ---

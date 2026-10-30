@@ -1,4 +1,4 @@
-# The Shuffle Model and Central Deployments
+# The shuffle model and central deployments
 
 The local model of [the previous chapter](01-local-dp.md) trusts no one, and pays with an error $\sqrt n$ times larger than the central model's. This chapter first studies a middle ground for differential privacy (DP), the shuffle model, in which a party that only mixes messages lets each person add far less noise. It then turns to the central model, where a company holds the data, and studies a query service for outside analysts and two public data releases.
 

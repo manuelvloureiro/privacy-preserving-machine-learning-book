@@ -1,4 +1,4 @@
-# The Laplace Mechanism
+# The Laplace mechanism
 
 Randomized response privatizes one bit per person. But most questions an analyst asks are numbers computed from the whole dataset, such as a count or a histogram. This chapter answers them with the Laplace mechanism, which computes the true answer and adds noise scaled to how much one person can change it. On the fraction of ones with privacy parameter $\varepsilon$, its error is of order $1/(\varepsilon n)$ rather than the $1/(\varepsilon\sqrt n)$ of randomized response. The chapter then proves three properties of differential privacy (DP) that let you build private algorithms from private parts: post-processing, group privacy and basic composition.
 

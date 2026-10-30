@@ -1,4 +1,4 @@
-# Adaptive Data Analysis
+# Adaptive data analysis
 
 A lab tests hypothesis after hypothesis on one dataset, each suggested by the earlier results, until one is significant. Often, fresh data does not reproduce that result. Each test may be sound alone, but the sequence used the same data to choose the questions and to answer them. So the answers describe the sample instead of the population.
 

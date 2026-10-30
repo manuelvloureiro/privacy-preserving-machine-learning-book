@@ -20,7 +20,7 @@ SCRIPTS   := $(foreach f,$(filter-out code/notes/%,$(wildcard code/*/*.py)),$(if
 QUARTO    := uv run quarto
 # The PDF file names, as each book's _quarto.yml sets them in `output-file`.
 PDF_full         := $(OUT)/Privacy-Preserving-Machine-Learning.pdf
-PDF_practitioner := $(OUT)/Privacy-Preserving-Machine-Learning-Practitioner.pdf
+PDF_practitioner := $(OUT)/Privacy-Preserving-Machine-Learning-for-Practitioners.pdf
 PDF_course       := $(OUT)/A-Course-in-Differential-Privacy.pdf
 PDF_opendp       := $(OUT)/Differential-Privacy-with-OpenDP.pdf
 
@@ -175,6 +175,7 @@ note:
 	  rsync -a $(BUILD)/figures/notes/$(NOTE)/ $(BUILD)/notes-$(NOTE)/figures/; fi
 	@for r in $(NOTE_ROUTES_$(NOTE)); do \
 	  rsync -a --exclude runs/ $(BUILD)/figures/notes/$(NOTE)-$$r/ $(BUILD)/notes-$(NOTE)/figures/$$r/ || exit 1; done
+	@rm -rf $(BUILD)/notes-$(NOTE)/_site  # so a renamed PDF leaves no stale copy behind
 	$(call RENDER,notes-$(NOTE),all)
 	@mkdir -p $(OUT)/notes/$(NOTE)
 	@rsync -a --delete $(BUILD)/notes-$(NOTE)/_site/ $(OUT)/notes/$(NOTE)/
@@ -210,6 +211,7 @@ CHECKED   := $(or $(BOOK),$(BOOKS) $(NOTE_DIRS))
 
 terms-check: ## Fail if an acronym isn't expanded at its first use on a page, or isn't in terms.toml (BOOK=)
 	@for b in $(CHECKED); do echo "== $$b"; uv run python tools/terms.py check --book $$b || exit 1; done
+	@if [ -z "$(BOOK)" ]; then echo "== terms.toml"; uv run python tools/terms.py unused --books $(CHECKED); fi
 
 acronyms: ## Report every acronym, its expansion and the pages that use it (BOOK=book-full)
 	uv run python tools/terms.py acronyms --book $(or $(BOOK),book-full)

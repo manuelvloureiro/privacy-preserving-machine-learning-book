@@ -1,4 +1,4 @@
-# Private Deep Learning
+# Private deep learning
 
 The private stochastic gradient descent (SGD) of [the previous chapter](02-private-erm.md) needs a convex, Lipschitz loss, and its privacy analysis loses large constants. The losses of neural networks are neither convex nor Lipschitz, and in practice the constants decide whether a guarantee is meaningful. This chapter adapts noisy SGD to neural networks under differential privacy (DP) by clipping each gradient. Then it replaces composition with a tighter accounting, built on the moments of the privacy loss. Last, it turns any non-private learner into a private one by a vote among models trained on disjoint data.
 

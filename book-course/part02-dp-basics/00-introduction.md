@@ -1,4 +1,4 @@
-# The Basics of Differential Privacy
+# The basics of differential privacy
 
 The first part showed that statistics about people can expose them. This part gives the answer that the rest of the course builds on, the definition of differential privacy (DP). Under DP, a change to one person's data changes the probability of any outcome by at most a factor $e^\varepsilon$, for a small privacy parameter $\varepsilon$. The part then builds the first private algorithms and the rules that combine them. Every later part uses these results, so each chapter gives exact constants and full proofs.
 

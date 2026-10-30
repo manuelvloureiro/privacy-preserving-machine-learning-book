@@ -1,4 +1,4 @@
-# Attempts at Data Privacy
+# Attempts at data privacy
 
 This chapter looks at five releases of sensitive data whose owners believed them safe. An attacker undid each one by combining the release with information from another source. Each protection came from intuition, and nobody could say what it guaranteed or against whom. The last section shows that $k$-anonymity, the first formal answer to these attacks, fails in the same way.
 

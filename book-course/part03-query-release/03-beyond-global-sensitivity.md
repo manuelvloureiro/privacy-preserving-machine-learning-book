@@ -1,4 +1,4 @@
-# Beyond Global Sensitivity
+# Beyond global sensitivity
 
 The Laplace mechanism adds noise scaled to the global sensitivity of a function, the largest change one record can cause on any pair of neighbouring datasets. For many functions that worst case is far from the dataset at hand, or infinite. This chapter asks whether the noise can be scaled to the dataset actually held instead, while keeping differential privacy (DP).
 

@@ -1,8 +1,6 @@
 ---
 title: "AIM, Explained From Scratch"
 subtitle: "How a differentially private synthetic-data mechanism chooses, measures and fits marginals"
-author: "Technical study notes"
-date: "23 October 2026"
 abstract: |
   AIM is one of the best algorithms for releasing a synthetic copy of a table of personal records under differential privacy. This note explains it step by step, for a reader who knows basic probability and nothing about privacy or graphical models. It follows AIM round by round on a toy dataset of a thousand people, with every number computed by a script, and proves that AIM keeps its privacy promise.
 ---

@@ -1,4 +1,4 @@
-# Packing Lower Bounds
+# Packing lower bounds
 
 Every chapter so far has given an algorithm and proved how much data it needs. This chapter asks whether a cleverer algorithm could need less. For pure differential privacy (DP), a short argument called packing answers it. An accurate algorithm must put its output in a different region for each of many datasets. But a private one barely moves its output distribution between them. Both can hold only when the dataset is large enough.
 

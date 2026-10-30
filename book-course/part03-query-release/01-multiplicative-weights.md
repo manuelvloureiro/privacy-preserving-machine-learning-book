@@ -1,4 +1,4 @@
-# Private Multiplicative Weights
+# Private multiplicative weights
 
 An analyst wants the answers to many statistical queries about a dataset, such as the fraction of records in each cell of a table. Independent noise on each answer makes the error grow polynomially with the number of queries. Under approximate differential privacy (DP), this chapter does much better. The number of records it needs grows only with the logarithm of the number of queries and of the size of the universe. The algorithm, private multiplicative weights, comes from online learning. It learns a distribution over the universe that agrees with the data on every query, and it reads the data only through a few private measurements.
 
