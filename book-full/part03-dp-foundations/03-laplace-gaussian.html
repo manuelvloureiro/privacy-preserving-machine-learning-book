@@ -6,6 +6,7 @@
 
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
+<meta name="author" content="Manuel V. Loureiro">
 
 <title>20&nbsp; The Laplace and Gaussian mechanisms – Privacy-Preserving Machine Learning</title>
 <style>
@@ -666,7 +667,19 @@ window.Quarto = {
 
 <div class="quarto-title-meta">
 
+    <div>
+    <div class="quarto-title-meta-heading">Author</div>
+    <div class="quarto-title-meta-contents">
+             <p>Manuel V. Loureiro </p>
+          </div>
+  </div>
     
+    <div>
+    <div class="quarto-title-meta-heading">Published</div>
+    <div class="quarto-title-meta-contents">
+      <p class="date">Version 2026-10-30</p>
+    </div>
+  </div>
   
     
   </div>
@@ -1192,7 +1205,7 @@ Figure&nbsp;20.5: Root-mean-square error per count at <span class="math inline">
 </figure>
 </div>
 <div id="exm-lg-cdf" class="theorem example">
-<p><span class="theorem-title"><strong>Example 20.5</strong></span> The hospital releases the empirical cumulative distribution function (CDF) of its patients’ ages, read off at <span class="math inline">\(d\)</span> thresholds, at <span class="math inline">\(\varepsilon = 1\)</span> and <span class="math inline">\(\delta = 10^{-5}\)</span>. There <span class="math inline">\(\sigma_1 = 3.7306\)</span>, the value found by bisection in <a href="#sec-lg-analytic" class="quarto-xref"><span>Section 20.4</span></a>. For one count, Laplace noise has root-mean-square error <span class="math inline">\(\sqrt2 = 1.4142\)</span> against 3.7306 for Gaussian noise, so Laplace wins. For threshold counts the crossover is at <span class="math inline">\(d = (3.7306)^2/2 = 6.96\)</span>. <a href="#tbl-lg-high-dim" class="quarto-xref">Table&nbsp;<span>20.6</span></a> shows the errors, exactly (from <span class="math inline">\(\sqrt2\,d\)</span> and <span class="math inline">\(3.7306\sqrt d\)</span>) and by simulation. At 100 thresholds Gaussian noise is 3.79 times more accurate, and at 1,000 thresholds 11.99 times.</p>
+<p><span class="theorem-title"><strong>Example 20.5</strong></span> The hospital releases the empirical CDF of its patients’ ages, read off at <span class="math inline">\(d\)</span> thresholds, at <span class="math inline">\(\varepsilon = 1\)</span> and <span class="math inline">\(\delta = 10^{-5}\)</span>. There <span class="math inline">\(\sigma_1 = 3.7306\)</span>, the value found by bisection in <a href="#sec-lg-analytic" class="quarto-xref"><span>Section 20.4</span></a>. For one count, Laplace noise has root-mean-square error <span class="math inline">\(\sqrt2 = 1.4142\)</span> against 3.7306 for Gaussian noise, so Laplace wins. For threshold counts the crossover is at <span class="math inline">\(d = (3.7306)^2/2 = 6.96\)</span>. <a href="#tbl-lg-high-dim" class="quarto-xref">Table&nbsp;<span>20.6</span></a> shows the errors, exactly (from <span class="math inline">\(\sqrt2\,d\)</span> and <span class="math inline">\(3.7306\sqrt d\)</span>) and by simulation. At 100 thresholds Gaussian noise is 3.79 times more accurate, and at 1,000 thresholds 11.99 times.</p>
 <div id="tbl-lg-high-dim" class="quarto-float quarto-figure quarto-figure-center anchored">
 <figure class="quarto-float quarto-float-tbl figure">
 <figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl" id="tbl-lg-high-dim-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">

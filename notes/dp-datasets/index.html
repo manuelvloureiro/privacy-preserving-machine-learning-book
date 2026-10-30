@@ -6,8 +6,7 @@
 
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
-<meta name="author" content="Study notes">
-<meta name="dcterms.date" content="2026-10-23">
+<meta name="author" content="Manuel V. Loureiro">
 
 <title>Datasets for Differentially Private Machine Learning</title>
 <style>
@@ -143,14 +142,14 @@ window.Quarto = {
     <div>
     <div class="quarto-title-meta-heading">Author</div>
     <div class="quarto-title-meta-contents">
-             <p>Study notes </p>
+             <p>Manuel V. Loureiro </p>
           </div>
   </div>
     
     <div>
     <div class="quarto-title-meta-heading">Published</div>
     <div class="quarto-title-meta-contents">
-      <p class="date">October 23, 2026</p>
+      <p class="date">Version 2026-10-30</p>
     </div>
   </div>
   
@@ -286,13 +285,13 @@ Table&nbsp;2: The symbols the note uses. Each is also explained where it first a
 <section id="the-privacy-unit" class="level2" data-number="1.1">
 <h2 data-number="1.1" class="anchored" data-anchor-id="the-privacy-unit"><span class="header-section-number">1.1</span> The privacy unit</h2>
 <p>DP protects whatever one record is, and its definition shows how. Write <span class="math inline">\(M\)</span> for a mechanism, the random procedure that computes the released output, and take two datasets <span class="math inline">\(D\)</span> and <span class="math inline">\(D'\)</span> that differ in one record. The privacy parameter <span class="math inline">\(\varepsilon\)</span> bounds how much the probability of any output may change between the two datasets, and the parameter <span class="math inline">\(\delta\)</span> is a small probability of exception. The mechanism is <span class="math inline">\((\varepsilon, \delta)\)</span>-DP when, for any such pair of datasets and any set <span class="math inline">\(S\)</span> of outputs,</p>
-<p><span class="math display">\[\Pr[M(D) \in S] \le e^{\varepsilon}\Pr[M(D') \in S] + \delta.\]</span></p>
+<p><span id="eq-auto-index-1"><span class="math display">\[\Pr[M(D) \in S] \le e^{\varepsilon}\Pr[M(D') \in S] + \delta. \tag{1}\]</span></span></p>
 <p>This note uses the add/remove relation, so <span class="math inline">\(D'\)</span> is <span class="math inline">\(D\)</span> with one record added or taken away. The guarantee is thus a promise about one record, and the dataset decides what a record is. In Adult one record is one person. In Online Retail one record is one line of an invoice, so a customer with 400 lines is 400 records, and a guarantee per record says little about the customer. To protect the customer, the mechanism must treat all of their lines as one unit, which is <strong>user-level</strong> privacy, and the dataset must say which lines belong to whom. Most benchmarks have no such identifier, so they can only test <strong>example-level</strong> privacy, and <a href="#sec-users" class="quarto-xref">Section&nbsp;5</a> is about the ones that do.</p>
 </section>
 <section id="the-size-of-the-dataset" class="level2" data-number="1.2">
 <h2 data-number="1.2" class="anchored" data-anchor-id="the-size-of-the-dataset"><span class="header-section-number">1.2</span> The size of the dataset</h2>
 <p>The noise that DP adds to a count does not depend on the number of records. Under add/remove, one record changes a count by at most one, so Laplace noise with scale <span class="math inline">\(1/\varepsilon\)</span> makes the count <span class="math inline">\(\varepsilon\)</span>-DP, and that noise has standard deviation <span class="math inline">\(\sqrt{2}/\varepsilon\)</span> for any dataset. The number of records <span class="math inline">\(n\)</span> decides how this fixed noise compares with the counts. A count that covers a share <span class="math inline">\(s\)</span> of the records is about <span class="math inline">\(ns\)</span>, so the noise, as a fraction of the count, is</p>
-<p><span class="math display">\[\frac{\sqrt{2}}{\varepsilon\, n s}.\]</span></p>
+<p><span id="eq-auto-index-2"><span class="math display">\[\frac{\sqrt{2}}{\varepsilon\, n s}. \tag{2}\]</span></span></p>
 <p>So twice the data halves the relative error, and a ten times smaller <span class="math inline">\(\varepsilon\)</span> costs as much as ten times less data.</p>
 <p><a href="#fig-noise-floor" class="quarto-xref">Figure&nbsp;1</a> plots that fraction against <span class="math inline">\(n\)</span> for a count of 1% of the records, with the common benchmarks marked on the <span class="math inline">\(\varepsilon = 1\)</span> line. The dotted line is a relative error of 10%, a reasonable bar for a statistic worth publishing. With <span class="math inline">\(s = 0.01\)</span>, the fraction falls to 0.1 when <span class="math inline">\(n = \sqrt{2}/(0.001\,\varepsilon)\)</span>. So a dataset clears the bar with 1,414 records at <span class="math inline">\(\varepsilon = 1\)</span>, and with 14,142 at <span class="math inline">\(\varepsilon = 0.1\)</span>. <a href="#tbl-sizes" class="quarto-xref">Table&nbsp;3</a> gives the values for each dataset.</p>
 <div id="fig-noise-floor" class="quarto-float quarto-figure quarto-figure-center anchored">
