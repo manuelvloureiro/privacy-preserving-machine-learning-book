@@ -1,0 +1,1924 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.10.19">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+<meta name="author" content="Manuel V. Loureiro">
+
+<title>Privacy-Preserving Machine Learning in 2026: A Systematic Review</title>
+<style>
+/* Default styles provided by pandoc.
+** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
+*/
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: 1.5em;}
+div.column{flex: auto;}
+@media screen {
+div.columns{gap: min(4vw, 1.5em);}
+div.column{overflow-x: auto;}
+}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+/* CSS for syntax highlighting */
+html { -webkit-text-size-adjust: 100%; }
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+</style>
+
+
+<script src="index_files/libs/clipboard/clipboard.min.js"></script>
+<script src="index_files/libs/quarto-html/quarto.js" type="module"></script>
+<script src="index_files/libs/quarto-html/tabsets/tabsets.js" type="module"></script>
+<script src="index_files/libs/quarto-html/popper.min.js"></script>
+<script src="index_files/libs/quarto-html/tippy.umd.min.js"></script>
+<script src="index_files/libs/quarto-html/anchor.min.js"></script>
+<link href="index_files/libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="index_files/libs/quarto-html/quarto-syntax-highlighting-bf27225e3a48a9273f3daa8f8e829971.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="index_files/libs/bootstrap/bootstrap.min.js"></script>
+<link href="index_files/libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="index_files/libs/bootstrap/bootstrap-67a1b6612eaed44f7b934f3849f761ca.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
+
+  <script src="https://cdnjs.cloudflare.com/polyfill/v3/polyfill.min.js?features=es6"></script>
+  <script defer="" src="https://cdn.jsdelivr.net/npm/mathjax@4/tex-chtml.js" type="text/javascript"></script>
+
+<script type="text/javascript">
+const typesetMath = (el) => {
+  if (window.MathJax) {
+    // MathJax Typeset
+    window.MathJax.typeset([el]);
+  } else if (window.katex) {
+    // KaTeX Render
+    var mathElements = el.getElementsByClassName("math");
+    var macros = [];
+    for (var i = 0; i < mathElements.length; i++) {
+      var texText = mathElements[i].firstChild;
+      if (mathElements[i].tagName == "SPAN" && texText && texText.data) {
+        window.katex.render(texText.data, mathElements[i], {
+          displayMode: mathElements[i].classList.contains('display'),
+          throwOnError: false,
+          macros: macros,
+          fleqn: false
+        });
+      }
+    }
+  }
+}
+window.Quarto = {
+  typesetMath
+};
+</script>
+
+</head>
+
+<body class="quarto-light">
+
+<div id="quarto-content" class="page-columns page-rows-contents page-layout-article toc-left">
+<div id="quarto-sidebar-toc-left" class="sidebar toc-left">
+  <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">Table of contents</h2>
+   
+  <ul>
+  <li><a href="#sec-method" id="toc-sec-method" class="nav-link active" data-scroll-target="#sec-method"><span class="header-section-number">1</span> How the review was done</a>
+  <ul class="collapse">
+  <li><a href="#the-search" id="toc-the-search" class="nav-link" data-scroll-target="#the-search"><span class="header-section-number">1.1</span> The search</a></li>
+  <li><a href="#the-screening" id="toc-the-screening" class="nav-link" data-scroll-target="#the-screening"><span class="header-section-number">1.2</span> The screening</a></li>
+  <li><a href="#checking-the-screening-by-hand" id="toc-checking-the-screening-by-hand" class="nav-link" data-scroll-target="#checking-the-screening-by-hand"><span class="header-section-number">1.3</span> Checking the screening by hand</a></li>
+  <li><a href="#extraction-and-classification" id="toc-extraction-and-classification" class="nav-link" data-scroll-target="#extraction-and-classification"><span class="header-section-number">1.4</span> Extraction and classification</a></li>
+  </ul></li>
+  <li><a href="#sec-map" id="toc-sec-map" class="nav-link" data-scroll-target="#sec-map"><span class="header-section-number">2</span> What was published, and where</a>
+  <ul class="collapse">
+  <li><a href="#how-many-and-when" id="toc-how-many-and-when" class="nav-link" data-scroll-target="#how-many-and-when"><span class="header-section-number">2.1</span> How many, and when</a></li>
+  <li><a href="#where" id="toc-where" class="nav-link" data-scroll-target="#where"><span class="header-section-number">2.2</span> Where</a></li>
+  <li><a href="#citations" id="toc-citations" class="nav-link" data-scroll-target="#citations"><span class="header-section-number">2.3</span> Citations</a></li>
+  </ul></li>
+  <li><a href="#sec-themes" id="toc-sec-themes" class="nav-link" data-scroll-target="#sec-themes"><span class="header-section-number">3</span> The themes</a></li>
+  <li><a href="#sec-synthesis" id="toc-sec-synthesis" class="nav-link" data-scroll-target="#sec-synthesis"><span class="header-section-number">4</span> Theme by theme: what the papers did</a>
+  <ul class="collapse">
+  <li><a href="#differentially-private-learning" id="toc-differentially-private-learning" class="nav-link" data-scroll-target="#differentially-private-learning"><span class="header-section-number">4.1</span> Differentially private learning</a></li>
+  <li><a href="#federated-learning" id="toc-federated-learning" class="nav-link" data-scroll-target="#federated-learning"><span class="header-section-number">4.2</span> Federated learning</a></li>
+  <li><a href="#privacy-attacks-and-defences" id="toc-privacy-attacks-and-defences" class="nav-link" data-scroll-target="#privacy-attacks-and-defences"><span class="header-section-number">4.3</span> Privacy attacks and defences</a></li>
+  <li><a href="#sec-synthesis-audit" id="toc-sec-synthesis-audit" class="nav-link" data-scroll-target="#sec-synthesis-audit"><span class="header-section-number">4.4</span> Auditing and measuring privacy</a></li>
+  <li><a href="#cryptographic-and-hardware-protection" id="toc-cryptographic-and-hardware-protection" class="nav-link" data-scroll-target="#cryptographic-and-hardware-protection"><span class="header-section-number">4.5</span> Cryptographic and hardware protection</a></li>
+  <li><a href="#synthetic-data-and-data-release" id="toc-synthetic-data-and-data-release" class="nav-link" data-scroll-target="#synthetic-data-and-data-release"><span class="header-section-number">4.6</span> Synthetic data and data release</a></li>
+  <li><a href="#machine-unlearning" id="toc-machine-unlearning" class="nav-link" data-scroll-target="#machine-unlearning"><span class="header-section-number">4.7</span> Machine unlearning</a></li>
+  <li><a href="#local-and-shuffle-differential-privacy" id="toc-local-and-shuffle-differential-privacy" class="nav-link" data-scroll-target="#local-and-shuffle-differential-privacy"><span class="header-section-number">4.8</span> Local and shuffle differential privacy</a></li>
+  <li><a href="#mechanisms-definitions-and-theory" id="toc-mechanisms-definitions-and-theory" class="nav-link" data-scroll-target="#mechanisms-definitions-and-theory"><span class="header-section-number">4.9</span> Mechanisms, definitions and theory</a></li>
+  <li><a href="#surveys-and-systematizations" id="toc-surveys-and-systematizations" class="nav-link" data-scroll-target="#surveys-and-systematizations"><span class="header-section-number">4.10</span> Surveys and systematizations</a></li>
+  </ul></li>
+  <li><a href="#sec-domains" id="toc-sec-domains" class="nav-link" data-scroll-target="#sec-domains"><span class="header-section-number">5</span> Domains and model types</a></li>
+  <li><a href="#sec-limits" id="toc-sec-limits" class="nav-link" data-scroll-target="#sec-limits"><span class="header-section-number">6</span> What the review can and cannot say</a></li>
+  <li><a href="#sec-reading" id="toc-sec-reading" class="nav-link" data-scroll-target="#sec-reading"><span class="header-section-number">7</span> Where to start reading</a></li>
+  <li><a href="#sec-sources" id="toc-sec-sources" class="nav-link" data-scroll-target="#sec-sources"><span class="header-section-number">8</span> References</a></li>
+  </ul>
+<div class="quarto-alternate-formats"><h2>Other Formats</h2><ul><li><a href="Privacy-Preserving-Machine-Learning-in-2026-A-Systematic-Review.pdf"><i class="bi bi-file-pdf"></i>PDF</a></li></ul></div></nav>
+</div>
+<div id="quarto-margin-sidebar" class="sidebar margin-sidebar zindex-bottom">
+</div>
+<main class="content" id="quarto-document-content">
+
+<header id="title-block-header" class="quarto-title-block default">
+<div class="quarto-title">
+<h1 class="title">Privacy-Preserving Machine Learning in 2026: A Systematic Review</h1>
+<p class="subtitle lead">What the field published in 2026, found by one reproducible search, screened by stated rules and read theme by theme</p>
+</div>
+
+
+
+<div class="quarto-title-meta">
+
+    <div>
+    <div class="quarto-title-meta-heading">Author</div>
+    <div class="quarto-title-meta-contents">
+             <p>Manuel V. Loureiro </p>
+          </div>
+  </div>
+    
+    <div>
+    <div class="quarto-title-meta-heading">Published</div>
+    <div class="quarto-title-meta-contents">
+      <p class="date">Version 2026-11-02</p>
+    </div>
+  </div>
+  
+    
+  </div>
+  
+<div>
+  <div class="abstract">
+    <div class="block-title">Abstract</div>
+    <p>What did the field of privacy-preserving machine learning publish in 2026, on which problems, and where? This note answers with a systematic review: thirteen search strings run on one bibliographic database on 2 November 2026, screening rules that a script applies and that a hand-read sample checks, and a classification of every included record by theme, venue and application domain. It then reads the most cited papers of each theme and says what they did. The review finds a field dominated by federated learning and by attacks on large language models, a growing share of unreviewed repository uploads, and a small core of papers that change what a practitioner should do.</p>
+  </div>
+</div>
+
+
+</header>
+
+
+<p>Suppose you want to know what the research on privacy-preserving machine learning did this year. You could read the proceedings of a few conferences, but most of the year’s papers are not in them, and the ones you happen to see are not a fair sample. A <strong>systematic review</strong> fixes this by stating, before it starts, where it will search, with which words, what it will keep, and how it will sort what it keeps. Anyone can then run the same search and get the same records. This note is such a review of the papers published in 2026, run on 2 November 2026, and every count in it comes from one script.</p>
+<p>The note is for a reader who knows what differential privacy (DP) and federated learning (FL) are and wants a map of the year. It links to no other book and defines each term where it is used. It has two parts. The first says how the records were found and screened, and what the counts show about how much was published, by whom and where. The second reads the most cited papers of each theme and says what they claim. Every number comes from the frozen table of records that the search script wrote, and the script that computes them is <a href="https://github.com/manuelvloureiro/privacy-preserving-machine-learning-book/blob/main/code/notes/ppml_2026_review.py">code/notes/ppml_2026_review.py</a>:</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb1"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="ex">uv</span> run python code/notes/ppml_2026_review_search.py   <span class="co"># the search and the screening, from the cached download</span></span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="ex">uv</span> run python code/notes/ppml_2026_review.py          <span class="co"># the counts, figures and tables of this note</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p><a href="#tbl-map" class="quarto-xref">Table&nbsp;1</a> gives the question each section answers, and <a href="#tbl-symbols" class="quarto-xref">Table&nbsp;2</a> lists the few symbols the note uses.</p>
+<div id="tbl-map" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-tbl figure">
+<figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl" id="tbl-map-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Table&nbsp;1: The question each section answers.
+</figcaption>
+<div aria-describedby="tbl-map-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<table class="caption-top table">
+<colgroup>
+<col style="width: 50%">
+<col style="width: 50%">
+</colgroup>
+<thead>
+<tr class="header">
+<th style="text-align: left;">Section</th>
+<th style="text-align: left;">The question it answers</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: left;"><a href="#sec-method" class="quarto-xref">Section&nbsp;1</a></td>
+<td style="text-align: left;">Where did the records come from, how were they screened, and how good is the screening?</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;"><a href="#sec-map" class="quarto-xref">Section&nbsp;2</a></td>
+<td style="text-align: left;">How much was published, when, where, and how much of it has been cited?</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;"><a href="#sec-themes" class="quarto-xref">Section&nbsp;3</a></td>
+<td style="text-align: left;">Which problems did the papers work on, and which problems go together?</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;"><a href="#sec-synthesis" class="quarto-xref">Section&nbsp;4</a></td>
+<td style="text-align: left;">What did the most cited papers of each theme do?</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;"><a href="#sec-domains" class="quarto-xref">Section&nbsp;5</a></td>
+<td style="text-align: left;">Which data and which models were the papers about?</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;"><a href="#sec-limits" class="quarto-xref">Section&nbsp;6</a></td>
+<td style="text-align: left;">What can this review not tell you?</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;"><a href="#sec-reading" class="quarto-xref">Section&nbsp;7</a></td>
+<td style="text-align: left;">Where should you start reading?</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;"><a href="#sec-sources" class="quarto-xref">Section&nbsp;8</a></td>
+<td style="text-align: left;">Which papers does the note cite, and where are they?</td>
+</tr>
+</tbody>
+</table>
+</div>
+</figure>
+</div>
+<div id="tbl-symbols" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-tbl figure">
+<figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl" id="tbl-symbols-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Table&nbsp;2: The symbols the note uses. Each is also explained where it first appears.
+</figcaption>
+<div aria-describedby="tbl-symbols-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<table class="caption-top table">
+<colgroup>
+<col style="width: 50%">
+<col style="width: 50%">
+</colgroup>
+<thead>
+<tr class="header">
+<th style="text-align: left;">Symbol</th>
+<th style="text-align: left;">Meaning</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: left;"><span class="math inline">\(n\)</span></td>
+<td style="text-align: left;">the number of included records</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;"><span class="math inline">\(m\)</span></td>
+<td style="text-align: left;">the number of records in a hand-read sample</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;"><span class="math inline">\(\hat p\)</span></td>
+<td style="text-align: left;">the share of a sample on which the reader agreed with the screening rule</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;"><span class="math inline">\(p\)</span></td>
+<td style="text-align: left;">the true share, which the sample estimates</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;"><span class="math inline">\(\varepsilon\)</span></td>
+<td style="text-align: left;">the privacy parameter of a differential-privacy guarantee, which bounds how much one record can change the output’s distribution</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;"><span class="math inline">\(f\)</span></td>
+<td style="text-align: left;">in <span class="math inline">\(f\)</span>-DP, the trade-off function that a guarantee is stated with</td>
+</tr>
+</tbody>
+</table>
+</div>
+</figure>
+</div>
+<section id="sec-method" class="level1" data-number="1">
+<h1 data-number="1"><span class="header-section-number">1</span> How the review was done</h1>
+<p>A review is only as good as its search and its screening, so this section states both before any count. The review asks three questions. The first question is how much the field published in 2026, and where. The second question is which problems the papers worked on, and how the problems overlap. The third question is what the papers of each problem did. The first two questions are answered by counts over every included record. The third is answered by reading, and <a href="#sec-synthesis" class="quarto-xref">Section&nbsp;4</a> says which papers were read and why those.</p>
+<section id="the-search" class="level2" data-number="1.1">
+<h2 data-number="1.1" class="anchored" data-anchor-id="the-search"><span class="header-section-number">1.1</span> The search</h2>
+<p>The records come from two databases. The first is <strong>OpenAlex</strong>, an open index of scholarly works. It merges the records of Crossref, arXiv, PubMed, DataCite and other sources. So it lists journals, conference proceedings, books and repositories together. Each of its records has a title, usually an abstract, a publication date, a type such as article or preprint, a primary venue and a count of citing works. The second is <strong>arXiv</strong> itself, the repository where most machine-learning research first appears, searched through its own interface. Its records have a title, an abstract, the date of first submission and a subject class, but no citation count.</p>
+<p>The search ran on 2 November 2026 with the thirteen strings of <a href="#tbl-queries" class="quarto-xref">Table&nbsp;3</a>. On OpenAlex a string was run over the title and the abstract of every work whose publication year is 2026. On arXiv it was run over the title and abstract of every paper first submitted in 2026, up to the search day. Each string names one way to protect, or to attack, the privacy of data used in learning. The strings were made wide on purpose. A paper that uses DP for anything was returned, and the screening then kept the ones about learning.</p>
+<div id="tbl-queries" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-tbl figure">
+<figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl" id="tbl-queries-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Table&nbsp;3: The thirteen search strings, as run on OpenAlex (publication year 2026) on 2026-11-02, and the records each returned there and on arXiv (first submitted in 2026). The arXiv form of each string, with its field prefixes, is in the search script. Zero OpenAlex records means the string was not run there, because the quota ran out.
+</figcaption>
+<div aria-describedby="tbl-queries-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<table class="caption-top table">
+<colgroup>
+<col style="width: 25%">
+<col style="width: 25%">
+<col style="width: 25%">
+<col style="width: 25%">
+</colgroup>
+<thead>
+<tr class="header">
+<th style="text-align: left;">String</th>
+<th style="text-align: left;">OpenAlex search, over title and abstract</th>
+<th style="text-align: right;">OpenAlex records</th>
+<th style="text-align: right;">arXiv records</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: left;">dp</td>
+<td style="text-align: left;"><code>"differential privacy" OR "differentially private"</code></td>
+<td style="text-align: right;">5,407</td>
+<td style="text-align: right;">849</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">fl</td>
+<td style="text-align: left;"><code>"federated learning" AND (privacy OR attack OR leakage OR "secure aggregation")</code></td>
+<td style="text-align: right;">11,063</td>
+<td style="text-align: right;">795</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">mia</td>
+<td style="text-align: left;"><code>"membership inference"</code></td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">283</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">ppml</td>
+<td style="text-align: left;"><code>"privacy-preserving machine learning" OR "privacy preserving machine learning" OR "private machine learning" OR "privacy-preserving deep learning" OR "privacy-preserving inference" OR "private inference"</code></td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">85</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">he</td>
+<td style="text-align: left;"><code>"homomorphic encryption" AND (learning OR inference OR "neural network" OR model)</code></td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">148</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">mpc</td>
+<td style="text-align: left;"><code>("multi-party computation" OR "multiparty computation" OR "secure computation") AND (learning OR inference OR "neural network")</code></td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">64</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">tee</td>
+<td style="text-align: left;"><code>("trusted execution environment" OR "confidential computing") AND (learning OR inference OR "neural network")</code></td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">49</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">unlearn</td>
+<td style="text-align: left;"><code>"machine unlearning"</code></td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">304</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">memor</td>
+<td style="text-align: left;"><code>(memorization OR "data extraction" OR "training data") AND ("language model" OR LLM) AND privacy</code></td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">165</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">inversion</td>
+<td style="text-align: left;"><code>"gradient inversion" OR "gradient leakage" OR "model inversion" OR "reconstruction attack" OR "attribute inference"</code></td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">192</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">synth</td>
+<td style="text-align: left;"><code>"synthetic data" AND (privacy OR "differentially private")</code></td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">248</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">audit</td>
+<td style="text-align: left;"><code>"privacy audit" OR "privacy auditing" OR "auditing differential privacy"</code></td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">44</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">split</td>
+<td style="text-align: left;"><code>"split learning" AND privacy</code></td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">30</td>
+</tr>
+</tbody>
+</table>
+</div>
+</figure>
+</div>
+<p>The plan was to run all thirteen strings on both databases, and the plan was not kept. OpenAlex gives an unregistered user a daily quota of requests, and the two widest strings, on differential privacy and on federated learning, used it up. The last quarter of the federated-learning string, the records dated October to December, was not downloaded, and the eleven narrower strings were not run there at all. A review must report such a deviation rather than hide it, so <a href="#tbl-queries" class="quarto-xref">Table&nbsp;3</a> shows zero OpenAlex records for those strings, and <a href="#sec-limits" class="quarto-xref">Section&nbsp;6</a> says what the gap costs. What it costs is bounded in one direction: an OpenAlex record on, say, membership inference is still in the review when its abstract also names differential privacy or federated learning, which <a href="#sec-synthesis" class="quarto-xref">Section&nbsp;4</a> shows most do. The script that runs the searches is <a href="https://github.com/manuelvloureiro/privacy-preserving-machine-learning-book/blob/main/code/notes/ppml_2026_review_search.py">code/notes/ppml_2026_review_search.py</a>, and it caches the download, so the screening can be rerun on the same records.</p>
+<p>The strings overlap by design, because a paper on federated learning with differential privacy should be found twice rather than missed. So the records of all the searches were put together and the repeats removed, first by their identifier and then by their title. The second step matters for two reasons. The same paper is often in OpenAlex twice, once as a preprint and once as the published version, each with its own identifier. And a paper found on arXiv directly is often also in OpenAlex, which indexes arXiv with a delay. When two records had the same title after punctuation and case were removed, one was kept. The published version came before a preprint, and an OpenAlex record before an arXiv one, because it carries a citation count. The citation counts of two records were never added.</p>
+</section>
+<section id="the-screening" class="level2" data-number="1.2">
+<h2 data-number="1.2" class="anchored" data-anchor-id="the-screening"><span class="header-section-number">1.2</span> The screening</h2>
+<p>A systematic review keeps a record only when it meets criteria written down before the search, and <a href="#def-included" class="quarto-xref">Definition&nbsp;1</a> states this review’s criteria. The criteria are applied by a script, not by a reader, so they are regular expressions on the title and the abstract, and the full list is in the script.</p>
+<div id="def-included" class="theorem definition">
+<p><span class="theorem-title"><strong>Definition 1 (An included record)</strong></span> A record is included when all of these hold. It is a paper, which means an article, a conference paper, a preprint, a review or a book chapter. It is in English. It is not retracted. Its title or abstract names a learning object, such as a model, training, a classifier, a language model or a neural network. And it is about privacy in one of two ways. Either its title or abstract names a privacy technique or a privacy attack, such as differential privacy, membership inference, homomorphic encryption, unlearning, synthetic data or anonymization. Or it names federated learning, or calls itself privacy-preserving, and has a privacy word in its title.</p>
+</div>
+<p>The last criterion does the real work, and its second half needs a reason. FL keeps the data on the device, and nearly every paper that uses it calls itself privacy-preserving for that reason alone. If the words were enough, the review would be a review of FL. So a paper that names no technique and no attack is included only when privacy is in its title, which is where an author puts the purpose of the paper.</p>
+<p>The criterion also removes two other kinds of record. The first kind mentions privacy only as a motivation. A paper on a smart grid, say, notes that its users care about privacy and then trains a model with no protection, so it has no cue at all. The second kind uses a privacy technique with no learning in it, such as a differentially private histogram of ages, so it has no learning cue. All three kinds are legitimate research, but they are not privacy-preserving machine learning. This review takes that term to mean the protection of data used to train, query or release a learned model, or an attack on that protection. <a href="#tbl-flow" class="quarto-xref">Table&nbsp;4</a> gives the records at each stage.</p>
+<div id="tbl-flow" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-tbl figure">
+<figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl" id="tbl-flow-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Table&nbsp;4: The flow of records from the searches to the included set.
+</figcaption>
+<div aria-describedby="tbl-flow-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<table class="caption-top table">
+<thead>
+<tr class="header">
+<th style="text-align: left;">Stage</th>
+<th style="text-align: right;">Records</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: left;">Returned by the searches, with repeats</td>
+<td style="text-align: right;">19,677</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Distinct records (one per identifier in its database)</td>
+<td style="text-align: right;">16,888</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Distinct papers (one per title)</td>
+<td style="text-align: right;">15,016</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Excluded: privacy only as a setting</td>
+<td style="text-align: right;">5,063</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Excluded: not a paper</td>
+<td style="text-align: right;">976</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Excluded: no machine learning</td>
+<td style="text-align: right;">855</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Excluded: no privacy technique or setting</td>
+<td style="text-align: right;">681</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Excluded: not in English</td>
+<td style="text-align: right;">151</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Excluded: retracted</td>
+<td style="text-align: right;">11</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Included</td>
+<td style="text-align: right;">7,279</td>
+</tr>
+</tbody>
+</table>
+</div>
+</figure>
+</div>
+<p>A record without an abstract was screened on its title alone, and a record with no cue in the title was then excluded. This loses some papers, and <a href="#sec-limits" class="quarto-xref">Section&nbsp;6</a> returns to it.</p>
+</section>
+<section id="checking-the-screening-by-hand" class="level2" data-number="1.3">
+<h2 data-number="1.3" class="anchored" data-anchor-id="checking-the-screening-by-hand"><span class="header-section-number">1.3</span> Checking the screening by hand</h2>
+<p>A rule written as a regular expression will keep some records it should not and drop some it should keep. A reader can measure both kinds of error on a sample, so the author read two random samples of records. The first sample has <span class="math inline">\(m\)</span> = 120 records, where <span class="math inline">\(m\)</span> is the sample size, drawn from the included set with a fixed random seed. Each was read, title and abstract, and marked as a paper on privacy-preserving machine learning or not. The share marked as such is the <strong>precision</strong> of the screening, written <span class="math inline">\(\hat p\)</span>. The second sample, of 40 records, was drawn from the records that the rule excluded for want of a learning cue, and each was marked as rightly or wrongly excluded. The decisions and the reason for each disagreement are in the file next to the script, so a second reader can check them.</p>
+<p>A share measured on a sample is uncertain, and the uncertainty should be shown. If the true precision is <span class="math inline">\(p\)</span>, the number of agreements in a sample of <span class="math inline">\(m\)</span> records is binomial with <span class="math inline">\(m\)</span> trials and success probability <span class="math inline">\(p\)</span>. The <strong>Clopper–Pearson interval</strong> is the set of values of <span class="math inline">\(p\)</span> under which the observed count is not in the most extreme 2.5% of either tail. It is exact, which means its coverage is never below 95%, and it is wider than the normal approximation on a small sample. <a href="#tbl-screening" class="quarto-xref">Table&nbsp;5</a> gives both samples, their shares and their intervals.</p>
+<p>The precision is <span class="math inline">\(\hat p\)</span> = 89%, with an interval from 82% to 94%. The thirteen false inclusions were security papers, systems papers and reviews that mention a privacy attack or a technique in passing. Of the records excluded for want of a learning word, 82% were rightly excluded. The interval is wide because the sample is small. The seven that were wrongly excluded are clustering, principal component analysis and trajectory synthesis, which the learning cue does not know. <a href="#sec-limits" class="quarto-xref">Section&nbsp;6</a> turns these shares into counts.</p>
+<div id="tbl-screening" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-tbl figure">
+<figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl" id="tbl-screening-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Table&nbsp;5: The hand screening of two random samples of records, and how often the reader agreed with the rule. The interval is the exact Clopper–Pearson interval.
+</figcaption>
+<div aria-describedby="tbl-screening-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<table class="caption-top table">
+<colgroup>
+<col style="width: 20%">
+<col style="width: 20%">
+<col style="width: 20%">
+<col style="width: 20%">
+<col style="width: 20%">
+</colgroup>
+<thead>
+<tr class="header">
+<th style="text-align: left;">Sample</th>
+<th style="text-align: right;">Records read</th>
+<th style="text-align: right;">Decision agrees with the rule</th>
+<th style="text-align: right;">Share</th>
+<th style="text-align: left;">95% interval</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: left;">Included by the rule</td>
+<td style="text-align: right;">120</td>
+<td style="text-align: right;">107</td>
+<td style="text-align: right;">89%</td>
+<td style="text-align: left;">82% to 94%</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Excluded by the rule for want of a learning cue</td>
+<td style="text-align: right;">40</td>
+<td style="text-align: right;">33</td>
+<td style="text-align: right;">82%</td>
+<td style="text-align: left;">67% to 93%</td>
+</tr>
+</tbody>
+</table>
+</div>
+</figure>
+</div>
+</section>
+<section id="extraction-and-classification" class="level2" data-number="1.4">
+<h2 data-number="1.4" class="anchored" data-anchor-id="extraction-and-classification"><span class="header-section-number">1.4</span> Extraction and classification</h2>
+<p>From each included record the script keeps the title, the date, the type and the venue with its kind. It also keeps the citation count, the first author, the number of authors, the search strings that returned it and the topic that OpenAlex, the first database, assigns. It then classifies the record twice, again by regular expressions on the title and abstract. The first classification is by <strong>theme</strong>, the problem the paper works on, and <a href="#tbl-themes" class="quarto-xref">Table&nbsp;8</a> in <a href="#sec-themes" class="quarto-xref">Section&nbsp;3</a> lists the ten themes with what each rule looks for. A record can carry several themes, and a record that matches none is counted as such rather than forced into one. The second classification is by <strong>domain</strong>, the kind of data or model the paper is about. The domains include language models, images, graphs, health records and the internet of things, and <a href="#sec-domains" class="quarto-xref">Section&nbsp;5</a> gives them.</p>
+<p>Two choices in the classification need a word. A record is a survey only when its title says so, because “survey data” in an abstract is a kind of data, not a kind of paper. And the theme of private training is matched only when a DP word and a training word fall within a few words of each other. Otherwise a paper that trains a model and, separately, releases a private statistic would count as private training. Every rule is in the script, and the test in <a href="https://github.com/manuelvloureiro/privacy-preserving-machine-learning-book/blob/main/tests/test_notes_ppml_2026_review.py">tests/test_notes_ppml_2026_review.py</a> checks each on examples.</p>
+</section>
+</section>
+<section id="sec-map" class="level1" data-number="2">
+<h1 data-number="2"><span class="header-section-number">2</span> What was published, and where</h1>
+<p>The screening kept <span class="math inline">\(n\)</span> = 7,279 records out of the 15,016 distinct papers the searches returned. This section counts them: by month, by the kind of venue, and by how often they have been cited. The counts answer the first question of the review, how much the field published in 2026 and where, and they also show what the record set can and cannot support.</p>
+<section id="how-many-and-when" class="level2" data-number="2.1">
+<h2 data-number="2.1" class="anchored" data-anchor-id="how-many-and-when"><span class="header-section-number">2.1</span> How many, and when</h2>
+<p><a href="#fig-months" class="quarto-xref">Figure&nbsp;1</a> shows the included records by the month of their publication date, split by the kind of venue. Two features of the figure are artefacts of the data, not of the field. The January column is the tallest because 1,077 records, 15% of the set, carry the date 1 January exactly. A journal that dates a whole volume to the first day of its year puts every paper of the volume there, so January counts papers from the whole year. The October column is short because the search ran on 2 November, OpenAlex indexes a paper some weeks after it appears, and the federated-learning string’s last window was never downloaded.</p>
+<div id="fig-months" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-months-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="figures/months.svg" class="img-fluid figure-img">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-months-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;1: The included records by publication month and kind of venue. The January column collects the papers that journals date to the first day of the year, and the October column is cut by the search date.
+</figcaption>
+</figure>
+</div>
+<p>Between those two columns the field published between 573 and 716 included records a month. So a reader who wants to follow privacy-preserving machine learning faces about twenty new papers a day, and most of them are not in the venues that such a reader would normally watch.</p>
+</section>
+<section id="where" class="level2" data-number="2.2">
+<h2 data-number="2.2" class="anchored" data-anchor-id="where"><span class="header-section-number">2.2</span> Where</h2>
+<p><a href="#tbl-sources" class="quarto-xref">Table&nbsp;6</a> gives the kind of venue of each record, as the databases list it, with arXiv, the preprint server, as a kind of its own. Journals hold the largest share, then arXiv, then conference proceedings. One record in eight sits in a repository other than arXiv, and most of those are on Zenodo, a general archive where anyone can deposit a file without review. The 500 Zenodo records are 7% of the set, and only 2% of the records in such repositories have been cited at all. Those shares, together with the share from arXiv, show that about a third of the year’s output had no peer review at the time of the search.</p>
+<div id="tbl-sources" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-tbl figure">
+<figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl" id="tbl-sources-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Table&nbsp;6: The included records by the kind of venue listed as their primary location. OpenAlex gives a citation count; a record found only on arXiv has none, so the last column is the share of the records with a count.
+</figcaption>
+<div aria-describedby="tbl-sources-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<table class="caption-top table">
+<colgroup>
+<col style="width: 20%">
+<col style="width: 20%">
+<col style="width: 20%">
+<col style="width: 20%">
+<col style="width: 20%">
+</colgroup>
+<thead>
+<tr class="header">
+<th style="text-align: left;">Where the record was published</th>
+<th style="text-align: right;">Records</th>
+<th style="text-align: right;">Share</th>
+<th style="text-align: right;">With a citation count</th>
+<th style="text-align: right;">Cited at least once</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: left;">a journal</td>
+<td style="text-align: right;">3,186</td>
+<td style="text-align: right;">44%</td>
+<td style="text-align: right;">3,186</td>
+<td style="text-align: right;">22%</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">conference proceedings</td>
+<td style="text-align: right;">1,216</td>
+<td style="text-align: right;">17%</td>
+<td style="text-align: right;">1,216</td>
+<td style="text-align: right;">12%</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">arXiv</td>
+<td style="text-align: right;">1,642</td>
+<td style="text-align: right;">23%</td>
+<td style="text-align: right;">686</td>
+<td style="text-align: right;">1%</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">another repository (Zenodo, SSRN, Research Square, …)</td>
+<td style="text-align: right;">839</td>
+<td style="text-align: right;">12%</td>
+<td style="text-align: right;">839</td>
+<td style="text-align: right;">2%</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">a book or book series</td>
+<td style="text-align: right;">274</td>
+<td style="text-align: right;">4%</td>
+<td style="text-align: right;">274</td>
+<td style="text-align: right;">11%</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">no venue listed, or another kind</td>
+<td style="text-align: right;">122</td>
+<td style="text-align: right;">2%</td>
+<td style="text-align: right;">122</td>
+<td style="text-align: right;">8%</td>
+</tr>
+</tbody>
+</table>
+</div>
+</figure>
+</div>
+<p><a href="#tbl-venues" class="quarto-xref">Table&nbsp;7</a> lists the twenty journals and proceedings with the most records. Scientific Reports, a general journal, leads with 144 records. The specialist venues of the field are far down the list. The IEEE Transactions on Dependable and Secure Computing has 57 records and the AAAI conference 32. The IEEE Transactions on Information Forensics and Security has 28, and the Proceedings on Privacy Enhancing Technologies 21. The fifteen venues this review treats as the core of the field, listed in <a href="#sec-synthesis" class="quarto-xref">Section&nbsp;4</a>, hold 166 records between them, 2% of the set. One entry of the table is a warning: a journal whose title names drug delivery has 27 records on privacy-preserving learning. So the record list of a bibliographic database holds some venues whose relation to the field is unclear, and a count of records is not a count of contributions.</p>
+<div id="tbl-venues" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-tbl figure">
+<figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl" id="tbl-venues-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Table&nbsp;7: The 20 journals and proceedings with the most included records.
+</figcaption>
+<div aria-describedby="tbl-venues-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<table class="caption-top table">
+<colgroup>
+<col style="width: 33%">
+<col style="width: 33%">
+<col style="width: 33%">
+</colgroup>
+<thead>
+<tr class="header">
+<th style="text-align: left;">Venue</th>
+<th style="text-align: right;">Records</th>
+<th style="text-align: right;">Cited at least once</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: left;">Scientific Reports</td>
+<td style="text-align: right;">144</td>
+<td style="text-align: right;">36%</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Lecture notes in computer science</td>
+<td style="text-align: right;">83</td>
+<td style="text-align: right;">11%</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Lecture notes in networks and systems</td>
+<td style="text-align: right;">81</td>
+<td style="text-align: right;">0%</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">IEEE Internet of Things Journal</td>
+<td style="text-align: right;">63</td>
+<td style="text-align: right;">40%</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">IEEE Access</td>
+<td style="text-align: right;">61</td>
+<td style="text-align: right;">20%</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">IEEE Transactions on Dependable and Secure Computing</td>
+<td style="text-align: right;">57</td>
+<td style="text-align: right;">37%</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">IEEE Transactions on Consumer Electronics</td>
+<td style="text-align: right;">44</td>
+<td style="text-align: right;">25%</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Communications in computer and information science</td>
+<td style="text-align: right;">42</td>
+<td style="text-align: right;">7%</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Electronics</td>
+<td style="text-align: right;">38</td>
+<td style="text-align: right;">29%</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Proceedings of the AAAI Conference on Artificial Intelligence</td>
+<td style="text-align: right;">32</td>
+<td style="text-align: right;">38%</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Procedia Computer Science</td>
+<td style="text-align: right;">31</td>
+<td style="text-align: right;">10%</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">IEEE Transactions on Information Forensics and Security</td>
+<td style="text-align: right;">28</td>
+<td style="text-align: right;">46%</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Discover Artificial Intelligence</td>
+<td style="text-align: right;">27</td>
+<td style="text-align: right;">26%</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">International Journal of Drug Delivery Technology</td>
+<td style="text-align: right;">27</td>
+<td style="text-align: right;">0%</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">International Journal of Artificial Intelligence and Machine Learning</td>
+<td style="text-align: right;">26</td>
+<td style="text-align: right;">0%</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">International Journal of Computer Information Systems and Industrial Management Applications</td>
+<td style="text-align: right;">26</td>
+<td style="text-align: right;">0%</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Cluster Computing</td>
+<td style="text-align: right;">25</td>
+<td style="text-align: right;">32%</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Computer Networks</td>
+<td style="text-align: right;">24</td>
+<td style="text-align: right;">21%</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">IET conference proceedings.</td>
+<td style="text-align: right;">23</td>
+<td style="text-align: right;">4%</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Knowledge-Based Systems</td>
+<td style="text-align: right;">22</td>
+<td style="text-align: right;">32%</td>
+</tr>
+</tbody>
+</table>
+</div>
+</figure>
+</div>
+</section>
+<section id="citations" class="level2" data-number="2.3">
+<h2 data-number="2.3" class="anchored" data-anchor-id="citations"><span class="header-section-number">2.3</span> Citations</h2>
+<p>OpenAlex gives a citation count for 6,323 of the records, every record it holds, while a record found only on arXiv has none. The median count is zero. Of the records with a count, 86% have not been cited, 37 have ten citations or more, and the most cited record has 33. Papers published in the same year as the search have had little time to be cited, so these numbers measure how early the year is, not how good the papers are.</p>
+<p>The counts still say something, because the few records that have been cited are of one kind. The most cited is a review of single-cell sequencing that mentions FL in passing. Then come a Bayesian FL framework for consumer devices, a scoping review of DP in medical deep learning, an FL governance framework for Canadian health data, and a hierarchical federated anomaly detector for cloud services. Four of the five are about health or infrastructure, and three are frameworks or reviews rather than new mechanisms or attacks. So citations in the first year reward breadth and a large readership, and a review that read the most cited papers alone would describe applied federated learning and nothing else. <a href="#sec-synthesis" class="quarto-xref">Section&nbsp;4</a> therefore reads by venue and by random draw as well as by citations.</p>
+</section>
+</section>
+<section id="sec-themes" class="level1" data-number="3">
+<h1 data-number="3"><span class="header-section-number">3</span> The themes</h1>
+<p>The second question of the review is which problems the papers worked on, which <a href="#sec-method" class="quarto-xref">Section&nbsp;1</a> called the themes. <a href="#tbl-themes" class="quarto-xref">Table&nbsp;8</a> gives the ten themes, what each rule looks for, and how many records carry each. A record carries every theme its title or abstract matches, so the shares add up to more than one, and 271 records match no theme at all.</p>
+<div id="tbl-themes" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-tbl figure">
+<figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl" id="tbl-themes-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Table&nbsp;8: The themes of the included records. A record can carry several themes, so the shares add up to more than one.
+</figcaption>
+<div aria-describedby="tbl-themes-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<table class="caption-top table">
+<colgroup>
+<col style="width: 25%">
+<col style="width: 25%">
+<col style="width: 25%">
+<col style="width: 25%">
+</colgroup>
+<thead>
+<tr class="header">
+<th style="text-align: left;">Theme</th>
+<th style="text-align: left;">What the rule looks for</th>
+<th style="text-align: right;">Records</th>
+<th style="text-align: right;">Share</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: left;">Differentially private learning</td>
+<td style="text-align: left;">DP-SGD and other private training or fine-tuning, and the accounting of its budget</td>
+<td style="text-align: right;">1,956</td>
+<td style="text-align: right;">27%</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Federated learning</td>
+<td style="text-align: left;">federated or split learning, and secure aggregation</td>
+<td style="text-align: right;">4,973</td>
+<td style="text-align: right;">68%</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Privacy attacks and defences</td>
+<td style="text-align: left;">membership, attribute and property inference, reconstruction, gradient inversion, extraction and memorization</td>
+<td style="text-align: right;">1,251</td>
+<td style="text-align: right;">17%</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Auditing and measuring privacy</td>
+<td style="text-align: left;">auditing or estimating a guarantee from a trained model</td>
+<td style="text-align: right;">328</td>
+<td style="text-align: right;">5%</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Cryptographic and hardware protection</td>
+<td style="text-align: left;">homomorphic encryption, secure computation, secret sharing, trusted hardware and zero-knowledge proofs</td>
+<td style="text-align: right;">1,664</td>
+<td style="text-align: right;">23%</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Synthetic data and data release</td>
+<td style="text-align: left;">synthetic data, data release and query release</td>
+<td style="text-align: right;">550</td>
+<td style="text-align: right;">8%</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Machine unlearning</td>
+<td style="text-align: left;">unlearning, deletion and the right to be forgotten</td>
+<td style="text-align: right;">425</td>
+<td style="text-align: right;">6%</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Local and shuffle differential privacy</td>
+<td style="text-align: left;">local differential privacy, randomized response and the shuffle model</td>
+<td style="text-align: right;">278</td>
+<td style="text-align: right;">4%</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Mechanisms, definitions and theory</td>
+<td style="text-align: left;">mechanisms, divergences, composition, lower bounds and estimation</td>
+<td style="text-align: right;">504</td>
+<td style="text-align: right;">7%</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Surveys and systematizations</td>
+<td style="text-align: left;">a survey, review, systematization or taxonomy, by its title</td>
+<td style="text-align: right;">243</td>
+<td style="text-align: right;">3%</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">No theme matched</td>
+<td style="text-align: left;"></td>
+<td style="text-align: right;">271</td>
+<td style="text-align: right;">4%</td>
+</tr>
+</tbody>
+</table>
+</div>
+</figure>
+</div>
+<div id="fig-themes" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-themes-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="figures/themes.svg" class="img-fluid figure-img">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-themes-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;2: The included records that carry each theme. A record can carry several.
+</figcaption>
+</figure>
+</div>
+<p>Federated learning is the theme of 68% of the records, and this share needs a careful reading. The screening already excluded 5,063 federated-learning papers that named no privacy technique or attack and had no privacy word in their title. The 4,973 that remain are the ones that present privacy as part of their purpose. But 2,070 of them, 42% of the federated theme, carry no other theme. They name no DP, no encryption, no attack and no audit. For these papers, keeping the data on the device is the whole of the privacy protection, and the paper’s contribution lies elsewhere, in the model, the aggregation or the application.</p>
+<div id="fig-cooccurrence" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-cooccurrence-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="figures/cooccurrence.svg" class="img-fluid figure-img">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-cooccurrence-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;3: For each theme on the left, the share of its records that also carry the theme below. The diagonal gives each theme’s count.
+</figcaption>
+</figure>
+</div>
+<p><a href="#fig-cooccurrence" class="quarto-xref">Figure&nbsp;3</a> shows how the themes overlap. The cryptographic theme is the one most tied to FL, with 83% of its records federated. The reason is that secure aggregation, homomorphic encryption of model updates and trusted hardware on the server are mostly studied as parts of a federated system. The attack theme is federated in 53% of its records, as gradient inversion and membership inference against shared updates are the attacks that paper after paper tests. Differentially private learning is federated in 59% of its records. The theme that stands apart is machine unlearning, federated in only 22% of its records and about large language models (LLMs) in 44%, and 79% of its records are on arXiv. Unlearning is the theme that moved fastest and furthest from the federated setting in 2026.</p>
+<p>Two smaller patterns complete the picture. Surveys are 243 records, and 81% of them survey federated learning, so the field reviews itself along the same lines on which it publishes. And 391 records, 5% of the set, have the word blockchain in their title. A ledger records model updates or client reputations next to the privacy mechanism in these papers. The core venues almost never publish that combination, and the long tail of journals publishes it often.</p>
+</section>
+<section id="sec-synthesis" class="level1" data-number="4">
+<h1 data-number="4"><span class="header-section-number">4</span> Theme by theme: what the papers did</h1>
+<p>Counts say what the field worked on, not what it found, so this section reads. Reading every included record is beyond one author, and <a href="#sec-map" class="quarto-xref">Section&nbsp;2</a> showed that the most cited records would give a skewed sample. The review therefore read, for each theme, three sets of records by their abstracts. The first set is every record of the theme published at one of fifteen <strong>core venues</strong> of the field, or a random twelve of them when there are more. <a href="#tbl-core" class="quarto-xref">Table&nbsp;9</a> lists the fifteen: the privacy and security conferences and journals, and the machine-learning conferences. The second set is the five most cited records of the theme in OpenAlex. The third is eight records of the theme drawn at random from arXiv, with a fixed seed. <a href="#tbl-reading" class="quarto-xref">Table&nbsp;10</a> gives the counts, and every paper named below is in <a href="#sec-sources" class="quarto-xref">Section&nbsp;8</a>.</p>
+<div id="tbl-core" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-tbl figure">
+<figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl" id="tbl-core-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Table&nbsp;9: The fifteen venues the review treats as the core of the field, and the included records at each. Two of the three large machine-learning conferences have none and the third has five, because OpenAlex indexes little of their 2026 proceedings.
+</figcaption>
+<div aria-describedby="tbl-core-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<table class="caption-top table">
+<thead>
+<tr class="header">
+<th style="text-align: left;">Core venue</th>
+<th style="text-align: right;">Included records</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: left;">Proceedings on Privacy Enhancing Technologies</td>
+<td style="text-align: right;">21</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">USENIX Security Symposium</td>
+<td style="text-align: right;">0</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">ACM Conference on Computer and Communications Security</td>
+<td style="text-align: right;">2</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">IEEE Symposium on Security and Privacy</td>
+<td style="text-align: right;">5</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Network and Distributed System Security Symposium</td>
+<td style="text-align: right;">12</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">International Conference on Learning Representations</td>
+<td style="text-align: right;">0</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">International Conference on Machine Learning</td>
+<td style="text-align: right;">5</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Conference on Neural Information Processing Systems</td>
+<td style="text-align: right;">0</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Conference on Artificial Intelligence and Statistics</td>
+<td style="text-align: right;">0</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">AAAI Conference on Artificial Intelligence</td>
+<td style="text-align: right;">32</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Transactions on Machine Learning Research</td>
+<td style="text-align: right;">0</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">IEEE Transactions on Information Forensics and Security</td>
+<td style="text-align: right;">28</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">IEEE Transactions on Dependable and Secure Computing</td>
+<td style="text-align: right;">57</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Journal of Privacy and Confidentiality</td>
+<td style="text-align: right;">2</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">ACM Transactions on Privacy and Security</td>
+<td style="text-align: right;">2</td>
+</tr>
+</tbody>
+</table>
+</div>
+</figure>
+</div>
+<div id="tbl-reading" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-tbl figure">
+<figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl" id="tbl-reading-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Table&nbsp;10: What was read for each theme: every record from a core venue of the field (a random twelve when there are more), the five most cited in OpenAlex, and eight drawn at random from arXiv.
+</figcaption>
+<div aria-describedby="tbl-reading-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<table class="caption-top table">
+<colgroup>
+<col style="width: 16%">
+<col style="width: 16%">
+<col style="width: 16%">
+<col style="width: 16%">
+<col style="width: 16%">
+<col style="width: 16%">
+</colgroup>
+<thead>
+<tr class="header">
+<th style="text-align: left;">Theme</th>
+<th style="text-align: right;">Records with an abstract</th>
+<th style="text-align: right;">At a core venue</th>
+<th style="text-align: right;">Read: core venue</th>
+<th style="text-align: right;">Read: most cited</th>
+<th style="text-align: right;">Read: random arXiv</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: left;">Differentially private learning</td>
+<td style="text-align: right;">1,824</td>
+<td style="text-align: right;">49</td>
+<td style="text-align: right;">12</td>
+<td style="text-align: right;">5</td>
+<td style="text-align: right;">8</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Federated learning</td>
+<td style="text-align: right;">3,957</td>
+<td style="text-align: right;">95</td>
+<td style="text-align: right;">12</td>
+<td style="text-align: right;">5</td>
+<td style="text-align: right;">8</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Privacy attacks and defences</td>
+<td style="text-align: right;">1,218</td>
+<td style="text-align: right;">43</td>
+<td style="text-align: right;">12</td>
+<td style="text-align: right;">5</td>
+<td style="text-align: right;">8</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Auditing and measuring privacy</td>
+<td style="text-align: right;">319</td>
+<td style="text-align: right;">7</td>
+<td style="text-align: right;">7</td>
+<td style="text-align: right;">5</td>
+<td style="text-align: right;">8</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Cryptographic and hardware protection</td>
+<td style="text-align: right;">1,564</td>
+<td style="text-align: right;">34</td>
+<td style="text-align: right;">12</td>
+<td style="text-align: right;">5</td>
+<td style="text-align: right;">8</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Synthetic data and data release</td>
+<td style="text-align: right;">537</td>
+<td style="text-align: right;">11</td>
+<td style="text-align: right;">11</td>
+<td style="text-align: right;">5</td>
+<td style="text-align: right;">8</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Machine unlearning</td>
+<td style="text-align: right;">405</td>
+<td style="text-align: right;">10</td>
+<td style="text-align: right;">10</td>
+<td style="text-align: right;">5</td>
+<td style="text-align: right;">8</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Local and shuffle differential privacy</td>
+<td style="text-align: right;">249</td>
+<td style="text-align: right;">16</td>
+<td style="text-align: right;">12</td>
+<td style="text-align: right;">5</td>
+<td style="text-align: right;">8</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Mechanisms, definitions and theory</td>
+<td style="text-align: right;">501</td>
+<td style="text-align: right;">21</td>
+<td style="text-align: right;">12</td>
+<td style="text-align: right;">5</td>
+<td style="text-align: right;">8</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Surveys and systematizations</td>
+<td style="text-align: right;">216</td>
+<td style="text-align: right;">3</td>
+<td style="text-align: right;">3</td>
+<td style="text-align: right;">5</td>
+<td style="text-align: right;">8</td>
+</tr>
+</tbody>
+</table>
+</div>
+</figure>
+</div>
+<p>Only 166 records, 2% of the set, are at a core venue at all. Two of the three large machine-learning conferences contribute none and the third contributes five, because OpenAlex indexes little of their 2026 proceedings, so their papers reach the set mostly through arXiv. The reading is thus a reading of the field’s most selective venues, of its most visible papers and of a random slice of its preprints. It is also a reading of abstracts, which <a href="#sec-limits" class="quarto-xref">Section&nbsp;6</a> weighs.</p>
+<section id="differentially-private-learning" class="level2" data-number="4.1">
+<h2 data-number="4.1" class="anchored" data-anchor-id="differentially-private-learning"><span class="header-section-number">4.1</span> Differentially private learning</h2>
+<p>This theme holds 1,956 records. Of these, 59% are federated, 17% are about language models and 28% are about health. Its core-venue papers work on three problems. The first is to make training with stochastic gradient descent (SGD) made private, called DP-SGD, lose less accuracy. Xu et al.&nbsp;(2026) smooth each example’s gradient with momentum before clipping it and filter the noise afterwards, to lower both the noise and the bias that clipping adds. Zheng et al.&nbsp;(2026) fine-tune a language model with noise only in the low-dimensional subspace where the task’s updates live. Yang et al.&nbsp;(2026) build steering vectors for language models under DP in the same spirit. Shi et al.&nbsp;(2026) study private gradient descent (GD), called DP-GD, and find a learning task where it generalizes better than GD itself, which is a rare theoretical result in the theme’s favour.</p>
+<p>The second problem is to account for the budget more tightly. Liang et al.&nbsp;(2026) prove that the privacy loss of DP-SGD converges with the number of iterations, when the loss is smooth and the parameters stay in a bounded set. So a long run no longer pays for every step. Xiang et al.&nbsp;(2026) revisit hyperparameter tuning, show by auditing that the generic analysis of private selection is loose in the white-box setting, and give a tighter one. Annamalai et al.&nbsp;(2026) audit DP-SGD trained with shuffling instead of Poisson sampling and find that the reported guarantees, computed as if sampling were Poisson, can be wrong. These three papers share a method: they put a reported <span class="math inline">\(\varepsilon\)</span> to the test instead of taking it from the accountant, and <a href="#sec-synthesis-audit" class="quarto-xref">Section&nbsp;4.4</a> returns to it.</p>
+<p>The third problem is to combine DP with another protection. Capano et al.&nbsp;(2026) run inference of a transformer inside secure computation and train it with DP, and show that the naive combination loses more accuracy than either alone. Zhou et al.&nbsp;(2026) prove convergence for training under fully homomorphic encryption with polynomial activations and add DP without per-example clipping. Takagi and a co-author (2026) secure the follow the regularized leader (FTRL) variant of private training, DP-FTRL, against a malicious server. They do so with a trusted execution environment (TEE), a protected part of the server’s processor, that signs what the server does.</p>
+<p>The most cited paper of the theme is a scoping review, not a method. Mohammadi et al.&nbsp;(2026) read 74 studies of DP in medical deep learning. They report that DP-SGD keeps clinically acceptable accuracy at a budget near <span class="math inline">\(\varepsilon = 10\)</span> and loses much at <span class="math inline">\(\varepsilon = 1\)</span>. Several of the studies also found that DP widens the gaps between patient subgroups. The random arXiv records agree with the pattern of the venues. Sopa et al.&nbsp;(2026) give a user-level private regression for panel data, and Wang et al.&nbsp;(2026) give risk bounds for DP-SGD with correlated noise. Lipcsey-Magyar and a co-author (2026) and Akyol et al.&nbsp;(2026) measure what DP-SGD costs on traffic flows and on electrocardiograms, and both report the trade-off rather than a way around it.</p>
+</section>
+<section id="federated-learning" class="level2" data-number="4.2">
+<h2 data-number="4.2" class="anchored" data-anchor-id="federated-learning"><span class="header-section-number">4.2</span> Federated learning</h2>
+<p>This is the largest theme, with 4,973 records, and it has two literatures. The first is the one the core venues publish, and it is about what leaks through the shared updates and how to stop it. Zhang et al.&nbsp;(2026) in HeteroFed adapt the clipping and the noise to each client, and Wang et al.&nbsp;(2026) do the same for asynchronous rounds. Hu et al.&nbsp;(2026) show the other side: their Venom attack reconstructs training images from gradients protected by DP noise, using a diffusion model as a prior, without knowing the noise distribution. Jin et al.&nbsp;(2026) protect vertical FL end to end by splitting the aggregator across several servers that run secure computation and release only a DP model.</p>
+<p>Two core-venue papers break what others built. Wu et al.&nbsp;(2026) show that a server with a TEE can still roll back its state and replay aggregations, and build a ledger of several such environments to prevent it. Lee and a co-author (2026) break a published scheme that encrypted gradients with additive homomorphic encryption (HE), in a two-page comment. It is a reminder that a security proof in a journal is not always one.</p>
+<p>The second literature is the one the most cited papers come from. Tian et al.&nbsp;(2026), the most cited federated paper, propose a Bayesian federated framework for consumer devices and name no privacy mechanism beyond keeping data local. Li et al.&nbsp;(2026) add two stages of DP to a hierarchical federated anomaly detector. Yazdinejad and a co-author (2026) propose a governance framework for health data in Canada with DP, consent and fairness audits inside it. Two of the five most cited are systematic reviews, by Fu et al.&nbsp;(2026) on differentially private federated learning and by Jimenez-Gutierrez et al.&nbsp;(2026) on attacks and defences in 203 papers. The random arXiv records sit between the two literatures. Wei et al.&nbsp;(2026) set the clipping norm of each layer from the median gradient norm. Sharma et al.&nbsp;(2026) compare DP and HE for cardiovascular risk models. Joo et al.&nbsp;(2026) give a secure aggregation protocol for one-bit gradients that tolerates dropouts.</p>
+<p>One empirical paper among the random records deserves a line of its own. Parampottupadam et al.&nbsp;(2026) train a small transformer on radiology reports across six clients and reconstruct text from the gradients with an active malicious server. They find that the choice of tokenizer changes how much leaks, with the architecture fixed. So a design choice that no privacy analysis mentions changes the leakage, which is the kind of fact only an attack can find.</p>
+</section>
+<section id="privacy-attacks-and-defences" class="level2" data-number="4.3">
+<h2 data-number="4.3" class="anchored" data-anchor-id="privacy-attacks-and-defences"><span class="header-section-number">4.3</span> Privacy attacks and defences</h2>
+<p>The attack theme holds 1,251 records, and 40% of them are on arXiv. Of the records, 53% are federated and 31% are about language models. The core-venue attacks are against FL, and they attack in four ways. Zhang et al.&nbsp;(2026) in TNT inject small perturbations during training so that activations take a shape from which training samples can be reconstructed, for larger batches than before. Gong et al.&nbsp;(2026) in Sleight hide a second model inside the shared parameters and use it to extract data without the detectable changes earlier attacks needed. Luan et al.&nbsp;(2026) run membership inference against a black-box federated model by poisoning and then scoring the poison’s effect over time, with no knowledge of the other clients’ data. Yang et al.&nbsp;(2026) infer the edges between clients’ graphs in federated graph neural networks (GNNs) by poisoning.</p>
+<p>The remaining core-venue attacks break a defence rather than the plain protocol. Zhang et al.&nbsp;(2026) in GDBR recover labels when only the classification head’s gradients are encrypted, and so show that partial encryption gives a false sense of privacy. Zhou et al.&nbsp;(2026) turn the attack on unlearning itself: the server records the parameters before and after a federated unlearning request and inverts the difference.</p>
+<p>The defences at the core venues are partial by design. Liu et al.&nbsp;(2026) protect the layers whose gradients carry more reconstructable information and leave the others alone. Jiang et al.&nbsp;(2026) in CausShield keep only the causal features of a sample in vertical FL. Neither gives a guarantee in the sense of DP, and both are evaluated against the attacks that exist today.</p>
+<p>The arXiv records show where the attacks went in 2026: to language models. Tan et al.&nbsp;(2026) show that the routing information a mixture-of-experts model emits during inference improves membership inference on its fine-tuning data. Zhai et al.&nbsp;(2026) and Kulkarni et al.&nbsp;(2026) attack fine-tuned diffusion language models and retrieval-based in-context learning. Cai et al.&nbsp;(2026) run black-box membership inference on fine-tuned text-to-speech models, which leak both the voice and the words. Cebere et al.&nbsp;(2026) take the opposite direction and audit a deployed model with no training run at all, by correcting for the distribution shift between known members and known non-members. Two papers in the hand-read sample belong here as well. Graph-based retrieval-augmented generation (RAG) systems leak their knowledge graph to subgraph reconstruction attacks. And batch normalization makes a network memorize its outliers more, so it leaks more under membership inference.</p>
+</section>
+<section id="sec-synthesis-audit" class="level2" data-number="4.4">
+<h2 data-number="4.4" class="anchored" data-anchor-id="sec-synthesis-audit"><span class="header-section-number">4.4</span> Auditing and measuring privacy</h2>
+<p>Auditing is the smallest technical theme, with 328 records, but it is the one whose core-venue papers change what a practitioner should do. Three of the seven come from one conference. Annamalai et al.&nbsp;(2026) audit DP-SGD with shuffling and find leakage above the reported bound. Xiang et al.&nbsp;(2026) audit hyperparameter tuning and find the generic bound loose. Zheng et al.&nbsp;(2026) prove that the privacy cost of a multi-layer graph neural network converges with depth, where earlier analyses charged for every layer, and check the result by audit. Deng et al.&nbsp;(2026) then question the audits themselves. The canary examples that audits insert may not be the queries that leak most, because the most informative query shifts during training. So they optimize the query and get tighter lower bounds on the privacy parameter <span class="math inline">\(\varepsilon\)</span>.</p>
+<p>The random arXiv records make the same point from the attacker’s side. Brännvall (2026) shows that the three leading membership inference attacks are one likelihood-ratio test under different distributional assumptions. The paper gives a rule for choosing among them by the number of shadow models one can afford. Li et al.&nbsp;(2026) calibrate text-rewriting mechanisms under local DP empirically, because their nominal <span class="math inline">\(\varepsilon\)</span> values cannot be compared across mechanisms. Mancera et al.&nbsp;(2026) audit which samples a model adapted with low-rank adapters was trained on. The most cited records of the theme are the reviews and frameworks already met, which use the word audit for governance rather than for a measurement of <span class="math inline">\(\varepsilon\)</span>. The theme’s method is one: state a guarantee, build the strongest attacker the threat model allows, and compare what the attacker achieves with what the guarantee permits.</p>
+</section>
+<section id="cryptographic-and-hardware-protection" class="level2" data-number="4.5">
+<h2 data-number="4.5" class="anchored" data-anchor-id="cryptographic-and-hardware-protection"><span class="header-section-number">4.5</span> Cryptographic and hardware protection</h2>
+<p>The cryptographic theme has 1,664 records, 83% of them federated, and it divides by what is protected. The largest part protects the model updates of federated learning. Wang et al.&nbsp;(2026) in DeSA run secure aggregation without a server, among devices that may be Byzantine, with zero-knowledge proofs of correct training. Sultan et al.&nbsp;(2026) give a secure aggregation protocol whose keys are set up once and that still keeps forward and backward secrecy when users join and leave. Zhou et al.&nbsp;(2026) show that a malicious server can fabricate clients to isolate one client’s gradient under secure aggregation, and defend against it. Li et al.&nbsp;(2026) in HEFLGuard detect backdoors when the updates are encrypted and the usual plaintext defences do not apply.</p>
+<p>The second part protects inference. Capano et al.&nbsp;(2026) in SPRINT and Feng et al.&nbsp;(2026) in CRYPTDP put secure computation and DP together, for transformer inference and for deep learning in the two-server model. Ye et al.&nbsp;(2026) and Zhou et al.&nbsp;(2026) protect the document store of retrieval-augmented generation with encryption whose ciphertexts still allow a nearest-neighbour search. Two arXiv papers rethink the network for the encryption. Yassin et al.&nbsp;(2026) run logic-gate networks, which are Boolean by construction, under a Boolean homomorphic scheme. Brito (2026) designs state-space sequence models whose state update stays cheap under encryption. The third part is hardware. Ge et al.&nbsp;(2026) use a TEE on older graphics processors to certify that a released model was trained with the DP it claims. Kanpak et al.&nbsp;(2026) in HE-OFT fine-tune a model in one encrypted round, so that no party ever receives the trained model.</p>
+<p>The most cited records of the theme are reviews of federated learning in health care and a framework for industrial anomaly detection. The random arXiv records add two systems papers, Interflow and OptiPrime, that remove the communication and memory bottlenecks of secure inference at the edge. The pattern across the theme is that cryptography in 2026 is engineering: the primitives are known, and the papers make them fit a protocol, a network or a chip.</p>
+</section>
+<section id="synthetic-data-and-data-release" class="level2" data-number="4.6">
+<h2 data-number="4.6" class="anchored" data-anchor-id="synthetic-data-and-data-release"><span class="header-section-number">4.6</span> Synthetic data and data release</h2>
+<p>The synthetic-data theme holds 550 records, half of them on arXiv and 28% about language models. Its core-venue papers generate new kinds of data under DP. Liu et al.&nbsp;(2026) in PrivCode synthesize code. Gong et al.&nbsp;(2026) in PrivORL synthesize the transitions and trajectories of offline reinforcement learning with a diffusion model. Wang et al.&nbsp;(2026) in RPGen make a diffusion model robust to DP noise before they fine-tune it on private images. For tabular data, Jia et al.&nbsp;(2026) combine a generative adversarial network (GAN) with a sparse Bayesian network and prove convergence bounds, which bridges the two families of tabular synthesizers. Bhusal et al.&nbsp;(2026) generate synthetic text by private prediction, aggregating the token distributions of a frozen language model over private records, with no fine-tuning.</p>
+<p>Two core-venue papers evaluate rather than generate. Angelozzi and a co-author (2026) benchmark fairness interventions on DP synthetic tables from the AIM mechanism and ask where in the pipeline an intervention still works. Golob et al.&nbsp;(2026) systematize reconstruction attacks on synthetic tables, pit fourteen attacks against thirteen generators on five datasets, and report that their strongest attack came from a national competition. The arXiv records add three ideas. Rosenblatt et al.&nbsp;(2026) give a global guarantee for high-dimensional synthetic data from sliced polynomial moments. Yavo et al.&nbsp;(2026) add a post-processing step that keeps synthetic records a minimum distance from real ones. Wang et al.&nbsp;(2026) release the aggregate secrets of a text corpus, which DP does not protect, under a mechanism of their own. Takahashi and a co-author (2026) raise a question the theme had not asked. A private report can contain plausible statements that the data do not support, so they certify the support of each statement under DP.</p>
+</section>
+<section id="machine-unlearning" class="level2" data-number="4.7">
+<h2 data-number="4.7" class="anchored" data-anchor-id="machine-unlearning"><span class="header-section-number">4.7</span> Machine unlearning</h2>
+<p>Unlearning has 425 records, and it is the theme least tied to the rest. Only 22% of its records are federated, 44% are about language models and 79% are on arXiv. The core-venue papers are nearly all about federated unlearning, the removal of one client’s contribution from a shared model. Wen et al.&nbsp;(2026) in FedShard ask that unlearning be fair to the clients who stay. Zhang et al.&nbsp;(2026) in Oblivionis unlearn from a federated language model, and Wu et al.&nbsp;(2026) unlearn one party from vertical FL. Jin et al.&nbsp;(2026) give a certified unlearning for federated linear models, the one core-venue paper with a guarantee. Zhang et al.&nbsp;(2026) at the IEEE Transactions on Information Forensics and Security unlearn from a language model through retrieval.</p>
+<p>Three core-venue papers attack unlearning rather than do it. Sheng et al.&nbsp;(2026) show that a client who dislikes an unlearning request can infer and reconstruct the unlearned data from the change it causes. Chen et al.&nbsp;(2026) in FedUBA embed a backdoor that activates only after a chosen unlearning request. Zhou et al.&nbsp;(2026) invert the parameter change of federated unlearning, as <a href="#sec-synthesis" class="quarto-xref">Section&nbsp;4</a> already noted. So unlearning, which exists to give a right to deletion, is in 2026 also a new channel of leakage.</p>
+<p>The arXiv records, which are most of the theme, are about language models and about evaluation. Almudévar and a co-author (2026) unlearn in the representation space with an information bottleneck instead of changing the weights. Abitante et al.&nbsp;(2026) find that unlearning updates can be too small to survive four-bit quantization and concentrate them in low-rank adapters. Ataee and a co-author (2026) in TRIAGE and Dahal et al.&nbsp;(2026) in GONE evaluate what unlearning did inside the model and to related knowledge, not only whether the model appears to forget. One paper from the hand-read sample studies the geometry: many unlearned models stay in the same connected basin of the loss as the original. What the theme lacks, across all three sets, is a shared definition of success that an outsider could check.</p>
+</section>
+<section id="local-and-shuffle-differential-privacy" class="level2" data-number="4.8">
+<h2 data-number="4.8" class="anchored" data-anchor-id="local-and-shuffle-differential-privacy"><span class="header-section-number">4.8</span> Local and shuffle differential privacy</h2>
+<p>Local differential privacy (LDP), where each user randomizes their own data before it leaves them, has 278 records. Its core-venue papers are of two kinds. The first improves the estimators. Jiang et al.&nbsp;(2026) generalize the count-mean sketch protocols that large companies deploy and optimize them for the frequencies one cares about. Seeam et al.&nbsp;(2026) learn the dependencies between attributes privately first and then spend the budget where they are. Su et al.&nbsp;(2026) prove that the privacy blanket decomposition is the optimal way to analyse amplification by shuffling, which closes a question that two analytical frameworks had left open. Ye and a co-author (2026) quantify what a classifier loses under any LDP mechanism, by reading the perturbation as a robustness problem.</p>
+<p>The second kind applies LDP to a learning system. Liu et al.&nbsp;(2026) in Rap-LI sanitize the prompts sent to a language-model service. They report that a uniform privacy budget of <span class="math inline">\(\varepsilon = 0.1\)</span> still leaks 72% of the sensitive items, so they spend the budget by risk. Xu et al.&nbsp;(2026) in Camel run federated learning in the shuffle model with a malicious-secure shuffler. Long et al.&nbsp;(2026) cluster non-identically distributed data in one shot from privatized centroids. The arXiv records add three estimators. Chen et al.&nbsp;(2026) release listwise preferences for aligning language models. Liu et al.&nbsp;(2026) fit an online quantile regression from one report per user. Afzali et al.&nbsp;(2026) learn univariate densities with few samples. The theme’s results are tighter than most of the field’s, because LDP has a precise model and a decade of lower bounds to compare against.</p>
+</section>
+<section id="mechanisms-definitions-and-theory" class="level2" data-number="4.9">
+<h2 data-number="4.9" class="anchored" data-anchor-id="mechanisms-definitions-and-theory"><span class="header-section-number">4.9</span> Mechanisms, definitions and theory</h2>
+<p>The theory theme holds 504 records, and its core-venue papers are the ones a textbook will cite. Wang et al.&nbsp;(2026) publish the Edgeworth accountant in a statistics journal. It composes guarantees in <span class="math inline">\(f\)</span>-DP, where <span class="math inline">\(f\)</span> is the trade-off function that states a guarantee, by an Edgeworth expansion of the distribution of the summed privacy-loss log-likelihood ratios, and it has a closed form. Sabater et al.&nbsp;(2026) estimate a mean in a fully decentralized network under DP with correlated noise, robust to parties that drop out. Raskhodnikova et al.&nbsp;(2026) define local node DP for graphs and answer linear queries about the degree distribution through a blurred version with lower sensitivity. Gu et al.&nbsp;(2026) show that the errors of compression and of a noisy wireless channel amplify privacy, and prove it in <span class="math inline">\(f\)</span>-DP. Zheng et al.&nbsp;(2026) prove the convergence of the privacy cost of message passing with depth, already noted under auditing.</p>
+<p>The arXiv records are the theory of the year’s open questions. Dharangutte and a co-author (2026) study probably approximately correct (PAC) learning under DP. They show that two classes with the same Vapnik–Chervonenkis (VC) and Littlestone dimensions can have different private sample complexities, and give a new parameter that lower-bounds that complexity. Bun et al.&nbsp;(2026) separate the oblivious and adaptive settings of DP under continual observation. Ribero et al.&nbsp;(2026) build two-sample tests from <span class="math inline">\(f\)</span>-divergences, with the hockey-stick divergence as the case that matters for auditing and for unlearning. Hu et al.&nbsp;(2026) show that a relaxation of DP that protects only policy-specified substitutions buys nothing for the nearest-neighbour synthesizers now in use, because their vote histograms jump at every decision boundary. The most cited records of the theme are applied comparisons of DP and encryption in finance and health, which cite the theory and add none.</p>
+</section>
+<section id="surveys-and-systematizations" class="level2" data-number="4.10">
+<h2 data-number="4.10" class="anchored" data-anchor-id="surveys-and-systematizations"><span class="header-section-number">4.10</span> Surveys and systematizations</h2>
+<p>Surveys are 243 records, 81% of them about FL and 39% about health. Only three are at a core venue, all in the Proceedings on Privacy Enhancing Technologies, and two of them are systematizations. Xie et al.&nbsp;(2026) systematize metric DP, which replaces the Hamming neighbourhood with a distance suited to locations, text and images. Rizzini et al.&nbsp;(2026) systematize verifiable integrity for privacy-preserving FL, and model a federated run as an append-only transcript. The most cited surveys review FL in health care, differentially private FL and the attacks and defences of FL. Among the arXiv surveys, Golob et al.&nbsp;(2026) on reconstruction attacks is the one with experiments. Liu et al.&nbsp;(2026) survey split learning for fine-tuning language models. Vargas Guerrero et al.&nbsp;(2026) propose a taxonomy of what federated clients exchange, from weights to synthetic data to statistics.</p>
+<p>One survey appears in two of the three reading sets. Jimenez-Gutierrez et al.&nbsp;(2026) sort 203 papers into security-enhancing and privacy-preserving techniques. This review found the same division. Poisoning and Byzantine robustness sit on one side, DP and encryption on the other, and the attacks on shared updates sit between them. What no 2026 survey does, as far as the abstracts show, is measure the field’s output as this note does, by database and by rule.</p>
+</section>
+</section>
+<section id="sec-domains" class="level1" data-number="5">
+<h1 data-number="5"><span class="header-section-number">5</span> Domains and model types</h1>
+<p>The last classification asks what data and what models the papers are about. <a href="#tbl-domains" class="quarto-xref">Table&nbsp;11</a> gives the ten domains, how many records carry each, and the share of each that works with differential privacy, with federated learning or with attacks. Like the themes, the domains come from words in the title and abstract, a record can carry several, and 29% carry none.</p>
+<div id="tbl-domains" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-tbl figure">
+<figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl" id="tbl-domains-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Table&nbsp;11: The application domains and model types of the included records, and the share of each that works with differential privacy (the record was returned by the differential-privacy string or carries one of its themes), with federated learning or with attacks.
+</figcaption>
+<div aria-describedby="tbl-domains-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<table class="caption-top table">
+<colgroup>
+<col style="width: 16%">
+<col style="width: 16%">
+<col style="width: 16%">
+<col style="width: 16%">
+<col style="width: 16%">
+<col style="width: 16%">
+</colgroup>
+<thead>
+<tr class="header">
+<th style="text-align: left;">Domain or model type</th>
+<th style="text-align: right;">Records</th>
+<th style="text-align: right;">Share</th>
+<th style="text-align: right;">With differential privacy</th>
+<th style="text-align: right;">With federated learning</th>
+<th style="text-align: right;">With attacks</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: left;">Language models</td>
+<td style="text-align: right;">1,300</td>
+<td style="text-align: right;">18%</td>
+<td style="text-align: right;">45%</td>
+<td style="text-align: right;">44%</td>
+<td style="text-align: right;">30%</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Images and video</td>
+<td style="text-align: right;">1,544</td>
+<td style="text-align: right;">21%</td>
+<td style="text-align: right;">48%</td>
+<td style="text-align: right;">71%</td>
+<td style="text-align: right;">22%</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Graphs</td>
+<td style="text-align: right;">274</td>
+<td style="text-align: right;">4%</td>
+<td style="text-align: right;">63%</td>
+<td style="text-align: right;">68%</td>
+<td style="text-align: right;">17%</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Tables and statistics</td>
+<td style="text-align: right;">326</td>
+<td style="text-align: right;">4%</td>
+<td style="text-align: right;">62%</td>
+<td style="text-align: right;">46%</td>
+<td style="text-align: right;">27%</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Health and medicine</td>
+<td style="text-align: right;">2,088</td>
+<td style="text-align: right;">29%</td>
+<td style="text-align: right;">53%</td>
+<td style="text-align: right;">80%</td>
+<td style="text-align: right;">18%</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Finance</td>
+<td style="text-align: right;">640</td>
+<td style="text-align: right;">9%</td>
+<td style="text-align: right;">62%</td>
+<td style="text-align: right;">78%</td>
+<td style="text-align: right;">21%</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Internet of things, edge and vehicles</td>
+<td style="text-align: right;">1,550</td>
+<td style="text-align: right;">21%</td>
+<td style="text-align: right;">48%</td>
+<td style="text-align: right;">90%</td>
+<td style="text-align: right;">12%</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Recommendation</td>
+<td style="text-align: right;">274</td>
+<td style="text-align: right;">4%</td>
+<td style="text-align: right;">65%</td>
+<td style="text-align: right;">65%</td>
+<td style="text-align: right;">16%</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Speech and audio</td>
+<td style="text-align: right;">108</td>
+<td style="text-align: right;">1%</td>
+<td style="text-align: right;">50%</td>
+<td style="text-align: right;">59%</td>
+<td style="text-align: right;">25%</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Locations, trajectories and time series</td>
+<td style="text-align: right;">417</td>
+<td style="text-align: right;">6%</td>
+<td style="text-align: right;">56%</td>
+<td style="text-align: right;">63%</td>
+<td style="text-align: right;">19%</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">No domain matched</td>
+<td style="text-align: right;">2,099</td>
+<td style="text-align: right;">29%</td>
+<td style="text-align: right;"></td>
+<td style="text-align: right;"></td>
+<td style="text-align: right;"></td>
+</tr>
+</tbody>
+</table>
+</div>
+</figure>
+</div>
+<p>Health is the largest domain, with 2,088 records, and it is the most federated. Of its records, 80% are about FL, which is the technique that lets hospitals train together without moving records. The internet of things, edge devices and vehicles come next and are federated in 90% of their records, with attacks in only 12%. Images and video, the classic domain of DP-SGD, are the third. Language models are the fourth domain, with 1,300 records, and they are where the field’s attention moved. Of their records, 30% are about attacks, the highest share of any domain, and only 44% are federated, the lowest. A paper about a language model in 2026 is more likely to attack it or to audit it than to train it in a federation.</p>
+<p>The two shares of the table that are nearly constant say something too. Differential privacy appears in about half of the records of every domain, from 45% for language models to 65% for recommendation, so no domain has adopted it or abandoned it. Attacks, by contrast, range from 12% to 30%, and the ordering follows how public the model is. A language model served to many users is attacked, and a model on a vehicle’s sensors is not. The domains with the fewest records, speech and audio with 108 and graphs with 274, are also the ones where the attacks of <a href="#sec-synthesis" class="quarto-xref">Section&nbsp;4</a> were newest, on text-to-speech models and on federated graph neural networks.</p>
+</section>
+<section id="sec-limits" class="level1" data-number="6">
+<h1 data-number="6"><span class="header-section-number">6</span> What the review can and cannot say</h1>
+<p>A systematic review is only as reliable as its weakest step, so this section lists the steps that limit this one, from the search to the reading. Each limit is stated with the number that measures it where the review has one.</p>
+<p><strong>The databases.</strong> Eleven of the thirteen strings were run on arXiv only, because the quota of OpenAlex, the first database, ran out after the two widest strings. A journal or conference paper on, say, homomorphic inference or unlearning entered the set only when its abstract also named differential privacy or federated learning, or when it was on arXiv. The arXiv searches found 956 records that OpenAlex did not, and only 40 of those match the two wide strings, so the eleven narrow strings do find papers the wide ones miss. How many such papers sit in journals that OpenAlex indexes and arXiv does not is unknown. The themes most affected are cryptographic protection, unlearning and attacks, whose venue shares in <a href="#sec-synthesis" class="quarto-xref">Section&nbsp;4</a> should be read with this in mind. OpenAlex also does not index the 2026 proceedings of the three large machine-learning conferences, so their papers appear only as arXiv preprints, without a venue and without a citation count. The federated-learning string’s last quarter was never downloaded, which lowers the October count and the federated share by an unknown amount.</p>
+<p><strong>The screening.</strong> The screening rules are regular expressions, and <a href="#tbl-screening" class="quarto-xref">Table&nbsp;5</a> measures how often a reader agrees with them. Of the 120 records read from the included set, 107 were about privacy-preserving machine learning. That is a precision, the share of included records that belong, of 89% with an interval from 82% to 94%. Applied to the 7,279 included records, it means roughly 800 records that a reader would have excluded, most of them security or systems papers that mention a privacy attack. Of the 40 records read from those excluded for want of a learning word, 33 were rightly excluded. So about 18% of the 855 records excluded for that reason were lost, roughly 150. They are private clustering, principal component analysis and trajectory synthesis, whose titles name no word the rule knew. The largest exclusion, 5,063 federated-learning papers with privacy only as a setting, was not sampled, and the line between a setting and a technique is the review’s most consequential judgement. A record without an abstract, 16% of the set, was screened on its title alone.</p>
+<p><strong>The classification.</strong> Themes and domains are also keyword rules. A paper that mentions membership inference in its related work carries the attack theme, and a paper on health that never says patient does not carry the health domain. The co-occurrence shares of <a href="#sec-themes" class="quarto-xref">Section&nbsp;3</a> are therefore upper bounds on how often two problems are really studied together. The surveys are found by title, so a survey whose title does not say so is missed.</p>
+<p><strong>The dates and the counts.</strong> OpenAlex’s publication date is the one the publisher deposits, and 1,077 records carry 1 January, so the monthly counts of <a href="#fig-months" class="quarto-xref">Figure&nbsp;1</a> describe publishers’ habits as much as the field’s rhythm. The search ran two months before the year’s end, and indexing lags publication, so the year’s total will be higher than 7,279 when it is complete. The citation counts are those of a few months and reward reviews and applied frameworks, as <a href="#sec-map" class="quarto-xref">Section&nbsp;2</a> showed.</p>
+<p><strong>The reading.</strong> The synthesis read abstracts, not papers, and one reader did the screening and the reading. An abstract states a claim without its evidence, so a paper that claims to break a defence or to tighten a bound was taken at its word. The reading rule gives the core venues most of the weight, and the core venues are the privacy and security community’s. A result published at a statistics or systems venue is read only if the random draw found it. The hand screening was done once, by the author, and no second reader measured the agreement between readers.</p>
+<p>What the review can say, within those limits, is this. It can say how many records a reproducible search finds, where they are published, and how the themes are distributed and overlap, with the error of its rules measured on a sample. It can say what the papers at the field’s own venues claim to have done, theme by theme. It cannot say which results are correct, which will matter, or what was published where neither database looked.</p>
+</section>
+<section id="sec-reading" class="level1" data-number="7">
+<h1 data-number="7"><span class="header-section-number">7</span> Where to start reading</h1>
+<p>A reader who wants the year in a dozen papers can take one or two from each theme, chosen here from the core-venue and arXiv records that <a href="#sec-synthesis" class="quarto-xref">Section&nbsp;4</a> read, for the question each answers. <a href="#tbl-start" class="quarto-xref">Table&nbsp;12</a> lists them. The choice is the author’s, after the reading, and a different reader would choose differently. The records that were read are counted in <a href="#tbl-reading" class="quarto-xref">Table&nbsp;10</a>, and the frozen table of all 7,279 records is in the repository for anyone who wants to choose otherwise.</p>
+<div id="tbl-start" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-tbl figure">
+<figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl" id="tbl-start-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Table&nbsp;12: A starting paper or two for each theme, from the records the review read.
+</figcaption>
+<div aria-describedby="tbl-start-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<table class="caption-top table">
+<colgroup>
+<col style="width: 33%">
+<col style="width: 33%">
+<col style="width: 33%">
+</colgroup>
+<thead>
+<tr class="header">
+<th style="text-align: left;">Theme</th>
+<th style="text-align: left;">Start with</th>
+<th style="text-align: left;">Because it</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: left;">Differentially private learning</td>
+<td style="text-align: left;">Liang et al.&nbsp;(2026); Xu et al.&nbsp;(2026)</td>
+<td style="text-align: left;">tightens the budget of a long run; lowers the noise and the clipping bias of DP-SGD at once</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Federated learning</td>
+<td style="text-align: left;">Jin et al.&nbsp;(2026); Hu et al.&nbsp;(2026)</td>
+<td style="text-align: left;">protects vertical federated learning end to end; reconstructs images from DP-protected gradients</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Attacks and defences</td>
+<td style="text-align: left;">Zhang et al.&nbsp;(2026) on GDBR; Tan et al.&nbsp;(2026)</td>
+<td style="text-align: left;">shows that partial encryption leaks the labels; shows that routing telemetry leaks membership</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Auditing</td>
+<td style="text-align: left;">Annamalai et al.&nbsp;(2026); Deng et al.&nbsp;(2026)</td>
+<td style="text-align: left;">finds leakage above the reported bound under shuffling; questions the canaries that audits use</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Cryptographic protection</td>
+<td style="text-align: left;">Capano et al.&nbsp;(2026); Ge et al.&nbsp;(2026)</td>
+<td style="text-align: left;">combines secure inference with DP training; certifies DP training with trusted hardware</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Synthetic data</td>
+<td style="text-align: left;">Golob et al.&nbsp;(2026); Takahashi and a co-author (2026)</td>
+<td style="text-align: left;">measures reconstruction attacks on synthetic tables; asks what a private report proves</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Unlearning</td>
+<td style="text-align: left;">Jin et al.&nbsp;(2026) on certified unlearning; Sheng et al.&nbsp;(2026)</td>
+<td style="text-align: left;">gives a guarantee; shows the leakage that unlearning creates</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Local and shuffle DP</td>
+<td style="text-align: left;">Su et al.&nbsp;(2026); Liu et al.&nbsp;(2026) on Rap-LI</td>
+<td style="text-align: left;">settles the analysis of shuffling; measures what a uniform local budget leaves exposed</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Theory</td>
+<td style="text-align: left;">Wang et al.&nbsp;(2026) on the Edgeworth accountant; Dharangutte and a co-author (2026)</td>
+<td style="text-align: left;">composes <span class="math inline">\(f\)</span>-DP in closed form; separates private from non-private sample complexity</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Surveys</td>
+<td style="text-align: left;">Jimenez-Gutierrez et al.&nbsp;(2026); Xie et al.&nbsp;(2026)</td>
+<td style="text-align: left;">sorts 203 papers into security and privacy; systematizes metric DP</td>
+</tr>
+</tbody>
+</table>
+</div>
+</figure>
+</div>
+</section>
+<section id="sec-sources" class="level1" data-number="8">
+<h1 data-number="8"><span class="header-section-number">8</span> References</h1>
+<p>The papers the note names, by the theme under which they were read. Each link goes to the paper’s digital object identifier where OpenAlex records one, otherwise to its OpenAlex or arXiv page. The frozen table of all 7,279 included records, with each record’s identifier, themes and domains, is <a href="https://github.com/manuelvloureiro/privacy-preserving-machine-learning-book/blob/main/code/notes/ppml_2026_review_records.csv">code/notes/ppml_2026_review_records.csv</a>, and the hand-screening decisions are <a href="https://github.com/manuelvloureiro/privacy-preserving-machine-learning-book/blob/main/code/notes/ppml_2026_review_screening.csv">code/notes/ppml_2026_review_screening.csv</a>.</p>
+<p>The databases and the method.</p>
+<ul>
+<li>Priem, J., Piwowar, H. and Orr, R. (2022). <a href="https://arxiv.org/abs/2205.01833">OpenAlex: A fully-open index of scholarly works, authors, venues, institutions, and concepts</a>. The database behind the two wide searches; its <a href="https://docs.openalex.org/api-entities/works">works endpoint</a> was queried over title and abstract.</li>
+<li>arXiv (2026). <a href="https://info.arxiv.org/help/api/index.html">The arXiv API</a>. The interface behind the thirteen arXiv searches, by date of first submission.</li>
+<li>Page, M. J. et al.&nbsp;(2021). <a href="https://doi.org/10.1136/bmj.n71">The PRISMA 2020 statement: an updated guideline for reporting systematic reviews</a>. <em>BMJ</em> 372. The reporting items the method section follows: the sources, the search strings, the criteria, the flow of records and the limits.</li>
+<li>Clopper, C. J. and Pearson, E. S. (1934). The use of confidence or fiducial limits illustrated in the case of the binomial. <em>Biometrika</em> 26(4). The exact interval of <a href="#tbl-screening" class="quarto-xref">Table&nbsp;5</a>.</li>
+</ul>
+<p>Differentially private learning.</p>
+<ul>
+<li>Xincheng Xu, Thilina Ranbaduge, Qing Wang et al.&nbsp;(2026). <a href="https://doi.org/10.1609/aaai.v40i32.39951">Enhancing DPSGD via Per-Sample Momentum and Low-Pass Filtering</a>. <em>Proceedings of the AAAI Conference on Artificial Intelligence</em>.</li>
+<li>Lele Zheng, Xiang Wang, Tao Zhang et al.&nbsp;(2026). <a href="https://doi.org/10.1609/aaai.v40i34.40117">Differentially Private Subspace Fine-Tuning for Large Language Models</a>. <em>Proceedings of the AAAI Conference on Artificial Intelligence</em>.</li>
+<li>Haocheng Yang, Xiang Cheng, Chenhao Sun et al.&nbsp;(2026). <a href="https://doi.org/10.1609/aaai.v40i40.40720">PrivSV: Differentially Private Steering Vector for Large Language Models</a>. <em>Proceedings of the AAAI Conference on Artificial Intelligence</em>.</li>
+<li>Zhongjie Shi, Puyu Wang, Chenyang Zhang et al.&nbsp;(2026). <a href="https://doi.org/10.1609/aaai.v40i30.39731">Towards Understanding Generalization in DP-GD: A Case Study in Training Two-Layer CNNs</a>. <em>Proceedings of the AAAI Conference on Artificial Intelligence</em>.</li>
+<li>Hao Liang, Wanrong Zhang, Xinlei He et al.&nbsp;(2026). <a href="https://doi.org/10.1609/aaai.v40i28.39510">An Improved Privacy and Utility Analysis of Differentially Private SGD with Bounded Domain and Smooth Losses</a>. <em>Proceedings of the AAAI Conference on Artificial Intelligence</em>.</li>
+<li>Zihang Xiang, Tianhao Wang, Cheng-Long Wang et al.&nbsp;(2026). <a href="https://doi.org/10.14722/ndss.2026.230447">Revisiting Differentially Private Hyper-parameter Tuning</a>. <em>Network and Distributed System Security Symposium</em>.</li>
+<li>Meenatchi Sundaram Muthu Selva Annamalai, Borja Balle, Jamie Hayes et al.&nbsp;(2026). <a href="https://doi.org/10.14722/ndss.2026.240597">To Shuffle or not to Shuffle: Auditing DP-SGD with Shuffling</a>. <em>Network and Distributed System Security Symposium</em>.</li>
+<li>Francesco Capano, Jonas Böhler and Benjamin Weggenmann (2026). <a href="https://doi.org/10.56553/popets-2026-0008">SPRINT: Scalable Secure &amp; Differentially Private Inference for Transformers</a>. <em>Proceedings on Privacy Enhancing Technologies</em>.</li>
+<li>Yvonne Zhou, Mingyu Liang, Ivan Brugere et al.&nbsp;(2026). <a href="https://doi.org/10.48550/arxiv.2605.27782">Revisiting ML Training under Fully Homomorphic Encryption: Convergence Guarantees, Differential Privacy, and Efficient Algorithms</a>. <em>arXiv</em>.</li>
+<li>Shun Takagi and Satoshi Hasegawa (2026). <a href="https://doi.org/10.56553/popets-2026-0025">Securing Private Federated Learning in a Malicious Setting: A Scalable TEE-Based Approach with Client Auditing</a>. <em>Proceedings on Privacy Enhancing Technologies</em>.</li>
+<li>Marziyeh Mohammadi, Mohsen Vejdanihemmat, Mahshad Lotfinia et al.&nbsp;(2026). <a href="https://doi.org/10.1038/s41746-025-02280-z">Differential privacy for medical deep learning: methods, tradeoffs, and deployment implications</a>. <em>npj Digital Medicine</em>.</li>
+<li>Getoar Sopa, Marco Avella Medina and Cynthia Rush (2026). <a href="https://doi.org/10.48550/arxiv.2601.10626">Differentially Private Inference for Longitudinal Linear Regression</a>. <em>arXiv</em>.</li>
+<li>Puyu Wang, Jan Schuchardt, Nikita Kalinin et al.&nbsp;(2026). <a href="https://doi.org/10.48550/arxiv.2605.12648">Optimization Risk Bounds for Kolmogorov-Arnold Networks Trained by DP-SGD with Correlated Noise</a>. <em>arXiv</em>.</li>
+<li>Márton Pál Lipcsey-Magyar and Adrián Pekár (2026). <a href="https://doi.org/10.48550/arxiv.2609.23521">Feature Suppression and Differential Privacy for Residential Traffic Classification: A Two-Home Federated Study</a>. <em>arXiv</em>.</li>
+<li>Kaan Arda Akyol, Jakub Kacper Szelag, Aydin Abadi et al.&nbsp;(2026). <a href="https://doi.org/10.48550/arxiv.2606.11556">Privacy-Preserving Federated Autoencoder for ECG Anomaly Detection on Edge Devices</a>. <em>arXiv</em>.</li>
+</ul>
+<p>Federated learning.</p>
+<ul>
+<li>Zhuangzhuang Zhang, L Wu, Helei Cui et al.&nbsp;(2026). <a href="https://doi.org/10.1109/tifs.2026.3685129">Heterogeneous Privacy-Preserving Federated Learning for Edge Intelligence</a>. <em>IEEE Transactions on Information Forensics and Security</em>.</li>
+<li>Jiahao Wang, Chunhua Jin, Wanru Lu et al.&nbsp;(2026). <a href="https://doi.org/10.1109/tdsc.2026.3667898">Efficient Adaptive Asynchronous Federated Learning Based on Differential Privacy</a>. <em>IEEE Transactions on Dependable and Secure Computing</em>.</li>
+<li>Bin Hu, Jingling Yuan, Jiawei Jiang et al.&nbsp;(2026). <a href="https://doi.org/10.1609/aaai.v40i26.39333">Venom: Liquid Diffusion-Guided Gradient Inversion for Breaking Differential Privacy in Federated Learning</a>. <em>Proceedings of the AAAI Conference on Artificial Intelligence</em>.</li>
+<li>Shan Jin, Sai Rahul Rachuri, Yizhen Wang et al.&nbsp;(2026). <a href="https://doi.org/10.56553/popets-2026-0099">Secure and Privacy-Preserving Vertical Federated Learning</a>. <em>Proceedings on Privacy Enhancing Technologies</em>.</li>
+<li>Guanlong Wu, Yang Ju, Zhen Huang et al.&nbsp;(2026). <a href="https://doi.org/10.1109/tifs.2026.3715108">DisT-FL: Enhancing Security for TEE-Based Aggregation in Federated Learning</a>. <em>IEEE Transactions on Information Forensics and Security</em>.</li>
+<li>Joohee Lee and Joon-Woo Lee (2026). <a href="https://doi.org/10.1109/tifs.2026.3673066">Comments on “APFed: Anti-Poisoning Attacks in Privacy-Preserving Heterogeneous Federated Learning”</a>. <em>IEEE Transactions on Information Forensics and Security</em>.</li>
+<li>Ying Zhong Tian, Hui Chen, Xianxun Zhu et al.&nbsp;(2026). <a href="https://doi.org/10.1109/tce.2026.3667765">FedKT: A Nature-Inspired Bayesian Federated Learning Framework for Privacy-Preserving and Lightweight Consumer Devices</a>. <em>IEEE Transactions on Consumer Electronics</em>.</li>
+<li>Sijia Li, B Chen, Yiru Li et al.&nbsp;(2026). <a href="https://doi.org/10.1109/isbdas69350.2026.11484374">Privacy-Preserving Anomaly Detection in Cloud Services using Hierarchical Federated Learning with Differential Privacy</a>. <em>International Symposium on Big Data and Applied Statistics (ISBDAS)</em>.</li>
+<li>Abbas Yazdinejad and Jude Dzevela Kong (2026). <a href="https://doi.org/10.1098/rsos.250959">Breaking interprovincial data silos: how federated learning can unlock Canada’s public health potential</a>. <em>Royal Society Open Science</em>.</li>
+<li>Jie Fu, Yuan Hong, Xinpeng Ling et al.&nbsp;(2026). <a href="https://doi.org/10.1145/3801079">Differentially Private Federated Learning: A Systematic Review</a>. <em>ACM Computing Surveys</em>.</li>
+<li>Daniel M. Jimenez-Gutierrez, Yelizaveta Falkouskaya, José L. Hernández-Ramos et al.&nbsp;(2026). <a href="https://doi.org/10.1016/j.inffus.2026.104155">On the security and privacy of federated learning: A survey with attacks, defenses, frameworks, applications, and future directions</a>. <em>Information Fusion</em>.</li>
+<li>W.L. Wei, Alla Jammine and Farid Naït‐Abdesselam (2026). <a href="https://doi.org/10.48550/arxiv.2608.15153">An Adaptive Gradient Clipping and Noise Injection Mechanism for Differentially Private Federated Learning</a>. <em>arXiv</em>.</li>
+<li>Gaurang Sharma, Juha Pajula, Aada Illikainen et al.&nbsp;(2026). <a href="https://doi.org/10.48550/arxiv.2604.27598">Privacy-Preserving Federated Learning via Differential Privacy and Homomorphic Encryption for Cardiovascular Disease Risk Modeling</a>. <em>arXiv</em>.</li>
+<li>Hyeong‐Gun Joo, S J Hong and Dong Joon Shin (2026). <a href="https://doi.org/10.48550/arxiv.2607.20890">Information-Theoretically Secure Aggregation for Lightweight Federated Learning: Resilient to Dropouts and Adversaries</a>. <em>arXiv</em>.</li>
+<li>Santhosh Parampottupadam, Andres Martinez, Dimitrios Bounias et al.&nbsp;(2026). <a href="https://doi.org/10.48550/arxiv.2607.14205">Privacy Leakage in Federated Learning in Radiology Reports: A Comparative Evaluation of Tokenizer-Driven Privacy Risks</a>. <em>arXiv</em>.</li>
+</ul>
+<p>Privacy attacks and defences.</p>
+<ul>
+<li>Wanqi Zhang, Kanye Ye Wang and Xiaobo Zhou (2026). <a href="https://doi.org/10.1109/tdsc.2026.3686696">TNT: Breaking the Privacy Barrier of Federated Learning via Targeted Neuron Stimulation</a>. <em>IEEE Transactions on Dependable and Secure Computing</em>.</li>
+<li>Xueluan Gong, Yuji Wang, Shuike Li et al.&nbsp;(2026). <a href="https://doi.org/10.1109/tdsc.2026.3655785">Sleight: Hidden Data Privacy Breaches in Federated Learning</a>. <em>IEEE Transactions on Dependable and Secure Computing</em>.</li>
+<li>Xukun Luan, Yuanguo Bi, Kuan Zhang et al.&nbsp;(2026). <a href="https://doi.org/10.1109/tdsc.2026.3699355">Poisoning-Assisted Membership Inference in Federated Learning</a>. <em>IEEE Transactions on Dependable and Secure Computing</em>.</li>
+<li>Guizhen Yang, Yanjun Zhang, Leo Yu Zhang et al.&nbsp;(2026). <a href="https://doi.org/10.56553/popets-2026-0042">Poisoning-based Link Inference Attacks Against Federated Graph Neural Networks</a>. <em>Proceedings on Privacy Enhancing Technologies</em>.</li>
+<li>Rui Zhang and Ka-Ho Chow (2026). <a href="https://doi.org/10.1109/eurosp68448.2026.00045">GDBR: Label Recovery Attack Against Partial Gradient Encryption in Federated Learning</a>. <em>IEEE European Symposium on Security and Privacy</em>.</li>
+<li>Lei Zhou, Youwen Zhu and Rongke Liu (2026). <a href="https://doi.org/10.1109/tifs.2026.3666295">Model Inversion Attack Against Federated Unlearning</a>. <em>IEEE Transactions on Information Forensics and Security</em>.</li>
+<li>Zhihao Liu, Guanghua Liu, Jia Zhang et al.&nbsp;(2026). <a href="https://doi.org/10.1109/tifs.2026.3667457">A Novel Perspective on Gradient Defense: Layer-Specific Protection Against Privacy Leakage</a>. <em>IEEE Transactions on Information Forensics and Security</em>.</li>
+<li>Lingqi Jiang, Dazhong Rong, Guoyao Yu et al.&nbsp;(2026). <a href="https://doi.org/10.1109/tdsc.2026.3677224">Reconstruct Private Embeddings: An Interaction-Level Membership Inference Attack Against Federated Social Matching</a>. <em>IEEE Transactions on Dependable and Secure Computing</em>.</li>
+<li>Yixin Tan, Jiayang Liu, Lu Sun et al.&nbsp;(2026). <a href="https://arxiv.org/abs/2610.10616">When Routing Reveals Membership: Privacy Leakage from MoE Router Telemetry</a>. <em>arXiv</em>.</li>
+<li>Shengfang Zhai, Leo Marchyok, Yuling Shi et al.&nbsp;(2026). <a href="https://arxiv.org/abs/2609.00873">Membership Inference in Fine-tuned Diffusion Language Models via Token-level Memorization Asymmetry</a>. <em>arXiv</em>.</li>
+<li>Tejas Kulkarni, Antti Koskela and Laith Zumot (2026). <a href="https://arxiv.org/abs/2605.04116">Membership Inference Attacks for Retrieval Based In-Context Learning for Document Question Answering</a>. <em>arXiv</em>.</li>
+<li>Kunlin Cai, Kaiyuan Zhang, Zihang Xiang et al.&nbsp;(2026). <a href="https://arxiv.org/abs/2609.01723">Hearing the Whispers: Black-Box Membership Inference Attacks on Finetuned TTS Models</a>. <em>arXiv</em>.</li>
+<li>Tudor Cebere, Mathieu Even, Linus Bleistein et al.&nbsp;(2026). <a href="https://doi.org/10.48550/arxiv.2605.14591">Privacy Auditing with Zero (0) Training Run</a>. <em>arXiv</em>.</li>
+<li>Minkyoo Song, Jaehan Kim, Myungchul Kang et al.&nbsp;(2026). <a href="https://arxiv.org/abs/2602.06495">Graphs Don’t Stay Secret: Practical Subgraph Reconstruction Attacks on Defended Graph RAG</a>. <em>arXiv</em>.</li>
+<li>Ngoc Phu Doan, Chongyan Gu and Ihsen Alouani (2026). <a href="https://arxiv.org/abs/2605.24420">Batch Normalization Amplifies Memorization and Privacy Risks</a>. <em>arXiv</em>.</li>
+</ul>
+<p>Auditing and measuring privacy.</p>
+<ul>
+<li>(Jennie) Yu Zheng, Chenang Li, Zhou Li et al.&nbsp;(2026). <a href="https://doi.org/10.14722/ndss.2026.240255">Convergent Privacy Framework for Multi-layer GNNs through Contractive Message Passing</a>. <em>Network and Distributed System Security Symposium</em>.</li>
+<li>Zehang Deng, Hongqiao Chen, Shan Jiang et al.&nbsp;(2026). <a href="https://doi.org/10.1109/tdsc.2026.3658692">Rethinking Query Choices for Differential Privacy Auditing</a>. <em>IEEE Transactions on Dependable and Secure Computing</em>.</li>
+<li>Rickard Brännvall (2026). <a href="https://arxiv.org/abs/2603.11799">Exponential-Family Membership Inference: From LiRA and RMIA to BaVarIA</a>. <em>arXiv</em>.</li>
+<li>Weijun Li, Arnaud Grivet Sébert, Qiongkai Xu et al.&nbsp;(2026). <a href="https://doi.org/10.48550/arxiv.2603.22968">Beyond Theoretical Bounds: Empirical Privacy Loss Calibration for Text Rewriting Under Local Differential Privacy</a>. <em>arXiv</em>.</li>
+<li>Gonzalo Mancera, Daniel DeAlcala, Aythami Morales et al.&nbsp;(2026). <a href="https://arxiv.org/abs/2606.06946">Auditing Training Data in Domain-adapted LLMs: LoRA-MINT</a>. <em>arXiv</em>.</li>
+<li>Michael Kuehne-Schlinkert (2026). <a href="https://doi.org/10.48550/arxiv.2610.13311">Quantization-Tolerant Gradient Auditing for Active Inference-Attack Detection in Federated Learning</a>. <em>arXiv</em>.</li>
+</ul>
+<p>Cryptographic and hardware protection.</p>
+<ul>
+<li>Lingling Wang, Zhongkai Lu, Meng Li et al.&nbsp;(2026). <a href="https://doi.org/10.1109/tifs.2026.3658996">DeSA: Decentralized Secure Aggregation for Federated Learning in Zero-Trust D2D Networks</a>. <em>IEEE Transactions on Information Forensics and Security</em>.</li>
+<li>Nazatul Haque Sultan, Yan Bo, Yansong Gao et al.&nbsp;(2026). <a href="https://doi.org/10.1145/3779208.3785414">Setup Once, Secure Always: A Single-Setup Secure Federated Learning Aggregation Protocol with Forward and Backward Secrecy for Dynamic Users</a>. <em>ACM Asia Conference on Computer and Communications Security (ASIA CCS)</em>.</li>
+<li>Hao Zhou, Hua Dai, Geng Yang et al.&nbsp;(2026). <a href="https://doi.org/10.1109/tdsc.2026.3651107">Robust Privacy-Preserving Federated Learning for Edge Computing With New Client Integration</a>. <em>IEEE Transactions on Dependable and Secure Computing</em>.</li>
+<li>Congyi Li, Peizhuo Lv, Jinwen He et al.&nbsp;(2026). <a href="https://doi.org/10.1109/tifs.2026.3688017">HEFLGuard: Backdoor Detection in Homomorphic Encryption-Based Federated Learning</a>. <em>IEEE Transactions on Information Forensics and Security</em>.</li>
+<li>Jun Feng, Hong Sun, Pengfei Zhang et al.&nbsp;(2026). <a href="https://doi.org/10.1609/aaai.v40i42.40852">Efficient, Secure, Differentially Private Deep Learning in the Two-Server Model</a>. <em>Proceedings of the AAAI Conference on Artificial Intelligence</em>.</li>
+<li>Huanyi Ye, Jiale Guo, Ziyao Liu et al.&nbsp;(2026). <a href="https://arxiv.org/abs/2601.12331">Efficient Privacy-Preserving Retrieval Augmented Generation with Distance-Preserving Encryption</a>. <em>arXiv</em>.</li>
+<li>Jinhao Zhou and Jun Wu (2026). <a href="https://doi.org/10.1109/tdsc.2026.3669543">Efficient Vector-Multiplicative Privacy-Preserving Retrieval-Augmented Generation for Large Language Models</a>. <em>IEEE Transactions on Dependable and Secure Computing</em>.</li>
+<li>Mahmoud Y. M. Yassin, Mahmoud AbdelHafeez Sayed and Mostafa Taha (2026). <a href="https://arxiv.org/abs/2609.13636">EI-DDLGN: Efficient Encrypted Inference with Deep Differentiable Logic Gate Networks under TFHE</a>. <em>arXiv</em>.</li>
+<li>Luis Brito (2026). <a href="https://arxiv.org/abs/2605.16647">Public-Decay Homomorphic State Space Models for Private Sequence Inference</a>. <em>arXiv</em>.</li>
+<li>Li Ge, Wenjie Qu, Weitao Feng et al.&nbsp;(2026). <a href="https://openalex.org/W7213675626">Towards TEE-Certified DP: Verifiable Differentially Private Training on Legacy GPUs</a>. <em>arXiv</em>.</li>
+<li>Halil İbrahim Kanpak, Sinem Sav and Alptekin Küpçü (2026). <a href="https://arxiv.org/abs/2610.08255">HE-OFT: Privacy-Preserving One-Shot Federated Fine-Tuning under Homomorphic Encryption</a>. <em>arXiv</em>.</li>
+<li>Hanieh Totonchi Asl, Ebrahim Nouri, Zhuoran Li et al.&nbsp;(2026). <a href="https://arxiv.org/abs/2610.27431">Interflow: Breaking the Offline-Online Barrier for Private AI at the Edge</a>. <em>arXiv</em>.</li>
+<li>Jiangrui Yu, Ye Yu, Si Chen et al.&nbsp;(2026). <a href="https://arxiv.org/abs/2609.16898">OptiPrime: Optimizing Private Inference through Protocol-Hardware Co-design</a>. <em>arXiv</em>.</li>
+<li>Changti Wu, Lulu Wang and Lei Zhang (2026). <a href="https://doi.org/10.1109/tdsc.2026.3653026">Verifiable Private Federated Learning Achieving Low-Communication With CUR Decomposition</a>. <em>IEEE Transactions on Dependable and Secure Computing</em>.</li>
+</ul>
+<p>Synthetic data and data release.</p>
+<ul>
+<li>Zheng Liu, Chen Gong, Terry Yue Zhuo et al.&nbsp;(2026). <a href="https://doi.org/10.14722/ndss.2026.240936">PrivCode: When Code Generation Meets Differential Privacy</a>. <em>Network and Distributed System Security Symposium</em>.</li>
+<li>Chen Gong, Zheng Liu, Kecen Li et al.&nbsp;(2026). <a href="https://doi.org/10.14722/ndss.2026.240149">PrivORL: Differentially Private Synthetic Dataset for Offline Reinforcement Learning</a>. <em>Network and Distributed System Security Symposium</em>.</li>
+<li>Zihao Wang, Hao Peng, Wei Dong et al.&nbsp;(2026). <a href="https://doi.org/10.1609/aaai.v40i13.38016">RPGen: Robust and Differentially Private Synthetic Image Generation</a>. <em>Proceedings of the AAAI Conference on Artificial Intelligence</em>.</li>
+<li>Ke Jia, Yuheng Ma, Yang Li et al.&nbsp;(2026). <a href="https://doi.org/10.1609/aaai.v40i27.39382">PrAda-GAN: A Private Adaptive Generative Adversarial Network with Bayes Network Structure</a>. <em>Proceedings of the AAAI Conference on Artificial Intelligence</em>.</li>
+<li>Bishnu Bhusal, Manoj Acharya, Ramneet Kaur et al.&nbsp;(2026). <a href="https://doi.org/10.1609/aaai.v40i42.40838">Privacy Preserving In-Context-Learning Framework for Large Language Models</a>. <em>Proceedings of the AAAI Conference on Artificial Intelligence</em>.</li>
+<li>Vinícius Gabriel Angelozzi and Héber H. Arcolezi (2026). <a href="https://doi.org/10.56553/popets-2026-0110">Where to Intervene? Benchmarking Fairness-Aware Learning on Differentially Private Synthetic Tabular Data</a>. <em>Proceedings on Privacy Enhancing Technologies</em>.</li>
+<li>Steven Golob, Sikha Pentyala and Martine De Cock (2026). <a href="https://doi.org/10.48550/arxiv.2606.08372">SoK: Reconstruction Attacks on Synthetic Tabular Data (Insights from Winning the NIST CRC)</a>. <em>arXiv</em>.</li>
+<li>Lucas Rosenblatt, R. Teal Witter and Christopher Musco (2026). <a href="https://arxiv.org/abs/2610.42081">Differentially Private Synthetic Data from Sliced Chebyshev Moments</a>. <em>arXiv</em>.</li>
+<li>David Yavo, Richard Khoury, Christophe Père et al.&nbsp;(2026). <a href="https://doi.org/10.48550/arxiv.2602.06390">Generating High-quality Privacy-preserving Synthetic Data</a>. <em>arXiv</em>.</li>
+<li>Shuaiqi Wang, Zinan Lin and Giulia C. Fanti (2026). <a href="https://doi.org/10.48550/arxiv.2609.17995">QuanText: Protecting Dataset-Level Secrets in Textual Data Sharing</a>. <em>arXiv</em>.</li>
+<li>Tsubasa Takahashi and Takumi Hiraoka (2026). <a href="https://doi.org/10.48550/arxiv.2609.38934">PrivCert: Certifying Statement Support under Differential Privacy</a>. <em>arXiv</em>.</li>
+<li>Guizhang Cui, Guowei Wu, Lin Yao et al.&nbsp;(2026). <a href="https://doi.org/10.1145/3820889">Privacy-Preserving GAN for Synthetic Data against Membership Inference Attack</a>. <em>ACM Transactions on Privacy and Security</em>.</li>
+<li>He, Guanlin, Yingtai Xiao, Jiamu Bai et al.&nbsp;(2026). <a href="https://doi.org/10.48550/arxiv.2604.00868">Accurate and Scalable Matrix Mechanisms via Divide and Conquer</a>. <em>arXiv</em>.</li>
+</ul>
+<p>Machine unlearning.</p>
+<ul>
+<li>Siyuan Wen, Meng Zhang, Yang Yang et al.&nbsp;(2026). <a href="https://doi.org/10.1609/aaai.v40i32.39895">FedShard: Federated Unlearning with Efficiency Fairness and Performance Fairness</a>. <em>Proceedings of the AAAI Conference on Artificial Intelligence</em>.</li>
+<li>Fuyao Zhang, Xinyu Yan, Tiantong Wu et al.&nbsp;(2026). <a href="https://doi.org/10.1609/aaai.v40i33.40045">Oblivionis: A Lightweight Learning and Unlearning Framework for Federated Large Language Models</a>. <em>Proceedings of the AAAI Conference on Artificial Intelligence</em>.</li>
+<li>Wenhan Wu, Zhili He, Huanghuang Liang et al.&nbsp;(2026). <a href="https://doi.org/10.1609/aaai.v40i32.39911">REMISVFU: Vertical Federated Unlearning via Representation Misdirection for Intermediate Output Feature</a>. <em>Proceedings of the AAAI Conference on Artificial Intelligence</em>.</li>
+<li>Ruinan Jin, Minghui Chen, Qiong Zhang et al.&nbsp;(2026). <a href="https://doi.org/10.1109/tnnls.2026.3683398">Forgettable Federated Linear Learning With Certified Data Unlearning</a>. <em>IEEE Transactions on Neural Networks and Learning Systems</em>.</li>
+<li>Lefeng Zhang, Tianqing Zhu, Zihan Xie et al.&nbsp;(2026). <a href="https://doi.org/10.1109/tifs.2026.3698588">Parameter-Agnostic Privacy-Preserving Machine Unlearning for Large Language Models</a>. <em>IEEE Transactions on Information Forensics and Security</em>.</li>
+<li>Xinyi Sheng, Wei Bao, Hequn Wang et al.&nbsp;(2026). <a href="https://doi.org/10.1609/aaai.v40i30.39725">Retaliatory Attacks Against Federated Unlearning via Data Leakage</a>. <em>Proceedings of the AAAI Conference on Artificial Intelligence</em>.</li>
+<li>Jian Chen, Wenlong Shi, Chengyu Hu et al.&nbsp;(2026). <a href="https://doi.org/10.1109/tdsc.2026.3703139">Federated Unlearning Activated Backdoor Attacks</a>. <em>IEEE Transactions on Dependable and Secure Computing</em>.</li>
+<li>Antonio Almudévar and Alfonso Ortega (2026). <a href="https://arxiv.org/abs/2601.21564">Representation Unlearning: Forgetting through Information Compression</a>. <em>arXiv</em>.</li>
+<li>João Vitor Boer Abitante, Joana Meneguzzo Pasquali, Luan Fonseca Garcia et al.&nbsp;(2026). <a href="https://arxiv.org/abs/2602.13151">Quantization-Robust LLM Unlearning via Low-Rank Adaptation</a>. <em>arXiv</em>.</li>
+<li>Danial Ataee and Peter Triantafillou (2026). <a href="https://arxiv.org/abs/2609.32103">LLM Unlearning Evaluation with TRIAGE</a>. <em>arXiv</em>.</li>
+<li>Chahana Dahal, Ashutosh Balasubramaniam and Zuobin Xiong (2026). <a href="https://arxiv.org/abs/2603.12275">GONE: Structural Knowledge Unlearning via Neighborhood-Expanded Distribution Shaping</a>. <em>arXiv</em>.</li>
+<li>Jiali Cheng and Hadi Amiri (2026). <a href="https://arxiv.org/abs/2607.23970">Understanding Machine Unlearning Through the Lens of Mode Connectivity</a>. <em>arXiv</em>.</li>
+<li>Christian Cianfarani and Aloni Cohen (2026). <a href="https://arxiv.org/abs/2610.04310">Modeling Deletion Requests in Machine Unlearning</a>. <em>arXiv</em>.</li>
+<li>Jianan Chen, Qin Hu, Fangtian Zhong et al.&nbsp;(2026). <a href="https://doi.org/10.1109/tmc.2026.3727044">Upcycling Noise for Federated Unlearning</a>. <em>IEEE Transactions on Mobile Computing</em>.</li>
+<li>Hyejun Jeong, Shiqing Ma and Amir Houmansadr (2026). <a href="https://doi.org/10.1109/tbdata.2026.3668538">Survey on Federated Unlearning: Challenges and Opportunities</a>. <em>IEEE Transactions on Big Data</em>.</li>
+</ul>
+<p>Local and shuffle differential privacy.</p>
+<ul>
+<li>Bo Jiang, Wanrong Zhang, Donghang Lu et al.&nbsp;(2026). <a href="https://doi.org/10.14722/ndss.2026.231397">When Focus Enhances Utility: Target Range LDP Frequency Estimation and Unknown Item Discovery</a>. <em>Network and Distributed System Security Symposium</em>.</li>
+<li>Shafizur Rahman Seeam, Zheng Ye and Yidan Hu (2026). <a href="https://doi.org/10.56553/popets-2026-0034">Frequency Estimation of Correlated Multi-attribute Data under Local Differential Privacy</a>. <em>Proceedings on Privacy Enhancing Technologies</em>.</li>
+<li>Pengcheng Su, Haibo Cheng and Ping Wang (2026). <a href="https://doi.org/10.1109/sp63933.2026.00151">Decomposition-Based Optimal Bounds for Privacy Amplification via Shuffling</a>. <em>IEEE Symposium on Security and Privacy (S&amp;P)</em>.</li>
+<li>Zheng Ye and Yidan Hu (2026). <a href="https://doi.org/10.56553/popets-2026-0103">Quantifying Classifier Utility under Local Differential Privacy</a>. <em>Proceedings on Privacy Enhancing Technologies</em>.</li>
+<li>Zhihuang Liu, Zhangdong Wang, Tongqing Zhou et al.&nbsp;(2026). <a href="https://doi.org/10.1109/tifs.2026.3667458">Risk-Aware Privacy Preservation for LLM Inference</a>. <em>IEEE Transactions on Information Forensics and Security</em>.</li>
+<li>Shuangqing Xu, Zhongyun Hua and Yifeng Zheng (2026). <a href="https://doi.org/10.1109/tdsc.2026.3663543">Federated Learning in the Shuffle Model of Differential Privacy: A Communication-Efficient and Maliciously Secure Realization</a>. <em>IEEE Transactions on Dependable and Secure Computing</em>.</li>
+<li>Yunbo Long, Jiaquan Zhang, Xi Chen et al.&nbsp;(2026). <a href="https://doi.org/10.1609/aaai.v40i28.39582">Topological Federated Clustering via Gravitational Potential Fields Under Local Differential Privacy</a>. <em>Proceedings of the AAAI Conference on Artificial Intelligence</em>.</li>
+<li>Junwei Chen, Manjiang Yu, Pengpeng Qiao et al.&nbsp;(2026). <a href="https://doi.org/10.48550/arxiv.2610.37682">Rank-Aware Differentially Private Release of Listwise Preferences for LLM Alignment</a>. <em>arXiv</em>.</li>
+<li>Yi Liu and Qirui Hu (2026). <a href="https://doi.org/10.48550/arxiv.2607.05312">Locally Private Online Quantile Regression: Estimation and Inference</a>. <em>arXiv</em>.</li>
+<li>Mohammad Afzali, Hassan Ashtiani and Sivan Sabato A (2026). <a href="https://doi.org/10.48550/arxiv.2610.21033">Efficient Agnostic Learning of Univariate Densities Under Local Differential Privacy</a>. <em>arXiv</em>.</li>
+</ul>
+<p>Mechanisms, definitions and theory.</p>
+<ul>
+<li>Hua Wang, Sheng Gao, Huanyu Zhang et al.&nbsp;(2026). <a href="https://doi.org/10.1080/01621459.2026.2668139">Edgeworth Accountant: An Analytical Approach to Differential Privacy Composition</a>. <em>Journal of the American Statistical Association</em>.</li>
+<li>César Sabater, Sonia Ben Mokhtar and Jan Ramon (2026). <a href="https://doi.org/10.56553/popets-2026-0057">Dropout-Robust Mechanisms for Differentially Private and Fully Decentralized Mean Estimation</a>. <em>Proceedings on Privacy Enhancing Technologies</em>.</li>
+<li>Sofya Raskhodnikova, Adam Smith, Connor Wagaman et al.&nbsp;(2026). <a href="https://doi.org/10.48550/arxiv.2602.15802">Local Node Differential Privacy</a>. <em>arXiv</em>.</li>
+<li>Yujie Gu, Richeng Jin, Chongwen Huang et al.&nbsp;(2026). <a href="https://doi.org/10.1109/tifs.2026.3671100">A Differentially Private Quadrature Amplitude Modulation Mechanism for Federated Analytics</a>. <em>IEEE Transactions on Information Forensics and Security</em>.</li>
+<li>Prathamesh Dharangutte and Amartya Sanyal (2026). <a href="https://arxiv.org/abs/2610.41980">New Lower Bounds for Private PAC Learning</a>. <em>arXiv</em>.</li>
+<li>Mark Bun, Marco Gaboardi and Connor Wagaman (2026). <a href="https://doi.org/10.4230/lipics.forc.2026.22">Separating Oblivious and Adaptive Differential Privacy Under Continual Observation</a>. <em>arXiv</em>.</li>
+<li>Mónica Ribero, Antonin Schrab and Arthur Gretton (2026). <a href="https://doi.org/10.48550/arxiv.2601.19755">Regularized <span class="math inline">\(f\)</span>-Divergence Kernel Tests</a>. <em>arXiv</em>.</li>
+<li>Yingge Hu, Gautham Ramesh Babu and Mostafa Milani (2026). <a href="https://doi.org/10.48550/arxiv.2610.11285">Soft Voting for Policy-Aware Private Data Synthesis</a>. <em>arXiv</em>.</li>
+<li>Arkajyoti Bhattacharjee and Arnab Auddy (2026). <a href="https://doi.org/10.48550/arxiv.2607.29675">Differentially Private Nonparametric Modal Learning with Applications to Regression and Clustering</a>. <em>arXiv</em>.</li>
+<li>T. Tony Cai and Yicheng Li (2026). <a href="https://doi.org/10.48550/arxiv.2605.19813">A Van Trees Lower Bound for Fully Interactive Differentially Private Federated Learning</a>. <em>arXiv</em>.</li>
+</ul>
+<p>Surveys and systematizations, and the most cited records.</p>
+<ul>
+<li>Xinpeng Xie, Chenyang Yu, Yan Huang et al.&nbsp;(2026). <a href="https://doi.org/10.56553/popets-2026-0128">SoK: Metric Differential Privacy in Theory and Practice</a>. <em>Proceedings on Privacy Enhancing Technologies</em>.</li>
+<li>Andrea Rizzini, Marco Esposito, Tommaso Gagliardoni et al.&nbsp;(2026). <a href="https://doi.org/10.56553/popets-2026-0119">SoK: Verifiable Integrity Claims for Privacy-Preserving Federated Learning</a>. <em>Proceedings on Privacy Enhancing Technologies</em>.</li>
+<li>Zihan Liu, Yizhen Wang, Rui Wang et al.&nbsp;(2026). <a href="https://arxiv.org/abs/2604.24468">A Survey on Split Learning for LLM Fine-Tuning: Models, Systems, and Privacy Optimizations</a>. <em>arXiv</em>.</li>
+<li>Alvaro Javier Vargas Guerrero, Xinguang Wang, Quang Manh Doan et al.&nbsp;(2026). <a href="https://doi.org/10.48550/arxiv.2606.16891">Beyond Weights and Gradients: A Taxonomy of Federated Learning Messages</a>. <em>arXiv</em>.</li>
+<li>Yahya Shahsavari, Reza Nourmohammadi, Sara Rouhani et al.&nbsp;(2026). <a href="https://doi.org/10.48550/arxiv.2607.10914">SoK: Federated Learning for Intrusion Detection in Vehicular Networks</a>. <em>arXiv</em>.</li>
+<li>Bilal Ahmad Mir, Syed Raza Abbas and Seung Won Lee (2026). <a href="https://doi.org/10.3390/healthcare14030306">Federated Learning in Healthcare Ethics: A Systematic Review of Privacy-Preserving and Equitable Medical AI</a>. <em>Healthcare</em>.</li>
+<li>Jiawei Shao, Zijian Li, Wenqiang Sun et al.&nbsp;(2026). <a href="https://doi.org/10.1145/3844940">A Survey of What to Share in Federated Learning: Perspectives on Model Utility, Privacy Leakage, and Communication Efficiency</a>. <em>ACM Computing Surveys</em>.</li>
+<li>Ali Mohammad Nesari, Habib MotieGhader and ‪Saeid Ghorbian (2026). <a href="https://doi.org/10.1093/bib/bbaf723">Advances and challenges in single-cell RNA sequencing data analysis: a comprehensive review</a>. <em>Briefings in Bioinformatics</em>.</li>
+</ul>
+</section>
+
+</main>
+<!-- /main column -->
+<script id="quarto-html-after-body" type="application/javascript">
+  window.document.addEventListener("DOMContentLoaded", function (event) {
+    const icon = "";
+    const anchorJS = new window.AnchorJS();
+    anchorJS.options = {
+      placement: 'right',
+      icon: icon
+    };
+    anchorJS.add('.anchored');
+    const isCodeAnnotation = (el) => {
+      for (const clz of el.classList) {
+        if (clz.startsWith('code-annotation-')) {                     
+          return true;
+        }
+      }
+      return false;
+    }
+    const onCopySuccess = function(e) {
+      // button target
+      const button = e.trigger;
+      // don't keep focus
+      button.blur();
+      // flash "checked"
+      button.classList.add('code-copy-button-checked');
+      var currentTitle = button.getAttribute("title");
+      button.setAttribute("title", "Copied!");
+      let tooltip;
+      if (window.bootstrap) {
+        button.setAttribute("data-bs-toggle", "tooltip");
+        button.setAttribute("data-bs-placement", "left");
+        button.setAttribute("data-bs-title", "Copied!");
+        tooltip = new bootstrap.Tooltip(button, 
+          { trigger: "manual", 
+            customClass: "code-copy-button-tooltip",
+            offset: [0, -8]});
+        tooltip.show();    
+      }
+      setTimeout(function() {
+        if (tooltip) {
+          tooltip.hide();
+          button.removeAttribute("data-bs-title");
+          button.removeAttribute("data-bs-toggle");
+          button.removeAttribute("data-bs-placement");
+        }
+        button.setAttribute("title", currentTitle);
+        button.classList.remove('code-copy-button-checked');
+      }, 1000);
+      // clear code selection
+      e.clearSelection();
+    }
+    const getTextToCopy = function(trigger) {
+      const outerScaffold = trigger.parentElement.cloneNode(true);
+      const codeEl = outerScaffold.querySelector('code');
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
+        }
+      }
+      return codeEl.innerText;
+    }
+    const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
+      text: getTextToCopy
+    });
+    clipboard.on('success', onCopySuccess);
+    if (window.document.getElementById('quarto-embedded-source-code-modal')) {
+      const clipboardModal = new window.ClipboardJS('.code-copy-button[data-in-quarto-modal]', {
+        text: getTextToCopy,
+        container: window.document.getElementById('quarto-embedded-source-code-modal')
+      });
+      clipboardModal.on('success', onCopySuccess);
+    }
+      var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+      var mailtoRegex = new RegExp(/^mailto:/);
+        var filterRegex = new RegExp('/' + window.location.host + '/');
+      var isInternal = (href) => {
+          return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+      }
+      // Inspect non-navigation links and adorn them if external
+     var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool):not(.about-link)');
+      for (var i=0; i<links.length; i++) {
+        const link = links[i];
+        if (!isInternal(link.href)) {
+          // undo the damage that might have been done by quarto-nav.js in the case of
+          // links that we want to consider external
+          if (link.dataset.originalHref !== undefined) {
+            link.href = link.dataset.originalHref;
+          }
+        }
+      }
+    function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+      const config = {
+        allowHTML: true,
+        maxWidth: 500,
+        delay: 100,
+        arrow: false,
+        appendTo: function(el) {
+            return el.parentElement;
+        },
+        interactive: true,
+        interactiveBorder: 10,
+        theme: 'quarto',
+        placement: 'bottom-start',
+      };
+      if (contentFn) {
+        config.content = contentFn;
+      }
+      if (onTriggerFn) {
+        config.onTrigger = onTriggerFn;
+      }
+      if (onUntriggerFn) {
+        config.onUntrigger = onUntriggerFn;
+      }
+      window.tippy(el, config); 
+    }
+    const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+    for (var i=0; i<noterefs.length; i++) {
+      const ref = noterefs[i];
+      tippyHover(ref, function() {
+        // use id or data attribute instead here
+        let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+        try { href = new URL(href).hash; } catch {}
+        const id = href.replace(/^#\/?/, "");
+        const note = window.document.getElementById(id);
+        if (note) {
+          return note.innerHTML;
+        } else {
+          return "";
+        }
+      });
+    }
+    const xrefs = window.document.querySelectorAll('a.quarto-xref');
+    const processXRef = (id, note) => {
+      // Strip column container classes
+      const stripColumnClz = (el) => {
+        el.classList.remove("page-full", "page-columns");
+        if (el.children) {
+          for (const child of el.children) {
+            stripColumnClz(child);
+          }
+        }
+      }
+      stripColumnClz(note)
+      if (id === null || id.startsWith('sec-')) {
+        // Special case sections, only their first couple elements
+        const container = document.createElement("div");
+        if (note.children && note.children.length > 2) {
+          container.appendChild(note.children[0].cloneNode(true));
+          for (let i = 1; i < note.children.length; i++) {
+            const child = note.children[i];
+            if (child.tagName === "P" && child.innerText === "") {
+              continue;
+            } else {
+              container.appendChild(child.cloneNode(true));
+              break;
+            }
+          }
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(container);
+          }
+          return container.innerHTML
+        } else {
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(note);
+          }
+          return note.innerHTML;
+        }
+      } else {
+        // Remove any anchor links if they are present
+        const anchorLink = note.querySelector('a.anchorjs-link');
+        if (anchorLink) {
+          anchorLink.remove();
+        }
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(note);
+        }
+        if (note.classList.contains("callout")) {
+          return note.outerHTML;
+        } else {
+          return note.innerHTML;
+        }
+      }
+    }
+    for (var i=0; i<xrefs.length; i++) {
+      const xref = xrefs[i];
+      tippyHover(xref, undefined, function(instance) {
+        instance.disable();
+        let url = xref.getAttribute('href');
+        let hash = undefined; 
+        if (url.startsWith('#')) {
+          hash = url;
+        } else {
+          try { hash = new URL(url).hash; } catch {}
+        }
+        if (hash) {
+          const id = hash.replace(/^#\/?/, "");
+          const note = window.document.getElementById(id);
+          if (note !== null) {
+            try {
+              const html = processXRef(id, note.cloneNode(true));
+              instance.setContent(html);
+            } finally {
+              instance.enable();
+              instance.show();
+            }
+          } else {
+            // See if we can fetch this
+            fetch(url.split('#')[0])
+            .then(res => res.text())
+            .then(html => {
+              const parser = new DOMParser();
+              const htmlDoc = parser.parseFromString(html, "text/html");
+              const note = htmlDoc.getElementById(id);
+              if (note !== null) {
+                const html = processXRef(id, note);
+                instance.setContent(html);
+              } 
+            }).finally(() => {
+              instance.enable();
+              instance.show();
+            });
+          }
+        } else {
+          // See if we can fetch a full url (with no hash to target)
+          // This is a special case and we should probably do some content thinning / targeting
+          fetch(url)
+          .then(res => res.text())
+          .then(html => {
+            const parser = new DOMParser();
+            const htmlDoc = parser.parseFromString(html, "text/html");
+            const note = htmlDoc.querySelector('main.content');
+            if (note !== null) {
+              // This should only happen for chapter cross references
+              // (since there is no id in the URL)
+              // remove the first header
+              if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
+                note.children[0].remove();
+              }
+              const html = processXRef(null, note);
+              instance.setContent(html);
+            } 
+          }).finally(() => {
+            instance.enable();
+            instance.show();
+          });
+        }
+      }, function(instance) {
+      });
+    }
+        let selectedAnnoteEl;
+        const selectorForAnnotation = ( cell, annotation) => {
+          let cellAttr = 'data-code-cell="' + cell + '"';
+          let lineAttr = 'data-code-annotation="' +  annotation + '"';
+          const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+          return selector;
+        }
+        const selectCodeLines = (annoteEl) => {
+          const doc = window.document;
+          const targetCell = annoteEl.getAttribute("data-target-cell");
+          const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+          const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+          const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+          const lineIds = lines.map((line) => {
+            return targetCell + "-" + line;
+          })
+          let top = null;
+          let height = null;
+          let parent = null;
+          if (lineIds.length > 0) {
+              //compute the position of the single el (top and bottom and make a div)
+              const el = window.document.getElementById(lineIds[0]);
+              top = el.offsetTop;
+              height = el.offsetHeight;
+              parent = el.parentElement.parentElement;
+            if (lineIds.length > 1) {
+              const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+              const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+              height = bottom - top;
+            }
+            if (top !== null && height !== null && parent !== null) {
+              // cook up a div (if necessary) and position it 
+              let div = window.document.getElementById("code-annotation-line-highlight");
+              if (div === null) {
+                div = window.document.createElement("div");
+                div.setAttribute("id", "code-annotation-line-highlight");
+                div.style.position = 'absolute';
+                parent.appendChild(div);
+              }
+              div.style.top = top - 2 + "px";
+              div.style.height = height + 4 + "px";
+              div.style.left = 0;
+              let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+              if (gutterDiv === null) {
+                gutterDiv = window.document.createElement("div");
+                gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+                gutterDiv.style.position = 'absolute';
+                const codeCell = window.document.getElementById(targetCell);
+                const gutter = codeCell.querySelector('.code-annotation-gutter');
+                gutter.appendChild(gutterDiv);
+              }
+              gutterDiv.style.top = top - 2 + "px";
+              gutterDiv.style.height = height + 4 + "px";
+            }
+            selectedAnnoteEl = annoteEl;
+          }
+        };
+        const unselectCodeLines = () => {
+          const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+          elementsIds.forEach((elId) => {
+            const div = window.document.getElementById(elId);
+            if (div) {
+              div.remove();
+            }
+          });
+          selectedAnnoteEl = undefined;
+        };
+          // Handle positioning of the toggle
+      window.addEventListener(
+        "resize",
+        throttle(() => {
+          elRect = undefined;
+          if (selectedAnnoteEl) {
+            selectCodeLines(selectedAnnoteEl);
+          }
+        }, 10)
+      );
+      function throttle(fn, ms) {
+      let throttle = false;
+      let timer;
+        return (...args) => {
+          if(!throttle) { // first call gets through
+              fn.apply(this, args);
+              throttle = true;
+          } else { // all the others get throttled
+              if(timer) clearTimeout(timer); // cancel #2
+              timer = setTimeout(() => {
+                fn.apply(this, args);
+                timer = throttle = false;
+              }, ms);
+          }
+        };
+      }
+        // Attach click handler to the DT
+        const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+        for (const annoteDlNode of annoteDls) {
+          annoteDlNode.addEventListener('click', (event) => {
+            const clickedEl = event.target;
+            if (clickedEl !== selectedAnnoteEl) {
+              unselectCodeLines();
+              const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+              if (activeEl) {
+                activeEl.classList.remove('code-annotation-active');
+              }
+              selectCodeLines(clickedEl);
+              clickedEl.classList.add('code-annotation-active');
+            } else {
+              // Unselect the line
+              unselectCodeLines();
+              clickedEl.classList.remove('code-annotation-active');
+            }
+          });
+        }
+    const findCites = (el) => {
+      const parentEl = el.parentElement;
+      if (parentEl) {
+        const cites = parentEl.dataset.cites;
+        if (cites) {
+          return {
+            el,
+            cites: cites.split(' ')
+          };
+        } else {
+          return findCites(el.parentElement)
+        }
+      } else {
+        return undefined;
+      }
+    };
+    var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+    for (var i=0; i<bibliorefs.length; i++) {
+      const ref = bibliorefs[i];
+      const citeInfo = findCites(ref);
+      if (citeInfo) {
+        tippyHover(citeInfo.el, function() {
+          var popup = window.document.createElement('div');
+          citeInfo.cites.forEach(function(cite) {
+            var citeDiv = window.document.createElement('div');
+            citeDiv.classList.add('hanging-indent');
+            citeDiv.classList.add('csl-entry');
+            var biblioDiv = window.document.getElementById('ref-' + cite);
+            if (biblioDiv) {
+              citeDiv.innerHTML = biblioDiv.innerHTML;
+            }
+            popup.appendChild(citeDiv);
+          });
+          return popup.innerHTML;
+        });
+      }
+    }
+  });
+  </script>
+</div> <!-- /content -->
+
+
+
+
+</body></html>
