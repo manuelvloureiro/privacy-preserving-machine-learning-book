@@ -91,17 +91,21 @@ PAPER_TYPES = ("article", "preprint", "conference-paper", "review", "book-chapte
 THEMES: dict[str, tuple[str, str]] = {
     "training": (
         "Differentially private learning",
-        r"(?:differential(?:ly)?[- ]priva|\bdp\b).{0,80}(?:training|fine-?tun|stochastic gradient|optimi[sz]|gradient|"
-        r"accountant|accounting|composition|amplification|clipping|learning rate|hyperparameter|learn|model|neural|network|"
-        r"classif|regression|estimator|algorithm|embedding|\bllm|language model)|"
-        r"\bdp-?sgd\b|\bdp-?ftrl\b|private(?:ly)? (?:training|fine-?tuning|optimi[sz]ation|learning|learn|stochastic|sgd)|"
-        r"(?:training|fine-?tun).{0,60}(?:differential(?:ly)?[- ]priva|\bdp\b)",
+        (
+            r"(?:differential(?:ly)?[- ]priva|\bdp\b).{0,80}(?:training|fine-?tun|stochastic gradient|optimi[sz]|gradient|"
+            r"accountant|accounting|composition|amplification|clipping|learning rate|hyperparameter|learn|model|neural|network|"
+            r"classif|regression|estimator|algorithm|embedding|\bllm|language model)|"
+            r"\bdp-?sgd\b|\bdp-?ftrl\b|private(?:ly)? (?:training|fine-?tuning|optimi[sz]ation|learning|learn|stochastic|sgd)|"
+            r"(?:training|fine-?tun).{0,60}(?:differential(?:ly)?[- ]priva|\bdp\b)"
+        ),
     ),
     "federated": ("Federated learning", r"federated|split learning|secure aggregation"),
     "attacks": (
         "Privacy attacks and defences",
-        r"membership inference|gradient (?:inversion|leakage)|model inversion|reconstruction attack|attribute inference|"
-        r"data extraction|memoriz|inference attack|property inference|re-?identification|deanonymi[sz]|linkage attack",
+        (
+            r"membership inference|gradient (?:inversion|leakage)|model inversion|reconstruction attack|attribute inference|"
+            r"data extraction|memoriz|inference attack|property inference|re-?identification|deanonymi[sz]|linkage attack"
+        ),
     ),
     "audit": (
         "Auditing and measuring privacy",
@@ -109,9 +113,11 @@ THEMES: dict[str, tuple[str, str]] = {
     ),
     "crypto": (
         "Cryptographic and hardware protection",
-        r"homomorphic|multi-?party computation|secure (?:computation|inference|two-party|multi-?party|aggregation)|secret shar|garbled|"
-        r"trusted execution|\btees?\b|confidential computing|encrypted (?:inference|training|computation|data)|functional encryption|"
-        r"\bfhe\b|\bmpc\b|\bsmpc\b|zero-knowledge|oblivious",
+        (
+            r"homomorphic|multi-?party computation|secure (?:computation|inference|two-party|multi-?party|aggregation)|secret shar|garbled|"
+            r"trusted execution|\btees?\b|confidential computing|encrypted (?:inference|training|computation|data)|functional encryption|"
+            r"\bfhe\b|\bmpc\b|\bsmpc\b|zero-knowledge|oblivious"
+        ),
     ),
     "synthetic": (
         "Synthetic data and data release",
@@ -124,9 +130,11 @@ THEMES: dict[str, tuple[str, str]] = {
     ),
     "mechanisms": (
         "Mechanisms, definitions and theory",
-        r"(?:laplace|gaussian|exponential|staircase|discrete) mechanism|lower bound|minimax|sample complexity|mean estimation|"
-        r"\bhistogram|composition theorem|privacy loss|privacy profile|f-dp|r[ée]nyi|zero-?concentrated|\bpufferfish|"
-        r"metric privacy|geo-?indistinguishab|privacy amplification|hockey-?stick|trade-?off function|utility bound|optimal mechanism",
+        (
+            r"(?:laplace|gaussian|exponential|staircase|discrete) mechanism|lower bound|minimax|sample complexity|mean estimation|"
+            r"\bhistogram|composition theorem|privacy loss|privacy profile|f-dp|r[ée]nyi|zero-?concentrated|\bpufferfish|"
+            r"metric privacy|geo-?indistinguishab|privacy amplification|hockey-?stick|trade-?off function|utility bound|optimal mechanism"
+        ),
     ),
     "survey": (
         "Surveys and systematizations",

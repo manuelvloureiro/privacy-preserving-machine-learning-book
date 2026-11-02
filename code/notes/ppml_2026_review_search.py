@@ -24,6 +24,7 @@ import csv
 import json
 import re
 import time
+import urllib.error
 import urllib.parse
 import urllib.request
 import xml.etree.ElementTree as ET
@@ -37,26 +38,9 @@ HERE = Path(__file__).resolve().parent
 CACHE = HERE.parents[1] / "data" / "openalex-ppml-2026"
 BASE = "https://api.openalex.org/works"
 MAILTO = "mvm.loureiro@gmail.com"  # OpenAlex's polite pool asks for a contact address
-FIELDS = ",".join(
-    [
-        "id",
-        "doi",
-        "title",
-        "publication_date",
-        "publication_year",
-        "type",
-        "language",
-        "is_retracted",
-        "cited_by_count",
-        "primary_location",
-        "authorships",
-        "primary_topic",
-        "abstract_inverted_index",
-        "indexed_in",
-        "open_access",
-        "referenced_works_count",
-        "locations_count",
-    ]
+FIELDS = (
+    "id,doi,title,publication_date,publication_year,type,language,is_retracted,cited_by_count,primary_location,"
+    "authorships,primary_topic,abstract_inverted_index,indexed_in,open_access,referenced_works_count,locations_count"
 )
 WINDOWS = [
     ("2026-01-01", "2026-03-31"),
@@ -113,7 +97,11 @@ def get(url: str, tries: int = 10) -> dict[str, Any]:
         try:
             with urllib.request.urlopen(url, timeout=90) as r:
                 return json.load(r)
-        except Exception as e:  # a 429 or a dropped connection: wait longer each time
+        except (
+            urllib.error.URLError,
+            OSError,
+            ValueError,
+        ) as e:  # a 429 or a dropped connection: wait longer each time
             print("  retry", i, str(e)[:70], flush=True)
             time.sleep(4 + 4 * i)
     raise RuntimeError(url)
@@ -153,7 +141,7 @@ def get_text(url: str, tries: int = 10) -> str:
         try:
             with urllib.request.urlopen(url, timeout=120) as r:
                 return r.read().decode("utf-8")
-        except Exception as e:
+        except (urllib.error.URLError, OSError, ValueError) as e:
             print("  retry", i, str(e)[:70], flush=True)
             time.sleep(5 + 5 * i)
     raise RuntimeError(url)
