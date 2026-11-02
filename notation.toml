@@ -212,7 +212,7 @@ use = 'the -ize spelling (randomized, minimize)'
 in = "text"
 find = '\b[Nn]eighbor(?!u)|\b[Bb]ehavior|\b[Cc]entered\b|\b[Mm]odeling\b|\b[Aa]nalyz(?:e|ed|es|ing)\b|\b[Ll]abeled\b|\b[Ff]avor(?!u)'
 use = 'the British spelling (neighbour, behaviour, centred, modelling, analyse, labelled, favour)'
-except = ['"[^"\n]{3,200}"', '“[^”\n]{3,200}”', 'Analyze Gauss', 'Language Modeling', '[Ee]ncode[,–-] ?[Ss]huffle[,–-] ?[Aa]nalyz']  # quoted titles, venues, Prochlo's architecture
+except = ['"[^"\n]{3,200}"', '“[^”\n]{3,200}”', 'Analyze Gauss', 'Language Modeling', '[Ee]ncode[,–-] ?[Ss]huffle[,–-] ?[Aa]nalyz', 'Privacy-Preserving Modeling in Heterogeneous Financial', 'Cardiovascular Disease Risk Modeling', 'Neighborhood-Expanded Distribution Shaping', 'Modeling Deletion Requests']  # quoted titles, venues, Prochlo's architecture, two cited titles
 
 [[rule]]
 in = "text"
@@ -223,6 +223,7 @@ use = 'dataset'
 in = "text"
 find = '\b[Tt]radeoffs?\b'
 use = 'trade-off'
+except = ['methods, tradeoffs, and deployment']  # a cited title
 
 [[rule]]
 in = "text"
@@ -249,6 +250,7 @@ max_per_page = 1
 in = "text"
 find = '\bDPSGD\b|\bDP SGD\b'
 use = 'DP-SGD'
+except = ['Enhancing DPSGD via']  # a cited title
 
 [[rule]]
 in = "text"

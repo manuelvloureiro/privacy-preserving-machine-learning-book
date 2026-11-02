@@ -1,0 +1,177 @@
+{
+ "search_date": "2026-11-02",
+ "databases": [
+  "OpenAlex",
+  "arXiv"
+ ],
+ "queries": {
+  "dp": {
+   "string": "\"differential privacy\" OR \"differentially private\"",
+   "arxiv_string": "(ti:\"differential privacy\" OR abs:\"differential privacy\" OR ti:\"differentially private\" OR abs:\"differentially private\")",
+   "openalex": {
+    "count": 5407,
+    "fetched": 5389
+   },
+   "arxiv": {
+    "count": 849,
+    "fetched": 849
+   }
+  },
+  "fl": {
+   "string": "\"federated learning\" AND (privacy OR attack OR leakage OR \"secure aggregation\")",
+   "arxiv_string": "(ti:\"federated learning\" OR abs:\"federated learning\") AND (all:privacy OR all:attack OR all:leakage OR abs:\"secure aggregation\")",
+   "openalex": {
+    "count": 11063,
+    "fetched": 11032
+   },
+   "arxiv": {
+    "count": 795,
+    "fetched": 795
+   }
+  },
+  "mia": {
+   "string": "\"membership inference\"",
+   "arxiv_string": "(ti:\"membership inference\" OR abs:\"membership inference\")",
+   "openalex": {
+    "count": 0,
+    "fetched": 0
+   },
+   "arxiv": {
+    "count": 283,
+    "fetched": 283
+   }
+  },
+  "ppml": {
+   "string": "\"privacy-preserving machine learning\" OR \"privacy preserving machine learning\" OR \"private machine learning\" OR \"privacy-preserving deep learning\" OR \"privacy-preserving inference\" OR \"private inference\"",
+   "arxiv_string": "(abs:\"privacy-preserving machine learning\" OR abs:\"privacy preserving machine learning\" OR abs:\"private machine learning\" OR abs:\"privacy-preserving deep learning\" OR abs:\"privacy-preserving inference\" OR abs:\"private inference\" OR ti:\"private inference\" OR ti:\"privacy-preserving machine learning\")",
+   "openalex": {
+    "count": 0,
+    "fetched": 0
+   },
+   "arxiv": {
+    "count": 85,
+    "fetched": 85
+   }
+  },
+  "he": {
+   "string": "\"homomorphic encryption\" AND (learning OR inference OR \"neural network\" OR model)",
+   "arxiv_string": "(ti:\"homomorphic encryption\" OR abs:\"homomorphic encryption\") AND (all:learning OR all:inference OR abs:\"neural network\" OR all:model)",
+   "openalex": {
+    "count": 0,
+    "fetched": 0
+   },
+   "arxiv": {
+    "count": 148,
+    "fetched": 148
+   }
+  },
+  "mpc": {
+   "string": "(\"multi-party computation\" OR \"multiparty computation\" OR \"secure computation\") AND (learning OR inference OR \"neural network\")",
+   "arxiv_string": "(abs:\"multi-party computation\" OR abs:\"multiparty computation\" OR abs:\"secure computation\" OR ti:\"multi-party computation\") AND (all:learning OR all:inference OR abs:\"neural network\")",
+   "openalex": {
+    "count": 0,
+    "fetched": 0
+   },
+   "arxiv": {
+    "count": 64,
+    "fetched": 64
+   }
+  },
+  "tee": {
+   "string": "(\"trusted execution environment\" OR \"confidential computing\") AND (learning OR inference OR \"neural network\")",
+   "arxiv_string": "(abs:\"trusted execution environment\" OR abs:\"confidential computing\" OR ti:\"trusted execution\") AND (all:learning OR all:inference OR abs:\"neural network\")",
+   "openalex": {
+    "count": 0,
+    "fetched": 0
+   },
+   "arxiv": {
+    "count": 49,
+    "fetched": 49
+   }
+  },
+  "unlearn": {
+   "string": "\"machine unlearning\"",
+   "arxiv_string": "(ti:\"machine unlearning\" OR abs:\"machine unlearning\")",
+   "openalex": {
+    "count": 0,
+    "fetched": 0
+   },
+   "arxiv": {
+    "count": 304,
+    "fetched": 304
+   }
+  },
+  "memor": {
+   "string": "(memorization OR \"data extraction\" OR \"training data\") AND (\"language model\" OR LLM) AND privacy",
+   "arxiv_string": "(all:memorization OR abs:\"data extraction\" OR abs:\"training data\") AND (abs:\"language model\" OR all:LLM) AND all:privacy",
+   "openalex": {
+    "count": 0,
+    "fetched": 0
+   },
+   "arxiv": {
+    "count": 165,
+    "fetched": 165
+   }
+  },
+  "inversion": {
+   "string": "\"gradient inversion\" OR \"gradient leakage\" OR \"model inversion\" OR \"reconstruction attack\" OR \"attribute inference\"",
+   "arxiv_string": "(abs:\"gradient inversion\" OR abs:\"gradient leakage\" OR abs:\"model inversion\" OR abs:\"reconstruction attack\" OR abs:\"attribute inference\" OR ti:\"gradient inversion\" OR ti:\"model inversion\")",
+   "openalex": {
+    "count": 0,
+    "fetched": 0
+   },
+   "arxiv": {
+    "count": 192,
+    "fetched": 192
+   }
+  },
+  "synth": {
+   "string": "\"synthetic data\" AND (privacy OR \"differentially private\")",
+   "arxiv_string": "(abs:\"synthetic data\" OR ti:\"synthetic data\") AND (all:privacy OR abs:\"differentially private\")",
+   "openalex": {
+    "count": 0,
+    "fetched": 0
+   },
+   "arxiv": {
+    "count": 248,
+    "fetched": 248
+   }
+  },
+  "audit": {
+   "string": "\"privacy audit\" OR \"privacy auditing\" OR \"auditing differential privacy\"",
+   "arxiv_string": "(abs:\"privacy audit\" OR abs:\"privacy auditing\" OR abs:\"auditing differential privacy\" OR ti:\"privacy auditing\" OR ti:\"privacy audit\")",
+   "openalex": {
+    "count": 0,
+    "fetched": 0
+   },
+   "arxiv": {
+    "count": 44,
+    "fetched": 44
+   }
+  },
+  "split": {
+   "string": "\"split learning\" AND privacy",
+   "arxiv_string": "(ti:\"split learning\" OR abs:\"split learning\") AND all:privacy",
+   "openalex": {
+    "count": 0,
+    "fetched": 0
+   },
+   "arxiv": {
+    "count": 30,
+    "fetched": 30
+   }
+  }
+ },
+ "returned": 19677,
+ "distinct_ids": 16888,
+ "distinct_titles": 15016,
+ "exclusions": {
+  "privacy only as a setting": 5063,
+  "not a paper": 976,
+  "no machine learning": 855,
+  "no privacy technique or setting": 681,
+  "not in English": 151,
+  "retracted": 11
+ },
+ "included": 7279
+}
