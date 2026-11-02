@@ -60,7 +60,7 @@ def test_theme_and_domain_rules() -> None:
         "Membership inference against fine-tuned language models", "We attack LLMs fine-tuned with DP-SGD."
     )
     assert "attacks" in themes and "training" in themes and "survey" not in themes
-    assert m.themes_of("A survey of federated unlearning", "...") == ["federated", "unlearning", "survey"]
+    assert set(m.themes_of("A survey of federated unlearning", "...")) == {"federated", "unlearning", "survey"}
     assert m.themes_of("Private data release", "We publish survey data with Laplace noise.") == [
         "synthetic"
     ]  # "survey" counts by title only
@@ -111,6 +111,9 @@ def test_run_reproduces_the_note(tmp_path: Path) -> None:
         "cooccurrence.svg",
         "months.svg",
         "_flow.md",
+        "_focus.md",
+        "_reading.md",
+        "_core_venues.md",
         "_queries.md",
         "_screening.md",
         "_themes.md",

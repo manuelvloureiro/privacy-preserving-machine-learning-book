@@ -87,7 +87,8 @@ LEARNING_CUE = (
 )
 PAPER_TYPES = ("article", "preprint", "conference-paper", "review", "book-chapter")
 
-# The themes of the synthesis, each a regular expression on the same text; a record can carry several.
+# The themes of the synthesis, each a regular expression on the same text; a record can carry several. The order is the
+# order of the synthesis: the reader's order of interest, then the surveys and the two themes the review sets aside.
 THEMES: dict[str, tuple[str, str]] = {
     "training": (
         "Differentially private learning",
@@ -99,34 +100,13 @@ THEMES: dict[str, tuple[str, str]] = {
             r"(?:training|fine-?tun).{0,60}(?:differential(?:ly)?[- ]priva|\bdp\b)"
         ),
     ),
-    "federated": ("Federated learning", r"federated|split learning|secure aggregation"),
-    "attacks": (
-        "Privacy attacks and defences",
-        (
-            r"membership inference|gradient (?:inversion|leakage)|model inversion|reconstruction attack|attribute inference|"
-            r"data extraction|memoriz|inference attack|property inference|re-?identification|deanonymi[sz]|linkage attack"
-        ),
-    ),
     "audit": (
         "Auditing and measuring privacy",
         r"privacy audit|auditing|empirical privacy|privacy (?:estimation|measurement)|canar(?:y|ies)",
     ),
-    "crypto": (
-        "Cryptographic and hardware protection",
-        (
-            r"homomorphic|multi-?party computation|secure (?:computation|inference|two-party|multi-?party|aggregation)|secret shar|garbled|"
-            r"trusted execution|\btees?\b|confidential computing|encrypted (?:inference|training|computation|data)|functional encryption|"
-            r"\bfhe\b|\bmpc\b|\bsmpc\b|zero-knowledge|oblivious"
-        ),
-    ),
     "synthetic": (
         "Synthetic data and data release",
         r"synthetic (?:data|text|tabular|images?|records)|data synthesis|data release|query release|data publishing",
-    ),
-    "unlearning": ("Machine unlearning", r"unlearn|right to be forgotten|data deletion"),
-    "local": (
-        "Local and shuffle differential privacy",
-        r"local(?:ly)? differential|\bldp\b|shuffle model|shuffling|randomi[sz]ed response",
     ),
     "mechanisms": (
         "Mechanisms, definitions and theory",
@@ -136,9 +116,30 @@ THEMES: dict[str, tuple[str, str]] = {
             r"metric privacy|geo-?indistinguishab|privacy amplification|hockey-?stick|trade-?off function|utility bound|optimal mechanism"
         ),
     ),
+    "attacks": (
+        "Privacy attacks and defences",
+        (
+            r"membership inference|gradient (?:inversion|leakage)|model inversion|reconstruction attack|attribute inference|"
+            r"data extraction|memoriz|inference attack|property inference|re-?identification|deanonymi[sz]|linkage attack"
+        ),
+    ),
+    "local": (
+        "Local and shuffle differential privacy",
+        r"local(?:ly)? differential|\bldp\b|shuffle model|shuffling|randomi[sz]ed response",
+    ),
+    "unlearning": ("Machine unlearning", r"unlearn|right to be forgotten|data deletion"),
     "survey": (
         "Surveys and systematizations",
         r"\bsurvey\b|systematic (?:literature )?review|systematization|\bsok\b|taxonomy|roadmap|tutorial|\boverview\b|position paper|scoping review|meta-analysis",
+    ),
+    "federated": ("Federated learning", r"federated|split learning|secure aggregation"),
+    "crypto": (
+        "Cryptographic and hardware protection",
+        (
+            r"homomorphic|multi-?party computation|secure (?:computation|inference|two-party|multi-?party|aggregation)|secret shar|garbled|"
+            r"trusted execution|\btees?\b|confidential computing|encrypted (?:inference|training|computation|data)|functional encryption|"
+            r"\bfhe\b|\bmpc\b|\bsmpc\b|zero-knowledge|oblivious"
+        ),
     ),
 }
 TITLE_ONLY_THEMES = ("survey",)  # a survey is one by its title; "survey data" in an abstract is not
@@ -280,6 +281,15 @@ def read_records(path: Path = RECORDS) -> list[Record]:
     ]
 
 
+# The review's focus: the records that are not about federated learning and not about cryptographic or hardware
+# protection. Both are counted and set aside; every count, figure and reading of the note is over the rest.
+SET_ASIDE = ("federated", "crypto")
+
+
+def focus(records: list[Record]) -> list[Record]:
+    return [r for r in records if not (set(r.themes) & set(SET_ASIDE))]
+
+
 # --- Screening precision ------------------------------------------------------------------------------------------
 
 
@@ -301,8 +311,8 @@ def read_screening(path: Path = SCREENING) -> list[dict[str, str]]:
 # --- The reading rule of the synthesis ----------------------------------------------------------------------------
 #
 # For each theme the synthesis reads, by abstract: every record of the theme from one of the field's core venues (a random
-# twelve when there are more), the five most cited records of the theme in OpenAlex, and eight records of the theme drawn
-# at random from arXiv. The selection is seeded, so it is the same on every run.
+# twenty when there are more), the five most cited records of the theme in OpenAlex, and twelve records of the theme drawn
+# at random from arXiv, all within the focus set. The selection is seeded, so it is the same on every run.
 
 CORE_VENUES = (
     "Proceedings on Privacy Enhancing Technologies",
@@ -321,7 +331,7 @@ CORE_VENUES = (
     "Journal of Privacy and Confidentiality",
     "Transactions on Privacy and Security",
 )
-CORE_READ, CITED_READ, ARXIV_READ = 12, 5, 8
+CORE_READ, CITED_READ, ARXIV_READ = 20, 5, 12
 
 
 def is_core_venue(source: str) -> bool:
@@ -370,8 +380,8 @@ def core_venues_table(records: list[Record]) -> str:
         lines.append(f"| {CORE_VENUE_NAMES[pattern]} | {count:,} |")
     lines.append("")
     lines.append(
-        ": The fifteen venues the review treats as the core of the field, and the included records at each. Two of the three large "
-        "machine-learning conferences have none and the third has five, because OpenAlex indexes little of their 2026 proceedings. {#tbl-core}"
+        ": The fifteen venues the review treats as the core of the field, and the records of the focus set at each. The three large "
+        "machine-learning conferences have none, because OpenAlex indexes little of their 2026 proceedings. {#tbl-core}"
     )
     return "\n".join(lines) + "\n"
 
@@ -382,13 +392,15 @@ def reading_table(records: list[Record]) -> str:
         "|:---|---:|---:|---:|---:|---:|",
     ]
     for key, (name, _) in THEMES.items():
+        if key in SET_ASIDE or key == "survey":
+            continue
         core, cited, arxiv, n_core = reading_list(records, key)
         rows = sum(1 for r in records if key in r.themes and r.has_abstract)
         lines.append(f"| {name} | {rows:,} | {n_core} | {len(core)} | {len(cited)} | {len(arxiv)} |")
     lines.append("")
     lines.append(
-        ": What was read for each theme: every record from a core venue of the field (a random twelve when there are more), "
-        "the five most cited in OpenAlex, and eight drawn at random from arXiv. {#tbl-reading}"
+        ": What was read for each theme of the focus set: every record from a core venue of the field (a random twenty when "
+        "there are more), the five most cited in OpenAlex, and twelve drawn at random from arXiv. {#tbl-reading}"
     )
     return "\n".join(lines) + "\n"
 
@@ -435,7 +447,7 @@ def median(values: list[int]) -> float:
 
 def figure_themes(records: list[Record], out: Path) -> None:
     counts = theme_counts(records)
-    keys: list[str] = list(THEMES) + ["other"]
+    keys: list[str] = [k for k in THEMES if k not in SET_ASIDE] + ["other"]
     names: list[str] = [THEMES[k][0] if k in THEMES else "No theme matched" for k in keys]
     values: list[int] = [counts.get(k, 0) for k in keys]
     order: list[int] = sorted(range(len(keys)), key=lambda i: values[i])
@@ -453,7 +465,7 @@ def figure_themes(records: list[Record], out: Path) -> None:
 
 
 def figure_cooccurrence(records: list[Record], out: Path) -> None:
-    keys = [k for k in THEMES if k != "survey"]
+    keys = [k for k in THEMES if k != "survey" and k not in SET_ASIDE]
     m = cooccurrence(records, keys)
     diag = np.diag(m).astype(float)
     shares = m / np.where(diag[:, None] == 0, 1, diag[:, None])  # row i: share of theme i's records that also carry j
@@ -572,6 +584,27 @@ def exclusion_table(search: Search, records: list[Record]) -> str:
     return "\n".join(lines) + "\n"
 
 
+def focus_table(records: list[Record]) -> str:
+    """How many included records the review sets aside, and how many it keeps."""
+    kept = focus(records)
+    n = len(records)
+    lines = ["| Records | Count | Share of the included set |", "|:---|---:|---:|"]
+    for label, rows in (
+        ("Included by the screening", records),
+        ("About federated or split learning", [r for r in records if "federated" in r.themes]),
+        ("About cryptographic or hardware protection", [r for r in records if "crypto" in r.themes]),
+        ("About both", [r for r in records if "federated" in r.themes and "crypto" in r.themes]),
+        ("Set aside: about either", [r for r in records if r not in kept]),
+        ("The focus set: about neither", kept),
+    ):
+        lines.append(f"| {label} | {len(rows):,} | {share(len(rows), n):.0%} |")
+    lines.append("")
+    lines.append(
+        ": The included records, the two themes the review sets aside, and the focus set that the rest of the note counts and reads. {#tbl-focus}"
+    )
+    return "\n".join(lines) + "\n"
+
+
 def screening_table(screening: list[dict[str, str]]) -> str:
     lines = [
         "| Sample | Records read | Decision agrees with the rule | Share | 95% interval |",
@@ -597,6 +630,8 @@ def themes_table(records: list[Record]) -> str:
     n = len(records)
     lines = ["| Theme | What the rule looks for | Records | Share |", "|:---|:---|---:|---:|"]
     for key, (name, _) in THEMES.items():
+        if key in SET_ASIDE:
+            continue
         lines.append(f"| {name} | {THEME_GLOSS[key]} | {counts.get(key, 0):,} | {share(counts.get(key, 0), n):.0%} |")
     lines.append(f"| No theme matched | | {counts.get('other', 0):,} | {share(counts.get('other', 0), n):.0%} |")
     lines.append("")
@@ -636,7 +671,7 @@ def sources_table(records: list[Record]) -> str:
         )
     lines.append("")
     lines.append(
-        ": The included records by the kind of venue listed as their primary location. OpenAlex gives a citation count; "
+        ": The focus set by the kind of venue listed as their primary location. OpenAlex gives a citation count; "
         "a record found only on arXiv has none, so the last column is the share of the records with a count. {#tbl-sources}"
     )
     return "\n".join(lines) + "\n"
@@ -659,14 +694,14 @@ def venues_table(records: list[Record], top: int = 20) -> str:
         cited = sum(1 for r in records if r.source == name and r.cited_by > 0)
         lines.append(f"| {name} | {count:,} | {share(cited, count):.0%} |")
     lines.append("")
-    lines.append(f": The {top} journals and proceedings with the most included records. {{#tbl-venues}}")
+    lines.append(f": The {top} journals and proceedings with the most records of the focus set. {{#tbl-venues}}")
     return "\n".join(lines) + "\n"
 
 
 def domains_table(records: list[Record]) -> str:
     n = len(records)
     lines = [
-        "| Domain or model type | Records | Share | With differential privacy | With federated learning | With attacks |",
+        "| Domain or model type | Records | Share | With differential privacy | With attacks | With synthetic data |",
         "|:---|---:|---:|---:|---:|---:|",
     ]
     for key, (name, _) in DOMAINS.items():
@@ -674,16 +709,16 @@ def domains_table(records: list[Record]) -> str:
         lines.append(
             f"| {name} | {len(rows):,} | {share(len(rows), n):.0%} | "
             f"{share(sum(1 for r in rows if 'dp' in r.queries or 'training' in r.themes or 'local' in r.themes or 'mechanisms' in r.themes), len(rows)):.0%} | "
-            f"{share(sum(1 for r in rows if 'federated' in r.themes), len(rows)):.0%} | "
-            f"{share(sum(1 for r in rows if 'attacks' in r.themes), len(rows)):.0%} |"
+            f"{share(sum(1 for r in rows if 'attacks' in r.themes), len(rows)):.0%} | "
+            f"{share(sum(1 for r in rows if 'synthetic' in r.themes), len(rows)):.0%} |"
         )
     none = sum(1 for r in records if not r.domains)
     lines.append(f"| No domain matched | {none:,} | {share(none, n):.0%} | | | |")
     lines.append("")
     lines.append(
-        ": The application domains and model types of the included records, and the share of each that works with differential "
-        "privacy (the record was returned by the differential-privacy string or carries one of its themes), with federated learning "
-        "or with attacks. {#tbl-domains}"
+        ": The application domains and model types of the focus set, and the share of each that works with differential "
+        "privacy (the record was returned by the differential-privacy string or carries one of its themes), with attacks "
+        "or with synthetic data. {#tbl-domains}"
     )
     return "\n".join(lines) + "\n"
 
@@ -698,17 +733,21 @@ def main() -> None:
     out: Path = args.out
     out.mkdir(parents=True, exist_ok=True)
 
-    records = read_records()
+    included = read_records()
     search = read_search()
-    assert search.included == len(records)
     screening = read_screening()
+    assert search.included == len(included)
+    records = focus(included)
     n = len(records)
-    print(f"included records: {n:,}")
+    print(
+        f"included records: {len(included):,}; federated {sum(1 for r in included if 'federated' in r.themes):,}; "
+        f"cryptographic {sum(1 for r in included if 'crypto' in r.themes):,}; focus set: {n:,} ({share(n, len(included)):.1%})"
+    )
     print(
         f"with an abstract: {sum(1 for r in records if r.has_abstract):,} ({share(sum(1 for r in records if r.has_abstract), n):.0%})"
     )
     counts = theme_counts(records)
-    for key in list(THEMES) + ["other"]:
+    for key in [k for k in THEMES if k not in SET_ASIDE] + ["other"]:
         print(f"theme {key}: {counts.get(key, 0):,} ({share(counts.get(key, 0), n):.1%})")
     print(f"records with one theme: {sum(1 for r in records if len(r.themes) == 1 and r.themes != ('other',)):,}")
     dcounts = domain_counts(records)
@@ -726,7 +765,7 @@ def main() -> None:
         f"citations known for {len(cited):,} records: median {median(cited):.0f}, uncited {share(sum(1 for c in cited if c == 0), len(cited)):.0%}, max {max(cited):,}"
     )
     print(
-        f"at least 10 citations: {sum(1 for c in cited if c >= 10):,}; at least 50: {sum(1 for c in cited if c >= 50):,}"
+        f"at least 10 citations: {sum(1 for c in cited if c >= 10):,}; at least 5: {sum(1 for c in cited if c >= 5):,}"
     )
     dbs = Counter(";".join(r.databases) for r in records)
     for db, count in dbs.most_common():
@@ -741,30 +780,17 @@ def main() -> None:
     def with_theme(rows: list[Record], theme: str) -> int:
         return sum(1 for r in rows if theme in r.themes)
 
-    fl = [r for r in records if "federated" in r.themes]
-    print(
-        f"federated records that also carry: training {share(with_theme(fl, 'training'), len(fl)):.0%}, crypto {share(with_theme(fl, 'crypto'), len(fl)):.0%}, "
-        f"attacks {share(with_theme(fl, 'attacks'), len(fl)):.0%}, unlearning {share(with_theme(fl, 'unlearning'), len(fl)):.0%}, "
-        f"none of the other themes {share(sum(1 for r in fl if r.themes == ('federated',)), len(fl)):.0%}"
-    )
-    for theme in ("training", "attacks", "crypto", "unlearning", "synthetic", "audit", "local", "mechanisms"):
+    for theme in ("training", "audit", "synthetic", "mechanisms", "attacks", "local", "unlearning", "survey"):
         rows = [r for r in records if theme in r.themes]
         print(
-            f"{theme}: {len(rows):,} records, {share(with_theme(rows, 'federated'), len(rows)):.0%} federated, "
-            f"{share(sum(1 for r in rows if 'llm' in r.domains), len(rows)):.0%} language models, "
+            f"{theme}: {len(rows):,} records, {share(sum(1 for r in rows if 'llm' in r.domains), len(rows)):.0%} language models, "
             f"{share(sum(1 for r in rows if r.source_kind == 'arXiv'), len(rows)):.0%} on arXiv, "
-            f"{share(sum(1 for r in rows if 'health' in r.domains), len(rows)):.0%} health"
+            f"{share(sum(1 for r in rows if 'health' in r.domains), len(rows)):.0%} health, "
+            f"{share(with_theme(rows, 'attacks'), len(rows)):.0%} with attacks, {share(with_theme(rows, 'training'), len(rows)):.0%} with private learning, "
+            f"core venue {sum(1 for r in rows if is_core_venue(r.source)):,}"
         )
-    blockchain = sum(1 for r in records if "blockchain" in r.title.lower())
-    print(
-        f"blockchain in the title: {blockchain:,} ({share(blockchain, n):.1%}); of the federated records {share(sum(1 for r in fl if 'blockchain' in r.title.lower()), len(fl)):.1%}"
-    )
     jan1 = sum(1 for r in records if r.date == "2026-01-01")
     print(f"dated exactly 2026-01-01: {jan1:,} ({share(jan1, n):.1%})")
-    surveys = [r for r in records if "survey" in r.themes]
-    print(
-        f"surveys: {len(surveys):,}, federated {share(with_theme(surveys, 'federated'), len(surveys)):.0%}, health {share(sum(1 for r in surveys if 'health' in r.domains), len(surveys)):.0%}"
-    )
     zenodo = sum(1 for r in records if r.source.startswith("Zenodo"))
     print(
         f"Zenodo: {zenodo:,} ({share(zenodo, n):.1%}); other repositories in all {sum(1 for r in records if r.source_kind == 'other repository'):,}"
@@ -775,10 +801,6 @@ def main() -> None:
     print(
         f"found on arXiv only: {len(arxiv_only):,}; of them matched by the dp or fl string {sum(1 for r in arxiv_only if {'dp', 'fl'} & set(r.queries)):,}"
     )
-    print(
-        f"records whose only cue is a setting (federated or privacy-preserving) with privacy in the title: n/a; records from the fl string only: {sum(1 for r in records if r.queries == ('fl',)):,}"
-    )
-
     core_total = sum(1 for r in records if is_core_venue(r.source))
     print(f"records at a core venue: {core_total:,} ({share(core_total, n):.1%})")
     for venue in (
@@ -792,17 +814,21 @@ def main() -> None:
         "Dependable and Secure Computing",
         "Scientific Reports",
         "Drug Delivery",
+        "International Conference on Machine Learning",
     ):
         print(f"venue {venue}: {sum(1 for r in records if venue.lower() in r.source.lower()):,}")
     for key in THEMES:
-        core, cited, arxiv, n_core = reading_list(records, key)
-        print(f"reading {key}: core {n_core} (read {len(core)}), cited {len(cited)}, arxiv {len(arxiv)}")
+        if key in SET_ASIDE or key == "survey":
+            continue
+        core, cited_read, arxiv, n_core = reading_list(records, key)
+        print(f"reading {key}: core {n_core} (read {len(core)}), cited {len(cited_read)}, arxiv {len(arxiv)}")
 
     figure_themes(records, out)
     figure_cooccurrence(records, out)
     figure_months(records, out)
     (out / "_queries.md").write_text(flow_table(search))
-    (out / "_flow.md").write_text(exclusion_table(search, records))
+    (out / "_flow.md").write_text(exclusion_table(search, included))
+    (out / "_focus.md").write_text(focus_table(included))
     (out / "_screening.md").write_text(screening_table(screening))
     (out / "_themes.md").write_text(themes_table(records))
     (out / "_sources.md").write_text(sources_table(records))
