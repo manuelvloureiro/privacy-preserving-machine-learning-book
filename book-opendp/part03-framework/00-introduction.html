@@ -348,8 +348,8 @@ ul.task-list li input[type="checkbox"] {
 </header>
 
 
-<p>Every query that the Context API ran in the previous parts was built from a few pieces, and this part shows those pieces. OpenDP’s framework describes a private computation as a chain of two kinds of object. A transformation maps data to data, and its stability bounds how much its output can change when its input changes. A measurement maps data to a random release, and its privacy bounds how much the distribution of the release can change. In a chain, these promises pass from one step to the next, and when you compose measurements, their privacy losses add up. So when you can read these objects, you can see exactly which guarantee a query carries. You can also build queries that the Context API does not offer, and check a claim that someone else makes.</p>
-<p>The first chapter gives the vocabulary: domains, metrics and measures, and the two maps that carry the promises. The next three build the pieces in order: the data-to-data steps, the mechanisms that add noise or select, and the combinators that chain and compose them. The last chapter covers the tools around the pieces and shows how the Context API maps onto them.</p>
+<p>The Context API queries in the previous parts use OpenDP framework components. A private computation chains transformations and measurements. A transformation maps data to data, and its stability bounds how much the output changes when the input changes. A measurement maps data to a random release, and its privacy map bounds changes to the release distribution. These bounds propagate through a chain, while composed measurements accumulate privacy loss. This framework lets you inspect guarantees, build queries unavailable through the Context API and verify claims.</p>
+<p>The first chapter defines domains, metrics, measures and the maps that describe stability and privacy. The next three cover transformations, measurements that add noise or select, and combinators for chaining and composition. The final chapter covers supporting utilities and shows how the Context API uses these components.</p>
 <div id="tbl-p3-chapters" class="quarto-float quarto-figure quarto-figure-center anchored">
 <figure class="quarto-float quarto-float-tbl figure">
 <figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl" id="tbl-p3-chapters-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
@@ -389,7 +389,7 @@ Table&nbsp;1: The chapters of this part and the questions they answer.
 </div>
 </figure>
 </div>
-<p>At the end of this part, you can build a private query from its pieces and read the guarantee of any chain with <code>map</code> and <code>check</code>. You can also explain what the Context API does when it resolves a query.</p>
+<p>By the end of this part, you can build private queries from framework components, inspect guarantees with <code>map</code> and <code>check</code>, and describe how the Context API resolves a query.</p>
 
 
 

@@ -1270,7 +1270,7 @@ Table&nbsp;37.7: A checklist for matching the accountant to the training code.
 </div>
 </figure>
 </div>
-<p>The first row is the most common mismatch. A loader that draws a random batch of exactly <span class="math inline">\(qn\)</span> records looks like Poisson sampling. But a record cannot enter a full batch without pushing another out, so in effect one record is swapped for another, and the batch sum can move by <span class="math inline">\(2C\)</span> and not only <span class="math inline">\(C\)</span>.</p>
+<p>The first row describes a common mismatch: drawing exactly <span class="math inline">\(qn\)</span> records is fixed-size sampling, not Poisson sampling. Under add/remove adjacency, adding one record to a fixed-size batch requires removing another. Their clipped gradients can differ by <span class="math inline">\(2C\)</span>, rather than the <span class="math inline">\(C\)</span> change allowed by Poisson sampling.</p>
 <div id="prp-choose-fixed" class="theorem proposition">
 <p><span class="theorem-title"><strong>Proposition 37.3 (Fixed-size batches (Lebeda et al.&nbsp;2024))</strong></span> If each step draws a fresh uniformly random batch of exactly <span class="math inline">\(qn\)</span> records, then under add/remove neighbours every <span class="math inline">\(\varepsilon\)</span> certified for the Poisson pair with rate <span class="math inline">\(q\)</span> and noise multiplier <span class="math inline">\(\sigma/2\)</span> holds for the run with noise multiplier <span class="math inline">\(\sigma\)</span>.</p>
 </div>

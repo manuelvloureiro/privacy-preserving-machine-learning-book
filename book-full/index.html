@@ -76,35 +76,6 @@ ul.task-list li input[type="checkbox"] {
   }
 }</script>
 
-  <script src="https://cdnjs.cloudflare.com/polyfill/v3/polyfill.min.js?features=es6"></script>
-  <script defer="" src="https://cdn.jsdelivr.net/npm/mathjax@4/tex-chtml.js" type="text/javascript"></script>
-
-<script type="text/javascript">
-const typesetMath = (el) => {
-  if (window.MathJax) {
-    // MathJax Typeset
-    window.MathJax.typeset([el]);
-  } else if (window.katex) {
-    // KaTeX Render
-    var mathElements = el.getElementsByClassName("math");
-    var macros = [];
-    for (var i = 0; i < mathElements.length; i++) {
-      var texText = mathElements[i].firstChild;
-      if (mathElements[i].tagName == "SPAN" && texText && texText.data) {
-        window.katex.render(texText.data, mathElements[i], {
-          displayMode: mathElements[i].classList.contains('display'),
-          throwOnError: false,
-          macros: macros,
-          fleqn: false
-        });
-      }
-    }
-  }
-}
-window.Quarto = {
-  typesetMath
-};
-</script>
 
 </head>
 
@@ -652,19 +623,19 @@ window.Quarto = {
 
 <section id="preface" class="level1 unnumbered">
 <h1 class="unnumbered">Preface</h1>
-<p>This is the full edition of <em>Privacy-Preserving Machine Learning</em>: every result is derived step by step. If differential privacy is new to you, read the <a href="../book-course/index.html">course in differential privacy</a> first: it teaches the definition and its core algorithms one topic per chapter, with complete proofs and little else, and this book then goes deeper and wider. The <a href="../book-practitioner/index.html">practitioner edition</a> shares this book’s parts and chapter files, states the same results without proofs and shows how to use them with real libraries; read it next if you build or review private systems.</p>
+<p>This is the full edition of <em>Privacy-Preserving Machine Learning</em>. It derives results step by step. If differential privacy is new to you, start with the <a href="../book-course/index.html">course in differential privacy</a>, which introduces the definition and core algorithms with proofs. The <a href="../book-practitioner/index.html">practitioner edition</a> uses the same parts and chapter topics without proofs, and shows how to apply the results with real libraries.</p>
 <p>The figures and the numbers quoted in the text are produced by each chapter’s script, in the repository’s <code>code/</code> directory, one folder per part.</p>
 <section id="how-this-book-is-organized" class="level2 unnumbered">
 <h2 class="unnumbered anchored" data-anchor-id="how-this-book-is-organized">How this book is organized</h2>
-<p>The book has five parts, each building on the ones before it.</p>
+<p>The book has five parts. Each builds on earlier results.</p>
 <ol type="1">
-<li><strong>Prerequisites</strong> collects the mathematics: distributions, concentration, divergences and hypothesis testing, then information theory, optimization and stability, and the basics of cryptography.</li>
-<li><strong>Threat models and attacks</strong> shows how models and data leak before any defence is introduced. It first attacks trained models, from one bit of membership up to whole training inputs, then attacks released data, from records with names removed to records hidden in crowds to aggregate statistics alone.</li>
-<li><strong>Differential privacy foundations</strong> defines the guarantee those attacks call for, builds its mechanisms, composes them, and ends with what privacy costs.</li>
-<li><strong>Privacy accounting</strong> tracks the guarantee through many steps of training, as accurately as possible.</li>
-<li><strong>Differential privacy in machine learning</strong> trains models with the guarantee: where the noise goes, how the knobs of noisy, clipped gradient descent trade privacy for accuracy, what else spends the budget, who pays for the noise, which <span class="math inline">\(\varepsilon\)</span> to choose, and how to audit the result.</li>
+<li><strong>Prerequisites</strong> develops probability distributions, concentration, divergences, hypothesis testing, information theory, optimization, stability and cryptography.</li>
+<li><strong>Threat models and attacks</strong> defines adversaries and evaluates attacks on trained models and released data. The attacks cover membership inference, reconstruction, linkage, syntactic anonymity and aggregate-data inference.</li>
+<li><strong>Differential privacy foundations</strong> defines the guarantee, develops mechanisms, proves composition results and studies privacy costs.</li>
+<li><strong>Privacy accounting</strong> tracks guarantees across iterative training.</li>
+<li><strong>Differential privacy in machine learning</strong> applies differential privacy to model training. It covers noise placement, clipped gradient descent, budget allocation, disparate impact, budget selection and auditing.</li>
 </ol>
-<p>The appendices derive, in plain steps, the results a chapter cites or sketches, and the book ends with a glossary of acronyms and an index.</p>
+<p>The appendices derive results that chapters cite or sketch. The book ends with a glossary of acronyms and an index.</p>
 
 
 </section>

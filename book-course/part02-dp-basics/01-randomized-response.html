@@ -391,14 +391,14 @@ window.Quarto = {
 </header>
 
 
-<p>Each person in a group holds one sensitive bit. An analyst wants the fraction of ones without learning anyone’s bit. This chapter solves the problem with a biased coin, the oldest private algorithm. That method is randomized response. Its idea of plausible deniability also leads to the definition of differential privacy (DP), which the rest of the course builds on.</p>
+<p>Each person holds one sensitive bit, and an analyst wants the fraction of ones without learning any individual’s bit. Randomized response uses a biased coin to estimate that fraction. Its plausible-deniability guarantee also motivates differential privacy (DP), the subject of the rest of the course.</p>
 <section id="sec-rr-mechanism" class="level2" data-number="3.1">
 <h2 data-number="3.1" class="anchored" data-anchor-id="sec-rr-mechanism"><span class="header-section-number">3.1</span> Randomized response</h2>
 <p>Write <span class="math inline">\(n\)</span> for the number of people. Person number <span class="math inline">\(i\)</span> holds a bit <span class="math inline">\(x_i \in \{0,1\}\)</span>, for instance whether they cheated on an exam, and the analyst wants the fraction of ones,</p>
 <p><span id="eq-auto-01randomizedresponse-1"><span class="math display">\[
 p = \frac{1}{n}\sum_{i=1}^n x_i .
 \tag{3.1}\]</span></span></p>
-<p>Each person sends the analyst one message <span class="math inline">\(Y_i\)</span>, determined by their bit <span class="math inline">\(x_i\)</span> and private coins. If everyone reports <span class="math inline">\(Y_i = x_i\)</span>, the analyst computes <span class="math inline">\(p\)</span> exactly but sees every bit. If each report is instead a fair coin, independent of <span class="math inline">\(x_i\)</span>, the analyst learns nothing about anyone. But then the reports reveal nothing about <span class="math inline">\(p\)</span> either: their average has distribution <span class="math inline">\(\frac1n\mathrm{Bin}(n, \frac12)\)</span> for every dataset. Randomized response balances these two extremes.</p>
+<p>Each person sends one message <span class="math inline">\(Y_i\)</span>, determined by their bit <span class="math inline">\(x_i\)</span> and private randomness. Truthful reports reveal <span class="math inline">\(p\)</span> exactly but expose every bit. Fair-coin reports hide every bit but have the same distribution, <span class="math inline">\(\frac1n\mathrm{Bin}(n,\frac12)\)</span>, for every dataset and therefore reveal nothing about <span class="math inline">\(p\)</span>. Randomized response trades accuracy for privacy between these extremes.</p>
 <div id="def-rr-mechanism" class="theorem definition">
 <p><span class="theorem-title"><strong>Definition 3.1 (Randomized response)</strong></span> For a bias <span class="math inline">\(\kappa \in [0, 1/2]\)</span>, which sets the probability <span class="math inline">\(\tfrac12 + \kappa\)</span> of reporting the truth, person <span class="math inline">\(i\)</span> reports</p>
 <p><span id="eq-auto-01randomizedresponse-2"><span class="math display">\[
@@ -406,19 +406,19 @@ Y_i = \begin{cases} x_i &amp; \text{with probability } \tfrac12 + \kappa, \\ 1 -
 \tag{3.2}\]</span></span></p>
 <p>with fresh, independent coins for each person.</p>
 </div>
-<p>The value <span class="math inline">\(\kappa = 1/2\)</span> gives the honest protocol and <span class="math inline">\(\kappa = 0\)</span> the fair coin. In between, say at <span class="math inline">\(\kappa = 1/4\)</span>, a person who reports <span class="math inline">\(Y_i = 1\)</span> can claim that their bit was <span class="math inline">\(0\)</span> and the coin flipped it, which happens with probability <span class="math inline">\(1/4\)</span>. That plausible deniability is the privacy, and it grows as <span class="math inline">\(\kappa\)</span> gets smaller.</p>
-<p>The reports lean towards the truth, so their average is not <span class="math inline">\(p\)</span>. But the analyst knows the bias and can undo it, because the average of one report,</p>
+<p>At <span class="math inline">\(\kappa=1/2\)</span>, reports are truthful; at <span class="math inline">\(\kappa=0\)</span>, they are fair coins. For <span class="math inline">\(\kappa=1/4\)</span>, a report of <span class="math inline">\(1\)</span> is consistent with a true bit of <span class="math inline">\(0\)</span>, because the coin flips the bit with probability <span class="math inline">\(1/4\)</span>. This ambiguity increases as <span class="math inline">\(\kappa\)</span> decreases.</p>
+<p>The reports are biased toward the true bits, so their average does not estimate <span class="math inline">\(p\)</span> directly. The analyst can correct for the bias because the expected report is linear in <span class="math inline">\(x_i\)</span>:</p>
 <p><span id="eq-auto-01randomizedresponse-3"><span class="math display">\[
 \mathbb E[Y_i] = \left(\tfrac12+\kappa\right)x_i + \left(\tfrac12-\kappa\right)(1-x_i) = 2\kappa x_i + \tfrac12 - \kappa ,
 \tag{3.3}\]</span></span></p>
-<p>is linear in <span class="math inline">\(x_i\)</span>. Solving for <span class="math inline">\(x_i\)</span> gives an unbiased estimate of each bit, and the average of those estimates is the estimator of <span class="math inline">\(p\)</span>.</p>
+<p>Solving for <span class="math inline">\(x_i\)</span> gives an unbiased estimate of each bit; averaging these estimates gives an unbiased estimate of <span class="math inline">\(p\)</span>.</p>
 <div id="def-rr-estimator" class="theorem definition">
 <p><span class="theorem-title"><strong>Definition 3.2 (Debiased estimator)</strong></span> For <span class="math inline">\(\kappa &gt; 0\)</span>, the analyst outputs</p>
 <p><span id="eq-rr-estimator"><span class="math display">\[
 \tilde p = \frac1n \sum_{i=1}^n \frac{Y_i - \tfrac12 + \kappa}{2\kappa}.
 \tag{3.4}\]</span></span></p>
 </div>
-<p>The next theorem checks that the estimator is right on average and measures, through its variance, how far it typically strays.</p>
+<p>The next theorem establishes unbiasedness and computes the estimator’s variance.</p>
 <div id="thm-rr-variance" class="theorem">
 <p><span class="theorem-title"><strong>Theorem 3.1</strong></span> For every <span class="math inline">\(\kappa \in (0, 1/2]\)</span> and every input <span class="math inline">\(D \in \{0,1\}^n\)</span>, the estimator is unbiased, <span class="math inline">\(\mathbb E[\tilde p] = p\)</span>, and its variance is</p>
 <p><span id="eq-auto-01randomizedresponse-4"><span class="math display">\[
@@ -437,7 +437,7 @@ Y_i = \begin{cases} x_i &amp; \text{with probability } \tfrac12 + \kappa, \\ 1 -
 \operatorname{Var}(\tilde p) = \frac{1}{n^2}\sum_{i=1}^n \frac{\operatorname{Var}(Y_i)}{4\kappa^2} = \frac{\tfrac14 - \kappa^2}{4\kappa^2 n} = \frac{1-4\kappa^2}{16\kappa^2 n}.
 \tag{3.6}\]</span></span></p>
 </div>
-<p>By Chebyshev’s inequality, the error is at most two standard deviations, <span class="math inline">\(|\tilde p - p| \le 1/(2\kappa\sqrt n)\)</span>, with probability at least <span class="math inline">\(3/4\)</span>. For a small failure probability <span class="math inline">\(\beta\)</span>, Hoeffding’s inequality does better, because each <span class="math inline">\(Z_i\)</span> takes only two values.</p>
+<p>Chebyshev’s inequality gives <span class="math inline">\(|\tilde p-p|\le 1/(2\kappa\sqrt n)\)</span> with probability at least <span class="math inline">\(3/4\)</span>. Hoeffding’s inequality gives a sharper bound for failure probability <span class="math inline">\(\beta\)</span>, because each <span class="math inline">\(Z_i\)</span> has a bounded range.</p>
 <div id="thm-rr-accuracy" class="theorem">
 <p><span class="theorem-title"><strong>Theorem 3.2</strong></span> For every <span class="math inline">\(\kappa \in (0,1/2]\)</span> and <span class="math inline">\(\beta \in (0,1)\)</span>, with probability at least <span class="math inline">\(1-\beta\)</span> over the coins,</p>
 <p><span id="eq-rr-accuracy"><span class="math display">\[
@@ -457,7 +457,7 @@ Y_i = \begin{cases} x_i &amp; \text{with probability } \tfrac12 + \kappa, \\ 1 -
 <li>Setting the right-hand side equal to <span class="math inline">\(\beta\)</span> and solving for <span class="math inline">\(t\)</span> gives <a href="#eq-rr-accuracy" class="quarto-xref">Equation&nbsp;<span>3.7</span></a>.</li>
 </ol>
 </div>
-<p>So the error is of order <span class="math inline">\(1/(\kappa\sqrt n)\)</span> and goes to <span class="math inline">\(0\)</span> as <span class="math inline">\(n\)</span> grows. Read the other way, an error of at most <span class="math inline">\(\alpha\)</span> with probability <span class="math inline">\(1-\beta\)</span> needs</p>
+<p>Thus the error decreases as <span class="math inline">\(1/(\kappa\sqrt n)\)</span>. Equivalently, accuracy <span class="math inline">\(\alpha\)</span> with failure probability at most <span class="math inline">\(\beta\)</span> requires</p>
 <p><span id="eq-auto-01randomizedresponse-7"><span class="math display">\[
 n \ge \frac{\ln(2/\beta)}{8\kappa^2\alpha^2}
 \tag{3.9}\]</span></span></p>
@@ -465,11 +465,11 @@ n \ge \frac{\ln(2/\beta)}{8\kappa^2\alpha^2}
 </section>
 <section id="sec-rr-definition" class="level2" data-number="3.2">
 <h2 data-number="3.2" class="anchored" data-anchor-id="sec-rr-definition"><span class="header-section-number">3.2</span> Differential privacy</h2>
-<p>The setting is the <strong>central model</strong>. Each of <span class="math inline">\(n\)</span> people sends their data point to a <strong>trusted curator</strong>, and they trust no one else. The curator runs an algorithm <span class="math inline">\(M\)</span> on the dataset <span class="math inline">\(D = (x_1, \dots, x_n) \in \mathcal X^n\)</span> and publishes the output, and anyone who sees the output may be an adversary. The guarantee is a property of the algorithm, called a <strong>mechanism</strong> in this field: no single person’s data has a large effect on the distribution of the output. To make “one person’s data” precise, compare two datasets that differ only in one person’s record.</p>
+<p>In the <strong>central model</strong>, each person sends their record to a <strong>trusted curator</strong>. The curator runs an algorithm <span class="math inline">\(M\)</span> on <span class="math inline">\(D=(x_1,\dots,x_n)\in\mathcal X^n\)</span> and publishes its output, which an adversary may observe. The algorithm, called a <strong>mechanism</strong>, must ensure that changing one person’s record has a limited effect on the output distribution. This requires comparing datasets that differ in one record.</p>
 <div id="def-rr-neighbours" class="theorem definition">
 <p><span class="theorem-title"><strong>Definition 3.3 (Neighbouring datasets)</strong></span> Two datasets <span class="math inline">\(D, D' \in \mathcal X^n\)</span> are <strong>neighbours</strong>, written <span class="math inline">\(D \sim D'\)</span>, if they differ in exactly one record. This is the <strong>replace-one</strong> relation.</p>
 </div>
-<p>The definition asks that the distribution of the output barely change between neighbours. On every set of outputs, the probability may grow by at most a factor <span class="math inline">\(e^\varepsilon\)</span>, where the privacy parameter <span class="math inline">\(\varepsilon\)</span> sets how much change is allowed.</p>
+<p>The definition bounds how much the output distribution can change between neighbours. For any event, its probability can increase by at most a factor of <span class="math inline">\(e^\varepsilon\)</span>.</p>
 <div id="def-rr-dp" class="theorem definition">
 <p><span class="theorem-title"><strong>Definition 3.4 (Differential privacy)</strong></span> Let <span class="math inline">\(\varepsilon \ge 0\)</span>. A randomized algorithm <span class="math inline">\(M \colon \mathcal X^n \to \mathcal Y\)</span>, which maps a dataset to an output in a set <span class="math inline">\(\mathcal Y\)</span>, is <strong><span class="math inline">\(\varepsilon\)</span>-differentially private</strong> (<span class="math inline">\(\varepsilon\)</span>-DP) if for all neighbours <span class="math inline">\(D \sim D'\)</span> and all events <span class="math inline">\(S \subseteq \mathcal Y\)</span>,</p>
 <p><span id="eq-rr-dp"><span class="math display">\[
@@ -477,12 +477,12 @@ n \ge \frac{\ln(2/\beta)}{8\kappa^2\alpha^2}
 \tag{3.10}\]</span></span></p>
 <p>The probability is over the coins of <span class="math inline">\(M\)</span> only. The datasets are fixed.</p>
 </div>
-<p>Its other name is <strong>pure</strong> differential privacy, which sets it apart from the relaxation of a later chapter. Four of its features matter later.</p>
-<p>First, the definition is quantitative. At <span class="math inline">\(\varepsilon = 0\)</span> the output distribution is the same on every dataset, which is perfect privacy and allows no accuracy. An algorithm that is not randomized is <span class="math inline">\(\infty\)</span>-DP, which is no guarantee at all. Typical values of <span class="math inline">\(\varepsilon\)</span> lie between about <span class="math inline">\(0.1\)</span> and <span class="math inline">\(5\)</span>, and smaller is more private. Because the bound is <span class="math inline">\(e^\varepsilon\)</span>, privacy weakens quickly once <span class="math inline">\(\varepsilon\)</span> is above <span class="math inline">\(1\)</span>.</p>
-<p>Second, it is a worst-case guarantee: it holds for every pair of neighbours, however unlikely the data, with no distribution over datasets.</p>
+<p>This guarantee is also called <strong>pure</strong> differential privacy, distinguishing it from the relaxation in a later chapter. Four properties are useful.</p>
+<p>First, the guarantee is quantitative. At <span class="math inline">\(\varepsilon=0\)</span>, the output distribution is identical on every dataset; this gives perfect privacy but no data-dependent accuracy. A deterministic algorithm is <span class="math inline">\(\infty\)</span>-DP and provides no finite guarantee. Typical <span class="math inline">\(\varepsilon\)</span> values range from about <span class="math inline">\(0.1\)</span> to <span class="math inline">\(5\)</span>; smaller values give stronger privacy. Since the bound is <span class="math inline">\(e^\varepsilon\)</span>, it weakens rapidly when <span class="math inline">\(\varepsilon&gt;1\)</span>.</p>
+<p>Second, it is a worst-case guarantee over every neighbouring pair, including unlikely datasets. It assumes no probability distribution over datasets.</p>
 <p>Third, it is symmetric. Swapping <span class="math inline">\(D\)</span> and <span class="math inline">\(D'\)</span> in <a href="#eq-rr-dp" class="quarto-xref">Equation&nbsp;<span>3.10</span></a> gives the lower bound <span class="math inline">\(\Pr[M(D)\in S] \ge e^{-\varepsilon}\Pr[M(D')\in S]\)</span>.</p>
-<p>Fourth, it bounds a ratio, not a difference. For small <span class="math inline">\(\varepsilon\)</span> the factor <span class="math inline">\(e^\varepsilon\)</span> is close to <span class="math inline">\(1 + \varepsilon\)</span>. The exponential form makes factors multiply when guarantees are chained, <span class="math inline">\(e^{\varepsilon_1}e^{\varepsilon_2} = e^{\varepsilon_1+\varepsilon_2}\)</span>, which the next chapter uses for group privacy. An additive notion of closeness, such as a small total variation distance, sounds natural but gives no meaningful guarantee.</p>
-<p>DP with these neighbours, which replace one record, has the name <strong>bounded</strong> DP. The <strong>add/remove</strong> relation, or <strong>unbounded</strong> DP, instead adds or removes one record. A replacement is a removal followed by an addition. So, by the chaining argument of the next chapter’s group privacy, <span class="math inline">\(\varepsilon\)</span>-DP under add/remove neighbours gives <span class="math inline">\(2\varepsilon\)</span>-DP under replace-one neighbours. The converse can fail, because under add/remove neighbours the size <span class="math inline">\(n\)</span> is itself private. The course uses replacement, which is more convenient mathematically, and you can compare two mechanisms only under the same relation.</p>
+<p>Fourth, it bounds a probability ratio rather than a difference. For small <span class="math inline">\(\varepsilon\)</span>, <span class="math inline">\(e^\varepsilon\)</span> is close to <span class="math inline">\(1+\varepsilon\)</span>. Ratios multiply across steps, so <span class="math inline">\(e^{\varepsilon_1}e^{\varepsilon_2}=e^{\varepsilon_1+\varepsilon_2}\)</span>; the next chapter uses this fact for group privacy. A small additive distance, such as total variation, does not provide the same guarantee.</p>
+<p>This replace-one relation defines <strong>bounded</strong> DP. The <strong>add/remove</strong>, or <strong>unbounded</strong>, relation instead adds or removes one record. A replacement takes two such changes, so group privacy from the next chapter gives <span class="math inline">\(2\varepsilon\)</span>-DP under replace-one neighbours from an <span class="math inline">\(\varepsilon\)</span>-DP add/remove guarantee. The converse may fail because the dataset size is private under add/remove adjacency. This course uses replace-one adjacency. Compare privacy guarantees only when they use the same relation.</p>
 <p>For discrete outputs it is enough to check single outcomes, because the probability of an event is the sum of the probabilities of its outcomes.</p>
 <div id="lem-rr-pointwise" class="theorem lemma">
 <p><span class="theorem-title"><strong>Lemma 3.1</strong></span> Let <span class="math inline">\(\mathcal Y\)</span> be countable. If <span class="math inline">\(\Pr[M(D) = y] \le e^{\varepsilon}\Pr[M(D') = y]\)</span> for all neighbours <span class="math inline">\(D \sim D'\)</span> and all outputs <span class="math inline">\(y \in \mathcal Y\)</span>, then <span class="math inline">\(M\)</span> is <span class="math inline">\(\varepsilon\)</span>-DP.</p>
@@ -493,7 +493,7 @@ n \ge \frac{\ln(2/\beta)}{8\kappa^2\alpha^2}
 \Pr[M(D)\in S] = \sum_{y \in S}\Pr[M(D) = y] \le e^{\varepsilon}\sum_{y\in S}\Pr[M(D') = y] = e^{\varepsilon}\Pr[M(D')\in S].
 \tag{3.11}\]</span></span></p>
 </div>
-<p>A first consequence of the definition is that privacy needs randomness.</p>
+<p>A finite privacy guarantee requires randomization.</p>
 <div id="prp-rr-randomized" class="theorem proposition">
 <p><span class="theorem-title"><strong>Proposition 3.1</strong></span> For <span class="math inline">\(\varepsilon &lt; \infty\)</span>, a deterministic <span class="math inline">\(\varepsilon\)</span>-DP algorithm is constant.</p>
 </div>
@@ -506,15 +506,15 @@ n \ge \frac{\ln(2/\beta)}{8\kappa^2\alpha^2}
 </div>
 <section id="sec-rr-testing" class="level3" data-number="3.2.1">
 <h3 data-number="3.2.1" class="anchored" data-anchor-id="sec-rr-testing"><span class="header-section-number">3.2.1</span> Hypothesis testing</h3>
-<p>The definition has an operational meaning from the adversary’s side. Suppose an adversary knows that the dataset is one of two neighbours, <span class="math inline">\(D\)</span> or <span class="math inline">\(D'\)</span>, and sees the output of <span class="math inline">\(M\)</span>. It must decide between the <strong>null hypothesis</strong> and the <strong>alternative</strong>,</p>
+<p>The definition also bounds an adversary’s ability to distinguish neighbouring datasets. Suppose the adversary knows that the dataset is either <span class="math inline">\(D\)</span> or <span class="math inline">\(D'\)</span> and observes the output of <span class="math inline">\(M\)</span>. It tests the <strong>null hypothesis</strong> against the <strong>alternative</strong>:</p>
 <p><span id="eq-auto-01randomizedresponse-9"><span class="math display">\[
 H_0\colon \text{the dataset is } D, \qquad H_1\colon \text{the dataset is } D' .
 \tag{3.12}\]</span></span></p>
-<p>A test is a function <span class="math inline">\(\phi\colon \mathcal Y \to [0,1]\)</span>, the probability of answering <span class="math inline">\(H_1\)</span> given the output, so a test can be random. The test’s <strong>false positive rate</strong> <span class="math inline">\(\mathrm{FPR}\)</span> is the chance of answering <span class="math inline">\(H_1\)</span> when <span class="math inline">\(H_0\)</span> holds, and its <strong>false negative rate</strong> <span class="math inline">\(\mathrm{FNR}\)</span> is the chance of answering <span class="math inline">\(H_0\)</span> when <span class="math inline">\(H_1\)</span> holds:</p>
+<p>A test is a function <span class="math inline">\(\phi\colon\mathcal Y\to[0,1]\)</span> giving the probability of choosing <span class="math inline">\(H_1\)</span> after observing an output. Its <strong>false positive rate</strong> <span class="math inline">\(\mathrm{FPR}\)</span> is the probability of choosing <span class="math inline">\(H_1\)</span> when <span class="math inline">\(H_0\)</span> is true; its <strong>false negative rate</strong> <span class="math inline">\(\mathrm{FNR}\)</span> is the probability of choosing <span class="math inline">\(H_0\)</span> when <span class="math inline">\(H_1\)</span> is true:</p>
 <p><span id="eq-auto-01randomizedresponse-10"><span class="math display">\[
 \mathrm{FPR} = \mathbb E[\phi(M(D))], \qquad \mathrm{FNR} = 1 - \mathbb E[\phi(M(D'))].
 \tag{3.13}\]</span></span></p>
-<p>A test takes values in <span class="math inline">\([0,1]\)</span>, while the definition bounds only probabilities of events. The proof of the next theorem needs the bound for such functions, which the following lemma gives.</p>
+<p>The definition bounds event probabilities, but a test can take any value in <span class="math inline">\([0,1]\)</span>. The following lemma extends the bound to these functions.</p>
 <div id="lem-rr-functions" class="theorem lemma">
 <p><span class="theorem-title"><strong>Lemma 3.2</strong></span> Let <span class="math inline">\(M\)</span> be <span class="math inline">\(\varepsilon\)</span>-DP and let <span class="math inline">\(h\colon\mathcal Y \to [0,1]\)</span>. For all neighbours <span class="math inline">\(D \sim D'\)</span>,</p>
 <p><span id="eq-auto-01randomizedresponse-11"><span class="math display">\[
@@ -529,7 +529,7 @@ H_0\colon \text{the dataset is } D, \qquad H_1\colon \text{the dataset is } D' .
 <li>Integrating over <span class="math inline">\(t \in [0,1]\)</span> gives <span class="math inline">\(e^\varepsilon\,\mathbb E[h(M(D'))]\)</span>.</li>
 </ol>
 </div>
-<p>An adversary wants both error rates small. The next theorem says that differential privacy is exactly a limit on how small they can be together, for every test.</p>
+<p>An adversary wants both error rates to be small. The next theorem characterizes differential privacy by a lower bound on their joint values for every test.</p>
 <div id="thm-rr-testing" class="theorem">
 <p><span class="theorem-title"><strong>Theorem 3.3</strong></span> A mechanism <span class="math inline">\(M\)</span> is <span class="math inline">\(\varepsilon\)</span>-DP if and only if, for every pair of neighbours and every test, the false positive rate <span class="math inline">\(\mathrm{FPR}\)</span> and the false negative rate <span class="math inline">\(\mathrm{FNR}\)</span> satisfy</p>
 <p><span id="eq-rr-testing"><span class="math display">\[
@@ -544,17 +544,17 @@ H_0\colon \text{the dataset is } D, \qquad H_1\colon \text{the dataset is } D' .
 <li><em>The inequalities imply DP.</em> Take an event <span class="math inline">\(S\)</span> and the test <span class="math inline">\(\phi(y) = \mathbf 1[y \in S]\)</span>, which answers <span class="math inline">\(H_1\)</span> exactly when the output lands in <span class="math inline">\(S\)</span>. Its error rates are <span class="math inline">\(\mathrm{FPR} = \Pr[M(D)\in S]\)</span> and <span class="math inline">\(\mathrm{FNR} = 1 - \Pr[M(D')\in S]\)</span>. The second inequality says <span class="math inline">\(e^\varepsilon\Pr[M(D)\in S] + 1 - \Pr[M(D')\in S] \ge 1\)</span>, that is, <span class="math inline">\(\Pr[M(D')\in S] \le e^\varepsilon \Pr[M(D)\in S]\)</span>. The pair of neighbours was arbitrary, so the same holds with the roles of <span class="math inline">\(D\)</span> and <span class="math inline">\(D'\)</span> swapped, which is <a href="#eq-rr-dp" class="quarto-xref">Equation&nbsp;<span>3.10</span></a>.</li>
 </ol>
 </div>
-<p>At <span class="math inline">\(\varepsilon = 0\)</span> the two inequalities force <span class="math inline">\(\mathrm{FPR} + \mathrm{FNR} \ge 1\)</span>, which a test that ignores the output already achieves, such as a random guess (<span class="math inline">\(\mathrm{FPR} = \mathrm{FNR} = 1/2\)</span>). As <span class="math inline">\(\varepsilon\)</span> grows, the region of possible error pairs gets larger, and the adversary can beat a blind guess by more.</p>
+<p>At <span class="math inline">\(\varepsilon=0\)</span>, the inequalities require <span class="math inline">\(\mathrm{FPR}+\mathrm{FNR}\ge1\)</span>, achieved by a test that ignores the output, such as a fair random guess. As <span class="math inline">\(\varepsilon\)</span> increases, lower error pairs become possible and the adversary can distinguish the datasets more accurately.</p>
 </section>
 <section id="sec-rr-meaning" class="level3" data-number="3.2.2">
 <h3 data-number="3.2.2" class="anchored" data-anchor-id="sec-rr-meaning"><span class="header-section-number">3.2.2</span> What the definition promises</h3>
-<p>In words, the probability of any event is about the same whether a given person’s data is in the dataset or is replaced by someone else’s. So a harm that comes from the output is not much more likely because the person took part. A linkage attack, for example, succeeds about as often without their record, whatever auxiliary data exists now or later. At <span class="math inline">\(\varepsilon = 0.1\)</span>, the chance of any bad event grows by a factor of at most <span class="math inline">\(e^{0.1} \approx 1.105\)</span>. The guarantee holds against an adversary with unlimited computation and side information, so it is information theoretic, unlike most of cryptography.</p>
-<p>The definition does not prevent inference from aggregate patterns. Suppose a study with differential privacy finds that smoking causes cancer, and an insurer then raises the premium of a smoker who took part. The study’s conclusion would be the same without that person’s record, so the harm comes from a fact about the population, not from their participation. Learning such facts is the purpose of statistics.</p>
+<p>The probability of any event changes by at most a factor <span class="math inline">\(e^\varepsilon\)</span> when one person’s record is replaced. Thus participation cannot substantially increase the probability of an output-caused harm. For example, a linkage attack succeeds at nearly the same rate when that person’s record is absent, regardless of auxiliary information. At <span class="math inline">\(\varepsilon=0.1\)</span>, the probability can increase by at most <span class="math inline">\(e^{0.1}\approx1.105\)</span>. This information-theoretic guarantee holds even against an adversary with unlimited computation and side information.</p>
+<p>The definition does not prevent inference from population patterns. If a private study finds an association between smoking and cancer, an insurer may raise a participant’s premium. The study would reach the same conclusion without that person’s record; the inference concerns the population, not participation. Statistical analysis is intended to reveal such population-level facts.</p>
 </section>
 </section>
 <section id="sec-rr-privacy" class="level2" data-number="3.3">
 <h2 data-number="3.3" class="anchored" data-anchor-id="sec-rr-privacy"><span class="header-section-number">3.3</span> Randomized response revisited</h2>
-<p>Randomized response now gets a privacy guarantee. The theorem treats the whole vector of reports as the output, and the estimator <a href="#eq-rr-estimator" class="quarto-xref">Equation&nbsp;<span>3.4</span></a>, a function of that vector, inherits the guarantee by post-processing, which the next chapter proves.</p>
+<p>The next theorem gives randomized response a privacy guarantee. It treats the report vector as the output; the estimator <a href="#eq-rr-estimator" class="quarto-xref">Equation&nbsp;<span>3.4</span></a> inherits the same guarantee by post-processing, proved in the next chapter.</p>
 <div id="thm-rr-privacy" class="theorem">
 <p><span class="theorem-title"><strong>Theorem 3.4</strong></span> Randomized response with bias <span class="math inline">\(\kappa \in [0,1/2)\)</span>, releasing <span class="math inline">\((Y_1,\dots,Y_n)\)</span>, is <span class="math inline">\(\varepsilon\)</span>-DP for</p>
 <p><span id="eq-auto-01randomizedresponse-12"><span class="math display">\[

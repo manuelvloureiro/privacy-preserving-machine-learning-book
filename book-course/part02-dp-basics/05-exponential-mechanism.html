@@ -393,22 +393,22 @@ window.Quarto = {
 </header>
 
 
-<p>The Laplace and Gaussian mechanisms release numbers. They work because a small change in a number does little harm. Many tasks instead ask for the best object from a set, such as a price or a classifier, and there a small change in the output can ruin its quality. The exponential mechanism samples each object with a probability that grows exponentially with a score. So good objects are likely, while the choice reveals little about any one person, as differential privacy (DP) requires. This chapter proves that the mechanism is private and nearly optimal, and applies it to three problems.</p>
+<p>The Laplace and Gaussian mechanisms release numeric values. Other tasks select an object, such as a price or classifier, and small numeric perturbations may sharply reduce its quality. The exponential mechanism samples objects with probability proportional to an exponential of their score. High-scoring objects are more likely, while the selection satisfies differential privacy (DP). This chapter proves its privacy and utility guarantees and applies it to three problems.</p>
 <section id="sec-em-setting" class="level2" data-number="7.1">
 <h2 data-number="7.1" class="anchored" data-anchor-id="sec-em-setting"><span class="header-section-number">7.1</span> Selecting an object</h2>
-<p>A seller has a digital good, such as an e-book, that costs nothing to copy, and <span class="math inline">\(n\)</span> buyers who each want one copy. Buyer <span class="math inline">\(i\)</span> values the good at <span class="math inline">\(v_i\)</span> and buys it if the price <span class="math inline">\(p\)</span> is at most <span class="math inline">\(v_i\)</span>. The seller’s revenue at price <span class="math inline">\(p\)</span> is the price times the number of buyers,</p>
+<p>A seller offers a digital good, such as an e-book, that costs nothing to copy. Each of <span class="math inline">\(n\)</span> buyers values it at <span class="math inline">\(v_i\)</span> and buys if the price <span class="math inline">\(p\)</span> is at most <span class="math inline">\(v_i\)</span>. Revenue at price <span class="math inline">\(p\)</span> is the price multiplied by the number of buyers,</p>
 <p><span id="eq-auto-05exponentialmechanism-1"><span class="math display">\[
 p \cdot \big|\{i : v_i \ge p\}\big| .
 \tag{7.1}\]</span></span></p>
-<p>The seller could compute the price with the highest revenue from the valuations, but that price can reveal a single buyer. If one buyer values the good far above the others, the best price may be that buyer’s valuation.</p>
-<p>Noise added to the best price does not help, because revenue is very sensitive to the price. Take three buyers who value the good at $1 and one who values it at $2.50. At a price of $1 all four buy and the revenue is $4, but at $1.01 only the last buyer buys and the revenue is $1.01. So a cent of noise can cost three quarters of the revenue. It is better to treat the prices as objects with a quality, the revenue, than as numbers to perturb.</p>
-<p>In general, the input to the selection problem has three parts:</p>
+<p>The revenue-maximizing price can reveal an individual valuation. If one buyer values the good much more than others, that valuation may determine the optimal price.</p>
+<p>Adding noise to the optimal price can sharply reduce revenue. Suppose three buyers value the good at $1 and one at $2.50. A price of $1 earns $4; a price of $1.01 earns $1.01 because only one buyer purchases. Thus one cent of noise reduces revenue by about three quarters. Instead of perturbing the price, select among candidate prices according to their revenue.</p>
+<p>In general, a selection problem specifies:</p>
 <ul>
 <li>a dataset <span class="math inline">\(D \in \mathcal X^n\)</span>,</li>
 <li>a set <span class="math inline">\(\mathcal R\)</span> of objects,</li>
 <li>a <strong>score function</strong> <span class="math inline">\(u\colon \mathcal X^n \times \mathcal R \to \mathbb R\)</span>, where <span class="math inline">\(u(D,r)\)</span> says how good the object <span class="math inline">\(r\)</span> is for the dataset <span class="math inline">\(D\)</span>.</li>
 </ul>
-<p>In the example, <span class="math inline">\(D\)</span> is the list of valuations, <span class="math inline">\(\mathcal R\)</span> is the set of prices, and <span class="math inline">\(u(D,p)\)</span> is the revenue at price <span class="math inline">\(p\)</span>. Only the dataset is private, while the objects and the score function are public. So the sensitivity measures how much the score of a fixed object can move when one record changes.</p>
+<p>For pricing, <span class="math inline">\(D\)</span> is the list of valuations, <span class="math inline">\(\mathcal R\)</span> is the set of prices, and <span class="math inline">\(u(D,p)\)</span> is revenue. The candidate objects and score function are public; only <span class="math inline">\(D\)</span> is private. Score sensitivity measures the maximum change in a fixed candidate’s score when one record changes.</p>
 <div id="def-em-sensitivity" class="theorem definition">
 <p><span class="theorem-title"><strong>Definition 7.1 (Sensitivity of a score function)</strong></span> The <strong>sensitivity</strong> of a score function <span class="math inline">\(u\)</span> is</p>
 <p><span id="eq-auto-05exponentialmechanism-2"><span class="math display">\[
@@ -416,7 +416,7 @@ p \cdot \big|\{i : v_i \ge p\}\big| .
 \tag{7.2}\]</span></span></p>
 <p>where the inner supremum is over neighbouring datasets, which differ in one record (the replace-one relation).</p>
 </div>
-<p>The score is a single real number, so it needs no choice of norm. The mechanism gives each object <span class="math inline">\(r\)</span> a weight <span class="math inline">\(\exp(\varepsilon u(D,r)/(2\Delta))\)</span>, where <span class="math inline">\(\varepsilon\)</span> is the privacy parameter and <span class="math inline">\(\Delta\)</span> is any upper bound on the sensitivity <span class="math inline">\(\Delta u\)</span>. Division by the sum of all weights, the normalizer, turns the weights into probabilities. For an infinite set of objects, such as an interval of prices, the weights become a density. The sum then becomes an integral against a fixed base measure <span class="math inline">\(\mu\)</span> on <span class="math inline">\(\mathcal R\)</span>, such as length on the real line.</p>
+<p>The score is scalar, so no norm is needed. The mechanism assigns weight <span class="math inline">\(\exp(\varepsilon u(D,r)/(2\Delta))\)</span> to each object <span class="math inline">\(r\)</span>, where <span class="math inline">\(\Delta\)</span> upper-bounds the score sensitivity. Dividing by the sum of weights gives probabilities. For an infinite object set, such as an interval of prices, the weights define a density and the normalizer is an integral with respect to a fixed measure <span class="math inline">\(\mu\)</span>.</p>
 <div id="def-em-mechanism" class="theorem definition">
 <p><span class="theorem-title"><strong>Definition 7.2 (Exponential mechanism)</strong></span> Let <span class="math inline">\(\varepsilon &gt; 0\)</span>, and let <span class="math inline">\(\Delta &gt; 0\)</span> satisfy <span class="math inline">\(\Delta \ge \Delta u\)</span>. Let <span class="math inline">\(\mu\)</span> be a measure on <span class="math inline">\(\mathcal R\)</span>, taken to be the counting measure, which gives each object weight <span class="math inline">\(1\)</span>, when <span class="math inline">\(\mathcal R\)</span> is finite. Assume that the normalizer</p>
 <p><span id="eq-auto-05exponentialmechanism-3"><span class="math display">\[
@@ -427,12 +427,12 @@ Z(D) = \int_{\mathcal R} \exp\!\left(\frac{\varepsilon\, u(D,r')}{2\Delta}\right
 p_D(r) = \frac{1}{Z(D)}\exp\!\left(\frac{\varepsilon\, u(D,r)}{2\Delta}\right) .
 \tag{7.4}\]</span></span></p>
 </div>
-<p>For finite <span class="math inline">\(\mathcal R\)</span>, <a href="#eq-em-density" class="quarto-xref">Equation&nbsp;<span>7.4</span></a> says that <span class="math inline">\(\Pr[M_E(D) = r]\)</span> is proportional to <span class="math inline">\(\exp(\varepsilon u(D,r)/(2\Delta))\)</span>, so a higher score makes an object more likely. A smaller <span class="math inline">\(\varepsilon\)</span> or a larger <span class="math inline">\(\Delta\)</span> flattens the distribution towards uniform, which is more private and less accurate.</p>
-<p>The definition says nothing about how to sample. For a finite set, you can compute every weight, add them up and sample, in time proportional to <span class="math inline">\(|\mathcal R|\)</span>, which is slow when <span class="math inline">\(\mathcal R\)</span> is exponentially large. For an infinite set, the usual remedy is to discretize, as <a href="#sec-em-pricing" class="quarto-xref"><span>Section 7.4.2</span></a> does. So the exponential mechanism always gives an algorithm, but not always an efficient one.</p>
+<p>For finite <span class="math inline">\(\mathcal R\)</span>, <a href="#eq-em-density" class="quarto-xref">Equation&nbsp;<span>7.4</span></a> assigns probability proportional to <span class="math inline">\(\exp(\varepsilon u(D,r)/(2\Delta))\)</span>. Higher scores are more likely. Smaller <span class="math inline">\(\varepsilon\)</span> or larger <span class="math inline">\(\Delta\)</span> makes the distribution more uniform, increasing privacy and reducing utility.</p>
+<p>The definition does not specify an efficient sampling method. For finite <span class="math inline">\(\mathcal R\)</span>, direct sampling takes time proportional to <span class="math inline">\(|\mathcal R|\)</span>, which is infeasible when the set is exponentially large. For infinite sets, discretization is one option, as in <a href="#sec-em-pricing" class="quarto-xref"><span>Section 7.4.2</span></a>. The mechanism is well-defined but not always computationally efficient.</p>
 </section>
 <section id="sec-em-privacy" class="level2" data-number="7.2">
 <h2 data-number="7.2" class="anchored" data-anchor-id="sec-em-privacy"><span class="header-section-number">7.2</span> Privacy</h2>
-<p>The score of <span class="math inline">\(r\)</span> changes by at most <span class="math inline">\(\Delta\)</span> between neighbours, so the weight of <span class="math inline">\(r\)</span> changes by at most a factor <span class="math inline">\(e^{\varepsilon/2}\)</span>. The normalizer is a sum of such weights, so it also changes by at most <span class="math inline">\(e^{\varepsilon/2}\)</span>, and the two factors together give <span class="math inline">\(e^\varepsilon\)</span>.</p>
+<p>Between neighbours, each score changes by at most <span class="math inline">\(\Delta\)</span>, so its weight changes by at most <span class="math inline">\(e^{\varepsilon/2}\)</span>. The normalizer changes by the same factor. Their ratio therefore changes by at most <span class="math inline">\(e^\varepsilon\)</span>.</p>
 <div id="thm-em-privacy" class="theorem">
 <p><span class="theorem-title"><strong>Theorem 7.1</strong></span> The exponential mechanism is <span class="math inline">\(\varepsilon\)</span>-DP.</p>
 </div>
@@ -448,7 +448,7 @@ p_D(r) = \frac{1}{Z(D)}\exp\!\left(\frac{\varepsilon\, u(D,r)}{2\Delta}\right) .
 <li><p>So <span class="math inline">\(p_D(r) \le e^\varepsilon p_{D'}(r)\)</span> for every <span class="math inline">\(r\)</span>. For an event <span class="math inline">\(S \subseteq \mathcal R\)</span>, integrating over <span class="math inline">\(S\)</span> gives <span class="math inline">\(\Pr[M_E(D)\in S] \le e^\varepsilon\Pr[M_E(D')\in S]\)</span>.</p></li>
 </ol>
 </div>
-<p>Step 3 spends the factor <span class="math inline">\(2\)</span> in <span class="math inline">\(2\Delta\)</span>, because it pays for the change in the normalizer. When the normalizer does not depend on the dataset, that half of the budget is not needed.</p>
+<p>The factor of <span class="math inline">\(2\)</span> in the denominator allocates half the privacy budget to the score and half to the normalizer. If the normalizer is data-independent, the mechanism does not need this allocation.</p>
 <div id="cor-em-fixed-normalizer" class="theorem corollary">
 <p><span class="theorem-title"><strong>Corollary 7.1</strong></span> Suppose that <span class="math inline">\(Z(D)\)</span>, computed with <span class="math inline">\(\Delta\)</span> in place of <span class="math inline">\(2\Delta\)</span>, is the same for every dataset <span class="math inline">\(D\)</span>. Then the mechanism with density proportional to <span class="math inline">\(\exp(\varepsilon u(D,r)/\Delta)\)</span> is <span class="math inline">\(\varepsilon\)</span>-DP.</p>
 </div>
@@ -458,11 +458,11 @@ p_D(r) = \frac{1}{Z(D)}\exp\!\left(\frac{\varepsilon\, u(D,r)}{2\Delta}\right) .
 </section>
 <section id="sec-em-utility" class="level2" data-number="7.3">
 <h2 data-number="7.3" class="anchored" data-anchor-id="sec-em-utility"><span class="header-section-number">7.3</span> Utility</h2>
-<p>The mechanism should output an object whose score is close to the best one. Write the best score and the set of objects that attain it as</p>
+<p>Utility requires an output whose score is near the maximum. Define the maximum score and its set of maximizers by</p>
 <p><span id="eq-auto-05exponentialmechanism-5"><span class="math display">\[
 \mathrm{OPT}(D) = \max_{r\in\mathcal R} u(D,r), \qquad \mathcal R^*(D) = \{r \in \mathcal R : u(D,r) = \mathrm{OPT}(D)\} .
 \tag{7.6}\]</span></span></p>
-<p>The theorem says that the output’s score is rarely more than about <span class="math inline">\((2\Delta/\varepsilon)\ln|\mathcal R|\)</span> below <span class="math inline">\(\mathrm{OPT}(D)\)</span>. So the loss grows linearly with the sensitivity and with <span class="math inline">\(1/\varepsilon\)</span>, but only logarithmically with the number of objects.</p>
+<p>The theorem bounds the score loss by approximately <span class="math inline">\((2\Delta/\varepsilon)\ln|\mathcal R|\)</span>. The loss is linear in sensitivity and <span class="math inline">\(1/\varepsilon\)</span>, but logarithmic in the number of candidates.</p>
 <div id="thm-em-utility" class="theorem">
 <p><span class="theorem-title"><strong>Theorem 7.2</strong></span> Let <span class="math inline">\(\mathcal R\)</span> be finite. For every dataset <span class="math inline">\(D\)</span> and every <span class="math inline">\(t \ge 0\)</span>,</p>
 <p><span id="eq-auto-05exponentialmechanism-6"><span class="math display">\[
@@ -485,7 +485,7 @@ p_D(r) = \frac{1}{Z(D)}\exp\!\left(\frac{\varepsilon\, u(D,r)}{2\Delta}\right) .
 <li><p>Set <span class="math inline">\(\tau = \mathrm{OPT}(D) - (2\Delta/\varepsilon)\big(\ln(|\mathcal R|/|\mathcal R^*(D)|) + t\big)\)</span>. The exponent becomes <span class="math inline">\(-\ln(|\mathcal R|/|\mathcal R^*(D)|) - t\)</span>, and the right-hand side becomes <span class="math inline">\(e^{-t}\)</span>.</p></li>
 </ol>
 </div>
-<p>Since at least one object attains the best score, dropping <span class="math inline">\(|\mathcal R^*(D)|\)</span> gives the form that is used most often.</p>
+<p>Since <span class="math inline">\(|\mathcal R^*(D)|\ge1\)</span>, the following corollary gives the commonly used, simpler bound.</p>
 <div id="cor-em-utility" class="theorem corollary">
 <p><span class="theorem-title"><strong>Corollary 7.2</strong></span> Let <span class="math inline">\(\mathcal R\)</span> be finite. For every dataset <span class="math inline">\(D\)</span> and every <span class="math inline">\(t \ge 0\)</span>,</p>
 <p><span id="eq-em-utility"><span class="math display">\[
@@ -501,7 +501,7 @@ p_D(r) = \frac{1}{Z(D)}\exp\!\left(\frac{\varepsilon\, u(D,r)}{2\Delta}\right) .
 </section>
 <section id="sec-em-applications" class="level2" data-number="7.4">
 <h2 data-number="7.4" class="anchored" data-anchor-id="sec-em-applications"><span class="header-section-number">7.4</span> Applications</h2>
-<p>Each application below follows the same recipe. It chooses the set of objects and the score function, bounds the sensitivity, and reads off privacy and accuracy from <a href="#thm-em-privacy" class="quarto-xref">Theorem&nbsp;<span>7.1</span></a> and <a href="#cor-em-utility" class="quarto-xref">Corollary&nbsp;<span>7.2</span></a>.</p>
+<p>Each application specifies the candidate set and score, bounds sensitivity, and applies <a href="#thm-em-privacy" class="quarto-xref">Theorem&nbsp;<span>7.1</span></a> and <a href="#cor-em-utility" class="quarto-xref">Corollary&nbsp;<span>7.2</span></a>.</p>
 <section id="sec-em-laplace" class="level3" data-number="7.4.1">
 <h3 data-number="7.4.1" class="anchored" data-anchor-id="sec-em-laplace"><span class="header-section-number">7.4.1</span> The Laplace mechanism</h3>
 <p>Let <span class="math inline">\(f\colon\mathcal X^n \to \mathbb R\)</span> have sensitivity <span class="math inline">\(\Delta f\)</span>, which means that <span class="math inline">\(|f(D) - f(D')| \le \Delta f\)</span> for all neighbours. Take the real line as the set of objects, with Lebesgue measure, and score each candidate answer by its distance from the true one,</p>
@@ -527,12 +527,12 @@ u(D, r) = -|f(D) - r| .
 <p><span id="eq-auto-05exponentialmechanism-10"><span class="math display">\[
 \gamma = \max_{p\in[0,1]} p\cdot|\{i : v_i \ge p\}| .
 \tag{7.12}\]</span></span></p>
-<p>The maximum exists, because the revenue increases linearly between consecutive valuations and drops just after each one, so it is attained at one of the <span class="math inline">\(v_i\)</span> or at <span class="math inline">\(0\)</span>.</p>
-<p>The set of all prices is infinite, and the revenue has no structure that makes sampling easy, so the mechanism runs on a grid. Fix an integer <span class="math inline">\(m \ge 1\)</span> and the step <span class="math inline">\(\alpha = 1/m\)</span>, and use the <span class="math inline">\(m\)</span> prices</p>
+<p>The maximum exists: revenue increases linearly between consecutive valuations and drops immediately above each valuation, so an optimum occurs at a valuation or at <span class="math inline">\(0\)</span>.</p>
+<p>Because the continuous price set is difficult to sample from, use a grid. For an integer <span class="math inline">\(m\ge1\)</span>, set <span class="math inline">\(\alpha=1/m\)</span> and use the <span class="math inline">\(m\)</span> prices</p>
 <p><span id="eq-auto-05exponentialmechanism-11"><span class="math display">\[
 \mathcal R = \{\alpha, 2\alpha, \dots, 1\} .
 \tag{7.13}\]</span></span></p>
-<p>Write <span class="math inline">\(\mathrm{OPT}(D)\)</span> for the best revenue over the grid. Rounding the best price down to the grid loses a little revenue, which the next lemma bounds.</p>
+<p>Write <span class="math inline">\(\mathrm{OPT}(D)\)</span> for the maximum grid revenue. The next lemma bounds the loss from rounding the optimal price down to the grid.</p>
 <div id="lem-em-grid" class="theorem lemma">
 <p><span class="theorem-title"><strong>Lemma 7.1</strong></span> The best revenue on the grid satisfies <span class="math inline">\(\mathrm{OPT}(D) \ge \gamma - \alpha n\)</span>.</p>
 </div>
@@ -544,7 +544,7 @@ u(D, r) = -|f(D) - r| .
 <li>Every buyer with <span class="math inline">\(v_i \ge p^*\)</span> also has <span class="math inline">\(v_i \ge p'\)</span>. So the revenue at <span class="math inline">\(p'\)</span> is at least <span class="math inline">\(p'\cdot|\{i : v_i\ge p^*\}| \ge (p^* - \alpha)|\{i : v_i\ge p^*\}| \ge \gamma - \alpha n\)</span>.</li>
 </ol>
 </div>
-<p>So the private price loses revenue twice, once to rounding and once to the random selection. The theorem adds the two losses, with a grid of about <span class="math inline">\(\varepsilon n\)</span> prices.</p>
+<p>The private price incurs rounding loss and selection loss. The theorem bounds their sum using a grid of about <span class="math inline">\(\varepsilon n\)</span> prices.</p>
 <div id="thm-em-pricing" class="theorem">
 <p><span class="theorem-title"><strong>Theorem 7.3</strong></span> Let <span class="math inline">\(\varepsilon &gt; 0\)</span>, <span class="math inline">\(m = \lceil \varepsilon n\rceil\)</span> and <span class="math inline">\(\alpha = 1/m\)</span>. The exponential mechanism with the grid <span class="math inline">\(\mathcal R\)</span>, the revenue <span class="math inline">\(u(D,p) = p\cdot|\{i : v_i \ge p\}|\)</span> as score and <span class="math inline">\(\Delta = 1\)</span> is <span class="math inline">\(\varepsilon\)</span>-DP. For every <span class="math inline">\(D\in[0,1]^n\)</span> and <span class="math inline">\(t \ge 0\)</span>, with probability at least <span class="math inline">\(1 - e^{-t}\)</span>, the revenue at its output price is at least</p>
 <p><span id="eq-em-pricing"><span class="math display">\[
@@ -560,7 +560,7 @@ u(D, r) = -|f(D) - r| .
 <li>Adding the two losses gives <a href="#eq-em-pricing" class="quarto-xref">Equation&nbsp;<span>7.14</span></a>.</li>
 </ol>
 </div>
-<p>The loss is <span class="math inline">\(O(\log(\varepsilon n)/\varepsilon)\)</span>. When a constant fraction of buyers values the good above a constant price, <span class="math inline">\(\gamma\)</span> grows linearly in <span class="math inline">\(n\)</span>, so the loss is a vanishing fraction of the best revenue. The grid size balances the two losses: a finer grid loses less to rounding, <span class="math inline">\(\alpha n\)</span>, but more to selection, <span class="math inline">\((2/\varepsilon)\ln(1/\alpha)\)</span>. The next example compares the guarantee with the revenue the mechanism actually earns.</p>
+<p>The loss is <span class="math inline">\(O(\log(\varepsilon n)/\varepsilon)\)</span>. If a constant fraction of buyers values the good above a constant price, then <span class="math inline">\(\gamma\)</span> grows linearly with <span class="math inline">\(n\)</span>, and the loss is a vanishing fraction of optimal revenue. Grid size balances rounding loss, <span class="math inline">\(\alpha n\)</span>, against selection loss, <span class="math inline">\((2/\varepsilon)\ln(1/\alpha)\)</span>. The next example compares the bound with observed utility.</p>
 <div id="exm-em-pricing" class="theorem example">
 <p><span class="theorem-title"><strong>Example 7.1</strong></span> Draw <span class="math inline">\(n = 1{,}000\)</span> valuations uniformly from <span class="math inline">\([0,1]\)</span> and take <span class="math inline">\(\varepsilon = 0.5\)</span>, so that the grid has <span class="math inline">\(m = 500\)</span> prices. The best revenue is <span class="math inline">\(\gamma = 267.40\)</span>, and the best grid price earns <span class="math inline">\(266.88\)</span>. With <span class="math inline">\(t = \ln 20\)</span>, <a href="#eq-em-pricing" class="quarto-xref">Equation&nbsp;<span>7.14</span></a> guarantees a revenue of at least <span class="math inline">\(267.40 - 38.84 = 228.56\)</span> with probability <span class="math inline">\(0.95\)</span>. The exact output distribution does much better. Its mean revenue is <span class="math inline">\(263.86\)</span>, and its 5th percentile is <span class="math inline">\(256.52\)</span>, a loss of <span class="math inline">\(10.88\)</span>, so the guarantee is about 3.6 times too pessimistic. <a href="#fig-em-pricing" class="quarto-xref">Figure&nbsp;<span>7.1</span></a> shows the output distribution on a smaller example.</p>
 </div>
@@ -577,7 +577,7 @@ Figure&nbsp;7.1: The exponential mechanism for pricing, with <span class="math i
 </section>
 <section id="sec-em-pac" class="level3" data-number="7.4.3">
 <h3 data-number="7.4.3" class="anchored" data-anchor-id="sec-em-pac"><span class="header-section-number">7.4.3</span> Private PAC learning</h3>
-<p>In the probably approximately correct (PAC) model of learning, a learner sees labelled records and must output a classifier that is accurate on new points from the same source. Here the records are points of the Boolean cube <span class="math inline">\(\{0,1\}^d\)</span>, labelled <span class="math inline">\(0\)</span> or <span class="math inline">\(1\)</span>. The definition measures accuracy by an error <span class="math inline">\(\alpha\)</span> and a failure probability <span class="math inline">\(\beta\)</span>, so in this section <span class="math inline">\(\alpha\)</span> is no longer the grid step of the pricing example.</p>
+<p>In the probably approximately correct (PAC) model, a learner receives labelled records and outputs a classifier accurate on new samples from the same distribution. Here, records are points in <span class="math inline">\(\{0,1\}^d\)</span> with labels in <span class="math inline">\(\{0,1\}\)</span>. Accuracy is specified by error <span class="math inline">\(\alpha\)</span> and failure probability <span class="math inline">\(\beta\)</span>; here <span class="math inline">\(\alpha\)</span> is not the pricing grid step.</p>
 <div id="def-em-pac" class="theorem definition">
 <p><span class="theorem-title"><strong>Definition 7.3 (PAC learning)</strong></span> A <strong>concept class</strong> is a finite set <span class="math inline">\(\mathcal C\)</span> of functions <span class="math inline">\(c\colon\{0,1\}^d\to\{0,1\}\)</span>. An unknown <strong>target</strong> <span class="math inline">\(c^* \in \mathcal C\)</span> and an unknown distribution <span class="math inline">\(\mathcal D\)</span> on <span class="math inline">\(\{0,1\}^d\)</span> generate the dataset. Each record is a point <span class="math inline">\(x_i\)</span>, drawn independently from <span class="math inline">\(\mathcal D\)</span>, together with its label <span class="math inline">\(y_i = c^*(x_i)\)</span>. So the dataset is <span class="math inline">\(D = (z_1, \dots, z_n)\)</span> with labelled records <span class="math inline">\(z_i = (x_i, y_i)\)</span>. The <strong>error</strong> of a function <span class="math inline">\(h\)</span> is</p>
 <p><span id="eq-auto-05exponentialmechanism-12"><span class="math display">\[
@@ -585,12 +585,12 @@ Figure&nbsp;7.1: The exponential mechanism for pricing, with <span class="math i
 \tag{7.15}\]</span></span></p>
 <p>A learner is <strong><span class="math inline">\((\alpha,\beta)\)</span>-accurate</strong> if, for every target and every <span class="math inline">\(\mathcal D\)</span>, it outputs a function <span class="math inline">\(\hat h\)</span> with <span class="math inline">\(\mathrm{err}(\hat h) \le \alpha\)</span> with probability at least <span class="math inline">\(1-\beta\)</span>.</p>
 </div>
-<p>For example, <span class="math inline">\(\mathcal C\)</span> might be a finite set of half-spaces, each of which labels <span class="math inline">\(1\)</span> the points on one side of a hyperplane.</p>
-<p>Without privacy, the classic learner outputs any function in <span class="math inline">\(\mathcal C\)</span> that labels every record correctly, and one exists because the target does. It works because, for every function at once, the fraction of mistakes on the sample is close to the error. Write that fraction as</p>
+<p>For example, <span class="math inline">\(\mathcal C\)</span> may be a finite set of half-spaces that label points on one side of a hyperplane as <span class="math inline">\(1\)</span>.</p>
+<p>Without privacy, a consistent learner outputs a function in <span class="math inline">\(\mathcal C\)</span> that labels every record correctly; the target guarantees such a function exists. Uniform convergence ensures that every function’s sample error is close to its true error. Define the sample error by</p>
 <p><span id="eq-auto-05exponentialmechanism-13"><span class="math display">\[
 \widehat{\mathrm{err}}(h) = \frac1n\big|\{i : h(x_i)\ne y_i\}\big| .
 \tag{7.16}\]</span></span></p>
-<p>The tool is Hoeffding’s inequality: the average of <span class="math inline">\(n\)</span> independent random variables with values in <span class="math inline">\([0,1]\)</span> falls below its mean by a margin <span class="math inline">\(s \ge 0\)</span> or more with probability at most <span class="math inline">\(\exp(-2ns^2)\)</span>. Applied to the mistakes of one function, with a union bound over <span class="math inline">\(\mathcal C\)</span>, it shows that the sample error is close to the true error for every function at once.</p>
+<p>Hoeffding’s inequality bounds the probability that an average of <span class="math inline">\(n\)</span> independent <span class="math inline">\([0,1]\)</span> variables falls below its mean by at least <span class="math inline">\(s\)</span> by <span class="math inline">\(\exp(-2ns^2)\)</span>. Apply it to each function’s error indicators and take a union bound over <span class="math inline">\(\mathcal C\)</span>.</p>
 <div id="lem-em-uniform" class="theorem lemma">
 <p><span class="theorem-title"><strong>Lemma 7.2</strong></span> Let <span class="math inline">\(\alpha, \beta \in (0,1)\)</span> and <span class="math inline">\(n \ge 2\ln(|\mathcal C|/\beta)/\alpha^2\)</span>. With probability at least <span class="math inline">\(1-\beta\)</span> over the sample, every <span class="math inline">\(h\in\mathcal C\)</span> satisfies <span class="math inline">\(\mathrm{err}(h) \le \widehat{\mathrm{err}}(h) + \alpha/2\)</span>. In particular, every function in <span class="math inline">\(\mathcal C\)</span> that labels the whole sample correctly has error at most <span class="math inline">\(\alpha/2\)</span>.</p>
 </div>
@@ -603,9 +603,9 @@ Figure&nbsp;7.1: The exponential mechanism for pricing, with <span class="math i
 <li>A function that labels the sample correctly has <span class="math inline">\(\widehat{\mathrm{err}}(h) = 0\)</span>, so its error is at most <span class="math inline">\(\alpha/2\)</span>.</li>
 </ol>
 </div>
-<p>So about <span class="math inline">\(\ln|\mathcal C|/\alpha^2\)</span> records suffice.</p>
-<p>For privacy, neighbouring datasets differ in one labelled record: any pair <span class="math inline">\(z_i' = (x_i', y_i')\)</span> can replace <span class="math inline">\(z_i = (x_i, y_i)\)</span>. The new point need not come from <span class="math inline">\(\mathcal D\)</span>, and its label need not equal <span class="math inline">\(c^*(x_i')\)</span>. Accuracy is proved for data drawn from the model, but privacy must hold for every dataset, so that a wrong model never costs anyone their privacy.</p>
-<p>The private learner keeps the aim of few mistakes on the sample, but chooses the function with the exponential mechanism. Its score is minus the sample error, so a function with fewer mistakes is more likely.</p>
+<p>Thus, <span class="math inline">\(O(\ln|\mathcal C|/\alpha^2)\)</span> records suffice.</p>
+<p>For privacy, neighbours differ in one labelled record, and the replacement <span class="math inline">\((x_i',y_i')\)</span> need not follow <span class="math inline">\(\mathcal D\)</span> or satisfy <span class="math inline">\(y_i'=c^*(x_i')\)</span>. Accuracy assumes data from the learning model; privacy must hold for every dataset.</p>
+<p>The private learner selects a function using the exponential mechanism with score equal to negative sample error. Functions with fewer mistakes receive higher probability.</p>
 <div id="thm-em-pac" class="theorem">
 <p><span class="theorem-title"><strong>Theorem 7.4 (Private PAC learning)</strong></span> Let <span class="math inline">\(\varepsilon &gt; 0\)</span> and <span class="math inline">\(\alpha,\beta\in(0,1)\)</span>. Run the exponential mechanism with <span class="math inline">\(\mathcal R = \mathcal C\)</span>, the score <span class="math inline">\(u(D,h) = -\widehat{\mathrm{err}}(h)\)</span> and <span class="math inline">\(\Delta = 1/n\)</span>. It is <span class="math inline">\(\varepsilon\)</span>-DP for every dataset. If</p>
 <p><span id="eq-auto-05exponentialmechanism-14"><span class="math display">\[

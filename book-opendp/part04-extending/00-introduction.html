@@ -348,8 +348,8 @@ ul.task-list li input[type="checkbox"] {
 </header>
 
 
-<p>The framework is open. Anything with a stability map or a privacy map can be a transformation or a measurement, whether OpenDP wrote it or you did. The thread of this part is that a plugin is only as private as its map. So writing one means proving its map, and the library makes the rest safe, from chaining to accounting.</p>
-<p><a href="../part04-extending/13-plugins.html">Plugins</a> writes a transformation and a measurement in Python and registers constructors for the Context API. Then it follows the documentation’s two larger examples, a Theil-Sen regression and a private choice of grouping columns. <a href="../part04-extending/14-statistical-modelling.html">Statistical modelling</a> fits the two models that come with the library, a differentially private linear regression and a differentially private principal component analysis, and reads what each guarantees. <a href="../part04-extending/15-limitations-and-troubleshooting.html">Limitations and troubleshooting</a> says what OpenDP does not promise, from floating-point arithmetic to side channels. It also explains the feature flags and the common error messages.</p>
+<p>OpenDP’s framework accepts built-in and user-defined transformations and measurements with stability or privacy maps. A plugin preserves privacy only if its map is valid; you must prove that validity. The framework then supports chaining and accounting.</p>
+<p><a href="../part04-extending/13-plugins.html">Plugins</a> implements a transformation and measurement in Python, registers Context API constructors, and reproduces the documentation’s examples: Theil-Sen regression and private selection of grouping columns. <a href="../part04-extending/14-statistical-modelling.html">Statistical modelling</a> fits differentially private linear regression and principal component analysis models and interprets their guarantees. <a href="../part04-extending/15-limitations-and-troubleshooting.html">Limitations and troubleshooting</a> covers limitations such as floating-point arithmetic and side channels, feature flags and common errors.</p>
 <div id="tbl-p4-chapters" class="quarto-float quarto-figure quarto-figure-center anchored">
 <figure class="quarto-float quarto-float-tbl figure">
 <figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl" id="tbl-p4-chapters-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
@@ -381,7 +381,7 @@ Table&nbsp;1: The chapters of this part and the questions they answer.
 </div>
 </figure>
 </div>
-<p>At the end of this part you can add a mechanism of your own, fit the built-in models, and say which parts of a deployment stay yours.</p>
+<p>By the end of this part, you can implement a mechanism, fit the built-in models and identify your remaining deployment responsibilities.</p>
 
 
 

@@ -348,8 +348,8 @@ ul.task-list li input[type="checkbox"] {
 </header>
 
 
-<p>This part does the everyday work of a private analysis: statistics on a table. OpenDP reads the lazy queries of Polars, a dataframe library, before they run. So every filter, cast and aggregation is part of the privacy guarantee. The thread of the part is that every statistic needs two things from you: a bound on what one person can contribute, and a share of the budget. The library turns them into a noise scale, which you read before a release.</p>
-<p>The chapters follow the documentation’s tutorial on tabular data. <a href="../part02-tabular-data/03-essential-statistics.html">Essential statistics</a> releases counts, sums, means, medians and quantiles, with the noise scale and error bar that <code>summarize</code> reports. <a href="../part02-tabular-data/04-grouping.html">Grouping</a> releases one row per group, with public keys or keys that the library selects privately. <a href="../part02-tabular-data/05-identifier-truncation.html">Identifier truncation and bounds</a> truncates the rows of a person who owns many, and bounds the groups that the person touches. <a href="../part02-tabular-data/06-preparing-microdata.html">Preparing microdata</a> covers the expressions that OpenDP allows before an aggregation, and the data types it knows. <a href="../part02-tabular-data/07-utility-and-noise.html">Assessing utility and choosing the noise</a> turns scales into error bars and back, and compares Laplace with Gaussian noise under zero-concentrated differential privacy.</p>
+<p>This part covers private statistics on tables. OpenDP analyses Polars lazy queries before execution, so filters, casts and aggregations are included in the privacy guarantee. Each statistic needs a bound on each person’s contribution and a budget share. OpenDP uses both to set the noise scale.</p>
+<p>The chapters follow the documentation’s tabular-data tutorial. <a href="../part02-tabular-data/03-essential-statistics.html">Essential statistics</a> releases counts, sums, means, medians and quantiles, then interprets the scales and error bars from <code>summarize</code>. <a href="../part02-tabular-data/04-grouping.html">Grouping</a> releases one row per group, using public or privately selected keys. <a href="../part02-tabular-data/05-identifier-truncation.html">Identifier truncation and bounds</a> limits each person’s rows and affected groups. <a href="../part02-tabular-data/06-preparing-microdata.html">Preparing microdata</a> covers supported pre-aggregation expressions and data types. <a href="../part02-tabular-data/07-utility-and-noise.html">Assessing utility and choosing the noise</a> converts scales to error bars and compares Laplace and Gaussian noise under zero-concentrated differential privacy.</p>
 <div id="tbl-p2-chapters" class="quarto-float quarto-figure quarto-figure-center anchored">
 <figure class="quarto-float quarto-float-tbl figure">
 <figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl" id="tbl-p2-chapters-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
@@ -389,7 +389,7 @@ Table&nbsp;1: The chapters of this part and the questions they answer.
 </div>
 </figure>
 </div>
-<p>At the end of this part, you can release a table of statistics on a dataset in which each person owns many rows. Each cell has an error bar, and the whole table has a guarantee.</p>
+<p>By the end of this part, you can release statistics on data with multiple rows per person, interpret cell-level error bars and state the table’s privacy guarantee.</p>
 
 
 
