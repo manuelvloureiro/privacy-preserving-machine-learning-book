@@ -1,6 +1,6 @@
 # Concentration inequalities
 
-A test error varies with the test sample. A minibatch varies between steps. Concentration bounds quantify both variation and tail probability.
+A test error rate and a randomly sampled minibatch size both fluctuate because they depend on sampled examples. Concentration inequalities bound the probability that either differs from its expected value by a specified amount.
 
 For a nonnegative random variable $X$ and $a>0$, Markov's inequality bounds $\Pr[X\ge a]$ by $\mathbb E[X]/a$. If $X$ has finite mean $\mu$ and variance $\sigma^2$, Chebyshev's inequality bounds $\Pr[|X-\mu|\ge t]$ by $\sigma^2/t^2$ for $t>0$. Chebyshev follows by applying Markov to $(X-\mu)^2$. Chernoff bounds also apply Markov, to $e^{\lambda X}$ for $\lambda>0$; the resulting bound uses the **moment generating function (MGF)** $\mathbb E[e^{\lambda X]}$ and can decay exponentially. Later sections apply Chernoff bounds to bounded variables, additive noise and sums of dependent terms.
 
