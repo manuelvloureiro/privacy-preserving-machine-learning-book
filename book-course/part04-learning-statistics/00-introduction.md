@@ -1,6 +1,6 @@
 # Private learning and statistics
 
-The earlier parts released statistics of a fixed dataset under differential privacy (DP). This part turns to the goals of machine learning and statistics, which are to fit models and to learn about the population that the data comes from. It starts with the question of what privacy must protect, because a model can predict a person's sensitive label without any use of that person's record. Then it trains convex models and neural networks privately, and finds how many samples a private estimate of a population mean needs. Last, it shows that a private mechanism lets one dataset answer adaptively chosen questions without overfitting. @tbl-p4-chapters gives the question of each chapter.
+The earlier parts released statistics of fixed datasets under differential privacy (DP). This part studies model fitting and population inference. It distinguishes prediction from memorization: a model can predict a person's sensitive label without using that person's record. The next chapters cover private training of convex models and neural networks, then bound the sample size for private mean estimation. The final chapter shows how DP lets one dataset answer adaptively chosen questions without overfitting.
 
 | Chapter | Question it answers |
 | --- | --- |

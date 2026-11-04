@@ -2,14 +2,14 @@
 
 ## What it is {#sec-gdp-gdp}
 
-Every differential privacy (DP) guarantee limits how well an attacker can tell whether the data held a target's record. That attacker runs a [hypothesis test](../part01-prerequisites/04-hypothesis-testing.md), so the fullest guarantee is a **trade-off curve**, the lowest false negative rate any test can get at each false positive rate. A mechanism is **$f$-DP** when its curve is never below a given curve $f$ (Dong, Roth and Su 2022). A privacy level $\varepsilon$ with its slack $\delta$ is only a summary of that curve.
+Every differential privacy (DP) guarantee limits an attacker's ability to determine whether a target's record was in the data. The attacker performs a [hypothesis test](../part01-prerequisites/04-hypothesis-testing.md), so the most complete guarantee is a **trade-off curve**: the minimum false negative rate at each false positive rate. A mechanism is **$f$-DP** if its curve is nowhere below a specified curve $f$ (Dong, Roth and Su 2022). A privacy level $\varepsilon$ and slack $\delta$ summarize this curve.
 
-For Gaussian noise the curve has one parameter. Write $\sigma$ for the noise multiplier, the noise's standard deviation in units of the query's $\ell_2$ sensitivity. In those units the attacker must tell a standard normal draw from one shifted by $\mu = 1/\sigma$. So the mechanism satisfies Gaussian differential privacy (GDP) with parameter $\mu$, written **$\mu$-GDP**. Write $\Phi$ for the standard normal distribution function. Then no membership attack at a false positive rate $\alpha$ gets a true positive rate above
+For Gaussian noise, the curve has one parameter. Let $\sigma$ be the noise multiplier, the noise standard deviation in units of the query's $\ell_2$ sensitivity. The attacker must distinguish a standard normal draw from one shifted by $\mu = 1/\sigma$. The mechanism therefore satisfies Gaussian differential privacy (GDP) with parameter $\mu$, or **$\mu$-GDP**. Let $\Phi$ be the standard normal distribution function. At false positive rate $\alpha$, no membership attack achieves a true positive rate above
 $$1 - \Phi\big(\Phi^{-1}(1 - \alpha) - \mu\big).$$
 
 ## When you meet it
 
-You meet GDP when you decide whether a guarantee is enough, and as a trap in Opacus (@sec-gdp-wrong). @tbl-gdp-mu reads $\mu$ as the best true positive rate (TPR) of an attack at a given false positive rate (FPR), whatever else the attacker knows.
+Use GDP to assess whether a guarantee is sufficient; Opacus also exposes it as a potentially unsafe option (@sec-gdp-wrong). @tbl-gdp-mu gives the maximum true positive rate (TPR) at each false positive rate (FPR), regardless of the attacker's other information. The same representation can account for stochastic gradient descent (SGD) runs without subsampling.
 
 | $\mu$ | Best TPR at 0.1% FPR | At 1% | At 5% | $\varepsilon$ at $\delta = 10^{-5}$ |
 | --- | --- | --- | --- | --- |
@@ -19,15 +19,15 @@ You meet GDP when you decide whether a guarantee is enough, and as a trap in Opa
 
 : Reading $\mu$-GDP as an attack and as $(\varepsilon, \delta)$. {#tbl-gdp-mu}
 
-For example, at a false positive rate of 1%, no attacker on a 1-GDP release finds the record in more than 9.24% of the trials where it is present. That is the ceiling for any [membership inference attack](../part02-attacks/02-membership-inference.md), and the value a [privacy audit](../part05-dp-ml/10-auditing.md) tests. Dong et al. suggest that $\mu \le 0.5$ is a reasonable guarantee and that $\mu \ge 6$ promises almost nothing. So report $\mu$ next to a Gaussian pipeline's $(\varepsilon, \delta)$.
+At 1% FPR, no attacker against a 1-GDP release can identify the record in more than 9.24% of trials where it is present. This bounds any [membership inference attack](../part02-attacks/02-membership-inference.md) and is the limit tested by a [privacy audit](../part05-dp-ml/10-auditing.md). Dong et al. suggest $\mu \le 0.5$ as a reasonable guarantee and note that $\mu \ge 6$ offers little protection. Report $\mu$ alongside $(\varepsilon,\delta)$ for Gaussian pipelines.
 
 ## How to use it
 
-Gaussian releases compose exactly in GDP, also when each one depends on the earlier ones. Write $\mu_i$ for the parameter of the $i$-th release. The run is then $\mu$-GDP with
+Gaussian releases compose exactly in GDP, including adaptive releases. Let $\mu_i$ be the parameter of release $i$. The full run is $\mu$-GDP, where
 $$\mu = \sqrt{\mu_1^2 + \mu_2^2 + \dots + \mu_k^2},$$
-so the quantity that adds up is $\mu^2$. For releases on the whole dataset, such as analytics queries and full-batch noisy gradient descent, no accountant does better. So keep a ledger of $\mu^2$ and convert once, at the end. For example, four 1-GDP releases compose to 2-GDP, which is $(9.9973, 10^{-5})$-DP. If you convert each release first, with a quarter of the slack, the four values of $\varepsilon$ add to 18.7607, almost twice as much.
+Thus, $\mu^2$ composes additively. For whole-dataset releases, such as analytics queries and full-batch noisy gradient descent, no accountant gives a tighter bound. Track $\mu^2$ and convert once after composition. Four 1-GDP releases compose to 2-GDP, or $(9.9973,10^{-5})$-DP. Converting each release separately using one quarter of the slack gives a summed $\varepsilon$ of 18.7607, almost twice as large.
 
-The snippet computes the attack ceiling and converts both ways. The `dp_accounting` functions take a noise multiplier, so for $\mu$-GDP you give $1/\mu$.
+The snippet computes the attack ceiling and converts between GDP and $(\varepsilon,\delta)$. The `dp_accounting` functions accept a noise multiplier, so pass $1/\mu$ for $\mu$-GDP.
 
 ```python
 from statistics import NormalDist
@@ -47,13 +47,13 @@ print(f"{dp_accounting.get_epsilon_gaussian(1.0, 1e-5):.4f}")  # 4.3772
 print(f"{dp_accounting.get_sigma_gaussian(1.0, 1e-5):.4f}")  # 3.7306
 ```
 
-The last print finds the noise multiplier of a single $(1, 10^{-5})$-DP release. It uses the exact curve, which needs less noise than the classical formula of [the Gaussian mechanism](../part03-dp-foundations/03-laplace-gaussian.md).
+The final line returns the noise multiplier for one $(1,10^{-5})$-DP release. It uses the exact curve, which requires less noise than the classical formula in [the Gaussian mechanism](../part03-dp-foundations/03-laplace-gaussian.md).
 
 ## What goes wrong {#sec-gdp-wrong}
 
-Opacus has `accountant="gdp"` for the private form of stochastic gradient descent (SGD), called DP-SGD. It estimates $\mu$ with the central limit theorem (CLT) of Bu et al. (2020), which says that many steps that each leak little compose to nearly a Gaussian curve. This estimate is an approximation, not a bound, and its error is on the unsafe side. A small $\delta$ depends on rare, large losses, and a CLT fits those tails badly. On the part's running example of 10,000 steps, the CLT gives 6.0071, but a [numerical accountant](06-numerical-accounting.md) proves that the true $\varepsilon$ is at least 6.1377. So report with the default numerical accountant of Opacus, `"prv"`.
+Opacus supports `accountant="gdp"` for DP-SGD. It estimates $\mu$ using the central limit theorem (CLT) of Bu et al. (2020), which approximates many small privacy losses by a Gaussian curve. This is an approximation, not a bound, and its error can be unsafe. Small $\delta$ depends on rare, large losses that the CLT models poorly. For this part's 10,000-step example, the CLT gives 6.0071, while a [numerical accountant](06-numerical-accounting.md) establishes that true $\varepsilon$ is at least 6.1377. Use Opacus's default numerical accountant, `"prv"`, for reporting.
 
-A mix of Laplace and Gaussian releases needs a numerical accountant, because a curve that is not Gaussian takes the composition out of GDP. But for Gaussian pipelines without subsampling, GDP is the best accountant. Even the best [conversion from a Rényi DP curve](02-rdp-conversions.md) loses: for 1-GDP at $\varepsilon = 1$, it gives a $\delta$ of 0.2149 against the exact 0.1269.
+Mixed Laplace and Gaussian releases require a numerical accountant because their composition is not Gaussian. For Gaussian pipelines without subsampling, GDP is the tightest accountant. Even the best [conversion from a Rényi DP curve](02-rdp-conversions.md) is looser: for 1-GDP at $\varepsilon = 1$, it gives $\delta = 0.2149$ instead of the exact 0.1269.
 
 ## References
 

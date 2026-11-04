@@ -2,13 +2,13 @@
 
 ## Why this matters
 
-A fraud detector must call each transaction normal or fraudulent, so it decides which of two distributions an observation came from. Every detector and every binary classifier is such a hypothesis test. To evaluate one, measure its two kinds of error, false alarms and missed cases, at the low rate of false alarms that you need. Accuracy hides that rate.
+A fraud detector classifies each transaction as normal or fraudulent, testing which of two distributions generated its score. Every binary classifier is a hypothesis test. Evaluate both error rates at the required low false-alarm rate; accuracy does not report that rate.
 
 ## Tests and their two errors {#sec-ht-setup}
 
 The default assumption, the **null hypothesis** $H_0$, is that the observation comes from a distribution $P$, such as the fraud model's scores for normal transactions. The **alternative hypothesis** $H_1$ is that it comes from a distribution $Q$, such as its scores for fraudulent ones. A **test** decides whether to reject the null, which here means to flag the transaction.
 
-A test can make two kinds of mistake. A flag on a normal case is a false positive, and its probability is the **false positive rate (FPR)**, written $\alpha$. A missed real case is a false negative, with probability $\beta$, the **false negative rate (FNR)**. The share of real cases that the test catches, $1 - \beta$, is the **true positive rate (TPR)**. A lower threshold raises the TPR but also the FPR. So first fix a budget for the FPR, the **level**, and then look for the test with the highest TPR, or **power**, within it.
+A test can make two errors. A false positive flags a normal case; its probability is the **false positive rate (FPR)**, written $\alpha$. A false negative misses a real case; its probability is the **false negative rate (FNR)**, written $\beta$. The **true positive rate (TPR)** is $1-\beta$. A lower threshold raises both TPR and FPR. First set the FPR budget, or **level**, then find the test with the highest TPR, or **power**, at that level.
 
 ## The Neyman–Pearson lemma {#sec-ht-np}
 
@@ -16,7 +16,7 @@ Write $p(x)$ and $q(x)$ for the probabilities, or densities, of an observation $
 $$\Lambda(x) = \frac{q(x)}{p(x)}.$$
 A **likelihood ratio (LR) test** rejects wherever this ratio exceeds a threshold $\tau$, which you set so that the FPR of the test equals the budget. The **Neyman–Pearson lemma** says that no other test at that level catches more real cases.
 
-So the best test uses only the likelihood ratio of an observation. A threshold on a raw score is that test only when a higher score always means a higher ratio. To estimate the ratio from labelled scores, fit a logistic regression of the label on the score. Its log-odds, minus the log prior odds, estimate $\ln\Lambda$. If a known group shifts the scores, the ratio depends on the group, so the best test sets a threshold within each group.
+The optimal test thresholds the likelihood ratio. Thresholding a raw score is equivalent only if higher scores always imply higher ratios. Estimate the ratio from labelled scores by fitting logistic regression of the label on the score; its log-odds minus the log prior odds estimates $\ln\Lambda$. If scores shift across known groups, the likelihood ratio also depends on group, and the optimal test uses group-specific thresholds.
 
 ## Trade-off curves {#sec-ht-tradeoff}
 
@@ -24,7 +24,7 @@ The best FNR at every level says how hard $P$ is to tell from $Q$. This curve is
 
 ## The Gaussian trade-off curve {#sec-ht-gaussian}
 
-A common pair is a score that is normal under the two hypotheses with the same spread, scaled so that normal cases have mean 0 and standard deviation 1. Write $\mu$ for the distance between the two centres in standard deviations, and $\Phi$ for the standard normal cumulative distribution function. The best test has its threshold at $\Phi^{-1}(1 - \alpha)$, and its FNR at level $\alpha$ is the Gaussian trade-off function
+A common model has normal scores under both hypotheses, with equal standard deviations. Scale the normal-case scores to mean 0 and standard deviation 1. Let $\mu$ be the distance between the means in standard deviations, and let $\Phi$ be the standard normal cumulative distribution function. The optimal threshold is $\Phi^{-1}(1 - \alpha)$, and the FNR at level $\alpha$ is the Gaussian trade-off function
 $$G_\mu(\alpha) = \Phi\big(\Phi^{-1}(1 - \alpha) - \mu\big).$$ {#eq-ht-gaussian-tradeoff}
 In SciPy this is `norm.cdf(norm.isf(alpha) - mu)`. Use `isf`, because `norm.ppf(1 - alpha)` loses the digits that matter at a very small $\alpha$. The single number $\mu$ fixes the best TPR at every FPR. At $\mu = 2$, for example, the best TPR is 0.6388 at an FPR of 5%, and only 0.1378 at an FPR of $10^{-3}$. In the other direction, a measured pair gives $\mu = \Phi^{-1}(1 - \alpha) + \Phi^{-1}(\mathrm{TPR})$, or `norm.isf(alpha) + norm.ppf(tpr)`. If that estimate changes with $\alpha$, the scores do not have this shape.
 
@@ -34,23 +34,23 @@ Take a Laplace distribution and a copy shifted by $\kappa$ times its scale. Thei
 $$\mathrm{TPR} \le e^\kappa\,\mathrm{FPR}.$$
 At a low FPR the best test reaches this cap. At $\kappa = 1$ and an FPR of 0.05, its TPR is $e \times 0.05 = 0.1359$.
 
-This cap makes the Laplace pair different from the normal one. A Laplace pair at $\kappa = 1$ and a normal pair at $\mu = 1.0301$ have the same best advantage, the largest TPR minus FPR of all tests (@sec-ht-tv). But at a level of $10^{-6}$, the normal pair allows 36 times the TPR. Its ratio has no cap, so a test can find rare observations that give strong evidence. So compare two pairs at the level you will use.
+This cap distinguishes the Laplace pair from the normal pair. A Laplace pair at $\kappa = 1$ and a normal pair at $\mu = 1.0301$ have the same maximum advantage, the largest possible TPR minus FPR (@sec-ht-tv). At a level of $10^{-6}$, however, the normal pair permits 36 times the TPR. Its likelihood ratio is unbounded, allowing a test to detect rare, high-evidence observations. Compare distributions at the FPR relevant to the application.
 
 ## Best advantage and total variation {#sec-ht-tv}
 
 The **advantage** of a test is its TPR minus its FPR. The best advantage over all tests is the **total variation (TV)** distance of [Divergences](03-divergences.md):
 $$\max(\mathrm{TPR} - \mathrm{FPR}) = \mathrm{TV}(P, Q) = \frac12\sum_x |q(x) - p(x)|.$$
-For the normal pair it is $2\Phi(\mu/2) - 1$, or 0.3829 at a shift of one standard deviation. Accuracy on a balanced set is one half plus half the advantage. So accuracy measures the same single point of the curve, and it says nothing about the low-FPR end.
+For the normal pair, TV is $2\Phi(\mu/2) - 1$, or 0.3829 at a shift of one standard deviation. Accuracy on a balanced set is one half plus half the advantage. Thus, accuracy describes one point on the curve and does not determine performance at low FPR.
 
 ## ROC summaries: why AUC hides the low-FPR regime {#sec-ht-auc}
 
-People often compare detectors by the **area under the curve (AUC)** of their ROC curves, the chance that a random positive scores higher than a random negative. But the area gives the same weight to every FPR from 0 to 1. So the low FPRs where a strict detector works add almost nothing to it. For example, take two detectors with standard normal scores on negatives. The positives of detector A have mean 1 and standard deviation 1. Those of B have mean 1.5811 and standard deviation 2, so the two detectors have the same AUC of 0.7602.
+The **area under the curve (AUC)** is the probability that a random positive scores higher than a random negative. It weights every FPR equally from 0 to 1, so performance at very low FPR contributes little. For example, consider two detectors with standard normal scores on negatives. Detector A's positive scores have mean 1 and standard deviation 1; detector B's have mean 1.5811 and standard deviation 2. Both have an AUC of 0.7602.
 
 But at an FPR of $10^{-3}$, A catches 0.0183 of the positives and B about 12 times as many (@fig-ht-auc-low-fpr). A few positives of B score far above all negatives, and a strict threshold catches exactly those.
 
 ![Two detectors with the same AUC of 0.760, on linear axes (left) and log axes (right).](figures/hypothesis_testing_auc_low_fpr.svg){#fig-ht-auc-low-fpr}
 
-So plot the ROC curve on log–log axes, and report the TPR at fixed low FPRs. Drop the first point of `roc_curve`, because its FPR is 0. Give `roc_curve(y_true, y_score)` scores, not the labels from `predict`. At a target FPR, take the highest TPR among the points at or below it, because no single threshold reaches a value from `np.interp`. And do not read a TPR at an FPR below one over the number of negatives, because there the curve rests on one false positive or none.
+Plot the ROC curve on log–log axes and report TPR at fixed low FPRs. Drop the first point of `roc_curve`, whose FPR is 0. Pass scores, not `predict` labels, to `roc_curve(y_true, y_score)`. At a target FPR, use the highest TPR at or below it; `np.interp` may report a value no threshold achieves. Do not report TPR below an FPR of one divided by the number of negatives, where the curve represents at most one false positive.
 
 ## The Bayesian view {#sec-ht-bayes}
 
@@ -58,15 +58,15 @@ Often you know a base rate $\pi$, for example that one transaction in a thousand
 $$\frac{\Pr[H_1 \mid x]}{\Pr[H_0 \mid x]} = \frac{\pi}{1 - \pi} \times \Lambda(x).$$ {#eq-ht-posterior-odds}
 The decision with the fewest errors says $H_1$ when these odds exceed 1, so it is again an LR test.
 
-The same rule applies to an alarm, whose likelihood ratio is the TPR divided by the FPR. Take the test with $\mu = 2$ in a population where 1% are positive. At an FPR of 0.05, a flagged case is positive with probability only 0.114, so most alarms are false. At an FPR of $10^{-3}$, the ratio of the alarm is much larger, and that probability rises to 0.582. So when positives are rare, the FPR decides whether you can believe an alarm.
+The same calculation applies to an alarm, whose likelihood ratio is TPR divided by FPR. Consider a test with $\mu = 2$ in a population where 1% of cases are positive. At FPR 0.05, a flagged case is positive with probability 0.114, so most alarms are false. At FPR $10^{-3}$, that probability rises to 0.582. When positives are rare, the FPR strongly affects the probability that an alarm is correct.
 
 ## Measuring rates from finite trials {#sec-ht-estimation}
 
-To measure the FPR of a detector, count the false positives among $n$ test negatives. If the detector flags each negative independently with the same small probability, the count $k$ is binomial and varies by about $\sqrt k$.
+Estimate a detector's FPR by counting false positives among $n$ negative test cases. If each case is independently flagged with the same probability, the count $k$ is binomial, with standard deviation approximately $\sqrt{k}$ when the rate is small.
 
-The **Clopper–Pearson interval** holds the true rates under which the observed count is not surprising. It is exact, because it uses the binomial itself, and conservative, because a 95% interval covers the true rate at least 95% of the time. In SciPy, it is `binomtest(k, n).proportion_ci(method="exact")`. A claim that an FPR is below a target needs only the upper end, which `alternative="less"` gives. With no events at all, the one-sided 95% bound is about $3/n$, the **rule of three**. The exact computation shows that an FPR below $10^{-3}$ needs 2,995 negatives with no false positive.
+The **Clopper–Pearson interval** gives rates consistent with the observed count. It is exact because it uses the binomial distribution, and conservative because a 95% interval covers the true rate at least 95% of the time. In SciPy, compute it with `binomtest(k, n).proportion_ci(method="exact")`. To show that an FPR is below a target, report only the upper bound using `alternative="less"`. With no events, the one-sided 95% upper bound is about $3/n$, the **rule of three**. An exact computation requires 2,995 negative cases with no false positives to bound the FPR below $10^{-3}$.
 
-These intervals are wide. Even 10 false positives in 10,000 negatives give the interval $[0.00048, 0.00184]$, from about half to almost twice the observed rate. About 100 events fix a rate within about 20%, so an FPR of $p$ needs about $100/p$ negatives. The **Wald interval** treats the count as normal and fails here, because it is too narrow and becomes $[0, 0]$ with no events.
+These intervals can be wide. Ten false positives in 10,000 negatives give the interval $[0.00048, 0.00184]$, from about half to nearly twice the observed rate. About 100 events estimate a rate within about 20%, so an FPR of $p$ requires about $100/p$ negative cases. The **Wald interval** is too narrow and gives $[0, 0]$ when there are no events.
 
 ## Evaluating a detector at a low false positive rate {#sec-ht-recipe}
 
@@ -76,7 +76,7 @@ These intervals are wide. Even 10 false positives in 10,000 negatives give the i
 4. Report the TPR and FPR measured at that threshold, with Clopper–Pearson intervals on the two, and the full ROC curve on log–log axes. A TPR read off the ROC curve of the test split is too high, because it picks its threshold on the test data.
 5. Compare two detectors at the same FPR, never by AUC or accuracy alone. On a shared evaluation set, check the gap with McNemar's test, `binomtest(m1, m1 + m2, 0.5)`. Here $m_1$ and $m_2$ count the positives that only one of the two detectors catches.
 
-The snippet runs steps 3 and 4 on scikit-learn's breast cancer dataset, with a logistic regression as the detector and malignant tumours as positives. It keeps 30% of the data for calibration and 30% for testing. For a target FPR of 1%, it puts the threshold at the 99th percentile of the benign scores in the calibration split.
+The snippet applies steps 3 and 4 to scikit-learn's breast cancer dataset. It uses logistic regression to detect malignant tumours and reserves 30% of the data for calibration and 30% for testing. For a target FPR of 1%, it sets the threshold at the 99th percentile of benign calibration scores.
 
 ```python
 import numpy as np
@@ -101,7 +101,7 @@ print(pos.sum(), pos.size, f"{pos.mean():.3f} [{tpr.low:.3f}, {tpr.high:.3f}]") 
 print(neg.sum(), neg.size, f"{neg.mean():.4f} <= {fpr_upper:.4f}")  # 2 108 0.0185 <= 0.0571
 ```
 
-The detector catches 56 of the 63 malignant test cases, a TPR of 0.889 with a 95% interval from 0.784 to 0.954. But the threshold for 1% flags 2 of the 108 benign test cases. From those counts, the one-sided 95% bound shows only that the FPR is below 0.0571. Step 2 asks for about 10,000 negatives at this target, so on a dataset this small, report the interval and do not claim the target.
+The detector catches 56 of 63 malignant test cases: TPR 0.889, with a 95% interval from 0.784 to 0.954. The threshold set for 1% FPR flags 2 of 108 benign test cases. These counts give a one-sided 95% upper bound of 0.0571 on the FPR. Step 2 requires about 10,000 negative cases for this target, so this dataset is too small to establish the target rate; report the interval instead.
 
 ## Cheat sheet
 

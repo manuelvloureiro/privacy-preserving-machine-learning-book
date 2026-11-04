@@ -1,16 +1,16 @@
 # Private deep learning
 
-The private stochastic gradient descent (SGD) of [the previous chapter](02-private-erm.md) needs a convex, Lipschitz loss, and its privacy analysis loses large constants. The losses of neural networks are neither convex nor Lipschitz, and in practice the constants decide whether a guarantee is meaningful. This chapter adapts noisy SGD to neural networks under differential privacy (DP) by clipping each gradient. Then it replaces composition with a tighter accounting, built on the moments of the privacy loss. Last, it turns any non-private learner into a private one by a vote among models trained on disjoint data.
+Private stochastic gradient descent (SGD) in [the previous chapter](02-private-erm.md) assumes a convex, Lipschitz loss and has loose privacy constants. Neural-network losses generally satisfy neither assumption. This chapter adapts SGD to differential privacy (DP) by clipping each gradient, gives a tighter privacy accountant based on privacy-loss moments, and privatizes arbitrary learners by voting among models trained on disjoint data.
 
 ## Neural networks {#sec-dpdl-networks}
 
-The setting is that of the previous chapter. Each record is a pair of a feature vector and a label, and training minimizes the total loss of the records over a parameter vector $\theta$,
+As in the previous chapter, each record contains a feature vector and label, and training minimizes total loss over parameter vector $\theta$:
 
 $$
 \mathcal L(\theta; D) = \sum_{i=1}^n \ell(\theta; x_i, y_i).
 $$
 
-Here a feature vector $x$ lies in $\mathbb R^{m_0}$, and a label is one of $K$ classes, $y \in \{1, \dots, K\}$. A neural network maps a feature vector to one score per class, and training adjusts its parameters $\theta$. The simplest network is a stack of layers, each a linear map followed by a fixed nonlinear function.
+Here a feature vector $x$ lies in $\mathbb R^{m_0}$, and a label is one of $K$ classes, $y \in \{1, \dots, K\}$. A neural network maps a feature vector to a score for each class. Training adjusts its parameters $\theta$. A multilayer perceptron stacks linear maps and fixed nonlinear functions.
 
 ::: {#def-dpdl-network name="Multilayer perceptron"}
 A network with $J$ layers sets $v^{(0)} = x$ and, for $j = 1, \dots, J$,
@@ -22,19 +22,19 @@ $$
 where $W^{(j)}$ is an $m_j \times m_{j-1}$ matrix of weights, $c^{(j)} \in \mathbb R^{m_j}$ is a vector of offsets, and the **activation function** $\phi\colon \mathbb R \to \mathbb R$ is applied to each coordinate. The last layer has no activation and outputs $o \in \mathbb R^K$, one score per class. The parameter vector $\theta$ collects all weights and offsets.
 :::
 
-Without the activation, the network is a composition of linear maps, and so a single linear map. Common activations are the rectified linear unit $\phi(u) = \max(0, u)$, the usual choice without privacy, and the bounded $\tanh(u) = (e^u - e^{-u})/(e^u + e^{-u})$.
+Without activations, the network is a single linear map. Common activations include the rectified linear unit $\phi(u)=\max(0,u)$ and bounded $\tanh(u)=(e^u-e^{-u})/(e^u+e^{-u})$.
 
-The **softmax** function turns the scores into a probability vector over the classes, $\hat y_k = e^{o_k}/\sum_{j=1}^K e^{o_j}$, which gives the confidence of the network in each class. The prediction is the class with the largest $\hat y_k$. The loss is the **cross-entropy**, the negative log of the probability of the true class,
+The **softmax** maps scores to class probabilities, $\hat y_k=e^{o_k}/\sum_{j=1}^K e^{o_j}$. The predicted class maximizes $\hat y_k$. The **cross-entropy** loss is the negative log probability assigned to the true class:
 
 $$
 \ell(\theta; x, y) = -\ln \hat y_y = -\sum_{k=1}^K \mathbf 1[k = y]\,\ln \hat y_k ,
 $$
 
-where $\hat y$ depends on $\theta$ through every layer. The analysis of the previous chapter does not apply to this loss. It is not convex in $\theta$, so no convergence theorem holds, although SGD works well in practice. It is not Lipschitz either, because in a two-layer network the second-layer weights multiply the gradient of the first-layer weights, and they can be arbitrarily large. So a single gradient has unbounded sensitivity.
+where $\hat y$ depends on $\theta$ through every layer. The previous chapter's analysis does not apply: this loss is not convex in $\theta$, and its gradients are not bounded. In a two-layer network, the second-layer weights multiply the first-layer gradient and can be arbitrarily large. Thus one gradient can have unbounded sensitivity.
 
 ## Differentially private SGD {#sec-dpdl-dpsgd}
 
-Two changes make noisy SGD practical. First, each gradient is **clipped** to a fixed norm, which bounds sensitivity directly. Clipping shrinks a vector that is too long and leaves a short one alone. Second, each step uses a random batch of records, called a **lot**, chosen by Poisson sampling.
+Two changes make noisy SGD practical. First, **clipping** limits each gradient's norm and directly bounds sensitivity. Second, each step uses a random batch, called a **lot**, formed by Poisson sampling.
 
 ::: {#def-dpdl-clip name="Clipping"}
 For a clipping norm $C$, a positive number, the clipping of a vector $g$ is
@@ -44,9 +44,9 @@ $$
 $$
 :::
 
-So every clipped vector has norm at most $C$.
+Each clipped vector has norm at most $C$.
 
-DP-SGD combines the two changes. Each step clips the gradient of every record in the lot, adds Gaussian noise to the sum, and divides by the expected lot size $qn$. The **noise multiplier** $\sigma$ sets the noise, as the ratio of its standard deviation to the clipping norm. So, unlike the $\sigma$ of the previous chapter, it is not the standard deviation itself.
+DP-SGD clips each gradient in the lot, adds Gaussian noise to their sum, and divides by the expected lot size $qn$. The **noise multiplier** $\sigma$ is the noise standard deviation divided by the clipping norm $C$; unlike the previous chapter's $\sigma$, it is not itself a standard deviation.
 
 ::: {#def-dpdl-dpsgd name="DP-SGD"}
 Let the parameter vector $\theta$ have $d$ coordinates. Fix a sampling rate $q$ in $(0, 1]$, a noise multiplier $\sigma > 0$, a clipping norm $C$, a number of steps $T$, learning rates $\eta_t$ and a start $\theta_0$. For $t = 1, \dots, T$:
@@ -61,7 +61,7 @@ $$
 Output $\theta_T$.
 :::
 
-Unlike the private SGD of the previous chapter, a step uses a lot of expected size $qn$ instead of one record. And clipping, not an assumption, bounds the gradient. The noise is calibrated to $C$, the most that one record can contribute to the sum.
+Unlike the previous chapter's private SGD, each step uses a lot with expected size $qn$. Clipping bounds each gradient by construction, and the noise is calibrated to $C$, the maximum contribution of one record.
 
 ::: {#lem-dpdl-clip}
 Adding or removing one record changes the clipped sum $\sum_{i\in B}\mathrm{clip}_C(\nabla\ell(\theta; z_i))$ by a vector of norm at most $C$. Replacing one record changes it by at most $2C$.
@@ -71,21 +71,21 @@ Adding or removing one record changes the clipped sum $\sum_{i\in B}\mathrm{clip
 Adding or removing a record adds or removes one clipped vector, of norm at most $C$. A replacement does both, and the triangle inequality gives $2C$.
 :::
 
-Clipping has a cost, because the clipped average is a biased estimate of the gradient. So even for convex losses the convergence theorem no longer applies, but clipped SGD works well in practice.
+Clipping biases the average gradient. Consequently, the earlier convergence theorem no longer applies even to convex losses, although clipped SGD works well in practice.
 
-The privacy analysis depends on how the lot is drawn. **Poisson sampling** includes each record independently with probability $q$, so the lot size is random. Even at $q = 1/n$, this is not the same as the choice of one record, because the lot may be empty or hold several records. Other schemes, such as **sampling without replacement** of a lot of fixed size, need other analyses. The analyses below are for Poisson sampling. They use the add/remove relation, under which neighbours $D \sim D'$ differ by one record, so @lem-dpdl-clip gives sensitivity $C$.
+Privacy amplification depends on the sampling scheme. **Poisson sampling** includes each record independently with probability $q$, producing a random lot size. Even when $q=1/n$, a lot may be empty or contain multiple records, unlike a single-record sample. Fixed-size sampling without replacement requires a different analysis. The results below use Poisson sampling and add/remove neighbours, which differ by one record; @lem-dpdl-clip gives sensitivity $C$ for this relation.
 
-Implementations often shuffle the data once and cut it into consecutive batches of fixed size. Each batch is then a uniform sample, but the batches are dependent, so the Poisson analysis does not apply to them.
+Implementations often shuffle once and divide the data into fixed-size batches. These batches are dependent, so the Poisson-sampling analysis does not apply.
 
 ## Privacy accounting {#sec-dpdl-accounting}
 
-The analysis of the previous chapter applies to DP-SGD too, because without sampling a single step is the Gaussian mechanism with noise multiplier $\sigma$. If that step is $(\varepsilon_0, \delta_0)$-DP, then amplification by Poisson sampling makes it about $(2q\varepsilon_0, q\delta_0)$-DP, and advanced composition over $T$ steps gives
+Without subsampling, each DP-SGD step is a Gaussian mechanism with noise multiplier $\sigma$, so the previous chapter's analysis applies. If a step is $(\varepsilon_0,\delta_0)$-DP, Poisson subsampling gives approximately $(2q\varepsilon_0,q\delta_0)$-DP. Advanced composition over $T$ steps then gives
 
 $$
 \Big(O\big(q\varepsilon_0\sqrt{T\ln(1/\delta)}\big),\ Tq\delta_0 + \delta\Big)\text{-DP}.
 $$
 
-Abadi and coauthors proved a better bound for the same algorithm, which needs less noise for the same guarantee.
+Abadi and coauthors derived a tighter bound for this algorithm, requiring less noise for the same guarantee.
 
 ::: {#thm-dpdl-abadi name="Moments accountant, asymptotic form"}
 There are constants $c_1$ and $c_2$ such that, for every sampling rate $q$ and number of steps $T$, every $\varepsilon < c_1q^2T$ and every $\delta > 0$, DP-SGD is $(\varepsilon, \delta)$-DP under add/remove neighbours if
@@ -96,7 +96,7 @@ $$
 :::
 <!-- proof: cited -->
 
-The proof is Theorem 1 of Abadi and coauthors, 2016, and the rest of this section proves its ingredients. Compared with composition, the gain is a factor of order $\sqrt{\ln(1/\delta_0)}$ in $\sigma$ and no failure probability $Tq\delta_0$, as @cor-dpdl-gaussian-composition shows below. Such factors in $\varepsilon$ separate a meaningful guarantee from an empty one.
+Abadi and coauthors (2016, Theorem 1) prove this result; the rest of the section derives its ingredients. Compared with composition, the bound reduces $\sigma$ by a factor of order $\sqrt{\ln(1/\delta_0)}$ and avoids the accumulated failure probability $Tq\delta_0$, as @cor-dpdl-gaussian-composition shows. These factors can determine whether a privacy guarantee is useful.
 
 The accountant starts from the privacy loss. For a mechanism $M$ whose output has density $p_D$ on dataset $D$, the **privacy loss** at an output $y$ is $\ln\big(p_D(y)/p_{D'}(y)\big)$. It is a random variable when $y$ is drawn from $M(D)$. By the privacy loss criterion of [the approximate DP chapter](../part02-dp-basics/03-approximate-dp.md), $(\varepsilon,\delta)$-DP follows if, for every ordered pair of neighbours, the loss exceeds $\varepsilon$ with probability at most $\delta$. But tail probabilities do not compose simply, and moments do, by addition. So the accountant takes, for an order $\lambda > 0$, the logarithm of the average $\lambda$-th power of the ratio $p_D(y)/p_{D'}(y)$, for the worst pair of neighbours.
 
@@ -188,7 +188,7 @@ $$
 :::
 <!-- proof: cited -->
 
-The proof is Section 3.3 of Mironov, Talwar and Zhang (2019). It expands the $a$-th power of the density ratio between the mixture and $\mathcal N(0,\sigma^2)$ with the binomial theorem, which gives $A_a$. Each term is then a Gaussian integral, $\mathbb E[e^{k\xi/\sigma^2}] = e^{k^2/(2\sigma^2)}$ for $\xi \sim \mathcal N(0,\sigma^2)$. The hard part of the proof is to show that this pair, in this order, is the worst case over all neighbours and over the reverse order. For $\sigma \ge 1$, small $q$ and moderate $\lambda$, the bound is $q^2\lambda(\lambda+1)/((1-q)\sigma^2) + O(q^3\lambda^3/\sigma^3)$, which gives @thm-dpdl-abadi.
+Mironov, Talwar and Zhang (2019, Section 3.3) prove the result. The binomial theorem expands the $a$th power of the mixture's density ratio and yields $A_a$. Each term is a Gaussian integral, $\mathbb E[e^{k\xi/\sigma^2}]=e^{k^2/(2\sigma^2)}$ for $\xi\sim\mathcal N(0,\sigma^2)$. The main step shows that this ordered pair is worst among all neighbouring pairs and both directions. For $\sigma\ge1$, small $q$, and moderate $\lambda$, the bound is $q^2\lambda(\lambda+1)/((1-q)\sigma^2)+O(q^3\lambda^3/\sigma^3)$, which implies @thm-dpdl-abadi.
 
 These pieces together give the **moments accountant**. It computes the log-moment of one step for every $\lambda$, multiplies by $T$ by @lem-dpdl-compose, and converts with @thm-dpdl-convert at the best $\lambda$:
 
@@ -196,7 +196,7 @@ $$
 \varepsilon(\delta) = \min_{\lambda \ge 1}\ \frac{T\ln A_{\lambda+1} + \ln(1/\delta)}{\lambda}.
 $$ {#eq-dpdl-accountant}
 
-The computation depends only on $q$, $\sigma$, $T$ and $\delta$, never on the data. So you can fix the privacy cost of a training run before you touch the data, and set the noise or the number of steps to meet a target. @fig-dpdl-accounting compares the accountant with the composition route on a typical setting.
+The accountant depends only on $q$, $\sigma$, $T$, and $\delta$, not on the data. You can therefore set the noise or number of steps to meet a privacy target before training. @fig-dpdl-accounting compares it with composition for one setting.
 
 ![Privacy parameter $\varepsilon$ at $\delta = 10^{-5}$ of DP-SGD with sampling rate $q = 0.01$ and noise multiplier $\sigma = 4$, against the number of epochs of $1/q$ steps. Dashed: each step is $(\varepsilon_0,\delta_0)$-DP by @cor-dpdl-gaussian-composition with $T = 1$, Poisson sampling makes it $(\ln(1 + q(e^{\varepsilon_0}-1)), q\delta_0)$-DP, and advanced composition combines the steps, with $\delta$ split evenly. Solid: the moments accountant @eq-dpdl-accountant.](figures/dpdl-accounting.svg){#fig-dpdl-accounting}
 
@@ -204,25 +204,25 @@ The computation depends only on $q$, $\sigma$, $T$ and $\delta$, never on the da
 With $q = 0.01$, $\sigma = 4$ and $\delta = 10^{-5}$, @fig-dpdl-accounting shows the two accountings of the same algorithm. After $100$ epochs, or $T = 10{,}000$ steps, the composition route certifies $\varepsilon = 22.08$ and the moments accountant certifies $\varepsilon = 1.26$. After $400$ epochs the values are $61.41$ and $2.58$. The first is no guarantee at all, and the second is a reasonable one.
 :::
 
-These analyses use add/remove neighbours, while this book uses replace-one. A replacement is a removal followed by an addition, so a guarantee for one relation converts to the other at the cost of about twice the $\varepsilon$.
+These analyses use add/remove neighbours, whereas this book generally uses replace-one neighbours. A replacement is a removal and an addition, so conversion between the relations costs about twice $\varepsilon$.
 
 ## DP-SGD in practice {#sec-dpdl-practice}
 
-DP-SGD replaces SGD directly, but its behaviour differs in three ways.
+DP-SGD differs from ordinary SGD in accuracy, architecture, and tuning.
 
-**Accuracy.** On the handwritten-digit benchmark MNIST, a well-tuned DP-SGD reached $98.1\%$ accuracy at $\varepsilon = 2.93$ and $\delta = 10^{-5}$, against about $99.8\%$ without privacy (Papernot and coauthors, 2020). On the harder image benchmark CIFAR-10, it reached only $66.2\%$ at $\varepsilon = 7.53$, which is weak in both accuracy and privacy.
+**Accuracy.** On MNIST, a well-tuned DP-SGD model reached $98.1\%$ accuracy at $\varepsilon=2.93$ and $\delta=10^{-5}$, compared with about $99.8\%$ without privacy (Papernot and coauthors, 2020). On CIFAR-10, it reached $66.2\%$ at $\varepsilon=7.53$, a weaker result in both accuracy and privacy.
 
-**Architecture.** Bounded activations such as $\tanh$ work better than the rectified linear unit under DP-SGD, and the size of the network matters too. In each step, the noise vector $b_t$ has expected squared norm $d\sigma^2C^2$, while the sum of the gradients clipped to norm $C$ has norm at most $qnC$. So the ratio of signal to noise is at most about $qn/(\sigma\sqrt d)$, which falls as the number of parameters $d$ grows. So a network must be large enough to fit the task and no larger.
+**Architecture.** Bounded activations such as $\tanh$ can outperform the rectified linear unit under DP-SGD. Network size also matters: the noise vector has expected squared norm $d\sigma^2C^2$, while the clipped-gradient sum has norm at most $qnC$. Thus the signal-to-noise ratio is at most about $qn/(\sigma\sqrt d)$ and decreases as the parameter count $d$ grows. Use a network large enough for the task, but no larger.
 
-**Hyperparameters.** Each training run on the private data that tunes the learning rate, lot size, clipping norm or number of epochs spends privacy budget. Results that tune on the private data and do not count this cost overstate the privacy of the final model. Private selection picks the best of many private runs at a small constant factor in $\varepsilon$ (Liu and Talwar). Public data helps too, for tuning or for pretraining a network whose last layers alone are then trained privately, which makes $d$ smaller.
+**Hyperparameters.** Tuning the learning rate, lot size, clipping norm, or epoch count on private data spends privacy budget. Ignoring this cost overstates the final model's privacy. Private selection can choose among many private runs at a small constant factor in $\varepsilon$ (Liu and Talwar). Public data can support tuning or pretraining, leaving fewer parameters to train privately.
 
 ## Private aggregation of teacher ensembles {#sec-dpdl-pate}
 
-DP-SGD changes the inside of one training algorithm. Private aggregation of teacher ensembles (PATE) instead treats the learner as a black box, so any improvement in non-private learning carries over. The price is a different model of the data. In addition to a sensitive labelled training set, PATE needs a supply of **public unlabelled** feature vectors.
+DP-SGD modifies one training algorithm. Private aggregation of teacher ensembles (PATE) treats the learner as a black box, so improvements to non-private learning also apply. PATE instead requires both a sensitive labelled training set and **public unlabelled** feature vectors.
 
-PATE is an instance of **sample and aggregate**. It splits the data into disjoint parts, runs a non-private algorithm on each part, and combines the answers by a private aggregation. One record affects only one part, so the aggregation has low sensitivity. In PATE, the parts train $m$ classifiers, the **teachers**, and the aggregation is a vote.
+PATE uses **sample and aggregate**: split the data into disjoint parts, train one non-private model on each part, then combine their outputs privately. Each record affects only one part, which limits the aggregation's sensitivity. PATE trains $m$ classifiers, called **teachers**, and aggregates them by voting.
 
-The simplest task is one private prediction for a public feature vector $x$. Each teacher votes for a label, and $c_k$ is the number of votes for label $k$. The **mode** $a$ is the label with the most votes, the smallest one in case of a tie. The **gap** $\Gamma = c_a - \max_{k\ne a}c_k$ measures how far the vote is from a change of winner. The private mode releases the mode only when a noisy gap is above a threshold, because a large gap means that one changed record cannot change the winner.
+For a public feature vector $x$, each teacher votes for a label. Let $c_k$ be the number of votes for label $k$. The **mode** $a$ is the most-voted label, with ties resolved in favour of the smallest label. The **gap** $\Gamma=c_a-\max_{k\ne a}c_k$ measures the margin over the next label. The private mode releases $a$ only when a noisy gap exceeds a threshold.
 
 ::: {#def-dpdl-mode name="Private mode of the teachers"}
 Let $\varepsilon > 0$ and $\delta \in (0, 1/2)$. Split the dataset into $m$ fixed disjoint parts by position, train one teacher on each, and collect their votes on $x$. Let $a$ be the mode of the votes and $\Gamma$ its gap, as above. Draw $Z \sim \mathrm{Lap}(2/\varepsilon)$, Laplace noise with scale $2/\varepsilon$. If
@@ -234,7 +234,7 @@ $$
 output the mode $a$. Otherwise output a symbol $\bot$ for "no answer", or a uniformly random label.
 :::
 
-When the teachers agree, the mode is stable, and its exact release costs little privacy. This is the propose-test-release idea of [the chapter on beyond global sensitivity](../part03-query-release/03-beyond-global-sensitivity.md). It tests privately that the data is far from a dataset with another answer, and if so, releases the answer without noise. The private mode is the stable mode of that chapter applied to the votes, with a lower threshold so that the failure probability is $\delta$, not $\delta/2$.
+When the votes agree, the mode is stable and can be released exactly. This is propose-test-release from [the chapter on beyond global sensitivity](../part03-query-release/03-beyond-global-sensitivity.md): privately test whether the data is far from one that changes the answer, then release the answer without noise if the test passes. The threshold here is lower so the failure probability is $\delta$, rather than $\delta/2$.
 
 ::: {#thm-dpdl-mode}
 The private mode is $(\varepsilon,\delta)$-DP. The teachers' training algorithm may be randomized, with coins independent of everything else.
@@ -251,7 +251,7 @@ $$
 where the middle step is the $\varepsilon$-DP of the test from step 2. Replacing $\bot$ by a random label is post-processing.
 :::
 
-The accuracy depends on how good the teachers are. If the records are independent draws from a distribution, then teachers trained on disjoint parts vote independently on a fixed $x$.
+Accuracy depends on teacher quality. For independent records and disjoint training subsets, teachers' votes on a fixed $x$ are independent.
 
 ::: {#prp-dpdl-mode-accuracy}
 Let $\beta \in (0,1)$ be a failure probability, and let $\tau$ be the threshold of @def-dpdl-mode. Suppose each teacher, independently, votes for the correct label $y$ of $x$ with probability at least $3/4$. If
@@ -274,11 +274,11 @@ then the private mode outputs $y$ with probability at least $1 - \beta$.
 With $\varepsilon = 1$, $\delta = 10^{-5}$ and $\beta = 0.01$, the threshold is $\tau = 2 + 2\ln(50{,}000) = 23.64$. The two lower bounds are $94.56 + 8\ln 100 = 131.4$ and $32\ln 200 = 169.5$, so $170$ teachers suffice. If a teacher needs $n_0$ records to be right three times in four, the private prediction needs $170\,n_0$.
 :::
 
-The number of teachers grows like $\ln(1/\delta)/\varepsilon$. This is the general price of sample and aggregate, about $1/\varepsilon$ times more data than the non-private algorithm. That is often more than the best private algorithm for a specific task needs.
+The required number of teachers grows as $\ln(1/\delta)/\varepsilon$. This sample-and-aggregate cost is about a factor $1/\varepsilon$ more data than the non-private algorithm requires, often more than a task-specific private method.
 
-To answer $k$ queries with $k$ runs of the private mode costs about $\varepsilon\sqrt{2k\ln(1/\delta')}$, by advanced composition. The sparse vector technique of [the sparse vector chapter](../part03-query-release/02-sparse-vector.md) does better when most queries are stable, because it pays only for the queries whose answer is above a threshold. Here each query asks whether the gap on the next point is small. So the technique pays only for the unstable points, where it outputs a random label, and it answers the stable ones with the exact mode. Its privacy cost grows like the square root of the number of unstable queries, not of all $k$ (Bassily, Thakkar and Thakurta).
+Answering $k$ queries with separate private-mode runs costs about $\varepsilon\sqrt{2k\ln(1/\delta')}$ by advanced composition. [Sparse vector](../part03-query-release/02-sparse-vector.md) is more efficient when most queries are stable: it pays only for answers above a threshold. Here, each query tests whether the next point's vote gap is small. The method therefore pays for unstable points, returning random labels for them, while releasing stable modes exactly. Its privacy cost grows with the square root of the number of unstable queries, rather than all $k$ (Bassily, Thakkar and Thakurta).
 
-The answers $(x_1,\hat y_1), \dots, (x_k,\hat y_k)$, with public features and private labels, form a labelled dataset that is safe to release. PATE trains a non-private learner, the **student**, on it. If the labelling is $(\varepsilon,\delta)$-DP and the public features do not depend on the private data, the student is $(\varepsilon,\delta)$-DP too, by post-processing. The student then answers any number of queries at no further cost. So PATE turns a bounded number of private predictions into a private model.
+The labelled pairs $(x_1,\hat y_1),\dots,(x_k,\hat y_k)$ use public features and private labels. PATE trains a non-private **student** on them. If labeling is $(\varepsilon,\delta)$-DP and the features are independent of private data, the student inherits that guarantee by post-processing and can answer further queries without additional cost. PATE thus converts a bounded number of private predictions into a private model.
 
 ## Summary {#sec-dpdl-summary}
 

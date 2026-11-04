@@ -1,6 +1,6 @@
 # Advanced composition
 
-When you run $k$ private analyses on the same data, basic composition says that their privacy costs add up. This chapter shows that the total cost grows much more slowly, about as $\sqrt{k}$, if you accept a small extra failure probability. The proof turns each step into one simple pair of outputs with four outcomes. Then it bounds $k$ copies of that pair with Hoeffding's inequality.
+Basic composition adds the privacy costs of $k$ analyses on the same data. This chapter proves a tighter bound, of order $\sqrt{k}$, at the cost of an additional failure probability. The proof represents each step by a pair of distributions on four outcomes, then applies Hoeffding's inequality to their composition.
 
 ## The theorem {#sec-ac-theorem}
 
@@ -20,11 +20,11 @@ $$
 $$
 :::
 
-So $M$ is $(\varepsilon,\delta)$-DP exactly when $M(D)$ and $M(D')$ are $(\varepsilon,\delta)$-indistinguishable for every pair of neighbours.
+Thus, $M$ is $(\varepsilon,\delta)$-DP exactly when its outputs on every neighbouring pair are $(\varepsilon,\delta)$-indistinguishable.
 
-The theorem is about the adaptive composition of @def-lap-adaptive: mechanisms $M_1, \dots, M_k$ run in order on the same $D$, where $M_j(D; y_{<j})$ may depend on the earlier outputs $y_{<j} = (y_1,\dots,y_{j-1})$, and the composition outputs the whole transcript $(y_1,\dots,y_k)$.
+The theorem concerns adaptive composition as defined in @def-lap-adaptive. Mechanisms $M_1,\dots,M_k$ run on the same dataset in sequence; $M_j(D;y_{<j})$ may depend on earlier outputs, and the composition releases the transcript $(y_1,\dots,y_k)$.
 
-Basic composition, proved in the two previous chapters, says that if each $M_j(\,\cdot\,; y_{<j})$ is $(\varepsilon,\delta)$-DP for every fixed $y_{<j}$, then $M$ is $(k\varepsilon, k\delta)$-DP. The theorem of this chapter improves the first parameter. Throughout, every output space is countable, so that probabilities are sums over outcomes.
+Basic composition from the previous chapters gives $(k\varepsilon,k\delta)$-DP when each conditional mechanism is $(\varepsilon,\delta)$-DP. This chapter improves the first parameter. All output spaces here are countable, so probabilities are sums over outcomes.
 
 ::: {#thm-ac-advanced name="Advanced composition"}
 Let $\varepsilon \ge 0$, $\delta \in [0,1)$ and $\delta' \in (0,1)$. Let $M$ be the adaptive composition of $k$ mechanisms such that $M_j(\,\cdot\,; y_{<j})$ is $(\varepsilon,\delta)$-DP for every $j$ and every $y_{<j}$. Then $M$ is $(\tilde\varepsilon, \tilde\delta)$-DP with
@@ -35,9 +35,9 @@ $$ {#eq-ac-advanced}
 :::
 <!-- proof: in @sec-ac-binary -->
 
-The first term of $\tilde\varepsilon$ is the important one, and it grows as $\varepsilon\sqrt k$ instead of $k\varepsilon$. The second term is small when $\varepsilon$ is small. Its factor is $(e^\varepsilon-1)/(e^\varepsilon+1) = \tanh(\varepsilon/2)$, and $\tanh x \le x$ for $x \ge 0$, so the term is at most $k\varepsilon^2/2$. That is also at most $k\varepsilon(e^\varepsilon - 1)$, because $e^\varepsilon - 1 \ge \varepsilon$, so the theorem implies the weaker form that [the previous chapter](03-approximate-dp.md) quoted. The extra slack $\delta'$ is a free parameter, and a larger $\delta'$ lowers $\tilde\varepsilon$, so the theorem trades a bigger $\delta$ for a smaller $\varepsilon$.
+The first term grows as $\varepsilon\sqrt{k}$ rather than $k\varepsilon$. Since $(e^\varepsilon-1)/(e^\varepsilon+1)=\tanh(\varepsilon/2)\le\varepsilon/2$, the second term is at most $k\varepsilon^2/2$. It is also at most $k\varepsilon(e^\varepsilon-1)$, so the theorem implies the weaker bound quoted in [the previous chapter](03-approximate-dp.md). The parameter $\delta'$ controls a trade-off: increasing it lowers $\tilde\varepsilon$ and increases the total $\tilde\delta$.
 
-The proof is in @sec-ac-binary. Before it, @exm-ac-numbers and @fig-ac-composition say how much the theorem gains.
+@exm-ac-numbers and @fig-ac-composition compare the theorem with basic composition before the proof in @sec-ac-binary.
 
 ::: {#exm-ac-numbers}
 Take $\varepsilon = 0.1$ and $\delta' = 10^{-6}$, so that $\ln(1/\delta') = 13.8155$ and $\tanh(0.05) = 0.04996$. For $k = 100$ mechanisms, basic composition gives $10$. Advanced composition gives $0.1\sqrt{200 \times 13.8155} + 100 \times 0.1 \times 0.04996 = 5.257 + 0.500 = 5.756$. For $k = 1{,}000$, basic composition gives $100$ and advanced composition gives $16.623 + 4.996 = 21.618$. Advanced composition is the smaller of the two from $k = 31$ on.
@@ -45,9 +45,9 @@ Take $\varepsilon = 0.1$ and $\delta' = 10^{-6}$, so that $\ln(1/\delta') = 13.8
 
 ![The total privacy parameter of $k$ mechanisms that are each $0.1$-DP, at $\delta' = 10^{-6}$. The solid line is basic composition, the dashed line is @eq-ac-advanced, and the dotted line is the exact smallest $\tilde\varepsilon$ for $k$ independent randomized responses, which is the worst case for pure DP by @sec-ac-reduction. Advanced composition overtakes basic composition at $k = 31$ and is within 21% of the exact value for every $k$ from $100$ to $10{,}000$.](figures/ac-composition.svg){#fig-ac-composition}
 
-The exact curve in @fig-ac-composition shows that @thm-ac-advanced is close to the truth, within 7% of it at $k = 10{,}000$. So growth as $\varepsilon\sqrt{k\ln(1/\delta')}$ is how privacy really degrades, not an artefact of the proof. Kairouz, Oh and Viswanath (2015) computed the exact optimal $\tilde\varepsilon$, which is tighter but harder to use.
+In @fig-ac-composition, @thm-ac-advanced is within 7% of the exact bound at $k=10{,}000$. The observed growth, $\varepsilon\sqrt{k\ln(1/\delta')}$, is therefore close to optimal, not merely a proof artifact. Kairouz, Oh, and Viswanath (2015) derived the exact, tighter bound.
 
-With a total budget $\varepsilon_{\mathrm{total}}$ for $k$ analyses, you can invert @eq-ac-advanced. The next corollary gives a simple choice that always works.
+Given a total budget $\varepsilon_{\mathrm{total}}$ for $k$ analyses, @eq-ac-advanced can be inverted. The next corollary gives a sufficient per-mechanism budget.
 
 ::: {#cor-ac-budget}
 Let $\varepsilon_{\mathrm{total}} \in (0,1]$ and $\delta' \in (0, 1/2]$. If each of $k$ adaptively composed mechanisms is $(\varepsilon,\delta)$-DP with
@@ -67,9 +67,9 @@ then the composition is $(\varepsilon_{\mathrm{total}}, k\delta + \delta')$-DP.
 4. Adding the two terms gives $\tilde\varepsilon \le \varepsilon_{\mathrm{total}}$. A mechanism that is $(\tilde\varepsilon,\tilde\delta)$-DP is also $(\varepsilon_{\mathrm{total}},\tilde\delta)$-DP for every $\varepsilon_{\mathrm{total}} \ge \tilde\varepsilon$.
 :::
 
-The corollary is conservative by about a factor of $2$. With $\varepsilon_{\mathrm{total}} = 1$, $k = 1{,}000$ and $\delta' = 10^{-6}$, it allows $\varepsilon = 0.00301$ per mechanism, for which @eq-ac-advanced gives a total of only $0.5045$. Solving @eq-ac-advanced numerically allows $\varepsilon = 0.00591$, almost twice as much, and basic composition with that $\varepsilon$ would give a total of $5.911$.
+The corollary is conservative by about a factor of $2$. For $\varepsilon_{\mathrm{total}}=1$, $k=1{,}000$, and $\delta'=10^{-6}$, it permits $\varepsilon=0.00301$ per mechanism, yielding a total of $0.5045$ under @eq-ac-advanced. Numerical inversion permits $\varepsilon=0.00591$, nearly twice as much; basic composition at that value gives $5.911$.
 
-The gain matters most when the number of analyses grows with the problem, as in the next example.
+The gain matters when the number of analyses grows with the problem, as in the following example.
 
 ::: {#exm-ac-mean name="Mean estimation with the Laplace mechanism"}
 Each of $n$ people holds a vector $x_i \in \{0,1\}^d$, and the analyst wants the mean $f(D) = \frac1n\sum_i x_i$. Recall the [Laplace mechanism](02-laplace-mechanism.md): if $f$ has $\ell_1$ sensitivity $\Delta_1 f$, meaning that $\|f(D) - f(D')\|_1 \le \Delta_1 f$ for all neighbours, then adding independent noise from the Laplace distribution with scale $\Delta_1 f/\varepsilon$ to each coordinate is $\varepsilon$-DP. A Laplace variable with scale $b$ has mean $0$ and variance $2b^2$, so the expected squared $\ell_2$ error of the noise vector is $2db^2$.

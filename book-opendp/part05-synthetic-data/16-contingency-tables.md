@@ -1,10 +1,10 @@
 # Contingency tables
 
-Suppose you want to publish a whole table, such as how many people of each age group usually work each number of hours, by employment status and sex. A **contingency table** is that table, with a count for every combination of the values of several columns. [Grouping](../part02-tabular-data/04-grouping.md) released one for two columns, and this chapter asks what changes with four columns, or forty. The answer is that you release a few **marginals**, the same counts for two or three columns at a time, and fit one model that agrees with all of them. The model then answers any count over those columns, consistently, from the budget already spent.
+Suppose you need a table of usual work hours by age, employment status and sex. A **contingency table** reports a count for every combination of column values. [Grouping](../part02-tabular-data/04-grouping.md) released a two-column table; adding more columns multiplies its cells and noise. Instead, release a few **marginals**, counts over two or three columns, and fit one model to them. The model then answers other queries over those columns without additional budget.
 
-The chapter follows the documentation's page on contingency tables. You will set up a context under zero-concentrated differential privacy (zCDP) and say which columns have known keys or cut points. Then you will release a fixed workload of marginals and read the `ContingencyTable` that comes back. At the end you will read a projection of the table against its error bar and add a marginal that the first release left out.
+The chapter follows the documentation's contingency-table page. It sets up a differential privacy (DP) context with a zero-concentrated budget (zCDP), specifies public keys and cut points, and releases a fixed workload of marginals. It then inspects the resulting `ContingencyTable`, compares a projection with its error bar and adds a marginal omitted from the first release.
 
-The script [opendp_contingency_tables.py](../../code/part05-synthetic-data/opendp_contingency_tables.py) runs every step on OpenDP 0.16.0 with `mbi` 1.1.0, the Private-PGM version that OpenDP pins, on the Labour Force Survey (LFS) sample. The budgets, scales, thresholds, keys and error bars it prints are the same on every run. OpenDP's noise cannot be seeded, so the page shows the released counts in one block marked as one run.
+The script [opendp_contingency_tables.py](../../code/part05-synthetic-data/opendp_contingency_tables.py) runs on the Labour Force Survey (LFS) sample with OpenDP 0.16.0 and `mbi` 1.1.0, the pinned Private-PGM version. Budgets, scales, thresholds, keys and error bars are deterministic. OpenDP's noise cannot be seeded, so the page labels released counts as one run.
 
 ```bash
 uv run python code/part05-synthetic-data/opendp_contingency_tables.py
@@ -12,19 +12,19 @@ uv run python code/part05-synthetic-data/opendp_contingency_tables.py
 
 ## From grouped counts to marginals {#sec-ctab-marginals}
 
-The grouped counts of [Grouping](../part02-tabular-data/04-grouping.md) fail in two ways as you add columns. The first is size, because each column multiplies the number of cells by its number of values, and the four raw columns of this sample already make 4,648 cells. The second is noise. The noise on a cell does not depend on how many records the cell holds. So when the same records spread over more cells, each count gets smaller while its noise stays the same. Soon most cells are noise.
+Grouped counts from [Grouping](../part02-tabular-data/04-grouping.md) become difficult as columns are added. Each column multiplies the number of cells by its number of values; four raw columns in this sample already produce 4,648 cells. Noise per cell does not depend on its record count. As records spread across more cells, counts shrink while noise stays constant, until noise dominates most cells.
 
-A marginal is the contingency table of a subset of the columns. Once the columns are binned as below, the two-way marginal of `AGE` and `HWUSUAL` has sixteen cells, each with a count large enough to survive its noise. Several low-order marginals keep the relations between the columns that share a marginal and give up the higher-order ones. The documentation's workload has two marginals, `AGE` with `HWUSUAL` and `HWUSUAL` with `ILOSTAT`.
+A marginal is a contingency table over a subset of columns. After binning, the two-way `AGE` by `HWUSUAL` marginal has sixteen cells with counts large enough to exceed their noise. A workload of low-order marginals preserves relationships within each subset but omits higher-order relationships. The documentation's workload contains `AGE` by `HWUSUAL` and `HWUSUAL` by `ILOSTAT`.
 
-Noisy marginals released separately do not agree. For example, both marginals above contain the one-way counts of `HWUSUAL`, and two noisy copies of the same count differ. So OpenDP fits one probability model over all the columns whose marginals come as close as possible to the noisy ones, and every count you read comes from that model.
+Separately released noisy marginals can disagree. Both marginals above include one-way `HWUSUAL` counts, but their noisy copies differ. OpenDP therefore fits one probability model to all columns, making its marginals jointly approximate the noisy measurements. All subsequent counts come from that model.
 
-The method of the fit is **Private-PGM** (McKenna, Sheldon and Miklau, 2019), in the `mbi` package. Its model is a graphical model with one factor per measured marginal, fitted by mirror descent, a gradient method that keeps the model a valid distribution at every step. The fit sees only the noisy marginals, so it is post-processing and costs no budget ([the full edition's chapter on query release](../../book-full/part03-dp-foundations/06-query-release.md)).
+The fit uses **Private-PGM** (McKenna, Sheldon and Miklau, 2019) from the `mbi` package. It builds a graphical model with one factor per measured marginal and fits it by mirror descent, which preserves a valid distribution at each step. Because fitting uses only noisy marginals, it is post-processing and costs no additional budget ([the full edition's chapter on query release](../../book-full/part03-dp-foundations/06-query-release.md)).
 
-Install the extra with `pip install 'opendp[mbi]'`, which brings `mbi` 1.1.0, and the documentation's code then runs as written. Every algorithm fits its model with `mbi.estimation.mirror_descent` at the default of 1,000 steps, and the check at the end of the chapter asks whether that is enough on this data.
+Install `pip install 'opendp[mbi]'` to get `mbi` 1.1.0 and run the documentation's code. Each algorithm fits its model with `mbi.estimation.mirror_descent`, using 1,000 steps by default. The final check tests whether that suffices for this dataset.
 
 ## The context under zCDP, with a delta {#sec-ctab-context}
 
-The context is the one of [Assessing utility and choosing the noise](../part02-tabular-data/07-utility-and-noise.md), with a larger budget. The privacy unit is the book's 36 contributions per person ([the data and the context](../part01-getting-started/02-the-data-and-the-context.md#sec-ctx-context)). The budget is a privacy parameter $\rho$ of 0.2 under zCDP, which bounds the privacy loss on average, with a slack $\delta$ of $10^{-7}$ for the stable keys. The two queries of the chapter take $\rho = 0.1$ and $\rho = 0.05$, so part of the budget stays unspent.
+The context follows [Assessing utility and choosing the noise](../part02-tabular-data/07-utility-and-noise.md) with a larger budget and the book's privacy unit of 36 contributions per person ([The data and the context](../part01-getting-started/02-the-data-and-the-context.md#sec-ctx-context)). Its zCDP budget is a privacy parameter $\rho$ of 0.2, with a slack $\delta$ of $10^{-7}$ for stable-key selection. The chapter's queries use $\rho = 0.1$ and $\rho = 0.05$, leaving part of the budget unspent.
 
 ```{.python excerpt="ctab-context"}
 def make_context(frame: pl.LazyFrame) -> dp.Context:
@@ -41,16 +41,16 @@ privacy unit: (SymmetricDistance(), 36)
 privacy loss: (Approximate(ZeroConcentratedDivergence), (0.2, 1e-07))
 ```
 
-The budget is under zCDP because a contingency table is many counts released together. Under zCDP the Gaussian noise on all of them composes by adding their values of $\rho$. That sum grows more slowly than the values of $\varepsilon$ of pure differential privacy would ([Combinators](../part03-framework/11-combinators.md), and the full edition's chapter on [concentrated differential privacy](../../book-full/part04-privacy-accounting/03-concentrated-dp.md)). A budget in $\varepsilon$ also works, with Laplace noise, but then the error bars below are only approximate.
+The zCDP budget suits a table that releases many counts: Gaussian costs compose by adding their $\rho$ values, more tightly than pure-DP $\varepsilon$ costs ([Combinators](../part03-framework/11-combinators.md) and the full edition's chapter on [concentrated differential privacy](../../book-full/part04-privacy-accounting/03-concentrated-dp.md)). An $\varepsilon$ budget with Laplace noise is also possible, but the error bars below would then be approximate.
 
-The $\delta$ is there because one column, `ILOSTAT`, has neither keys nor cuts, so its keys come from the data by the stable-keys release of [Grouping](../part02-tabular-data/04-grouping.md). A key is shown only when its noisy count clears a threshold, set so that one person alone reaches it with probability at most $\delta$. The slack pays for that threshold and for nothing else, and the library enforces this in both directions. It refuses a $\delta$ when every column has keys or cuts, and it refuses $\delta = 0$ when a column has neither. The script provokes both refusals on this data.
+The budget includes $\delta$ because `ILOSTAT` has no keys or cuts. OpenDP selects its keys by the stable-key method from [Grouping](../part02-tabular-data/04-grouping.md), showing a key only when its noisy count exceeds a threshold. The threshold limits the probability that one person's rows alone create a key to at most $\delta$. This slack pays only for key selection. OpenDP rejects nonzero $\delta$ when every column has keys or cuts, and rejects $\delta = 0$ when a column has neither. The script demonstrates both refusals.
 
 ```text
 delta with keys for every column: delta (1e-07) must be zero because keys and cuts span all columns
 no delta with ILOSTAT unkeyed: delta (0.0) must be nonzero because keys and cuts don't span all columns
 ```
 
-The snippet shows the first refusal on a toy frame. It also shows that when every column has keys, nothing is spent on discovering keys, so the query reports no one-way scale or threshold.
+The toy-frame snippet demonstrates the first refusal. When all columns have public keys, no budget is spent discovering keys, so the query reports no one-way scale or threshold.
 
 ```python
 import opendp.prelude as dp
@@ -77,11 +77,11 @@ The model needs a fixed, finite set of values for every column, because its cell
 
 Each of the three sources can miss values, and the library handles every miss the same way. A value outside the key list, such as a code 3 in `SEX`, becomes `null`, and so does a stable key with too small a count. So `null` stands for "something else", and a true null in the data joins it. To keep true nulls apart, recode them to a value of their own with `with_columns` before the query, as the documentation advises. A cut column has no null bin, so a null `AGE` or `HWUSUAL` lands in the last bin. The check at the end confirms that on the 255 rows without an age and the 20,819 without usual hours.
 
-The codebook of `ILOSTAT` lists six codes, from 1 for working to 9 for a child under 15. Codes 4 and 5 do not occur in this sample, so the stable keys should find four. Then `null` is the cell of the two missing codes, with no rows behind it.
+The `ILOSTAT` codebook lists six codes, from 1 for working to 9 for a child under 15. Codes 4 and 5 do not occur here, so stable-key selection should find four codes. The `null` key represents the two absent codes and has no corresponding rows.
 
 ## The Fixed algorithm and its workload {#sec-ctab-fixed}
 
-`dp.mbi.Fixed` releases a workload you name in advance, as a list of `Count` queries, one per marginal. It is the right tool when you already know which relations you need, while the algorithms of [the next chapter](17-aim-and-mst.md) choose the marginals themselves. The query names the columns, the keys and cuts, and the algorithm.
+`dp.mbi.Fixed` releases a specified workload: a list of `Count` queries, one per marginal. Use it when you know which relationships to measure. The algorithms in [the next chapter](17-aim-and-mst.md) select marginals instead. The query specifies columns, keys, cuts and algorithm.
 
 ```{.python excerpt="ctab-query"}
 def workload_query(context: dp.Context) -> ContingencyTableQuery:
@@ -100,21 +100,21 @@ def workload_query(context: dp.Context) -> ContingencyTableQuery:
     )
 ```
 
-The budget of the query has two parts. A share `oneway_split` goes to the one-way marginals of the columns without keys, which give the stable keys of `ILOSTAT`. The rest goes to the workload, equally over its counts unless you give them weights. By default `Fixed` takes half the budget times the fraction of columns without keys, here a half of a quarter. The documentation sets this one eighth explicitly, and the script prints the split.
+The query splits its budget between two uses. `oneway_split` assigns a share to one-way marginals for columns without keys; here, it discovers stable keys for `ILOSTAT`. The remaining budget funds the workload, divided equally among its counts unless weights are provided. By default, `Fixed` uses half the budget times the fraction of unkeyed columns. Here that is half of one quarter. The documentation sets the resulting one-eighth share explicitly.
 
 ```text
 oneway split: 0.125 of rho=0.1 -> rho=0.0125 one-way, rho=0.04375 per count
 oneway scale: 227.68  oneway threshold: 1364
 ```
 
-Read the two attributes before you release. The scale is the standard deviation of the Gaussian noise on the one-way counts of `ILOSTAT`. The threshold is the count that a noisy key must exceed to be kept. Both follow from the privacy unit. One person's 36 rows can all carry the same status, so a person changes one count by up to 36, which is the sensitivity of the one-way marginal. The Gaussian scale that spends $\rho$ on a count of sensitivity $\Delta$ is $\Delta / \sqrt{2\rho}$ ([Assessing utility and choosing the noise](../part02-tabular-data/07-utility-and-noise.md)), as the script checks for both parts of the budget.
+Inspect both attributes before release. The scale is the standard deviation of Gaussian noise on the one-way `ILOSTAT` counts. The threshold is the minimum noisy count for retaining a key. The privacy unit sets both: one person's 36 rows may share a status, so that person's contribution to one cell can be 36. This is the marginal's sensitivity. At budget $\rho$, the Gaussian scale for a count of sensitivity $\Delta$ is $\Delta / \sqrt{2\rho}$ ([Assessing utility and choosing the noise](../part02-tabular-data/07-utility-and-noise.md)). The script checks the scale for each budget share.
 
 ```text
 scale from the formula 36 / sqrt(2 x 0.0125): 227.68
 scale of each count of the workload, 36 / sqrt(2 x 0.04375): 121.70
 ```
 
-So each cell of the two measured marginals carries Gaussian noise with standard deviation 121.70. The threshold 1364 is set as in [Grouping](../part02-tabular-data/04-grouping.md). At scale 227.68, a key held by one person alone, in all 36 of their rows, clears it with probability at most $\delta$. The sensitivity 36 is the price of the privacy unit, and a truncation to one row per person and year ([Identifier truncation](../part02-tabular-data/05-identifier-truncation.md)) would lower it.
+Each cell in the two measured marginals receives Gaussian noise with standard deviation 121.70. The threshold 1364 follows the method in [Grouping](../part02-tabular-data/04-grouping.md). At scale 227.68, a key supported only by one person's 36 rows exceeds the threshold with probability at most $\delta$. The privacy unit sets sensitivity to 36; truncating to one row per person and year ([Identifier truncation](../part02-tabular-data/05-identifier-truncation.md)) would reduce it.
 
 ## The released table {#sec-ctab-table}
 
@@ -124,7 +124,7 @@ ilostat_std = table.std(("ILOSTAT",))
 ilostat_accuracy = dp.gaussian_scale_to_accuracy(ilostat_std, alpha=ALPHA)
 ```
 
-The release returns a `ContingencyTable`. It holds the key sets that the model was fitted on, the cuts, the thresholds that produced any stable keys, and the data type of the keys of each column.
+The release returns a `ContingencyTable` containing the model's key sets, cuts, stable-key thresholds and each column's key type.
 
 ```text
 keys: SEX=[1, 2, null]  AGE=[(-inf, 20.0], (20.0, 40.0], (40.0, 60.0], (60.0, inf]]  HWUSUAL=[(-inf, 1.0], (1.0, 20.0], (20.0, 40.0], (40.0, inf]]  ILOSTAT=[1, 2, 3, 9, null]
@@ -133,11 +133,11 @@ thresholds: {'ILOSTAT': 1364}
 schema: {'SEX': Int64, 'AGE': String, 'HWUSUAL': String, 'ILOSTAT': Int64}
 ```
 
-Every key set that is not a cut set ends in `null`, the cell for values outside the keys. So `SEX` has one, although the data hold only 1 and 2. The stable keys of `ILOSTAT` are the four codes with rows, plus `null`. The schema shows that a cut column now holds strings, the bin labels, so a query on the table names bins and not numbers.
+Every key set without cuts ends in `null`, which collects values outside the specified keys. `SEX` therefore has a `null` key, although the data contain only 1 and 2. `ILOSTAT` has four observed codes and `null`. The schema shows that cut columns use string bin labels, so queries name bins rather than numeric values.
 
-The method `project` sums the model over every column except the ones you name, and returns the counts as an array in the order of the keys. The method `project_melted` returns them as a data frame. Both are post-processing. You can project onto any set of columns, even ones that no marginal measured, which the next section shows is a mixed blessing.
+`project` sums out every column except those named and returns counts in key order. `project_melted` returns the same projection as a data frame. Both are post-processing. They can project onto unmeasured column sets, but those estimates have no release-based error bar.
 
-The method `std` estimates the standard deviation of a projection, and `dp.gaussian_scale_to_accuracy` turns it into an error bar. Projecting a two-way marginal onto one of its columns sums four noisy cells, so the standard deviation doubles, from 121.70 to 243.40. So with probability 0.95, each count of `ILOSTAT` is within 477.06 of the truth. That estimate leaves out the one-way marginal of `ILOSTAT`, because it measured only the released keys, and OpenDP counts no cell-wise precision for such a measurement. The column `HWUSUAL` sits in both measured marginals, and the two estimates combine by their inverse variances to 181.42.
+`std` estimates a projection's standard deviation; `dp.gaussian_scale_to_accuracy` converts it to an error bar. Projecting a two-way marginal onto one column sums four noisy cells, doubling the standard deviation from 121.70 to 243.40. Thus each `ILOSTAT` count is within 477.06 of its truth with probability 0.95. This estimate excludes the one-way `ILOSTAT` measurement: it releases keys only, so OpenDP assigns no cell-wise precision to it. `HWUSUAL` appears in both measured marginals, and their estimates combine by inverse variance to 181.42.
 
 ```text
 std ILOSTAT: 243.40  95% accuracy: 477.06
@@ -147,13 +147,13 @@ std HWUSUAL: 181.42  95% accuracy: 355.58
 
 ## Adaptive estimation {#sec-ctab-adaptive}
 
-`SEX` has keys, but no marginal of the workload contains it. The model knows the total number of rows and nothing about how they split by sex. So it spreads the total evenly over the three keys, and `std` refuses to put a bar on that.
+No measured marginal contains `SEX`, although its keys are known. The model therefore distributes the total evenly across its three keys, and `std` cannot provide an error bar.
 
 ```text
 std SEX: attrs (('SEX',)) are not covered by the query set
 ```
 
-A second query repairs this without starting over. Passing the released table as `table=` tells the library to keep its keys, cuts, marginals and model, measure the new marginals, and fit the model again. Every column now has keys, including the ones that the first release found, so this query must carry $\delta = 0$ and spends nothing on key discovery.
+A second query adds the missing marginal without rebuilding the table from scratch. Passing the released table as `table=` preserves its keys, cuts, marginals and model, then measures the new marginal and refits the model. All columns now have keys, including those discovered in the first release, so this query must use $\delta = 0$ and spends nothing on key discovery.
 
 ```{.python excerpt="ctab-adaptive"}
 def sex_query(context: dp.Context, table: dp.mbi.ContingencyTable) -> ContingencyTableQuery:
@@ -168,7 +168,7 @@ def sex_query(context: dp.Context, table: dp.mbi.ContingencyTable) -> Contingenc
     )
 ```
 
-The new marginal is a one-way count at $\rho = 0.05$ with the same sensitivity of 36, so its scale is 113.84. The three cells of `SEX` then have an error bar of 223.13. The model now has four marginals, and the context has spent $\rho = 0.15$ of its 0.2. The budget of the second query was chosen after seeing the first table, which is the adaptive composition of [Combinators](../part03-framework/11-combinators.md). The new fit starts from the first model and runs its own 1,000 steps of mirror descent.
+The new one-way marginal uses $\rho = 0.05$ and sensitivity 36, giving scale 113.84 and a 223.13 error bar for each of the three `SEX` cells. The model now has four marginals, and the context has spent $\rho = 0.15$ of its 0.2 budget. Because the second query's budget was chosen after seeing the first table, the releases compose adaptively ([Combinators](../part03-framework/11-combinators.md)). The new fit starts from the first model and runs another 1,000 mirror-descent steps.
 
 ```text
 std SEX after the second query: 113.84  95% accuracy: 223.13
@@ -178,7 +178,7 @@ privacy loss spent: (0.15, 1e-07)
 
 ## Checking the release against the truth {#sec-ctab-check}
 
-The data are public, so the script computes the true values that the table estimates. Polars gives the true one-way counts of `ILOSTAT` and the true `AGE` by `HWUSUAL` table for the documentation's cuts. Every null age or null hours goes in the last bin, as the library places them.
+Because the data are public, the script can compare estimates with truth. Polars computes the one-way `ILOSTAT` counts and the `AGE` by `HWUSUAL` table using the documentation's cuts. As in the library, null ages and hours go in the last bin.
 
 ```text
 true ILOSTAT counts: 1=1,517,011  2=155,661  3=1,450,283  9=688,977
@@ -189,7 +189,7 @@ true AGE x HWUSUAL (a null AGE or HWUSUAL counts in the last bin):
   AGE (60.0, inf]: (-inf, 1.0]=1,502  (1.0, 20.0]=28,084  (20.0, 40.0]=122,405  (40.0, inf]=1,039,109
 ```
 
-The releases of one run follow, to read against the error bars above. They show more than the noise.
+The following one-run releases can be compared with the error bars above. Their errors also reflect model fitting.
 
 ```text
 released (one run):
@@ -211,13 +211,13 @@ released (one run):
     ILOSTAT null: 590  (true 0, off by +590)
 ```
 
-Start with the cells that the noise alone explains. The largest of the sixteen two-way errors is 521 rows, past twice the bar of 238.53 per cell but inside three times it. It sits in the last bin of both columns, which holds the rows without usual hours or age, so the run confirms where the library puts a null. The `null` keys of `ILOSTAT` and `SEX` have no rows behind them, but their estimates are positive, because a fitted distribution cannot go negative. Keep that in mind for a cell whose truth may be zero.
+The largest of the sixteen two-way errors is 521 rows: more than twice, but less than three times, the 238.53 error bar. It occurs in the last bin of both columns, which contains rows with null hours or age; this confirms how the library assigns nulls. The `null` keys of `ILOSTAT` and `SEX` have no true rows but receive positive estimates, because fitted counts cannot be negative. Expect upward bias for cells whose true count is zero.
 
-The fit, not the noise, explains the other errors. The working code 1 of `ILOSTAT` came out 1,422 rows short, past twice its bar of 477.06. The empty `null` key holds 1,142 rows. The fit starts from the uniform model, so `null` begins with a fifth of all rows. A key with no rows is the slowest cell to fit, because the model can empty it only in the limit. So 1,000 steps leave about a thousand rows in it, and those rows are missing from the other keys.
+Model fitting explains the larger errors. The working code 1 of `ILOSTAT` is 1,422 rows below truth, more than twice its 477.06 bar. Its empty `null` key instead holds 1,142 rows. The fit starts from a uniform model, which assigns one fifth of the rows to `null`. Because an empty key approaches zero only in the limit, 1,000 steps leave about a thousand rows there, missing from other keys.
 
-The second query shows the same thing in `SEX`. Its fit starts from the first model, in which the `null` key of `SEX` holds a third of all rows. After 1,000 steps that key still holds 610 rows, more than twice its bar. So the two real keys are short by 455 and 434 rows. The same steps continued to fit `ILOSTAT`, whose working code is now 723 rows short.
+The second query shows the same effect for `SEX`. Its fit starts from the first model, where the `null` key holds one third of the rows. After 1,000 steps, it still holds 610 rows, more than twice its bar. The two real keys are therefore short by 455 and 434 rows. The fit also continues to adjust `ILOSTAT`; its working code remains 723 rows below truth.
 
-To settle it, the script fits the four released marginals of the second table again from scratch, with 10,000 steps of `mbi.estimation.mirror_descent` instead of the default 1,000. That touches no data, so it is post-processing and a dev-time check, never part of a release.
+The script tests the fit by refitting the second table's four released marginals from scratch with 10,000 steps of `mbi.estimation.mirror_descent`, rather than the default 1,000. This uses no data, so it is post-processing and a development check, not part of a release.
 
 ```text
   the same marginals refitted at 10,000 steps (dev time, post-processing):
@@ -230,9 +230,9 @@ To settle it, the script fits the four released marginals of the second table ag
     AGE x HWUSUAL largest |refit - true|: 295  (accuracy 238.53)
 ```
 
-With more steps, the `null` key of `ILOSTAT` keeps 103 rows and that of `SEX` 27, inside their bars. Code 1 is within 182 rows of the truth and each real key of `SEX` within 163. The largest two-way error is 295 rows, inside three times its bar. So a fit that stops early biases the empty cells upward and the largest ones downward, and nothing in the release warns you. A dev-time check against public or historical data is how you notice it.
+After more steps, the `null` keys of `ILOSTAT` and `SEX` hold 103 and 27 rows, within their bars. Code 1 is 182 rows from truth, and each real `SEX` key is within 163. The largest two-way error is 295 rows, less than three times its bar. Early stopping therefore biases empty cells upward and larger cells downward without warning in the release. A development check against public or historical data reveals this bias.
 
-The test behind the script holds each two-way cell and each count of the longer fit within three times its bar. For the default fit, it checks that each `null` holds less than a tenth of a percent of the rows. It also checks that each real key is within three times its bar plus the rows left in `null`.
+The script's test requires every two-way cell and count from the longer fit to lie within three error bars. For the default fit, it checks that each `null` key holds less than one tenth of a percent of the rows and that each real key's error is within three bars plus the rows remaining in `null`.
 
 ## Summary
 

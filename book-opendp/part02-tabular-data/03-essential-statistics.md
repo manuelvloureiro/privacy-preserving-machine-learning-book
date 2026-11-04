@@ -1,8 +1,8 @@
 # Essential statistics
 
-With a context on a table, you can ask the everyday questions. How many responses are there, how many hours do people work in total and on average, and what is a typical week? This chapter answers them on the Labour Force Survey (LFS) sample with OpenDP's Polars queries. Each answer is a statistic with noise. The library finds the noise scale from a bound on what one person can change and from a share of the budget. You read that scale and its error bar before you release anything.
+This chapter answers four questions on the Labour Force Survey (LFS) sample: how many responses are there, how many hours do people work, and what are the mean and typical work week? OpenDP's Polars queries release each statistic with noise. The library sets the noise scale from a bound on one person's contribution and the query's budget share. Read the scale and error bar before release.
 
-The chapter follows the documentation's tutorial on essential statistics and its page on aggregation. You count rows, decide where bounds come from, sum a column, release a mean in two ways, and choose a median and quartiles from candidates. [The practitioner edition's workflow on releasing statistics](../../book-practitioner/part03-dp-foundations/12-release-statistics.md) does the same work on a retail dataset.
+The chapter follows the documentation's tutorial on essential statistics and its aggregation guide. It counts rows, chooses bounds, sums a column, releases a mean in two ways and selects a median and quartiles from candidates. [The practitioner edition's workflow on releasing statistics](../../book-practitioner/part03-dp-foundations/12-release-statistics.md) applies these methods to retail data.
 
 The script [opendp_essential_statistics.py](../../code/part02-tabular-data/opendp_essential_statistics.py) runs every query on OpenDP 0.16.0. It reads the sample lazily through `practitioner_datasets.france_lfs()`, as the documentation reads the same file through `dp.examples.get_france_lfs_path()`. The scales, error bars, refusals and true values that it prints are the same on every run. The released values are not, because OpenDP's noise cannot be seeded, so this page shows them in one block marked as one run.
 
@@ -26,11 +26,11 @@ def make_context(frame: pl.LazyFrame, invariant: Literal["keys", "lengths"] | No
     )
 ```
 
-The chapter's five releases come from this one context. A query takes its share of the budget when you build it, so the comparisons on this page, which only read scales, use new contexts with the same settings. A real analysis builds one context and plans its shares before the first query.
+The five releases use one context. Building a query reserves its budget share, so scale comparisons use separate contexts with the same settings. In a real analysis, plan the shares before building queries in one context.
 
 ## Counting responses {#sec-stats-count}
 
-The first release on the survey is its number of rows. The query selects `dp.len`, OpenDP's private version of Polars' `len`, and the context fills in the noise.
+The first release counts the survey rows. The query selects `dp.len`, OpenDP's private version of Polars' `len`; the context calibrates the noise.
 
 ```{.python excerpt="stats-count"}
 count_query = context.query().select(dp.len(signed=True))
@@ -38,7 +38,7 @@ count_summary = count_query.summarize(alpha=0.05)
 dp_count = count_query.release().collect().item()
 ```
 
-Before `release`, call `summarize`. It describes the measurement that the context built, without running it, one row per statistic.
+Call `summarize` before `release` to inspect the measurement without running it. The summary has one row per statistic.
 
 ```text
 shape: (1, 5)
@@ -51,22 +51,22 @@ shape: (1, 5)
 └────────┴──────────────┴─────────────────┴───────┴────────────┘
 ```
 
-The aggregate is the length of the frame, and the distribution is integer Laplace, because a count is an integer. The scale comes from the privacy unit. One person more or less changes up to 36 rows, so the **sensitivity** of the count, the most that one person can change it, is 36. The Laplace scale is the sensitivity over the query's share of $\varepsilon$, so 36 over 0.2. [The full edition's chapter on the Laplace and Gaussian mechanisms](../../book-full/part03-dp-foundations/03-laplace-gaussian.md) derives why that scale gives $\varepsilon$-DP. The accuracy is the error bar at the level that you passed as `alpha`: with probability 0.95, the released count is within 539.73 of the true one.
+The aggregate is frame length, and its distribution is integer Laplace because the count is an integer. One person's addition or removal changes up to 36 rows, so count **sensitivity** is 36. The Laplace scale is sensitivity divided by the query's $\varepsilon$ share: $36/0.2$. [The full edition's chapter on the Laplace and Gaussian mechanisms](../../book-full/part03-dp-foundations/03-laplace-gaussian.md) derives this calibration. The accuracy is the error bar for the requested `alpha`; at 95% confidence, the released count is within 539.73 of the true count.
 
-The error bar depends on `alpha`, not on the data, so both numbers below cost nothing to read. If you ask for more confidence, the bar widens, and at `alpha=0.01` the same scale gives 829.43.
+The error bar depends on `alpha`, not the data, so reading it has no privacy cost. Greater confidence requires a wider bar: at `alpha=0.01`, this scale gives 829.43.
 
 ```text
 count: scale=180.0 95% accuracy=539.73 99% accuracy=829.43
 sensitivity 36 over epsilon 0.2: scale 180.0
 ```
 
-The bar covers the noise and only the noise. It does not cover the sampling error between this sample and the population of France, or the recoding and suppression that Eurostat applied before publication. And it counts responses, not people. The argument `signed=True` keeps the released count a signed integer, so a small count can come out negative when the noise is larger. Without the argument, the library clamps a negative count to zero, which biases small counts upwards, and it warns that the default will change.
+The bar covers noise only. It excludes sampling error between this sample and France's population, as well as Eurostat's recoding and suppression. It also counts responses, not people. `signed=True` allows a negative released count when noise exceeds a small true count. Without this argument, OpenDP clamps negative counts to zero, which biases small counts upward; the library warns that this default will change.
 
 ```text
 without signed=True: FutureWarning: The default value is currently signed=False, and counts are clamped at zero, consistent with past releases, but the default will be changing to signed=True.
 ```
 
-A column has its own counts, which the documentation's aggregation page lists. On a column, `.dp.len` counts the rows with nulls, `.dp.count` the rows that are not null, and `.dp.null_count` the rows that are. So the column counts answers to the hours question, and its null count measures non-response. Then `.dp.n_unique` counts distinct values, with null as one value. One person's rows change each count by at most 36, so each has the scale of the frame length when it is alone in a query. The excerpt asks for all five in one query.
+Columns support additional counts described in the documentation's aggregation guide. `.dp.len` counts rows including nulls, `.dp.count` counts non-null rows, and `.dp.null_count` counts nulls. These give the number of hours responses and the non-response count. `.dp.n_unique` counts distinct values, treating null as one value. Each count has sensitivity at most 36, so its scale matches frame length when queried alone. The excerpt requests all five counts together.
 
 ```{.python excerpt="stats-variants"}
 five_counts = variants.query().select(
@@ -87,17 +87,17 @@ HWUSUAL n_unique alone: scale=180.0
 five counts in one query: scale=900.0 each, 95% accuracy=2696.7
 ```
 
-Five statistics in one query share its budget equally, so each gets a fifth of it and five times the scale. Every query on this page divides its share evenly among its statistics, unless you set their scales yourself. [Grouping](04-grouping.md) gets the null and the non-null count together for one count's noise, by grouping on whether the value is null.
+Five statistics in one query split its budget equally, giving each a fifth of the share and five times the scale. The queries on this page use equal splits unless their scales are set explicitly. [Grouping](04-grouping.md) releases null and non-null counts with one count's noise by grouping on null status.
 
 ## Where bounds come from {#sec-stats-bounds}
 
-Every statistic after the count needs the range of its values. A sum or a mean needs a lower and an upper bound, and a median needs a list of candidates. The bounds set the sensitivity, because one person's rows can move a sum by at most their number times the width of the bounds. That is the clipping idea, which [the full edition's chapter on sensitivity](../../book-full/part03-dp-foundations/07-sensitivity.md) derives. Bounds that are too wide add more noise than the data need. Bounds that are too narrow clip real values and bias the result, and the error bar does not show that bias.
+Statistics other than counts need value bounds or candidates. Sums and means need lower and upper bounds; medians need candidate values. The bounds determine sensitivity: one person's rows can change a sum by at most their count times the interval width. [The full edition's chapter on sensitivity](../../book-full/part03-dp-foundations/07-sensitivity.md) derives sensitivity under clipping. Wide bounds add unnecessary noise. Narrow bounds clip valid values and bias the result; the error bar does not include that bias.
 
-Take bounds from domain knowledge, from a comparable public dataset, or from a share of the budget spent on a coarse quantile query. Never take them from the private data. A bound read off the data, such as its maximum, depends on one person's value and leaks it, outside the guarantee. This page uses domain knowledge: a working week of 0 to 80 hours, with the whole hours from 20 to 59 as candidates.
+Choose bounds from domain knowledge, a comparable public dataset or a budgeted coarse-quantile query. Never estimate them from private data: a bound such as the observed maximum depends on individual values and leaks information outside the guarantee. This chapter uses domain knowledge: 0 to 80 hours for a work week and whole-hour candidates from 20 to 59.
 
 ## The sum of hours {#sec-stats-sum}
 
-The column `HWUSUAL` holds the hours that a person usually works in a week, with 99 for "not applicable". So the query first filters out those rows, and OpenDP accounts for the filter as part of the query. Then `.dp.sum` clips every value into the bounds, sums, and adds noise.
+`HWUSUAL` records usual weekly hours; 99 means "not applicable." The query filters out those rows, and OpenDP accounts for the filter. `.dp.sum` then clips values to the bounds, sums them and adds noise.
 
 ```{.python excerpt="stats-sum"}
 hours: Any = pl.col("HWUSUAL").cast(int)  # Any: the .dp namespace is added at run time
@@ -115,7 +115,7 @@ sum HWUSUAL: Sum, Integer Laplace, scale=14,400.00 95% accuracy=43,139.0
 sensitivity 36 x 80 = 2,880 over epsilon 0.2: scale 14,400
 ```
 
-One person owns at most 36 rows of at most 80 hours each, so the sensitivity is their product. An error bar of 43,139 hours is small against a total near 56 million. The noise does not grow with the number of rows, so the relative error decreases as the table grows.
+One person contributes at most 36 rows of at most 80 hours each, so sensitivity is their product. The 43,139-hour error bar is small relative to the total of about 56 million. Noise does not grow with the row count, so relative error decreases as the table grows.
 
 The sum needs the margin, and it says so when the margin is missing.
 
@@ -123,7 +123,7 @@ The sum needs the margin, and it says so when the margin is missing.
 without a margin: must specify 'max_length' in a margin with by=[]
 ```
 
-As [the previous chapter](../part01-getting-started/02-the-data-and-the-context.md#sec-ctx-margin) explains, the library must know the largest number of rows to account for overflow and rounding in a sum. The `by=[]` in the message names the margin of the whole table, and [Grouping](04-grouping.md) adds margins per group. The refusal does not depend on the data, as a snippet on three rows shows.
+[The previous chapter](../part01-getting-started/02-the-data-and-the-context.md#sec-ctx-margin) explains that a sum needs a row-count bound to account for overflow and rounding. The message's `by=[]` identifies the whole-table margin; [Grouping](04-grouping.md) adds margins for groups. The refusal is data-independent, as the three-row snippet demonstrates.
 
 ```python
 import opendp.prelude as dp
@@ -142,7 +142,7 @@ except dp.OpenDPException as err:
     print(err.message)  # must specify 'max_length' in a margin with by=[]
 ```
 
-The integer cast is the second adjustment. The column holds floats, and a float sum pays for the rounding of up to `max_length` additions. At this chapter's bound the price is small, but a careless bound of a billion rows raises the float scale to 192,035.68. The cast removes the rounding and its dependence on `max_length`, so cast whenever the values are whole numbers.
+The second adjustment casts the float column to integers. A float sum accounts for rounding across up to `max_length` additions. The cost is small at this chapter's bound, but a bound of one billion rows raises the float scale to 192,035.68. Integer casting avoids that rounding cost and its dependence on `max_length`; use it when the values are whole numbers.
 
 ```text
 float sum, max_length 5,400,000: HWUSUAL: Sum, Float Laplace, scale=14,405.18 95% accuracy=43,154.1
@@ -150,18 +150,18 @@ float sum, max_length 1,000,000,000: HWUSUAL: Sum, Float Laplace, scale=192,035.
 int sum, max_length 1,000,000,000: HWUSUAL: Sum, Integer Laplace, scale=14,400.00 95% accuracy=43,139.0
 ```
 
-The third adjustment is `fill_null`, because a sum has no value when a row is null. If you write the clip and the sum by hand, the library refuses a nullable column. The shortcut `.dp.sum` instead fills a null with the midpoint of the bounds, 40 here. With `fill_null(35)` you choose the legal working week in France, a public fact. On this data the choice has no effect: Polars drops a row whose test `!= 99` is null, so the filter drops every null. To confirm the midpoint rule, the script also sums the whole column, nulls included.
+The third adjustment is `fill_null`. A sum cannot process a null row, so OpenDP rejects a nullable column when you write the clipping and sum manually. `.dp.sum` instead fills nulls with the bounds' midpoint, 40 here. `fill_null(35)` uses a legal French work week, a public fact. This choice does not affect this dataset: Polars treats a null comparison with `!= 99` as null, so the filter drops every null row. The script also sums the whole column to confirm the midpoint rule.
 
 ```text
 sum without fill_null: scale=14,400.0 (accepted; a null becomes the midpoint 40)
 clip, sum and laplace by hand, without fill_null: input data (HWUSUAL) might contain nulls. Preprocess your data with `.fill_null`.
 ```
 
-The error bar is about the *clipped* sum. A value above 80 becomes 80 before the sum, and no error bar reports that. Here no applicable value is above the bound, as the check at the end shows.
+The error bar applies to the *clipped* sum. Values above 80 become 80, and the error bar does not capture this change. The final check shows that no applicable value exceeds the bound in this dataset.
 
 ## The mean {#sec-stats-mean}
 
-A mean is a sum divided by a count, and under the add/remove relation both are private. The documentation recommends that you release the two in one query and divide afterwards. The division of two released numbers is post-processing, which costs nothing, as [the full edition's chapter on properties](../../book-full/part03-dp-foundations/02-properties.md) proves.
+A mean is a sum divided by a count. Under the add/remove relation, both are private, so the documentation recommends releasing them in one query and dividing afterwards. This division is post-processing and incurs no additional cost, as proved in [the full edition's chapter on properties](../../book-full/part03-dp-foundations/02-properties.md).
 
 ```{.python excerpt="stats-mean-joint"}
 joint_query = (
@@ -178,14 +178,14 @@ joint HWUSUAL: Sum, Integer Laplace, scale=28,800.00 95% accuracy=86,277.6
 joint len: Frame Length, Integer Laplace, scale=360.00 95% accuracy=1,079.0
 ```
 
-The two statistics split the query's share evenly, so each has twice the scale that it had alone. But the pair costs only one share, and one released count can also divide the sums of other columns. On this context, `.dp.mean` releases the same noisy sum and noisy length, as the script shows.
+The query splits its share between the two statistics, doubling each scale compared with a standalone query. Together they cost one share, and the released count can divide sums from other columns. In this context, `.dp.mean` releases the same noisy sum and length.
 
 ```text
 dp.mean on the add/remove context: HWUSUAL: Sum, Integer Laplace, scale=28,800.00 95% accuracy=86,277.6
 dp.mean on the add/remove context: HWUSUAL: Length, Integer Laplace, scale=360.00 95% accuracy=1,079.0
 ```
 
-The alternative is to declare the number of rows public, which the documentation calls bounded DP. The neighbouring relation becomes replace-one: two neighbours have the same number of rows and differ in one person's values. In a margin, `invariant="lengths"` makes the number of rows public, and `.dp.mean` then adds noise to the sum only.
+Alternatively, declare the row count public, which the documentation calls bounded DP. Neighbours then have equal row counts and differ in one person's values (the replace-one relation). Setting `invariant="lengths"` in a margin makes the length public, so `.dp.mean` adds noise only to the sum.
 
 ```{.python excerpt="stats-mean-bounded"}
 applicable_frame = frame.filter(pl.col("HWUSUAL") != 99.0)  # filtered outside the context: see the text
@@ -200,9 +200,9 @@ bounded mean HWUSUAL: Sum, Integer Laplace, scale=7,200.00 95% accuracy=21,569.8
 bounded mean HWUSUAL: Length, Integer Laplace, scale=0.00 95% accuracy=none
 ```
 
-The sum's scale is half of the scale with a whole share under add/remove. When the length is fixed, a changed row counts as one removal and one addition, so a distance of 36 means at most 18 changed rows. The length has a scale of zero, because it is released exactly. That is the weaker guarantee. The release still hides what a person answered, but not whether the person is in the table.
+The sum's scale is half the add/remove scale for a full budget share. With fixed length, changing one row is one removal and one addition, so distance 36 allows at most 18 changed rows. The length has scale zero because it is released exactly. This weaker guarantee hides a person's answers but not their presence in the table.
 
-The excerpt shows a second cost: the filter on the code 99 runs outside the context. Inside the context, a filter makes the number of rows unknown again. Then the invariant is lost, and `.dp.mean` falls back to a noisy sum and a noisy length, as the script shows. A filter outside the context is sound only if the number of applicable responses is truly public. If it is not, use the joint query.
+The excerpt also filters out code 99 outside the context. Filtering inside the context makes the row count unknown, so the invariant no longer holds and `.dp.mean` uses a noisy sum and length. Filter outside the context only when the number of applicable responses is public. Otherwise, use the joint query.
 
 ```text
 dp.mean after a filter inside the bounded context: HWUSUAL: Sum, Integer Laplace, scale=28,800.00 95% accuracy=86,277.6
@@ -211,7 +211,7 @@ dp.mean after a filter inside the bounded context: HWUSUAL: Length, Integer Lapl
 
 ## The median and the quartiles {#sec-stats-quantiles}
 
-You cannot release a median by adding noise to it. When few values lie near the middle, one person's rows can move the median by any amount, so no finite scale covers every dataset. So OpenDP chooses the median from **candidates** that you supply. Each candidate gets a score for how unbalanced the counts below and above it are. OpenDP adds exponential noise to every score and releases the candidate with the smallest noisy score. That is the exponential mechanism, which [the full edition's chapter on selection](../../book-full/part03-dp-foundations/05-selection.md) derives. The candidates here are the whole hours from 20 to 59.
+Direct noise on a median has no finite sensitivity bound: if few values lie near the middle, one person's rows can shift it arbitrarily. OpenDP instead chooses among supplied **candidates**. It scores each candidate by the imbalance between counts below and above it, adds exponential noise to the scores and releases the candidate with the smallest noisy score. [The full edition's chapter on selection](../../book-full/part03-dp-foundations/05-selection.md) derives this exponential mechanism. Here the candidates are whole hours from 20 to 59.
 
 ```{.python excerpt="stats-median"}
 candidates = list(range(20, 60))  # whole hours from 20 to 59
@@ -226,9 +226,9 @@ score sensitivity 36: scale 2 x 36 / 0.2 = 360
 median without a margin: Must know max_length
 ```
 
-The aggregate reads 0.5-quantile because `.dp.median` calls `.dp.quantile` with `alpha=0.5`. The scale is twice the score's sensitivity over the query's share, a factor that comes from the analysis of the exponential mechanism. The accuracy is empty because the noise goes into the scores, not into the answer, so there is no error bar in hours. Instead, a candidate whose score is far above the best one is very unlikely to win, as the check at the end shows. The quantile also needs the margin, because the scores are integers whose size depends on the number of rows.
+The aggregate is labelled 0.5-quantile because `.dp.median` calls `.dp.quantile` with `alpha=0.5`. Its scale is twice the score sensitivity divided by the query's budget share, as required by the exponential mechanism. Accuracy is empty because noise perturbs scores, not the answer, so there is no error bar in hours. A candidate with a much worse score is unlikely to win; the final check quantifies this gap. The quantile also needs a margin because its integer scores depend on the row count.
 
-A quantile other than the median takes `alpha`, the share of values below it. The excerpt asks for the three quartiles in one query.
+For other quantiles, `alpha` is the fraction of values below the target. The excerpt requests all three quartiles in one query.
 
 ```{.python excerpt="stats-quartiles"}
 quartile_query = (
@@ -247,11 +247,11 @@ quartiles 0.75-Quantile: 0.75-Quantile, ExponentialMin, scale=3,240.00 95% accur
 0.25-quantile alone: scale=1,080.0
 ```
 
-Three quantiles in one query split its share three ways, so the median's scale triples. The quartiles' scales are three times larger again, but the median did not get more of the budget. A quantile's score is an integer scaled by the denominator of `alpha`, four for a quartile and two for the median. So one person's rows move a quartile's score three times as far. The last line confirms the even split: the first quartile alone gets a third of its scale in the trio.
+Three quantiles split the query's share equally, tripling the median's scale. The quartile scales are three times larger again, without increasing the median's budget share. A quantile score is an integer multiplied by the denominator of `alpha`: four for a quartile and two for the median. One person's rows therefore move a quartile score three times farther. The final line shows that the first quartile's standalone scale is one-third its scale in the trio.
 
 ## A check against the truth {#sec-stats-check}
 
-The sample is public, so the script computes the true values and reads one run's releases against them. On private data, do this check on public or historical data during development, and release the real data once.
+Because the sample is public, the script computes true values and compares them with one run's releases. For private data, perform this check during development on public or historical data, then release the private data once.
 
 ```text
 true responses: 3,811,932
@@ -263,7 +263,7 @@ true quartiles: 35, 37, 40
 score gap from the true quartile to the nearest other candidate: 0.25: 219,506  0.5: 74,383  0.75: 116,811
 ```
 
-The second and third lines settle two open questions: the filter leaves no nulls, and no applicable value is above 80. The bounded mean's error bar is the sum's error bar divided by the exact length. The last line takes the place of an error bar for the quantiles. Each nearest other candidate scores at least 74,383 above the true quartile, against a noise scale of at most 3,240. So a wrong candidate is far too unlikely to see, and the test requires the exact quartiles.
+The second and third lines show that the filter leaves no nulls and no applicable value exceeds 80. The bounded mean's error bar is the sum's error bar divided by the exact length. For quantiles, the final line replaces an error bar: the nearest alternative candidate scores at least 74,383 above the true quartile, while the maximum noise scale is 3,240. A wrong candidate is therefore unlikely, and the test requires the exact quartiles.
 
 ```text
 released (one run):
@@ -275,7 +275,7 @@ released (one run):
   sum of the whole column 240,726,542  (true with nulls as 40: 240,742,034)
 ```
 
-The count and the sum are inside their error bars, as they must be about 19 times in 20. A count error of a few hundred is small on 3.8 million responses. The joint mean is off in the second decimal, because it divides two noisy numbers. The bounded mean is inside a bar of about a hundredth of an hour, which is what a public length buys. The median and the quartiles are exact. The sum of the whole column is near the total that counts each null as 40 hours, far from the total without them.
+In this run, the count and sum fall within their 95% error bars; each does so in about 19 runs out of 20. A count error of a few hundred is small relative to 3.8 million responses. The joint mean differs in the second decimal because it divides two noisy values. The bounded mean falls within an error bar of about a hundredth of an hour, the benefit of a public length. The median and quartiles match exactly. The whole-column sum is close to the total that imputes 40 hours for each null, not the total that drops nulls.
 
 ## Summary
 

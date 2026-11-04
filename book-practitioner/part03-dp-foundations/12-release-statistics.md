@@ -2,19 +2,19 @@
 
 ## Why this matters
 
-Suppose that you are the analytics engineer of an online shop. The business wants a dashboard of purchase lines, revenue and the typical sale, overall and per country, and of how many customers bought each product. The figures describe customers, so they need a differential privacy (DP) guarantee. But one customer has many rows, and a guarantee for one row protects a single purchase, not the person behind a hundred. This chapter does the job with OpenDP, from the unit to the written guarantee.
+An online shop wants a dashboard of purchase lines, revenue and typical sale, overall and by country, plus customer counts by product. Because these statistics describe customers, their release needs a differential privacy (DP) guarantee. A customer may contribute many rows, so a row-level guarantee would protect a purchase rather than the customer. This chapter uses OpenDP to build the release, define its privacy unit and state its guarantee.
 
-The data are the Online Retail set from the University of California, Irvine (UCI) Machine Learning Repository, with 541,909 invoice lines of a British online shop. Each line records one product on one invoice, with its quantity, unit price, customer and country. The script [practitioner_release_statistics.py](../../code/part03-dp-foundations/practitioner_release_statistics.py) does every step in less than a minute, with OpenDP 0.16.0 and Polars 1.36.1.
+The data are Online Retail from the University of California, Irvine (UCI) Machine Learning Repository: 541,909 invoice lines from a British online shop. Each line records a product, quantity, unit price, customer and country. The script [practitioner_release_statistics.py](../../code/part03-dp-foundations/practitioner_release_statistics.py) runs every step in less than a minute with OpenDP 0.16.0 and Polars 1.36.1.
 
 ```bash
 uv run python code/part03-dp-foundations/practitioner_release_statistics.py
 ```
 
-OpenDP takes its noise from a cryptographic generator that has no seed, so the released values change on every run. So this page quotes scales, error bars and thresholds, which contain no noise, and shows released values only in a block marked as one run.
+OpenDP uses an unseeded cryptographic generator, so released values vary between runs. This page quotes deterministic scales, error bars and thresholds, and marks one-run releases explicitly.
 
 ## Choose the library {#sec-relstat-library}
 
-The main question is whether a library can bound the contribution of a person with many rows (@tbl-relstat-libraries).
+Choose a library that can bound the contribution of a person with many rows (@tbl-relstat-libraries).
 
 | Library | Runs on | Person with many rows | Groups not known in advance | Use it for |
 | --- | --- | --- | --- | --- |
@@ -25,11 +25,11 @@ The main question is whether a library can bound the contribution of a person wi
 
 : Libraries for releasing statistics, and what each can express. {#tbl-relstat-libraries}
 
-We did not run PipelineDP and Tumult, so their rows come from their documentation. Whichever library you use, do not write a mechanism yourself. Keep [one accountant](02-properties.md#sec-dpprop-budget), which adds up the budget, for the whole release.
+PipelineDP and Tumult were not run; their entries are based on their documentation. Do not implement a mechanism yourself. Use [one accountant](02-properties.md#sec-dpprop-budget) to track the total budget for the release.
 
 ## Decide the unit and the budget {#sec-relstat-unit}
 
-The **unit of privacy**, which the guarantee protects, is a customer. So two neighbouring datasets differ by one customer with all their lines, added or removed ([The definition of differential privacy](01-definition.md#sec-dpdef-neighbours)). The script removes returns, lines with a zero price and lines with no customer identifier, which belong to nobody. Each filter looks only at the line itself, so a customer who is added or removed still changes only their own lines.
+The **unit of privacy** is a customer. Neighbouring datasets differ by one customer and all their lines, added or removed ([The definition of differential privacy](01-definition.md#sec-dpdef-neighbours)). The script removes returns, zero-price lines and lines without a customer identifier. Each filter uses only the line itself, so adding or removing a customer affects only that customer's lines.
 
 ```{.python excerpt="relstat-unit"}
 raw = practitioner_datasets.online_retail()
@@ -49,13 +49,13 @@ delta: 1e-05
 lines per customer: p50=41 p90=208 p99=662 max=7847
 ```
 
-The slack $\delta$ follows the book's default for $n$ people ([How small δ must be](01-definition.md#sec-dpdef-small-delta)), which gives $10^{-5}$. OpenDP warns that $\delta$ must be at most $10^{-6}$, but this book ties $\delta$ to the number of people. The privacy level is $\varepsilon = 1$ for the whole release, because all its tables describe the same customers and their costs add up ([Post-processing, group privacy and composition](02-properties.md#sec-dpprop-comp)).
+The slack $\delta$ follows the book's default for $n$ people ([How small δ must be](01-definition.md#sec-dpdef-small-delta)), giving $10^{-5}$. OpenDP warns that $\delta$ should be at most $10^{-6}$, while this book sets it from the population size. The entire release has privacy level $\varepsilon = 1$: all tables describe the same customers, and their costs compose ([Post-processing, group privacy and composition](02-properties.md#sec-dpprop-comp)).
 
-With a guarantee per line, the largest customer is a group of 7,847 records, and group privacy multiplies $\varepsilon$ by the size of the group. You can print that maximum only because this set is public.
+Under a line-level guarantee, the largest customer represents 7,847 records, and group privacy multiplies $\varepsilon$ by the group size. This maximum is reported only because the dataset is public.
 
 ## Bound each customer's contribution {#sec-relstat-bound}
 
-Write $k$ for the largest number of lines that a customer may give, so that every query keeps at most $k$ lines of each customer. A small $k$ means little noise but removes data, and a large $k$ keeps the data but needs more noise. The script measures this trade-off on the public set.
+Let $k$ be the maximum number of lines retained per customer in each query. A smaller $k$ reduces noise but discards more data; a larger $k$ retains more data but requires more noise. The script measures this trade-off on the public dataset.
 
 ```text
 k=10: lines kept 10.2%  customers truncated 84.8%
@@ -66,9 +66,9 @@ k=200: lines kept 72.7%  customers truncated 10.4%
 k=500: lines kept 88.2%  customers truncated 1.8%
 ```
 
-The default $k$ is a high percentile of lines per customer in public or historical data, never in the data that you release. If you have neither, spend a small share of the budget on a private high quantile, over candidates fixed in advance ([Selection](05-selection.md#sec-sel-apps)). This chapter takes $k = 100$, which is less than the 90th percentile of 208 because the noise grows with $k$. It keeps 55.1% of the lines and truncates a quarter of the customers.
+Choose $k$ from a high percentile in public or historical data, never from the release data. If neither is available, spend a small part of the budget on a private high quantile over candidates fixed in advance ([Selection](05-selection.md#sec-sel-apps)). This chapter uses $k = 100$, below the public-data 90th percentile of 208 because noise grows with $k$. It retains 55.1% of lines and truncates about a quarter of customers.
 
-The first $k$ lines by date bias every statistic towards early purchases, so the script keeps a random sample of $k$ lines per customer. The filter below does what OpenDP's `truncate_per_group(k, keep="sample")` does, but with a seed, so that the true values of the check stay fixed.
+Keeping the first $k$ lines by date would bias statistics toward early purchases. The script instead samples $k$ lines per customer. The filter below matches OpenDP's `truncate_per_group(k, keep="sample")` while using a seed to keep validation values reproducible.
 
 ```{.python excerpt="relstat-truncate"}
 def sample_per_customer(k: int, seed: int, *by: str) -> pl.Expr:
@@ -76,13 +76,13 @@ def sample_per_customer(k: int, seed: int, *by: str) -> pl.Expr:
     return pl.int_range(pl.len()).shuffle(seed=seed).over("CustomerID", *by) < k
 ```
 
-Values need bounds too. The value of a line is its quantity times its unit price, and the script clips it to between £0 and £200. The lower end is true because the script removed the returns. The upper end is a bound that the business sets, and it clips 1.02% of the lines. So one customer can move the revenue by at most 100 lines of £200 each. Take value bounds from the domain, never from the minimum or maximum of the data ([Beyond global sensitivity](07-sensitivity.md#sec-sens-clip)).
+Bound each line value, defined as quantity times unit price. The script clips values to £0–£200. The lower bound follows from removing returns; the business sets the upper bound, which clips 1.02% of lines. Thus one customer can affect revenue by at most 100 lines of £200 each. Set value bounds from the domain, not the observed minimum or maximum ([Beyond global sensitivity](07-sensitivity.md#sec-sens-clip)).
 
-A group-by can use two more bounds. The bound $L_0$ is the number of groups that one customer may touch. The bound $L_\infty$ is the number of lines that a customer may put in one group. Countries need neither, because the $k$ lines of a customer change the country counts by at most $k$ in total, and the noise already covers that. Products need both bounds for partition selection (@sec-relstat-partitions).
+A grouped query may require two further bounds: $L_0$, the number of groups one customer may affect, and $L_\infty$, the number of lines they may contribute to one group. Country counts need neither because a customer's $k$ lines change the total counts by at most $k$, already covered by the noise. Product partition selection requires both (@sec-relstat-partitions).
 
 ## Set up the context {#sec-relstat-context}
 
-OpenDP keeps the whole release in a **context**, which holds the data, the unit, the total budget and its split between queries. Contexts need `dp.enable_features("contrib")`, which turns on components that are not formally vetted. So a reviewer who needs vetted code must examine each call in the documentation of OpenDP.
+OpenDP's **context** stores the data, privacy unit, total budget and allocation across queries. Contexts require `dp.enable_features("contrib")`, which enables components that are not formally vetted. Reviewers who require vetted code must check each call against OpenDP's documentation.
 
 ```{.python excerpt="relstat-context"}
 context = dp.Context.compositor(
@@ -94,11 +94,11 @@ context = dp.Context.compositor(
 )
 ```
 
-The identifier column makes the unit a customer. So `contributions=1` means one customer with all their lines, added or removed, and the truncation filters bound those lines. For replace, OpenDP takes `changes=` instead. The budget is in **zero-concentrated differential privacy (zCDP)** ([Concentrated differential privacy](../part04-privacy-accounting/03-concentrated-dp.md)), which gives privacy as one number, written $\rho$. Values of $\rho$ add up across queries and change to $(\varepsilon, \delta)$ at the end.
+The identifier column defines each customer as one privacy unit. Thus `contributions=1` represents adding or removing one customer with all their lines; truncation bounds those lines. For replace-one neighbours, OpenDP instead takes `changes=`. The budget uses **zero-concentrated differential privacy (zCDP)** ([Concentrated differential privacy](../part04-privacy-accounting/03-concentrated-dp.md)), represented by $\rho$. Add $\rho$ across queries, then convert the total to $(\varepsilon, \delta)$.
 
-With a zCDP budget, the context adds Gaussian noise to every count and sum. That suits the product counts, where one customer touches many groups ([The Laplace and Gaussian mechanisms](03-laplace-gaussian.md#sec-lg-choose)). The script's `rho_for` finds $\rho = 0.0284$, the largest value that the conversion of OpenDP turns into $\varepsilon \le 1$ with half of $\delta$. The other half pays for the threshold of @sec-relstat-partitions. The margin gives a public upper bound on the number of lines, which OpenDP needs before it adds floating-point values.
+With a zCDP budget, the context adds Gaussian noise to each count and sum. This supports product counts, where one customer may affect many groups ([The Laplace and Gaussian mechanisms](03-laplace-gaussian.md#sec-lg-choose)). The script's `rho_for` selects $\rho = 0.0284$, the largest value OpenDP converts to $\varepsilon \le 1$ using half of $\delta$. The remaining half pays for the threshold in @sec-relstat-partitions. The margin supplies a public upper bound on line counts, which OpenDP needs before summing floating-point values.
 
-The weights give a quarter of the budget to the overall statistics, a quarter to the countries and half to the products, which need it most. The script prints the split and converts the whole release back to the $(\varepsilon, \delta)$ of the statement.
+The weights allocate one quarter of the budget to overall statistics, one quarter to countries and one half to products, which need the most. The script prints this allocation and converts the total budget back to the $(\varepsilon, \delta)$ stated in the guarantee.
 
 ```text
 budget scalars: rho=0.0071 delta=1.25e-06
@@ -107,11 +107,11 @@ budget products: rho=0.0142 delta=2.50e-06
 whole release as (epsilon, delta): (1.0000, 1e-05)
 ```
 
-A query takes its share of the budget when you build it, but spends the share only when you release it. Each new query gets the next unspent share. So if you build all the queries first, each one gets the first share. The product query then gets the noise of a quarter but costs half. Build, check and release each query in turn, as the script does.
+OpenDP assigns a query its budget share when the query is built and spends that share on release. Each new query receives the next unspent share. Building all queries before releasing them can therefore assign each the first share; the product query would receive one quarter's noise while costing half the budget. Build, inspect and release each query in sequence, as the script does.
 
 ## Release overall statistics with error bars {#sec-relstat-scalars}
 
-The first query releases the count of lines, the revenue and the median line value. The context holds the raw lines, so each query truncates them itself.
+The first query releases line count, revenue and median line value. Because the context stores the raw lines, each query applies its own truncation.
 
 ```{.python excerpt="relstat-scalars"}
 value = clipped_value()  # the line value, clipped to [low, high]
@@ -128,7 +128,7 @@ scalar_summary = scalars.summarize(alpha=0.05)
 scalars_hat = scalars.release().collect()
 ```
 
-`signed=True` keeps negative noisy counts, and `summarize` reports, before anything is released, each statistic's noise and 95% error bar.
+`signed=True` retains negative noisy counts. Before release, `summarize` reports each statistic's noise scale and 95% error bar.
 
 ```text
 scalars len: Frame Length, Integer Gaussian, scale=1,453.38 95% accuracy=2,850.0
@@ -136,15 +136,15 @@ scalars revenue: Sum, Float Gaussian, scale=290,804.33 95% accuracy=569,966.0
 scalars median: 0.5-Quantile, GumbelMin, scale=1,453.38 95% accuracy=none
 ```
 
-With probability 0.95, the released count of lines is within 2,850 of the truth, and the revenue within £569,966. These bars depend only on the bounds and the budget, so you can read them before the release and decide if the budget is sufficient.
+With probability 0.95, the released line count is within 2,850 of its true value and revenue is within £569,966. These error bars depend only on bounds and budget, so inspect them before release to assess whether the budget is sufficient.
 
-The output also shows how OpenDP splits the share of a query among its statistics. Each statistic gets the same noise scale relative to its sensitivity. So the count and the median both get 1,453.38, and the revenue, with 200 times the sensitivity of the count, gets about 200 times that. To give one statistic more budget, put it in a query of its own with its own weight. The exponential mechanism, sampled by `GumbelMin`, chooses the median among candidates in steps of £0.50. So its error bar is in ranks, and `summarize` gives none ([Selection](05-selection.md#sec-sel-apps)).
+The output also shows how OpenDP divides a query's budget among its statistics. Each statistic receives the same noise scale relative to its sensitivity. The count and median therefore have scale 1,453.38, while revenue, with 200 times the count's sensitivity, has about 200 times that scale. To allocate more budget to one statistic, place it in a separate weighted query. `GumbelMin`, an implementation of the exponential mechanism, selects the median from candidates spaced £0.50 apart. Its error is measured in ranks, so `summarize` provides no error bar ([Selection](05-selection.md#sec-sel-apps)).
 
-The error bars cover only the noise, not the bias of truncation and clipping, which together keep only 48.5% of the revenue. So the private revenue estimates a truncated total, not the takings of the shop. Say so in the release. If the full total is more important than the noise, choose a larger $k$.
+The error bars cover noise, not bias from truncation and clipping, which together retain only 48.5% of revenue. The private statistic therefore estimates a truncated total, not the shop's full takings. State this in the release. If coverage matters more than noise, increase $k$.
 
 ## Group by a public key list {#sec-relstat-public-keys}
 
-The next query gives lines and revenue per country, and its key list must not come from the data. The distinct values of the Country column tell which countries are in the private data, and no noise covers that. So the script fixes its keys in advance. The 38 keys are the United Kingdom, the 27 EU member states and the 4 states of the European Free Trade Association. Then come the United States, Canada, Australia, Japan, China and "Other". A rule renames three spellings, such as `EIRE` to Ireland, and maps every other value to Other.
+The next query reports lines and revenue by country. Its key list must be fixed in advance because the distinct `Country` values reveal which countries occur in private data, and noise does not protect that list. The script uses 38 keys: the United Kingdom, 27 EU member states, four European Free Trade Association states, the United States, Canada, Australia, Japan, China and "Other". A mapping standardizes three spellings, including `EIRE` to Ireland, and maps all remaining values to Other.
 
 ```{.python excerpt="relstat-public-keys"}
 by_country = (
@@ -163,13 +163,13 @@ per country len: Frame Length, Integer Gaussian, scale=1,185.25 95% accuracy=2,3
 per country revenue: Sum, Float Gaussian, scale=237,698.48 95% accuracy=465,880.5
 ```
 
-The query releases every key, also the 11 with no purchase lines, whose counts are only noise. So the release tells nothing about which markets have customers. The count of each market has a 95% error bar of 2,324, and its revenue one of about £466,000. The true count of 5,379 for Germany is still useful, but its revenue of £131,902 is less than its error bar. So publish the error bar with every cell, or merge small markets into Other before the release.
+The query releases every key, including 11 countries with no purchase lines; their counts contain only noise. Thus, the key list does not disclose which markets have customers. Each count has a 95% error bar of 2,324, and each revenue an error bar of about £466,000. Germany's true count of 5,379 is informative, but its revenue of £131,902 is smaller than the error bar. Publish each cell's error bar or combine small markets into Other before release.
 
 ## Group by unknown keys with partition selection {#sec-relstat-partitions}
 
-The list of products is not public. If one customer buys a product, its row in the table shows that purchase. So the release uses **partition selection** to choose privately which products to show. It releases only the products whose noisy count is above a threshold, so a product with few customers almost never appears. The threshold is what costs $\delta$ ([Beyond global sensitivity](07-sensitivity.md)).
+The product list is private: a row for a product would reveal that at least one customer bought it. The release therefore uses **partition selection** to select products privately. It publishes only products whose noisy counts exceed a threshold, making products with few customers unlikely to appear. The threshold incurs $\delta$ ([Beyond global sensitivity](07-sensitivity.md)).
 
-To count customers, not lines, the query first keeps one line per customer and product. So $L_\infty$, the lines per customer in one group, is 1. It then keeps at most a number $m$ of products per customer, so $L_0$, the groups per customer, is $m$. The script measures the trade-off that $m$ sets on this public set.
+To count customers rather than lines, the query first retains one line per customer-product pair, setting $L_\infty$, the lines per customer in one group, to 1. It then retains at most $m$ products per customer, setting $L_0$, the groups per customer, to $m$. The script evaluates this trade-off on public data.
 
 ```text
 m=1: pairs kept 1.6%  customers truncated 97.9%  scale=5.93  threshold=29  products above it: 1
@@ -179,7 +179,7 @@ m=20: pairs kept 27.5%  customers truncated 68.3%  scale=26.54  threshold=138  p
 m=50: pairs kept 52.7%  customers truncated 38.6%  scale=41.96  threshold=225  products above it: 50
 ```
 
-The threshold grows with $m$, from 29 to 225, because each customer can push more groups over it. But the counts grow faster, so the number of products whose true count is above the threshold goes from 1 to 50. The script takes $m = 50$ (`M` in the code), again chosen on public data.
+The threshold rises from 29 to 225 as $m$ increases because each customer can affect more groups. Product counts rise faster: the number of products whose true count exceeds the threshold grows from 1 to 50. The script uses $m = 50$ (`M` in the code), selected using public data.
 
 ```{.python excerpt="relstat-partition-selection"}
 by_product = (
@@ -197,9 +197,9 @@ products_hat = by_product.release().collect()
 per product customers: Frame Length, Integer Gaussian, scale=41.96 95% accuracy=83.0 threshold=225
 ```
 
-The release shows a product only if its noisy count is 225 or more, and a released count has a 95% error bar of 83. Never publish how many products were left out, or which, because both come from the private data. A product just below the threshold gets in when its noise is positive. So treat a count near 225 as a sign of popularity, not as a measurement.
+The release shows a product only when its noisy count is at least 225; released counts have a 95% error bar of 83. Do not publish the number or identity of omitted products because both depend on private data. Positive noise can include a product just below the threshold. Treat counts near 225 as evidence of possible popularity, not as precise measurements.
 
-In OpenDP 0.16.0, `truncate_num_groups` should bound the groups per customer, but it does not work. With the default `keep="sample"`, `summarize` accepts the query, but `release` fails after it spends the share of the query. So run each query end to end on public data first. With `keep="first"`, it keeps one group fewer than asked, and this biases the counts. The filters above avoid both problems only because $L_\infty = 1$ makes groups into lines. For $L_\infty > 1$, this book knows of no unbiased group bound in this version.
+In OpenDP 0.16.0, `truncate_num_groups` is intended to bound groups per customer but does not work. With default `keep="sample"`, `summarize` accepts the query, but `release` fails after consuming its budget share. Test each query end to end on public data first. With `keep="first"`, the function retains one fewer group than requested and biases counts. The filters above avoid both failures only because $L_\infty = 1$ makes groups equivalent to lines. This book knows of no unbiased group bound for $L_\infty > 1$ in this version.
 
 ## Check the release before publishing {#sec-relstat-check}
 
@@ -225,11 +225,11 @@ released (one run):
 
 Compare it with the error bars, which must hold about 95% of the market counts. Negative values are noise on small markets, and you can round them up to zero, because post-processing costs no budget. Expect more than the 50 products whose true count is above the threshold, for the reason above. Compare the private median with the truncated £15.00, not with the £11.80 of all lines.
 
-The check fails if a value is far outside its error bar, which shows a wrong sensitivity. It also fails if far more or far fewer than 95% of the cells are inside. And it fails if the true count of a released product is far below the threshold. In production you cannot compare with the truth, because a decision to publish that uses the true values is a release of them. So run this check on historical or public data during development. Then release the real data once, with the code that you checked.
+The check should fail when a value lies far outside its error bar, indicating incorrect sensitivity, or when substantially fewer or more than 95% of cells fall inside. It should also fail if a released product's true count is far below the threshold. In production, do not use true values to decide what to publish; that decision would itself release private information. Run these checks during development on historical or public data, then release real data once with the validated code.
 
 ## Write the guarantee down {#sec-relstat-statement}
 
-The script prints the claim from the variables that set the bounds and the budget, so the claim always agrees with the code.
+The script constructs the privacy statement from the variables that define bounds and budget, keeping the statement aligned with the implementation.
 
 ```text
 This release satisfies (epsilon = 1, delta = 1e-05)-differential privacy for adding or
@@ -240,7 +240,7 @@ Gaussian noise (accounted as 0.0284-zCDP plus 5e-06 for thresholds, converted to
 and delta). The market list was fixed in advance; the product list is not public.
 ```
 
-The statement names all that a reviewer needs to compute the claim again ([Writing the guarantee down](01-definition.md#sec-dpdef-statement)). Next to it, say what it does not cover. Another release about the same customers adds its own budget to the claim. If that release is pure $\varepsilon$-DP, you can add the two $(\varepsilon, \delta)$ pairs. Or you can add its $\rho = \varepsilon^2/2$ to this release's $\rho$ and then convert. Use the smaller total ([Concentrated differential privacy](../part04-privacy-accounting/03-concentrated-dp.md)). Also, the dashboard must say that the figures describe truncated data. [Release and governance](../part05-dp-ml/12-release-governance.md) maps such a claim to data-protection law.
+The statement gives reviewers the information needed to recompute the guarantee ([Writing the guarantee down](01-definition.md#sec-dpdef-statement)). Also state what it excludes. Any further release about the same customers adds to the total budget. For a pure $\varepsilon$-DP release, add the two $(\varepsilon, \delta)$ pairs. Alternatively, add its $\rho = \varepsilon^2/2$ to this release's $\rho$, then convert the total; use the smaller result ([Concentrated differential privacy](../part04-privacy-accounting/03-concentrated-dp.md)). The dashboard must also state that its figures use truncated data. [Release and governance](../part05-dp-ml/12-release-governance.md) connects this guarantee to data-protection law.
 
 ## Checklist
 

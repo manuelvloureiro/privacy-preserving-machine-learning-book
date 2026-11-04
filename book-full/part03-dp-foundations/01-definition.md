@@ -1,6 +1,6 @@
 # The definition of differential privacy
 
-Each attack of Part 2 was a game in which the adversary saw an algorithm's output on one of two datasets that differ in one person, and guessed which ([Threat models and privacy games](../part02-attacks/01-threat-models.md)). **Differential privacy (DP)** asks that, for every such pair, the distribution of the output barely changes. Then every attack of Part 2 fails at once, whatever the adversary knows and computes.
+In Part 2, each attack showed an adversary an algorithm's output on one of two datasets that differ in one person. The adversary had to guess which dataset produced it ([Threat models and privacy games](../part02-attacks/01-threat-models.md)). **Differential privacy (DP)** keeps the output distributions on every such pair nearly alike. It therefore limits every attack from Part 2, whatever the adversary knows or computes.
 
 The one idea is the **privacy loss**: the logarithm of how much more likely an output was under one dataset than under its neighbour, the log-likelihood ratio of [Divergences](../part01-prerequisites/03-divergences.md). Pure DP bounds it at every output. Approximate DP lets it exceed the bound on outputs of small total probability $\delta$.
 
@@ -8,7 +8,7 @@ The running example is a survey. Alice, Bob and Carol are asked whether they smo
 
 ## Neighbouring datasets {#sec-dpdef-neighbours}
 
-Before anything can be proved, "differ in one person" needs a precise meaning. A dataset $D$ is a multiset of **records** from a universe $\mathcal X$ of possible records. The **neighbouring relation** says which pairs of datasets the guarantee protects, and so it fixes the **unit of privacy**, the thing whose presence or value the output must not reveal.
+To prove a privacy guarantee, first define what it means for datasets to "differ in one person." A dataset $D$ is a multiset of **records** from a universe $\mathcal X$ of possible records. The **neighbouring relation** identifies the pairs the guarantee protects. It therefore fixes the **unit of privacy**: the thing whose presence or value the output must not reveal.
 
 ::: {#def-dpdef-neighbours name="Neighbouring datasets"}
 Datasets $D$ and $D'$ are **neighbours**, written $D \sim D'$, in one of two senses, which every guarantee must name.
@@ -38,7 +38,7 @@ Take $D = (\text{Alice: smoker}, \text{Bob: non-smoker}, \text{Carol: smoker})$.
 
 ## Pure and approximate differential privacy {#sec-dpdef-definition}
 
-"The output distribution barely changes" needs a measure, and the two obvious ones fail. An average such as the Kullback–Leibler divergence can hide one rare output with an enormous loss. A difference such as the total variation (TV) distance fails because any two datasets of $n$ records are $n$ replacements apart. So a tolerance $\tau$ per replacement lets their outputs differ by up to $n\tau$. At $n = 1000$ and $\tau = 10^{-4}$, no test tells any two datasets apart with probability above 0.5500, so the output is useless. But $\tau = 1/n$ already allows the mechanism of @sec-dpdef-small-delta, which here publishes some record in full with probability 0.6323. So DP bounds a ratio, in the worst case over every pair and every event, and allows a small difference only on top. @sec-apx-cal-dp derives the definition's forms from scratch.
+"The output distribution barely changes" needs a precise measure. Two natural choices fail. An average such as the Kullback–Leibler divergence can hide one rare output with an enormous loss. A difference such as total variation (TV) distance also fails: any two datasets of $n$ records can be joined by $n$ replacements. A tolerance $\tau$ per replacement can therefore allow their outputs to differ by $n\tau$. At $n = 1000$ and $\tau = 10^{-4}$, no test distinguishes any two datasets with probability above 0.5500, so the output is useless. Yet $\tau = 1/n$ already permits the mechanism of @sec-dpdef-small-delta, which here publishes some record in full with probability 0.6323. Differential privacy instead bounds a ratio in the worst case over every pair and event, with a small additive allowance. @sec-apx-cal-dp derives the definitions from scratch.
 
 Write $M$ for a **mechanism**, a randomized algorithm that maps a dataset to a random output in a set $\mathcal Y$. The probability that the output lands in an event $S \subseteq \mathcal Y$ is taken over the mechanism's own coins.
 

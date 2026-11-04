@@ -1,6 +1,6 @@
 # The Laplace mechanism
 
-Randomized response privatizes one bit per person. But most questions an analyst asks are numbers computed from the whole dataset, such as a count or a histogram. This chapter answers them with the Laplace mechanism, which computes the true answer and adds noise scaled to how much one person can change it. On the fraction of ones with privacy parameter $\varepsilon$, its error is of order $1/(\varepsilon n)$ rather than the $1/(\varepsilon\sqrt n)$ of randomized response. The chapter then proves three properties of differential privacy (DP) that let you build private algorithms from private parts: post-processing, group privacy and basic composition.
+Randomized response privatizes one bit per person. Many analyses instead compute a statistic of the full dataset, such as a count or histogram. The Laplace mechanism adds noise proportional to the maximum change one record can cause. For the fraction of ones, its error is of order $1/(\varepsilon n)$, compared with $1/(\varepsilon\sqrt n)$ for randomized response. This chapter also proves three properties of differential privacy (DP): post-processing, group privacy, and basic composition.
 
 ## Sensitivity {#sec-lap-sensitivity}
 
@@ -16,9 +16,9 @@ $$
 where $\|v\|_1 = \sum_{j=1}^d|v_j|$ for a vector $v \in \mathbb R^d$.
 :::
 
-The $\ell_1$ norm is what makes the privacy proof of @thm-lap-privacy work. Other mechanisms use other norms, such as the $\ell_2$ norm for the Gaussian mechanism of [the next chapter](03-approximate-dp.md). For $d = 1$ all these norms are the absolute value, and for $d > 1$ the $\ell_1$ and $\ell_2$ sensitivities can differ by a factor of up to $\sqrt d$.
+The $\ell_1$ norm determines the privacy proof of @thm-lap-privacy. Other mechanisms use other norms; the Gaussian mechanism in [the next chapter](03-approximate-dp.md) uses $\ell_2$. In one dimension, both norms are absolute value. In $d$ dimensions, the sensitivities can differ by up to a factor of $\sqrt d$.
 
-The running example of this chapter is the fraction of ones that randomized response estimates. Its sensitivity is small, because one person moves the fraction only a little.
+The running example is the fraction of ones from the randomized response chapter. Replacing one bit changes the fraction by at most $1/n$.
 
 ::: {#exm-lap-mean-sensitivity}
 Let $\mathcal X = \{0,1\}$ and let $f(D) = \frac1n\sum_{i=1}^n x_i$ be the fraction of ones. Changing one bit changes the sum by at most $1$, so $\Delta_1 f = 1/n$.
@@ -26,7 +26,7 @@ Let $\mathcal X = \{0,1\}$ and let $f(D) = \frac1n\sum_{i=1}^n x_i$ be the fract
 
 ## The Laplace distribution {#sec-lap-distribution}
 
-The noise must hide a shift of the true answer by up to the sensitivity. A density that falls exponentially in the distance from zero does this, because a shift by a fixed amount changes its value by at most a fixed factor. The Laplace distribution is the simplest such density.
+The noise must mask shifts of the true answer up to its sensitivity. The Laplace density decays exponentially with distance from zero, so a bounded shift changes its value by at most a bounded factor.
 
 ::: {#def-lap-distribution name="Laplace distribution"}
 The **Laplace distribution** $\mathrm{Lap}(b)$ with scale $b > 0$ has density
@@ -36,7 +36,7 @@ $$
 $$
 :::
 
-It is a two-sided exponential distribution: the exponential density, proportional to $e^{-x/b}$ on $[0,\infty)$, reflected to the negative half-line. Its tails decay like $e^{-|x|/b}$, more slowly than a Gaussian's but still exponentially. The accuracy of the mechanism rests on three facts about this distribution: its mean, its variance and the exact size of its tails.
+The Laplace distribution is a two-sided exponential distribution with tails proportional to $e^{-|x|/b}$. These tails decay more slowly than Gaussian tails. Its mean, variance, and tail probability determine the mechanism's accuracy.
 
 ::: {#lem-lap-moments}
 Let $Z \sim \mathrm{Lap}(b)$. Then $\mathbb E[Z] = 0$, $\operatorname{Var}(Z) = 2b^2$, and for every $t \ge 0$,
@@ -54,7 +54,7 @@ $$ {#eq-lap-tail}
 
 ## The Laplace mechanism {#sec-lap-mechanism}
 
-The mechanism adds independent Laplace noise to each coordinate, with scale equal to the sensitivity divided by $\varepsilon$.
+The mechanism adds independent Laplace noise to each coordinate, with scale $\Delta_1 f/\varepsilon$.
 
 ::: {#def-lap-mechanism name="Laplace mechanism"}
 For $f\colon\mathcal X^n\to\mathbb R^d$ with $0 < \Delta_1 f < \infty$ and for $\varepsilon > 0$, the Laplace mechanism outputs
@@ -66,7 +66,7 @@ $$
 where $Z_1, \dots, Z_d$ are independent with distribution $\mathrm{Lap}(\Delta_1 f/\varepsilon)$.
 :::
 
-Before the privacy proof, consider the accuracy of the mechanism on the running example. The mechanism is unbiased, and @lem-lap-moments gives its error.
+On the running example, the mechanism is unbiased. @lem-lap-moments gives its variance and tail bound.
 
 ::: {#exm-lap-mean}
 For $f(D) = p$, the fraction of ones, @exm-lap-mean-sensitivity gives $\Delta_1 f = 1/n$. The mechanism outputs $\tilde p = p + Z$ with $Z \sim \mathrm{Lap}(1/(\varepsilon n))$. So $\mathbb E[\tilde p] = p$, and $\operatorname{Var}(\tilde p) = 2/(\varepsilon n)^2$. By @eq-lap-tail with $t = \ln(1/\beta)$, with probability at least $1 - \beta$,
@@ -78,7 +78,7 @@ $$
 With $\varepsilon = 1$, $n = 10{,}000$ and $\beta = 0.05$, this is $\ln(20)/10{,}000 = 3.0\times 10^{-4}$. Randomized response with the same $\varepsilon$, $n$ and $\beta$ has the bound $0.0294$, which is $98$ times larger.
 :::
 
-The gap grows with $n$, because randomized response has error of order $1/(\varepsilon\sqrt n)$ and the Laplace mechanism of order $1/(\varepsilon n)$. The price of the smaller error is a trusted curator who sees the true data, which randomized response does not need. It remains to prove that the mechanism is private.
+The accuracy gap grows with $n$: randomized response has error of order $1/(\varepsilon\sqrt n)$, while the Laplace mechanism has error of order $1/(\varepsilon n)$. The latter requires a trusted curator who sees the data. The next theorem proves its privacy guarantee.
 
 ::: {#thm-lap-privacy name="Privacy of the Laplace mechanism"}
 For every $f\colon\mathcal X^n\to\mathbb R^d$ with $0 < \Delta_1 f < \infty$ and every $\varepsilon > 0$, the Laplace mechanism is $\varepsilon$-DP.
@@ -95,13 +95,13 @@ $$
 3. For an event $S \subseteq \mathbb R^d$, integrate the pointwise bound over $S$: $\Pr[M(D)\in S] = \int_S p \le e^\varepsilon\int_S q = e^\varepsilon\Pr[M(D')\in S]$.
 :::
 
-The proof shows why the Laplace distribution fits the definition. Its density falls exponentially in the distance from the true value, and the definition bounds a ratio by an exponential. So a shift of the centre by the sensitivity changes the density by a factor of at most $e^\varepsilon$. @fig-lap-mechanism shows the two densities for a one-dimensional statistic.
+The proof uses the matching exponential forms of the Laplace density and the privacy ratio. Shifting the density centre by at most the sensitivity changes its value by a factor of at most $e^\varepsilon$. @fig-lap-mechanism shows the densities for a one-dimensional statistic.
 
 ![Left, the densities of the Laplace mechanism at $\varepsilon = 1$ on two neighbours whose values differ by the sensitivity $\Delta_1 f = 1$. Their ratio stays between $e^{-1}$ and $e$. Right, the 95th percentile of the error in estimating a fraction of ones, over 2,000 simulated runs with $p = 0.3$. Randomized response falls as $1/\sqrt n$ and the Laplace mechanism as $1/n$. The dashed line is the exact 95th percentile $\ln(20)/(\varepsilon n)$ from @eq-lap-tail.](figures/lap-mechanism.svg){#fig-lap-mechanism}
 
 ## Counting queries {#sec-lap-counting}
 
-A **counting query** asks how many people in the dataset have some property. It is given by a predicate $\phi\colon\mathcal X \to \{0,1\}$ and has the value $f(D) = \sum_{i=1}^n\phi(x_i)$. One record changes the count by at most $1$, so $\Delta_1 f = 1$, and the Laplace mechanism adds $\mathrm{Lap}(1/\varepsilon)$. By @eq-lap-tail, its error is at most $\ln(1/\beta)/\varepsilon$ with probability $1-\beta$, whatever the size of the dataset.
+A **counting query** asks how many records satisfy a predicate $\phi\colon\mathcal X\to\{0,1\}$. Its value is $f(D)=\sum_{i=1}^n\phi(x_i)$. Replacing one record changes the count by at most $1$, so $\Delta_1 f=1$ and the mechanism adds $\mathrm{Lap}(1/\varepsilon)$. By @eq-lap-tail, the error is at most $\ln(1/\beta)/\varepsilon$ with probability $1-\beta$, independent of $n$.
 
 Often an analyst asks many counting queries $f = (f_1, \dots, f_k)$, with predicates $\phi_1, \dots, \phi_k$, on the same data, such as whether a person smokes and whether their income is above a threshold. One person can then change all of the answers at once.
 
@@ -144,11 +144,11 @@ The sensitivity is $2$ because a replacement moves a record from one bin to anot
 
 ## Properties of differential privacy {#sec-lap-properties}
 
-Three properties let you reason about a private algorithm piece by piece.
+Three properties support analysis of private algorithms built from multiple steps.
 
 ### Post-processing {#sec-lap-post}
 
-No computation on a private output can undo its privacy, as long as the computation does not look at the data again. The randomized response chapter used this to turn the private reports into an estimate.
+Post-processing cannot weaken privacy if it uses only the private output and independent randomness. The randomized response chapter used this property to estimate the fraction of ones.
 
 ::: {#thm-lap-post name="Post-processing"}
 Let $M\colon\mathcal X^n\to\mathcal Y$ be $\varepsilon$-DP, and let $F\colon\mathcal Y\to\mathcal Z$ be a randomized map whose coins are independent of those of $M$. Then $F\circ M$ is $\varepsilon$-DP.
@@ -171,7 +171,7 @@ $$
 
 ### Group privacy {#sec-lap-group}
 
-The definition protects one record. Datasets that differ in several records, such as the records of one family, are still protected, with a guarantee that degrades in proportion to their number.
+The definition protects one record. Group privacy extends the guarantee to datasets that differ in several records, with a cost proportional to their number.
 
 ::: {#thm-lap-group name="Group privacy"}
 Let $M\colon\mathcal X^n\to\mathcal Y$ be $\varepsilon$-DP, and let $D, D'\in\mathcal X^n$ differ in $k$ records. For every event $S\subseteq\mathcal Y$,
@@ -190,23 +190,23 @@ $$
 $$
 :::
 
-So a group of $k$ people has the protection of $k\varepsilon$-DP, which means something only while $k\varepsilon$ is small. The theorem also relates the two kinds of neighbours of [the randomized response chapter](01-randomized-response.md). A replacement is a removal followed by an addition, so $\varepsilon$-DP under add/remove neighbours gives $2\varepsilon$-DP under replace-one neighbours.
+Thus, a group of $k$ records has a $k\varepsilon$ guarantee, which is informative only when $k\varepsilon$ is small. The theorem also relates the adjacency conventions from [the randomized response chapter](01-randomized-response.md): replacement is one removal and one addition, so $\varepsilon$-DP under add/remove adjacency implies $2\varepsilon$-DP under replace-one adjacency.
 
 ### Basic composition {#sec-lap-composition}
 
-An analyst rarely runs one mechanism. Usually each mechanism is chosen in the light of the outputs of the earlier ones and runs on the same dataset.
+Analysts often run several mechanisms on the same dataset, choosing later mechanisms from earlier outputs.
 
 ::: {#def-lap-adaptive name="Adaptive composition"}
 Let $M_1, \dots, M_k$ be mechanisms. For each $i$ and each sequence of earlier outputs $y_{<i} = (y_1, \dots, y_{i-1})$, the mechanism $M_i(\cdot\,; y_{<i})$ takes the dataset $D$ and returns $y_i$. Their **adaptive composition** $M$ runs them in order on the same $D$, each with fresh coins, and releases $(y_1,\dots,y_k)$.
 :::
 
-Basic composition says that the privacy parameters add up, even though each mechanism may depend on the earlier outputs.
+Basic composition adds the privacy parameters, even when each mechanism depends on earlier outputs.
 
 ::: {#thm-lap-composition name="Basic composition"}
 If each $M_i(\cdot\,; y_{<i})$ is $\varepsilon_i$-DP for every $y_{<i}$, then the adaptive composition of $M_1, \dots, M_k$ is $\big(\sum_{i=1}^k\varepsilon_i\big)$-DP. In particular, $k$ mechanisms that are each $\varepsilon$-DP compose to a $k\varepsilon$-DP mechanism.
 :::
 
-The proof is simplest for countable outputs, where the probability of a sequence of outputs factors into conditional probabilities.
+For countable output spaces, the probability of an output sequence factors into conditional probabilities.
 
 ::: {.proof}
 *Countable outputs.*
@@ -221,7 +221,7 @@ $$
 3. The pointwise lemma of the randomized response chapter turns this bound on single outcomes into the definition.
 :::
 
-For outputs that are not countable, such as the real numbers that the Laplace mechanism releases, the same idea works with averages in place of products. It uses one fact about functions $h$ with values in $[0,1]$: if $M$ is $\varepsilon$-DP, then for all neighbours
+For uncountable outputs, such as real-valued Laplace releases, the proof uses conditional expectations instead of products. It relies on the following extension to functions $h$ with values in $[0,1]$: if $M$ is $\varepsilon$-DP, then for all neighbours
 
 $$
 \mathbb E[h(M(D))] \le e^\varepsilon\,\mathbb E[h(M(D'))].

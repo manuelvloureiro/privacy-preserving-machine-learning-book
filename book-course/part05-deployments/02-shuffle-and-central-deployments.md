@@ -1,30 +1,30 @@
 # The shuffle model and central deployments
 
-The local model of [the previous chapter](01-local-dp.md) trusts no one, and pays with an error $\sqrt n$ times larger than the central model's. This chapter first studies a middle ground for differential privacy (DP), the shuffle model, in which a party that only mixes messages lets each person add far less noise. It then turns to the central model, where a company holds the data, and studies a query service for outside analysts and two public data releases.
+The [previous chapter](01-local-dp.md) showed that local privacy can incur $\sqrt n$ times the error of the central model. This chapter studies the shuffle model, where an intermediary mixes messages to provide differential privacy (DP) with less local noise, then examines central deployments: analyst query services and public data releases.
 
-## Encode, shuffle, analyze {#sec-shuf-prochlo}
+## Encode, shuffle, analyse {#sec-shuf-prochlo}
 
-Google's Prochlo system started from a failure of local privacy. Its designers wanted to count which of a thousand applications call which of a hundred system interfaces, $10^5$ pairs in all. By their estimate, a local protocol such as RAPPOR would need reports from about a trillion people to count them usefully, more people than exist.
+Google's Prochlo system addressed a limitation of local privacy. Its designers wanted to count calls from a thousand applications to a hundred system interfaces, or $10^5$ pairs. They estimated that a local protocol such as RAPPOR would require about a trillion reports for useful counts.
 
-Their architecture has three stages, **encode, shuffle, analyze**. Each person *encodes* their data on their own device, for example with a local randomizer. A *shuffler* collects the encoded messages, removes their metadata such as arrival times and network addresses, and sends them on in a uniformly random order. The *analyst* sees only the shuffled batch and decodes statistics from it. So the shuffler has one job, which is to break the link between a message and its sender.
+The architecture has three stages: **encode, shuffle, analyse**. Each person encodes data on their device, for example with a local randomizer. A *shuffler* collects messages, removes metadata such as arrival times and network addresses, and sends them in uniform random order. The *analyst* sees only the shuffled batch. The shuffler's purpose is to hide the sender-message mapping.
 
-The users must trust the shuffler not to reveal the order. Prochlo runs it inside trusted hardware, an Intel SGX enclave, so trust rests on the hardware vendor. Side-channel attacks such as Spectre have shown that such hardware can leak. Another choice is a mix network of several servers, each of which shuffles and re-encrypts the batch. Then the order stays hidden unless all of them collude.
+Users must trust the shuffler to hide the order. Prochlo uses an Intel SGX trusted-hardware enclave, placing trust in the hardware vendor; side-channel attacks such as Spectre show that this hardware can leak. Alternatively, several servers can each shuffle and re-encrypt the batch. The sender mapping remains hidden unless all servers collude.
 
 ## The shuffle model {#sec-shuf-model}
 
-Prochlo led to a formal model between the local and central ones. In it, the adversary sees the shuffled messages but not who sent which.
+Prochlo motivated a formal model between the local and central models. The adversary sees the shuffled messages but not their senders.
 
 ::: {#def-shuf-model name="Shuffle model"}
 A protocol in the **shuffle model** gives each person the same randomizer $R\colon \mathcal X \to \mathcal Y$. Person $i$ sends $Y_i = R(X_i)$, using randomness independent of everyone else's, and the **shuffler** outputs $(Y_{\pi(1)}, \dots, Y_{\pi(n)})$ for a permutation $\pi$ drawn uniformly at random. The protocol is **$(\varepsilon, \delta)$-DP in the shuffle model** if this shuffled output, as a mechanism on the dataset $D$, is $(\varepsilon,\delta)$-DP in the central sense.
 :::
 
-The uniform order adds no information, so the shuffled output carries the same information as the multiset of messages. A local protocol is also a shuffle protocol with the same guarantee, because the shuffled output is a post-processing of the messages. The interesting protocols are those whose messages are *not* private one by one but become private once mixed.
+The uniform permutation adds no information beyond the message multiset. A local protocol is also a shuffle protocol with the same guarantee, since shuffling is post-processing. The shuffle model is useful when individual messages are not private but their shuffled collection is.
 
-The benchmark task is again a sum of bits. In the central model, a count plus Laplace noise of scale $1/\varepsilon$ has error of order $1/\varepsilon$. In the local model each person adds noise of that size, so the $n$ independent noises add up to a standard deviation of order $\sqrt n/\varepsilon$, and by [the previous chapter's lower bound](01-local-dp.md) no local protocol does better. The question is how close the shuffle model can get to $1/\varepsilon$.
+Use bit counting as a benchmark. In the central model, adding Laplace noise of scale $1/\varepsilon$ gives error of order $1/\varepsilon$. In the local model, the $n$ independent noises yield standard deviation of order $\sqrt n/\varepsilon$, and [the previous chapter's lower bound](01-local-dp.md) shows that no local protocol does better. The goal is to approach the central error in the shuffle model.
 
 ## Amplification by shuffling {#sec-shuf-amplification}
 
-The first answer holds for any local randomizer, because shuffling makes it more private, just as subsampling did in [an earlier chapter](../part04-learning-statistics/02-private-erm.md). In the form first proved, a message that is $\varepsilon_0$-private on its own gives a shuffled batch whose parameter is smaller by a factor of order $\sqrt n$.
+Shuffling amplifies the privacy of any local randomizer, as subsampling does in [an earlier chapter](../part04-learning-statistics/02-private-erm.md). The first bound shows that a randomizer with privacy parameter $\varepsilon_0$ yields a shuffled batch with parameter smaller by order $\sqrt n$.
 
 ::: {#thm-shuf-amplification name="Amplification by shuffling"}
 Let $n \ge 1000$, $\delta \in (0, \frac1{100})$, and let $R$ be an $\varepsilon_0$-local randomizer with $0 < \varepsilon_0 < \frac12$. Then the shuffled output of $R(X_1), \dots, R(X_n)$ is $(\varepsilon, \delta)$-DP with
@@ -35,13 +35,13 @@ $$
 :::
 <!-- proof: cited -->
 
-The proof is in Erlingsson and coauthors (2019, Theorem 7 and Corollary 9). When everyone uses the same randomizer, shuffling the records before randomizing them gives the same output distribution, and the proof works in that form. It moves the one differing record to the front, swaps it into a uniformly random position, and then bounds how much each later message reveals about that position.
+Erlingsson and coauthors (2019, Theorem 7 and Corollary 9) prove this result. Because everyone uses the same randomizer, shuffling records before randomization preserves the output distribution. Their proof places the differing record first, randomizes its position, and bounds how much the remaining messages reveal about that position.
 
-The theorem applies only to randomizers that are already very private, but few deployments want $\varepsilon_0 \le \frac12$, because local accuracy is worst there. Feldman, McMillan and Talwar (2021) cover the useful regime, $\varepsilon_0$ of order $\ln n$, where $\varepsilon$ is still a constant. For every $\varepsilon_0 \le \ln\big(n/(16\ln(2/\delta))\big)$, they give $\varepsilon = O\big((1 - e^{-\varepsilon_0})\sqrt{e^{\varepsilon_0}\ln(1/\delta)/n}\big)$. In their proof, the message of each other person is, with probability $e^{-\varepsilon_0}$, a "clone" of what the differing person might have sent, and the count of clones hides that person. The next section carries out this idea in full for one simple randomizer.
+This theorem requires an already-private randomizer, with $\varepsilon_0\le1/2$, a regime that limits local accuracy. Feldman, McMillan and Talwar (2021) analyse the more useful regime $\varepsilon_0$ of order $\ln n$, where the shuffled guarantee can remain constant. For $\varepsilon_0\le\ln(n/(16\ln(2/\delta)))$, they obtain $\varepsilon=O((1-e^{-\varepsilon_0})\sqrt{e^{\varepsilon_0}\ln(1/\delta)/n})$. Their proof treats each other person's message as a possible "clone" of the differing person's message; the number of clones hides that person's contribution. The next section proves this idea for a simple randomizer.
 
 ## Counting bits in the shuffle model {#sec-shuf-bits}
 
-For a sum of bits, a direct protocol reaches error of order $\sqrt{\ln(1/\delta)}/\varepsilon$, which does not depend on $n$. Its randomizer is randomized response in which almost everyone tells the truth.
+For bit sums, a direct shuffle protocol achieves error of order $\sqrt{\ln(1/\delta)}/\varepsilon$, independent of $n$. It uses randomized response with a low probability of replacing the true bit by a fair coin.
 
 ::: {#def-shuf-rr name="Shuffled randomized response"}
 Fix a coin probability $\nu \in (0,1]$. Person $i$, with bit $X_i$, sends $Y_i = X_i$ with probability $1 - \nu$, and otherwise sends a fresh fair coin. The analyst sees the shuffled reports, counts their ones as $Z = \sum_{i=1}^n Y_i$, and estimates the count $c = \sum_{i=1}^n X_i$ by
@@ -51,7 +51,7 @@ $$
 $$
 :::
 
-In the local model $\nu$ would be a constant. Here it is of order $\ln(1/\delta)/(\varepsilon^2 n)$, so only about $\ln(1/\delta)/\varepsilon^2$ people in total send coins. These coins hide each single person, as the clones did above. Two lemmas prepare the proof, and both use $\tau = \tanh(\varepsilon/2)$, the number for which $(1+\tau)/(1-\tau) = e^\varepsilon$. The first says that, when $s$ is large, the number of ones among $s$ fair coins hides whether one more bit, of any distribution, is added to it.
+In the local model, $\nu$ would be constant. Here $\nu$ is order $\ln(1/\delta)/(\varepsilon^2n)$, so about $\ln(1/\delta)/\varepsilon^2$ people send coins. These coins hide each person's contribution, analogous to the clones above. The proof uses two lemmas and $\tau=\tanh(\varepsilon/2)$, for which $(1+\tau)/(1-\tau)=e^\varepsilon$. The first lemma shows that, for large $s$, the count of $s$ fair coins conceals whether one additional bit is included.
 
 ::: {#lem-shuf-binomial}
 Let $\varepsilon > 0$, let $\tau = \tanh(\varepsilon/2)$, and let $s \ge 2/\tau$ be an integer. Let $N$ be binomial with $s$ trials and success probability $\frac12$, and let $B$ and $B'$ be Bernoulli variables independent of $N$, with any parameters. Then for every set $S$ of integers,
@@ -69,7 +69,7 @@ $$
 5. Split $S$ into $S \cap K$, bounded by step 3, and the rest, bounded by step 4.
 :::
 
-The second lemma makes sure that enough people send coins. It is a lower tail bound for the binomial distribution, sharper than Hoeffding's inequality when the mean is small.
+The second lemma bounds the probability that too few people send coins. For small means, it gives a sharper binomial lower-tail bound than Hoeffding's inequality.
 
 ::: {#lem-shuf-chernoff}
 Let $N$ be binomial with mean $\mu$. Then

@@ -1,18 +1,18 @@
 # Beyond global sensitivity
 
-The Laplace mechanism adds noise scaled to the global sensitivity of a function, the largest change one record can cause on any pair of neighbouring datasets. For many functions that worst case is far from the dataset at hand, or infinite. This chapter asks whether the noise can be scaled to the dataset actually held instead, while keeping differential privacy (DP).
+The Laplace mechanism scales noise to a function's global sensitivity: the largest change one record can cause between neighbouring datasets. This worst-case value may be much larger than the sensitivity near the dataset of interest, or may be infinite. This chapter develops methods that use dataset-dependent sensitivity while preserving differential privacy (DP).
 
-Done naively, it cannot, because the amount of noise then depends on the data and leaks it. Four techniques make the idea work. Propose-test-release checks privately that the dataset is far from any dataset where the function is sensitive. A stability argument built on it finds the most frequent element and every count of a histogram, whatever the size of the domain. The last two techniques bound the sensitivity privately, or smooth it, before they use it.
+Directly scaling noise to local sensitivity is not private because the scale depends on the data. Four techniques avoid this leak. Propose-test-release privately checks that the dataset is far from any dataset with high local sensitivity. A stability argument finds the most frequent element and all histogram counts, regardless of domain size. The final methods privately bound or smooth the sensitivity before using it.
 
 ## Local sensitivity {#sec-bgs-local}
 
-Throughout the chapter, $f\colon \mathcal X^n \to \mathbb R$ is a real-valued function of the dataset. Its **global sensitivity** is the largest change that replacing one record can cause, over neighbouring datasets $D \sim D'$ (the replace-one relation),
+Throughout, $f\colon\mathcal X^n\to\mathbb R$ is a real-valued function of the dataset. Its **global sensitivity** is the largest change caused by replacing one record, over all neighbouring datasets $D\sim D'$:
 
 $$
 \Delta f = \max_{D \sim D'} |f(D) - f(D')| ,
 $$
 
-and the [Laplace mechanism](../part02-dp-basics/02-laplace-mechanism.md) adds to $f(D)$ a noise term drawn from $\mathrm{Lap}(\Delta f/\varepsilon)$, which makes the release $\varepsilon$-DP. The maximum ranges over all pairs of neighbours, including datasets that look nothing like the one held. Fixing the first dataset gives a local version.
+The [Laplace mechanism](../part02-dp-basics/02-laplace-mechanism.md) adds $\mathrm{Lap}(\Delta f/\varepsilon)$ noise to $f(D)$ and is $\varepsilon$-DP. The maximum includes datasets unlike the one held. Fixing $D$ gives a local measure.
 
 ::: {#def-bgs-local name="Local sensitivity"}
 The **local sensitivity** of $f$ at a dataset $D \in \mathcal X^n$ is
@@ -22,13 +22,13 @@ $$
 $$
 :::
 
-The global sensitivity is the largest local sensitivity, $\Delta f = \max_D \mathrm{LS}_f(D)$, and the local sensitivity can be much smaller. The natural mechanism releases $f(D) + \mathrm{Lap}(\mathrm{LS}_f(D)/\varepsilon)$. It fails, because the scale of the noise is itself a function of the data. The distance between the two closest records shows how the local sensitivity can jump from one dataset to a neighbour.
+Global sensitivity is the maximum local sensitivity, $\Delta f=\max_D\mathrm{LS}_f(D)$, and may greatly exceed its value at a particular dataset. A natural mechanism releases $f(D)+\mathrm{Lap}(\mathrm{LS}_f(D)/\varepsilon)$, but its data-dependent noise scale can reveal information. The closest-pair distance illustrates how local sensitivity can change between neighbours.
 
 ::: {#exm-bgs-closest}
 Let $\mathcal X = \mathbb R$, $n = 3$, and let $f(D)$ be the distance between the two closest records. On the real line $f$ has infinite global sensitivity. For example, $(0, c, 2c)$ and its neighbour $(0, 0, 2c)$ have $f$ equal to $c$ and $0$, for every $c > 0$, so the Laplace mechanism does not apply. Take $D = (0, 0, 0)$. Replacing any one record leaves two records at $0$, so $f$ stays $0$ and $\mathrm{LS}_f(D) = 0$. Now take the neighbour $D' = (0, 0, 5)$. It also has $f(D') = 0$, but replacing one of its zeros by $10$ gives $(0, 10, 5)$ with closest distance $5$, so $\mathrm{LS}_f(D') \ge 5$.
 :::
 
-On these two neighbours, the naive mechanism adds no noise to one and some noise to the other, and that difference alone gives the dataset away.
+For these neighbours, the naive mechanism adds no noise on one dataset and positive noise on the other. The output distributions are therefore distinguishable.
 
 ::: {#prp-bgs-naive}
 The mechanism $M(D) = f(D) + \mathrm{Lap}(\mathrm{LS}_f(D)/\varepsilon)$, where $\mathrm{Lap}(0)$ means no noise, is not $\varepsilon$-DP for any finite $\varepsilon$ when $f$ is the closest-pair distance of @exm-bgs-closest.
@@ -40,11 +40,11 @@ The mechanism $M(D) = f(D) + \mathrm{Lap}(\mathrm{LS}_f(D)/\varepsilon)$, where 
 3. So the event $\{0\}$ has probability $1$ on $D$ and $0$ on $D'$, and no factor $e^{\varepsilon}$ with finite $\varepsilon$ can bound the first by the second.
 :::
 
-The failure is that $D$ has low local sensitivity while a neighbour has high local sensitivity, and the noise level tells them apart. So the local sensitivity is itself a statistic of the data, which leaks even through the scale of the noise. Each technique below accounts for the sensitivity of nearby datasets, not just of $D$.
+The local sensitivity is low at $D$ and high at a neighbour, so the noise scale distinguishes them. The scale itself is a data-dependent statistic. The methods below account for sensitivity at nearby datasets, not only at $D$.
 
 ## Propose-test-release {#sec-bgs-ptr}
 
-The first technique proposes a bound $b$ on the local sensitivity and tests privately that the bound holds at $D$ and at every dataset near $D$. Only if the test passes does it release $f(D)$ with noise scaled to $b$. The test measures how many records must change before the bound fails. The **Hamming distance** $d(D, D')$ between two datasets is the number of records in which they differ.
+Propose-test-release chooses a bound $b$ and privately tests whether it holds at $D$ and nearby datasets. If the test passes, it releases $f(D)$ with noise scaled to $b$. The test measures the number of record changes needed to violate the bound. The **Hamming distance** $d(D,D')$ counts differing records.
 
 ::: {#def-bgs-distance name="Distance to instability"}
 For a proposed bound $b \ge 0$ on the local sensitivity $\mathrm{LS}_f$, the **distance to instability** of $D$ is
@@ -56,7 +56,7 @@ $$
 the fewest records that must change to reach a dataset whose local sensitivity exceeds $b$, where $d$ is the Hamming distance. If no dataset has local sensitivity above $b$, set $\gamma_b(D) = \infty$ for every $D$.
 :::
 
-So $\gamma_b(D) = 0$ exactly when $\mathrm{LS}_f(D) > b$. The distance is a count of records, and that gives it sensitivity $1$ whatever $f$ is.
+Thus, $\gamma_b(D)=0$ exactly when $\mathrm{LS}_f(D)>b$. Since it counts record changes, $\gamma_b$ has sensitivity $1$, independent of $f$.
 
 ::: {#lem-bgs-distance}
 If $\gamma_b$ is finite, then $|\gamma_b(D) - \gamma_b(D')| \le 1$ for all neighbours $D \sim D'$.
@@ -68,7 +68,7 @@ If $\gamma_b$ is finite, then $|\gamma_b(D) - \gamma_b(D')| \le 1$ for all neigh
 3. Swapping the roles of $D$ and $D'$ gives the other inequality.
 :::
 
-Because the distance has sensitivity $1$, the Laplace mechanism can release it privately, and that noisy distance is the test. The threshold of the test is set so that a dataset whose local sensitivity exceeds $b$ passes only with probability $\delta/2$.
+The Laplace mechanism releases this distance with privacy. The threshold ensures that a dataset with local sensitivity above $b$ passes the test with probability at most $\delta/2$.
 
 ::: {#def-bgs-ptr name="Propose-test-release"}
 The mechanism takes a proposed bound $b > 0$ and privacy parameters $\varepsilon > 0$ and $\delta \in (0,1)$. On input $D$, it does three steps.
@@ -78,7 +78,7 @@ The mechanism takes a proposed bound $b > 0$ and privacy parameters $\varepsilon
 3. otherwise output $f(D) + Z_2$ with $Z_2 \sim \mathrm{Lap}(b/\varepsilon)$, independent of $Z_1$.
 :::
 
-The test spends one budget of $\varepsilon$, and the release spends another. The test can wrongly pass on a sensitive dataset, and $\delta$ pays for that. The release step is the naive mechanism of @prp-bgs-naive with the scale $b$ in place of $\mathrm{LS}_f(D)$. It is safe now because $b$ is fixed in advance. The decision to use it depends on the data only through the private estimate $\hat\gamma$.
+The test and release each spend $\varepsilon$. The test may pass on a dataset with local sensitivity above $b$; $\delta$ accounts for this event. The release uses fixed scale $b/\varepsilon$, and its activation depends on the data only through the private estimate $\hat\gamma$.
 
 ::: {#thm-bgs-ptr}
 Propose-test-release is $(2\varepsilon, \delta)$-DP.
@@ -147,21 +147,21 @@ Fix neighbours $D \sim D'$ and an event $S$, and write $\tau = 1 + \ln(1/\delta)
 4. *Accuracy.* If $c_{(1)} - c_{(2)} \ge 2 + 4\ln(1/\delta)/\varepsilon$, then $g(D) \ge \tau + \ln(1/\delta)/\varepsilon$. The output is $\bot$ only if $Z \le -\ln(1/\delta)/\varepsilon$, which has probability $\delta/2$.
 :::
 
-With typical parameters, the gap the theorem needs is a few dozen records.
+For typical parameters, the theorem requires a gap of a few dozen records.
 
 ::: {#exm-bgs-mode}
-With $\varepsilon = 1$ and $\delta = 10^{-6}$, the threshold is $1 + \ln(10^6) = 14.82$. A gap of $2 + 4 \times 13.82 = 57.3$, so $58$ records, between the most frequent element and the runner-up is enough. The domain plays no part. It may be the set of all strings, which is infinite.
+For $\varepsilon=1$ and $\delta=10^{-6}$, the threshold is $1+\ln(10^6)=14.82$. The required gap is $2+4\times13.82=57.3$, so a gap of $58$ records suffices. The guarantee does not depend on domain size, even for an infinite domain.
 :::
 
-The stable mode costs $\varepsilon$, not $2\varepsilon$, because the release step adds no noise and spends no budget. Its accuracy depends on the gap, not on the domain, and under pure DP no such bound is possible. The [packing chapter](04-packing-lower-bounds.md) shows that an $\varepsilon$-DP algorithm that finds the mode of a dataset over $k$ elements needs at least $\ln(k/2)/\varepsilon$ records, even when all records are equal. So approximate DP replaces the cost $\ln k$ of a large domain by $\ln(1/\delta)$.
+The stable mode costs $\varepsilon$, not $2\varepsilon$, because releasing the mode after the test uses no additional noise. Accuracy depends on the count gap, not the domain size. Pure DP cannot provide this guarantee: the [packing chapter](04-packing-lower-bounds.md) shows that an $\varepsilon$-DP mode algorithm over $k$ elements needs at least $\ln(k/2)/\varepsilon$ records, even when all records are equal. Approximate DP replaces the domain cost $\ln k$ with $\ln(1/\delta)$.
 
-The same idea estimates every count at once. The algorithm adds noise only to the counts of elements that appear in the data. It reports only those whose noisy count clears a threshold. An element that appears once in $D$ and not at all in a neighbour is the only danger, and the threshold hides it except with probability $\delta/2$.
+The same method estimates all counts at once. It adds noise only to observed elements and reports those whose noisy count exceeds a threshold. A newly appearing element has count one; the threshold suppresses it except with probability $\delta/2$.
 
 ::: {#def-bgs-histogram name="Stability-based histogram"}
 Given $\varepsilon > 0$ and $\delta \in (0,1)$, let $\tau = 1 + 2\ln(1/\delta)/\varepsilon$. On input $D$, for each element $x$ whose count $c_x(D)$ of records is positive, draw an independent $Z_x \sim \mathrm{Lap}(2/\varepsilon)$ and set $\hat c_x = c_x(D) + Z_x$. Output the list of pairs $(x, \hat c_x)$ with $\hat c_x > \tau$. An element not on the list has estimate $\hat c_x = 0$.
 :::
 
-The noise has scale $2/\varepsilon$ because replacing one record changes two counts. The threshold costs $\delta$ in privacy. In accuracy, it adds at most $\tau$ to the noise on each count, because a count is reported as $0$ only when its noisy value is at most $\tau$.
+The noise scale is $2/\varepsilon$ because replacement can change two counts. The threshold accounts for the additive privacy term $\delta$. An unreported count has noisy value at most $\tau$, so thresholding adds at most $\tau$ to its error.
 
 ::: {#thm-bgs-histogram}
 The stability-based histogram is $(\varepsilon, \delta)$-DP. For every $\beta \in (0,1)$, with probability at least $1 - \beta$, every element $x \in \mathcal X$ has
@@ -189,11 +189,11 @@ $$
 6. On that event, take any element $x$. If it is listed, its error is $|Z_x|$. If it appears in $D$ but is not listed, then $c_x + Z_x \le \tau$, so its error is $c_x \le \tau + |Z_x|$. If it does not appear, both its count and its estimate are $0$. In every case the error is at most @eq-bgs-histogram.
 :::
 
-In the usual regime $\delta \le 1/n$, the bound @eq-bgs-histogram is at most $1 + (2/\varepsilon)\big(2\ln(1/\delta) + \ln(1/\beta)\big)$. So every count is accurate to within a number of order $\ln(1/\delta)/\varepsilon$, whatever the size of the domain. The Laplace histogram under pure DP pays $\ln|\mathcal X|$ instead, and by the [packing chapter](04-packing-lower-bounds.md) pure DP cannot avoid that cost.
+When $\delta\le1/n$, @eq-bgs-histogram is at most $1+(2/\varepsilon)(2\ln(1/\delta)+\ln(1/\beta))$. Thus, every count has error of order $\ln(1/\delta)/\varepsilon$, independent of the domain size. A pure-DP Laplace histogram instead pays $\ln|\mathcal X|$, which the [packing chapter](04-packing-lower-bounds.md) shows is unavoidable.
 
 ## Privately bounding the local sensitivity {#sec-bgs-bounding}
 
-Propose-test-release guesses a bound and checks it. A second technique estimates the local sensitivity itself, privately, and uses the estimate as the noise scale. It applies when the local sensitivity does not change fast between neighbours, that is, when $\mathrm{LS}_f$ has bounded global sensitivity.
+Propose-test-release checks a proposed bound. A second method privately estimates local sensitivity and uses the estimate as the noise scale. It applies when local sensitivity itself has bounded global sensitivity.
 
 ::: {#def-bgs-bounding name="Noisy local sensitivity"}
 Suppose that the local sensitivity changes by at most $\lambda > 0$ between neighbours, that is, $|\mathrm{LS}_f(D) - \mathrm{LS}_f(D')| \le \lambda$ for all $D \sim D'$. Given $\varepsilon > 0$ and $\delta \in (0,1)$, on input $D$:
@@ -202,7 +202,7 @@ Suppose that the local sensitivity changes by at most $\lambda > 0$ between neig
 2. if $\hat s \le 0$, output $\bot$, and otherwise output $f(D) + Z_2$ with $Z_2 \sim \mathrm{Lap}(\hat s/\varepsilon)$.
 :::
 
-The shift $\lambda\ln(1/\delta)/\varepsilon$ makes the estimate $\hat s$ an overestimate of $\mathrm{LS}_f(D)$ except with probability $\delta/2$. On that good event, the noise is large enough for privacy. Paying both for the noisy estimate and for the release gives the factor $2\varepsilon$ in the next theorem.
+The shift $\lambda\ln(1/\delta)/\varepsilon$ makes $\hat s$ at least $\mathrm{LS}_f(D)$ except with probability $\delta/2$. On this event, the release noise is sufficient. The estimate and release each use budget $\varepsilon$, giving the $2\varepsilon$ guarantee.
 
 ::: {#thm-bgs-bounding}
 Let $\lambda > 0$ satisfy $|\mathrm{LS}_f(D) - \mathrm{LS}_f(D')| \le \lambda$ for all neighbours $D \sim D'$, and let $\varepsilon > 0$ and $\delta \in (0,1)$. Then noisy local sensitivity with these parameters is $(2\varepsilon, \delta)$-DP.
@@ -221,11 +221,11 @@ $$
 $$
 :::
 
-For each function, the local sensitivity at $D$ and a bound $\lambda$ on how fast it changes must be worked out by hand. The first takes up to $n(|\mathcal X| - 1)$ evaluations of $f$, one per neighbour. For some functions it is much faster, such as the mode, whose local sensitivity depends only on the two largest counts. The technique is simpler to run than propose-test-release, but it applies to fewer functions, because it needs the local sensitivity to change slowly everywhere.
+For each function, one must derive the local sensitivity and a bound $\lambda$ on its change. Direct computation may require $n(|\mathcal X|-1)$ evaluations of $f$. Some functions, such as the mode, admit faster formulas based on the two largest counts. This method is simpler than propose-test-release but applies only when local sensitivity changes slowly everywhere.
 
 ## Smooth sensitivity {#sec-bgs-smooth}
 
-The last technique also lets the local sensitivity grow away from $D$, but discounts each dataset by its distance. Take the closest-pair function of @exm-bgs-closest on the bounded domain $\mathcal X = [0, 10]$, so that its global sensitivity is finite. The dataset $D = (0,0,0)$ still has local sensitivity $0$, while its neighbour $(0,0,5)$ has local sensitivity at least $5$. A safe noise scale at $D$ must account for that neighbour, but less than for $D$ itself.
+Smooth sensitivity also accounts for nearby datasets, discounting sensitivity by distance from $D$. Consider the closest-pair function of @exm-bgs-closest on $\mathcal X=[0,10]$, where global sensitivity is finite. At $D=(0,0,0)$ local sensitivity is $0$, while at its neighbour $(0,0,5)$ it is at least $5$. A safe noise scale at $D$ must account for this neighbour, with a distance-dependent discount.
 
 ::: {#def-bgs-smooth name="Smooth sensitivity"}
 For a smoothing parameter $s > 0$, the **smooth sensitivity** of $f$ at $D$ discounts the local sensitivity of every dataset $D'$ by a factor $e^{-s}$ for each record in which $D'$ differs from $D$:
@@ -237,7 +237,7 @@ $$
 where $d$ is the Hamming distance.
 :::
 
-The supremum ranges over all datasets, not only neighbours. Every dataset is within distance $n$ of every other, so $e^{-sn}\Delta f \le S_{f,s}(D) \le \Delta f$. The smooth sensitivity is therefore finite exactly when the global sensitivity is, and it can be smaller by a factor up to $e^{sn}$. Two properties follow from the definition, and they are all that privacy needs.
+The supremum covers all datasets. Since any two datasets are at distance at most $n$, $e^{-sn}\Delta f\le S_{f,s}(D)\le\Delta f$. Smooth sensitivity is finite exactly when global sensitivity is finite; it may be smaller by a factor of $e^{sn}$. The following two properties suffice for the privacy proof.
 
 ::: {#lem-bgs-smooth}
 For every $D$, $S_{f,s}(D) \ge \mathrm{LS}_f(D)$. For all neighbours $D \sim D'$, $S_{f,s}(D) \le e^{s} S_{f,s}(D')$.
@@ -248,7 +248,7 @@ For every $D$, $S_{f,s}(D) \ge \mathrm{LS}_f(D)$. For all neighbours $D \sim D'$
 2. For any dataset $W$, the triangle inequality gives $d(D, W) \ge d(D', W) - 1$, so $\mathrm{LS}_f(W)e^{-s\,d(D,W)} \le e^{s}\,\mathrm{LS}_f(W)e^{-s\,d(D',W)} \le e^{s} S_{f,s}(D')$. Taking the supremum over $W$ gives the second claim.
 :::
 
-Laplace noise scaled to the smooth sensitivity is not enough for pure DP. The scale moves by a factor up to $e^{s}$ between neighbours, and far in the tail a Laplace density changes by much more than that when its scale changes. Noise with polynomial tails changes little under rescaling, and it works. The standard Cauchy distribution is such a noise, with density at a point $z$ equal to
+Laplace noise scaled to smooth sensitivity does not guarantee pure DP. The scale may change by a factor of $e^s$ between neighbours, while a Laplace density changes more in the tail under a scale change. Polynomial-tail noise is less sensitive to rescaling. The standard Cauchy distribution is one such noise, with density
 
 $$
 h(z) = \frac{1}{\pi(1+z^2)} .
@@ -278,7 +278,7 @@ by the two facts of step 2.
 4. *Bounding the exponents.* By @lem-bgs-smooth, $|f(D) - f(D')| \le \mathrm{LS}_f(D) \le S^*(D)$, so $|w| \le a = \varepsilon/2$. By the same lemma applied in both directions, $|\kappa| \le \varepsilon/2$. The densities therefore differ by a factor at most $e^{\varepsilon}$, and integrating over any event gives $\varepsilon$-DP.
 :::
 
-The Cauchy distribution has such heavy tails that it has no mean. Its tail is $\Pr[|Z| > z] = \frac2\pi\arctan(1/z) \le 2/(\pi z)$, so the error exceeds $4S^*(D)/(\pi\varepsilon\beta)$ with probability at most $\beta$. That bound grows as $1/\beta$, while the exponential tails of Laplace or Gaussian noise give $\ln(1/\beta)$. Those two noises, scaled to the smooth sensitivity with a smaller smoothing parameter, give approximate DP with lighter tails. Computing $S_{f,s}$ means a maximum over all datasets, which is hard in general, but for the median it takes polynomial time.
+The Cauchy distribution has no mean. Its tail is $\Pr[|Z|>z]=\frac2\pi\arctan(1/z)\le2/(\pi z)$, so the error exceeds $4S^*(D)/(\pi\varepsilon\beta)$ with probability at most $\beta$. This bound scales as $1/\beta$, compared with $\ln(1/\beta)$ for Laplace or Gaussian noise. Those distributions, scaled to smooth sensitivity with a smaller smoothing parameter, give approximate DP and lighter tails. Computing $S_{f,s}$ requires maximizing over all datasets and is generally difficult; for the median, it takes polynomial time.
 
 ## Summary {#sec-bgs-summary}
 

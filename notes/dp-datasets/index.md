@@ -7,7 +7,7 @@ abstract: |
 
 Suppose you want to run, or read, an experiment with differential privacy (DP). You need a dataset, and three things about it decide what the experiment can show. What one record is decides whom the guarantee protects. How many records there are decides whether the noise is small. And where the data came from decides whether you may use them and whether a model has already seen them. This note is a guide to the public datasets of DP papers, organized around those three questions.
 
-The note assumes basic probability and what DP promises, and nothing about any dataset. Every size, licence and result below comes from the dataset's own page or from the paper that reports it, and the sources are listed at the end. Where the note could not confirm a number, it says so. @tbl-map gives the question each section answers, and @tbl-symbols lists the few symbols the note uses.
+You need basic probability and the definition of DP, but no prior knowledge of these datasets. Each size and licence comes from the dataset's own page; each result comes from the paper that reports it. The sources appear at the end. The note identifies any number it could not confirm. @tbl-map lists each section's question, and @tbl-symbols defines the notation.
 
 | Section | The question it answers |
 |:---|:---|
@@ -37,7 +37,7 @@ The note assumes basic probability and what DP promises, and nothing about any d
 
 # What a dataset has to offer a DP experiment {#sec-what}
 
-Four questions come up for every dataset in the catalogue, so this section answers them once. What is one record? Are the records enough? Is the range of each value known? And what does the licence allow? All the numbers of the note come from one script, [code/notes/dp_datasets.py](https://github.com/manuelvloureiro/privacy-preserving-machine-learning-book/blob/main/code/notes/dp_datasets.py).
+Evaluate each dataset by asking what one record represents, whether it has enough records, whether each value has a known range, and what its licence permits. The script [code/notes/dp_datasets.py](https://github.com/manuelvloureiro/privacy-preserving-machine-learning-book/blob/main/code/notes/dp_datasets.py) computes every number in this note.
 
 ## The privacy unit
 
@@ -53,7 +53,7 @@ The noise that DP adds to a count does not depend on the number of records. Unde
 
 $$\frac{\sqrt{2}}{\varepsilon\, n s}.$$
 
-So twice the data halves the relative error, and a ten times smaller $\varepsilon$ costs as much as ten times less data.
+Doubling the dataset halves the relative error. Reducing $\varepsilon$ by a factor of ten requires ten times as many records to keep the same relative error.
 
 @fig-noise-floor plots that fraction against $n$ for a count of 1% of the records, with the common benchmarks marked on the $\varepsilon = 1$ line. The dotted line is a relative error of 10%, a reasonable bar for a statistic worth publishing. With $s = 0.01$, the fraction falls to 0.1 when $n = \sqrt{2}/(0.001\,\varepsilon)$. So a dataset clears the bar with 1,414 records at $\varepsilon = 1$, and with 14,142 at $\varepsilon = 0.1$. @tbl-sizes gives the values for each dataset.
 
@@ -61,7 +61,7 @@ So twice the data halves the relative error, and a ten times smaller $\varepsilo
 
 {{< include figures/_sizes.md >}}
 
-Two things follow for the choice of a dataset. First, the small datasets of machine-learning courses, with a few hundred or a thousand records, cannot show DP at work, because the noise swamps any count finer than the whole. For example, a 1% count of German Credit's 1,000 applicants is ten people, and the noise at $\varepsilon = 1$ is 14% of it. Second, above about fifty thousand records a single count is almost free at any $\varepsilon$ a paper would report. On such data the cost of DP comes from many questions, because they share the budget, or from the training of a model, which asks thousands.
+These calculations guide dataset choice. Small teaching datasets, with a few hundred or a thousand records, cannot demonstrate useful DP for detailed counts because noise can overwhelm them. For example, a 1% count of German Credit's 1,000 applicants is ten people, and noise at $\varepsilon = 1$ is 14% of that count. With more than about fifty thousand records, noise is small relative to a single count at the $\varepsilon$ values reported in papers. On larger datasets, privacy costs come from answering many queries under one budget or from model training, which uses thousands of steps.
 
 ## The domain
 
@@ -267,17 +267,17 @@ Small marginals are at the other end, as @tbl-adult-marginals shows. When basic 
 
 ## The NIST challenges
 
-The public record of the field is three NIST challenges, each with public data and published scores. The **2018 Differential Privacy Synthetic Data Challenge** ran three matches ([NIST](https://www.nist.gov/ctl/pscr/open-innovation-prize-challenges/past-prize-challenges/2018-differential-privacy-synthetic)). The first two used San Francisco Fire Department calls for service, about 305,000 records with 32 attributes. The third used the 1940 Census PUMS for Colorado, about 661,000 records with 98 attributes. Bowen and Snoke (2021) compare the entries.
+Three NIST challenges provide public datasets and published scores for comparing synthetic-data methods. The **2018 Differential Privacy Synthetic Data Challenge** ran three matches ([NIST](https://www.nist.gov/ctl/pscr/open-innovation-prize-challenges/past-prize-challenges/2018-differential-privacy-synthetic)). The first two used San Francisco Fire Department calls for service, about 305,000 records with 32 attributes. The third used the 1940 Census PUMS for Colorado, about 661,000 records with 98 attributes. Bowen and Snoke (2021) compare the entries.
 
-The results set the pattern for everything since. Ryan McKenna's entry won the third match and the overall ranking, and the winning methods measured low-order marginals with noise and fitted a graphical model. The one entry built on a GAN scored far below them. McKenna, Miklau and Sheldon (2021) turned the winner into **MST**. It measures all one-way marginals, selects two-way marginals along a maximum spanning tree of mutual information, and fits a graphical model to the noisy measurements with Private-PGM, described with @tbl-generators.
+Ryan McKenna's entry won the third match and the overall ranking. The winning methods measured low-order marginals with noise and fitted a graphical model; the single GAN-based entry scored far below them. McKenna, Miklau and Sheldon (2021) developed the winning method into **MST**. It measures all one-way marginals, selects two-way marginals along a maximum spanning tree of mutual information, and fits a graphical model to the noisy measurements with Private-PGM, described with @tbl-generators.
 
 The **2020 Differential Privacy Temporal Map Challenge** moved to data with time and place, from Baltimore 911 calls, the ACS and Chicago taxi trips ([NIST](https://www.nist.gov/ctl/pscr/open-innovation-prize-challenges/past-prize-challenges/2020-differential-privacy-temporal)). Noisy marginals and graphical models won again. The winning code is public, and McKenna's entry became the basis of **AIM** ([nist-synthetic-data-2021](https://github.com/ryan112358/nist-synthetic-data-2021)).
 
-The **Collaborative Research Cycle**, from 2023, is a shared benchmark, not a competition ([NIST CRC](https://pages.nist.gov/privacy_collaborative_research_cycle/)). Its data are the **NIST ACS Data Excerpts**, drawn from the 2019 ACS PUMS with 24 features. There is a national excerpt of 27,254 records and smaller ones for Massachusetts and Texas, each with a control sample from 2018 ([SDNist](https://github.com/usnistgov/SDNist)). As Sen et al. (2023) describe, the areas were chosen for their demographic diversity, so that a generator's errors on minorities show. The SDNist tool scores any synthetic version against the originals, and the archive holds over 450 scored submissions, the largest public comparison of DP synthetic data.
+The **Collaborative Research Cycle**, from 2023, is a shared benchmark, not a competition ([NIST CRC](https://pages.nist.gov/privacy_collaborative_research_cycle/)). Its data are the **NIST ACS Data Excerpts**, drawn from the 2019 ACS PUMS with 24 features. The benchmark includes a national excerpt of 27,254 records and smaller excerpts for Massachusetts and Texas, each with a control sample from 2018 ([SDNist](https://github.com/usnistgov/SDNist)). Sen et al. (2023) explain that the areas were chosen for demographic diversity, allowing evaluation of generator errors on minority groups. The SDNist tool scores each synthetic dataset against the originals. Its archive holds over 450 scored submissions, the largest public comparison of DP synthetic data.
 
 ## Benchmark suites and what they found
 
-**SDGym**, from the CTGAN paper of Xu et al. (2019), fixed the datasets of the deep-learning side ([SDGym](https://github.com/sdv-dev/SDGym)). Its real datasets include Adult, Census-Income KDD, Credit Card Fraud and two binarized MNISTs, and it adds seven simulated datasets. CTGAN itself is not private, but DP-CTGAN, PATE-CTGAN and DP-MERF were evaluated on SDGym's datasets.
+**SDGym**, introduced with the CTGAN paper by Xu et al. (2019), established benchmarks for deep-learning methods ([SDGym](https://github.com/sdv-dev/SDGym)). Its real datasets include Adult, Census-Income KDD, Credit Card Fraud and two binarized MNISTs; it also includes seven simulated datasets. CTGAN itself is not private, but researchers evaluated DP-CTGAN, PATE-CTGAN and DP-MERF on SDGym's datasets.
 
 Tao, McKenna, Hay, Machanavajjhala and Miklau (2021) ran the first systematic DP comparison, on seven small tables that include Adult, Bank Marketing and Census-Income KDD. They found that many mechanisms, and nearly all the GAN-based ones, did not keep even the one-way marginals. No mechanism was best everywhere, but MST had the best average rank, and the bins of the numeric columns mattered as much as the mechanism. Ganev, Xu and De Cristofaro (2024) trained about 21,000 models to explain why. Graphical models spread their budget over columns and struggle on wide tables, while deep models spend it per training step and scale to width. So PATE-GAN wins on complex prediction tasks and MST on statistics, and Chen et al. (2025) find the same trade-off on ACS, Bank and Loan data.
 
@@ -285,7 +285,7 @@ The benchmarks also showed a problem of reproducibility. Ganev, Annamalai and De
 
 ## The generators and their data
 
-@tbl-generators lists the main generators with the data of their evaluations, which you need to compare a new method with them.
+@tbl-generators lists the datasets used to evaluate major generators, which you need to match when comparing methods.
 
 | Generator | Kind | Evaluated on | Source |
 |:---|:---|:---|:---|

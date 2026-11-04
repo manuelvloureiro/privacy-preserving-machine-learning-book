@@ -1,10 +1,10 @@
 # Plugins
 
-Sometimes the mechanism you need is not in the library, such as a new estimator from a paper. The framework of the previous part allows for this, because a transformation is any function with a stability map and a measurement is any function with a privacy map. So you can write both in Python and give them to the library as **plugins**, which then chain, compose and run through a context like the built-in ones.
+OpenDP may not include the mechanism you need, such as a new estimator from a paper. The framework allows user-defined transformations with stability maps and measurements with privacy maps. You can implement them in Python as **plugins** and chain, compose or run them through a context like built-in components.
 
-The one idea of this chapter is that a plugin is exactly as private as its map, and the library cannot check the map. Every built-in constructor comes with a written proof of its map, but for a plugin that proof is yours. So each example below says why its map is right, or where the documentation leaves that open. You will write a measurement, a transformation and your own spaces, register a constructor for the Context API, and follow the documentation's Theil-Sen regression and private choice of grouping columns.
+A plugin's privacy depends entirely on its map, which OpenDP cannot verify. Built-in constructors include written proofs; plugin authors must provide them. The examples explain each map or identify what remains unproved. They cover measurements, transformations, custom spaces, Context API registration, Theil-Sen regression and private selection of grouping columns.
 
-The script [opendp_plugins.py](../../code/part04-extending/opendp_plugins.py) runs every step on OpenDP 0.16.0. The regression uses the documentation's toy data, a hundred points on a line with seeded normal noise, and the choice of grouping columns uses the Labour Force Survey (LFS) sample. Every map, check, error message, score and candidate range on this page is the same on every run. OpenDP's noise cannot be seeded, so the released values appear in one block marked as one run at the end.
+The script [opendp_plugins.py](../../code/part04-extending/opendp_plugins.py) runs on OpenDP 0.16.0. The regression uses the documentation's toy data: 100 points on a line with seeded normal noise. Grouping-column selection uses the Labour Force Survey (LFS) sample. Maps, checks, errors, scores and candidate ranges are deterministic. OpenDP's noise cannot be seeded, so the page labels the released values as one run.
 
 ```bash
 uv run python code/part04-extending/opendp_plugins.py
@@ -12,15 +12,15 @@ uv run python code/part04-extending/opendp_plugins.py
 
 ## Trust and the honest-but-curious flag {#sec-plug-trust}
 
-The documentation gives two reasons for plugins: the library cannot ship every mechanism, and an idea is easier to try in Python than in Rust. Either way a Python function is at the centre of a guarantee, so the library cannot read it. It cannot tell whether your privacy map is right, whether your function has side effects, or whether it raises an error only on some data.
+Plugins let the library support mechanisms it cannot ship and let users prototype in Python. Because Python functions are central to their guarantees, OpenDP cannot inspect them. It cannot verify the privacy map, detect side effects or identify errors that occur only for some data.
 
-That is why plugin constructors need a second feature flag next to `contrib`, named `honest-but-curious` after its trust model. The author of the plugin is honest, because they have proved their map, and the library guards only against curiosity downstream. Without the flag a plugin constructor refuses to build.
+Plugin constructors therefore require the `honest-but-curious` feature flag in addition to `contrib`. The trust model assumes the author has proved the map and protects against downstream curiosity. Without the flag, a plugin constructor refuses to build.
 
 ```text
 without the flag: Attempted to use function that requires "contrib", "honest-but-curious", but not enabled
 ```
 
-Each constructor's docstring states the promise. For any two inputs at most `d_in` apart under the input metric, the output distributions must be at most `privacy_map(d_in)` apart under the output measure. Also, the function must have no side effects, and the map must be pure. A wrong map breaks the guarantee silently, because the context charges what the map reports. The snippet shows the extreme case, a measurement that returns its input and claims a privacy loss of zero.
+Each constructor's docstring states its guarantee: inputs at most `d_in` apart must produce output distributions at most `privacy_map(d_in)` apart. The function must have no side effects, and the map must be pure. An incorrect map silently invalidates the guarantee because the context charges the reported cost. The snippet demonstrates the extreme case: a measurement returns its input but claims zero privacy loss.
 
 ```python
 import opendp.prelude as dp
@@ -32,11 +32,11 @@ print(leak.map(1))  # 0.0
 print(leak([1, 2, 3]))  # [1, 2, 3]
 ```
 
-The library accepts it, and a context would release the raw data at no charge. The flag records that the claim rests on your word, and the sentence that justifies each map below is what makes that word worth something.
+OpenDP accepts this plugin, so a context would release raw data at no cost. The flag records that the guarantee depends on the author's claim; each map below needs a justification.
 
 ## A measurement plugin {#sec-plug-measurement}
 
-The documentation's first example is a measurement that ignores its input and returns a constant, which is useless as a release but has the easiest map to justify. The constructor `make_user_measurement` takes the five parts of a measurement ([A framework to understand differential privacy](../part03-framework/08-a-framework-for-privacy.md)). They are an input domain, an input metric, an output measure, the function and the privacy map.
+The documentation first demonstrates a measurement that ignores its input and returns a constant. It is not useful as a release, but its map is easy to prove. `make_user_measurement` takes the five components described in [A framework to understand differential privacy](../part03-framework/08-a-framework-for-privacy.md): input domain, input metric, output measure, function and privacy map.
 
 ```{.python excerpt="plug-constant"}
 def make_base_constant(constant: str) -> dp.Measurement:
@@ -58,16 +58,16 @@ def make_base_constant(constant: str) -> dp.Measurement:
     )
 ```
 
-The input space is one integer under the absolute difference. The output measure is the max divergence of pure differential privacy, so the map gives an $\varepsilon$. The map returns zero at every distance, which is correct because the output does not depend on the input. The last argument, `TO`, names the type that the function returns. The script chains the result after a sum of bounded integers.
+The input is one integer under absolute distance. Max divergence is the output measure, so the map reports $\varepsilon$. It returns zero at every distance because the output is independent of the input. The `TO` argument names the function's return type. The script chains this measurement after a bounded integer sum.
 
 ```text
 constant: input=AtomDomain(T=i32) metric=AbsoluteDistance(i32) measure=MaxDivergence
 sum >> constant: map(1)=0.0 release=denied
 ```
 
-The chain works because the output space of the sum, an integer under the absolute distance, is the input space of the plugin. The library checks that match, because domains and metrics are its own objects, but it does not check the map.
+The sum outputs an integer under absolute distance, matching the plugin's input space. OpenDP checks this match because it owns the domain and metric objects; it does not check the map.
 
-The next constructor has a real map. It adds Laplace noise from NumPy instead of from OpenDP, and it takes its input space as its first two arguments, the convention that the Context API needs later.
+The next constructor adds Laplace noise with NumPy and supplies a privacy map. Its first two arguments are the input domain and metric, as required for Context API registration later.
 
 ```{.python excerpt="plug-laplace"}
 def make_numpy_laplace(input_domain: dp.Domain, input_metric: dp.Metric, scale: float) -> dp.Measurement:
@@ -85,7 +85,7 @@ def make_numpy_laplace(input_domain: dp.Domain, input_metric: dp.Metric, scale: 
     )
 ```
 
-The map is the sensitivity over the scale, which is what Laplace noise costs in $\varepsilon$ ([the full edition's chapter on the Laplace and Gaussian mechanisms](../../book-full/part03-dp-foundations/03-laplace-gaussian.md) derives it). The built-in `then_laplace` at the same scale reports the same map, and that comparison is the check to run on any plugin with a built-in equivalent.
+The map divides sensitivity by scale, the Laplace cost in $\varepsilon$ ([the full edition's chapter on the Laplace and Gaussian mechanisms](../../book-full/part03-dp-foundations/03-laplace-gaussian.md) derives this result). At the same scale, built-in `then_laplace` reports the same map. Compare plugin maps with built-in equivalents when available.
 
 ```text
 python laplace scale 2: map(1.0)=0.5 built-in map(1.0)=0.5
@@ -93,7 +93,7 @@ halved map, same noise: map(1.0)=0.25 check(1.0, 0.25)=True
 laplace scale 2: 95% accuracy=5.9915
 ```
 
-The second line uses the same noise with a map that claims half the loss, as a test of what the library catches. The library accepts it, and `check` reports that it fits a budget of 0.25, which is false, so a context would give such a plugin a quarter and spend half. The third line is the 95% error bar of the noise at scale 2, for the release at the end of the page. In production, prefer the Rust core, because NumPy's float sampling leaks a little through rounding and OpenDP's own samplers prevent that.
+The second line keeps the noise but claims half its true cost. OpenDP accepts the map, and `check` incorrectly approves a budget of 0.25; a context would allocate a quarter while spending half. The third line gives the 95% error bar for scale 2. In production, prefer the Rust core: NumPy's floating-point sampler leaks slightly through rounding, while OpenDP's samplers prevent this.
 
 ## A transformation plugin {#sec-plug-transformation}
 

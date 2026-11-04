@@ -2,11 +2,11 @@
 
 ## Why this matters
 
-A language model trained on scraped text or support tickets sees phone numbers, addresses, keys and private messages. Asked to continue "Anna Smith's phone number is", it may finish with the real number. This is **training-data extraction**. [Membership inference](02-membership-inference.md) needs the record in hand to ask whether it was used, while extraction hands the attacker the record itself.
+A language model trained on scraped text or support tickets may learn phone numbers, addresses, keys and private messages. Given the prompt "Anna Smith's phone number is", it may generate the real number. This is **training-data extraction**. [Membership inference](02-membership-inference.md) tests whether the model used a specified record; extraction recovers the record itself.
 
 ## Which memorization to measure {#sec-memo-definitions}
 
-The notions of memorization in @tbl-memo-definitions give rates that differ by orders of magnitude, so a report must say which one it measures. All use greedy decoding, which writes out the most likely next token at each step.
+The memorization definitions in @tbl-memo-definitions produce rates that differ by orders of magnitude. Reports must specify which definition they use. Each definition uses greedy decoding, which selects the most likely next token at each step.
 
 | Definition | The string counts as memorized if | Use it for |
 | --- | --- | --- |
@@ -17,50 +17,50 @@ The notions of memorization in @tbl-memo-definitions give rates that differ by o
 
 : The notions of memorization and when to use each. The first three are verbatim, needing an exact match, and each implies approximate. Discoverable implies extractable. {#tbl-memo-definitions}
 
-Discoverable memorization is the one you can measure, because you hold the training text it uses as the prompt. Treat any verbatim rate as a lower bound on the leak, because near copies leak too. A filter that blocks only verbatim training text is easy to bypass (Ippolito et al. 2023).
+Discoverable memorization is measurable because the auditor has the training text used as a prompt. A verbatim rate is a lower bound on leakage because near copies may also reveal information. A filter that blocks only verbatim text can be bypassed (Ippolito et al. 2023).
 
-Deployed systems sample rather than decode greedily, so whether a string comes out depends on how many samples the attacker draws. A sample at temperature 1 writes out a string with probability $p$, the model's probability of that string after the prompt. Write $\beta$ for the chance of failure the attacker accepts. Then a number $m$ of independent samples suffices when
+Deployed systems sample rather than decode greedily, so extraction probability depends on the attacker's sample count. At temperature 1, let $p$ be the model's probability of generating the string after the prompt and let $\beta$ be the attacker's tolerated failure probability. At least $m$ independent samples are sufficient when
 $$m \ge \frac{\ln(1/\beta)}{p}.$$ {#eq-memo-samples}
-For a string of probability $10^{-3}$ and $\beta = 0.01$, that is about 4,600 samples. So report a sampling budget alongside the greedy rate, and measure with the decoding settings you deploy.
+For a string with probability $10^{-3}$ and $\beta = 0.01$, the requirement is about 4,600 samples. Report the sampling budget with the greedy rate and use the deployed decoding settings.
 
 ## What gets memorized, and the first defences {#sec-memo-copies}
 
-Memorization grows with the copies of a string. On open models, the largest reproduced at least 1% of its training data in the discoverable sense (Carlini et al. 2023). A sequence repeated ten times is generated about a thousand times more often than one seen once (Kandpal, Wallace & Raffel 2022).
+Memorization increases with the number of copies of a string. In open models, the largest reproduced at least 1% of the training data under the discoverable definition (Carlini et al. 2023). A sequence repeated ten times is generated about a thousand times more often than one seen once (Kandpal, Wallace & Raffel 2022).
 
-So the cheapest defence is **deduplication**, which lowers the copies of every repeated string. Models trained on deduplicated data emit memorized text about ten times less often, at the same quality (Lee et al. 2022). Deduplicate before you plant the canaries of the next section, so that only they carry known copy counts.
+The lowest-cost defence is **deduplication**, which reduces repeated copies. Models trained on deduplicated data emit memorized text about ten times less often at the same quality (Lee et al. 2022). Deduplicate before inserting canaries so their copy counts are controlled.
 
-The second defence removes personal data before training. A detector of personally identifiable information (PII), such as Microsoft's Presidio, finds names, phone numbers and similar fields so that you can mask them. But it misses whatever its patterns do not cover. Neither defence helps a secret seen once in a large model, where one copy is enough. Only [fine-tuning with differential privacy](../part05-dp-ml/14-private-llm-finetuning.md), which limits how much any one training sequence can change the model, gives a guarantee for such singletons.
+The second defence removes personal data before training. A personally identifiable information (PII) detector, such as Microsoft's Presidio, identifies fields such as names and phone numbers for masking, but can miss patterns it does not cover. Neither deduplication nor detection protects a secret that appears once in a large model. [Fine-tuning with differential privacy](../part05-dp-ml/14-private-llm-finetuning.md) limits how much one training sequence can change the model and provides a guarantee for such singletons.
 
 ## Auditing with canaries and exposure {#sec-memo-exposure}
 
-Discoverable memorization is all or nothing, while an auditor wants a graded answer. Carlini et al. (2019) plant **canaries**, random secrets of a fixed format such as "my pin is" followed by five random digits. After training, you order all the values the secret could have taken from the most to the least likely under the model. The planted value's **rank** in that order is the number of guesses an attacker needs if it tries them in turn.
+Discoverable memorization is binary, but an audit needs a graded measure. Carlini et al. (2019) insert **canaries**, random secrets with a fixed format, such as "my pin is" followed by five random digits. After training, rank all possible secret values by model likelihood. The planted value's **rank** is the number of guesses required if an attacker tests them in order.
 
 Write $\hat r$ for the planted value and $|\mathcal R|$ for the number of values in the set $\mathcal R$ it could have taken. The **exposure** is the number of bits of search the model saves an attacker,
 $$\mathrm{exposure}(\hat r) = \log_2|\mathcal R| - \log_2\operatorname{rank}(\hat r).$$ {#eq-memo-exposure}
-Each bit halves the guesses the attacker needs. At rank 1 the exposure reaches its maximum, $\log_2|\mathcal R|$, and the secret can be extracted. For five digits, $10^5$ values, the maximum is 16.61 bits.
+Each exposure bit halves the number of required guesses. Rank 1 gives maximum exposure $\log_2|\mathcal R|$ and allows extraction. For five digits, there are $10^5$ values and maximum exposure is 16.61 bits.
 
-Exposure works as an audit because we know how it behaves when the model memorized nothing. The canary's value is uniformly random, so a model that never saw it gives it a uniformly random rank. So for any threshold of $t$ bits,
+Exposure supports an audit because its null behaviour is known. A uniformly random canary that the model never saw has a uniformly random rank. Therefore, for any threshold of $t$ bits,
 $$\Pr\big[\mathrm{exposure}(\hat r) \ge t\big] \le 2^{-t}.$$ {#eq-memo-null}
-So $2^{-\text{exposure}}$ bounds the p-value, the chance that an uninserted canary would look at least this memorized. The same uniform rank gives an uninserted canary an average exposure of $\log_2 e$, about 1.44 bits, which the controls should match.
+Thus, $2^{-\text{exposure}}$ bounds the p-value: the probability that an uninserted canary appears at least this memorized. A uniform rank gives an uninserted canary mean exposure $\log_2 e$, about 1.44 bits; controls should be near this value.
 
-To run the audit, draw canaries in the format of the secrets your data could contain. A format unlike your data measures only how the model treats unfamiliar text. Insert each canary a chosen number of times, from once to many, keep some never inserted as controls, and fine-tune as usual. Then score each canary's value, and many random values of the same format, by the model's log-probability after the prefix. The share of random values that score at least as high estimates the **rank fraction**, the rank divided by $|\mathcal R|$. Minus its base-2 logarithm is the exposure.
+Draw canaries in the format of secrets present in the data; an unrelated format tests only how the model treats unfamiliar text. Insert each canary a controlled number of times, retain uninserted controls and fine-tune normally. Score each canary and many random values in the same format using their model log-probability after the prefix. The fraction of random values with at least as high a score estimates the **rank fraction**, the rank divided by $|\mathcal R|$. Its negative base-2 logarithm estimates exposure.
 
-Most audits go wrong at the scoring step. A candidate's log-probability is the sum over its tokens, but the mean loss that Hugging Face models return divides that sum by the number of tokens. Values of different token lengths then get scores on different scales, and the ranking is wrong. So score every candidate by its summed log-probability, in a format where every candidate has the same number of tokens. For example, write a pin as "the pin of Alice is 8 6 5 2 3", so that each digit is one token.
+Scoring errors can invalidate the audit. Candidate log-probability is the sum over tokens, whereas Hugging Face models return mean loss divided by token count. Scores for candidates with different token lengths are therefore not comparable. Use summed log-probabilities and a format that gives every candidate the same number of tokens. For example, write a pin as "the pin of Alice is 8 6 5 2 3", with each digit represented by one token.
 
-[Fine-tune a language model privately with LoRA](../part05-dp-ml/14-private-llm-finetuning.md#sec-llmwf-memorization) runs this audit on Pythia-14m, a small language model, and shows the code and its output. It inserts three canaries at each copy count from 1 to 64 into 1,024 sequences of Tiny Shakespeare. It keeps three more as controls and ranks each value among 2,000 random candidates. Exposure rises with the copies, and the controls sit at 1.4 bits, as the 1.44 expected for them predicts. Greedy decoding extracts only the three canaries seen 64 times. Yet two of the canaries seen 4 times reach 6.9 and 8.2 bits, which no extraction test notices. So an audit measures exposure and not only extraction.
+[Fine-tune a language model privately with LoRA](../part05-dp-ml/14-private-llm-finetuning.md#sec-llmwf-memorization) runs this audit on Pythia-14m. It inserts three canaries at each copy count from 1 to 64 into 1,024 Tiny Shakespeare sequences, keeps three controls and ranks each value among 2,000 random candidates. Exposure increases with copy count. Controls have 1.4 bits of exposure, near the expected 1.44. Greedy decoding extracts only the three canaries repeated 64 times, while two canaries repeated four times reach 6.9 and 8.2 bits. Exposure therefore detects risk that extraction tests miss.
 
-The 2,000 candidates set a cap on the measured exposure. A canary that beats all of them shows only that its rank fraction is below about 1 in 2,000. So its exposure stops at $\log_2 2000 = 10.97$ bits. Past the cap, fit a skew-normal distribution to the candidates' scores and read the canary's rank off its tail, as Carlini et al. (2019) do. Ties also hide memorization, because when every candidate gets the same score, every exposure is 0.
+The 2,000 candidates cap the measured exposure. If a canary outranks all candidates, its rank fraction is only known to be below about 1 in 2,000, so measured exposure is capped at $\log_2 2000 = 10.97$ bits. To estimate exposure beyond this cap, fit a skew-normal distribution to candidate scores and estimate the canary's rank from its tail, as Carlini et al. (2019) do. Ties also hide memorization: if all candidates have the same score, each has exposure 0.
 
-A canary repeated 16 or more times is the positive control. If it does not reach a high exposure without privacy, the run is too short to tell you anything. In that run the canaries fill a quarter of the training set, which lets so small a model memorize them. [Pre-release privacy risk assessment](10-risk-assessment.md) sets the exposure that blocks a release.
+Use a canary repeated 16 or more times as a positive control. If it does not reach high exposure without privacy, the run is too short to assess memorization. In the cited run, canaries occupy one quarter of the training set, allowing this small model to memorize them. [Pre-release privacy risk assessment](10-risk-assessment.md) specifies the exposure threshold for blocking release.
 
 ## Extraction without the prefix: generate, rank, verify {#sec-memo-attack}
 
-A real attacker has only the model. Carlini et al. (2021) extracted data from GPT-2 in three steps. They generated many samples, ranked them by how likely each was to be memorized, and checked the top ones. The ranking is the hard step, because a model finds a string likely either because it is ordinary text or because it memorized it. A **reference model**, trained on similar data but not on the target's training set, stands in for ordinary text. Write $p_\theta(x)$ for the target model's probability of a string $x$, and $p_{\mathrm{ref}}(x)$ for the reference's. Rank by the log-likelihood ratio
+A real attacker has access only to the model. Carlini et al. (2021) extracted data from GPT-2 in three steps: they generated many samples, ranked them by likelihood and checked the highest-ranked candidates for memorization. Ranking is difficult because a model may assign high probability to a string either because it is ordinary text or because it memorized it. A **reference model**, trained on similar data but not on the target's training set, estimates ordinary-text likelihood. Write $p_\theta(x)$ for the target model's probability of a string $x$, and $p_{\mathrm{ref}}(x)$ for the reference model's probability. Rank by the log-likelihood ratio
 $$\Lambda(x) = \ln p_\theta(x) - \ln p_{\mathrm{ref}}(x).$$ {#eq-memo-ratio}
 
-The ratio cancels the strings that any model finds likely, such as software licences and boilerplate. Raw likelihood would put these first, and they reveal nothing. A crude reference, such as a smaller model of the same family, works. To audit your own fine-tuned model, use the base model as the reference.
+The ratio discounts strings that any model finds likely, such as software licenses and boilerplate. Raw likelihood ranks these strings highly even though they reveal no memorization. A smaller model from the same family can serve as the reference. For a fine-tuned model, use its base model.
 
-Without the prefix, an attacker extracts less than the discoverable rate suggests, but aligned production models are not safe. Nasr et al. (2023) asked ChatGPT to repeat one word forever, until it left its aligned behaviour and wrote memorized text. For about 200 US dollars of queries, they extracted over 10,000 records.
+Without the prefix, attackers extract less than the discoverable rate suggests, but alignment does not prevent extraction. Nasr et al. (2023) prompted ChatGPT to repeat one word until it stopped following its aligned behaviour and generated memorized text. They extracted over 10,000 records using about 200 US dollars of queries.
 
 ## Cheat sheet
 

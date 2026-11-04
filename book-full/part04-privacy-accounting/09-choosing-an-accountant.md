@@ -205,7 +205,7 @@ Every number so far assumes a model of the training run, and the accountant cann
 
 : A checklist for matching the accountant to the training code. {#tbl-choose-checklist}
 
-The first row is the most common mismatch. A loader that draws a random batch of exactly $qn$ records looks like Poisson sampling. But a record cannot enter a full batch without pushing another out, so in effect one record is swapped for another, and the batch sum can move by $2C$ and not only $C$.
+The first row describes a common mismatch: drawing exactly $qn$ records is fixed-size sampling, not Poisson sampling. Under add/remove adjacency, adding one record to a fixed-size batch requires removing another. Their clipped gradients can differ by $2C$, rather than the $C$ change allowed by Poisson sampling.
 
 ::: {#prp-choose-fixed name="Fixed-size batches (Lebeda et al. 2024)"}
 If each step draws a fresh uniformly random batch of exactly $qn$ records, then under add/remove neighbours every $\varepsilon$ certified for the Poisson pair with rate $q$ and noise multiplier $\sigma/2$ holds for the run with noise multiplier $\sigma$.

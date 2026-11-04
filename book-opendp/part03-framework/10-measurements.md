@@ -1,10 +1,10 @@
 # Measurements
 
-A **measurement** ends a chain. It takes data and returns a random release, and it bounds how much the distribution of that release can change when one person's data change. [Transformations](09-transformations.md) built the deterministic half of a query, and this chapter builds the random half, which gives the privacy guarantee.
+A **measurement** ends a chain by mapping data to a random release. Its privacy map bounds how much the release distribution can change when one person's data change. [Transformations](09-transformations.md) described the deterministic part of a query; this chapter covers the randomized part and its guarantee.
 
-You read every measurement in OpenDP from four parts. The input domain says what it accepts, and the input metric compares two inputs. The output measure is the currency of the privacy cost, and the privacy map turns a distance between inputs into a cost in that currency. With these four parts, you can calibrate any mechanism in the library and compare two mechanisms fairly.
+Every OpenDP measurement has four parts: an input domain, an input metric, an output measure and a privacy map. The domain specifies valid inputs; the metric compares them. The output measure defines the privacy-cost units, and the map converts input distance into that cost. These components let you calibrate and compare mechanisms.
 
-The script [opendp_measurements.py](../../code/part03-framework/opendp_measurements.py) builds every mechanism on this page on OpenDP 0.16.0 and prints its metric, measure and map. A thresholded count of `ILOSTAT` and a private median of `HWUSUAL` run on the Labour Force Survey (LFS), and the others use the documentation's toy inputs. The maps, checks, thresholds, scores and error messages are the same on every run. The releases change, because OpenDP's noise cannot be seeded, so they are in one block marked as one run.
+The script [opendp_measurements.py](../../code/part03-framework/opendp_measurements.py) builds the mechanisms on OpenDP 0.16.0 and prints their metrics, measures and maps. It applies thresholded counts of `ILOSTAT` and a private median of `HWUSUAL` to the Labour Force Survey (LFS); other mechanisms use the documentation's toy inputs. Maps, checks, thresholds, scores and errors are deterministic. Releases vary because OpenDP's noise cannot be seeded, so the page labels them as one run.
 
 ```bash
 uv run python code/part03-framework/opendp_measurements.py
@@ -12,7 +12,7 @@ uv run python code/part03-framework/opendp_measurements.py
 
 ## Additive noise {#sec-meas-additive}
 
-The simplest measurement adds a random draw to a number. The constructor `make_laplace` adds Laplace noise and counts privacy in the budget $\varepsilon$ of pure differential privacy (DP), under the output measure `MaxDivergence`. The constructor `make_gaussian` adds Gaussian noise and counts privacy in the budget $\rho$ of zero-concentrated differential privacy (zCDP), under `ZeroConcentratedDivergence`. Both use the same input space.
+The simplest measurements add noise to a number. `make_laplace` adds Laplace noise and measures cost as $\varepsilon$ under pure differential privacy (DP) and `MaxDivergence`. `make_gaussian` adds Gaussian noise and measures cost as $\rho$ under zero-concentrated differential privacy (zCDP) and `ZeroConcentratedDivergence`. Both use the same input space.
 
 ```{.python excerpt="meas-scalar"}
 def scalar_mechanisms(scale: float) -> tuple[dp.Measurement, dp.Measurement]:
@@ -23,7 +23,7 @@ def scalar_mechanisms(scale: float) -> tuple[dp.Measurement, dp.Measurement]:
     return laplace, gaussian
 ```
 
-The Laplace map is the sensitivity divided by the scale, so a unit sensitivity at unit scale costs $\varepsilon = 1$. The Gaussian map is the squared sensitivity over twice the squared scale, so the same inputs give $\rho = 0.5$. The `check` method compares the map with a budget, so a sensitivity of 2 fails the budget that a sensitivity of 1 fits.
+The Laplace map is sensitivity divided by scale, so unit sensitivity and scale cost $\varepsilon=1$. The Gaussian map is squared sensitivity divided by twice the squared scale, giving $\rho=0.5$ for the same values. `check` compares this cost with a budget: sensitivity 2 exceeds the budget that accepts sensitivity 1.
 
 ```text
 laplace float: map(1.0)=1.0 measure=MaxDivergence
@@ -31,7 +31,7 @@ gaussian float: map(1.0)=0.5 measure=ZeroConcentratedDivergence
 laplace float: check(1.0, 1.0)=True check(2.0, 1.0)=False
 ```
 
-The two currencies promise different things. Pure DP with parameter $\varepsilon$ says that one person changes the probability of any release by a factor of at most $e^\varepsilon$. Zero-concentrated DP with parameter $\rho$ bounds the privacy loss on average and in its tails at once, which suits the thin tails of the Gaussian. [Combinators](11-combinators.md) converts $\rho$ into $\varepsilon$ with a slack $\delta$, and [Assessing utility and choosing the noise](../part02-tabular-data/07-utility-and-noise.md) compares the two. [The full edition's chapter on the Laplace and Gaussian mechanisms](../../book-full/part03-dp-foundations/03-laplace-gaussian.md) derives both maps.
+These privacy measures provide different guarantees. Pure DP with $\varepsilon$ limits the probability ratio for any release to $e^\varepsilon$. zCDP with $\rho$ bounds privacy loss on average and in its tails, matching Gaussian noise. [Combinators](11-combinators.md) converts $\rho$ to $\varepsilon$ with slack $\delta$; [Assessing utility and choosing the noise](../part02-tabular-data/07-utility-and-noise.md) compares the guarantees. [The full edition's chapter on the Laplace and Gaussian mechanisms](../../book-full/part03-dp-foundations/03-laplace-gaussian.md) derives both maps.
 
 ### Integers, floats and vectors
 
@@ -42,7 +42,7 @@ laplace int: map(1)=1.0 output type=int
 gaussian int: map(1)=0.5
 ```
 
-A vector input changes the metric. Laplace noise needs a bound on the L1 distance, the sum of the absolute differences, because its map adds the cost of each coordinate. Gaussian noise needs a bound on the L2 distance, the square root of the summed squares, because its cost adds in squares. The constructor refuses a space with the wrong metric.
+Vector inputs require different metrics. Laplace noise uses an L1 bound, the sum of absolute coordinate differences, because its map adds coordinate costs. Gaussian noise uses an L2 bound, the square root of summed squared differences, because its cost adds in squares. OpenDP rejects a mismatched metric.
 
 ```{.python excerpt="meas-vector"}
 def vector_mechanisms(scale: float) -> tuple[dp.Measurement, dp.Measurement]:
@@ -53,7 +53,7 @@ def vector_mechanisms(scale: float) -> tuple[dp.Measurement, dp.Measurement]:
     return laplace, gaussian
 ```
 
-So doubling the L2 sensitivity multiplies $\rho$ by four, while the Laplace map stays linear. A plain float given to a vector mechanism is a type error, and the message says what the mechanism expected.
+Doubling L2 sensitivity quadruples $\rho$, while the Laplace cost doubles. Passing a scalar to a vector mechanism raises a type error that states the expected input.
 
 ```text
 laplace vector: metric=L1Distance(f64) map(1.0)=1.0
@@ -65,9 +65,9 @@ gaussian on an L1 space: No match for concrete type L1Distance<f64>. See https:/
 
 ### Why OpenDP rounds, and the parameter `k`
 
-A computer cannot sample a continuous distribution, and with floating-point noise the gaps between floats can leak the input. So OpenDP turns a float input into an exact rational, adds discrete noise to its numerator, and rounds the result back to a float. This equals true continuous noise followed by rounding, which is post-processing, so the analysis stays exact.
+Computers cannot sample a continuous distribution. Floating-point noise can also leak inputs through gaps between representable values. OpenDP converts a float to an exact rational, adds discrete noise to its numerator, then rounds back to a float. This is equivalent to continuous noise followed by rounding, a post-processing step, so the analysis remains exact.
 
-The grid of that rational is $2^k$, where `k` is a parameter of the constructor. The default `k` is the smallest exponent of a 64-bit float, so the grid is exact and costs nothing. A coarser grid samples faster, but rounding to it can move two neighbouring inputs one grid step further apart. So the map adds that step to the sensitivity: a grid of a half adds a half to every map, even at zero sensitivity.
+The rational grid is $2^k$, where `k` is a constructor parameter. The default is the smallest exponent of a 64-bit float, giving an exact grid with no extra cost. Coarser grids sample faster but may increase the distance between neighbouring inputs by one grid step. The map adds that step to sensitivity: a grid of 0.5 adds 0.5 even at zero input sensitivity.
 
 ```text
 laplace k=-1074: map(0.0)=0.0 map(1.0)=1.0
@@ -77,11 +77,11 @@ laplace k=1: map(0.0)=2.0 map(1.0)=3.0
 laplace k on integers: k is only valid for domains over floats
 ```
 
-Integers need no grid, so the constructor rejects `k` on an integer domain. Change `k` only if a vector release is too slow, and then read the map again. [The full edition's chapter on discrete mechanisms](../../book-full/part03-dp-foundations/08-discrete-mechanisms.md) explains why the discrete distributions are safe.
+Integer domains need no grid, so OpenDP rejects `k` for them. Change `k` only to speed up a vector release, then check the map again. [The full edition's chapter on discrete mechanisms](../../book-full/part03-dp-foundations/08-discrete-mechanisms.md) explains the discrete distributions' guarantees.
 
 ### The geometric mechanism and `make_noise`
 
-The constructor `make_geometric` is the Laplace mechanism on integers with one more option. With `bounds`, the sampler runs in constant time, which closes a timing side channel, and it clamps the release. It fails on floats, because the geometric distribution has no float version.
+`make_geometric` implements the integer Laplace mechanism with an additional option. Supplying `bounds` makes sampling constant-time, closing a timing side channel, and clamps the release. It rejects floats because the geometric distribution is discrete.
 
 ```{.python excerpt="meas-geometric"}
 geometric = int_space >> dp.m.then_geometric(scale=1.0)
@@ -94,7 +94,7 @@ geometric bounds (0, 10): map(1)=1.0
 geometric on floats: No match for concrete type f64. See https://github.com/opendp/opendp/discussions/451.
 ```
 
-The general constructor behind the two is `make_noise`. You name the output measure, and the library picks the distribution for it: Laplace for the max divergence and Gaussian for the zero-concentrated divergence. Use it in code that lets the caller choose the currency.
+`make_noise` generalizes both constructors. Specify the output measure, and OpenDP selects Laplace noise for max divergence or Gaussian noise for zero-concentrated divergence. Use it when callers choose the privacy measure.
 
 ```{.python excerpt="meas-noise"}
 noise_pure = space >> dp.m.then_noise(dp.max_divergence(), scale=1.0)  # the Laplace mechanism

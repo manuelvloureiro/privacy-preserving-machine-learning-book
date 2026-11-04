@@ -1,22 +1,22 @@
 # What differential privacy protects
 
-Machine learning on sensitive data often gives results that feel invasive, but not each of them is a privacy violation. This chapter gives a test that separates the inferences that differential privacy (DP) must prevent from those it allows. Two facts support the test. A private learner can still find a rule that predicts a person's sensitive label, but it cannot memorize a secret that is only in one person's records.
+Machine learning on sensitive data can produce invasive results, but not every such result violates privacy. This chapter distinguishes inferences that differential privacy (DP) must prevent from those it permits. A private learner can predict a sensitive label from population patterns, but should not memorize a secret found only in one person's records.
 
 ## What the definition promises {#sec-viol-checklist}
 
-Recall the definition from [the randomized response chapter](../part02-dp-basics/01-randomized-response.md). Two datasets $D \sim D'$ are neighbours if they differ by the replacement of one record. A mechanism $M$ is $\varepsilon$-DP if, for all such pairs and all sets $S$ of outputs,
+Recall the definition from [the randomized response chapter](../part02-dp-basics/01-randomized-response.md). Neighbours $D\sim D'$ differ in one record. A mechanism $M$ is $\varepsilon$-DP if, for every such pair and output event $S$,
 
 $$
 \Pr[M(D)\in S] \le e^\varepsilon \Pr[M(D')\in S].
 $$
 
-So the output changes little when one record changes, and the definition says nothing more. Two properties from [the Laplace mechanism chapter](../part02-dp-basics/02-laplace-mechanism.md) turn the definition into a statement about attackers. **Post-processing** says that a function of the output of an $\varepsilon$-DP mechanism, computed with coins independent of the data, is again $\varepsilon$-DP. **Group privacy** says that if $D$ and $D'$ differ in some number $k$ of entries, then
+The output distribution changes little when one record changes. Two properties from [the Laplace mechanism chapter](../part02-dp-basics/02-laplace-mechanism.md) translate this guarantee to attackers. **Post-processing** preserves $\varepsilon$-DP when a function uses only the mechanism's output and independent randomness. **Group privacy** extends the bound to datasets differing in $k$ entries:
 
 $$
 \Pr[M(D)\in S] \le e^{k\varepsilon}\Pr[M(D')\in S].
 $$
 
-Write $D^{(i \leftarrow z)}$ for the dataset $D$ with entry $i$ replaced by a record $z$. An attacker is any function $\mathcal A$ of the output, possibly randomized, that answers $1$ when it believes it has learned something harmful. The attacker may know every other record and any side information, because all of that is fixed in $\mathcal A$. The first fact compares its chance to answer $1$ on the real dataset and on the dataset with one record replaced.
+Write $D^{(i\leftarrow z)}$ for $D$ with record $i$ replaced by $z$. An attacker is any possibly randomized function $\mathcal A$ of the output that returns $1$ when it detects a specified harm. It may use all other records and any side information; these are fixed inputs to $\mathcal A$. The next proposition bounds the attacker's success when one record is replaced.
 
 ::: {#prp-viol-participation name="What an attacker gains from one record"}
 Let $M$ be $\varepsilon$-DP, and let $\mathcal A$ be a randomized function of the output whose coins are independent of the coins of $M$. Then for every dataset $D$, every index $i$ and every record $z$,
@@ -31,33 +31,33 @@ $$
 2. The datasets $D$ and $D^{(i\leftarrow z)}$ differ in at most one entry, so they are neighbours or equal. The definition, applied to the event $\{1\}$, gives the inequality.
 :::
 
-So a harm that the output causes a person is about as likely when a placeholder replaces their record. The definition does not try to stop that harm. This gives three questions to ask of an alleged violation.
+Thus, replacing a person's record with a placeholder changes the probability of an output-caused harm by at most the DP factor. DP does not prevent harms that remain likely after replacement. To assess an alleged violation, ask:
 
 1. Is the result substantially different if one person's record is changed or left out?
 2. Is the harmful inference the same thing as the accuracy of the learned model?
 3. If the inference still feels wrong, at what point, and by whom, was the information given away?
 
-The second question matters most. If an inference about a person is exactly what an accurate model predicts, the only way to prevent it is to release an inaccurate model, for example one that ignores the data. That is always possible and always useless.
+The second question is central. If an inference is exactly what an accurate model predicts, preventing it requires releasing an inaccurate model, such as one that ignores the data. Such a model is uninformative.
 
 ## Learning a rule is not a violation {#sec-viol-rule}
 
-A learning algorithm takes a training set of pairs $(x_i, y_i)$, where $x_i$ is a **feature vector** and $y_i$ a **label**. It outputs a **classifier**, a function that maps a feature vector to a predicted label. In the private setting, the training set is the sensitive dataset, and the classifier is the output that must be differentially private. The test points that measure its accuracy are not protected.
+A learning algorithm takes training pairs $(x_i,y_i)$, where $x_i$ is a **feature vector** and $y_i$ is a **label**. It outputs a **classifier**, which maps feature vectors to predicted labels. Under DP, the training set is private and the classifier is the protected output; test points used to measure accuracy are not protected.
 
-Take a simple training set of real pairs,
+Consider real-valued training pairs
 
 $$
 (0, 1),\ (2, 3),\ (5, 6),\ (-6, -5),\ (0.5, 1.5),\ (\pi, \pi+1),\ \dots
 $$
 
-in which every label is one more than its feature. Any reasonable learner finds the rule $y = x + 1$. At $x = 4$, which is not in the training set, it predicts $5$. At $x = \pi$, it predicts $\pi + 1$, which is the true label of a training record. That is not a violation, because the learner found a fact about the population. The prediction at $x = \pi$ is the same if the record $(\pi, \pi+1)$ was never collected.
+Every label is one more than its feature. A learner can infer the rule $y=x+1$, predict $5$ at $x=4$, and predict $\pi+1$ at $x=\pi$. The latter prediction matches a training label, but it is not a privacy violation: the rule holds across the population, so the prediction does not depend on whether $(\pi,\pi+1)$ was collected.
 
-A private algorithm makes this exact. Each record gives an offset $y_i - x_i$, and a rule $y = x + b$ is a choice of offset. The stability-based histogram of [the chapter on beyond global sensitivity](../part03-query-release/03-beyond-global-sensitivity.md) releases the offsets that many records share, although offsets are real numbers with infinitely many possible bins. Its guarantee is approximate DP, $(\varepsilon,\delta)$-DP, from [the approximate DP chapter](../part02-dp-basics/03-approximate-dp.md), which adds a slack $\delta$ to the bound of the definition:
+A private algorithm makes this distinction explicit. Each record determines an offset $y_i-x_i$, and a rule $y=x+b$ specifies an offset. The stability-based histogram from [the chapter on beyond global sensitivity](../part03-query-release/03-beyond-global-sensitivity.md) can release frequently occurring offsets even though the domain is continuous. Its guarantee is approximate DP, defined in [the approximate DP chapter](../part02-dp-basics/03-approximate-dp.md) by adding slack $\delta$:
 
 $$
 \Pr[M(D)\in S] \le e^\varepsilon\Pr[M(D')\in S] + \delta \quad\text{for all } D \sim D' \text{ and all } S.
 $$
 
-The algorithm adds Laplace noise to the count of each offset and releases the offsets whose noisy count is above a threshold.
+The algorithm adds Laplace noise to each observed offset's count and releases offsets whose noisy counts exceed a threshold.
 
 ::: {#def-viol-histogram name="Stable histogram of offsets"}
 Let $\varepsilon > 0$ and $\delta \in (0,1)$, and set the threshold
@@ -73,7 +73,7 @@ M(D) = \{\, b : c_b > 0 \text{ and } c_b + Z_b > \tau \,\}.
 $$
 :::
 
-This is the stability-based histogram on the offsets $y_i - x_i$, with the noisy counts dropped from its output. Bins with count zero are never released, and the threshold $\tau$ stops the release of a bin that one record holds, except with small probability. So the guarantee of the histogram carries over.
+This applies the stability-based histogram to offsets $y_i-x_i$, then removes the noisy counts from the output. Zero-count bins are not considered, and threshold $\tau$ suppresses a bin supported by one record except with small probability. The resulting mechanism retains the histogram's privacy guarantee.
 
 ::: {#thm-viol-histogram}
 The stable histogram of offsets is $(\varepsilon,\delta)$-DP.
@@ -85,7 +85,7 @@ The stable histogram of offsets is $(\varepsilon,\delta)$-DP.
 3. The output $M(D)$ is the set of elements on the histogram's list, a function of that output alone. So it is $(\varepsilon,\delta)$-DP by post-processing, which holds for approximate DP as well.
 :::
 
-The privacy cost does not depend on how many records follow the rule. Accuracy only needs enough of them to clear the threshold.
+The privacy cost does not depend on how many records follow the rule. Accuracy requires enough records for the offset count to exceed the threshold.
 
 ::: {#prp-viol-rule}
 Suppose every record satisfies $y_i = x_i + 1$, let $\tau$ be the threshold of @def-viol-histogram, and let $\beta \in (0, 1/2)$ be a failure probability. If
@@ -110,19 +110,19 @@ $$
 Take $\varepsilon = 1$, $\delta = 10^{-6}$ and $\beta = 0.01$. With these values the threshold is $\tau = 1 + 2\ln(10^{6}) = 1 + 2 \times 13.82 = 28.63$. The bound on $n$ adds $2\ln 50 = 7.82$ to it, which gives $36.45$. So $37$ records that follow the rule are enough for the private algorithm to output it with probability at least $0.99$.
 :::
 
-So @prp-viol-participation protects the record $(\pi, \pi+1)$, but the rule predicts the label of that record exactly. The prediction follows from the rule, and the rule is a fact about nature. If this still feels like a leak, the third question finds the point of the leak. It is the moment when someone revealed that the person's feature value is $\pi$, because after that anyone who knows the rule can calculate the label.
+Thus, @prp-viol-participation protects record $(\pi,\pi+1)$ even though the rule predicts its label exactly. The prediction follows from a population-level rule. The relevant disclosure occurred when the feature value $\pi$ became known; anyone who knows the rule can then calculate the label.
 
 ## Inferences from what people reveal {#sec-viol-inference}
 
-The same pattern explains examples that people often present as privacy failures. Take a smoker who must decide whether to join a study of whether smoking causes cancer, and fears higher insurance premiums if the study publishes the link. This is the rule $y = x + 1$ in another form. The feature is "smokes", the label is "likely to develop cancer", and the study reaches the same conclusion without this person. The only way to prevent the harm is not to run the study. The person gave up privacy when their smoking became known.
+The same distinction applies to a study of smoking and cancer. A smoker may fear higher insurance premiums if the study publishes an association. Here, "smokes" is the feature and "likely to develop cancer" is the label. The study would reach the same conclusion without this person. Preventing the resulting inference would require suppressing the population-level finding; the person's smoking status was disclosed separately.
 
 ## What a violation looks like {#sec-viol-violations}
 
-A violation is an inference that depends on the presence of the person's own sensitive record in the dataset.
+A privacy violation is an inference that depends on the person's sensitive record being in the dataset.
 
-**The Netflix Prize.** Netflix released movie ratings with dates under pseudonymous user identifiers. Narayanan and Shmatikov linked them to public reviews on the Internet Movie Database, and so found films that the matched users had rated but never reviewed in public. Without a user's record, that reidentification is impossible, so it fails the first question. In contrast, an analyst who sees that a user reviewed the first and third films of a trilogy may guess that they watched the second. That guess uses only what the user chose to publish, so it is not a violation.
+**The Netflix Prize.** Netflix released dated movie ratings under pseudonymous identifiers. Narayanan and Shmatikov linked them to public reviews on the Internet Movie Database and identified ratings that matched users had not made public. This reidentification depends on the users' records. By contrast, inferring that someone watched the second film in a trilogy after seeing their public reviews of the first and third uses only information they chose to publish.
 
-**Memorized secrets.** Carlini and coauthors trained language models on text with a secret, such as a nine-digit identification number, that one person had typed several times. The model gave the secret an unusually high likelihood, and a search guided by those scores could extract it. This is a violation. A model that learned only the language has no reason to prefer one nine-digit number to another, so the preference comes from that person's records. DP prevents it, with group privacy for the repetitions, as the next proposition shows.
+**Memorized secrets.** Carlini and coauthors trained language models on text containing secrets, such as a nine-digit identification number entered several times by one person. The model assigned the secret unusually high likelihood, enabling score-guided extraction. This is a violation because language patterns alone do not favour one nine-digit number; the preference comes from the person's records. DP and group privacy bound this risk, as the next proposition shows.
 
 ::: {#prp-viol-secret name="Secrets are not memorized"}
 Let $\mathcal S$ be a finite set of $N$ possible secrets. For each $s \in \mathcal S$, let $D(s)$ be a training set in which $k$ entries depend on $s$ and the other entries do not. Let $M$ be $\varepsilon$-DP, and let $G$ be any guessing rule, with coins independent of $M$, that maps the trained model to an element of $\mathcal S$. If the secret $s$ is drawn uniformly from $\mathcal S$, then
@@ -142,7 +142,7 @@ $$
 $$
 :::
 
-For a nine-digit number, $N = 10^9$. With $\varepsilon = 1$ and a secret typed $k = 4$ times, the chance of the attacker is at most $e^4/10^9 = 5.5\times10^{-8}$, against $10^{-9}$ for a blind guess. The bound grows exponentially in $k$. So a person who contributes many records needs a guarantee per person, not per record.
+For a nine-digit number, $N=10^9$. If $\varepsilon=1$ and the secret appears $k=4$ times, the attacker's success probability is at most $e^4/10^9=5.5\times10^{-8}$, compared with $10^{-9}$ for a blind guess. The bound grows exponentially with $k$, so repeated contributions require a user-level rather than record-level guarantee.
 
 ## Summary {#sec-viol-summary}
 

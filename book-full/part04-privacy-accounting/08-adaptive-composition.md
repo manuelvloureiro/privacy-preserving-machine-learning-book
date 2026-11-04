@@ -103,7 +103,7 @@ If $N_t \ge 0$ for every $t$, the horizon can be dropped: $\mathbb E\big[N_T\mat
 :::
 
 ::: {.proof}
-The idea is to write the stopped process as a running total of the increments it collects, and to show that each has non-positive mean. Write $T\wedge t = \min(T, t)$.
+Write the stopped process as the sum of its increments up to $T\wedge t = \min(T,t)$. Each included increment has non-positive conditional mean, which gives the required expectation bound.
 
 1. *Write the stopped process as a sum.* The stopped process gains $N_t - N_{t-1}$ only if the run takes step $t$, which the indicator $\mathbf 1[T \ge t]$ records:
 $$N_{T\wedge t} = N_{T\wedge(t-1)} + \mathbf 1[T \ge t](N_t - N_{t-1}).$$

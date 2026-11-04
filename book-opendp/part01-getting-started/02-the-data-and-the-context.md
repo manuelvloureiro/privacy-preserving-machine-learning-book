@@ -12,7 +12,7 @@ uv run python code/part01-getting-started/opendp_data_context.py
 
 ## The Labour Force Survey sample {#sec-ctx-data}
 
-Every quarter, Eurostat and the national statistical offices survey the working hours of people across the European Union in the Labour Force Survey (LFS). Eurostat publishes a public sample of the microdata. For its tutorials, the OpenDP project took a few columns of the French sample over the nine years from 2005 to 2013. Statistical disclosure control already protects these public microdata, with the classical tools of recoded categories, suppressed rare values and a little noise. So no release from this sample can harm anyone, and you can compare every release with the truth. That is why the book uses it.
+Eurostat and national statistical offices survey working hours across the European Union in the Labour Force Survey (LFS). Eurostat publishes a public microdata sample. OpenDP's tutorials use selected columns from the French sample for 2005–2013. Statistical disclosure control has already protected these data through recoded categories, suppression of rare values and added noise. Releases from this sample therefore pose no risk to respondents and can be compared with the true values. The book uses it for these reasons.
 
 | Column | Meaning | Coding |
 | --- | --- | --- |
@@ -27,7 +27,7 @@ Every quarter, Eurostat and the national statistical offices survey the working 
 
 : The columns of the LFS sample, with the coding of the survey's user guide. {#tbl-ctx-columns}
 
-The survey publishes no person identifier, so the OpenDP project generated `PIDENT`. This synthetic column links rows as if they were one person's answers over time. It shows how the library handles a person who owns many rows, and it points to no real person. The script reads the sizes of the sample before any context exists, which is permitted only because the sample is public.
+The survey publishes no person identifier, so OpenDP generated `PIDENT`. This synthetic column links rows as if they belonged to one person over time. It demonstrates how the library handles people with multiple rows and identifies no real person. The script reads sample sizes before creating a context; this is permitted because the sample is public.
 
 ```text
 rows: 3,811,932  people: 1,682,306
@@ -35,11 +35,11 @@ years: 2005 to 2013  quarters: 36
 responses per person: max 15  distinct quarters per person: max 4
 ```
 
-About 3.8 million responses come from about 1.7 million identifiers, so a typical identifier appears two or three times. The busiest appears 15 times, in at most four distinct quarters, so the synthetic identifier sometimes links several rows of one quarter. The rest of the book does not use these numbers. The privacy unit comes from the survey's public design, and the numbers only confirm that the design's bound holds with room to spare.
+The sample has about 3.8 million responses and 1.7 million identifiers. A typical identifier appears two or three times. The busiest appears 15 times and in at most four distinct quarters, so some identifiers link several rows from one quarter. Later chapters do not use these counts. The privacy unit follows the survey's public design; these counts only confirm that the design's bound holds with room to spare.
 
 ## Loading the data lazily {#sec-ctx-load}
 
-Polars can read a file in two ways. An eager read loads the whole table into memory at once. A lazy scan records only where the file is and what its columns are, and it reads the rows when a query runs. OpenDP targets the lazy API, so the script opens the sample with `scan_parquet` and gets a `LazyFrame`. To print its schema, Polars reads only the file's header.
+Polars reads files eagerly or lazily. An eager read loads the table into memory. A lazy scan records the file location and column names, then reads rows when a query runs. OpenDP targets the lazy API, so the script uses `scan_parquet` to create a `LazyFrame`. Polars reads only the file header to print its schema.
 
 ```{.python excerpt="ctx-load"}
 frame = pl.scan_parquet(practitioner_datasets.france_lfs())  # a LazyFrame: the file is read only when a query runs
@@ -50,7 +50,7 @@ print("schema: " + ", ".join(f"{name} {dtype}" for name, dtype in frame.collect_
 schema: PIDENT Int64, YEAR Int64, QUARTER Int64, SEX Int64, AGE Float64, HWUSUAL Float64, HWACTUAL Float64, ILOSTAT Int64
 ```
 
-The documentation reads the same sample as a CSV file, through `dp.examples.get_france_lfs_path()` and `scan_csv`. The repository caches it as Parquet, for a reason that a warning in the documentation gives. A CSV file has no types, so Polars infers them from the values, and the type of a column then depends on the data. A column of whole numbers becomes an integer column, but with one decimal value in it, it becomes a float column.
+The documentation reads the same sample from CSV with `dp.examples.get_france_lfs_path()` and `scan_csv`. The repository caches it as Parquet because CSV files do not store types. Polars infers types from values, so a column's type depends on its data: whole numbers produce an integer column, while one decimal value makes the column floating point.
 
 ```python
 import io
@@ -65,13 +65,13 @@ print(decimals.collect_schema())  # Schema({'hours': Float64})
 print(strings.collect_schema())  # Schema({'hours': String})
 ```
 
-This matters for privacy because the guarantee covers only the queries that go through the context. Loading the data is outside it, and the documentation leaves that step to a trusted curator. Suppose that one person's unusual value changes an inferred type or makes the parse fail, and that someone outside the trusted environment sees the difference. Then the data have leaked through a channel that the guarantee never counted. So use one of two safe habits. Read a format that carries its own schema, such as Parquet. Or load every CSV column as a string with `infer_schema=False`, as the last line of the snippet does, and cast it yourself.
+The privacy guarantee covers only queries submitted through the context. Data loading is outside it; the documentation assigns that step to a trusted curator. If one person's unusual value changes an inferred type or causes parsing to fail, an observer outside that trusted environment could learn about the person through a channel the guarantee does not cover. Use a format with a stored schema, such as Parquet, or load CSV columns as strings with `infer_schema=False` and cast them yourself.
 
-Give the context the `LazyFrame` itself, not a collected table. Then OpenDP can read the plan of every query before it touches a row, and the 3.8 million rows stay out of memory until a release needs them.
+Pass the `LazyFrame` to the context rather than a collected table. OpenDP can then inspect each query plan before reading rows, which remain out of memory until a release needs them.
 
 ## A context on the frame {#sec-ctx-context}
 
-The context of the first chapter took a list, and this one takes the frame. Its arguments are the same, but each has a new value, and each needs a sentence.
+The first chapter's context took a list; this one takes a frame. The arguments are the same, but their values differ.
 
 ```{.python excerpt="ctx-context"}
 def make_context(frame: pl.LazyFrame, margins: Sequence[dp.polars.Margin] | None = None) -> dp.Context:
@@ -92,13 +92,13 @@ budget split evenly over 5: [0.2, 0.2, 0.2, 0.2, 0.2]
 budget split by weights [2, 1, 1, 1]: [0.4, 0.2, 0.2, 0.2]
 ```
 
-The privacy unit is `dp.unit_of(contributions=36)`, and the 36 comes from the survey's design. The unit is what the guarantee protects, so it must cover everything that one person can contribute. The survey runs every quarter for nine years, and a person answers at most once a quarter, so a person owns at most 36 rows. So two datasets are **neighbours** when one is the other with up to 36 rows of one person more or less. OpenDP writes this as a symmetric distance of 36. [Identifier truncation and bounds](../part02-tabular-data/05-identifier-truncation.md) replaces this fixed bound by `dp.unit_of(contributions=1, identifier="PIDENT")`, so that the library enforces the bound and does not trust it.
+Set the privacy unit to `dp.unit_of(contributions=36)`, using the survey's design. A person can answer once per quarter for nine years, so they contribute at most 36 rows. The unit must cover all rows one person can contribute. Neighbouring datasets therefore differ by up to 36 rows from one person, represented in OpenDP as symmetric distance 36. [Identifier truncation and bounds](../part02-tabular-data/05-identifier-truncation.md) replaces this fixed bound with `dp.unit_of(contributions=1, identifier="PIDENT")`, which enforces the bound rather than assuming it.
 
-The unit has a price. One person more or less changes a count by up to 36. So every count here is 36 times as sensitive as with a unit of one row, and every noise scale grows by the same factor. This price is necessary. A unit of one row would protect each quarter's answer separately, and for a person with 15 rows the guarantee would weaken to 15 times the budget. That is the group-privacy property, which [the full edition's chapter on properties](../../book-full/part03-dp-foundations/02-properties.md) proves.
+This unit increases the privacy cost. One person's addition or removal can change a count by up to 36, so counts are 36 times as sensitive as with a one-row unit, and their noise scales increase by the same factor. This protects all of a person's responses. A one-row unit would protect each row separately; for someone with 15 rows, group privacy would weaken the guarantee by a factor of 15, as proved in [the full edition's chapter on properties](../../book-full/part03-dp-foundations/02-properties.md).
 
-The budget is `dp.loss_of(epsilon=1.0)`, pure differential privacy with a privacy parameter $\varepsilon$ of 1. It promises that a change to all 36 rows of one person changes the probability of an output by a factor of at most $e^\varepsilon$. [The full edition's chapter on the definition](../../book-full/part03-dp-foundations/01-definition.md) sets this out. The documentation calls this argument the privacy loss. This book calls it the budget, because the context spends it.
+Set the budget to `dp.loss_of(epsilon=1.0)`, which specifies pure differential privacy with $\varepsilon=1$. Changing all 36 rows from one person changes the probability of any output by at most a factor of $e^\varepsilon$. [The full edition's chapter on the definition](../../book-full/part03-dp-foundations/01-definition.md) states this guarantee. The documentation calls the argument privacy loss; this book calls it the budget because the context spends it.
 
-The context must split the budget, because the losses of several releases add up. With `split_evenly_over=5`, each query gets $\varepsilon/5$, and the five shares of 0.2 sum to the whole budget, by the basic composition rule of the same chapter on properties. Without a limit on the number of queries, the total loss would have no bound. The documentation advises an even split when the queries are alike, and weights when some matter more. The script builds a second context only to print a weighted split.
+The context splits the budget because privacy losses add across releases. With `split_evenly_over=5`, each query gets $\varepsilon/5$, and the five shares of 0.2 sum to the full budget by the basic composition rule in the same chapter on properties. Without a query limit, the total loss would be unbounded. The documentation recommends equal shares for similar queries and weights when some queries matter more. The script builds a second context to show a weighted split.
 
 ```{.python excerpt="ctx-weights"}
 weighted = dp.Context.compositor(
@@ -109,18 +109,18 @@ weighted = dp.Context.compositor(
 )
 ```
 
-The first query gets 0.4 and the other three get 0.2 each, so the weights are shares of the budget, not values of $\varepsilon$. The documentation recommends one context for all your queries.
+The first query gets 0.4; each of the other three gets 0.2. These weights are budget shares, not values of $\varepsilon$. The documentation recommends using one context for all queries.
 
 ```{.python excerpt="ctx-delete"}
 context = make_context(frame)
 del frame  # from here on, every computation on the data goes through a context
 ```
 
-The last line is a habit that the documentation insists on: when the context exists, delete your own reference to the frame. Anything that you compute from the frame itself is outside the guarantee. The sizes printed above are such a computation, permitted here only because the sample is public.
+The documentation recommends deleting other references to the frame once the context exists. Computations made directly from the frame are outside the guarantee. The sizes printed above are such computations, permitted because the sample is public.
 
 ## A query is not a frame {#sec-ctx-query}
 
-With a `LazyFrame` behind it, `context.query()` returns a `LazyFrameQuery`. The documentation's page on Polars versus OpenDP gives four ways in which it differs from the frame, and a tiny frame shows the first two.
+With a `LazyFrame` as its data, `context.query()` returns a `LazyFrameQuery`. The documentation's comparison of Polars and OpenDP describes four differences; a small frame demonstrates the first two.
 
 ```python
 import opendp.prelude as dp
@@ -139,7 +139,7 @@ scale = query.summarize()["scale"].item()
 print(f"scale {scale:.1f}")  # scale 5.0
 ```
 
-The first difference is how you specify the data. You never touch the frame again, and you write every query against `context.query()`, which the documentation calls a mock for the real data. The script shows how good a mock it is.
+First, specify the data through `context.query()` rather than accessing the frame directly. The documentation calls this object a mock of the data.
 
 ```text
 query type: LazyFrameQuery
@@ -148,21 +148,21 @@ collect before release: You must call `.release()` before executing a query.
 plain Polars mean: MakeMeasurement("Expr is not recognized at this time: col("AGE").mean(). If you would like to see this supported, please file an issue.")
 ```
 
-The mock knows the schema of the frame, so the library checks a query against the real columns and types. The documentation describes the mock as an empty `LazyFrame` with extra methods. In the installed version it is a class of its own, not a subclass of `LazyFrame`, but you use it in the same way.
+The mock knows the frame's schema, so OpenDP checks queries against the real columns and types. The documentation describes it as an empty `LazyFrame` with extra methods. In version 0.16.0, it is a separate class rather than a `LazyFrame` subclass, but its query interface is similar.
 
-The second difference is how you construct a query, because OpenDP extends the Polars API in two places. The query gets the methods `summarize`, which reports the noise that each aggregate will get, and `release`, which spends the budget. Expressions get the namespace `.dp`, whose methods are the aggregates that add noise, such as `dp.len`, `.dp.sum` and `.dp.median`. In the snippet, the count's sensitivity of 1 over a share of $\varepsilon/5$ gives a scale of 5.
+Second, OpenDP extends the Polars API with query methods and an expression namespace. `summarize` reports the noise for each aggregate; `release` spends the budget. The `.dp` namespace provides noisy aggregates such as `dp.len`, `.dp.sum` and `.dp.median`. In the snippet, count sensitivity 1 and budget share $\varepsilon/5$ give a scale of 5.
 
-The third difference is how you run a query. In plain Polars you call `collect` on a lazy frame. In OpenDP you must call `release` first, as the refusal in the text block shows. The release takes the query's share of the budget and returns a `OnceFrame`, which hands out its rows once. A second `collect` fails, so keep the collected frame, not the released query.
+Third, query execution requires `release` before `collect`. A release spends the query's budget share and returns a `OnceFrame`, which yields its rows once. A second `collect` fails, so retain the collected frame rather than the released query.
 
 ```text
 second collect: FailedFunction("OnceFrame has been exhausted")
 ```
 
-The fourth difference is what a query can contain. OpenDP makes guarantees only about the query plans and expressions that it has a proof for, so it acts as an allow-list. It refuses a plain Polars `mean` of the age column, with the message in the text block above, because that expression adds no noise. The private mean is `.dp.mean`, which the next chapter uses. OpenDP also changes the arguments of some expressions that it accepts, mostly so that a failure cannot raise an error that depends on the data.
+Fourth, OpenDP allows only query plans and expressions covered by its proofs. It rejects the plain Polars `mean` of the age column because it adds no noise. The private alternative is `.dp.mean`, used in the next chapter. OpenDP also changes some accepted expressions' arguments to prevent data-dependent errors.
 
 ## A margin, in preview {#sec-ctx-margin}
 
-A count needs no public information beyond the unit, but the sum of working hours in the next chapter needs one more fact. The script asks for that sum on the context above and prints the refusal. Then it builds a context that carries the missing fact.
+A count needs only the privacy unit. The working-hours sum in the next chapter also needs a public bound on frame length. The script first requests the sum without this bound, then builds a context that includes it.
 
 ```{.python excerpt="ctx-margin"}
 margin = dp.polars.Margin(
@@ -179,9 +179,9 @@ sum without a margin: MakeTransformation("must specify 'max_length' in a margin 
 sum with the margin: scale=14,405.2  (36 x 80 over epsilon / 5 = 14,400)
 ```
 
-A **margin** is a set of facts about the frame, grouped by some columns, that you declare public. With `by=[]` the group is the whole frame, and `max_length` is a bound on its number of rows. A sum needs that bound because OpenDP's guarantee also covers overflow and floating-point rounding. A sum of millions of floats loses a little precision, and the proof that this loss leaks nothing needs to know how many numbers were added. Without the bound, the library refuses the sum, as the first line of the block shows. With it, a sum of clipped usual hours gets a scale a little above 14,400, the plain sensitivity over the share. The small extra pays for the rounding.
+A **margin** declares public facts about a frame, grouped by selected columns. With `by=[]`, the group is the whole frame, and `max_length` bounds its row count. The sum needs this bound because OpenDP's guarantee accounts for overflow and floating-point rounding. Summing millions of floats loses some precision; proving that this loss does not leak data requires a bound on the number of values. Without a margin, OpenDP rejects the sum. With it, the clipped usual-hours sum has a scale slightly above 14,400, its sensitivity divided by the budget share. The small increase accounts for rounding.
 
-The bound must be public, and the documentation shows how to find one. Eurostat publishes that the French survey reaches about 50,000 households a quarter, and public statistics put the average household below three people. So 150,000 responses a quarter is a generous bound, and over the 36 quarters it gives 5.4 million rows. This bound does not come from the row count printed earlier, and it must not, because a bound read from the data leaks the data. You give away a fact that an adversary could look up anyway, and in exchange the library can prove that arithmetic cannot weaken the guarantee. A margin can also bound the number of groups and declare the keys or the lengths of groups invariant, which [Grouping](../part02-tabular-data/04-grouping.md) takes up.
+The bound must be public. Eurostat reports about 50,000 French households per quarter, and public statistics put the average household below three people. Thus 150,000 responses per quarter is a generous bound, or 5.4 million rows over 36 quarters. Do not derive the bound from the observed row count; that would leak private data. A public bound lets OpenDP prove that arithmetic does not weaken the guarantee. Margins can also bound group counts and declare group keys or lengths invariant, as discussed in [Grouping](../part02-tabular-data/04-grouping.md).
 
 ## Summary
 

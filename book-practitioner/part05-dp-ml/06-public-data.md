@@ -2,31 +2,31 @@
 
 ## Why this matters
 
-The differential privacy (DP) version of stochastic gradient descent (SGD), [DP-SGD](02-dp-sgd.md), loses much accuracy when it trains a model from random weights, most at a privacy loss $\varepsilon$ of 1 or below. The most accurate private models avoid this. They start from a model **pretrained** without privacy on a large public dataset, and only **fine-tune** it privately on the sensitive data (Tramèr & Boneh 2021).
+Differential privacy (DP) applied to stochastic gradient descent (SGD), or DP-SGD ([DP-SGD](02-dp-sgd.md)), can cause substantial accuracy loss when training from random initialization, especially at privacy loss $\varepsilon \le 1$. More accurate private models often start from weights **pretrained** without privacy on a large public dataset, then **fine-tune** them on sensitive data (Tramèr & Boneh 2021).
 
-Fine-tuning only a small part of the model often helps further. DP-SGD adds noise to every weight it trains, while the useful signal does not grow with their number, so fewer weights mean less noise for the same signal. The workflow [Fine-tune a language model privately with LoRA](14-private-llm-finetuning.md) does the job end to end.
+Fine-tuning fewer weights can further improve accuracy. DP-SGD adds noise to every trained weight, while the useful signal does not grow with the number of weights. Training fewer weights therefore reduces noise relative to signal. [Fine-tune a language model privately with LoRA](14-private-llm-finetuning.md) demonstrates this workflow.
 
 ## How many weights to train {#sec-pub-dimension}
 
-Which weights you train leaves $\varepsilon$ unchanged, because DP-SGD's guarantee needs only that one record moves the clipped sum by at most the clipping norm $C$. The choice changes only how much noise lands on the model. Anything else computed only from public data is also free, if no choice in it looked at the private data. Examples are the starting weights, a tokenizer and normalization statistics.
+The trainable weights do not change $\varepsilon$: DP-SGD requires only that one record changes the clipped sum by at most clipping norm $C$. The choice affects the noise added to the model. Other computations based only on public data are also free, provided they do not depend on private data. Examples include initial weights, tokenizers and normalization statistics.
 
-The noise grows with the number $d$ of trainable weights. Write $\sigma$ for the noise multiplier and $B$ for the expected batch size, expected because DP-SGD's Poisson sampling draws batches of random size. Then the noise on the averaged gradient has length about
+Noise magnitude grows with the number $d$ of trainable weights. Let $\sigma$ be the noise multiplier and $B$ the expected batch size; Poisson sampling gives variable batch sizes. The averaged-gradient noise has length about
 $$\text{noise length} \approx \frac{\sigma C\sqrt d}{B}.$$ {#eq-pub-noise-length}
-The signal, the average clipped gradient, is at most $C$ long whatever $d$ is. When fewer weights train it loses the frozen weights' part of the gradient, though clipping then cuts the rest less.
+The average clipped-gradient signal has length at most $C$, independent of $d$. Training fewer weights omits gradient components for frozen weights, although clipping may then reduce the remaining components less.
 
-Take the running example of [DP-SGD](02-dp-sgd.md), the Adult network with 6,018 weights. Pretrain it without privacy on the 1,500 public stand-in rows of [Train a model with DP-SGD](13-train-dp-sgd.md), then fine-tune it on the 30,000 private rows. At $\varepsilon = 1$ and the pretrained weights, the noise is 1.6 times longer than the signal when all weights train. It is only 0.4 times as long when the 130 weights of the last layer train. That gap is narrower than the formula's factor of 6.8, because the signal is shorter when only the last layer trains (0.0726 against 0.1137).
+Consider the Adult network in [DP-SGD](02-dp-sgd.md), with 6,018 weights. Pretrain it without privacy on the 1,500 public stand-in rows used by [Train a model with DP-SGD](13-train-dp-sgd.md), then fine-tune on 30,000 private rows. At $\varepsilon=1$, noise is 1.6 times the signal when all weights train, but 0.4 times the signal when only the 130 last-layer weights train. This difference is smaller than the formula's factor of 6.8 because the last-layer signal is also shorter (0.0726 rather than 0.1137).
 
-But counting weights overstates the cost of training them all. Noise does harm only along the directions in which the loss is curved, because a step along a flat direction barely changes the loss. Near a pretrained model, few directions are curved (Li, Liu et al. 2022). So on the running example, full fine-tuning trains 46 times as many weights as the last layer, but its noise should raise the loss only 16 times as much. A larger learning rate lets the noise into more of the nearly flat directions, so private fine-tuning wants smaller steps than training from scratch.
+Parameter count overstates the cost of full fine-tuning. Noise affects loss mainly along directions with curvature; steps along flat directions have little effect. Near a pretrained model, few directions are curved (Li, Liu et al. 2022). In the running example, full fine-tuning uses 46 times as many weights as last-layer training, but its noise should increase loss only 16 times as much. Larger learning rates expose more nearly flat directions to noise, so private fine-tuning often needs smaller steps than training from scratch.
 
 Training fewer weights has its own cost, a **bias**, because no private data can move the model along a frozen direction that the task needs.
 
 ## Linear probing first {#sec-pub-features}
 
-The simplest option freezes everything but the last layer and trains a linear classifier on the frozen features, which is **linear probing**. Because the features are fixed, the probe's loss is convex. So linear probing turns private deep learning back into [Private empirical risk minimization](01-dp-erm.md), which makes it the safe first baseline.
+The simplest option freezes all but the last layer and trains a linear classifier on the fixed features, a method called **linear probing**. Its loss is convex, so it reduces private deep learning to [Private empirical risk minimization](01-dp-erm.md) and provides a useful baseline.
 
-A private probe's error has two parts. One is the error that privacy adds to convex empirical risk minimization (ERM), which grows with the number $d$ of features. The other is the **feature gap**, how far the best linear model on the features falls short of the best model of any kind, which no number of records or size of $\varepsilon$ closes. For example, the running example's probe without privacy, its ceiling, has a test accuracy of 0.8431, while a non-private network trained from scratch reaches 0.8498. At every budget of @sec-pub-run the private probe stays within 0.002 of that ceiling, on either side, which is the spread between runs.
+A private probe has two error sources. Privacy error for convex empirical risk minimization (ERM) grows with feature count $d$. The **feature gap** is the difference between the best linear model on the features and the best model of any type; more data or a larger $\varepsilon$ cannot remove it. In this example, the non-private probe reaches test accuracy 0.8431, while a non-private network trained from scratch reaches 0.8498. Across budgets in @sec-pub-run, private-probe accuracy stays within 0.002 of its ceiling, comparable to run-to-run variation.
 
-So measure the probe's ceiling first, by fitting it without privacy on labelled public data that resemble the task. If it already meets your target, stop there. To train the probe privately, feed the frozen features to diffprivlib's `LogisticRegression` ([Private empirical risk minimization](01-dp-erm.md)), or run DP-SGD on the one layer.
+Measure the probe's ceiling by fitting it without privacy on labelled public data similar to the task. If it meets the target, use the probe. For private training, pass frozen features to diffprivlib's `LogisticRegression` ([Private empirical risk minimization](01-dp-erm.md)) or run DP-SGD on the final layer.
 
 ## Low-rank adapters and full fine-tuning {#sec-pub-lora}
 

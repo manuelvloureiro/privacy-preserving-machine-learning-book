@@ -153,7 +153,7 @@ Here $\mathrm{kl}(a\|p) = a\ln\frac ap + (1 - a)\ln\frac{1-a}{\bar p}$ is the Ku
 
 ![Top: the $\mathrm{Bin}(10, \frac12)$ probabilities and the same list moved one place right. Bottom: their difference at each $k$. The positive differences (green) all lie after the peak and add up to the height of the mode.](figures/apx_prob_shift_tv.svg){#fig-apx-prob-shift-tv}
 
-@fig-apx-prob-stirling shows that Stirling's error $r_n$ is close to its bound $1/(12n)$ everywhere. At $n = 10$ it is $8.331 \times 10^{-3}$ against $8.333 \times 10^{-3}$, so $1/(12n)$ is nearly the exact error, not just a bound. The rough bounds of step 3 are far weaker.
+At $n = 10$, Stirling's error $r_n$ is $8.331 \times 10^{-3}$ and its bound $1/(12n)$ is $8.333 \times 10^{-3}$ (@fig-apx-prob-stirling). This bound is nearly exact; the estimates in step 3 are much looser.
 
 ![The error of Stirling's formula, $r_n = \ln n! - \ln\big(\sqrt{2\pi n}(n/e)^n\big)$, against $n$ on log axes, with the bound $1/(12n)$ and the gap between the rough bounds of step 3.](figures/apx_prob_stirling.svg){#fig-apx-prob-stirling}
 

@@ -117,7 +117,7 @@ A simulation of the threshold test agrees with the table (@tbl-gdp-code). Read a
 
 Regulators, papers and libraries report $(\varepsilon, \delta)$. So you need to turn a curve into $(\varepsilon, \delta)$ pairs without loss, and you need the profile of $\mu$-GDP in closed form.
 
-The idea is geometric. An $(\varepsilon, \delta)$ guarantee is the line $\mathrm{FNR} = 1 - \delta - e^\varepsilon \mathrm{FPR}$ and its mirror image, and a curve satisfies it when it lies above the line. For a slope $-e^\varepsilon$, the smallest $\delta$ that works is the one where the line just touches the curve. The line of slope $u$ through the point $(\mathrm{FPR}, f(\mathrm{FPR}))$ meets the $\mathrm{FNR}$-axis at $f(\mathrm{FPR}) - u\,\mathrm{FPR}$, and the touching line has the lowest of these intercepts. Minus that intercept is the **convex conjugate**
+Represent an $(\varepsilon,\delta)$ guarantee by the line $\mathrm{FNR} = 1 - \delta - e^\varepsilon \mathrm{FPR}$ and its mirror image. A trade-off curve satisfies the guarantee when it lies above both lines. For slope $-e^\varepsilon$, the smallest valid $\delta$ is attained when the line touches the curve. A line of slope $u$ through $(\mathrm{FPR}, f(\mathrm{FPR}))$ meets the $\mathrm{FNR}$-axis at $f(\mathrm{FPR}) - u\,\mathrm{FPR}$; the touching line has the lowest such intercept. The negative of that intercept is the **convex conjugate**
 $$f^*(u) = \sup_{\mathrm{FPR} \in [0, 1]}\big(u\,\mathrm{FPR} - f(\mathrm{FPR})\big).$$
 
 ::: {#thm-gdp-duality name="Duality between f-DP and (ε, δ)-DP"}
@@ -223,7 +223,7 @@ Composition of points instead of curves loses. Four 1-GDP releases are 2-GDP, $\
 
 ## The central limit theorem for composition {#sec-gdp-clt}
 
-Most mechanisms are not Gaussian, so @eq-gdp-compose does not apply to them. But the loss of a composition is a sum of independent per-step losses, and such sums are nearly normal. As a statement about curves, this lets one $\mu$ summarize a long training run.
+Most mechanisms are not Gaussian, so @eq-gdp-compose does not apply directly. A composition sums independent per-step privacy losses, and the central limit theorem makes this sum approximately normal under the conditions below. Its trade-off curve can then be approximated by a Gaussian trade-off curve indexed by one parameter $\mu$.
 
 A CLT needs the mean, the variance and a third moment of the loss. Dong et al. write them as integrals of the log-slope of the curve, because the slope encodes the privacy loss.
 

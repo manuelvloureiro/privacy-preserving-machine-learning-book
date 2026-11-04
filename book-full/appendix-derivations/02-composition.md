@@ -1,12 +1,12 @@
 # Composing private releases
 
-A private system almost never releases one number. A dashboard publishes a hundred counts, an analyst asks one query after another, and a training run takes thousands of noisy steps. Each release on its own may be private, but an attacker sees all of them together. So this appendix derives the total privacy cost of a number $k$ of releases and the noise each one needs to keep the whole set within a budget. It ends with a comparison of the ways to add up the cost.
+Systems release multiple outputs: dashboards publish many counts, analysts issue repeated queries, and training runs take many noisy steps. An attacker observes the outputs together. This appendix derives the privacy cost of $k$ releases, calibrates their noise to a total budget and compares accounting methods.
 
-Everything here rests on one quantity. A mechanism $M$ is **differentially private** if changing one person's record, which turns a dataset $D$ into a **neighbouring** dataset $D'$, barely changes the distribution of its output. The **privacy loss** of an output $y$ is the logarithm of how much more likely $y$ is under $D$ than under $D'$. For a budget $\varepsilon$, pure $\varepsilon$-differential privacy (DP) says this loss is between $-\varepsilon$ and $\varepsilon$ for every output. Approximate $(\varepsilon, \delta)$-DP asks instead that every set $S$ of outputs, for every pair of neighbours, satisfies
+Changing one person's record gives neighbouring datasets $D$ and $D'$. The **privacy loss** of output $y$ is the logarithm of the ratio of its probabilities under $D$ and $D'$. For a budget $\varepsilon$, pure $\varepsilon$-differential privacy (DP) bounds this loss between $-\varepsilon$ and $\varepsilon$ for every output. Approximate $(\varepsilon, \delta)$-DP instead requires that every output set $S$ and every neighbouring pair satisfy
 $$\Pr_D[S] \le e^\varepsilon\Pr_{D'}[S] + \delta,$$
 where $\Pr_D[S]$ is the chance that the output lands in $S$ when the data are $D$. The small slack $\delta$ lets rare outputs break the factor $e^\varepsilon$. @sec-apx-cal-dp in the appendices states both definitions in full, with examples.
 
-The one idea of this page is that **the privacy loss of several releases is the sum of their separate losses**. A method that adds up the cost of many releases from this sum is an **accountant**. @tbl-apx-ccomp-map lists the derivations and the chapter sections that use them.
+Privacy losses add across sequential releases; an **accountant** uses this sum to bound their total cost. @tbl-apx-ccomp-map lists the derivations and the chapter sections that use them.
 
 | Derivation | Where the chapters state or use it |
 | --- | --- |

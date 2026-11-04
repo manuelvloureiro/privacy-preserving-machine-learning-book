@@ -2,13 +2,13 @@
 
 You train a model and its loss on the training data is low. Will its loss on new data be low too? The difference between the two is the **generalization gap**, and bounding it is the central question of learning theory. The classical answer counts the models an algorithm could output, but this chapter looks at the algorithm instead.
 
-The idea is that a model generalizes when it does not depend much on any single training record. If replacing one record can move the loss by at most $\gamma$ at every test point, a property called uniform stability, then the expected gap is at most $\gamma$. The chapter computes $\gamma$ for regularized empirical risk minimization (ERM) and for stochastic gradient descent (SGD). It ends with the same bias in a holdout set that is reused to choose what to measure.
+Uniform stability bounds how much replacing one training record changes the loss at any test point. If that change is at most $\gamma$, the expected generalization gap is at most $\gamma$. This chapter computes $\gamma$ for regularized empirical risk minimization (ERM) and stochastic gradient descent (SGD). Its final section bounds the bias caused by reusing a holdout set to select measurements.
 
 The running example is logistic regression in ten dimensions. Features $x$ are uniform on the unit sphere in $\mathbb R^{10}$, and the label $y = \pm1$ is $+1$ with probability $\sigma(5x_1)$, where $\sigma(t) = 1/(1 + e^{-t})$ is the logistic function. The model is a weight vector $\theta$, chosen to minimize the average logistic loss $\ln(1 + e^{-y\langle\theta, x\rangle})$ plus a penalty $\frac\lambda2\|\theta\|^2$. With $n = 50$ records and $\lambda = 0.01$, averaged over 100 training sets, the training loss is 0.4603 and the test loss is 0.5781. With $n = 1{,}000$ records the gap shrinks to about 0.006.
 
 ## Risk, empirical risk and the gap {#sec-stability-risk}
 
-Before you bound the gap, you need to say exactly what it is, and why it is not zero. Training loss and future loss agree on average only for a model chosen before looking at the data.
+Define the training and population risks before bounding their difference. For a model chosen independently of the training data, empirical risk is an unbiased estimate of population risk.
 
 ::: {#def-stability-risk name="Risk, empirical risk and the gap"}
 A **training set** $D = (z_1, \dots, z_n)$ is a list of $n$ records drawn independently from a distribution $\mathcal D$, the source of all data, past and future. A **training algorithm** $\mathcal T$ maps $D$ to a model $\mathcal T(D)$, and a **loss** $\ell(\theta; z) \ge 0$ says how badly the model $\theta$ does on the record $z$. The **population risk**, or test loss, of $\theta$ is its average loss on a new record, and its **empirical risk**, or training loss, is its average loss on the training set:
@@ -29,7 +29,7 @@ $$\mathbb E_D\big[\mathcal L(\theta; D)\big] = \mathcal L_{\mathcal D}(\theta).$
 2. Each $z_i$ is a draw from $\mathcal D$ and $\theta$ is fixed, so each term $\mathbb E[\ell(\theta; z_i)]$ is the average loss of $\theta$ on a draw from $\mathcal D$, which is $\mathcal L_{\mathcal D}(\theta)$. The average of $n$ copies of it is itself.
 :::
 
-Step 2 is exactly what fails for the trained model $\mathcal T(D)$. The record $z_i$ helped to choose $\mathcal T(D)$, so from the model's point of view it is no longer an independent draw. The algorithm chose a model that does well on exactly these records, so the training loss is biased downward.
+For the trained model $\mathcal T(D)$, $z_i$ is not independent of the model because it helped select that model. The training loss is therefore biased downward: the algorithm chose a model using these same records.
 
 ::: {#exm-stability-overfit}
 In the running example with $n = 50$ and $\lambda = 0.01$, the average training loss over 100 training sets is 0.4603 and the average test loss, computed by numerical integration (@sec-stability-code), is 0.5781. The expected gap is about 0.119. That is not exactly their difference, because @exm-stability-gap estimates it with less noise. With $n = 1{,}000$ it is about 0.006.

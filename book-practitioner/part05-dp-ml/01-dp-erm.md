@@ -2,25 +2,25 @@
 
 ## What it is {#sec-dperm-what}
 
-Most of machine learning is **empirical risk minimization (ERM)**, which picks the weights $\theta$ with the least average loss over a training set. Write $D$ for that set and $n$ for its number of records. A ridge penalty usually keeps the weights small. Its strength is a number $\lambda$, and training minimizes
+**Empirical risk minimization (ERM)** selects weights $\theta$ that minimize average loss on a training set. Let $D$ be the training set and $n$ its record count. Let $\lambda$ be the strength of the ridge penalty. Training minimizes
 $$\mathcal L(\theta; D) = \frac1n\sum_{i=1}^n\ell(\theta; z_i) + \frac\lambda2\|\theta\|^2,$$
-where $\ell(\theta; z)$ is the loss of the weights on one record $z$. Differential privacy (DP) asks that replacing one record barely change the released weights, so noise must enter the trained weights, the objective or each gradient step.
+where $\ell(\theta; z)$ is the loss of the weights on one record $z$. Differential privacy (DP) requires that replacing one record has limited effect on released weights. Add noise to the final weights, the objective or each gradient step.
 
-**Output perturbation** trains as usual and adds Gaussian noise to the final weights, with a small slack $\delta$. The noise is scaled to the most that the trained weights $\theta^*$ can move between datasets $D$ and $D'$ that differ in one record. For a convex loss, the ridge limits that move to
+**Output perturbation** trains normally, then adds Gaussian noise to the final weights, with slack $\delta$. Calibrate noise to the maximum change in trained weights $\theta^*$ between neighbouring datasets $D$ and $D'$. For a convex loss, ridge regularization bounds that change:
 $$\|\theta^*(D) - \theta^*(D')\| \le \frac{2L}{\lambda n}.$$
-Here the constant $L$ bounds the length of each record's loss gradient. It is 1 for logistic regression with labels $\pm1$ and features of length at most 1.
+Here, $L$ bounds the maximum norm of one record's loss gradient. For logistic regression, labels are $\pm1$ and feature norms are at most 1. These conditions give L of 1.
 
-**Objective perturbation** adds a random linear term to the objective and minimizes the result exactly. Part of the privacy budget $\varepsilon$ pays for the loss's curvature, which is at most a constant $c$, one quarter for the logistic loss. The noise is scaled to what is left,
+**Objective perturbation** adds a random linear term to the objective and minimizes it exactly. Part of privacy budget $\varepsilon$ accounts for loss curvature, bounded by constant $c$ (one quarter for logistic loss). The remaining budget is
 $$\varepsilon' = \varepsilon - 2\ln\Big(1 + \frac{c}{n\lambda}\Big).$$
-The subtracted term grows as $n\lambda$ shrinks, so with little data the ridge must grow to keep $\varepsilon'$ positive.
+As $n\lambda$ decreases, the subtracted term increases. With little data, increase the ridge strength to keep $\varepsilon'$ positive.
 
-**Gradient perturbation** adds noise to every gradient step instead. With random batches and clipped per-record gradients, it becomes noisy stochastic gradient descent (SGD), [DP-SGD](02-dp-sgd.md), the only option for a model that is not convex.
+**Gradient perturbation** adds noise at every gradient step. With random batches and clipped per-record gradients, this is noisy stochastic gradient descent (SGD), or [DP-SGD](02-dp-sgd.md), which also applies to non-convex models.
 
 ## When you meet it {#sec-dperm-when}
 
-You meet these methods for linear models, such as a linear probe on features from a public pretrained network ([Public data and private fine-tuning](06-public-data.md)). Objective perturbation is usually the most accurate, because the objective's full curvature damps its noise, while only the ridge damps output perturbation's. So use output perturbation only when training is a black box.
+Use these methods for linear models, such as a linear probe on features from a public pretrained network ([Public data and private fine-tuning](06-public-data.md)). Objective perturbation often gives higher accuracy because the objective's full curvature reduces its noise; output perturbation relies only on ridge curvature. Use output perturbation when training is a black box.
 
-Whether you have enough data depends on $n$ and $\varepsilon$. On the training objective they matter only through their product, so halving $\varepsilon$ costs as much as halving the data. On new data, with $d$ features, privacy adds less error than sampling does once $n$ is well above $d\ln(1/\delta)/\varepsilon^2$.
+Required data depends on $n$ and $\varepsilon$. In the training objective, they enter through their product, so halving $\varepsilon$ has the same effect as halving the sample size. On new data with $d$ features, privacy adds less error than sampling once $n$ is much larger than $d\ln(1/\delta)/\varepsilon^2$.
 
 ## How to use it {#sec-dperm-use}
 
@@ -51,14 +51,14 @@ def accuracy(eps, seed):  # eps = inf adds no noise
 print(" ".join(f"{np.mean([accuracy(e, s) for s in range(20)]):.3f}" for e in [1, 4, np.inf]))  # 0.783 0.946 0.964
 ```
 
-Averaged over 20 noise draws, test accuracy is 0.783 at $\varepsilon = 1$ and 0.946 at $\varepsilon = 4$, against 0.964 without noise. So with only 250 training records, accuracy comes close only at $\varepsilon = 4$. Nothing was tuned on the private rows, so the guarantee is pure DP for the 250 training rows, against replacing one record. The 69 stand-in rows get none.
+Across 20 noise draws, test accuracy is 0.783 at $\varepsilon = 1$ and 0.946 at $\varepsilon = 4$. Without noise, it is 0.964. With 250 training records, accuracy is close to the non-private result only at $\varepsilon = 4$. No parameter was tuned on the private rows, so the guarantee is pure DP for the 250 training rows under replace-one adjacency. The 69 stand-in rows receive no protection.
 
 ## What goes wrong {#sec-dperm-wrong}
 
-The most common failure is a bound taken from the data. Left unset, `data_norm` is computed from the training rows with a `PrivacyLeakWarning`, and the guarantee is gone. A range table computed from the same rows is no better, because each minimum and maximum is one record's value. So take every bound from public knowledge or public rows, and clip the private rows to it.
+The common failure is deriving a bound from private data. If omitted, `data_norm` is calculated from training rows and raises `PrivacyLeakWarning`; the guarantee is then invalid. A range table computed from those rows also leaks through its minima and maxima. Set bounds from public knowledge or public rows, then clip private rows to them.
 
-The second failure is the solver, because output and objective perturbation assume the exact minimizer. A solver that stops where the gradient still has length $g$ adds $2g/\lambda$ to the sensitivity. That is small beside the exact sensitivity $2L/(\lambda n)$ only when $g$ is well below $L/n$. So set the tolerance there, and check the final gradient rather than the number of steps.
+The solver can also violate assumptions: output and objective perturbation require the exact minimizer. If optimization stops with gradient norm $g$, sensitivity increases by $2g/\lambda$. This increase is negligible relative to exact sensitivity $2L/(\lambda n)$ only when $g$ is much less than $L/n$. Set a corresponding tolerance and inspect the final gradient norm, not just the iteration count.
 
-The third failure is an unpenalized weight, because the sensitivity bound needs the ridge's curvature in every direction. Scikit-learn's loss, which diffprivlib reuses, leaves the intercept out of the ridge, so the snippet adds a constant feature. Fix $\lambda$ by a rule or on public data, since tuning it on private data is a search that must be paid for ([Hyperparameter tuning](03-hyperparameter-tuning.md)). Finally, these guarantees assume replaced records, unlike the add/remove accountants of later chapters, and the two do not convert freely. So state the relation next to every $\varepsilon$.
+The sensitivity bound also requires ridge curvature in every direction. Scikit-learn's loss, reused by diffprivlib, leaves the intercept unpenalized, so the snippet adds a constant feature. Set $\lambda$ by a fixed rule or public data; private-data tuning must be accounted for ([Hyperparameter tuning](03-hyperparameter-tuning.md)). These guarantees use replace-one neighbours, unlike later add/remove accounting, and the bounds are not directly interchangeable. State the relation with every $\varepsilon$.
 
 **Derivations.** Every result here is derived step by step in [the full edition's chapter](../../book-full/part05-dp-ml/01-dp-erm.md).

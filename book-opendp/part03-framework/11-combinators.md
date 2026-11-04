@@ -1,8 +1,8 @@
 # Combinators
 
-A real release is a clamp, then a sum, then noise, then a second query that depends on the first. It is reported as one guarantee of differential privacy (DP). The **combinators** join such pieces into bigger ones. Each takes objects of the framework and returns a new one, with a privacy map that gives its cost. So you never add budgets by hand, and the combinator refuses to join pieces whose promises do not fit. At the end of the chapter, you can read the privacy map of any chain and say why a context refuses a query. You can also convert a budget between privacy measures.
+Real releases chain data preparation, aggregation and noise; later queries may depend on earlier answers. The **combinators** compose framework objects and return a combined object with a privacy map. They account for the total differential privacy (DP) cost and reject components whose guarantees do not compose. This chapter explains chain maps, query refusals and conversions between privacy measures.
 
-The script [opendp_combinators.py](../../code/part03-framework/opendp_combinators.py) runs every step on OpenDP 0.16.0. As in the documentation, its toy data are twenty seeded integers from 0 to 10, with a Laplace count and a Laplace sum of the clamped values. One example runs on the Labour Force Survey (LFS) sample. The maps, profiles, scales and error messages are the same on every run, but the releases change, because OpenDP's noise cannot be seeded. So they are in one block marked as one run.
+The script [opendp_combinators.py](../../code/part03-framework/opendp_combinators.py) runs on OpenDP 0.16.0. It follows the documentation with 20 seeded integers from 0 to 10, releasing a Laplace count and a Laplace sum of clamped values. One example uses the Labour Force Survey (LFS) sample. Maps, profiles, scales and errors are deterministic; releases vary because OpenDP's noise cannot be seeded and are labelled as one run.
 
 ```bash
 uv run python code/part03-framework/opendp_combinators.py
@@ -10,7 +10,7 @@ uv run python code/part03-framework/opendp_combinators.py
 
 ## Chaining {#sec-comb-chaining}
 
-The simplest way to combine two pieces is to run one after the other. The constructor `make_chain_tt` joins two transformations, `make_chain_mt` puts a measurement after a transformation, and `make_chain_pm` attaches a post-processing function to a measurement. There is no chainer for two measurements, because a computation after a measurement is post-processing, which needs no accounting. The script first builds the clamped sum and its Laplace release with these long forms.
+Chain objects by applying them in sequence. `make_chain_tt` joins two transformations, `make_chain_mt` appends a measurement to a transformation, and `make_chain_pm` attaches post-processing to a measurement. Two measurements do not need a chainer: computation after a measurement is post-processing and requires no additional accounting. The script first builds a clamped sum and Laplace release with these constructors.
 
 ```{.python excerpt="comb-chain-long"}
 def chained_by_hand() -> tuple[dp.Transformation, dp.Measurement]:
@@ -23,7 +23,7 @@ def chained_by_hand() -> tuple[dp.Transformation, dp.Measurement]:
     return clamped_sum, noisy_sum
 ```
 
-Each call takes the outer piece first and the inner piece second, as in function composition. The chained transformation has a stability map ([Transformations](09-transformations.md)). One added or removed record changes the clamped sum by at most the width of the bounds, so the map at distance 1 is 10. The chained measurement has a privacy map ([Measurements](10-measurements.md)), which is that stability over the noise scale. So Laplace noise of scale 5 on the sum costs a privacy loss of $\varepsilon = 2$.
+Each constructor takes the outer object before the inner one, as in function composition. The chained transformation has a stability map ([Transformations](09-transformations.md)): adding or removing one record changes the clamped sum by at most the bound width, 10. The chained measurement's privacy map ([Measurements](10-measurements.md)) divides that stability by the noise scale. Laplace noise of scale 5 therefore costs $\varepsilon=2$.
 
 ```text
 clamp >> sum: map(1)=10
@@ -31,7 +31,7 @@ clamp >> sum >> laplace: map(1)=2.0 check(1, 2.0)=True
 with >>: map(1)=2.0
 ```
 
-The `>>` operator chooses the right chainer for you, and with a `then_` constructor on its right you never repeat the input space. Here is the same measurement in one line.
+The `>>` operator selects the chainer. A `then_` constructor also infers the input space, so the same measurement fits in one line.
 
 ```python
 import opendp.prelude as dp
@@ -57,9 +57,9 @@ mean_of_sum = shortcut >> divide_by_size
 post-processed: map(1)=2.0
 ```
 
-In version 0.16.0 this needs a second feature flag, `honest-but-curious`, because the library cannot inspect a Python function. The script switches it on just before the chain and off just after. A post-processor must not read global state, such as the clock, or raise an exception that depends on the data. Either opens a channel that the privacy map does not count.
+In version 0.16.0, this requires the `honest-but-curious` feature because OpenDP cannot inspect a Python function. The script enables the feature only around the chain. A post-processor must not read global state, such as the clock, or raise data-dependent exceptions; either behaviour creates a channel absent from the privacy map.
 
-A chain forms only when the pieces fit: the output domain and metric of the inner piece must equal the input domain and metric of the outer one. The script gives a sum of floats to a Laplace mechanism built for integers, and the library refuses.
+A chain requires matching spaces: the inner object's output domain and metric must equal the outer object's input domain and metric. The script passes a float sum to a Laplace mechanism built for integers, so OpenDP rejects it.
 
 ```{.python excerpt="comb-mismatch"}
 try:
@@ -78,7 +78,7 @@ metric mismatch: Intermediate metrics don't match. See https://github.com/opendp
     input_metric:  AbsoluteDistance(f64)
 ```
 
-The second message comes from a count, whose output is an integer distance, before a Laplace mechanism that measures distances in floats. So read the two lines of the error and insert the cast, clamp or impute step that makes them equal.
+The second error comes from connecting an integer count to a Laplace mechanism that expects float distances. Read both spaces in the error and insert a cast, clamp or imputation step to make them match.
 
 Here are the error bars of the sum and the count that the rest of the chapter composes ([Assessing utility and choosing the noise](../part02-tabular-data/07-utility-and-noise.md) explains them).
 

@@ -1,10 +1,10 @@
 # Limitations and troubleshooting
 
-Every chapter so far has shown what OpenDP guarantees, and this one shows where the guarantee stops. The one idea is that the guarantee covers exactly what passes through a measurement with a checked proof. The rest is yours to account for, such as the arithmetic that the proof assumes, the code before the context, and channels other than the output. Most refusals of the library keep you on the right side of that line, so an error message is usually the guarantee doing its job.
+OpenDP's guarantee covers only computations through measurements with valid proofs. It does not cover assumptions about arithmetic, code before the context or channels other than the output. Most library refusals enforce this boundary; error messages often indicate that the guarantee is working as intended.
 
-The chapter follows the documentation's pages on limitations, on features and on troubleshooting. You will read what the library does not promise, see what each feature flag gates, and mark out what lies outside the guarantee. Then you will meet the error messages of the earlier chapters again, each with its cause and its fix, and see what a reviewer checks before trusting a release.
+This chapter follows the documentation's pages on limitations, features and troubleshooting. It describes unsupported guarantees, the role of each feature flag and behaviour outside the guarantee. It also explains recurring error messages and the checks reviewers should make before trusting a release.
 
-The script [opendp_limitations.py](../../code/part04-extending/opendp_limitations.py) reproduces every message on this page with OpenDP 0.16.0 and Polars 1.36.1. It uses tiny lists for the framework calls and the France Labour Force Survey (LFS) sample behind a context for the Polars ones. The messages, the sensitivities, the scales and the error bar are the same on every run. OpenDP's noise cannot be seeded, so the one released count changes, and it appears at the end in a block marked as one run.
+The script [opendp_limitations.py](../../code/part04-extending/opendp_limitations.py) reproduces these messages with OpenDP 0.16.0 and Polars 1.36.1. Framework examples use small lists; Polars examples use the France Labour Force Survey (LFS) sample behind a context. Messages, sensitivities, scales and error bars are deterministic. OpenDP's noise cannot be seeded, so the released count varies and is labelled as one run.
 
 ```bash
 uv run python code/part04-extending/opendp_limitations.py
@@ -12,9 +12,9 @@ uv run python code/part04-extending/opendp_limitations.py
 
 ## What OpenDP does not promise {#sec-limits-promise}
 
-The documentation's page on limitations names five things, and each changes how you deploy the library. The first is arithmetic. A privacy proof is about real numbers, but a computer adds floating-point numbers, which round. Casacuberta, Shoemate, Vadhan and Wagaman (2022) found that several libraries computed the sensitivity of a sum as if the arithmetic were exact. The rounding made the true sensitivity larger, so the noise was too small and the stated $\varepsilon$ was wrong.
+The documentation identifies five deployment limitations. First, privacy proofs use real arithmetic, while computers round floating-point sums. Casacuberta, Shoemate, Vadhan and Wagaman (2022) found that several libraries treated arithmetic as exact when computing sum sensitivity. Rounding increased the true sensitivity, making the added noise too small and the stated $\varepsilon$ incorrect.
 
-OpenDP puts the rounding into the proof. To see this, the script builds a float sum and an integer sum of values between 0 and 80 ([Transformations](../part03-framework/09-transformations.md)). Then it asks each for its sensitivity when 36 rows are added or removed.
+OpenDP accounts for rounding in its proof. The script builds float and integer sums of values from 0 to 80 ([Transformations](../part03-framework/09-transformations.md)) and computes their sensitivity for 36 added or removed rows.
 
 ```{.python excerpt="limits-numerics"}
 def sum_sensitivities(d_in: int) -> tuple[float, int]:
@@ -29,17 +29,17 @@ float sum of 36 rows in [0, 80]: sensitivity 2880.0000007451
 int sum of 36 rows in [0, 80]: sensitivity 2880
 ```
 
-In exact arithmetic both would be 36 times 80. The map of the float sum adds a small term for the rounding error, and the integer sum needs none, because integers add exactly. The term grows with the number of rows, so a float sum on the LFS needs a public bound on that number ([Essential statistics](../part02-tabular-data/03-essential-statistics.md)). The library puts any component that still assumes exact arithmetic behind the `idealized-numerics` flag. So prefer integer statistics where you can, and otherwise read the scale of a float statistic from the library, not from the formula.
+With exact arithmetic, both sensitivities would be $36\times80$. The float sum's map adds a rounding term; integer addition needs none. This term grows with row count, so float sums on the LFS need a public row-count bound ([Essential statistics](../part02-tabular-data/03-essential-statistics.md)). Components that still assume exact arithmetic require the `idealized-numerics` flag. Prefer integer statistics when possible; otherwise use OpenDP's reported scale rather than a formula that ignores rounding.
 
-The second limitation is side channels. OpenDP is not hardened against them, so the time, the memory and the cache lines of a query may depend on the data. No proof covers what an attacker learns from them. So the deployment question is who can interact with the running system. An analyst who submits queries through a queue is in a different position from one with a shell on the machine. Keep the second kind out, or accept that the guarantee is weaker than the $\varepsilon$ you record.
+Second, OpenDP is not hardened against side channels. Query time, memory use and cache-line access may depend on the data, and proofs do not cover information learned through these channels. Deployment must therefore limit who can interact with the system. An analyst submitting queries through a queue poses a different risk from one with shell access. Restrict the latter or account for the weaker guarantee.
 
-The third is vetting. Every component of OpenDP is meant to come with a written proof and a review of that proof, and until the review is finished the component needs the `contrib` flag. The documentation expects the review to find bugs in code and in proofs. So every release in this book rests on proofs that no second reader has checked yet. Record which components a release used, so that you can revisit it if one is corrected.
+Third, components require vetting. Each should have a written proof and review; until review is complete, it requires the `contrib` flag. Review is intended to identify errors in code or proofs. Releases using `contrib` components therefore rely on proofs not yet checked by a second reviewer. Record the components used so you can reassess a release after corrections.
 
-The fourth is stability. Until version 1.0.0, OpenDP's interfaces may change between minor releases. So pin the version, as this book pins 0.16.0. Keep a test that reruns your release code, so that a changed default fails the test before it changes a number. The fifth is software quality, because no deployment can rule out an unknown bug. So keep a record of the run from which you can compute the guarantee again, as [Release and governance](../../book-practitioner/part05-dp-ml/12-release-governance.md) in the practitioner edition describes.
+Fourth, interfaces may change between minor releases before version 1.0.0. Pin the version, as this book does at 0.16.0, and test release code so changed defaults are detected before they alter results. Fifth, unknown software bugs remain possible. Keep a reproducible record of each run so you can recompute its guarantee, as described in the practitioner edition's [Release and governance](../../book-practitioner/part05-dp-ml/12-release-governance.md).
 
 ## The feature flags {#sec-limits-features}
 
-The feature flags are how the library asks for your consent to each of those limitations. There are four, plus a deprecated alias, and all are off until you call `dp.enable_features`. [A first release](../part01-getting-started/01-first-release.md) switched `contrib` on without showing what happens otherwise, so the script switches it off, tries the Laplace mechanism of that chapter, and switches it back on.
+Feature flags record acceptance of these limitations. OpenDP has four flags and one deprecated alias; all are off until `dp.enable_features` enables them. [A first release](../part01-getting-started/01-first-release.md) enabled `contrib` without showing the disabled behaviour, so the script disables it, tests the Laplace mechanism and enables it again.
 
 ```{.python excerpt="limits-contrib"}
 dp.disable_features("contrib")
@@ -51,9 +51,9 @@ dp.enable_features("contrib")
 laplace without contrib: OpenDPException: Attempted to use function that requires "contrib", but not enabled. See https://docs.opendp.org/en/stable/api/user-guide/#feature-listing, then call enable_features("contrib")
 ```
 
-The helper `refusal` runs a call and returns the type and message of the exception. Every flag gives the same message, which names the flag and the call that enables it. So to find which calls of a script depend on a flag, run the script with that flag off.
+The helper `refusal` returns an exception's type and message. Each flag's error names the flag and the call that enables it. To find which calls require a flag, run the script with that flag disabled.
 
-The second flag is `honest-but-curious`. It gates constructors whose guarantee depends on the correctness of your arguments, mainly the plugins of [Plugins](13-plugins.md). For example, `make_user_measurement` takes a privacy map as a Python function, and the library cannot check that the function tells the truth. The name describes the adversary the flag assumes, who is honest when building the measurement and only curious when reading its outputs. The script builds the smallest possible plugin, which releases its input unchanged and claims a privacy loss equal to the distance between inputs.
+The `honest-but-curious` flag gates constructors whose guarantees rely on user-supplied arguments, mainly the plugins in [Plugins](13-plugins.md). For example, `make_user_measurement` accepts a Python privacy map that OpenDP cannot verify. The name describes the assumed adversary: honest when constructing the measurement, curious when inspecting its outputs. The script builds a plugin that returns its input unchanged and claims privacy loss equal to input distance.
 
 ```{.python excerpt="limits-plugin"}
 def plugin_measurement() -> dp.Measurement:
@@ -72,7 +72,7 @@ plugin without honest-but-curious: OpenDPException: Attempted to use function th
 plugin with honest-but-curious: map(1.0)=1.0
 ```
 
-With the flag on, the plugin reports whatever its map says, here a loss of 1 at distance 1, and nobody verified that number. So turn the flag on where you write and prove plugins, never where an untrusted analyst submits queries, because such an analyst could register a map that claims any loss. The same flag gates `OnceFrame.lazy()`, which gives back a released Polars plan that could run twice.
+With the flag enabled, the plugin reports its claimed map: loss 1 at distance 1, with no verification. Enable it when developing and proving plugins, not where untrusted analysts submit queries; they could register a map claiming any cost. The flag also gates `OnceFrame.lazy()`, which exposes a released Polars plan that could run twice.
 
 The third flag is `idealized-numerics`, which marks components whose proof assumes exact arithmetic. In 0.16.0 none of the constructors in this book needs it. The float Laplace mechanism and the float sums above build with the flag off, because their proofs account for rounding. The older name of the flag, `floating-point`, still works and gives a warning.
 

@@ -2,19 +2,19 @@
 
 ## Why this matters
 
-A hospital deletes the names from its discharge records and shares them with researchers. It keeps the postcode, the date of birth, the sex and the diagnosis. A voter roll lists names next to the same three columns. Anyone who has one can join the two tables and put a name back on most rows. This is a **linkage attack**, and putting a name back on a "de-identified" record is **re-identification**.
+A hospital removes names from discharge records but retains postcode, date of birth, sex and diagnosis. A voter roll lists names with the same quasi-identifiers. Joining the tables can identify many records. This is a **linkage attack**; identifying a person in a supposedly de-identified record is **re-identification**.
 
-To judge whether a table can be linked, count its identifying information in bits. Each bit halves the candidates. So it takes $\log_2 n$ bits to single out one person in a population of $n$ people. For the United States of 1990, that is 27.9 bits. Almost everyone is unique once the attributes an adversary knows carry a few bits more than that, and a unique record can be linked.
+Estimate linkage risk by measuring identifying information in bits. Each bit halves the candidate set, so $\log_2 n$ bits can distinguish one person among $n$. For the 1990 United States, this is 27.9 bits. When known attributes carry slightly more information, many people have unique combinations that can be linked.
 
 ## Quasi-identifiers and the linkage attack {#sec-link-quasi}
 
-**Direct identifiers**, like a name or an email address, name a person on their own. **Sensitive attributes**, such as a diagnosis, are what the release is about. **Quasi-identifiers** sit in between. None of them names anyone alone, but together they often single out one person, and they appear next to names in other datasets.
+**Direct identifiers**, such as names or email addresses, identify a person on their own. **Sensitive attributes**, such as diagnoses, are the subject of the release. **Quasi-identifiers** do not identify people individually but can do so in combination; they also appear beside names in other datasets.
 
-To score a release you hold, group its $n$ records into **equivalence classes**. A class is a set of records with identical quasi-identifiers. Write $J$ for the number of classes. Suppose an adversary knows the target's quasi-identifiers and knows that the target is in the release. If the target's class holds $k$ records, the adversary names the right one with probability $1/k$. The class holds $k$ possible targets, so every class adds one win whatever its size. Over all $n$ targets, the chance of naming the right record is therefore
+To assess a release, group its $n$ records into **equivalence classes**, each containing records with identical quasi-identifiers. Let $J$ be the number of classes. Suppose an adversary knows the target's quasi-identifiers and knows that the target is in the release. If the target's class contains $k$ records, the adversary identifies the target with probability $1/k$. Each class contributes one expected correct identification across its $k$ records. Thus, across all $n$ targets, the success probability is
 $$\Pr[\text{win}] = \frac{J}{n},$$ {#eq-link-success}
-and no adversary that sees only the quasi-identifiers can do better. This is the **prosecutor model**, the worst case, because it assumes the adversary knows the target is in the data.
+No adversary using only quasi-identifiers can do better. This is the **prosecutor model**, a worst-case assumption in which the adversary knows that the target is in the release.
 
-The script [practitioner_table_risk.py](../../code/part02-attacks/practitioner_table_risk.py) shows how fast uniqueness grows on a real table. The table is Adult, the 48,842 people of the 1994 US Current Population Survey in the UCI repository. Adult has no ZIP code or birth date, so the script starts from age, sex and race and adds one quasi-identifier at a time. For each set it prints the share of unique records, the share in classes smaller than 5, the smallest class size and $J/n$.
+The script [practitioner_table_risk.py](../../code/part02-attacks/practitioner_table_risk.py) measures uniqueness on Adult, a dataset of 48,842 people from the 1994 US Current Population Survey in the UCI repository. Because Adult lacks ZIP codes and birth dates, the script starts with age, sex and race, then adds quasi-identifiers one at a time. For each set, it prints the unique-record share, the share in classes smaller than 5, the minimum class size and $J/n$.
 
 ```{.python excerpt="qi-uniqueness"}
 n = df.height
@@ -40,15 +40,15 @@ age + sex + race + native-country + marital-status + education: unique=14.64%  i
 age + sex + race + native-country + marital-status + education + hours-per-week: unique=36.55%  in classes <5=57.05%  min k=1  J/n=0.480
 ```
 
-Three columns that look harmless leave 0.12% of the records unique, and six leave 14.64%. The hours worked per week, which nobody would list as an identifier, then make 36.55% unique. So add every column an adversary could know to the test, one at a time. The column that breaks the table may be one that nobody suspected. A minimum class size of 5 is a common rule, yet every set here has classes of a single record.
+Three columns leave 0.12% of records unique; six leave 14.64%. Adding hours worked per week, which is not usually treated as an identifier, raises the unique share to 36.55%. Test every column an adversary could know, adding them one at a time. Every set here contains single-record classes, despite the common minimum class-size rule of 5.
 
 ## Pseudonyms and hashed identifiers {#sec-link-pseudonyms}
 
-Many releases replace each identifier by a **pseudonym**, a code that stays the same across a person's records. Such codes fail in two ways. First, an adversary can reverse a hash without a secret key, such as plain MD5, whenever the possible identifiers can be listed. It hashes every candidate and looks each pseudonym up. New York City hashed its taxi drivers' licences this way in its 2013 trip release. There were only about 2 million possible licences, so in 2014 Vijay Pandurangan hashed them all in minutes and named each driver.
+Many releases replace identifiers with **pseudonyms**, codes that remain constant across one person's records. These codes can fail in two ways. First, an adversary can reverse an unkeyed hash such as MD5 when the possible identifiers can be enumerated: hash each candidate and look for a match. New York City used this approach for taxi-driver licenses in its 2013 trip release. The set contained about 2 million possible licenses; in 2014, Vijay Pandurangan hashed them all and identified the drivers.
 
-The second failure survives any key. The pseudonym ties a person's records together, so a link to any one of them reveals all the others. In the taxi data, a passenger who knows the pickup minute and place can find one trip and its driver. The driver's pseudonym, even a random one, then reveals every trip that driver made. For this reason the General Data Protection Regulation (GDPR) still counts pseudonymized data as personal data.
+The second risk remains even with a key. A pseudonym links one person's records, so identifying one record reveals the others. In the taxi data, a passenger who knows a trip's pickup time and place can identify the driver; the driver's pseudonym then links all their trips. The General Data Protection Regulation (GDPR) therefore still treats pseudonymized data as personal data.
 
-If you must keep a join key, make it with a keyed hash, a hash-based message authentication code (HMAC). Keep the key away from the data.
+If a join key is necessary, generate it with a keyed hash, such as a hash-based message authentication code (HMAC), and store the key separately from the data.
 
 ```python
 import hashlib
@@ -68,34 +68,34 @@ keyed = hmac.new(key, licence.encode(), hashlib.sha256).hexdigest()
 print(keyed in lookup)  # False
 ```
 
-The key stops the dictionary attack but not the second failure, because each person's records still form an identifying history. The same key in two releases would join that history across them, so draw a new key for each release.
+The key prevents dictionary attacks but does not prevent linkage through a person's record history. Reusing the key across releases enables cross-release linkage, so generate a new key for each release.
 
 ## How many people are unique? {#sec-link-unique}
 
-When you design a release, there is no table to count yet, so estimate uniqueness by adding bits. An attribute with $v$ equally likely values carries $\log_2 v$ bits, and the bits of independent attributes add. Attributes that carry $b$ bits in total split people into $2^b$ cells. Suppose each person lands in a random cell, every cell equally likely. Then the expected share of the $n$ people who are alone in their cell is about
+Before the table exists, estimate uniqueness by summing information across attributes. An attribute with $v$ equally likely values carries $\log_2 v$ bits; independent attributes' bits add. Attributes with $b$ total bits divide the population into $2^b$ cells. If each person is assigned uniformly at random to a cell, the expected fraction of $n$ people alone in their cell is approximately
 $$\frac{\text{unique people}}{n} \approx \exp\big(-2^{\log_2 n - b}\big).$$ {#eq-link-uniform}
-The share depends only on the bits beyond $\log_2 n$, and it rises steeply with them. Half the people are unique at only 0.53 bits beyond $\log_2 n$.
+The fraction depends on the number of bits above $\log_2 n$ and increases rapidly with that excess. Half the people are unique at 0.53 bits above $\log_2 n$.
 
-For example, ZIP code, birth date and sex carry 31.1 bits, a few more than the 27.9 bits that single out one American. The formula then predicts that 0.899 of Americans are unique, close to the 87% that Latanya Sweeney estimated from the 1990 census. Real attributes are skewed and correlated, which usually lowers uniqueness, so the estimate is cautious.
+ZIP code, birth date and sex carry 31.1 bits, slightly more than the 27.9 bits needed to single out one American. The formula predicts that 0.899 of Americans are unique, close to Latanya Sweeney's 87% estimate from the 1990 census. Real attributes are skewed and correlated, which usually lowers uniqueness; the uniform-cell estimate is therefore cautious.
 
 ## Sparse data: the Netflix attack {#sec-link-sparse}
 
-Ratings, purchases and locations have no quasi-identifier columns, yet they identify people even better. In 2006 Netflix released about 100 million movie ratings, with random numbers in place of the subscribers' names. Narayanan and Shmatikov (2008) matched its records to public reviews. Their score adds up the items on which a record agrees with what the adversary knows. It weights each item by its rarity, because an obscure film says more than a hit. Eight ratings with dates known to within 14 days identified 99% of the records, even when two of them were wrong.
+Ratings, purchases and locations can identify people without quasi-identifier columns. In 2006, Netflix released about 100 million movie ratings with random identifiers instead of subscriber names. Narayanan and Shmatikov (2008) matched these records to public reviews. Their score sums agreement with known items, weighting rare items more heavily than popular ones. Eight ratings with dates known within 14 days identified 99% of records, even when two ratings were incorrect.
 
-The best score always points at some record, even when the target is not in the release. So the **eccentricity test** declares a match only if the best score beats the second best by a margin. It counts the margin in standard deviations of all the scores. Set that margin on people who are not in the data. On the full edition's simulated ratings, the original attack's margin also matched 26.3% of such outsiders. So report the attack's success at a stated false positive rate ([Hypothesis testing](../part01-prerequisites/04-hypothesis-testing.md)).
+The highest score always identifies some record, even when the target is absent. The **eccentricity test** declares a match only when the highest score exceeds the second-highest by a specified margin, measured in standard deviations of all scores. Calibrate this margin using people known to be outside the release. In the full edition's simulated ratings, the original attack's margin also matched 26.3% of outsiders. Report attack success at a specified false positive rate ([Hypothesis testing](../part01-prerequisites/04-hypothesis-testing.md)).
 
 ## Does releasing a sample protect? {#sec-link-sampling}
 
-Agencies often release a sample, as Adult is, because a record unique in the sample may share its attributes with someone left out. This protects less than it seems. Suppose the release holds a share $q$ of the population, the **sampling rate**, and the adversary finds exactly one record that matches a person. Write $\lambda$ for the expected number of other people in the population who share the target's cell. The record can be a look-alike's only if the target was left out, which happens with probability $1 - q$. So for a rare cell, the probability $\kappa$ that the match is right is about
+Agencies often release samples, as with Adult, because a record unique in the sample may match someone outside it. Let $q$ be the **sampling rate**, the fraction of the population in the release. Suppose the adversary finds exactly one matching record, and let $\lambda$ be the expected number of other people in the population who share the target's cell. A look-alike can account for the match only if the target was not sampled, with probability $1-q$. For a rare cell, the probability $\kappa$ that the match is correct is approximately
 $$\kappa \approx \frac{1}{1 + \lambda(1 - q)}.$$ {#eq-link-kappa}
 
-For example, take a cell expected to hold $\lambda = 0.1$ other people. Even in a 1% sample, a match is right with probability 0.910. The sample size enters only through $1 - q$, which can never exceed 1. So the chance of a right match never falls below $1/(1 + \lambda)$, and a smaller sample barely helps. A sample protects only people whose cells are crowded anyway.
+For a cell with $\lambda = 0.1$ expected other people, a match is correct with probability 0.910 even in a 1% sample. Since $1-q$ cannot exceed 1, the probability of a correct match is at least $1/(1+\lambda)$. Reducing the sample size therefore offers little protection for rare cells. Sampling mainly helps when cells are already crowded.
 
-So the Adult figures above are **sample uniqueness**, exact when the adversary knows the target is in the release. The **population uniqueness** behind them is lower, but not by much for rare cells. Estimate it with a model, and do not assume the risk away. ARX and sdcMicro offer such estimates, and Rocher, Hendrickx and de Montjoye (2019) model correlated attributes for it.
+The Adult figures above measure **sample uniqueness**, which is exact under the assumption that the target is in the release. **Population uniqueness** is lower but remains close for rare cells. Estimate it with a model; ARX and sdcMicro provide such estimates, and Rocher, Hendrickx and de Montjoye (2019) model attribute correlations.
 
 ## A pre-release risk check {#sec-link-check}
 
-First list every column an adversary could find next to a name elsewhere, such as a date, a location or a rare event. No tool knows what other data exist, so no tool can make this list. To lower the risk, coarsen geography and dates first, because they carry the most bits. Then suppress the records that remain unique ([Syntactic anonymity and how it breaks](08-syntactic-anonymity.md)). If the analysis needs fine-grained or sparse data, release a differentially private output instead ([Release statistics with a library](../part03-dp-foundations/12-release-statistics.md)). [Pre-release privacy risk assessment](10-risk-assessment.md) runs this check with thresholds fixed before the counts are seen.
+List every field an adversary could find beside a name in another source, such as a date, location or rare event. No tool can identify all available auxiliary data. Reduce risk by first coarsening geography and dates, which often carry many bits, then suppressing records that remain unique ([Syntactic anonymity and how it breaks](08-syntactic-anonymity.md)). For analyses that require fine-grained or sparse data, release differentially private outputs instead ([Release statistics with a library](../part03-dp-foundations/12-release-statistics.md)). [Pre-release privacy risk assessment](10-risk-assessment.md) applies thresholds set before examining the counts.
 
 ## Cheat sheet
 

@@ -1,6 +1,6 @@
 # Privacy failures
 
-Privacy is easy to promise and hard to deliver, so this part shows what goes wrong without a definition before the course gives one. The first chapter looks at real releases that their owners protected with pseudonyms, removed names, summary statistics or a trained model. An attacker defeated each one by combining the release with information from another source. The second chapter turns these cases into theorems: answers to counting queries that are too accurate let an analyst rebuild almost every secret bit. Together the chapters set the requirements for a definition of privacy. It must hold against any side information and apply to any kind of output. It must degrade gracefully as more data comes out, and it must allow the error that the attacks show to be necessary.
+This part examines privacy failures before defining privacy. Its first chapter shows how attackers combine releases protected by pseudonyms, identifier removal, summary statistics, or model training with information from other sources. Its second proves that accurate answers to counting queries can reveal almost every secret bit. These failures motivate a definition that allows arbitrary side information, covers every output, degrades gracefully under repeated releases, and permits enough error to prevent reconstruction.
 
 | Chapter | Question it answers |
 | --- | --- |

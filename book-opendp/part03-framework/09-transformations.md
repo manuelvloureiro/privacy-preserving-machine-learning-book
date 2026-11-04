@@ -1,10 +1,10 @@
 # Transformations
 
-Every query of the previous parts started with the data and ended with noise, with a chain of steps between them that cast, imputed, clamped, resized and aggregated. In OpenDP each step is a **transformation**, a function from data to data. Its stability map bounds how much its output can change when its input changes ([A framework to understand differential privacy](08-a-framework-for-privacy.md)). This chapter builds the transformations, from preprocessing to the sum, the mean and the quantile scores, and shows how stability passes along a chain.
+Previous queries transformed data by casting, imputing, clamping, resizing and aggregating before adding noise. In OpenDP, each data-to-data step is a **transformation**. Its stability map bounds output changes for a given input change ([A framework to understand differential privacy](08-a-framework-for-privacy.md)). This chapter builds transformations for preprocessing, sums, means and quantile scores, and composes their stability maps.
 
-A chain works only when the output space of each step is exactly the input space of the next. Then the chain's stability map applies the maps of its steps in turn. At the end of the chapter, you can build a sum, a mean or a median's scores from the framework alone. You can also read the sensitivity for your privacy unit, and recognize the error that OpenDP raises when two spaces do not match.
+A chain requires each step's output space to match the next step's input space. Its stability map composes the maps of its steps. You will build sums, means and median scores from framework components, compute sensitivity for a privacy unit and diagnose space-mismatch errors.
 
-The script [opendp_transformations.py](../../code/part03-framework/opendp_transformations.py) runs every step on OpenDP 0.16.0 with the Labour Force Survey (LFS) sample. Its vector is the `HWUSUAL` column, the hours a respondent usually works, as integers, without its nulls and the code 99 for "not applicable". The sensitivities, scales, accuracies, scores and true values are the same on every run. The noisy releases change, because OpenDP's noise cannot be seeded, and so does a float sum that keeps a random sample of its input. They are in one block marked as one run.
+The script [opendp_transformations.py](../../code/part03-framework/opendp_transformations.py) runs on OpenDP 0.16.0 and the Labour Force Survey (LFS) sample. Its vector contains integer `HWUSUAL` hours, excluding nulls and code 99 ("not applicable"). Sensitivities, scales, accuracies, scores and true values are deterministic. Noisy releases vary because OpenDP's noise cannot be seeded; a float sum also varies because it samples its input. The page labels these outputs as one run.
 
 ```bash
 uv run python code/part03-framework/opendp_transformations.py
@@ -12,7 +12,7 @@ uv run python code/part03-framework/opendp_transformations.py
 
 ## Constructors and chains {#sec-trans-chains}
 
-Every constructor has two forms. The `make_` form takes the input space first, as a domain and a metric, and then its own arguments, as in `make_clamp(input_domain, input_metric, bounds)`. The `then_` form leaves the space out. It returns a partial constructor, and `>>` fills in the space from the object to its left, which is a space written as a tuple or a transformation. The two forms build the same object.
+Each constructor has two forms. The `make_` form takes an input space (domain and metric) followed by its arguments, as in `make_clamp(input_domain, input_metric, bounds)`. The `then_` form omits the space and returns a partial constructor. The `>>` operator supplies the space from the object on its left, either a space tuple or transformation. Both forms build the same object.
 
 ```python
 import opendp.prelude as dp
@@ -29,17 +29,17 @@ print(chain.output_space)  # (AtomDomain(T=i32), AbsoluteDistance(i32))
 print(clamp.map(1), total.map(1), chain.map(1))  # 1 10 10
 ```
 
-The clamp changes the domain and not the metric. Its output is vectors of integers between 0 and 10, still under the symmetric distance, the number of rows to add or remove to turn one vector into the other. The sum takes that output space as its input space, as `make_sum(*clamp.output_space)` says, and outputs one integer under the absolute distance. So read `output_space` after each step, because the next constructor must accept exactly that space (@sec-trans-reading).
+The clamp changes the domain but preserves the metric. Its output is a vector of integers from 0 to 10 under symmetric distance, the number of row additions or removals between vectors. The sum takes the clamp's output space as input, as `make_sum(*clamp.output_space)` shows, and returns an integer under absolute distance. Check `output_space` after each step; the next constructor must accept it (@sec-trans-reading).
 
-The number that `map` returns is the **stability**, the largest change in the output for inputs at most `d_in` apart. For the clamp it is 1, because one added row in gives one added row out. For the sum it is 10, the larger bound, and for the chain it is the sum's map applied to the clamp's. When a chain ends with an aggregator, its stability is the sensitivity of the query, the number a measurement needs to calibrate its noise. [The full edition's chapter on sensitivity](../../book-full/part03-dp-foundations/07-sensitivity.md) derives it for sums, means and histograms.
+`map` returns **stability**, the largest output change for inputs at most `d_in` apart. Clamp stability is 1 because adding one row adds one output row. Sum stability is 10, the larger value bound. The chain composes these maps. When a chain ends with an aggregator, its stability is the query's sensitivity, which determines the measurement's noise. [The full edition's chapter on sensitivity](../../book-full/part03-dp-foundations/07-sensitivity.md) derives sensitivities for sums, means and histograms.
 
 ## Preprocessing {#sec-trans-preprocessing}
 
-Preprocessing turns the data into the domain that an aggregator accepts: the sum needs bounded values, and the mean needs bounded values and a known size. The documentation lists the preprocessing constructors in the usual order of a chain, which is cast, impute, clamp and resize, and the subsections keep that order. All of them except the resize work row by row, so one added row in is one added row out, and the stability is 1.
+Preprocessing converts data to an aggregator's input domain. A sum needs bounded values; a mean also needs a known size. This section follows the documentation's constructor order: cast, impute, clamp and resize. All except resize operate row by row, so one added input row produces one output row and stability is 1.
 
 ### Casting and imputing
 
-Data from a file are strings, and `make_cast` turns a vector of strings into a vector of another type. A string that does not parse becomes a missing value, so the output is a vector of options, which hold a value or nothing. No aggregator accepts options. If it skipped the missing values, it would understate the sensitivity, and if it kept them, it would show whether a value was missing. So remove them first. The step `make_impute_constant` puts in a value you choose, and `make_drop_null` drops the rows. The step `make_cast_default` casts and imputes the type's default, 0 for numbers.
+File data often arrive as strings. `make_cast` converts them to another type; unparseable strings become missing values, represented as options. Aggregators accept neither options nor silently skipped values: skipping them would understate sensitivity, while retaining them would reveal missingness. Resolve missing values first with `make_impute_constant` or `make_drop_null`. `make_cast_default` instead casts and imputes the type's default, such as 0 for numbers.
 
 ```python
 import opendp.prelude as dp
@@ -60,13 +60,13 @@ print(uniform.output_domain)  # VectorDomain(AtomDomain(T=f64))
 print(cast.map(1), imputed.map(1), uniform.map(1))  # 1 1 1
 ```
 
-Floats have their own missing value, NaN, which the plain `atom_domain(T=float)` allows, as the printed `nan=true` shows. The constructor `make_impute_constant` accepts that domain too. And `make_impute_uniform_float` replaces each NaN by a uniform draw from the bounds you give, so that imputed values do not collect at one point. Both output the domain without NaN that the aggregators need, with a stability of 1. [Preparing microdata](../part02-tabular-data/06-preparing-microdata.md) does the same on a whole table through Polars.
+Floats use NaN as a missing value; `atom_domain(T=float)` allows it, as `nan=true` shows. `make_impute_constant` accepts this domain. `make_impute_uniform_float` replaces each NaN with a uniform draw from the supplied bounds, avoiding concentration at one value. Both produce a NaN-free domain with stability 1. [Preparing microdata](../part02-tabular-data/06-preparing-microdata.md) applies these steps to a table through Polars.
 
 ### Clamping and resizing
 
-Clamping moves every value into public bounds: a value below the lower bound becomes the lower bound, and a value above the upper becomes the upper. So it costs no accuracy on data that are already in the bounds, and it makes the sum's sensitivity finite. Take the bounds from public knowledge, such as a codebook. Do not take them from the data, because a bound read from the data leaks it.
+Clamping moves values into public bounds. It preserves values already within bounds and makes sum sensitivity finite. Set bounds from public knowledge, such as a codebook; estimating them from private data would leak information.
 
-Resizing has a stability of 2. It pads a vector shorter than the target size with a constant, and cuts a longer one down by a random sample. The mean and the variance need it, because they must know the number of rows they divide by, and that number is private. So the resize writes a size into the domain, which OpenDP then treats as public: a guess, a released count or public knowledge. For the stability, add one row to an input shorter than the target. The output gains that row and loses one padded row, so two rows change for one.
+Resize has stability 2. It pads short vectors with a constant and reduces long vectors by random sampling. Means and variances require a known row count, which may be private. Resize records a target size in the domain, so OpenDP treats it as public, whether it is a guess, released count or public fact. Adding one row to a short input adds that row and removes one padded row, giving stability 2.
 
 ```python
 import opendp.prelude as dp

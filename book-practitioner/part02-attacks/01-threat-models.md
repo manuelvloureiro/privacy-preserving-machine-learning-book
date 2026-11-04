@@ -2,11 +2,11 @@
 
 ## Why this matters
 
-A hospital trains a model on patient records and offers it to doctors through a web service. The question "is the model private?" has no answer until you say against whom. One attacker reads only the labels the model returns. Another attacker holds the weights, knows the other patients or adds crafted records to the training data, so the answers differ. A **threat model** writes these assumptions down. With a threat model, an attack becomes a **game**: the adversary guesses a hidden **secret**, such as whether the model used one patient's record.
+A hospital trains a model on patient records and serves it to doctors. Privacy risk depends on the adversary's access and knowledge. One adversary may see only predicted labels; another may hold the model weights, know other patients' records or add crafted records to training data. A **threat model** specifies these assumptions. An attack can then be framed as a **game** in which an adversary guesses a hidden **secret**, such as whether a patient's record was used.
 
 ## Writing down the threat model {#sec-threat-models}
 
-Write the threat model before anyone runs an attack, because it decides which attacks to run and what result stops the release. In the worksheet, @tbl-threat-worksheet, the first six rows are the questions every threat model answers. The last two rows turn the answers into a test.
+Specify the threat model before running attacks. It determines which tests to run and which results block release. The first six rows of @tbl-threat-worksheet define the threat model; the final two rows specify the tests and decision rule.
 
 | Question | What to write down | Default when unsure |
 | --- | --- | --- |
@@ -21,35 +21,35 @@ Write the threat model before anyone runs an attack, because it decides which at
 
 : The threat-model worksheet. {#tbl-threat-worksheet}
 
-The access row has four levels: labels, scores, weights and the **transcript**. The transcript is everything that training exposed, such as the gradients of each step. Each level is enough to compute the one before it, so in this ordering, the **access chain**, more access never weakens the best attack. The chain compares the *best* attacks, not the ones someone tried, so "the attack we tried failed" proves little ([Membership inference](02-membership-inference.md)).
+Access ranges from labels to scores, weights and the **transcript**, which includes everything exposed during training, such as per-step gradients. Each level can produce the preceding one. Therefore, the best attack cannot become weaker as access increases; this ordering is the **access chain**. It compares optimal attacks, not only the attacks tested, so a failed test does not establish safety ([Membership inference](02-membership-inference.md)).
 
-To fill the access row, read the serving code and the release plan. A service that returns probability vectors gives black-box access, and a checkpoint shared with a partner gives white-box access. A model in several deployments carries the risk of the most exposed one. For the behaviour row, an **honest-but-curious** adversary follows the protocol and analyses only what it sees. A **malicious** adversary may add crafted records to the training data, called **poisoning**, or send tampered models. If the party that collects the data may be an adversary, protect the data before they leave the user ([Local, shuffle and distributed trust models](../part03-dp-foundations/09-trust-models.md)).
+Determine access from the serving code and release plan. A service that returns probability vectors gives black-box access; a checkpoint shared with a partner gives white-box access. If a model has several deployments, assess the most exposed one. An **honest-but-curious** adversary follows the protocol and analyses its observations. A **malicious** adversary may add crafted records to training data (**poisoning**) or send tampered models. If the data collector may be an adversary, protect data before collection ([Local, shuffle and distributed trust models](../part03-dp-foundations/09-trust-models.md)).
 
-You cannot see what else the adversary holds, so assume that it knows every record except the target's. The unit row decides what one guarantee covers: a guarantee per row covers each of a user's 200 rows, but not all 200 together.
+Assume the adversary knows every record except the target's. The privacy unit determines the guarantee's scope: a guarantee per row covers each of a user's 200 rows individually, not the group of 200 rows.
 
-For the hospital's classifier, the API returns class probabilities, so the goal is membership and the access is black-box scores. A doctor is honest-but-curious but may query adaptively, the side information is a public sample of the same population, and the unit is the patient. The release stops if the lower end of the TPR's interval at an FPR of $10^{-3}$ exceeds ten times that FPR. Fix that threshold before the attack runs, because a threshold chosen after the results can always pass them.
+For the hospital classifier, the API returns class probabilities, so the goal is membership inference and access is black-box scores. The doctor is honest-but-curious and may query adaptively. The side information is a public sample from the same population, and the privacy unit is the patient. Block release if the lower end of the TPR interval at FPR $10^{-3}$ exceeds ten times that FPR. Set this threshold before running the attack to avoid tuning it to the result.
 
 ## Scoring an attack against its baseline {#sec-threat-scoring}
 
-In the membership game, a challenger flips a coin to decide whether to train the model with or without the target's record. The adversary then guesses whether the target is a **member**, that is, whether the model used its record.
+In the membership game, a challenger flips a coin to decide whether to train the model with or without the target's record. The adversary then guesses whether the target is a **member**, meaning that the model was trained on its record.
 
 The **true positive rate** is the fraction of members that the attack flags. The **false positive rate** is the fraction of non-members that it flags by mistake. Write $\pi_1$ for the chance that the coin makes the target a member, the prior, and $\pi_0 = 1 - \pi_1$ for the opposite. The attack wins with probability
 $$\Pr[\text{win}] = \pi_1\,\mathrm{TPR} + \pi_0\,(1 - \mathrm{FPR}).$$
-The two rates do not depend on the prior, but this win rate, the accuracy, does. If only one target in ten is a member, the guess "not a member" wins $\pi_0 = 90\%$ of the games without looking at the model. So score every attack against a **baseline**, the best score of a guess that never looks at the model.
+The two rates do not depend on the prior, but accuracy does. If one target in ten is a member, guessing "not a member" wins $\pi_0 = 90\%$ of games without using the model. Compare each attack with a **baseline**, the best score from a guess that does not use the model.
 
 With a fair prior, $\pi_1 = \pi_0 = 1/2$, the baseline is one half. The attack's **advantage** is how far its TPR exceeds its FPR. With the fair prior in the win rate,
 $$\Pr[\text{win}] = \frac12 + \frac12\,(\mathrm{TPR} - \mathrm{FPR}).$$
-So an attack with 55% accuracy at a fair prior has an advantage of 0.1. Unlike the accuracy, the advantage does not change with the prior. Differential privacy caps every attack's advantage, through the total variation distance of [Divergences](../part01-prerequisites/03-divergences.md).
+An attack with 55% accuracy at a fair prior therefore has advantage 0.1. Unlike accuracy, advantage does not depend on the prior. Differential privacy bounds every attack's advantage through the total variation distance described in [Divergences](../part01-prerequisites/03-divergences.md).
 
 ## Reporting: TPR at a low FPR {#sec-threat-advantage}
 
-An attack scores each target and flags those above a threshold. Its **receiver operating characteristic (ROC)** curve plots its TPR against its FPR as that threshold moves, and the advantage is the curve's largest height above the diagonal. The advantage and the area under the curve both hide the region where false positives are rare, which is where privacy breaks. For example, an attack that flags 1% of members with no false alarms has a tiny advantage, yet it identifies those members with certainty. So report membership attacks by their TPR at a low FPR such as $10^{-3}$, as Carlini et al. (2022) do.
+An attack assigns each target a score and flags targets above a threshold. Its **receiver operating characteristic (ROC)** curve plots TPR against FPR as the threshold varies; advantage is the curve's maximum height above the diagonal. Neither advantage nor area under the curve shows performance where false positives are rare. An attack that flags 1% of members with no false positives has small overall advantage but identifies those flagged members with certainty. Report membership attacks by TPR at a low FPR, such as $10^{-3}$, following Carlini et al. (2022).
 
 A flagged person cares about the chance that the verdict is right, the **precision**,
 $$\Pr[\text{member} \mid \text{flagged}] = \frac{\pi_1\,\mathrm{TPR}}{\pi_1\,\mathrm{TPR} + \pi_0\,\mathrm{FPR}}.$$
-When members are rare, $\pi_0$ is large, so even a small FPR on the many non-members swamps the true positives. For example, take a count of people with a condition, released with Gaussian noise of standard deviation 1. A member adds 1 to the count, so an adversary who knows every other record flags the target when the count is high. At an FPR of $10^{-3}$, it catches members with probability 0.0183. At a fair prior the two halves of the prior cancel, so its precision is $0.0183/(0.0183 + 0.001) = 0.948$. If only one target in a hundred is a member, the precision drops to 0.156, so never quote a precision without its prior.
+When members are rare, $\pi_0$ is large, and even a small FPR among non-members can exceed the number of true positives. For example, release a count with Gaussian noise of standard deviation 1. A member adds 1 to the count, so an adversary who knows all other records flags the target when the count is high. At FPR $10^{-3}$, the TPR is 0.0183. With a fair prior, precision is $0.0183/(0.0183 + 0.001) = 0.948$. If one target in a hundred is a member, precision falls to 0.156. Report precision with its prior.
 
-Each rate comes from a finite set of targets, so it needs an interval. The recipe of [Hypothesis testing](../part01-prerequisites/04-hypothesis-testing.md#sec-ht-recipe) plans about $100/\alpha$ non-members for an FPR of $\alpha$, so that about 100 false positives fix the rate. It sets the threshold on one split, measures on another, and puts a Clopper–Pearson interval on each rate.
+Each rate is estimated from a finite target set and needs a confidence interval. The [Hypothesis testing](../part01-prerequisites/04-hypothesis-testing.md#sec-ht-recipe) procedure plans about $100/\alpha$ non-members for target FPR $\alpha$, yielding about 100 false positives. It sets the threshold on one split, evaluates on another and computes a Clopper–Pearson interval for each rate.
 
 The snippet below applies a short form of the recipe to the black-box membership attack of the Adversarial Robustness Toolbox (ART). The target is a random forest trained on half of scikit-learn's 569 breast cancer records. The attacker trains its attack on every other record, whose membership it knows, and reads the TPR on the rest at an FPR of at most 0.01. It sets the threshold on those same scores.
 

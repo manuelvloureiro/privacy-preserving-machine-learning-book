@@ -1,10 +1,10 @@
 # Synthetic data with AIM and MST
 
-[Contingency tables](16-contingency-tables.md) released the marginals you asked for, which works when you know the questions in advance. The analyst of a synthetic dataset usually does not, and a workload that guesses wrong leaves the relations they care about to chance. So this chapter lets the library choose. The **AIM** algorithm picks its marginals one round at a time, each time the one that its current model gets most wrong. The **MST** algorithm picks a spanning tree of column pairs in one step. Both fit a model to the noisy marginals, and `synthesize()` turns the model into rows, which is post-processing and costs nothing.
+[Contingency tables](16-contingency-tables.md) released a specified workload, which suits known questions. Synthetic-data users may not know future questions, so a fixed workload can omit important relationships. This chapter uses algorithms that choose marginals: **AIM** selects the marginal its current model fits worst at each round, while **MST** selects a spanning tree of column pairs. Both fit a model to noisy marginals. `synthesize()` draws rows from that model as post-processing, at no additional cost.
 
-The chapter follows the documentation's synthetic-data page and the docstrings of `dp.mbi.AIM`, `dp.mbi.MST`, `dp.mbi.Sequential` and `ContingencyTable.synthesize`. You will release three tables over four survey columns and read which marginals each algorithm chose. Then you will generate a synthetic frame of 3.8 million rows, state the guarantee, and compare the synthetic marginals with the real ones. That comparison shows a problem with nulls, which you will fix.
+The chapter follows the documentation's synthetic-data page and the docstrings for `dp.mbi.AIM`, `dp.mbi.MST`, `dp.mbi.Sequential` and `ContingencyTable.synthesize`. It releases three tables over four survey columns, inspects the selected marginals, generates a synthetic frame of 3.8 million rows and states the guarantee. Comparing synthetic and real marginals reveals a null-handling problem, which the chapter then fixes.
 
-The script [opendp_aim_and_mst.py](../../code/part05-synthetic-data/opendp_aim_and_mst.py) runs everything on the Labour Force Survey (LFS) sample with OpenDP 0.16.0 and `mbi` 1.1.0, the Private-PGM version that OpenDP pins, with JAX on the CPU. The noise scales, the threshold, the budget arithmetic, the conversion to $\varepsilon$ and the facts about the data are the same on every run. OpenDP's noise cannot be seeded, so the chosen marginals, the counts, the rows and the distances to the real data change. The page shows them in blocks marked as one run. The whole script takes about 75 seconds.
+The script [opendp_aim_and_mst.py](../../code/part05-synthetic-data/opendp_aim_and_mst.py) runs on the Labour Force Survey (LFS) sample with OpenDP 0.16.0, pinned `mbi` 1.1.0 and CPU JAX. Noise scales, thresholds, budget calculations, conversions to $\varepsilon$ and data facts are deterministic. OpenDP's noise cannot be seeded, so selected marginals, counts, rows and distances vary; the page labels them as one run. The script takes about 75 seconds.
 
 ```bash
 uv run python code/part05-synthetic-data/opendp_aim_and_mst.py
@@ -12,13 +12,13 @@ uv run python code/part05-synthetic-data/opendp_aim_and_mst.py
 
 ## When you do not know the questions {#sec-synth-adaptive}
 
-A fixed workload spends the budget on the marginals you name and on nothing else. For a pair of columns you did not name, the model answers as if the two columns were independent, as `SEX` came out uniform in the previous chapter. With four columns you could name every pair and every triple. But the budget would then spread over ten marginals, most of which the model fits well anyway. The question is how to spend the budget where the model is wrong.
+A fixed workload spends budget only on specified marginals. For an omitted column pair, the model assumes independence; in the previous chapter, this made `SEX` uniform. With four columns, measuring every pair and triple would divide the budget among ten marginals, including many the model already fits well. The goal is to spend budget where the model is wrong.
 
-AIM answers it adaptively. It first measures the one-way marginal of every column with half the budget, which also releases the keys of a column without keys. Then it fits a model and runs rounds. Each round scores every candidate marginal of up to three columns by how far the model's version is from the true one, minus what measuring it would cost in noise. Candidates that overlap the workload weigh more, so the three-way marginals, which are the workload itself, weigh most.
+AIM selects marginals adaptively. It first measures every one-way marginal with half the budget, which also releases keys for unkeyed columns. It then fits a model and runs rounds. Each round scores candidate marginals of up to three columns by model error adjusted for measurement noise. Candidates that overlap the workload receive greater weight, so the three-way workload marginals weigh most.
 
-A noisy selection with a tenth of the round's budget picks one candidate, by the report-noisy-max form of the exponential mechanism ([the full edition's chapter on selection](../../book-full/part03-dp-foundations/05-selection.md)). The other nine tenths measure the chosen marginal with Gaussian noise, and AIM fits the model again.
+Report-noisy-max, a form of the exponential mechanism, uses one tenth of the round's budget to select a candidate ([the full edition's chapter on selection](../../book-full/part03-dp-foundations/05-selection.md)). The other nine tenths measure that marginal with Gaussian noise, after which AIM refits the model.
 
-The budget per round adapts. It starts at the budget divided by the number of rounds. When a measurement moves the model by less than its noise, the round taught little, so the next round gets four times the share. The rounds stop when a privacy filter finds the budget spent. The `rounds` argument sets the number of planned rounds, by default sixteen per column, which is 64 here, and the script uses 10 so that a release takes seconds. The `max_size` argument caps the memory of the model in megabytes, which never binds with four small columns.
+Round budgets adapt. Each starts at the total budget divided by the planned number of rounds. If a measurement changes the model by less than its noise, the next round receives four times the share. A privacy filter stops the rounds when the budget is spent. The `rounds` argument sets the plan: 16 per column by default, or 64 here. The script uses 10 to reduce runtime. `max_size` caps model memory in megabytes; it does not bind for these four small columns.
 
 ```python
 import opendp.prelude as dp
@@ -30,11 +30,11 @@ print(dp.mbi.MST().num_selections, dp.mbi.MST().measure_split)  # None 0.9
 print(dp.mbi.Count(("SEX", "ILOSTAT")))  # Count(by=('SEX', 'ILOSTAT'), weight=1.0)
 ```
 
-The `queries` argument is either the largest number of columns of a candidate, 3 by default, or a workload of weighted `dp.mbi.Count` objects. The `measure_split` of 0.9 is the share of each round that goes to measuring. MST has the same split and one argument of its own, `num_selections` (@sec-synth-mst).
+`queries` sets either the maximum candidate size (3 by default) or a workload of weighted `dp.mbi.Count` objects. `measure_split=0.9` allocates 90% of each round to measurement. MST uses the same split and adds `num_selections` (@sec-synth-mst).
 
 ## The AIM release {#sec-synth-aim}
 
-The context is the documentation's, with three times the budget because this chapter releases three tables. The privacy unit is 36 contributions per person, as in [the data and the context](../part01-getting-started/02-the-data-and-the-context.md#sec-ctx-context). The budget is a privacy parameter $\rho$ of 0.3 under zero-concentrated differential privacy (zCDP), with Gaussian noise. The parameter bounds the privacy loss on average ([the full edition's chapter on concentrated differential privacy (DP)](../../book-full/part04-privacy-accounting/03-concentrated-dp.md)). The slack $\delta$ of $3 \times 10^{-7}$ pays for releasing the keys of `ILOSTAT`, which the query does not name.
+The context follows the documentation and triples the budget because this chapter releases three tables. It uses the 36-contribution privacy unit from [The data and the context](../part01-getting-started/02-the-data-and-the-context.md#sec-ctx-context). Its budget is a privacy parameter $\rho$ of 0.3 under zero-concentrated differential privacy (zCDP), with Gaussian noise; the parameter bounds privacy loss on average ([the full edition's chapter on concentrated differential privacy (DP)](../../book-full/part04-privacy-accounting/03-concentrated-dp.md)). The slack $\delta$ of $3 \times 10^{-7}$ pays for selecting `ILOSTAT` keys, which the query does not specify.
 
 ```{.python excerpt="synth-context"}
 def make_context(frame: pl.LazyFrame) -> dp.Context:
@@ -46,7 +46,7 @@ def make_context(frame: pl.LazyFrame) -> dp.Context:
     )
 ```
 
-Every release goes through one function, because the three queries differ only in the algorithm. The query takes a third of the budget, $\rho = 0.1$ with $\delta = 10^{-7}$. It selects the documentation's four columns, gives the keys of `SEX` and the cuts of `AGE` and `HWUSUAL`, and leaves `ILOSTAT` to the threshold. The `fill` argument is for later.
+One function builds all three releases, which differ only by algorithm. Each query receives one-third of the budget: $\rho = 0.1$ and $\delta = 10^{-7}$. It selects four columns, supplies public `SEX` keys and `AGE` and `HWUSUAL` cuts, and discovers `ILOSTAT` keys by thresholding. The `fill` argument is used later.
 
 ```{.python excerpt="synth-query"}
 def table_query(context: dp.Context, algorithm: Algorithm, fill: bool = False) -> ContingencyTableQuery:
@@ -61,7 +61,7 @@ def table_query(context: dp.Context, algorithm: Algorithm, fill: bool = False) -
     )
 ```
 
-The first release uses AIM with ten rounds. Before the release, the query reports the scale and the threshold of its one-way step, which cost nothing to read.
+The first release uses AIM with ten rounds. Before release, inspect the one-way scale and threshold; reading them incurs no cost.
 
 ```{.python excerpt="synth-aim"}
 aim_query = table_query(context, dp.mbi.AIM(rounds=ROUNDS))
@@ -79,7 +79,7 @@ aim: rounds=10  rho per round=0.0050  measure=0.0045  select=0.0005  scale of a 
 aim keys ILOSTAT: [1, 2, 3, 9, None]  thresholds: {'ILOSTAT': 1364}
 ```
 
-The scales follow from the budget split. Half of the query's $\rho$ goes to the one-way step, where AIM measures all four one-way marginals, so each gets 0.0125. One person changes the cells of a marginal by at most 36 rows in all, possibly all in one cell. So the sensitivity in the Euclidean norm is 36. Write $\Delta_2$ for that sensitivity and $\sigma$ for the standard deviation of the Gaussian noise. The mechanism is $\rho$-zCDP when
+The budget split determines the scales. Half of the query's $\rho$ funds the four one-way marginals, giving each 0.0125. One person can change at most 36 entries across a marginal, all in one cell in the worst case, so its Euclidean sensitivity is 36. Let $\Delta_2$ denote that sensitivity and $\sigma$ the Gaussian standard deviation. The mechanism is $\rho$-zCDP when
 $$\sigma = \frac{\Delta_2}{\sqrt{2\rho}},$$
 and that formula gives the 227.68 the query reports.
 
@@ -96,11 +96,11 @@ aim measured: ('SEX', 'HWUSUAL') std=379.47
 aim measured: ('AGE', 'HWUSUAL') std=379.47
 ```
 
-The `marginals` attribute of the table holds every measurement with its clique, the columns it spans, and its noise. In this run AIM measured all four three-way marginals before any pair, as the weights predict. One of them appears twice, the second time at half the scale, which is the adaptive rule at work. A round had moved the model by less than its noise, so the next round took four times the share, which was all that was left. So there were seven measurements and not ten. Another run chooses differently, so read this list after every release.
+The table's `marginals` attribute lists each measurement, its clique of columns and its noise. Here AIM measured all four three-way marginals before any pair, as the weights predict. It measured one marginal twice, with the second measurement at half the scale. The first changed the model by less than its noise, so the adaptive rule gave the next round four times its share. This exhausted the budget after seven measurements rather than ten. The selected marginals vary across runs; inspect this list after each release.
 
 ## A spanning tree of pairs with MST {#sec-synth-mst}
 
-MST, the mechanism that won the 2018 NIST synthetic-data contest, is simpler than AIM. After the same one-way step it scores only pairs of columns, by how far the model's version is from the true one. Then it picks pairs one at a time by noisy maximum, each time among the pairs that join two columns not yet connected. With four columns that gives three pairs, which form a tree that spans every column, hence the name. The `num_selections` argument sets how many pairs to pick, by default one fewer than the number of columns. Then MST measures all the selected pairs at once with nine tenths of the remaining budget, and fits the model.
+MST, winner of the 2018 NIST synthetic-data contest, is simpler than AIM. After the same one-way step, it scores column pairs by their disagreement with the current model. Noisy maximum selects pairs that connect columns not yet joined. With four columns, the default is three pairs forming a spanning tree. `num_selections` sets the number of pairs; its default is one fewer than the number of columns. MST measures the selected pairs at once with nine tenths of the remaining budget, then fits the model.
 
 ```{.python excerpt="synth-mst"}
 mst_query = table_query(context, dp.mbi.MST())
@@ -117,15 +117,15 @@ mst measured: ('SEX', 'ILOSTAT') std=207.85
 mst pairs form a spanning tree: True
 ```
 
-The one-way step is identical, so its scale and threshold are the same. The three pairs share nine tenths of the remaining budget, 0.015 each, and the formula gives 207.85. So each pair is measured more precisely than a round of AIM, because MST commits to three measurements where AIM keeps budget back for rounds it may need. In this run the tree is a star on `ILOSTAT`, the column most related to the other three. The script checks that the pairs connect all four columns without a cycle, as the selection guarantees.
+The one-way step has the same scale and threshold as AIM. The three pairs split nine tenths of the remaining budget, receiving 0.015 each; the scale is 207.85. This is more precise than an AIM round because MST commits to three measurements rather than reserving budget for later rounds. Here the tree is a star centred on `ILOSTAT`, which is most related to the other columns. The script checks that the selected pairs connect all four columns without a cycle.
 
 ## A first look at the one-way marginals {#sec-synth-oneway}
 
-The data are public, so the script can compare each one-way marginal of the synthetic rows, with their numeric columns put back into bins, with the real one. It reports the total variation distance, which is half the sum of the absolute differences of the shares of the two marginals. It also reports the largest error of any cell in rows, and the standard deviation of that marginal from `std`.
+Because the data are public, the script compares each synthetic one-way marginal with its real counterpart after binning numeric columns. It reports total variation distance, half the sum of absolute differences between cell shares, the largest cell error in rows and the marginal's standard deviation from `std`.
 
-The last column is a bound. Write $k$ for the number of cells of the marginal and $n$ for the number of rows. If every cell were off by three standard deviations at once, the distance would be
+The last column is a bound. Write $k$ for the number of cells and $n$ for the number of rows. If every cell were off by three standard deviations, the distance would be
 $$\frac{3 k \sigma}{2 n}.$$
-A well-fitted marginal stays far under that, because the cell errors have different signs and few reach three standard deviations.
+A well-fitted marginal is usually far below this bound because cell errors have different signs and few reach three standard deviations.
 
 ```text
 one-way SEX (aim): tv=0.00007 largest cell error=2,813 rows  std=204.6 bound=0.00024
@@ -138,18 +138,18 @@ one-way HWUSUAL (mst): tv=0.00257 largest cell error=13,620 rows  std=204.5 boun
 one-way ILOSTAT (mst): tv=0.00040 largest cell error=1,963 rows  std=227.7 bound=0.00045
 ```
 
-`SEX` and `AGE` are right as shares, with distances below their bounds. But their largest cell errors of two or three thousand rows are more than the noise explains. `HWUSUAL` is wrong even as shares. Its distance is many times its bound in both releases, and one cell is off by more than eleven thousand rows, over fifty standard deviations. Both algorithms measured that marginal at the same scale as the others, so noise cannot explain it, and something systematic is wrong with the column.
+The `SEX` and `AGE` shares fall within their bounds, but their largest cell errors of two to three thousand rows exceed the noise estimates. `HWUSUAL` is inaccurate even as shares: its distance exceeds the bound manyfold in both releases, and one cell differs by more than eleven thousand rows, over fifty standard deviations. Both algorithms measured this marginal at the same scale as the others, so noise does not explain the error. A systematic problem affects the column.
 
 ## Nulls and the key set {#sec-synth-nulls}
 
-The model behind every table needs a fixed set of keys for every column, which the documentation's section on nulls explains. The keys come from you, through `keys` and `cuts`, or from the stable-key release. Either way, every value outside the set is replaced by null before counting. A cut column has no null key, so the four bins of `HWUSUAL` are its whole key set, and the column has 20,819 real nulls, hours that were not recorded.
+Every table's model requires a fixed key set for each column. As the documentation explains, keys come from `keys`, `cuts` or stable-key release; values outside the set become null before counting. Cut columns have no null key. Thus the four `HWUSUAL` bins cover its entire key set, although 20,819 real rows have unrecorded hours.
 
 ```text
 rows: 3,811,932  AGE nulls: 255  HWUSUAL nulls: 20,819
 HWUSUAL = 99 (not applicable): 2,294,921
 ```
 
-In version 0.16.0 those nulls take two different paths. The one-way step counts a cut column by joining its counts onto the bin labels, so it does not count a null row at all. The multi-way step gives a row whose bin is null the last index, so it counts that row in the bin above 40 hours. So the model is fitted to measurements that disagree about the number of rows, and it compromises. The script shows the fitted one-way marginal of `HWUSUAL` against the real counts with the nulls in the last bin.
+In version 0.16.0, nulls follow different paths. For a cut column, the one-way step joins counts to bin labels and omits null rows. The multi-way step assigns a null bin the last index, counting those rows in the bin above 40 hours. The resulting measurements disagree on the row total, so the fitted model compromises. The script compares its one-way `HWUSUAL` marginal with real counts that place nulls in the last bin.
 
 ```text
 aim model total (one run): 3,806,638.8  real rows 3,811,932
@@ -160,13 +160,13 @@ HWUSUAL bins (aim, one run): fitted count against the real count with nulls in t
   (40.0, inf]: fitted 2,647,240  real 2,658,551  difference -11,311
 ```
 
-The last bin is eleven thousand rows short and every other bin is two thousand rows over. The total of the model, which it estimates from the one-way marginals, is five thousand rows below the real count. Those are the missing nulls, spread by the fit.
+The last bin is eleven thousand rows short, while each other bin is about two thousand rows high. The model's total, estimated from one-way marginals, is five thousand below the real count. The fit has spread the omitted null rows across bins.
 
-The documentation's remedy is to turn true nulls into a key before the table, with `select` or `with_columns`, which is what the `fill` argument of the query does. It is a row-by-row transformation inside the query, so it changes nothing about the privacy unit. The script sends the nulls of `HWUSUAL` to 99, the survey's code for not applicable. It sends the 255 nulls of `AGE` to zero, the youngest bin. The code a null gets is a modelling decision, but every row must land in a key, the same way in both steps.
+The documentation's remedy is to replace true nulls with keys before tabulation, using `select` or `with_columns`. The query's `fill` option does this row by row without changing the privacy unit. The script maps null `HWUSUAL` values to 99, the survey's code for not applicable, and 255 null `AGE` values to zero, the youngest bin. Choosing a replacement is a modelling decision, but both steps must assign every row to the same key.
 
 ## Guaranteeing marginals with Sequential {#sec-synth-sequential}
 
-Adaptive selection has a cost, because AIM may not measure a marginal that the release must contain. `Sequential` runs a list of algorithms one after another on the same table, each from the model of the previous one. It splits the budget evenly between them unless `weights` says otherwise. So with a `Fixed` workload first and AIM second, the named marginals are always measured, and AIM spends the rest where the model is still wrong. The third release does this with the pairs of `ILOSTAT` with `SEX` and with `AGE`, and it fills the nulls.
+Adaptive selection may omit a marginal the release requires. `Sequential` runs algorithms in order on one table, each using the previous model. It divides the budget equally unless `weights` specifies another split. Placing `Fixed` before AIM guarantees the named marginals, while AIM uses the remaining budget where the model is inaccurate. The third release guarantees `ILOSTAT` by `SEX` and `AGE` pairs and fills the nulls.
 
 ```{.python excerpt="synth-sequential"}
 sequential = dp.mbi.Sequential(
@@ -196,7 +196,7 @@ sequential measured: ('SEX', 'HWUSUAL') std=536.66
 sequential guaranteed marginals present: True
 ```
 
-The one-way step again takes half, and the rest is split evenly between the two algorithms. `Fixed` divides its quarter between its two marginals, at the familiar 227.68. AIM runs its ten rounds on the other quarter, so each of its marginals is noisier than in the first release, 536.66 against 379.47. That is the price of the guarantee, and `weights` can shift it either way. The total of the model is now 219 rows from the truth, within one standard deviation of a one-way measurement, so the nulls were the problem.
+The one-way step again receives half the budget, and the remainder is divided equally between the two algorithms. `Fixed` splits its quarter between two marginals, each with scale 227.68. AIM uses the other quarter for ten rounds, so each marginal has more noise than in the first release: 536.66 rather than 379.47. This is the cost of the guarantee; `weights` can change the allocation. The model's total is now 219 rows from truth, within one standard deviation of a one-way measurement, confirming that null handling caused the earlier discrepancy.
 
 ```text
 one-way SEX (sequential): tv=0.00004 largest cell error=240 rows  std=198.2 bound=0.00023
@@ -205,11 +205,11 @@ one-way HWUSUAL (sequential): tv=0.00009 largest cell error=273 rows  std=206.2 
 one-way ILOSTAT (sequential): tv=0.00008 largest cell error=360 rows  std=271.5 bound=0.00053
 ```
 
-Every distance is under its bound by a factor of three or more, and no cell is more than 360 rows off, under two standard deviations. The largest error of `HWUSUAL` fell from eleven thousand rows to 273.
+Every distance is at least three times below its bound, and no cell differs by more than 360 rows, less than two standard deviations. The largest `HWUSUAL` error fell from eleven thousand rows to 273.
 
 ## Generating the rows {#sec-synth-rows}
 
-A `ContingencyTable` is a model, and `synthesize()` turns it into a frame. The model is the Private-PGM fit of the previous chapter, a graphical model over the four columns whose marginals match the noisy measurements as closely as possible at once. Drawing rows from it looks only at released values, so it is post-processing and spends nothing, however often you call it.
+`ContingencyTable` stores the Private-PGM model fitted in the previous chapter: a graphical model whose marginals jointly approximate the noisy measurements. `synthesize()` draws a frame from this model. It uses only released values, so repeated calls are post-processing and spend no additional budget.
 
 ```text
 synthesize (aim, one run): shape (3806638, 4)  model total 3,806,638.8  11.9 s
@@ -229,7 +229,7 @@ synthetic dtypes: {'SEX': Int64, 'AGE': Float64, 'HWUSUAL': Float64, 'ILOSTAT': 
 synthetic SEX values: [1, 2]  ILOSTAT values: [1, 2, 3, 9]
 ```
 
-Without a `rows` argument the frame has as many rows as the total of the model, a noisy estimate of the row count. The four columns keep their original types, and `SEX` and `ILOSTAT` take values from their keys. The default `method="round"` scales the expected counts of the model to the number of rows and rounds them at random. So the synthetic marginals match those of the model to within a row per cell. The alternative, `method="sample"`, draws each row independently, which adds sampling noise of about the square root of each count, and suits rows that should behave like a sample.
+Without `rows`, the frame size is the model's noisy estimate of the row count. The columns retain their original types, and `SEX` and `ILOSTAT` use their key values. By default, `method="round"` scales expected counts to the requested row count and rounds randomly, so each synthetic marginal matches the model within one row per cell. `method="sample"` instead draws rows independently, adding sampling noise of about the square root of each count. Use it when rows should behave like a sample.
 
 ```{.python excerpt="synth-sample"}
 sample = table_aim.synthesize(rows=SAMPLE_ROWS, method="sample")  # draws rows independently from the model
@@ -239,15 +239,15 @@ sample = table_aim.synthesize(rows=SAMPLE_ROWS, method="sample")  # draws rows i
 synthesize rows=100,000 method=sample: shape (100000, 4)
 ```
 
-Look again at the numeric columns, because the first rows all show an `AGE` just under 20. The model knows only which bin a row is in, so for a cut column `synthesize()` draws a value uniformly inside the bin, or within one unit of the edge for the two open-ended bins. Every synthetic age therefore lies between 19 and 61. The rows coded 99 all become hours just above 40.
+The first rows have `AGE` just below 20 because the model stores bins, not original values. For cut columns, `synthesize()` draws uniformly within each bin and within one unit of the edge for open-ended bins. Synthetic ages therefore range from 19 to 61. Rows coded 99 receive hours just above 40.
 
-So a mean age from this frame reflects the bins and the sampling rule, not the data. If the numbers matter, give finer cuts, at the cost of more cells per marginal and more noise per cell ([Evaluating and tuning synthetic data](18-evaluating-synthetic-data.md)).
+The frame's mean age reflects the bins and sampling rule, not the original data. Use finer cuts when numeric values matter, accepting more cells per marginal and more noise per cell ([Evaluating and tuning synthetic data](18-evaluating-synthetic-data.md)).
 
-The script seeds NumPy's global generator, which the rounding and the draws inside a bin use, so the frame is a function of the released table.
+The script seeds NumPy's global generator, used for rounding and within-bin draws. Thus the frame is deterministic given the released table.
 
 ## The privacy statement {#sec-synth-statement}
 
-The context has spent its three shares, and the script writes the statement of the whole release from its variables.
+The context has spent all three shares. The script builds the release statement from its variables.
 
 ```text
 budget spent: (0.3, 3e-07)
@@ -255,7 +255,7 @@ rho=0.3 at delta=1e-07: epsilon=4.2709
 whole context converted: epsilon=4.2709 delta=4e-07
 ```
 
-A budget in $\rho$ is stated to readers in $\varepsilon$, with the conversion of [Assessing utility and choosing the noise](../part02-tabular-data/07-utility-and-noise.md). The combinators `make_zCDP_to_approxDP` and `make_fix_delta` convert the budget of 0.3 to $\varepsilon = 4.27$, at a further $\delta$ of $10^{-7}$. The same two combinators on the `accountant` of the context give the same $\varepsilon$ with the total $\delta$, three parts for the keys and one for the conversion. So three adaptive releases cost $\varepsilon = 4.27$, which is a loose guarantee.
+Report a $\rho$ budget in $\varepsilon$ using the conversion in [Assessing utility and choosing the noise](../part02-tabular-data/07-utility-and-noise.md). `make_zCDP_to_approxDP` and `make_fix_delta` convert the budget of 0.3 to $\varepsilon = 4.27$ with an additional $\delta$ of $10^{-7}$. Applying both combinators to the context's `accountant` gives the same $\varepsilon$ and total $\delta$: three parts for key selection and one for conversion. The resulting $\varepsilon = 4.27$ guarantee for the three adaptive releases is loose.
 
 ```{.python excerpt="synth-statement"}
 print(
@@ -269,7 +269,7 @@ print(
 )
 ```
 
-The statement covers the synthetic rows, because post-processing adds nothing to the loss. It names what was public, since a cut chosen by looking at the data would leak it. The unit of 36 contributions is the expensive part, because every scale above carries the factor 36. But [Identifier truncation and bounds](../part02-tabular-data/05-identifier-truncation.md) showed that hardly anyone answers more than a few times. So the script builds the same query under the identifier unit with a truncation to four rows per person, to read the scale, and does not release it.
+Post-processing extends the guarantee to the synthetic rows without increasing privacy loss. The statement also records which keys and cuts were public; choosing cuts from private data would leak information. The 36-contribution privacy unit inflates every scale by a factor of 36. [Identifier truncation and bounds](../part02-tabular-data/05-identifier-truncation.md) shows that few people contribute often, so the script builds—but does not release—the same query with an identifier unit and a four-row contribution bound.
 
 ```{.python excerpt="synth-identifier"}
 context_id = dp.Context.compositor(
@@ -290,11 +290,11 @@ identifier unit, 4 rows per person: oneway scale=25.2982 threshold=142
 identifier unit: scale ratio 9.00 = 36/4
 ```
 
-The one-way scale falls nine-fold, to 25.30, because a person now moves a count by at most 4 rows. The threshold falls from 1364 to 142, and every other scale of the release carries the same factor. The cost is the truncation, which drops every row beyond the fourth of anyone who answered more often.
+The one-way scale falls nine-fold to 25.30 because each person can now change a count by at most 4 rows. The threshold falls from 1364 to 142, and all other release scales shrink by the same factor. This requires dropping every contribution after a person's fourth row.
 
 ## The measured marginals against the real ones {#sec-synth-check}
 
-The last check compares every measured multi-way marginal of the three releases with the real one, as for the one-way marginals. Each release spent its budget on its measured marginals, so the synthetic data should be closest to the truth there. The lines are from the same run as the lists above.
+The final check compares each measured multi-way marginal with its real counterpart, as in the one-way check. These should be the closest marginals because each release spent budget measuring them. The results are from the same run as above.
 
 ```text
 measured (AGE, HWUSUAL) (aim): tv=0.00200 largest cell error=2,992 rows  std=224.1 bound=0.00141
@@ -315,9 +315,9 @@ measured (SEX, AGE, ILOSTAT) (sequential): tv=0.00099 largest cell error=751 row
 measured (SEX, HWUSUAL, ILOSTAT) (sequential): tv=0.00073 largest cell error=567 rows  std=536.7 bound=0.01267
 ```
 
-Two things stand out. In the two releases that left the nulls alone, every marginal with `HWUSUAL` breaks its bound. The pairs without it are also further from the truth than in the third release, because the wrong total leaks into every marginal. In the release that filled the nulls, every measured marginal is under its bound by a factor of four or more. The bound counts three standard deviations in every cell at once, which never happens, so a three-way marginal with a distance of one thousandth is a good fit.
+In the two releases without null filling, every marginal containing `HWUSUAL` exceeds its bound. Pairs without that column also have larger errors than in the third release because the incorrect total affects every marginal. After null filling, each measured marginal is at least four times below its bound. The bound assumes every cell is three standard deviations from truth at once, an unlikely event; a three-way distance near one thousandth therefore indicates a good fit.
 
-This check does not say how the synthetic data answers a question that nobody measured, or how a model trained on it compares with one trained on the real rows. [Evaluating and tuning synthetic data](18-evaluating-synthetic-data.md) asks those questions, and shows what changes with the budget, the cuts or the number of rounds.
+This check does not assess unmeasured queries or models trained on synthetic rows. [Evaluating and tuning synthetic data](18-evaluating-synthetic-data.md) tests both and examines the effects of budget, cuts and rounds.
 
 ## Summary
 

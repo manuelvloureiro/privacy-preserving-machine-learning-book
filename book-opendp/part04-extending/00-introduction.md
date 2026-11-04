@@ -1,8 +1,8 @@
 # Extending the library
 
-The framework is open. Anything with a stability map or a privacy map can be a transformation or a measurement, whether OpenDP wrote it or you did. The thread of this part is that a plugin is only as private as its map. So writing one means proving its map, and the library makes the rest safe, from chaining to accounting.
+OpenDP's framework accepts built-in and user-defined transformations and measurements with stability or privacy maps. A plugin preserves privacy only if its map is valid; you must prove that validity. The framework then supports chaining and accounting.
 
-[Plugins](13-plugins.md) writes a transformation and a measurement in Python and registers constructors for the Context API. Then it follows the documentation's two larger examples, a Theil-Sen regression and a private choice of grouping columns. [Statistical modelling](14-statistical-modelling.md) fits the two models that come with the library, a differentially private linear regression and a differentially private principal component analysis, and reads what each guarantees. [Limitations and troubleshooting](15-limitations-and-troubleshooting.md) says what OpenDP does not promise, from floating-point arithmetic to side channels. It also explains the feature flags and the common error messages.
+[Plugins](13-plugins.md) implements a transformation and measurement in Python, registers Context API constructors, and reproduces the documentation's examples: Theil-Sen regression and private selection of grouping columns. [Statistical modelling](14-statistical-modelling.md) fits differentially private linear regression and principal component analysis models and interprets their guarantees. [Limitations and troubleshooting](15-limitations-and-troubleshooting.md) covers limitations such as floating-point arithmetic and side channels, feature flags and common errors.
 
 | Chapter | Question it answers |
 | --- | --- |
@@ -12,4 +12,4 @@ The framework is open. Anything with a stability map or a privacy map can be a t
 
 : The chapters of this part and the questions they answer. {#tbl-p4-chapters}
 
-At the end of this part you can add a mechanism of your own, fit the built-in models, and say which parts of a deployment stay yours.
+By the end of this part, you can implement a mechanism, fit the built-in models and identify your remaining deployment responsibilities.

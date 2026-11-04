@@ -2,9 +2,9 @@
 
 ## Why this matters
 
-A model trained with differential privacy (DP) is not finished when training stops. A privacy reviewer or a data protection officer decides whether it may ship. They ask what the guarantee covers, whether its number is right and what it means under the law, and none of them can rerun your training. So the claim must travel with everything needed to check it. This chapter is the book's home for the privacy statement and for the review of someone else's claim.
+A model trained with differential privacy (DP) is not ready to ship when training ends. A privacy reviewer or data protection officer must determine what the guarantee covers, whether its value is correct and how it relates to law. They may not be able to rerun training, so provide the evidence needed to verify the claim. This chapter defines the privacy statement and review process.
 
-The model is a small network, trained on 30,000 people from Adult with the private form of stochastic gradient descent (SGD), called DP-SGD. It comes from [Train a model with DP-SGD](13-train-dp-sgd.md), with a target privacy level $\varepsilon$ of 4. The script [practitioner_release.py](../../code/part05-dp-ml/practitioner_release.py) runs in a few seconds. It reads the run record that the training script writes, passed with `--record PATH`, or else a built-in copy of the book's record.
+The example model is a small stochastic gradient descent (SGD) network trained under this guarantee on 30,000 Adult records, with target privacy level $\varepsilon=4$. It is produced by [Train a model with DP-SGD](13-train-dp-sgd.md). The script [practitioner_release.py](../../code/part05-dp-ml/practitioner_release.py) runs in seconds and reads the training run record supplied with `--record PATH`, or a built-in example record.
 
 
 ```bash
@@ -13,9 +13,9 @@ uv run python code/part05-dp-ml/practitioner_release.py
 
 ## Assemble the run record {#sec-relgov-record}
 
-The record must hold what the accountant needs. The accountant is the code that turns a run's settings into $\varepsilon$ ([Choosing an accountant](../part04-privacy-accounting/09-choosing-an-accountant.md)). It reads four settings, the noise multiplier $\sigma$, the sampling rate $q$, the number of steps and the slack $\delta$. It also takes four things for granted, so the record states those too. They are the privacy unit, here one person, the neighbouring relation and the sampler that drew each batch. The fourth is that no other use of the private data went uncounted.
+The run record must include the inputs to the accountant, which converts settings to $\varepsilon$ ([Choosing an accountant](../part04-privacy-accounting/09-choosing-an-accountant.md)): noise multiplier $\sigma$, sampling rate $q$, step count and slack $\delta$. It must also document assumptions: privacy unit (one person here), neighbouring relation, batch sampler and whether any other use of private data was excluded.
 
-The record also gives $n$, the number of units, the seed, Opacus's `secure_mode` and the library versions. It says how the hyperparameters were chosen and whether any preprocessing saw private data. In the excerpt, `data` is the training script's record and `RELEASE_CONTEXT` holds the release owner's additions.
+Also record $n$, the number of units, the random seed, Opacus's `secure_mode`, library versions, hyperparameter selection and any preprocessing on private data. In the excerpt, `data` is the training record and `RELEASE_CONTEXT` contains release-owner additions.
 
 ```{.python excerpt="release-record-load"}
 merged = RELEASE_CONTEXT | data  # the training record, plus what the release owner adds
@@ -49,11 +49,11 @@ record limitations: 1
   - secure_mode=False: Opacus drew the noise from a seeded, non-cryptographic generator so the numbers reproduce; floating-point attacks on the noise are not excluded. Retrain with secure_mode=True to ship
 ```
 
-The record's $\delta$ of $10^{-5}$ follows the book's rule ([How small δ must be](../part03-dp-foundations/01-definition.md#sec-dpdef-small-delta)). Its values of $\varepsilon$ come from the cross-check of [Calibrate and account a DP-SGD run](../part04-privacy-accounting/10-calibrate-dp-sgd.md#sec-calib-crosscheck).
+The record's $\delta=10^{-5}$ follows the book's rule ([How small δ must be](../part03-dp-foundations/01-definition.md#sec-dpdef-small-delta)). Its $\varepsilon$ values come from the independent check in [Calibrate and account a DP-SGD run](../part04-privacy-accounting/10-calibrate-dp-sgd.md#sec-calib-crosscheck).
 
-The tuning entry matters most to a reviewer, because the final run's $\varepsilon$ leaves out every run that helped choose a hyperparameter. Here non-private runs chose the learning rate on 2,000 held-out Adult rows that play the part of public data, and $\varepsilon = 4$ was fixed before any private run. So the run's $\varepsilon$ is also the $\varepsilon$ of the whole procedure. Those 2,000 people come from the same survey and get no guarantee, so the statement names them. If you tune on private data, report both values ([Hyperparameter tuning](03-hyperparameter-tuning.md#sec-hpt-practice)).
+The tuning record is essential because the final run's $\varepsilon$ excludes runs used to select hyperparameters. Here, non-private runs selected the learning rate on 2,000 held-out Adult rows treated as public, and $\varepsilon=4$ was fixed before private training. The training run's $\varepsilon$ therefore equals the procedure's cost. The 2,000 people receive no guarantee and must be named in the statement. For private-data tuning, report both costs ([Hyperparameter tuning](03-hyperparameter-tuning.md#sec-hpt-practice)).
 
-A record problem stops the release, such as a missing field, a sampler that is not Poisson, a $\delta$ above the rule or unreported tuning. The one limitation here is `secure_mode`, left off so that the book's numbers repeat. The statement discloses it, and a model you ship is retrained with it on.
+Stop release for a record problem such as missing fields, a non-Poisson sampler, excessive $\delta$ or undocumented tuning. Here, `secure_mode` is disabled to keep example numbers reproducible. Disclose this limitation and enable secure mode when retraining a production model.
 
 ## Recompute the guarantee {#sec-relgov-recompute}
 

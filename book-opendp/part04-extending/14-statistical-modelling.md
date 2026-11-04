@@ -1,10 +1,10 @@
 # Statistical modelling
 
-Every release so far has been a table of statistics, such as a count, a sum, a mean or a quantile per group. Often the question is about a relation instead, such as how many hours people actually work for each hour they usually work, or which directions of a table carry its variance. OpenDP ships two models for such questions, a differentially private linear regression and a differentially private principal component analysis (PCA), both with interfaces like those of scikit-learn. The one idea of this chapter is that a fitted model is a release like any other. Its cost is the privacy map of the measurement behind `fit`, not the argument named `epsilon`.
+Earlier releases reported statistics such as counts, sums, means and quantiles. Some questions concern relationships, such as actual hours worked versus usual hours or the directions that explain a table's variance. OpenDP provides differentially private linear regression and principal component analysis (PCA), with interfaces similar to scikit-learn. A fitted model is a release: its cost is the privacy map behind `fit`, not necessarily the argument named `epsilon`.
 
-You will fit the regression on the documentation's generated points and on the Labour Force Survey (LFS), read its privacy loss, and see why its sensitivity is bounded. You will fit the PCA on the documentation's generated table and compare it with NumPy's exact decomposition. Then you will meet the NumPy domain under both estimators, and the questions a reviewer should ask about a private model.
+This chapter fits regression to the documentation's generated points and the Labour Force Survey (LFS), then reads its privacy loss and sensitivity bound. It also fits PCA to the documentation's generated table and compares it with NumPy's exact decomposition. The final sections cover the NumPy domain and review questions for private models.
 
-The script [opendp_statistical_modelling.py](../../code/part04-extending/opendp_statistical_modelling.py) runs every step on OpenDP 0.16.0 with scikit-learn 1.8.0. A seeded NumPy generator makes the toy data and fixes how the regression pairs its rows. So the exact fits, the bounds, the cut points and every privacy map are the same on every run. The released fits change, because OpenDP's generator cannot be seeded, and they appear in one block marked as one run.
+The script [opendp_statistical_modelling.py](../../code/part04-extending/opendp_statistical_modelling.py) runs on OpenDP 0.16.0 and scikit-learn 1.8.0. A seeded NumPy generator creates the toy data and fixes regression pairings, making exact fits, bounds, cut points and privacy maps reproducible. Released fits vary because OpenDP's generator cannot be seeded; the page labels them as one run.
 
 ```bash
 uv run python code/part04-extending/opendp_statistical_modelling.py
@@ -12,17 +12,17 @@ uv run python code/part04-extending/opendp_statistical_modelling.py
 
 ## A model or a table? {#sec-model-choice}
 
-The documentation's page on statistical modelling makes one point before any code. When you know which relation you need, a model made for it spends the whole budget on the few numbers that answer the question. A slope costs two private medians, as the next section shows, while a table fine enough to read the slope from would cost a noisy count in every cell. In the same way, the PCA releases a few directions, not a full covariance matrix.
+The documentation recommends a model when the target relationship is known. A purpose-built model spends the budget on the few parameters needed: a slope costs two private medians, while a table detailed enough to estimate it would require noise on every cell. PCA similarly releases a few directions rather than a full covariance matrix.
 
-The flexible alternative is synthetic data, which answers any later question and can go to people who need microdata. The price is accuracy, because a copy that serves every question answers each one less accurately than a direct release under the same budget ([AIM and MST](../part05-synthetic-data/17-aim-and-mst.md)). So release a table when the questions are counts, a model when the question is a relation, and synthetic data when the questions are not yet known.
+Synthetic data are more flexible: they support later analyses and can be shared as microdata. That flexibility reduces accuracy for each question compared with a direct release under the same budget ([AIM and MST](../part05-synthetic-data/17-aim-and-mst.md)). Release a table for counts, a model for a known relationship and synthetic data when future questions are unknown.
 
-The two models are narrow on purpose. The regression takes one explanatory column and one response, and the PCA takes a numeric table whose rows have a bounded length. For many explanatory variables, use the methods of [the full edition's chapter on private empirical risk minimization](../../book-full/part05-dp-ml/01-dp-erm.md), which OpenDP does not ship.
+Both models have narrow scope. Regression accepts one explanatory variable and one response; PCA accepts a numeric table with bounded row lengths. For multiple explanatory variables, use the methods in [the full edition's chapter on private empirical risk minimization](../../book-full/part05-dp-ml/01-dp-erm.md), which OpenDP does not implement.
 
 ## Linear regression {#sec-model-regression}
 
-A least-squares line is a poor thing to release directly. Its slope is a ratio of sums whose sensitivity is unbounded unless you clip both columns, and clipping changes the line. OpenDP ships a **Theil-Sen regression**, which uses medians instead. It pairs the rows at random, fits the line through each pair, and reads each line at two fixed cut points on the x axis. At each cut point it releases the median of those readings with a private quantile. Then it solves the two medians for a slope and an intercept, which is post-processing and costs nothing.
+Directly releasing a least-squares line is unsafe: its slope is a ratio of sums with unbounded sensitivity unless both columns are clipped, which changes the line. OpenDP instead provides **Theil-Sen regression**. It randomly pairs rows, fits a line to each pair, and evaluates each line at two fixed x-axis cut points. It privately releases the median reading at each point, then computes the slope and intercept by post-processing at no additional cost.
 
-The sensitivity is bounded because of how the private median chooses. It scores every candidate on a fixed grid by how many readings lie on either side of it. Then the exponential mechanism picks a candidate with a probability that favours high scores. One person's row sits in one pair, so it moves one reading and changes the score of any candidate by at most one. How far the reading moved does not matter, so the estimator needs no clipping and survives a person who reports a thousand hours. [The full edition's chapter on selection](../../book-full/part03-dp-foundations/05-selection.md) derives the exponential mechanism and the private quantile, and [its chapter on sensitivity](../../book-full/part03-dp-foundations/07-sensitivity.md) explains why a count of readings is the quantity to bound.
+The private median has bounded sensitivity. It scores candidates on a fixed grid by the number of readings on either side, then uses the exponential mechanism to favour high scores. One person's row enters one pair, changes one reading and changes each candidate's score by at most one. The reading's magnitude does not matter, so the estimator needs no clipping and tolerates extreme reports. [The full edition's chapter on selection](../../book-full/part03-dp-foundations/05-selection.md) derives the exponential mechanism and private quantiles; [its chapter on sensitivity](../../book-full/part03-dp-foundations/07-sensitivity.md) explains why the score change is the relevant bound.
 
 ```{.python excerpt="model-regression"}
 def make_regression(
@@ -38,7 +38,7 @@ def make_regression(
     )
 ```
 
-The first argument is the output measure, and `dp.max_divergence()` asks for pure differential privacy (DP), whose parameter is the privacy loss $\varepsilon$. The bounds are public and never clip the data. The x bounds only place the two cut points, at the fractions `fraction_bounds` of the way across, a quarter and three quarters by default. The y bounds only fix the grid of `candidates_count` evenly spaced candidates for each median, a hundred by default. The scale is the noise scale of each private median, and `runs` repeats the random pairing and pools the readings. [Plugins](13-plugins.md) builds the same estimator from plugins, as the documentation does.
+The first argument selects the output measure; `dp.max_divergence()` gives pure differential privacy (DP) with privacy parameter $\varepsilon$. Bounds are public and do not clip data. The x bounds place cut points at the `fraction_bounds` fractions of the range, one quarter and three quarters by default. The y bounds define `candidates_count` evenly spaced median candidates, 100 by default. `scale` sets noise per median; `runs` repeats random pairings and pools readings. [Plugins](13-plugins.md) builds the same estimator from plugins.
 
 ```text
 regression space: NPArray2Domain(num_columns=2, nan=True, T=f64) SymmetricDistance() MaxDivergence
@@ -47,7 +47,7 @@ regression map: scale=2 runs=1 -> epsilon=1.0
 regression map: scale=2 runs=3 -> epsilon=3.0
 ```
 
-The `measurement` attribute of the estimator reads like any other measurement. Its input is a two-column NumPy array under the symmetric distance, so its map at distance 1 is the privacy loss for adding or removing one row. Two medians at scale 1 cost $\varepsilon = 2$, and doubling the scale halves that. Three runs at scale 2 cost $\varepsilon = 3$, because a row then sits in three pairs and moves three readings. More runs make the median better defined, but at a fixed budget they force a larger scale, so they rarely pay on a large dataset.
+The estimator's `measurement` attribute exposes its privacy map. Its input is a two-column NumPy array under symmetric distance, so map distance 1 gives the cost of adding or removing one row. Two medians at scale 1 cost $\varepsilon=2$; doubling the scale halves the cost. Three runs at scale 2 cost $\varepsilon=3$ because one row can affect three pairwise readings. More runs define the median better, but require a larger scale at fixed budget and rarely help on large datasets.
 
 The documentation's toy data is a hundred points with a true slope of 2 and an intercept of 1, here from a seeded generator. The script prints the exact values to read a fit against.
 

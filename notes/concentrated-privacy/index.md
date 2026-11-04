@@ -7,7 +7,7 @@ abstract: |
 
 A statistic computed from a dataset, such as a count, reveals a little about each person in it. Differential privacy limits how much. It asks that the published output be almost as likely whether or not any one person's record is in the data. Random noise makes this possible. Without noise, adding one person to a count changes the answer by exactly one, and anyone who compares two releases can see it. With noise, the two possible answers overlap, so one output cannot reliably tell them apart.
 
-This note asks how the privacy cost of many releases adds up. The simplest answer is that the costs add, so a hundred releases cost a hundred times as much as one. That answer is safe but pessimistic, because it charges every release its worst case. In fact the cost of a release is random, usually far below its worst case and sometimes negative. So the total is a sum of small average costs plus a fluctuation that grows only like the square root of the number of releases.
+This note asks how the privacy cost of many releases adds up. For pure differential privacy, basic composition adds the per-release costs, so a hundred releases cost a hundred times as much as one. This bound is safe but pessimistic because it charges every release its worst-case loss. A release's privacy loss is random, usually below its maximum and sometimes negative. The total therefore combines the average losses with fluctuations that grow only as the square root of the number of releases.
 
 You need only basic probability: densities, expectations, variances, the normal distribution and Markov's inequality. @tbl-map gives the question that each section answers, and @tbl-symbols lists the symbols.
 
@@ -168,7 +168,7 @@ For every history, round $i$ is $\varepsilon_i$-DP, so @thm-pure-loss gives $|L_
 
 So a hundred releases at $\varepsilon = 0.1$ each cost $\varepsilon = 10$. That is a weak guarantee, because by @eq-bayes a loss of $10$ multiplies an observer's odds by $e^{10} \approx 22{,}000$. The theorem is correct, but it charges every round its largest loss, all in the same direction, while the actual loss of a round is random and usually smaller.
 
-The counting example shows by how much. When the data are $D$, the output is the count $1$ plus Laplace noise of scale $1$. With probability $\tfrac12$ it lands at or above $1$, where the loss is $+1$, and with probability $\tfrac12 e^{-1} = 0.184$ it lands at or below $0$, where the loss is $-1$. The outputs in between have losses strictly between $-1$ and $1$, and they add $0.052$ to the average. So the loss averages $0.5 - 0.184 + 0.052 = 0.368$, well below its maximum of $1$, and it is negative more than a sixth of the time. Over many rounds these losses partly cancel, and @sec-advanced turns that into a much better bound.
+The counting example quantifies this difference. When the data are $D$, the output is the count $1$ plus Laplace noise of scale $1$. With probability $\tfrac12$ it lands at or above $1$, where the loss is $+1$, and with probability $\tfrac12 e^{-1} = 0.184$ it lands at or below $0$, where the loss is $-1$. Outputs between $0$ and $1$ have losses strictly between $-1$ and $1$ and contribute $0.052$ to the average. The mean loss is therefore $0.5 - 0.184 + 0.052 = 0.368$, below its maximum of $1$; it is negative more than a sixth of the time. Over many rounds these losses partly cancel, and @sec-advanced uses that cancellation to derive a tighter bound.
 
 ## Post-processing
 
@@ -555,7 +555,7 @@ $$\ln\mathbb E_P\bigl[e^{\lambda L}\bigr] \le \frac{\varepsilon^2}{2}\bigl(\lamb
 **The divergence.** Dividing by $\lambda = \alpha - 1$, and using $1 + \lambda = \alpha$, @lem-renyi gives $D_\alpha(P \| Q) \le \alpha\varepsilon^2/2$. The same holds in the other order.
 :::
 
-The proof needs the sharper mean bound $\varepsilon\tanh(\varepsilon/2)$, because the looser form $\varepsilon(e^\varepsilon - 1)/2$ exceeds $\varepsilon^2/2$ and would give a slightly worse $\rho$. With this theorem, the example of @sec-advanced becomes a zCDP calculation. A hundred $0.1$-DP releases are each $0.005$-zCDP, so $0.5$-zCDP in total, and @eq-zcdp-total with $\delta' = 10^{-5}$ gives $\varepsilon = 5.30$. That is slightly better than the $5.32$ of advanced composition.
+The proof needs the sharper mean bound $\varepsilon\tanh(\varepsilon/2)$, because the looser form $\varepsilon(e^\varepsilon - 1)/2$ exceeds $\varepsilon^2/2$ and would give a slightly worse $\rho$. With this theorem, the example of @sec-advanced becomes a zCDP calculation. A hundred $0.1$-DP releases are each $0.005$-zCDP, for $0.5$-zCDP in total. Using @eq-zcdp-total with $\delta' = 10^{-5}$ gives $\varepsilon = 5.30$, compared with $5.32$ under advanced composition.
 
 ::: {#thm-cdp-zcdp name="CDP gives zCDP"}
 A $(\mu, \tau)$-CDP mechanism is $\bigl(\max\{0, \mu - \tau^2/2\},\; \tau^2/2\bigr)$-zCDP.

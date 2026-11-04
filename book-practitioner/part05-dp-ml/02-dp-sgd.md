@@ -2,9 +2,9 @@
 
 ## Why this matters
 
-Nearly every deep-learning system that satisfies differential privacy (DP) runs one algorithm. It is stochastic gradient descent (SGD) with clipped per-record gradients and Gaussian noise at every step, called DP-SGD (Abadi et al. 2016). Clipping limits how far one record moves the model at each step, and the noise hides that move. An **accountant** adds up the cost of the steps into the guarantee's $\varepsilon$, with a small additive slack $\delta$.
+Nearly every deep-learning system with differential privacy (DP) uses the differentially private version of stochastic gradient descent (SGD), called DP-SGD: it clips per-record gradients and adds Gaussian noise at each step (Abadi et al. 2016). Clipping bounds each record's effect on the model; noise obscures that effect. An **accountant** composes step costs into privacy level $\varepsilon$ and slack $\delta$.
 
-The accountant sees only the noise, the sampling rate (the chance that a record joins a batch) and the number of steps, never the model. So those three decide $\varepsilon$, and you can tune the clipping norm and learning rate for accuracy alone. Most failures come from code that breaks an assumption of the privacy proof, so the checks matter as much as the settings. [Train a model with DP-SGD](13-train-dp-sgd.md) does the whole job in Opacus.
+The accountant uses only the noise, sampling rate and number of steps; it does not inspect the model. These parameters determine $\varepsilon$, while clipping norm and learning rate can be tuned for accuracy. Most failures arise when code violates a proof assumption, so implementation checks are as important as parameter choices. [Train a model with DP-SGD](13-train-dp-sgd.md) demonstrates the full Opacus workflow.
 
 ## The algorithm and its guarantee {#sec-dpsgd-algorithm}
 
@@ -24,9 +24,9 @@ This part's running example (@sec-dpsgd-run) is the run of [Train a model with D
 
 ## The implementation checklist {#sec-dpsgd-checklist}
 
-The guarantee rests on four properties of your code. Code that breaks one still trains and reports as before.
+The guarantee requires four implementation properties. Violating one does not necessarily stop training or reporting.
 
-First, one record must move the clipped sum by at most $C$. Batch normalization breaks this, because its statistics let one record change every other record's gradient. So private models use group or layer normalization, which works on each record alone. With `strict=False`, Opacus's validator lists the layers to replace instead of raising an error.
+First, one record may change the clipped sum by at most $C$. Batch normalization violates this condition because its statistics let one record affect other records' gradients. Use group or layer normalization instead; these operate on each record separately. With `strict=False`, Opacus's validator lists incompatible layers rather than raising an error.
 
 ```python
 from opacus.validators import ModuleValidator
@@ -38,29 +38,29 @@ model = ModuleValidator.fix(model)
 print(len(ModuleValidator.validate(model, strict=False)))  # 0
 ```
 
-Also fix $C$ in advance, from public data or a private estimate. A $C$ read off the current batch makes the noise depend on the data.
+Set $C$ in advance using public data or a private estimate. Estimating $C$ from the current batch makes the noise data-dependent.
 
-Second, the accountant must assume the sampler the code actually runs ([Amplification by subsampling](../part04-privacy-accounting/05-subsampling.md#sec-sub-schemes)). The Poisson accountant's saving comes from each record's chance of being left out of a batch. A loader that shuffles once per epoch and cuts fixed batches puts every record in exactly one batch per epoch. That chance is then gone, and the true $\varepsilon$ can be far above the Poisson number.
+Second, match the accountant to the implemented sampler ([Amplification by subsampling](../part04-privacy-accounting/05-subsampling.md#sec-sub-schemes)). Poisson accounting benefits from the chance that each record is absent from a batch. A loader that shuffles once per epoch and divides data into fixed batches includes every record exactly once per epoch, eliminating that amplification. Its true $\varepsilon$ may greatly exceed the Poisson estimate.
 
-Fixed-size batches drawn afresh at every step can still use a Poisson accountant, at the batch's share of the data and half your noise multiplier. The noise counts as halved because a record that enters a fixed-size batch pushes another out, so the sum can move by $2C$. This raises the running example's $\varepsilon$ from 3.98 to 23.03, both from `dp_accounting`'s numerical accountant, and it holds only for add/remove neighbours.
+Fresh fixed-size batches can be accounted with a Poisson accountant using the batch's sampling rate and half the noise multiplier. A sampled record replaces another, so the sum can change by $2C$. In the running example, `dp_accounting`'s numerical accountant gives $\varepsilon=23.03$, compared with 3.98 for Poisson sampling; this bound uses add/remove neighbours.
 
-Third, divide the noisy sum by the public number $B$, never by the actual batch size. The actual size is one larger when the protected record is drawn, so dividing by it reveals whether it was.
+Third, divide the noisy sum by the public expected batch size $B$, not the realized size. The realized size is one larger when the protected record is included, so dividing by it reveals that inclusion.
 
-Fourth, the accountant must count every step that touched the data, including those of runs discarded in [tuning](03-hyperparameter-tuning.md).
+Fourth, account for every step that accessed the data, including discarded runs during [tuning](03-hyperparameter-tuning.md).
 
-Beyond the proof, state the neighbouring relation next to every $\varepsilon$, and make data-dependent preprocessing private too. A person with many records needs [user-level privacy](07-user-level.md). For a model you release, turn on Opacus's `secure_mode=True`, because floating-point sampling is not the exact Gaussian noise of the proof ([Discrete and floating-point-safe mechanisms](../part03-dp-foundations/08-discrete-mechanisms.md)).
+State the neighbouring relation with each $\varepsilon$, and make data-dependent preprocessing private. Use [user-level privacy](07-user-level.md) when one person contributes multiple records. For released models, enable Opacus's `secure_mode=True`; floating-point sampling does not produce the exact Gaussian noise assumed by the proof ([Discrete and floating-point-safe mechanisms](../part03-dp-foundations/08-discrete-mechanisms.md)).
 
 ## Clipping and the learning rate {#sec-dpsgd-clipping}
 
-Clipping must happen per record. PyTorch's `torch.nn.utils.clip_grad_norm_` clips a whole batch's gradient, which bounds no single record and so gives no privacy at any threshold.
+Clip each record's gradient separately. PyTorch's `torch.nn.utils.clip_grad_norm_` clips the batch gradient, which does not bound any single record's contribution and provides no privacy guarantee.
 
-The clipping norm $C$ does not change $\varepsilon$, but it costs accuracy either way. A small $C$ clips more gradients, so records with large gradients count for less, and they are often rare records ([Disparate impact](08-disparate-impact.md)). A large $C$ means more noise, since the noise is $\sigma C$.
+The clipping norm $C$ does not change $\varepsilon$, but it affects accuracy. Small $C$ clips more gradients, reducing the contribution of high-gradient records, which may be rare ([Disparate impact](08-disparate-impact.md)). Large $C$ increases noise because its standard deviation is $\sigma C$.
 
-When every gradient is clipped, each has length exactly $C$ and the noise is proportional to $C$ too. So the step depends only on the product $\eta C$ of the learning rate and the clipping norm. Clip hard, and tune that one number. On the running example at $\varepsilon = 4$, holding $\eta C$ at 2 keeps test accuracy between 0.8446 and 0.8464 for every $C$ from 0.1 to 10. Holding $\eta$ at 2 instead, $C = 10$ drops it to 0.7869.
+When all gradients are clipped to length $C$, the noise also scales with $C$. The update therefore depends on the product $\eta C$, where $\eta$ is the learning rate. If clipping is aggressive, tune this product. In the running example at $\varepsilon=4$, fixing $\eta C=2$ keeps test accuracy between 0.8446 and 0.8464 for $C$ from 0.1 to 10. Fixing $\eta=2$ instead gives accuracy 0.7869 at $C=10$.
 
-Noise and clipping also move the best learning rate. Noise lowers it ([Optimization](../../book-full/part01-prerequisites/06-optimization.md)), while clipping raises it, because clipped gradients are shorter. The two do not cancel predictably, so search the step again whenever $\sigma$ or $C$ changes, and count the search's runs in $\varepsilon$.
+Noise and clipping both affect the optimal learning rate. Noise lowers it ([Optimization](../../book-full/part01-prerequisites/06-optimization.md)); clipping raises it because gradients become shorter. Their effects do not cancel predictably. Retune the learning rate when $\sigma$ or $C$ changes, and include all search runs in the privacy cost.
 
-Gradient norms also drift. The running example's median per-example norm, measured on public rows, falls from 1.444 to 0.044 in its 300 steps. So $C = 1$ clips every row at the start and only a quarter of them at the end. Adaptive clipping moves $C$ toward a quantile of the norms, measured by a small private count, and Opacus offers it with `clipping="adaptive"`. The count spends part of the budget, so the gradient gets more noise at the same $\sigma$.
+Gradient norms change during training. In the running example, the median per-example norm on public rows falls from 1.444 to 0.044 over 300 steps. Thus, $C=1$ clips every row initially but only one quarter at the end. Adaptive clipping adjusts $C$ toward a gradient-norm quantile using a private count; Opacus enables it with `clipping="adaptive"`. This count consumes budget, increasing gradient noise at the same $\sigma$.
 
 ## Batch size at a fixed budget {#sec-dpsgd-batch}
 

@@ -2,23 +2,23 @@
 
 ## Why this matters
 
-In **federated learning (FL)**, a server sends the current model to each phone or other client. The client computes the gradient of the loss on its own few records and sends back only that gradient. The server averages the gradients and takes a training step. People often call this private because "the data stay on the device".
+In **federated learning (FL)**, a server sends the current model to each client. Each client computes the loss gradient on its records and returns the gradient; the server averages the gradients and updates the model. This arrangement is sometimes described as private because raw data remain on the device.
 
-Yet one client's gradient can give back all of that client's data, because many of its derivatives are simple functions of the input. An average over a batch protects much less than people expect (@sec-gradinv-batch). So treat each client's update as being as sensitive as the data it came from.
+However, a client's gradient may reveal its data because many gradient components are simple functions of the input. Averaging over a batch provides limited protection (@sec-gradinv-batch). Treat each client update as sensitive as the underlying data.
 
 ## The attacker and what it sees {#sec-gradinv-setting}
 
-The attacker is the server, which knows every parameter because it sent the model out, and which also sees each client's own update. So its access is the **transcript** of [Threat models and privacy games](01-threat-models.md), everything that training exposes. Assume first that the server is **honest-but-curious**, so that it only analyses what it receives. Each client holds a batch of $B$ records and sends the average of their gradients. Write $\ell_i$ for the loss on record $i$, which depends on all the parameters $\theta$. The client then sends
+The server knows the model parameters and sees each client's update. Its access is the training **transcript** defined in [Threat models and privacy games](01-threat-models.md). First assume the server is **honest-but-curious**: it follows the protocol but analyses all received information. A client with a batch of $B$ records sends the mean gradient. Let $\ell_i$ be the loss on record $i$, which depends on model parameters $\theta$. The client sends
 $$g = \frac1B\sum_{i=1}^B\nabla_\theta\ell_i.$$
 
 ## Exact recovery from a fully connected layer {#sec-gradinv-exact}
 
-The most common first layer, a fully connected layer with a bias, gives its input back by one division. Write $W_1$ and $b_1$ for its weights and bias. Each unit $j$ multiplies the input $x$ by its row of weights and adds its bias. Its backward signal $u_j$ is how fast the loss responds to the unit's output. The chain rule turns this signal into the weight and bias gradients
+For a fully connected first layer with a bias, one division recovers the input. Let $W_1$ and $b_1$ be the weights and bias. Unit $j$ multiplies input $x$ by its weight row and adds its bias. Let $u_j$ be the loss derivative with respect to the unit's output. The chain rule gives the weight and bias gradients
 $$\nabla_{W_1}\ell = u\,x^\top, \qquad \nabla_{b_1}\ell = u.$$ {#eq-gradinv-outer}
-So row $j$ of the weight gradient is the input scaled by $u_j$, and the bias gradient of unit $j$ is that same scale. For a single record, divide one by the other. This gives the input exactly, for every unit whose bias gradient is not zero:
+Thus, row $j$ of the weight gradient is $x$ scaled by $u_j$, and unit $j$'s bias gradient is $u_j$. For one record, their ratio recovers the input exactly whenever the bias gradient is nonzero:
 $$x = \frac{(\nabla_{W_1}\ell)_{j,:}}{(\nabla_{b_1}\ell)_j}.$$ {#eq-gradinv-ratio}
 
-Everything above the layer, including the network's depth, the loss and the label, sits inside $u_j$ and cancels. So the attack needs no optimization and no knowledge of the data. The snippet below plays one client with one image of scikit-learn's digits in PyTorch. Its last line reads the label, as @sec-gradinv-labels explains.
+The network depth, loss and label affect $u_j$, which cancels in the ratio. The attack therefore requires neither optimization nor prior knowledge of the input. The snippet simulates one client using an image from scikit-learn's digits dataset in PyTorch. Its final line recovers the label, as described in @sec-gradinv-labels.
 
 ```python
 import torch
@@ -39,29 +39,29 @@ print(f"image recovered: {torch.allclose(recovered, x[0], atol=1e-6)}")  # image
 print(f"recovered label {int(last.bias.grad.argmin())}, true label {int(y)}")  # recovered label 7, true label 7
 ```
 
-The snippet divides at the unit whose bias gradient is largest, because a ReLU unit that is off has a zero gradient. One active unit is enough. But a convolutional first layer stops the division. It uses the same filter at every position of the image, so its gradient is a sum of one product per image patch. No division can separate them. The attacker then has to search (@sec-gradinv-dlg).
+The snippet uses the unit with the largest bias gradient because an inactive ReLU unit has zero gradient; one active unit suffices. A convolutional first layer does not permit this division. It reuses each filter across image positions, so its gradient sums products from multiple patches. The attacker must then use a search method (@sec-gradinv-dlg).
 
 ## Label recovery from the last layer {#sec-gradinv-labels}
 
-The label is often the most sensitive part of an example, such as a diagnosis. The attacker can read it off the last layer without search (Zhao, Mopuri & Bilen 2020). The condition is that the layer has a bias and feeds the softmax and cross-entropy loss. Write $p$ for the predicted probabilities and $e_y$ for the vector with a 1 at the position of the label $y$. The gradient of the last layer's bias $b_2$ is then $p - e_y$. Every entry of $p$ lies between 0 and 1, so only the entry at the true label is negative, and for a single record
-$$y = \arg\min_k(\nabla_{b_2}\ell)_k,$$ {#eq-gradinv-labels}
-which is the snippet's `argmin`. It fails only for a very confident model. If the true label's probability $p_y$ rounds to 1, that entry becomes zero, and no entry is negative.
+The label, such as a diagnosis, may be the most sensitive part of a record. It can be recovered from the last layer without search (Zhao, Mopuri & Bilen 2020) when that layer has a bias and feeds a softmax with cross-entropy loss. Let $p$ be the predicted probabilities and $e_y$ the vector with 1 at the true label $y$. The last-layer bias gradient $b_2$ is $p-e_y$. Since each entry of $p$ is between 0 and 1, only the true-label entry is negative. For one record,
+$$y = \arg\min_k(\nabla_{b_2}\ell)_k.$$ {#eq-gradinv-labels}
+This is the snippet's `argmin`. If the model is so confident that $p_y$ rounds to 1, the true-label gradient becomes zero and the rule no longer identifies a negative entry.
 
-A batch hides which record has which label, but not how many records each class has. Each entry of the bias gradient is then the class's average predicted probability minus its share of the batch. So a server that estimates the average prediction can read off each class's count. In the full edition's experiment, this gave every count exactly in all batches of 4, and in 52.5% of batches of 64.
+A batch hides the label of each record but may reveal each class count. Each bias-gradient entry equals that class's average predicted probability minus its fraction of the batch. A server that estimates the average prediction can recover the class counts. In the full edition's experiment, all counts were exact for every batch of 4 and for 52.5% of batches of 64.
 
 ## Deep Leakage from Gradients {#sec-gradinv-dlg}
 
-When the division does not apply, the attacker searches. **Deep Leakage from Gradients (DLG)**, from Zhu, Liu & Han (2019), guesses inputs and computes the gradient they would produce. It then moves the guesses until that gradient matches the observed gradient $g$. Write $x_i'$ for the guessed inputs, $y_i$ for their labels, read first from the last layer, and $\ell(\theta; x', y)$ for the loss of one guess. The attack minimizes the **matching loss** $R$, the squared distance between the guesses' average gradient and $g$:
+When division does not apply, the attacker can use **Deep Leakage from Gradients (DLG)** (Zhu, Liu & Han 2019). DLG guesses inputs, computes their gradients and adjusts the inputs until the average gradient matches the observed gradient $g$. Let $x_i'$ be the guessed inputs, $y_i$ their labels (recovered from the last layer), and $\ell(\theta;x',y)$ the loss of a guess. The attack minimizes the **matching loss** $R$, the squared distance between the guessed mean gradient and $g$:
 $$\hat x_1, \dots, \hat x_B = \arg\min_{x_1', \dots, x_B'}R(x'), \qquad R(x') = \Big\|\frac1B\sum_{i=1}^B\nabla_\theta\ell(\theta; x_i', y_i) - g\Big\|^2.$$ {#eq-gradinv-dlg}
-In PyTorch, `create_graph=True` in `torch.autograd.grad` makes the guess's gradient differentiable, so an optimizer such as Adam can follow the slope of $R$ back to the input.
+In PyTorch, `create_graph=True` in `torch.autograd.grad` makes the guessed gradient differentiable. An optimizer such as Adam can then follow the gradient of $R$ with respect to the input.
 
-Two things decide whether the search works. First, the activation's slope must vary, because the search differentiates a gradient. The ReLU's slope is constant on each side of zero, so Zhu et al. used the sigmoid. Second, $R$ is not convex, so the search can get stuck. Run it until $R$ stops falling, and compare the final value with the squared size $\|g\|^2$ of the observed gradient. In double precision, a successful run in the full edition ends near $10^{-27}$ and a stuck one near $10^{-5}$. Another input can also give a small $R$, so restart from several random guesses, and trust an image only when the restarts agree on it.
+Two conditions affect the search. First, the activation's slope must vary because the search differentiates a gradient. ReLU has constant slope on either side of zero, so Zhu et al. used sigmoid. Second, $R$ is nonconvex and the search may get stuck. Stop when $R$ no longer decreases, then compare it with the observed gradient's squared norm $\|g\|^2$. In double precision, a successful run in the full edition reaches about $10^{-27}$, while a stuck run reaches about $10^{-5}$. Because other inputs may also give small $R$, use several random restarts and accept a reconstruction only when the results agree.
 
 ## Batches and averaging {#sec-gradinv-batch}
 
-Clients usually send the average over a batch, or the change in their parameters after several training steps on the device (**local steps**). The average breaks the division and slows the search, but much of the structure survives. Each record adds one outer product to the gradient of the first layer, so every row of that gradient is a combination of the $B$ inputs. So the server learns their **span**, the set of all such combinations, which contains every record.
+Clients usually send a batch average or a parameter change after several on-device training steps (**local steps**). Averaging prevents the direct division and slows search, but preserves structure. Each record adds an outer product to the first-layer gradient, so each gradient row is a combination of the $B$ inputs. The server therefore learns their **span**, the set of their linear combinations, which contains every record.
 
-The division still recovers a record exactly when some ReLU unit is on for that record only. The other records then add nothing to that unit's row. Such a unit **isolates** the record. Isolation is far more common than a count of random units suggests. On images that resemble one another, a unit fires on many records or on few. In the full edition's network with 1,024 hidden units, a naive count predicts that 1.6% of a batch of 16 is exposed. But 69.1% was, as @tbl-gradinv-isolation shows. The share falls with a larger batch and rises with a wider first layer. So measure at your own width and batch size, and treat any isolated record as a breach.
+The division still recovers a record exactly if a ReLU unit activates only for that record; other records then contribute nothing to its gradient row. Such a unit **isolates** the record. Isolation is more common than a count of random units predicts because similar images may activate the same units. In the full edition's network with 1,024 hidden units, a naive estimate predicts exposure for 1.6% of records in a batch of 16; the measured share is 69.1% (@tbl-gradinv-isolation). Larger batches reduce this share, while wider first layers increase it. Measure the risk at the deployed width and batch size, and treat any isolated record as exposed.
 
 | Hidden units | Batch size | Share of the batch recovered exactly |
 | --- | --- | --- |
@@ -72,11 +72,11 @@ The division still recovers a record exactly when some ReLU unit is on for that 
 
 : Isolation attack on synthetic images, from the full edition. {#tbl-gradinv-isolation}
 
-Batches hurt DLG more: on the full edition's sigmoid network, the median run on a batch of 4 gets stuck. The search is harder, but the information is still there, because the isolation attack recovered all four images of such a batch. Local steps do not protect a single record either. The gradient of the first layer at each step is an outer product with the same input, so the division still works on the total change. A **malicious** server that chooses the weights can do more. It plants units that fire only on rare inputs, so that each unit isolates one record. It then recovers most records of a batch of any size (Boenisch et al. 2023, Fowl et al. 2022).
+Batches make DLG less reliable: in the full edition's sigmoid-network experiment, the median search on a batch of 4 gets stuck. However, the isolation attack still recovered all four images in such a batch. Local training steps also fail to protect a single record. At each step, the first-layer gradient is an outer product with the same input, so the ratio still recovers that input from the total parameter change. A **malicious** server that chooses the weights can plant units that activate only on rare inputs. Each unit can then isolate one record, allowing recovery of most records in a batch of any size (Boenisch et al. 2023, Fowl et al. 2022).
 
 ## What to do as a deployer {#sec-gradinv-defences}
 
-The risk of an FL deployment depends on who can see one client's update, as @tbl-gradinv-decisions shows.
+The risk of an FL deployment depends on who can see each client's update (@tbl-gradinv-decisions).
 
 | Setting | What leaks to the server | What to do |
 | --- | --- | --- |
@@ -87,11 +87,11 @@ The risk of an FL deployment depends on who can see one client's update, as @tbl
 
 : Gradient leakage by FL setting, and the response. {#tbl-gradinv-decisions}
 
-**Secure aggregation** is a cryptographic protocol that lets the server see only the sum over many clients. It removes the view of single clients that every attack here uses. But a sum over very few clients is close to a single update. So set a minimum cohort size, and make sure that clients who drop out in a round cannot shrink a sum below it.
+**Secure aggregation** lets the server see only the sum of updates from multiple clients, preventing the single-client access required by the attacks above. A sum from a very small cohort may still reveal an individual update. Set a minimum cohort size and prevent client dropouts from reducing the sum below it.
 
-Secure aggregation alone is not enough. The sum is still a batch average that the attacks above can read, and a malicious server can still choose its weights. For a guarantee, add DP with the client as the unit of privacy. Clip each client's update to a fixed maximum norm and add noise to the sum. That bounds what any one client's data can change ([User-level privacy](../part05-dp-ml/07-user-level.md)). Flower and TensorFlow Federated offer both protections. Gradient pruning and similar defences make the search harder but give no guarantee.
+Secure aggregation alone does not provide a formal guarantee. The aggregate remains a batch average that may be vulnerable to the attacks above, and a malicious server may still choose the model weights. Add DP at the client level for a guarantee: clip each client's update to a fixed maximum norm and add noise to the sum. This bounds the effect of any one client's data ([User-level privacy](../part05-dp-ml/07-user-level.md)). Flower and TensorFlow Federated offer both protections. Gradient pruning and similar defences may hinder attacks but provide no guarantee.
 
-To assess your deployment, first find out whether the server sees single updates or only sums, and with what minimum cohort. Then run the attacks on your own architecture, batch size and number of local steps. Geiping's open-source `breaching` framework for PyTorch runs them. If the server can see one client's update on its own, block the deployment until secure aggregation or client-level DP is in place. Record the verdict in the [Pre-release privacy risk assessment](10-risk-assessment.md).
+Assess whether the server sees individual updates or only aggregates, and identify the minimum cohort size. Run the attacks using the deployed architecture, batch size and number of local steps. Geiping's open-source PyTorch framework `breaching` implements these attacks. If the server can see an individual update, block deployment until secure aggregation or client-level DP is in place. Record the decision in [Pre-release privacy risk assessment](10-risk-assessment.md).
 
 ## Cheat sheet
 

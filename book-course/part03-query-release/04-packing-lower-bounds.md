@@ -1,12 +1,12 @@
 # Packing lower bounds
 
-Every chapter so far has given an algorithm and proved how much data it needs. This chapter asks whether a cleverer algorithm could need less. For pure differential privacy (DP), a short argument called packing answers it. An accurate algorithm must put its output in a different region for each of many datasets. But a private one barely moves its output distribution between them. Both can hold only when the dataset is large enough.
+Previous chapters gave algorithms and upper bounds on their sample sizes. This chapter asks whether better algorithms can use less data. Under pure differential privacy (DP), a packing argument gives lower bounds: accuracy requires different output regions for many datasets, while privacy limits how much output probabilities can vary between them. Both requirements force a minimum dataset size.
 
-The resulting lower bounds hold for every $\varepsilon$-DP algorithm, however it is built. On one-way marginals and histograms, they show that the simple Laplace-noise algorithms are optimal up to a constant or a logarithmic factor. They also show that pure DP costs strictly more than approximate DP there.
+These lower bounds apply to every $\varepsilon$-DP algorithm. For one-way marginals and histograms, they show that Laplace mechanisms are optimal up to constant or logarithmic factors. They also show that pure DP requires more data than approximate DP for these problems.
 
 ## Two problems and their upper bounds {#sec-pack-problems}
 
-Both problems ask for many counting queries at once, answered as fractions of the dataset. The first has records that are $d$ yes-or-no answers, and asks for the fraction of yes answers to each question.
+Both problems release many counting queries as fractions of the dataset. In the first, each record contains $d$ binary answers, and the mechanism estimates the fraction of yes answers to each question.
 
 ::: {#def-pack-marginals name="One-way marginals"}
 Let $\mathcal X = \{0,1\}^d$. For a record $x_i$, write $x_{ij}$ for its coordinate $j$. The **one-way marginals** of a dataset $D \in \mathcal X^n$ are the $d$ averages
@@ -16,7 +16,7 @@ f_j(D) = \frac1n \sum_{i=1}^n x_{ij}, \qquad j = 1, \dots, d .
 $$
 :::
 
-The second problem has records that are symbols from a finite set, and asks for the fraction of records equal to each symbol.
+In the second, each record is a symbol from a finite set, and the mechanism estimates the fraction of records equal to each symbol.
 
 ::: {#def-pack-histogram name="Histogram"}
 Let $\mathcal X = [k] = \{1, \dots, k\}$. The **normalized histogram** of a dataset $D \in [k]^n$ is the vector $h(D) \in [0,1]^k$ with coordinates
@@ -28,15 +28,15 @@ $$
 where $\mathbf 1[x_i = j]$ is $1$ if record $i$ equals $j$ and $0$ otherwise.
 :::
 
-For both problems, an answer $y$ is judged by its worst coordinate, the $\ell_\infty$ error $\max_j |y_j - f_j(D)|$. So an answer with error at most $\alpha$ gets every query right to within $\alpha$ at once.
+For both problems, error is the largest coordinate error, $\ell_\infty=\max_j|y_j-f_j(D)|$. Error at most $\alpha$ therefore bounds every query simultaneously.
 
-The upper bounds come from the [Laplace mechanism](../part02-dp-basics/02-laplace-mechanism.md). Suppose the vector of answers $f$ has $\ell_1$ sensitivity at most $\Delta_1 f$, which means that $\sum_j |f_j(D) - f_j(D')| \le \Delta_1 f$ for all neighbours $D \sim D'$, datasets that differ in one record (the replace-one relation). The Laplace mechanism releases $f(D) + (Z_1, \dots, Z_d)$, where the noise terms $Z_j$ are independent Laplace variables with scale $\Delta_1 f/\varepsilon$, and it is $\varepsilon$-DP. The analysis needs only the tail of a Laplace variable $Z$ with scale $b$, for every $s \ge 0$,
+The upper bounds use the [Laplace mechanism](../part02-dp-basics/02-laplace-mechanism.md). If answer vector $f$ has $\ell_1$ sensitivity $\Delta_1f$, meaning $\sum_j|f_j(D)-f_j(D')|\le\Delta_1f$ for neighbours that differ in one record, then adding independent Laplace noise of scale $\Delta_1f/\varepsilon$ to each coordinate gives $\varepsilon$-DP. Its analysis uses the tail probability for $Z\sim\mathrm{Lap}(b)$:
 
 $$
 \Pr[|Z| \ge s] = e^{-s/b} .
 $$
 
-Computing the $\ell_1$ sensitivity of each problem and applying this tail to every coordinate gives the two upper bounds that the rest of the chapter tries to beat.
+The next proposition computes sensitivities and applies this tail bound to each coordinate.
 
 ::: {#prp-pack-upper}
 Let $\varepsilon > 0$, $\alpha > 0$ and $\beta \in (0,1)$. With probability at least $1 - \beta$:
@@ -58,13 +58,13 @@ $$ {#eq-pack-upper}
 4. *Sample size.* Each error bound is at most $\alpha$ exactly when $n$ satisfies @eq-pack-upper with $\beta = 1/2$.
 :::
 
-Approximate DP does better on both problems. For the marginals, the Gaussian mechanism of the [approximate DP chapter](../part02-dp-basics/03-approximate-dp.md) uses the $\ell_2$ sensitivity $\sqrt d/n$ instead of the $\ell_1$ sensitivity $d/n$, and needs $n$ only of order $\sqrt{d \ln(1/\delta)\ln d}/(\alpha\varepsilon)$, a factor of about $\sqrt d$ less. For histograms, the stability-based histogram of the [previous chapter](03-beyond-global-sensitivity.md) needs $n$ of order $\ln(1/\delta)/(\alpha\varepsilon)$ when $\delta \le 1/n$, with no dependence on $k$ at all. The rest of the chapter shows that under pure DP neither gain is possible.
+Approximate DP improves both bounds. For marginals, the Gaussian mechanism in the [approximate DP chapter](../part02-dp-basics/03-approximate-dp.md) uses $\ell_2$ sensitivity $\sqrt d/n$ rather than $\ell_1$ sensitivity $d/n$, reducing the required $n$ to order $\sqrt{d\ln(1/\delta)\ln d}/(\alpha\varepsilon)$. For histograms, the [stability-based histogram](03-beyond-global-sensitivity.md) needs $n$ of order $\ln(1/\delta)/(\alpha\varepsilon)$ when $\delta\le1/n$, independent of $k$. The rest of this chapter shows that pure DP cannot achieve these improvements.
 
 ## The packing argument {#sec-pack-argument}
 
-The name comes from packing balls into a box, where only a limited number fit because the balls cannot overlap. Here the balls are regions of the output space that do not overlap, one for each of many datasets. Accuracy forces each dataset to send its output into its own region, and privacy forces every dataset to give every region some probability. The probabilities of disjoint regions add up to at most $1$, so only a limited number of datasets can be packed.
+The argument resembles packing disjoint balls into a box. Here each dataset has a disjoint accuracy region in the output space. Accuracy places the output in its dataset's region with high probability; privacy requires other datasets to assign that region nonzero probability. Since probabilities over disjoint regions sum to at most one, only a limited number of datasets can satisfy both conditions.
 
-The tool that connects datasets far apart is group privacy, from the [Laplace mechanism chapter](../part02-dp-basics/02-laplace-mechanism.md). The **Hamming distance** between two datasets in $\mathcal X^n$ is the number of records in which they differ. Group privacy says that an $\varepsilon$-DP mechanism $M$ is $t\varepsilon$-DP for datasets at Hamming distance at most $t$. So for such datasets $D$ and $D'$ and every event $S$,
+Group privacy connects datasets that differ in multiple records; it was proved in the [Laplace mechanism chapter](../part02-dp-basics/02-laplace-mechanism.md). The **Hamming distance** between datasets in $\mathcal X^n$ counts differing records. An $\varepsilon$-DP mechanism is $t\varepsilon$-DP for datasets at distance at most $t$. Thus, for such $D,D'$ and every event $S$,
 
 $$
 \Pr[M(D) \in S] \le e^{t\varepsilon}\, \Pr[M(D') \in S] .
@@ -72,7 +72,7 @@ $$ {#eq-pack-group}
 
 ### A first example: the mode {#sec-pack-mode}
 
-The simplest instance of the argument is the mode of a dataset over $[k]$, the most frequent symbol. Take the $k$ datasets $D_1, \dots, D_k$, where $D_j$ consists of $n$ copies of the symbol $j$. The mode of $D_j$ is $j$, and any two of these datasets are at Hamming distance $n$. An accurate mechanism must answer $j$ on $D_j$ at least half the time, for every $j$. Group privacy then forces each answer $j$ to keep some probability on every other dataset as well, and $k$ such probabilities cannot all fit into a total of $1$ unless $n$ is large.
+Consider estimating the mode, the most frequent symbol in $[k]$. For each $j$, let $D_j$ contain $n$ copies of $j$. The mode is $j$, and every pair of these datasets is at Hamming distance $n$. An accurate mechanism outputs $j$ on $D_j$ with probability at least one half. Group privacy gives a lower bound on the probability of each answer under every other dataset. The probabilities can sum to at most one only if $n$ is sufficiently large.
 
 ::: {#prp-pack-mode name="Lower bound for the mode"}
 Let $k \ge 2$ and $\varepsilon > 0$, and for each $j \in [k]$ let $D_j$ be the dataset of $n$ copies of the symbol $j$. Let $M \colon [k]^n \to [k]$ be $\varepsilon$-DP, and suppose that $\Pr[M(D_j) = j] \ge 1/2$ for every $j \in [k]$. Then
@@ -94,7 +94,7 @@ $$
 4. *Rearranging.* The chain gives $e^{n\varepsilon} \ge k/2$, and taking logarithms gives $n\varepsilon \ge \ln(k/2)$.
 :::
 
-So a private mode needs a number of records of order $\ln k/\varepsilon$. With $k = 1{,}000$ symbols and $\varepsilon = 1$, the bound is $\ln 500 = 6.21$, so no $1$-DP algorithm finds the mode reliably from $6$ records.
+Thus, a private mode requires order $\ln k/\varepsilon$ records. For $k=1{,}000$ and $\varepsilon=1$, the bound is $\ln500=6.21$; six records cannot suffice for a reliable $1$-DP mode estimate.
 
 ### The packing theorem {#sec-pack-theorem}
 
@@ -125,11 +125,11 @@ $$
 3. *Rearranging.* Dividing by $m$ gives @eq-pack-packing.
 :::
 
-Taking logarithms, the theorem says that $t\varepsilon \ge \ln(mp)$. With the trivial distance $t = n$ and $p = 1/2$, this reads $n \ge \ln(m/2)/\varepsilon$, which is @prp-pack-mode again with $m = k$. A lower bound on $n$ therefore needs a packing with many datasets $m$, accuracy regions that do not overlap, and a small distance $t$ in terms of $n$.
+Taking logarithms gives $t\varepsilon\ge\ln(mp)$. With $t=n$ and $p=1/2$, this becomes $n\ge\ln(m/2)/\varepsilon$, recovering @prp-pack-mode for $m=k$. Stronger lower bounds require many datasets, disjoint accuracy regions, and distances $t$ small relative to $n$.
 
 ## One-way marginals {#sec-pack-marginals}
 
-To make the answers on different datasets as different as possible, take datasets made of one repeated record. For each $w \in \{0,1\}^d$, let $D_w$ consist of $n$ copies of $w$. Its marginals are $f(D_w) = w$, a corner of the cube $[0,1]^d$, and there are $2^d$ corners. Two distinct corners differ by $1$ in some coordinate, so an answer with every error below $1/2$ points to a single corner. The packing theorem then applies with $2^d$ datasets.
+For one-way marginals, take datasets that repeat a single record. For each $w\in\{0,1\}^d$, let $D_w$ contain $n$ copies of $w$. Its marginals equal the corner $w$ of $[0,1]^d$. The $2^d$ corners differ by one in at least one coordinate, so error below $1/2$ identifies a unique corner. The packing theorem applies to these $2^d$ datasets.
 
 ::: {#thm-pack-marginals name="Lower bound for one-way marginals"}
 Let $\varepsilon > 0$. Let $M\colon (\{0,1\}^d)^n \to \mathbb R^d$ be $\varepsilon$-DP, and suppose that on every dataset $D$, with probability at least $1/2$, it answers every one-way marginal with error less than $1/2$:
@@ -152,9 +152,9 @@ $$
 4. *Packing.* @thm-pack-packing with $m = 2^d$, $p = 1/2$ and $t = n$ gives $2^{-d} \ge \frac12 e^{-n\varepsilon}$. Taking logarithms, $n\varepsilon \ge d\ln 2 - \ln 2$.
 :::
 
-So $n = \Omega(d/\varepsilon)$ records are necessary for error below $1/2$ under $\varepsilon$-DP, against the upper bound $d\ln(2d)/(\alpha\varepsilon)$ of @prp-pack-upper. Under approximate DP, $n$ of order $\sqrt d$ suffices, so pure DP costs a factor $\sqrt d$ more. A matching lower bound of order $\sqrt d$ under approximate DP also holds. Packing cannot give it, because group privacy under $(\varepsilon,\delta)$-DP degrades too fast with $t$, and the proof needs fingerprinting codes instead.
+Under $\varepsilon$-DP, error below $1/2$ requires $n=\Omega(d/\varepsilon)$, compared with the upper bound $d\ln(2d)/(\alpha\varepsilon)$ in @prp-pack-upper. Approximate DP needs only order $\sqrt d$ records, a factor of about $\sqrt d$ fewer. A matching approximate-DP lower bound also holds, but packing cannot prove it: group privacy degrades too quickly with $t$, so the proof uses fingerprinting codes.
 
-The bound above does not depend on $\alpha$, because the packing uses corners of the cube, which are far apart. Datasets with only a few records changed have marginals closer together, and they give the factor $1/\alpha$.
+This bound is independent of $\alpha$ because the cube's corners are far apart. For an $\alpha$-dependent bound, use datasets that differ in only a few records, whose marginals are closer.
 
 ::: {#cor-pack-marginals}
 Let $\varepsilon > 0$ and $\alpha \in (0, 1/2)$. If an $\varepsilon$-DP mechanism $M\colon (\{0,1\}^d)^n \to \mathbb R^d$ answers every one-way marginal with error at most $\alpha$, with probability at least $1/2$ on every dataset, then
@@ -171,7 +171,7 @@ $$
 4. *Packing.* @thm-pack-packing with $m = 2^d$ and $p = 1/2$ gives $\ln(2^{d-1}) \le t\varepsilon \le (2\alpha n + 1)\varepsilon$. Rearranging gives the claim.
 :::
 
-For concrete parameters, the lower bound and the Laplace upper bound of @prp-pack-upper are within a modest factor of each other.
+For these parameters, the lower and Laplace upper bounds in @prp-pack-upper differ by a moderate factor.
 
 ::: {#exm-pack-marginals}
 With $d = 1{,}000$ questions, $\alpha = 0.1$ and $\varepsilon = 1$, @cor-pack-marginals says that $n \ge 3{,}458$ is necessary, and @eq-pack-upper says that $n \ge 76{,}010$ suffices. The ratio, $22.0$, is the factor $\ln(2d) = 7.60$ times constants, and it grows only logarithmically with $d$.

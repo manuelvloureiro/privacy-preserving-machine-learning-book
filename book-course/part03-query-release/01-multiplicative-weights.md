@@ -1,10 +1,10 @@
 # Private multiplicative weights
 
-An analyst wants the answers to many statistical queries about a dataset, such as the fraction of records in each cell of a table. Independent noise on each answer makes the error grow polynomially with the number of queries. Under approximate differential privacy (DP), this chapter does much better. The number of records it needs grows only with the logarithm of the number of queries and of the size of the universe. The algorithm, private multiplicative weights, comes from online learning. It learns a distribution over the universe that agrees with the data on every query, and it reads the data only through a few private measurements.
+An analyst may need answers to many statistical queries, such as the fraction of records in each table cell. Independent noise on each answer can require a number of records polynomial in the number of queries. Under approximate differential privacy (DP), private multiplicative weights needs a sample size logarithmic in the query-set and universe sizes. The algorithm adapts online learning: it constructs a distribution that matches the data on each query while accessing the data only through a small number of private measurements.
 
 ## Linear queries {#sec-pmw-queries}
 
-Records take values in a set $\mathcal X$, the universe, and a dataset is a list of $n$ records. A linear query asks for the average of a bounded function over the records.
+Records lie in the universe $\mathcal X$. A linear query returns the dataset average of a bounded function.
 
 ::: {#def-pmw-linear name="Linear query"}
 A **linear query** is a function $q \colon \mathcal X \to [0,1]$ on the universe. On a dataset $D \in \mathcal X^n$ with records $x_1, \dots, x_n$ it takes the value
@@ -14,9 +14,9 @@ q(D) = \frac1n \sum_{i=1}^n q(x_i).
 $$
 :::
 
-A counting query is the special case where $q$ takes only the values $0$ and $1$, and two families of counting queries come up often. In a **histogram**, there is one query $q_s(x) = \mathbf 1[x = s]$ for each element $s$ of the universe, so the answers are the fractions of records equal to each $s$. In **one-way marginals**, the universe is $\{0,1\}^d$, and the query $q_j(x) = x_j$ for each coordinate $j$ gives the fraction of records with feature $j$ set to $1$. This chapter allows any finite set of linear queries, however irregular.
+A counting query has a binary-valued $q$. Two common families are **histograms**, with one query $q_s(x)=\mathbf1[x=s]$ per universe element, and **one-way marginals**, with universe $\{0,1\}^d$ and query $q_j(x)=x_j$ for each coordinate. The analysis applies to any finite query set.
 
-The analyst wants every query in the set answered at once, so accuracy is the worst error over the set. A mechanism succeeds if, except with a small failure probability $\beta$, no answer is off by more than a target error $\alpha$.
+The mechanism must answer every query at once. Its error is the largest absolute error across the set, and it succeeds if this is at most $\alpha$ with probability at least $1-\beta$.
 
 ::: {#def-pmw-release name="Query release"}
 Let $\mathcal Q$ be a finite set of linear queries, $\alpha \in (0,1]$ a target error and $\beta \in (0,1)$ a failure probability. A mechanism $M \colon \mathcal X^n \to [0,1]^{\mathcal Q}$ outputs one answer $M(D)_q$ for each query $q \in \mathcal Q$. It answers $\mathcal Q$ **to accuracy $\alpha$** with probability $1-\beta$ if, for every dataset $D$,
@@ -26,9 +26,9 @@ $$
 $$
 :::
 
-The question is how large $n$ must be for a private mechanism to do this. The sample sizes below are sufficient conditions, and smaller is better.
+The following sufficient sample-size bounds quantify the data required.
 
-The first answer uses only earlier chapters. Changing one record changes a linear query by at most $1/n$, so its **sensitivity**, the largest change over neighbouring datasets, is at most $1/n$. The [Laplace mechanism](../part02-dp-basics/02-laplace-mechanism.md) adds noise from the Laplace distribution $\mathrm{Lap}(b)$ of scale $b$, whose density at $z$ is $e^{-|z|/b}/(2b)$. It is $\varepsilon$-DP when $b$ is the $\ell_1$ sensitivity divided by $\varepsilon$, and its tails are $\Pr[|\mathrm{Lap}(b)| \ge tb] = e^{-t}$ for $t \ge 0$. Independent Laplace noise on every query in $\mathcal Q$, with the budget split evenly among them, gives the baseline that the rest of the chapter improves on.
+Changing one record changes a linear query by at most $1/n$, so its **sensitivity** is at most $1/n$. The [Laplace mechanism](../part02-dp-basics/02-laplace-mechanism.md) adds noise from $\mathrm{Lap}(b)$, whose density is $e^{-|z|/b}/(2b)$. At scale equal to $\ell_1$ sensitivity divided by $\varepsilon$, it is $\varepsilon$-DP, and $\Pr[|\mathrm{Lap}(b)|\ge tb]=e^{-t}$. Applying it independently to each query gives a baseline for comparison.
 
 ::: {#prp-pmw-laplace name="Laplace baseline"}
 Let $\varepsilon > 0$ and $\beta \in (0,1)$. Release $M(D)_q = q(D) + Z_q$ for every $q \in \mathcal Q$, with independent $Z_q \sim \mathrm{Lap}(|\mathcal Q|/(\varepsilon n))$. This mechanism is $\varepsilon$-DP, and it answers $\mathcal Q$ to accuracy $\alpha$ with probability $1-\beta$ whenever
@@ -44,14 +44,14 @@ $$
 3. The condition on $n$ says exactly that $tb \le \alpha$. So with probability at least $1-\beta$, every error is below $\alpha$.
 :::
 
-Approximate DP does better, through the [advanced composition theorem](../part02-dp-basics/04-advanced-composition.md). That theorem implies that $k$ mechanisms run in sequence, each $\varepsilon_0$-DP and each possibly chosen after seeing the earlier outputs, are together $(\varepsilon', \delta)$-DP for every $\delta \in (0,1)$, with
+The [advanced composition theorem](../part02-dp-basics/04-advanced-composition.md) improves the bound under approximate DP. It implies that $k$ adaptive mechanisms, each $\varepsilon_0$-DP, are $(\varepsilon',\delta)$-DP for every $\delta\in(0,1)$, where
 
 
 $$
 \varepsilon' = \varepsilon_0\sqrt{2k\ln(1/\delta)} + k\varepsilon_0\left(e^{\varepsilon_0} - 1\right).
 $$ {#eq-pmw-advanced}
 
-To use the theorem, one starts from a target budget $\varepsilon$ and asks how much each of the $k$ mechanisms may spend. The next lemma gives a per-mechanism budget $\varepsilon_0$ that keeps $\varepsilon'$ at most $\varepsilon$. It is the budget-splitting corollary of that chapter, proved again here for the form @eq-pmw-advanced.
+For a target budget $\varepsilon$, the next lemma bounds the per-mechanism budget $\varepsilon_0$ that keeps $\varepsilon'\le\varepsilon$. It restates the budget-splitting corollary for @eq-pmw-advanced.
 
 ::: {#lem-pmw-split name="Splitting a budget"}
 Let $\varepsilon \in (0,1]$, $\delta \in (0,1/2]$ and $k \ge 1$. The adaptive composition of $k$ mechanisms, each $\varepsilon_0$-DP with
@@ -69,7 +69,7 @@ is $(\varepsilon,\delta)$-DP.
 3. That is at most $\varepsilon/2$ because $\varepsilon \le 1 \le 2\ln 2 \le 2\ln(1/\delta)$. Adding the two terms gives $\varepsilon' \le \varepsilon$.
 :::
 
-With one Laplace mechanism per query, so $k = |\mathcal Q|$, the lemma lets each query spend a budget of order $\varepsilon/\sqrt{|\mathcal Q|}$ instead of $\varepsilon/|\mathcal Q|$. So the factor $|\mathcal Q|$ in the baseline becomes $\sqrt{|\mathcal Q|}$.
+With one Laplace mechanism per query, the lemma permits a budget of order $\varepsilon/\sqrt{|\mathcal Q|}$ per query instead of $\varepsilon/|\mathcal Q|$. This reduces the baseline's factor $|\mathcal Q|$ to $\sqrt{|\mathcal Q|}$.
 
 ::: {#prp-pmw-advanced-baseline name="Laplace with advanced composition"}
 Let $\varepsilon \in (0,1]$, $\delta \in (0,1/2]$ and $\beta \in (0,1)$. Release $M(D)_q = q(D) + Z_q$ with independent $Z_q \sim \mathrm{Lap}(1/(\varepsilon_0 n))$, where $\varepsilon_0 = \varepsilon/(2\sqrt{2|\mathcal Q|\ln(1/\delta)})$. This mechanism is $(\varepsilon,\delta)$-DP, and it answers $\mathcal Q$ to accuracy $\alpha$ with probability $1-\beta$ whenever
@@ -84,7 +84,7 @@ $$
 2. As in @prp-pmw-laplace, $\Pr[\max_q|Z_q| \ge \ln(|\mathcal Q|/\beta)/(\varepsilon_0 n)] \le \beta$, and the condition on $n$ says that $\ln(|\mathcal Q|/\beta)/(\varepsilon_0 n) \le \alpha$.
 :::
 
-The Gaussian mechanism with advanced composition does a little better, $\sqrt{|\mathcal Q|\ln|\mathcal Q|\ln(1/\delta)}/(\alpha\varepsilon)$, because its lighter tails make the union bound cost $\sqrt{\ln|\mathcal Q|}$ instead of $\ln|\mathcal Q|$. These bounds are polynomial in $|\mathcal Q|$, and in the worst case over query sets nothing better is possible. A smaller universe helps, though, as @tbl-pmw-known shows, up to constants.
+The Gaussian mechanism with advanced composition improves the rate to $\sqrt{|\mathcal Q|\ln|\mathcal Q|\ln(1/\delta)}/(\alpha\varepsilon)$ because its tails reduce the union-bound factor from $\ln|\mathcal Q|$ to $\sqrt{\ln|\mathcal Q|}$. These bounds remain polynomial in $|\mathcal Q|$; in the worst case, this dependence cannot be improved. A smaller universe can help, as @tbl-pmw-known shows.
 
 | Method | Privacy | Records needed, up to constants |
 | --- | --- | --- |
@@ -193,7 +193,7 @@ $$
 5. With $\eta = \sqrt{\ln N/T}$, both $\eta T$ and $\ln N/\eta$ equal $\sqrt{T\ln N}$. The condition $N \ge 2$ makes $\eta > 0$, and $T \ge 4\ln N$ makes $\eta \le 1/2$.
 :::
 
-The regret is of order $\sqrt T$, while the losses themselves can add up to order $T$. So on average over rounds the algorithm does as well as the best fixed distribution, up to a term that vanishes as $\sqrt{\ln N/T}$. With $p$ a point mass, the distribution that puts all its weight on one expert, the theorem covers the randomized algorithm that picks one expert.
+The regret is of order $\sqrt T$, compared with cumulative losses of order $T$. Thus, average loss approaches that of the best fixed distribution, with an error term of order $\sqrt{\ln N/T}$. A point-mass distribution recovers the guarantee for an algorithm that selects one expert at each round.
 
 ::: {#cor-pmw-experts}
 Let $N \ge 2$. Fix losses $\ell^1, \dots, \ell^T \in [-1,1]^N$ in advance, with $T \ge 4\ln N$, and let $L_i = \sum_t \ell^t_i$. Pick expert $i_t$ with probability $p^t_{i_t}$, where $p^t$ comes from @def-pmw-mw with $\eta = \sqrt{\ln N/T}$. Then
@@ -209,17 +209,17 @@ The losses are fixed, so each $p^t$ is fixed too, and $\mathbb E[\ell^t_{i_t}] =
 
 ## Multiplicative weights for queries {#sec-pmw-nonprivate}
 
-To use the game for query release, the experts become the elements of the universe, and the distribution $p^t$ becomes a candidate dataset. To compare a candidate with the true dataset, we also write the true dataset as a distribution over the universe.
+For query release, each universe element is an expert, and each $p^t$ is a candidate dataset distribution. Represent the true dataset by its histogram distribution for comparison.
 
 ::: {#def-pmw-histogram name="Histogram of a dataset"}
 The **histogram** of $D \in \mathcal X^n$ is the distribution $p_D$ on $\mathcal X$ with $p_D(x) = |\{i : x_i = x\}|/n$, the fraction of records equal to $x$. For a linear query $q$ and a distribution $p$ on $\mathcal X$, write $\langle q, p\rangle = \sum_{x\in\mathcal X} q(x)p(x)$.
 :::
 
-Grouping the records by value gives $q(D) = \langle q, p_D\rangle$. So answering the queries means finding a distribution $\hat p$ with $\langle q, \hat p\rangle$ close to $\langle q, p_D\rangle$ for every $q \in \mathcal Q$.
+Grouping records by value gives $q(D)=\langle q,p_D\rangle$. The goal is to find $\hat p$ such that $\langle q,\hat p\rangle$ approximates $\langle q,p_D\rangle$ for every $q\in\mathcal Q$.
 
-Picture a game in rounds. An adversary picks a query $q^t \in \mathcal Q$ after the algorithm commits to a distribution $p^t$, and the algorithm pays its error $|\langle q^t,p^t\rangle - \langle q^t,p_D\rangle|$. This looks pointless, since the algorithm could play $p^t = p_D$ from the start. But that move reads the whole dataset, while multiplicative weights reads it only through one query per round and the sign of its error, which are cheap to privatize. And a bound on the total error turns into a bound on the number of rounds with a large error, as shown below.
+Consider a game in which an adversary chooses query $q^t$ after the algorithm selects distribution $p^t$. The loss is $|\langle q^t,p^t\rangle-\langle q^t,p_D\rangle|$. Although $p_D$ would answer every query exactly, computing it reads the full dataset. Multiplicative weights accesses the data through one query and its error sign per round; both can be privatized. A bound on cumulative error then limits the number of rounds with large error.
 
-The loss vector comes from the error itself. Write the error as a function of the candidate, $f(p') = |\langle q^t, p'\rangle - \langle q^t, p_D\rangle|$. This function is convex, and $f(p_D) = 0$. Where the error is not zero, its gradient at $p^t$ is $s_t q^t$, where $s_t$ is the sign of $\langle q^t, p^t - p_D\rangle$, taken as $+1$ at $0$. So the loss vector to feed the experts is $\ell^t = s_t q^t$, and the next lemma shows that it measures the error exactly.
+Define the candidate's error by $f(p')=|\langle q^t,p'\rangle-\langle q^t,p_D\rangle|$. This is convex and equals zero at $p_D$. Away from zero error, its gradient at $p^t$ is $s_tq^t$, where $s_t$ is the sign of $\langle q^t,p^t-p_D\rangle$; take $s_t=+1$ at zero. The next lemma shows that the loss vector $\ell^t=s_tq^t$ equals the query error in the regret comparison.
 
 ::: {#lem-pmw-loss}
 Let $q$ be a linear query, $p'$ and $p$ distributions on $\mathcal X$, and $s$ the sign of $\langle q, p' - p\rangle$, with $s = +1$ if it is $0$. The vector $\ell = s q$ lies in $[-1,1]^{\mathcal X}$, and
@@ -233,7 +233,7 @@ $$
 The entries of $q$ lie in $[0,1]$, so those of $sq$ lie in $[-1,1]$. By linearity, $\ell\cdot(p'-p) = s\langle q, p'-p\rangle$, which is the absolute value of $\langle q, p'-p\rangle$ by the choice of $s$.
 :::
 
-With these losses, the regret of multiplicative weights against the fixed distribution $p_D$ is exactly the total error of the candidates. So the regret bound also bounds that total.
+For these losses, regret against the fixed distribution $p_D$ equals the candidates' cumulative query error. The regret bound therefore limits that total.
 
 ::: {#thm-pmw-query-regret}
 Run multiplicative weights over the experts $\mathcal X$ with learning rate $\eta \in (0,1/2]$, and let $p^t$ be the distribution it plays in round $t$. Feed it the losses $\ell^t = s_tq^t$, where $q^1, q^2, \dots$ are any queries in $\mathcal Q$ and $s_t$ is the sign of $\langle q^t, p^t - p_D\rangle$. After any number $U$ of rounds,
@@ -249,7 +249,7 @@ With $|\mathcal X| \ge 2$, $U \ge 4\ln|\mathcal X|$ and $\eta = \sqrt{\ln|\mathc
 By @lem-pmw-loss, the left-hand side equals $\sum_t \ell^t\cdot p^t - \sum_t\ell^t\cdot p_D$. Apply @thm-pmw-regret with $N = |\mathcal X|$ and the fixed distribution $p = p_D$.
 :::
 
-This bounds a total, while the goal is one distribution that is accurate on every query. Call round $t$ a **mistake** if the error there exceeds $\alpha$. If the adversary always picks a query on which the current distribution makes a mistake, the total grows by more than $\alpha$ per round, while the regret bound grows only by $\eta$ per round. So the mistakes cannot go on for long. To use this, the algorithm plays the adversary against itself and always chooses the hardest query it can find.
+The regret bound controls cumulative error, but the goal is a single distribution accurate on every query. Call a round a **mistake** when its error exceeds $\alpha$. If each round selects a query with such an error, cumulative error grows by more than $\alpha$ per round, while the regret bound grows by only $\eta$ per round. Thus the number of mistakes is bounded. The algorithm implements this strategy by selecting the query with largest error.
 
 ::: {#def-pmw-nonprivate name="Multiplicative weights for queries"}
 Given $D$, $\mathcal Q$ and $\alpha \in (0,1]$, set $\eta = \alpha/2$ and let $p^1$ be uniform on $\mathcal X$. In round $t = 1, 2, \dots$:
@@ -259,7 +259,7 @@ Given $D$, $\mathcal Q$ and $\alpha \in (0,1]$, set $\eta = \alpha/2$ and let $p
 3. Update $p^{t+1}(x) \propto p^t(x)\left(1 - \eta s_tq^t(x)\right)$.
 :::
 
-In step 3, the symbol $\propto$ means that the right-hand side is divided by its sum over $x$, so that $p^{t+1}$ is again a distribution. Every update adds more than $\alpha$ to the total error, while the bound on that total grows by only $\eta = \alpha/2$ per round. So the updates must stop soon.
+In step 3, $\propto$ means normalize the right-hand side to sum to one. Each update adds more than $\alpha$ to cumulative error, while its upper bound grows by only $\eta=\alpha/2$ per round. Therefore the algorithm must terminate.
 
 ::: {#cor-pmw-mistakes name="Mistake bound"}
 Let $|\mathcal X| \ge 2$. The algorithm of @def-pmw-nonprivate stops after fewer than $4\ln|\mathcal X|/\alpha^2$ updates, and its output $\hat p$ satisfies $|\langle q,\hat p\rangle - q(D)| \le \alpha$ for every $q \in \mathcal Q$.
@@ -276,7 +276,7 @@ $$
 3. So the algorithm stops, which happens only at step 1, where every query is within $\alpha$.
 :::
 
-The bound is a worst case, and @fig-pmw-convergence runs the algorithm on a small example where the number of updates stays far below it.
+The bound is worst-case. @fig-pmw-convergence shows an example with substantially fewer updates.
 
 ![Multiplicative weights for queries on the universe $\{0,1\}^8$, with the 128 one-way and two-way marginal queries $\mathbf 1[x_j = a]$ and $\mathbf 1[x_j = a, x_k = b]$. The dataset has 2,000 records whose eight features copy a hidden fair bit with probability $0.8$. Each round picks the query with the largest error. The algorithm stops after about 700 updates for $\alpha = 0.05$ and about 2,000 for $\alpha = 0.02$, against the bounds $4\ln 256/\alpha^2$ of 8,872 and 55,452.](figures/pmw-convergence.svg){#fig-pmw-convergence}
 

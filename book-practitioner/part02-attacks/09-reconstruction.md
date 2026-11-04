@@ -2,22 +2,22 @@
 
 ## What it is
 
-A **reconstruction attack** rebuilds the records behind published aggregates, because every count is a linear equation in the secret values of the people counted. For example, each of $n$ people has one secret bit, listed in $d$. A **subset-sum query** asks how many people in a set have bit 1. So the attacker's $m$ queries form a matrix $A$ of zeros and ones, one query per row. The **curator** who answers them publishes the true answers plus an error vector $e$,
+A **reconstruction attack** recovers records from published aggregates because each count is a linear equation in the values of the people counted. Suppose each of $n$ people has a secret bit, represented in vector $d$. A **subset-sum query** counts the people in a set whose bit is 1. The attacker's $m$ queries form a binary matrix $A$, one query per row. The **curator** publishes the true answers plus an error vector $e$:
 $$a = Ad + e.$$
 
-**Least squares** finds the real numbers with answers closest to the published ones, then rounds each to 0 or 1. Let each query include each person with probability one half. Let the noise be normal with standard deviation $\sigma$. Then least squares recovers about a fraction
+**Least squares** finds real-valued records whose query answers are closest to the published answers, then rounds each value to 0 or 1. Suppose each query includes each person with probability one half and the noise is normal with standard deviation $\sigma$. Least squares then recovers approximately the following fraction
 $$\Phi\left(\frac{\sqrt{m - n}}{4\sigma}\right)$$ {#eq-recon-ls-random}
-of the bits, where $\Phi$ is the standard normal distribution function. The baseline is the **majority guess**, which gives everyone the more common value, so it is right on one half of balanced bits. So with a few times more queries than people, noise well below $\sqrt n$ reveals the data. If the curator answers all $2^n$ subset sums, only error of order $n$ stops reconstruction (Dinur and Nissim 2003).
+of the bits, where $\Phi$ is the standard normal distribution function. The baseline is the **majority guess**, which assigns the more common value to every person and is correct on half of balanced bits. With several times more queries than people, noise well below $\sqrt n$ can reveal the data. If the curator answers all $2^n$ subset sums, only error of order $n$ prevents reconstruction (Dinur and Nissim 2003).
 
-These results are the **Fundamental Law of Information Recovery**: too many answers that are too accurate destroy privacy. But a release that stops reconstruction is not private for that reason. A curator that answers from a secret random half of the people stops it, yet gives that half away exactly. And a test of membership needs far fewer statistics ([Lower bounds](../part03-dp-foundations/10-lower-bounds.md)).
+These results form the **Fundamental Law of Information Recovery**: too many accurate answers can destroy privacy. Preventing reconstruction alone does not establish privacy. A curator could answer queries using a secret random half of the population, preventing reconstruction while revealing that half exactly. Membership inference also requires far fewer statistics ([Lower bounds](../part03-dp-foundations/10-lower-bounds.md)).
 
 ## When you meet it
 
-Every published count, cross-tabulation, dashboard cell or query answer is such an equation. The Census Bureau attacked its own 2010 publications and rebuilt a record for every person. About 46% of them matched a real person exactly on block, sex, age, race and ethnicity. With commercial data, they confirmed the identity of about 17% of the population, so the 2020 Census moved to differential privacy. Query systems fall too: the noise of Diffix did not grow with the number of queries, so Cohen and Nissim (2020) averaged it away.
+Every published count, cross-tabulation, dashboard cell and query answer contributes an equation. The Census Bureau attacked its 2010 publications and reconstructed a record for every person. About 46% of records matched a real person exactly on block, sex, age, race and ethnicity. Commercial data confirmed the identities of about 17% of the population, motivating the 2020 Census to adopt differential privacy. Query systems are also vulnerable: because Diffix noise did not increase with query count, Cohen and Nissim (2020) averaged it away.
 
 ## How to use it
 
-To audit an aggregate release, first count the equations. If the cells or allowed queries outnumber the people, only the noise protects the people. Put your noise level and number of queries into @eq-recon-ls-random. If the prediction is far above the majority guess, run the attack. The snippet draws the noise from OpenDP's Gaussian mechanism and runs least squares. OpenDP's noise cannot be seeded, so the snippet compares the share recovered with the prediction instead of printing it.
+To audit an aggregate release, count its equations. If the cells or allowed queries outnumber the people, protection depends on the noise. Substitute the noise level and query count into @eq-recon-ls-random. If predicted recovery exceeds the majority baseline substantially, run the attack. The snippet uses OpenDP's Gaussian mechanism and least squares. Because OpenDP noise cannot be seeded, the snippet checks whether the recovered share is within tolerance of the prediction rather than printing that share.
 
 ```python
 from statistics import NormalDist
@@ -41,15 +41,15 @@ print(f"predicted {predicted:.4f}")  # predicted 0.9584
 print(f"recovered within 0.04 of it: {abs(recovered - predicted) < 0.04}")  # recovered within 0.04 of it: True
 ```
 
-The number of queries matters as much as the noise. In the full edition's simulation, with noise of twice $\sqrt n$, four queries per person recovered only 0.5875 of the bits. But @eq-recon-ls-random shows that at that noise, 106.1 queries per person recover 90%. So fixed noise falls to enough queries, and the noise must grow with the number of answers, as differential privacy makes it.
+Query count matters as much as noise. In the full edition's simulation, noise of twice $\sqrt n$ and four queries per person recovered 0.5875 of the bits. At the same noise level, @eq-recon-ls-random predicts that 106.1 queries per person recover 90%. Fixed noise therefore becomes insufficient as the query count grows; differential privacy scales noise with the number of answers.
 
-For queries that are not random, use the linear-programming decoder of Dinur and Nissim, which fits unknowns between 0 and 1 with `scipy.optimize.linprog`. For published tables, write each cell as a constraint on whole-number unknowns. Solve the constraints with `scipy.optimize.milp`. Then count the solutions, because a single solution rebuilds the records. The release fails if either decoder beats the majority guess.
+For nonrandom queries, use Dinur and Nissim's linear-programming decoder, which constrains unknowns to $[0,1]$ with `scipy.optimize.linprog`. For published tables, express each cell as a constraint on integer unknowns and solve with `scipy.optimize.milp`. Count the feasible solutions: one solution is enough to reconstruct records. The release fails if either decoder outperforms the majority baseline.
 
 ## What goes wrong
 
-Rounding, household swapping and small-cell suppression are not noise. Rounding hides nothing, because the attacker can round the answers of each candidate dataset too. Swapping leaves most constraints exact, and a suppressed cell even adds a constraint: the count is below the threshold. And sticky noise, the same answer to a repeated query, stops only repeats, which the attack never needs.
+Rounding, household swapping and small-cell suppression do not provide noise. Rounding hides nothing because an attacker can round candidate answers in the same way. Swapping leaves most constraints exact. A suppressed cell adds a constraint that its count is below the threshold. Sticky noise—returning the same answer to a repeated query—prevents only duplicate queries, which reconstruction does not require.
 
-Test the union of all releases, not one table at a time. Do not trust least squares alone, because errors chosen against it hurt it more than random noise. Before you publish, reconstruct your own release with the two decoders. Record the result in [Pre-release privacy risk assessment](10-risk-assessment.md).
+Test the union of all releases, not each table separately. Least squares alone is insufficient because adversarially chosen errors affect it more than random noise. Before publication, apply both decoders to the release and record the results in [Pre-release privacy risk assessment](10-risk-assessment.md).
 
 ## References
 

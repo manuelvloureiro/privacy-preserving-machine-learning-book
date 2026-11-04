@@ -2,9 +2,9 @@
 
 ## Why this matters
 
-You have a pretrained language model and private text, such as support tickets or clinical notes. You want the model to learn from that text without being able to repeat it. A model fine-tuned without privacy can write out a phone number or a password that was often in its training text ([Memorization and training-data extraction](../part02-attacks/05-memorization-extraction.md)). The fix is to fine-tune with the differential privacy (DP) version of stochastic gradient descent (SGD), called DP-SGD. It costs least when it trains only a small adapter on the frozen model, which is often as accurate as training every weight ([Public data and private fine-tuning](06-public-data.md)). Here the adapter is low-rank adaptation (LoRA), from Hugging Face's `peft` library, and Opacus does the private training.
+Fine-tune a pretrained language model on private text, such as support tickets or clinical notes, without exposing training examples. Non-private fine-tuning can reproduce frequent phone numbers or passwords ([Memorization and training-data extraction](../part02-attacks/05-memorization-extraction.md)). Differential privacy (DP) applied through stochastic gradient descent (SGD), or DP-SGD, limits this risk. Training a small adapter on frozen weights can retain accuracy while reducing noise cost ([Public data and private fine-tuning](06-public-data.md)). This workflow uses Hugging Face's low-rank adaptation (LoRA) in `peft` and Opacus.
 
-The model is Pythia-14m, a public language model of 14 million parameters from EleutherAI. The private text is Tiny Shakespeare, a million characters of Shakespeare's plays. The script fine-tunes the model twice, once without privacy and once at a privacy loss $\varepsilon$ of 8 for each sequence of training text. First it plants made-up secrets, called canaries, in the text, so that you can see what each model memorized. The script [practitioner_lora.py](../../code/part05-dp-ml/practitioner_lora.py) runs in a few minutes without a GPU.
+The model is EleutherAI's public Pythia-14m, with 14 million parameters. The private text is Tiny Shakespeare, about one million characters of plays. The script fine-tunes the model with and without privacy. The private run has privacy loss $\varepsilon$ of 8 per training sequence. It inserts synthetic secrets, called canaries, to test memorization. [practitioner_lora.py](../../code/part05-dp-ml/practitioner_lora.py) runs in a few minutes without a GPU.
 
 ```bash
 uv run python code/part05-dp-ml/practitioner_lora.py
@@ -12,7 +12,7 @@ uv run python code/part05-dp-ml/practitioner_lora.py
 
 ## Fix the privacy unit, n and δ {#sec-llmwf-unit}
 
-The guarantee protects one unit, so decide first what the unit is. A language model trains on fixed-length sequences of tokens, the word pieces its tokenizer cuts text into. The script cuts the text into sequences of 32 tokens, about one or two lines of verse, and makes each sequence the unit. To keep the run short, it trains on the first 1,024 sequences and holds out the last 128.
+Define the privacy unit before training. Language models process fixed-length sequences of tokens, or word pieces produced by a tokenizer. This script uses 32-token sequences, roughly one or two lines of verse, as units. It trains on the first 1,024 sequences and holds out the last 128 to limit runtime.
 
 ```text
 sequences of 32 tokens: 10,632  training n=1,024  held out 128
@@ -21,11 +21,11 @@ delta=1e-04 (privacy unit: one training sequence)
 
 For $n = 1{,}024$ sequences, the book's rule for the slack $\delta$ gives $10^{-4}$ ([How small δ must be](../part03-dp-foundations/01-definition.md#sec-dpdef-small-delta)).
 
-A sequence is the right unit for this demonstration, but rarely in production. One person's document spans many sequences, and one user writes many documents, so a guarantee per sequence protects a person much less than it seems. In production, make the unit a document or a user, and bound how many sequences each contributes. Then set $\delta$ from the number of users ([User-level differential privacy](07-user-level.md)).
+A sequence is suitable for this demonstration but rarely for production. A person's document may span many sequences, and one user may contribute several documents. Sequence-level privacy therefore provides weaker person-level protection. For production, use a document or user as the unit, bound each contribution, and set $\delta$ from the user count ([User-level differential privacy](07-user-level.md)).
 
 ## Plant canaries {#sec-llmwf-canaries}
 
-To check memorization later, you need secrets whose presence you control. So the script writes **canaries** into the training text. Each is a sentence such as "the pin of Alice is 8 6 5 2 3", whose last five digits are the secret. There are four groups of three canaries, inserted 1, 4, 16 and 64 times each. Three more, the controls, are drawn the same way but never inserted, so they show what an unseen secret scores in the audit of @sec-llmwf-memorization.
+The script writes **canaries** into the training text so their memorization can be measured. Each canary is a sentence such as "the pin of Alice is 8 6 5 2 3"; its last five digits are the secret. The script inserts three canaries 1, 4, 16 and 64 times each. It draws three controls in the same way but never inserts them. The controls show how an unseen secret scores in the audit of @sec-llmwf-memorization.
 
 ```{.python excerpt="lora-canary-insert"}
 def insert_canaries(
@@ -42,7 +42,7 @@ def insert_canaries(
     return train
 ```
 
-The 255 copies take up a quarter of the training set. That is far denser than secrets in real data, on purpose, because it lets a model this small memorize within a short run, so the audit has a positive control.
+The 255 copies take up a quarter of the training set, far more than secrets occupy in real data. This deliberate density lets a small model memorize them during a short run and provides a positive control for the audit.
 
 ```text
 canary sequences: 255 (3 canaries each at (1, 4, 16, 64) copies)
@@ -50,17 +50,17 @@ tokens per secret: [5]
 candidates: 2,000  exposure cap 10.97 bits  (full space 16.61)
 ```
 
-The digits are separated by spaces so that every possible secret is exactly five tokens long, which the second line confirms over 1,000 random secrets.
+Spaces separate the digits so every possible secret has exactly five tokens. The second line confirms this for 1,000 random secrets.
 
 ## Load a public model and tokenizer {#sec-llmwf-public}
 
-Everything not trained privately must come from outside the private data. That includes the tokenizer, whose vocabulary would leak rare words if it were built from the private text. So the weights and the tokenizer both come from the same public checkpoint, Pythia-14m, pinned to one revision. The script loads the model in float32, because `transformers` loads some checkpoints in float16, which is far slower on a CPU.
+All components not trained privately must come from outside the private data. This includes the tokenizer: a vocabulary built from private text could expose rare words. The script loads the weights and tokenizer from the same pinned public checkpoint, Pythia-14m. It loads the model in float32 because `transformers` loads some checkpoints in float16, which runs far more slowly on a CPU.
 
 The guarantee then covers the private text given the pretrained model, and says nothing about the model's own training data. Pythia was pretrained on the Pile, which includes Project Gutenberg's books and so very likely Shakespeare's plays. That is harmless here, but with real data, check for overlap with the public model's training data ([Public data and private fine-tuning](06-public-data.md#sec-pub-caveats)).
 
 ## Choose what to train {#sec-llmwf-lora}
 
-DP-SGD adds noise to every weight it trains. So the noise on the averaged gradient grows with the square root of the number of trained weights, but the clipped signal does not ([Public data and private fine-tuning](06-public-data.md#sec-pub-dimension)). That makes the choice of trainable weights a main lever on accuracy, with the learning rate. LoRA freezes each pretrained matrix and learns a correction to it, the product of two thin factors whose width is the rank.
+DP-SGD adds noise to every trained weight. The noise on the averaged gradient grows with the square root of the number of trained weights, but the clipped signal does not ([Public data and private fine-tuning](06-public-data.md#sec-pub-dimension)). The number of trainable weights and the learning rate therefore affect accuracy. LoRA freezes each pretrained matrix and learns a correction formed by multiplying two thin factors; their width is the rank.
 
 ```{.python excerpt="lora-config"}
 attention_and_mlp = ["query_key_value", "dense", "dense_h_to_4h", "dense_4h_to_h"]  # every linear layer
@@ -76,21 +76,21 @@ full model parameters: 14,067,712
 trainable parameters: LoRA 98,304  full fine-tuning 14,067,712
 ```
 
-By default the adapters have rank 8 and sit on every linear layer, in attention and in the feed-forward blocks. They train 98,304 weights, against about 14 million for full fine-tuning. `lora_alpha` scales the adapters' correction, set to the usual twice the rank. For a real task, choose the rank and the layers on public data, because a choice made from private runs costs privacy ([Hyperparameter tuning](03-hyperparameter-tuning.md)).
+By default, the adapters have rank 8 and cover every linear layer in attention and the feed-forward blocks. They train 98,304 weights, compared with about 14 million for full fine-tuning. `lora_alpha` scales the correction and is set to twice the rank. For a real task, choose the rank and layers using public data. Choices based on private runs cost privacy ([Hyperparameter tuning](03-hyperparameter-tuning.md)).
 
 ## Make the model Opacus-compatible {#sec-llmwf-opacus}
 
-Opacus needs one gradient per sequence, and layers that mix the records of a batch, such as batch normalization, make that impossible. Opacus's `ModuleValidator.validate` lists such layers before you train.
+Opacus needs one gradient per sequence. Layers that mix records within a batch, such as batch normalization, prevent this calculation. Opacus's `ModuleValidator.validate` lists such layers before training.
 
 ```text
 validator errors: 0
 ```
 
-Pythia has none, and only the adapters train in any case. They are ordinary linear layers, which Opacus's default hooks handle, so the script passes `grad_sample_mode="hooks"`. Opacus computes per-sequence gradients only for the weights that require gradients, so the 14 million frozen weights add no cost. Call `model.train()` before you wrap a model you have just evaluated, because Opacus rejects one in evaluation mode. After training, the hooks stay attached and slow down everything the model does next, so the script calls `remove_hooks()` before it evaluates the private model.
+Pythia has none, and the script trains only the adapters. These are ordinary linear layers handled by Opacus's default hooks, so the script sets `grad_sample_mode="hooks"`. Opacus computes per-sequence gradients only for trainable weights; the 14 million frozen weights add no cost. Call `model.train()` before wrapping a model that has been evaluated, because Opacus rejects evaluation mode. After training, the hooks remain attached and slow later operations. The script calls `remove_hooks()` before evaluating the private model.
 
 ## Calibrate and train {#sec-llmwf-train}
 
-The accountant finds the noise for a fixed target, here $\varepsilon = 8$ over 3 epochs with an expected batch of 32 sequences. The sampling rate $q$, the share of the data in an average batch, is then $32/1{,}024$, so the 3 epochs take 96 steps. The accountant is the privacy loss random variable (PRV) accountant, which computes $\varepsilon$ almost exactly ([Choosing an accountant](../part04-privacy-accounting/09-choosing-an-accountant.md)).
+The accountant finds the noise for a fixed target, here $\varepsilon = 8$ over 3 epochs with an expected batch of 32 sequences. The sampling rate $q$ is the share of the data in an average batch, or $32/1{,}024$. The run therefore takes 96 steps. The accountant is the privacy loss random variable (PRV) accountant, which computes $\varepsilon$ almost exactly ([Choosing an accountant](../part04-privacy-accounting/09-choosing-an-accountant.md)).
 
 ```{.python excerpt="lora-private"}
 privacy_engine = PrivacyEngine(accountant="prv")
@@ -124,15 +124,15 @@ sample rate q=0.03125  steps=96  noise multiplier=0.553
 epsilon (Opacus PRV)=7.99  epsilon (dp_accounting PLD)=7.98  at delta=1e-04
 ```
 
-The noise multiplier is the noise's standard deviation in units of the clipping norm, `MAX_GRAD_NORM`, which the script sets to 1. The last line cross-checks the $\varepsilon$ with the privacy loss distribution (PLD) accountant of Google's `dp_accounting`, as in [Calibrate and account a DP-SGD run](../part04-privacy-accounting/10-calibrate-dp-sgd.md#sec-calib-crosscheck), and the two agree.
+The noise multiplier gives the noise's standard deviation in units of the clipping norm, `MAX_GRAD_NORM`, which the script sets to 1. The last line cross-checks $\varepsilon$ with the privacy loss distribution (PLD) accountant in Google's `dp_accounting`, as in [Calibrate and account a DP-SGD run](../part04-privacy-accounting/10-calibrate-dp-sgd.md#sec-calib-crosscheck). The accountants agree.
 
-Both runs use AdamW at a learning rate of $10^{-3}$, and the private run differs only by clipping, noise and Poisson sampling. That learning rate, the rank and the epochs were chosen in a few non-private trial runs on the same text. A real run must choose them on similar public text, such as other public-domain plays, or pay for the trials in $\varepsilon$ ([Hyperparameter tuning](03-hyperparameter-tuning.md)).
+Both runs use AdamW at a learning rate of $10^{-3}$. The private run differs only in clipping, noise and Poisson sampling. The learning rate, rank and epochs were chosen in non-private trials on the same text. A real run must choose them using similar public text, such as other public-domain plays, or account for the trials in $\varepsilon$ ([Hyperparameter tuning](03-hyperparameter-tuning.md)).
 
-Two more settings change for a real run. With more data, use batches in the thousands, and let Opacus's `BatchMemoryManager` split them into physical batches that fit in memory ([Train a model with DP-SGD](13-train-dp-sgd.md)). And a model you release needs `secure_mode=True` in `PrivacyEngine`. Its secure noise cannot be seeded, so the script leaves it off.
+For a real run, use batches in the thousands when the dataset is larger. Opacus's `BatchMemoryManager` can split them into physical batches that fit in memory ([Train a model with DP-SGD](13-train-dp-sgd.md)). Set `secure_mode=True` in `PrivacyEngine` for a released model. Secure noise cannot be seeded, so the script leaves this option off.
 
 ## Evaluate {#sec-llmwf-evaluate}
 
-A language model is judged by how well it predicts held-out text. The script measures the mean cross-entropy per token on the 128 held-out sequences, and its exponential, the **perplexity**. A perplexity of 159.3 means the model is as unsure as if it chose among about 159 equally likely tokens. So lower is better.
+Language-model quality can be measured by predictions on held-out text. The script measures mean cross-entropy per token on the 128 held-out sequences and reports its exponential, the **perplexity**. A perplexity of 159.3 corresponds to uncertainty similar to choosing among about 159 equally likely tokens. Lower perplexity is better.
 
 ```text
 held-out loss pretrained: 5.306 nats/token  perplexity 201.6
@@ -140,9 +140,9 @@ held-out loss LoRA non-private: 5.071 nats/token  perplexity 159.3
 held-out loss LoRA DP eps=8: 5.044 nats/token  perplexity 155.1
 ```
 
-Both fine-tuned models improve on the pretrained one. On one seed, the private model's slightly lower perplexity means only that DP costs nothing measurable here. Both gains are modest, because a quarter of the training sequences begin with canaries rather than Shakespeare.
+Both fine-tuned models improve on the pretrained model. On this seed, the private model's slightly lower perplexity shows only that DP has no measurable cost in this run. Both gains are modest because canaries, rather than Shakespeare, begin a quarter of the training sequences.
 
-Do not expect privacy to be this cheap on every task. This run is short, trains few weights, and uses text that is very likely in the pretraining data already. With a harder task or a smaller $\varepsilon$, compare the private model with both baselines at several budgets, as [Train a model with DP-SGD](13-train-dp-sgd.md#sec-trainwf-utility) does.
+This result does not imply that privacy has little cost on other tasks. This run is short, trains few weights, and uses text likely to appear in the pretraining data. For a harder task or smaller $\varepsilon$, compare the private model with both baselines at several budgets, as in [Train a model with DP-SGD](13-train-dp-sgd.md#sec-trainwf-utility).
 
 ## Check memorization {#sec-llmwf-memorization}
 

@@ -2,29 +2,29 @@
 
 ## Why this matters
 
-When you train with differential privacy (DP), the accountant turns your configuration into a privacy level $\varepsilon$ at a slack $\delta$. That number is a proof about an algorithm, but what ships is code. A bug in the noise, the clipping or the sampling makes the model less private but barely changes its accuracy, which is flat across a wide range of noise levels ([the training workflow](13-train-dp-sgd.md)). So the usual tests never notice the bug.
+For differential privacy (DP), an accountant maps the training configuration to privacy level $\varepsilon$ and slack $\delta$. This proves a property of the algorithm, but deployed systems run code. Bugs in noise, clipping or sampling can weaken privacy without noticeably changing accuracy, which often remains stable across a wide range of noise levels ([the training workflow](13-train-dp-sgd.md)). Standard accuracy tests may not detect these bugs.
 
-An **audit** checks the code by attacking it. It plants records called **canaries**, trains with and without them, and counts how often a membership test guesses right. DP caps how often any test can be right, so a test that is right too often proves that the code is less private than claimed. A test that is rarely right proves nothing, since a weak attack also fails against a leaky model.
+An **audit** tests implementation privacy by attack. It inserts **canaries**, trains with and without them, then measures membership-test success. DP limits every test's success rate, so a rate above the limit disproves the claimed guarantee. A low rate proves nothing: a weak attack may fail even against a non-private model.
 
 ## Known bugs, and which audit catches them {#sec-audit-bugs}
 
-These bugs break the private form of stochastic gradient descent (SGD), [DP-SGD](02-dp-sgd.md).
+The following implementation errors can invalidate stochastic gradient descent (SGD) with differential privacy, [DP-SGD](02-dp-sgd.md).
 
 - **The variance passed where the standard deviation is expected,** or **noise scaled for the mean but added to the sum,** which adds the batch size times too little noise. A unit test in continuous integration (CI) catches both (@sec-audit-ci).
 - **Clipping applied after averaging, or noise from a weak seed.** Nasr et al. (2023) found both in real code with per-step audits like the CI test.
 - **The accountant told the wrong numbers,** such as a record count that includes augmented copies, which makes $\varepsilon$ look smaller than it is. Only an end-to-end audit can catch it, and only if the error is large.
 - **Batches shuffled but accounted as Poisson sampling,** which can make the true $\varepsilon$ several times the reported one ([Amplification by subsampling](../part04-privacy-accounting/05-subsampling.md)). No audit here exercises the sampling, so check the loader itself.
 
-Audits catch errors only in the unsafe direction, so code that adds too much noise passes them all.
+Audits detect only privacy loss beyond the claim; code that adds excess noise will pass.
 
 ## A CI test for the noise and the clipping {#sec-audit-ci}
 
-The cheapest strong audit tests one step of the optimizer, many times. A **Dirac canary** is a per-example gradient that is zero except on one coordinate, where every other record's gradient is zero. Put it into every step of one run and leave it out of another. The reading $x_t$ is step $t$'s noisy gradient sum on that coordinate, divided by the clipping norm $C$. The canary is longer than $C$, so a correct optimizer clips it to length $C$ and it adds exactly 1 to the reading. The optimizer also adds noise of standard deviation $\sigma C$, where $\sigma$ is the noise multiplier, so each reading follows
+An efficient strong audit repeatedly tests one optimizer step. A **Dirac canary** has a nonzero per-example gradient only in one coordinate; all other records have zero gradient there. Include it at every step in one run and omit it in another. Let $x_t$ be the noisy gradient sum in that coordinate at step $t$, divided by clipping norm $C$. A canary longer than $C$ is clipped to length $C$, contributing exactly 1. The optimizer adds noise with standard deviation $\sigma C$, where $\sigma$ is the noise multiplier, so each reading follows
 $$x_t \sim \mathcal N(0, \sigma^2) \text{ without the canary}, \qquad x_t \sim \mathcal N(1, \sigma^2) \text{ with it}.$$ {#eq-audit-perstep}
 
-A threshold test says "canary in" whenever a reading exceeds a threshold. Its **true positive rate (TPR)** is how often it says so when the canary was there, and its **false positive rate (FPR)** how often when it was not.
+A threshold test reports "canary in" when a reading exceeds a threshold. Its **true positive rate (TPR)** is the detection frequency with the canary present; its **false positive rate (FPR)** is the frequency without it.
 
-For two normal distributions a distance $\mu$ apart, every threshold gives $\Phi^{-1}(\mathrm{TPR}) - \Phi^{-1}(\mathrm{FPR}) = \mu$, where $\Phi$ is the standard normal distribution function. So measured rates bound the true separation $\mu$, which a correct optimizer keeps at $1/\sigma$:
+For two normal distributions separated by $\mu$, every threshold satisfies $\Phi^{-1}(\mathrm{TPR})-\Phi^{-1}(\mathrm{FPR})=\mu$, where $\Phi$ is the standard normal distribution function. Measured rates therefore bound the separation $\mu$, which a correct optimizer limits to $1/\sigma$:
 $$\mu \ge \Phi^{-1}(\mathrm{TPR}) - \Phi^{-1}(\mathrm{FPR}).$$ {#eq-audit-mu}
 The test plugs in the low end of the TPR's Clopper–Pearson interval and the high end of the FPR's. Each end is taken at level $\beta/2$, so the bound holds with probability $1 - \beta$ ([Hypothesis testing](../part01-prerequisites/04-hypothesis-testing.md)). If this bound exceeds $1/\sigma$, the code adds less noise than it claims.
 

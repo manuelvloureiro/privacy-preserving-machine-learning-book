@@ -1,6 +1,6 @@
 # Privacy accounting
 
-This part answers the question that decides whether a trained model's privacy claim means anything: **after thousands of noisy steps, each on a random subset of the data, how large is $\varepsilon$?** The previous part defined differential privacy (DP), built the basic mechanisms and proved how $(\varepsilon, \delta)$ guarantees compose, but no single theorem of it answers this question. The answer comes from an **accountant**, a procedure that tracks a summary of each step's privacy loss, combines the summaries, and converts the result into the $(\varepsilon, \delta)$ you report. The running case is stochastic gradient descent (SGD) with per-example clipping and Gaussian noise, called DP-SGD, and the main summary is Rényi differential privacy (RDP). Two accountants can report values of $\varepsilon$ for the same run that differ by a large factor. Both can be correct upper bounds, but only the tighter one tells you what the noise bought.
+This part computes privacy guarantees for iterative training, where each step uses a random subset of the data. The previous part defined differential privacy (DP), its basic mechanisms and composition. An **accountant** tracks a summary of each step's privacy loss, combines the summaries and converts the result to $(\varepsilon,\delta)$. The running case is stochastic gradient descent (SGD) with per-example clipping and Gaussian noise, called DP-SGD; Rényi differential privacy (RDP) is the main summary. Different accountants can give different upper bounds for the same run. The tighter bound is more informative, but both may be valid.
 
 ## Who this part is for
 
@@ -8,7 +8,7 @@ This part assumes the [prerequisites](../part01-prerequisites/00-introduction.md
 
 ## The common thread
 
-Composition is easy for the privacy loss itself, but hard for $(\varepsilon, \delta)$. If you run $k$ mechanisms, the privacy loss of the whole run is the sum of the $k$ per-step losses, so its distribution is a convolution. A pair $(\varepsilon, \delta)$ forgets almost everything about that distribution, and advanced composition recovers only part of what is lost. So every accountant in this part makes one move: **track a richer summary of the privacy loss, one that composes simply, and convert to $(\varepsilon, \delta)$ only once, at the end.** The summaries differ in how much they keep, and @tbl-acct-map lists them.
+For $k$ composed mechanisms, the total privacy loss is the sum of the per-step losses, so its distribution is their convolution. The pair $(\varepsilon,\delta)$ retains little information about this distribution; advanced composition recovers only part of it. Accountants therefore track a richer summary that composes efficiently, then convert once to $(\varepsilon,\delta)$ at the end. @tbl-acct-map compares the summaries and the information each retains.
 
 | Chapter | The question it answers | Summary it tracks | Builds on |
 | --- | --- | --- | --- |
@@ -24,7 +24,7 @@ Composition is easy for the privacy loss itself, but hard for $(\varepsilon, \de
 
 : The chapters of this part, the question each one answers, the summary of the privacy loss it tracks, and the earlier chapters it uses. {#tbl-acct-map}
 
-The summaries form a ladder, in which each one keeps less than the one before. An RDP curve is a lossy summary of the trade-off function. A zero-concentrated DP (zCDP) parameter $\rho$ is a lossy summary of the RDP curve, and $(\varepsilon, \delta)$ is a lossy summary of all three. Numerical accounting keeps the whole privacy loss distribution and loses only a discretization error, which it bounds. Amplification (chapters 33 and 35) is a separate question: which pair of distributions you account for in the first place. Every accountant must use the pair that matches the sampling scheme that the training code runs.
+The RDP curve summarizes the trade-off function; a zero-concentrated DP (zCDP) parameter $\rho$ summarizes the RDP curve; and $(\varepsilon,\delta)$ summarizes these guarantees with further loss of information. Numerical accounting instead retains the privacy-loss distribution and bounds the error from discretizing it. Amplification (chapters 33 and 35) changes which pair of distributions the accountant compares. The pair must match the sampling scheme used by the training code.
 
 ## The running example
 

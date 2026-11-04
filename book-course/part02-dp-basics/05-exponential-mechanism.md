@@ -1,26 +1,26 @@
 # The exponential mechanism
 
-The Laplace and Gaussian mechanisms release numbers. They work because a small change in a number does little harm. Many tasks instead ask for the best object from a set, such as a price or a classifier, and there a small change in the output can ruin its quality. The exponential mechanism samples each object with a probability that grows exponentially with a score. So good objects are likely, while the choice reveals little about any one person, as differential privacy (DP) requires. This chapter proves that the mechanism is private and nearly optimal, and applies it to three problems.
+The Laplace and Gaussian mechanisms release numeric values. Other tasks select an object, such as a price or classifier, and small numeric perturbations may sharply reduce its quality. The exponential mechanism samples objects with probability proportional to an exponential of their score. High-scoring objects are more likely, while the selection satisfies differential privacy (DP). This chapter proves its privacy and utility guarantees and applies it to three problems.
 
 ## Selecting an object {#sec-em-setting}
 
-A seller has a digital good, such as an e-book, that costs nothing to copy, and $n$ buyers who each want one copy. Buyer $i$ values the good at $v_i$ and buys it if the price $p$ is at most $v_i$. The seller's revenue at price $p$ is the price times the number of buyers,
+A seller offers a digital good, such as an e-book, that costs nothing to copy. Each of $n$ buyers values it at $v_i$ and buys if the price $p$ is at most $v_i$. Revenue at price $p$ is the price multiplied by the number of buyers,
 
 $$
 p \cdot \big|\{i : v_i \ge p\}\big| .
 $$
 
-The seller could compute the price with the highest revenue from the valuations, but that price can reveal a single buyer. If one buyer values the good far above the others, the best price may be that buyer's valuation.
+The revenue-maximizing price can reveal an individual valuation. If one buyer values the good much more than others, that valuation may determine the optimal price.
 
-Noise added to the best price does not help, because revenue is very sensitive to the price. Take three buyers who value the good at \$1 and one who values it at \$2.50. At a price of \$1 all four buy and the revenue is \$4, but at \$1.01 only the last buyer buys and the revenue is \$1.01. So a cent of noise can cost three quarters of the revenue. It is better to treat the prices as objects with a quality, the revenue, than as numbers to perturb.
+Adding noise to the optimal price can sharply reduce revenue. Suppose three buyers value the good at \$1 and one at \$2.50. A price of \$1 earns \$4; a price of \$1.01 earns \$1.01 because only one buyer purchases. Thus one cent of noise reduces revenue by about three quarters. Instead of perturbing the price, select among candidate prices according to their revenue.
 
-In general, the input to the selection problem has three parts:
+In general, a selection problem specifies:
 
 - a dataset $D \in \mathcal X^n$,
 - a set $\mathcal R$ of objects,
 - a **score function** $u\colon \mathcal X^n \times \mathcal R \to \mathbb R$, where $u(D,r)$ says how good the object $r$ is for the dataset $D$.
 
-In the example, $D$ is the list of valuations, $\mathcal R$ is the set of prices, and $u(D,p)$ is the revenue at price $p$. Only the dataset is private, while the objects and the score function are public. So the sensitivity measures how much the score of a fixed object can move when one record changes.
+For pricing, $D$ is the list of valuations, $\mathcal R$ is the set of prices, and $u(D,p)$ is revenue. The candidate objects and score function are public; only $D$ is private. Score sensitivity measures the maximum change in a fixed candidate's score when one record changes.
 
 ::: {#def-em-sensitivity name="Sensitivity of a score function"}
 The **sensitivity** of a score function $u$ is
@@ -32,7 +32,7 @@ $$
 where the inner supremum is over neighbouring datasets, which differ in one record (the replace-one relation).
 :::
 
-The score is a single real number, so it needs no choice of norm. The mechanism gives each object $r$ a weight $\exp(\varepsilon u(D,r)/(2\Delta))$, where $\varepsilon$ is the privacy parameter and $\Delta$ is any upper bound on the sensitivity $\Delta u$. Division by the sum of all weights, the normalizer, turns the weights into probabilities. For an infinite set of objects, such as an interval of prices, the weights become a density. The sum then becomes an integral against a fixed base measure $\mu$ on $\mathcal R$, such as length on the real line.
+The score is scalar, so no norm is needed. The mechanism assigns weight $\exp(\varepsilon u(D,r)/(2\Delta))$ to each object $r$, where $\Delta$ upper-bounds the score sensitivity. Dividing by the sum of weights gives probabilities. For an infinite object set, such as an interval of prices, the weights define a density and the normalizer is an integral with respect to a fixed measure $\mu$.
 
 ::: {#def-em-mechanism name="Exponential mechanism"}
 Let $\varepsilon > 0$, and let $\Delta > 0$ satisfy $\Delta \ge \Delta u$. Let $\mu$ be a measure on $\mathcal R$, taken to be the counting measure, which gives each object weight $1$, when $\mathcal R$ is finite. Assume that the normalizer
@@ -48,13 +48,13 @@ p_D(r) = \frac{1}{Z(D)}\exp\!\left(\frac{\varepsilon\, u(D,r)}{2\Delta}\right) .
 $$ {#eq-em-density}
 :::
 
-For finite $\mathcal R$, @eq-em-density says that $\Pr[M_E(D) = r]$ is proportional to $\exp(\varepsilon u(D,r)/(2\Delta))$, so a higher score makes an object more likely. A smaller $\varepsilon$ or a larger $\Delta$ flattens the distribution towards uniform, which is more private and less accurate.
+For finite $\mathcal R$, @eq-em-density assigns probability proportional to $\exp(\varepsilon u(D,r)/(2\Delta))$. Higher scores are more likely. Smaller $\varepsilon$ or larger $\Delta$ makes the distribution more uniform, increasing privacy and reducing utility.
 
-The definition says nothing about how to sample. For a finite set, you can compute every weight, add them up and sample, in time proportional to $|\mathcal R|$, which is slow when $\mathcal R$ is exponentially large. For an infinite set, the usual remedy is to discretize, as @sec-em-pricing does. So the exponential mechanism always gives an algorithm, but not always an efficient one.
+The definition does not specify an efficient sampling method. For finite $\mathcal R$, direct sampling takes time proportional to $|\mathcal R|$, which is infeasible when the set is exponentially large. For infinite sets, discretization is one option, as in @sec-em-pricing. The mechanism is well-defined but not always computationally efficient.
 
 ## Privacy {#sec-em-privacy}
 
-The score of $r$ changes by at most $\Delta$ between neighbours, so the weight of $r$ changes by at most a factor $e^{\varepsilon/2}$. The normalizer is a sum of such weights, so it also changes by at most $e^{\varepsilon/2}$, and the two factors together give $e^\varepsilon$.
+Between neighbours, each score changes by at most $\Delta$, so its weight changes by at most $e^{\varepsilon/2}$. The normalizer changes by the same factor. Their ratio therefore changes by at most $e^\varepsilon$.
 
 ::: {#thm-em-privacy}
 The exponential mechanism is $\varepsilon$-DP.
@@ -73,7 +73,7 @@ The exponential mechanism is $\varepsilon$-DP.
 4. So $p_D(r) \le e^\varepsilon p_{D'}(r)$ for every $r$. For an event $S \subseteq \mathcal R$, integrating over $S$ gives $\Pr[M_E(D)\in S] \le e^\varepsilon\Pr[M_E(D')\in S]$.
 :::
 
-Step 3 spends the factor $2$ in $2\Delta$, because it pays for the change in the normalizer. When the normalizer does not depend on the dataset, that half of the budget is not needed.
+The factor of $2$ in the denominator allocates half the privacy budget to the score and half to the normalizer. If the normalizer is data-independent, the mechanism does not need this allocation.
 
 ::: {#cor-em-fixed-normalizer}
 Suppose that $Z(D)$, computed with $\Delta$ in place of $2\Delta$, is the same for every dataset $D$. Then the mechanism with density proportional to $\exp(\varepsilon u(D,r)/\Delta)$ is $\varepsilon$-DP.
@@ -85,13 +85,13 @@ In step 1 of the proof of @thm-em-privacy, with $\Delta$ in place of $2\Delta$, 
 
 ## Utility {#sec-em-utility}
 
-The mechanism should output an object whose score is close to the best one. Write the best score and the set of objects that attain it as
+Utility requires an output whose score is near the maximum. Define the maximum score and its set of maximizers by
 
 $$
 \mathrm{OPT}(D) = \max_{r\in\mathcal R} u(D,r), \qquad \mathcal R^*(D) = \{r \in \mathcal R : u(D,r) = \mathrm{OPT}(D)\} .
 $$
 
-The theorem says that the output's score is rarely more than about $(2\Delta/\varepsilon)\ln|\mathcal R|$ below $\mathrm{OPT}(D)$. So the loss grows linearly with the sensitivity and with $1/\varepsilon$, but only logarithmically with the number of objects.
+The theorem bounds the score loss by approximately $(2\Delta/\varepsilon)\ln|\mathcal R|$. The loss is linear in sensitivity and $1/\varepsilon$, but logarithmic in the number of candidates.
 
 ::: {#thm-em-utility}
 Let $\mathcal R$ be finite. For every dataset $D$ and every $t \ge 0$,
@@ -120,7 +120,7 @@ $$
 5. Set $\tau = \mathrm{OPT}(D) - (2\Delta/\varepsilon)\big(\ln(|\mathcal R|/|\mathcal R^*(D)|) + t\big)$. The exponent becomes $-\ln(|\mathcal R|/|\mathcal R^*(D)|) - t$, and the right-hand side becomes $e^{-t}$.
 :::
 
-Since at least one object attains the best score, dropping $|\mathcal R^*(D)|$ gives the form that is used most often.
+Since $|\mathcal R^*(D)|\ge1$, the following corollary gives the commonly used, simpler bound.
 
 ::: {#cor-em-utility}
 Let $\mathcal R$ be finite. For every dataset $D$ and every $t \ge 0$,
@@ -136,7 +136,7 @@ $$ {#eq-em-utility}
 
 ## Applications {#sec-em-applications}
 
-Each application below follows the same recipe. It chooses the set of objects and the score function, bounds the sensitivity, and reads off privacy and accuracy from @thm-em-privacy and @cor-em-utility.
+Each application specifies the candidate set and score, bounds sensitivity, and applies @thm-em-privacy and @cor-em-utility.
 
 ### The Laplace mechanism {#sec-em-laplace}
 
@@ -167,15 +167,15 @@ $$
 \gamma = \max_{p\in[0,1]} p\cdot|\{i : v_i \ge p\}| .
 $$
 
-The maximum exists, because the revenue increases linearly between consecutive valuations and drops just after each one, so it is attained at one of the $v_i$ or at $0$.
+The maximum exists: revenue increases linearly between consecutive valuations and drops immediately above each valuation, so an optimum occurs at a valuation or at $0$.
 
-The set of all prices is infinite, and the revenue has no structure that makes sampling easy, so the mechanism runs on a grid. Fix an integer $m \ge 1$ and the step $\alpha = 1/m$, and use the $m$ prices
+Because the continuous price set is difficult to sample from, use a grid. For an integer $m\ge1$, set $\alpha=1/m$ and use the $m$ prices
 
 $$
 \mathcal R = \{\alpha, 2\alpha, \dots, 1\} .
 $$
 
-Write $\mathrm{OPT}(D)$ for the best revenue over the grid. Rounding the best price down to the grid loses a little revenue, which the next lemma bounds.
+Write $\mathrm{OPT}(D)$ for the maximum grid revenue. The next lemma bounds the loss from rounding the optimal price down to the grid.
 
 ::: {#lem-em-grid}
 The best revenue on the grid satisfies $\mathrm{OPT}(D) \ge \gamma - \alpha n$.
@@ -188,7 +188,7 @@ The best revenue on the grid satisfies $\mathrm{OPT}(D) \ge \gamma - \alpha n$.
 3. Every buyer with $v_i \ge p^*$ also has $v_i \ge p'$. So the revenue at $p'$ is at least $p'\cdot|\{i : v_i\ge p^*\}| \ge (p^* - \alpha)|\{i : v_i\ge p^*\}| \ge \gamma - \alpha n$.
 :::
 
-So the private price loses revenue twice, once to rounding and once to the random selection. The theorem adds the two losses, with a grid of about $\varepsilon n$ prices.
+The private price incurs rounding loss and selection loss. The theorem bounds their sum using a grid of about $\varepsilon n$ prices.
 
 ::: {#thm-em-pricing}
 Let $\varepsilon > 0$, $m = \lceil \varepsilon n\rceil$ and $\alpha = 1/m$. The exponential mechanism with the grid $\mathcal R$, the revenue $u(D,p) = p\cdot|\{i : v_i \ge p\}|$ as score and $\Delta = 1$ is $\varepsilon$-DP. For every $D\in[0,1]^n$ and $t \ge 0$, with probability at least $1 - e^{-t}$, the revenue at its output price is at least
@@ -206,7 +206,7 @@ $$ {#eq-em-pricing}
 4. Adding the two losses gives @eq-em-pricing.
 :::
 
-The loss is $O(\log(\varepsilon n)/\varepsilon)$. When a constant fraction of buyers values the good above a constant price, $\gamma$ grows linearly in $n$, so the loss is a vanishing fraction of the best revenue. The grid size balances the two losses: a finer grid loses less to rounding, $\alpha n$, but more to selection, $(2/\varepsilon)\ln(1/\alpha)$. The next example compares the guarantee with the revenue the mechanism actually earns.
+The loss is $O(\log(\varepsilon n)/\varepsilon)$. If a constant fraction of buyers values the good above a constant price, then $\gamma$ grows linearly with $n$, and the loss is a vanishing fraction of optimal revenue. Grid size balances rounding loss, $\alpha n$, against selection loss, $(2/\varepsilon)\ln(1/\alpha)$. The next example compares the bound with observed utility.
 
 ::: {#exm-em-pricing}
 Draw $n = 1{,}000$ valuations uniformly from $[0,1]$ and take $\varepsilon = 0.5$, so that the grid has $m = 500$ prices. The best revenue is $\gamma = 267.40$, and the best grid price earns $266.88$. With $t = \ln 20$, @eq-em-pricing guarantees a revenue of at least $267.40 - 38.84 = 228.56$ with probability $0.95$. The exact output distribution does much better. Its mean revenue is $263.86$, and its 5th percentile is $256.52$, a loss of $10.88$, so the guarantee is about 3.6 times too pessimistic. @fig-em-pricing shows the output distribution on a smaller example.
@@ -216,7 +216,7 @@ Draw $n = 1{,}000$ valuations uniformly from $[0,1]$ and take $\varepsilon = 0.5
 
 ### Private PAC learning {#sec-em-pac}
 
-In the probably approximately correct (PAC) model of learning, a learner sees labelled records and must output a classifier that is accurate on new points from the same source. Here the records are points of the Boolean cube $\{0,1\}^d$, labelled $0$ or $1$. The definition measures accuracy by an error $\alpha$ and a failure probability $\beta$, so in this section $\alpha$ is no longer the grid step of the pricing example.
+In the probably approximately correct (PAC) model, a learner receives labelled records and outputs a classifier accurate on new samples from the same distribution. Here, records are points in $\{0,1\}^d$ with labels in $\{0,1\}$. Accuracy is specified by error $\alpha$ and failure probability $\beta$; here $\alpha$ is not the pricing grid step.
 
 ::: {#def-em-pac name="PAC learning"}
 A **concept class** is a finite set $\mathcal C$ of functions $c\colon\{0,1\}^d\to\{0,1\}$. An unknown **target** $c^* \in \mathcal C$ and an unknown distribution $\mathcal D$ on $\{0,1\}^d$ generate the dataset. Each record is a point $x_i$, drawn independently from $\mathcal D$, together with its label $y_i = c^*(x_i)$. So the dataset is $D = (z_1, \dots, z_n)$ with labelled records $z_i = (x_i, y_i)$. The **error** of a function $h$ is
@@ -228,15 +228,15 @@ $$
 A learner is **$(\alpha,\beta)$-accurate** if, for every target and every $\mathcal D$, it outputs a function $\hat h$ with $\mathrm{err}(\hat h) \le \alpha$ with probability at least $1-\beta$.
 :::
 
-For example, $\mathcal C$ might be a finite set of half-spaces, each of which labels $1$ the points on one side of a hyperplane.
+For example, $\mathcal C$ may be a finite set of half-spaces that label points on one side of a hyperplane as $1$.
 
-Without privacy, the classic learner outputs any function in $\mathcal C$ that labels every record correctly, and one exists because the target does. It works because, for every function at once, the fraction of mistakes on the sample is close to the error. Write that fraction as
+Without privacy, a consistent learner outputs a function in $\mathcal C$ that labels every record correctly; the target guarantees such a function exists. Uniform convergence ensures that every function's sample error is close to its true error. Define the sample error by
 
 $$
 \widehat{\mathrm{err}}(h) = \frac1n\big|\{i : h(x_i)\ne y_i\}\big| .
 $$
 
-The tool is Hoeffding's inequality: the average of $n$ independent random variables with values in $[0,1]$ falls below its mean by a margin $s \ge 0$ or more with probability at most $\exp(-2ns^2)$. Applied to the mistakes of one function, with a union bound over $\mathcal C$, it shows that the sample error is close to the true error for every function at once.
+Hoeffding's inequality bounds the probability that an average of $n$ independent $[0,1]$ variables falls below its mean by at least $s$ by $\exp(-2ns^2)$. Apply it to each function's error indicators and take a union bound over $\mathcal C$.
 
 ::: {#lem-em-uniform}
 Let $\alpha, \beta \in (0,1)$ and $n \ge 2\ln(|\mathcal C|/\beta)/\alpha^2$. With probability at least $1-\beta$ over the sample, every $h\in\mathcal C$ satisfies $\mathrm{err}(h) \le \widehat{\mathrm{err}}(h) + \alpha/2$. In particular, every function in $\mathcal C$ that labels the whole sample correctly has error at most $\alpha/2$.
@@ -250,11 +250,11 @@ Let $\alpha, \beta \in (0,1)$ and $n \ge 2\ln(|\mathcal C|/\beta)/\alpha^2$. Wit
 4. A function that labels the sample correctly has $\widehat{\mathrm{err}}(h) = 0$, so its error is at most $\alpha/2$.
 :::
 
-So about $\ln|\mathcal C|/\alpha^2$ records suffice.
+Thus, $O(\ln|\mathcal C|/\alpha^2)$ records suffice.
 
-For privacy, neighbouring datasets differ in one labelled record: any pair $z_i' = (x_i', y_i')$ can replace $z_i = (x_i, y_i)$. The new point need not come from $\mathcal D$, and its label need not equal $c^*(x_i')$. Accuracy is proved for data drawn from the model, but privacy must hold for every dataset, so that a wrong model never costs anyone their privacy.
+For privacy, neighbours differ in one labelled record, and the replacement $(x_i',y_i')$ need not follow $\mathcal D$ or satisfy $y_i'=c^*(x_i')$. Accuracy assumes data from the learning model; privacy must hold for every dataset.
 
-The private learner keeps the aim of few mistakes on the sample, but chooses the function with the exponential mechanism. Its score is minus the sample error, so a function with fewer mistakes is more likely.
+The private learner selects a function using the exponential mechanism with score equal to negative sample error. Functions with fewer mistakes receive higher probability.
 
 ::: {#thm-em-pac name="Private PAC learning"}
 Let $\varepsilon > 0$ and $\alpha,\beta\in(0,1)$. Run the exponential mechanism with $\mathcal R = \mathcal C$, the score $u(D,h) = -\widehat{\mathrm{err}}(h)$ and $\Delta = 1/n$. It is $\varepsilon$-DP for every dataset. If

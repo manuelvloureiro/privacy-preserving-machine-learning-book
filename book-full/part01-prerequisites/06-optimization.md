@@ -1,8 +1,7 @@
 # Optimization
 
-Training a model means minimizing an average loss over the training set, and two questions come up every time. The first is **how fast the optimizer gets there**: how many steps gradient descent (GD) and stochastic gradient descent (SGD) need, and which learning rate to pick. SGD estimates the gradient from a few random records, so its steps are noisy and it needs more of them. The second is **how much the answer depends on any one training record**, which the next chapter turns into a guarantee that the model works on new data.
-
-Both questions have the same kind of answer, because **a few constants of the loss decide everything**: how steep it can be, how sharply it can curve at most, how much it must curve at least, and how noisy SGD's gradient estimates are.
+Training minimizes the average loss over the training set. This chapter asks how many gradient descent (GD) or stochastic gradient descent (SGD) steps are needed, which learning rate ensures convergence, and how far the minimizer moves when one training record changes. SGD estimates the gradient from a random sample of records, so its updates have variance. The next chapter uses the minimizer's sensitivity to bound generalization.
+The answers depend on bounds for the loss and its derivatives: its Lipschitz constant, smoothness and strong convexity, plus the variance of the stochastic gradient.
 
 The running example is logistic regression, a linear classifier, trained on 1,000 records with five features. For example, after 10,000 steps of SGD its loss is within $7.71\times10^{-4}$ of the minimum, while the guarantee of @thm-opt-sgd-convex only promises 0.050, and the chapter explains why the guarantee is so cautious. @tbl-opt-symbols lists the symbols.
 

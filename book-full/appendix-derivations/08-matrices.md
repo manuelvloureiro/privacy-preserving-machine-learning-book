@@ -77,7 +77,7 @@ So with $m = O(n\log n)$ queries, error $E = o(\sqrt n)$ leaves $o(n)$ wrong bit
 
 ### The idea
 
-@tbl-apx-mat-chain lists how a lemma about one query becomes a bound on the smallest singular value. The lemma, from the chapter's linear-programming section @sec-recon-lp, says that one random query catches any fixed direction $x$ with probability at least $\frac3{16}$. Over $m$ queries, Hoeffding's inequality makes it nearly certain that a good share of the queries catch $x$. To handle all directions at once, the proof rounds every unit vector to a point of a fine grid, applies the union bound over the grid, and pays for the rounding with a crude bound on how much $A$ can stretch the small difference.
+@tbl-apx-mat-chain shows how a bound for one query yields a lower bound on the smallest singular value. The lemma from the chapter's linear-programming section @sec-recon-lp says that one random query detects any fixed direction $x$ with probability at least $\frac3{16}$. Hoeffding's inequality shows that, over $m$ queries, many detect $x$ with high probability. To cover all directions, the proof rounds each unit vector to a fine grid and applies a union bound over the grid. The rounding error is controlled by the operator-norm bound $\|A\|_{\mathrm{op}} \le \sqrt{mn}$, which follows from the entries of $A$ being 0 or 1.
 
 | Move | What it gives | Holds |
 | --- | --- | --- |

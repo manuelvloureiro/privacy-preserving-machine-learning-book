@@ -1,12 +1,12 @@
 # Private mean estimation
 
-Earlier chapters estimated properties of a fixed dataset. In statistics, the dataset is a sample, and the goal is a property of the distribution that generated it. This chapter asks how many samples an algorithm with differential privacy (DP) needs to estimate the mean of a distribution to within $\alpha$. It also asks how much more that is than without privacy.
+Earlier chapters estimated properties of fixed datasets. Statistical estimation instead treats the dataset as a sample and targets a property of its generating distribution. This chapter bounds the sample size needed for an estimate under differential privacy (DP) of a distribution's mean within error $\alpha$, and compares it with the non-private requirement.
 
-For bounded data, privacy costs a lower-order term. Unbounded data needs prior knowledge, at least a bound $R$ on the mean. Clipping to $[-R, R]$ costs samples linear in $R$, but an algorithm that first locates the data costs only samples logarithmic in $R$. For heavy-tailed data, the clipping must introduce bias, and the price of privacy grows.
+For bounded data, privacy adds a lower-order sample cost. For unbounded data, assume prior knowledge such as a bound $R$ on the mean. Direct clipping to $[-R,R]$ costs samples proportional to $R$; first locating the data reduces this dependence to logarithmic in $R$. Heavy tails require biased clipping and increase the privacy cost.
 
 ## The mean of a dataset and of a distribution {#sec-mean-bernoulli}
 
-The chapter uses two facts from earlier chapters. A Laplace variable with scale $b$, written $Z \sim \mathrm{Lap}(b)$, has density proportional to $e^{-|z|/b}$, so its tail is
+Two earlier results are used throughout. A Laplace variable $Z\sim\mathrm{Lap}(b)$ with scale $b$ has density proportional to $e^{-|z|/b}$ and tail
 
 $$
 \Pr[|Z| > t] = e^{-t/b} \qquad (t \ge 0).
@@ -18,9 +18,9 @@ $$
 \Delta_1 f = \max_{D \sim D'} \|f(D) - f(D')\|_1 .
 $$
 
-If $\Delta_1 f$ is finite, the release of $f(D)$ plus independent $\mathrm{Lap}(\Delta_1 f/\varepsilon)$ noise in each coordinate is $\varepsilon$-DP.
+If $\Delta_1 f$ is finite, adding independent $\mathrm{Lap}(\Delta_1 f/\varepsilon)$ noise to each coordinate of $f(D)$ gives an $\varepsilon$-DP release.
 
-Start with bits. Each of the $n$ records is a bit $X_i \in \{0,1\}$, and their empirical mean is $\tilde p = \frac1n \sum_i X_i$. A replaced bit moves $\tilde p$ by at most $1/n$, so the Laplace mechanism releases
+For bits $X_i\in\{0,1\}$, the empirical mean is $\tilde p=\frac1n\sum_iX_i$. Replacing one bit changes it by at most $1/n$, so the Laplace mechanism releases
 
 $$
 \hat p = \tilde p + \mathrm{Lap}\!\left(\frac{1}{\varepsilon n}\right).
@@ -44,23 +44,23 @@ $$
 5. A union bound over the two failures gives the claim.
 :::
 
-Each term is at most $\alpha/2$ once
+Both terms are at most $\alpha/2$ if
 
 $$
 n \ge \frac{2\ln(4/\beta)}{\alpha^2} + \frac{2\ln(2/\beta)}{\alpha\varepsilon},
 $$
 
-so $n = O(1/\alpha^2 + 1/(\alpha\varepsilon))$ samples are enough for a fixed $\beta$. The first term is the sample complexity without privacy, and the second is the **cost of privacy**. For a constant $\varepsilon$ and small $\alpha$, the cost of privacy is smaller by a factor of $\alpha$, so here privacy is nearly free. The proof split the error into the **sampling error** $\tilde p - p$, present without privacy, and the **noise error** $\hat p - \tilde p$ that privacy adds. That split recurs in the chapter.
+Thus, for fixed $\beta$, $n=O(1/\alpha^2+1/(\alpha\varepsilon))$ samples suffice. The first term is the non-private sample complexity; the second is the **cost of privacy**. For constant $\varepsilon$ and small $\alpha$, the latter is smaller by a factor of $\alpha$. The proof separates **sampling error** $\tilde p-p$ from the added **noise error** $\hat p-\tilde p$; this decomposition recurs below.
 
 ## Unbounded data {#sec-mean-unbounded}
 
-The Bernoulli case was easy because each record lies in $[0,1]$. Take instead real records, such as heights in centimetres. If one height of $160$ is replaced by a recorded $10^5$, the empirical mean moves by about $10^5/n$, and nothing bounds the move. So the empirical mean has infinite sensitivity. The next result shows that no private algorithm can fix that. It uses **group privacy**. If a mechanism $M$ is $\varepsilon$-DP and two datasets $D, D'$ differ in $k$ entries, then for every event $S$,
+The Bernoulli mean has bounded sensitivity because records lie in $[0,1]$. For real-valued records such as heights, replacing $160$ cm with $10^5$ cm shifts the empirical mean by about $10^5/n$. The mean therefore has infinite sensitivity. Group privacy shows why no private algorithm can estimate it accurately on every dataset: if an $\varepsilon$-DP mechanism's inputs differ in $k$ records, then for every event $S$,
 
 $$
 \Pr[M(D)\in S] \le e^{k\varepsilon}\Pr[M(D')\in S],
 $$
 
-by the definition applied along a path of $k$ neighbours. So every $\varepsilon$-DP algorithm is far from the empirical mean on some real dataset, however large the allowed error $\alpha$.
+This follows by applying the DP definition along a path of $k$ neighbouring datasets. The next proposition uses this bound to show that every $\varepsilon$-DP algorithm fails on some real-valued dataset, for any finite error tolerance $\alpha$.
 
 ::: {#prp-mean-impossible}
 Let $M \colon \mathbb R^n \to \mathbb R$ be $\varepsilon$-DP and $\alpha > 0$. Some dataset $D \in \mathbb R^n$ has $\Pr[|M(D) - \bar X| \le \alpha] < 1/2$, where $\bar X$ is its empirical mean.
@@ -73,13 +73,13 @@ Let $M \colon \mathbb R^n \to \mathbb R$ be $\varepsilon$-DP and $\alpha > 0$. S
 4. The sum over the disjoint intervals gives $1 \ge m e^{-\varepsilon n}/2 > 1$, a contradiction.
 :::
 
-The way out is prior knowledge that does not come from the data. No human is taller than $300$ cm, so the algorithm can force each height into $[0, 300]$ before the average.
+The remedy is prior knowledge independent of the data. For example, an algorithm can clip heights to the known range $[0,300]$ cm.
 
 ::: {#def-mean-clip name="Clipping"}
 For $u \le v$, the **clipping** map onto $[u,v]$ is $g_{[u,v]}(x) = \min(\max(x, u), v)$. It leaves points of $[u,v]$ unchanged and moves every other point to the nearer endpoint.
 :::
 
-Clipping to a range fixed in advance bounds how far one record can move the mean, so the Laplace mechanism applies to the clipped mean.
+Clipping to a fixed range bounds each record's effect on the mean, allowing the Laplace mechanism to privatize it.
 
 ::: {#lem-mean-clipped}
 Let $u < v$ be fixed before seeing the data, and let $g_{[u,v]}$ be the clipping map of @def-mean-clip. The estimator
@@ -96,11 +96,11 @@ is $\varepsilon$-DP. If every $X_i$ lies in $[u,v]$, then $|M(D) - \bar X| \le (
 2. If every $X_i$ lies in $[u,v]$, clipping changes nothing, and $M(D) - \bar X$ is the Laplace noise, whose tail gives the bound.
 :::
 
-With heights in $[0, 300]$, $n = 1{,}000$ and $\varepsilon = 1$, the noise scale is $300/1{,}000 = 0.3$ cm. Fix the range before you see the data. A range chosen after a look, for example to exclude one absurd record, depends on that record, and the guarantee no longer holds.
+For heights in $[0,300]$, $n=1{,}000$, and $\varepsilon=1$, the noise scale is $300/1{,}000=0.3$ cm. Choose the range before inspecting the data. A range selected afterward to exclude an outlier depends on that record and invalidates the guarantee.
 
 ## Estimating a parameter of a distribution {#sec-mean-setting}
 
-From here on the data is a sample from an unknown distribution, and the target is the mean of that distribution. An estimator must be private on every dataset, and accurate on samples from the distribution.
+From this point, the dataset is a sample from an unknown distribution and the target is its mean. The estimator must be private on every dataset and accurate on samples from the assumed distribution.
 
 ::: {#def-mean-estimation name="Private estimation"}
 Let $\mathcal P$ be a class of distributions on $\mathbb R$, each with a mean $\mu(P)$. An algorithm $M \colon \mathbb R^n \to \mathbb R$ is an **$\varepsilon$-DP $(\alpha, \beta)$-estimator** for $\mathcal P$ if
@@ -111,9 +111,9 @@ Let $\mathcal P$ be a class of distributions on $\mathbb R$, each with a mean $\
 The smallest such $n$ is the **sample complexity** of the class.
 :::
 
-Privacy is a worst-case guarantee. It holds even for a dataset that has probability zero under every $P \in \mathcal P$. So the people in the dataset do not pay if the model of the analyst is wrong. Accuracy, in contrast, is an average over samples from $P$, and it needs assumptions on $P$ even without privacy. For example, a Cauchy distribution has no mean, and the empirical mean of its samples does not converge.
+Privacy is worst-case: it covers datasets with probability zero under every $P\in\mathcal P$. Thus privacy does not depend on whether the analyst's distributional model is correct. Accuracy is measured over samples from $P$ and requires assumptions even without privacy. For example, a Cauchy distribution has no mean, and its sample mean does not converge.
 
-The main class is the Gaussians with unit variance and a bounded mean,
+The main example is the class of unit-variance Gaussians with bounded means:
 
 $$
 \mathcal G_R = \{\, \mathcal N(\mu, 1) : |\mu| \le R \,\}.
@@ -191,13 +191,13 @@ $$ {#eq-mean-naive}
 5. *Noise.* The Laplace tail gives $|Z| \le 2(r+\tau)\ln(1/\beta)/(\varepsilon n)$ with probability $1 - \beta$. A union bound with $E$ gives @eq-mean-naive.
 :::
 
-The proof splits the error in three. Take any clipping map $g$, write $\bar g = \frac1n\sum_i g(X_i)$ for the clipped mean and $\tilde\mu$ for the empirical mean, and let the estimate be $\hat\mu = \bar g + Z$ with noise $Z$. Then
+Decompose the estimation error into three terms. For clipping map $g$, let $\bar g=\frac1n\sum_i g(X_i)$ be the clipped mean, $\tilde\mu$ the empirical mean, and $Z$ the added noise. Then
 
 $$
 \hat\mu - \mu = \underbrace{(\tilde\mu - \mu)}_{\text{sampling}} + \underbrace{(\bar g - \tilde\mu)}_{\text{clipping bias}} + \underbrace{Z}_{\text{noise}} .
 $$ {#eq-mean-three-terms}
 
-Here the clipping interval is wide enough that the bias term is zero with high probability. Until @sec-mean-heavy, where the bias must be traded against the noise, the chapter keeps that choice.
+Here the interval is wide enough that clipping bias vanishes with high probability. In @sec-mean-heavy, the interval is narrower and the bias-noise trade-off matters.
 
 With $c = 0$ and $r = R$, each term of @eq-mean-naive is at most $\alpha/2$ when
 
@@ -252,13 +252,13 @@ $$
 n = \tilde O\!\left(\frac{1}{\alpha^2} + \frac{1}{\alpha\varepsilon} + \frac{\ln R}{\varepsilon}\right).
 $$ {#eq-mean-rate}
 
-The dependence on $R$ fell from linear to logarithmic. The first term is needed without privacy, @prp-mean-lower shows that the last is needed, and the middle one is needed too, up to logarithmic factors.
+This reduces dependence on $R$ from linear to logarithmic. The first term is necessary without privacy; @prp-mean-lower shows that the last is necessary, and the middle term is also necessary up to logarithmic factors.
 
 ## Shrinking confidence intervals {#sec-mean-shrinking}
 
-The histogram finds the data in one shot, but a histogram over a region of $\mathbb R^d$ needs a number of bins exponential in $d$. A second route applies the clipped Laplace estimator repeatedly. Each call returns a confidence interval instead of a point, a constant factor shorter than the one it started from, which with high probability still contains $\mu$.
+The histogram locates the data in one step, but a histogram over a region in $\mathbb R^d$ needs exponentially many bins. An alternative repeatedly applies the clipped Laplace estimator. Each call returns a shorter confidence interval that still contains $\mu$ with high probability.
 
-One step takes an interval $[c - r, c + r]$ and a budget $\varepsilon'$, computes the estimate $c' = M_{c,r}(D)$ with $\varepsilon'$, and returns the interval $[c' - s, c' + s]$ with $s = s_{\varepsilon'}(r)$ from @eq-mean-naive. The radius $s$ depends only on $r$ and on public parameters, not on the data.
+Given interval $[c-r,c+r]$ and privacy budget $\varepsilon'$, one step computes $c'=M_{c,r}(D)$ and returns $[c'-s,c'+s]$, where $s=s_{\varepsilon'}(r)$ from @eq-mean-naive. This radius depends on $r$ and public parameters, not the data.
 
 ::: {#lem-mean-step name="One step"}
 Let $\tau$ be as in @eq-mean-tau, $n \ge 16$ and $n \ge 16\ln(1/\beta)/\varepsilon'$. Consider one step, as described above, from the interval $[c - r, c + r]$ to the interval $[c' - s, c' + s]$. Then
@@ -366,7 +366,7 @@ The proof is that of @thm-mean-shrinking, with these changes.
 6. *Final step.* With $r_T \le \tau_d$, the final noise, with budget $(\varepsilon/2, \delta/2)$, has $\sigma = 4(r_T + \tau_d)\sqrt{2\ln(2/\delta) + \varepsilon/2}/(\varepsilon n) \le 8\tau_d\sqrt{2\ln(2/\delta) + \varepsilon}/(\varepsilon n)$, and steps 3 and 4 give the bound. The failures add up as before.
 :::
 
-Since $L$ and $\tau_d$ are $\sqrt d$ up to logarithmic terms, error $\alpha$ with $\varepsilon \le 1$ needs
+Because $L$ and $\tau_d$ scale as $\sqrt d$ up to logarithmic factors, achieving error $\alpha$ for $\varepsilon\le1$ requires
 
 $$
 n = \tilde O\!\left(\frac{d}{\alpha^2} + \frac{d\sqrt{\ln(1/\delta)}}{\alpha\varepsilon} + \frac{\sqrt{d}\,\ln R\,\sqrt{\ln(1/\delta)}}{\varepsilon}\right).
@@ -376,7 +376,7 @@ The first two terms are $d$ times the one-dimensional ones. The cost of locating
 
 ## Heavy-tailed data {#sec-mean-heavy}
 
-So far the arguments used only that the data has light tails. So they hold for **sub-Gaussian** distributions, whose tails decay at least as fast as those of a Gaussian. Then $\tau$ is multiplied by the scale of the tails. Real data often has heavier tails, and then only a few moments may be bounded. Take the class of distributions on $\mathbb R$ with
+The preceding bounds require light tails and therefore apply to **sub-Gaussian** distributions, whose tails decay at least as fast as Gaussian tails. The parameter $\tau$ then scales with the tail width. For heavier-tailed data, only a few moments may be bounded. Consider distributions on $\mathbb R$ satisfying
 
 $$
 \mu = \mathbb E[X] \in [-1, 1], \qquad \operatorname{Var}(X) \le 1 .
@@ -384,13 +384,13 @@ $$
 
 The problem is to estimate $\mu$ to a precision $\alpha$ well below $1$.
 
-The previous strategy clips only where no point lands. Chebyshev's inequality gives $\Pr[|X - \mu| \ge \sqrt{n/\beta}] \le \beta/n$. So the interval $[-1 - C, 1 + C]$, with the clipping norm $C$ set to $\sqrt{n/\beta}$, clips no point with probability $1 - \beta$. But the noise scale is then $2(1 + C)/(\varepsilon n)$, which is more than $2/(\varepsilon\sqrt{\beta n})$. The tail bound on the noise error is this scale times $\ln(1/\beta)$, and it is at most $\alpha$ only if
+The previous strategy clips only outside the range occupied by the sample. Chebyshev's inequality gives $\Pr[|X-\mu|\ge\sqrt{n/\beta}]\le\beta/n$, so clipping to $[-1-C,1+C]$ with $C=\sqrt{n/\beta}$ leaves every sample point unchanged with probability at least $1-\beta$. The resulting noise scale, $2(1+C)/(\varepsilon n)$, exceeds $2/(\varepsilon\sqrt{\beta n})$. Its tail is at most $\alpha$ only if
 
 $$
 n \ge \frac{4\ln^2(1/\beta)}{\beta\,\alpha^2\varepsilon^2},
 $$
 
-which is worse than the Gaussian rate in both $\alpha$ and $\varepsilon$. The remedy is to clip more aggressively and accept a bias, the clipping bias of @eq-mean-three-terms, which the next lemma bounds.
+which is worse than the Gaussian rate in both $\alpha$ and $\varepsilon$. Instead, clip more tightly and control the resulting bias, one of the terms in @eq-mean-three-terms.
 
 ::: {#lem-mean-bias name="Clipping bias"}
 Let $X$ have mean $\mu$ and variance at most $\sigma_X^2$, and let $[u,v] \supseteq [\mu - C, \mu + C]$ with $C > 0$. Then $g = g_{[u,v]}$ satisfies
@@ -407,7 +407,7 @@ $$
 4. Clipping is $1$-Lipschitz. With $X'$ an independent copy of $X$, $\operatorname{Var}(g(X)) = \tfrac12\mathbb E[(g(X) - g(X'))^2] \le \tfrac12\mathbb E[(X - X')^2] = \operatorname{Var}(X)$.
 :::
 
-With the bias bounded, the clipping interval no longer has to catch every point. The next estimator clips at a distance $C$ from the range of possible means, and the three terms of @eq-mean-three-terms decide how large $C$ must be.
+Bounding the bias removes the need to retain every sample point. The next estimator clips at distance $C$ beyond the possible mean range; the three terms in @eq-mean-three-terms determine the choice of $C$.
 
 ::: {#thm-mean-heavy name="Heavy-tailed mean"}
 For $C > 0$, the estimator
@@ -431,7 +431,7 @@ $$ {#eq-mean-heavy}
 5. *Noise.* The Laplace tail gives $|Z| \le 2(1+C)\ln(1/\beta)/(\varepsilon n)$ with probability $1 - \beta$. A union bound finishes the proof.
 :::
 
-The bias falls as $C$ grows and the noise rises, so there is a best clipping norm. If each of the three terms of @eq-mean-heavy is at most $\alpha/3$, the sample complexity is simple.
+Increasing $C$ reduces bias but increases noise, so an optimal clipping norm balances them. If each term in @eq-mean-heavy is at most $\alpha/3$, the sample complexity follows directly.
 
 ::: {#cor-mean-heavy}
 Let $\alpha \in (0, 1]$, and let $\hat\mu$ be the estimator of @thm-mean-heavy with $C = 3/\alpha$. If
@@ -448,7 +448,7 @@ then $|\hat\mu - \mu| \le \alpha$ with probability at least $1 - 2\beta$.
 2. Since $\alpha \le 1$, $1 + C \le 4/\alpha$, so the noise term is at most $8\ln(1/\beta)/(\alpha\varepsilon n)$, which the second condition makes at most $\alpha/3$.
 :::
 
-So the clipping norm must be about $1/\alpha$, and $n = O(1/(\alpha^2\varepsilon))$ samples are enough for a fixed $\beta$ and $\varepsilon \le 1$. This is more than the $O(1/\alpha^2 + 1/(\alpha\varepsilon))$ of the Gaussian case, because the two terms now multiply instead of adding. The increase is necessary. For distributions with only a bounded variance, no $\varepsilon$-DP estimator has error below order $1/\sqrt{\varepsilon n}$ (Barber and Duchi, 2014). In terms of $n$, the clipping norm that minimizes $1/C + 2C\ln(1/\beta)/(\varepsilon n)$ is
+Thus $C$ is of order $1/\alpha$, and for fixed $\beta$ and $\varepsilon\le1$, $n=O(1/(\alpha^2\varepsilon))$ suffices. This exceeds the Gaussian rate $O(1/\alpha^2+1/(\alpha\varepsilon))$ because the terms multiply rather than add. The increase is necessary: with only bounded variance, every $\varepsilon$-DP estimator has error at least order $1/\sqrt{\varepsilon n}$ (Barber and Duchi, 2014). For fixed $n$, the clipping norm minimizing $1/C+2C\ln(1/\beta)/(\varepsilon n)$ is
 
 $$
 C^\ast = \sqrt{\frac{\varepsilon n}{2\ln(1/\beta)}},

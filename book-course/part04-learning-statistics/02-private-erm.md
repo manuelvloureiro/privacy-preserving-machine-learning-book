@@ -1,10 +1,10 @@
 # Private empirical risk minimization
 
-Most of machine learning fits a model by minimizing its average loss on a training set. This chapter asks how to do that under differential privacy (DP) when the loss is convex. Noise can go into the output of a non-private solver, into the objective that the solver minimizes, or into each step of gradient descent. The chapter proves a privacy guarantee for each of the three methods. It also proves an accuracy guarantee for the third, which the next chapter scales to neural networks.
+Machine learning often fits a model by minimizing its average training loss. This chapter analyses three methods under differential privacy (DP) for convex losses: perturb the solver's output, perturb its objective, or perturb each gradient step. It proves privacy guarantees for all three and an accuracy guarantee for gradient descent, which the next chapter extends to neural networks.
 
 ## Empirical risk minimization {#sec-erm-setup}
 
-Each record $z = (x, y)$ is a pair of a feature vector $x$ and a label $y$, and the dataset $D = (z_1, \dots, z_n)$ holds $n$ records. A parameter vector $\theta$ in $\mathbb R^d$ describes a model. A **loss function** $\ell(\theta; z)$ measures how badly the model $\theta$ fits the record $z$. To fit a model is to choose $\theta$ from a set of allowed values so that the total loss over the dataset is small. The definition also says how to measure an algorithm that only comes close to the best choice.
+Each record $z=(x,y)$ contains a feature vector $x$ and label $y$; dataset $D=(z_1,\dots,z_n)$ contains $n$ records. A parameter vector $\theta\in\mathbb R^d$ specifies the model. The **loss function** $\ell(\theta;z)$ measures its error on record $z$. Empirical risk minimization chooses an allowed parameter with low total loss. The definition also measures algorithms that approximate the minimum.
 
 ::: {#def-erm-erm name="Empirical risk minimization"}
 Let $\Theta \subseteq \mathbb R^d$ be a nonempty, closed, convex set of allowed parameters. The empirical risk of $\theta$ on $D$ is the total loss
@@ -16,9 +16,9 @@ $$
 and $\theta^* \in \Theta$ denotes a minimizer of $\mathcal L(\cdot\,; D)$ over $\Theta$. An algorithm that outputs $\tilde\theta \in \Theta$ has **excess empirical risk** $\mathbb E[\mathcal L(\tilde\theta; D)] - \mathcal L(\theta^*; D)$, where the expectation is over the algorithm's coins only. The dataset is fixed.
 :::
 
-The problem is called empirical risk minimization (ERM). In practice the loss on new data matters. But where a uniform convergence argument applies, a good empirical minimizer also has a small loss on new data. So this chapter studies only the empirical problem.
+This problem is **empirical risk minimization (ERM)**. This chapter analyses empirical loss; when uniform convergence applies, low empirical loss also implies low loss on new data.
 
-In this generality the problem is hopeless, so the chapter makes three assumptions. The set of allowed parameters is bounded, which its diameter measures. The loss is convex, so that a local minimum is a global one, and Lipschitz, so that it cannot change quickly. The definitions below make these terms precise, with the subgradient, which replaces the gradient where a convex function has a kink.
+The analysis assumes that the parameter set is bounded, the loss is convex, and the loss is Lipschitz. Boundedness limits the parameter range; convexity makes every local minimum global; Lipschitz continuity bounds how quickly the loss changes. A **subgradient** extends the gradient to points where a convex function has a kink.
 
 ::: {#def-erm-convex name="Diameter, convexity, Lipschitz continuity"}
 - The **diameter** of $\Theta$ is $\|\Theta\|_2 = \sup_{\theta, \theta' \in \Theta}\|\theta - \theta'\|_2$.
@@ -27,7 +27,7 @@ In this generality the problem is hopeless, so the chapter makes three assumptio
 - A vector $g$ is a **subgradient** of a convex $f$ at $\theta$ if $f(\theta') \ge f(\theta) + \langle g, \theta' - \theta\rangle$ for all $\theta'$. Where $f$ is differentiable, its gradient $\nabla f(\theta)$, the vector of partial derivatives, is the only subgradient.
 :::
 
-So the chapter assumes that $\Theta$ has finite diameter. It also assumes that, for every record $z$, the loss $\theta \mapsto \ell(\theta; z)$ is convex and $L$-Lipschitz on $\mathbb R^d$. A convex function that is finite on all of $\mathbb R^d$ has a subgradient at every point. Write $\nabla\ell(\theta; z)$ for a gradient, or a subgradient where $\ell$ is not differentiable. Lipschitz continuity matters to privacy because it bounds every gradient, and so the effect of one record on a gradient step.
+Assume $\Theta$ has finite diameter and, for every record $z$, $\ell(\cdot;z)$ is convex and $L$-Lipschitz on $\mathbb R^d$. Such a finite convex function has a subgradient everywhere. Write $\nabla\ell(\theta;z)$ for its gradient or, at nondifferentiable points, a subgradient. Lipschitz continuity bounds these vectors and therefore limits each record's effect on a gradient step.
 
 ::: {#lem-erm-gradient}
 If a convex function $f$ is $L$-Lipschitz on $\mathbb R^d$, then every subgradient $g$ of $f$ satisfies $\|g\|_2 \le L$.
@@ -38,7 +38,7 @@ If a convex function $f$ is $L$-Lipschitz on $\mathbb R^d$, then every subgradie
 2. The Lipschitz condition gives $f(\theta+u) - f(\theta) \le L\|u\|_2 = L$. The two bounds together give $\|g\|_2 \le L$.
 :::
 
-The most common losses are convex, and most of them are Lipschitz when the features are bounded.
+Common losses are convex; bounded features often also make them Lipschitz.
 
 ::: {#exm-erm-losses name="Common losses"}
 Take $x, \theta \in \mathbb R^d$.
@@ -49,11 +49,11 @@ Take $x, \theta \in \mathbb R^d$.
 - **Support vector machine (SVM)**, $y \in \{-1, 1\}$: the hinge loss $\ell(\theta; x, y) = \max(0, 1 - y\langle x, \theta\rangle)$. It is a maximum of two functions that are linear in $\theta$, so it is convex and $\|x\|_2$-Lipschitz.
 :::
 
-Stronger assumptions, such as strong convexity or smoothness of the loss, give faster rates, but the chapter does not need them. Until @sec-erm-gradient, the solver of this convex problem is a black box.
+Strong convexity and smoothness can improve rates but are not needed here. Before @sec-erm-gradient, treat the solver as a black box.
 
 ## Why the minimizer is not private {#sec-erm-nonprivate}
 
-An exact minimizer can reveal records outright, and the median is the simplest case.
+An exact minimizer can reveal a record. The median gives a direct example.
 
 ::: {#prp-erm-median}
 Let $d = 1$, $\ell(\theta; x) = |\theta - x|$, records in $[-R, R]$ with $R > 0$, $\Theta = [-R, R]$, and $n$ odd. Then the empirical risk has a unique minimizer, the median $x_{(m)}$ with $m = (n+1)/2$, where $x_{(1)} \le \dots \le x_{(n)}$ are the sorted records. The algorithm that outputs it is not $(\varepsilon,\delta)$-DP for any $\varepsilon$ and any $\delta < 1$.
@@ -65,21 +65,21 @@ Let $d = 1$, $\ell(\theta; x) = |\theta - x|$, records in $[-R, R]$ with $R > 0$
 3. The algorithm is deterministic. For the event $S = \{v\}$ this gives $\Pr[M(D) \in S] = 1$ and $\Pr[M(D') \in S] = 0$, and $1 \le e^\varepsilon \cdot 0 + \delta$ fails for every $\delta < 1$.
 :::
 
-To privatize each record before any non-private algorithm is local DP, which needs far more data for the same accuracy. So the three methods below add noise after the data is pooled.
+Privatizing each record before using a non-private algorithm gives local DP, which needs more data for the same accuracy. The methods below instead add noise after pooling the data.
 
 ## Output perturbation {#sec-erm-output}
 
-The obvious method computes the minimizer and adds noise scaled to its sensitivity. But @prp-erm-median shows that the minimizer can have large sensitivity, and regularization is the fix.
+Output perturbation adds noise calibrated to the minimizer's sensitivity. As @prp-erm-median shows, that sensitivity can be large; regularization reduces it.
 
-Polynomial regression shows the problem. With records $(x_i, y_i) \in \mathbb R^2$ and the squared loss $\ell(\theta; x, y) = \big(\sum_{j=0}^{p}\theta_j x^j - y\big)^2$, the model is a polynomial of degree $p$. If the degree is as high as $p = n - 1$, then for distinct features the minimizer passes through every point. Its excess risk is zero, but it fits new data poorly and swings wildly when one point moves. These are two views of the same instability, as the left panel of @fig-erm-regularization shows.
+Polynomial regression illustrates the problem. For records $(x_i,y_i)\in\mathbb R^2$ and squared loss $\ell(\theta;x,y)=(\sum_{j=0}^p\theta_jx^j-y)^2$, the model has degree $p$. If $p=n-1$ and the features are distinct, the minimizer interpolates every point. It has zero excess risk on the training data but can fit new data poorly and change sharply when one point moves. The left panel of @fig-erm-regularization shows this instability.
 
-**Regularization** adds a penalty that favours simple models. For a function $N$ of the parameters alone, called the **regularizer**, and a weight $\lambda > 0$, the regularized objective is
+**Regularization** penalizes model complexity. For a parameter-only function $N$, called the **regularizer**, and weight $\lambda>0$, define the regularized objective as
 
 $$
 F_D(\theta) = \mathcal L(\theta; D) + \lambda N(\theta).
 $$
 
-At $\lambda = 0$ there is no regularization, and as $\lambda \to \infty$ the data is ignored. The usual choice is $N(\theta) = \tfrac12\|\theta\|_2^2$. Its effect on sensitivity comes from strong convexity, which asks that the function curve upward by at least a fixed amount everywhere. For the regularized objective, that amount is the weight $\lambda$.
+At $\lambda=0$ there is no regularization; as $\lambda\to\infty$, the penalty dominates the data. A common choice is $N(\theta)=\tfrac12\|\theta\|_2^2$. Its effect on sensitivity follows from strong convexity, which requires a uniform lower bound on curvature. For the regularized objective, that lower bound is the weight $\lambda$.
 
 ::: {#def-erm-strong name="Strong convexity"}
 For $\lambda > 0$, a function $f$ on a convex set $K$ is **$\lambda$-strongly convex** if, for all $\theta, \theta' \in K$ and $t \in [0,1]$,
@@ -153,21 +153,21 @@ The map $D \mapsto \theta_D$ has $\ell_2$ sensitivity at most $2L/\lambda$ by @t
 
 ![Polynomials of degree $9$ fitted by least squares to $10$ points, on a dataset and on a neighbour with one label raised (the square). Without regularization, both fits pass through every point, and one moved point changes the whole curve. With the penalty $\tfrac\lambda2\|\theta\|_2^2$, the two fits stay close.](figures/erm-regularization.svg){#fig-erm-regularization}
 
-Output perturbation is simple and works with any exact solver. But its accuracy is often weak, because the regularization that privacy needs can be far from the one that fits the data best.
+Output perturbation works with any exact solver, but privacy may require enough regularization to reduce accuracy.
 
 ## Objective perturbation {#sec-erm-objective}
 
-The second method adds noise to the objective instead of the output. It minimizes
+Objective perturbation adds noise to the objective and releases its minimizer:
 
 $$
 J_b(\theta) = \mathcal L(\theta; D) + \frac\lambda2\|\theta\|_2^2 + \langle b, \theta\rangle
 $$
 
-for a random vector $b$, and releases the exact minimizer. The linear term rewards or penalizes each direction of the parameter space by a random amount.
+for random vector $b$. The linear term randomly changes the objective's slope in each direction.
 
-The proof below is for losses of **generalized linear** form, such as logistic regression and smoothed versions of the hinge loss. Such a loss is $\ell(\theta; x, y) = \phi(\langle x, \theta\rangle, y)$. For each label $y$, the scalar function $u \mapsto \phi(u, y)$ is convex and twice continuously differentiable, with derivatives $|\phi'| \le L$ and $0 \le \phi'' \le \beta$. The features satisfy $\|x\|_2 \le 1$. So the gradient $\nabla\ell = \phi'(\langle x,\theta\rangle, y)\,x$ has norm at most $L$. The Hessian, the matrix of second derivatives, is $\nabla^2\ell = \phi''(\langle x,\theta\rangle, y)\,xx^\top$, with rank at most one and eigenvalues in $[0, \beta]$.
+The proof covers **generalized linear** losses, including logistic regression and smoothed hinge loss. Such a loss has form $\ell(\theta;x,y)=\phi(\langle x,\theta\rangle,y)$, where for each $y$, $\phi(\cdot,y)$ is convex and twice continuously differentiable, $|\phi'|\le L$, and $0\le\phi''\le\beta$. Assume $\|x\|_2\le1$. Then $\nabla\ell=\phi'(\langle x,\theta\rangle,y)x$ has norm at most $L$, and the Hessian $\nabla^2\ell=\phi''(\langle x,\theta\rangle,y)xx^\top$ has rank at most one and eigenvalues in $[0,\beta]$.
 
-The proof compares the densities of the output on two neighbouring datasets. So it needs a criterion in terms of densities, from [the approximate DP chapter](../part02-dp-basics/03-approximate-dp.md). Write $p_D$ for the density of the output when the dataset is $D$. The **privacy loss** of an output $\theta$ is $\ln\big(p_D(\theta)/p_{D'}(\theta)\big)$, which is large when $\theta$ is much more likely under $D$ than under $D'$. The criterion says that $M$ is $(\varepsilon,\delta)$-DP if, for every ordered pair of neighbours, an output drawn from $M(D)$ has privacy loss above $\varepsilon$ with probability at most $\delta$.
+The proof compares output densities on neighbouring datasets. The [approximate-DP chapter](../part02-dp-basics/03-approximate-dp.md) defines the needed privacy-loss criterion: if $p_D$ is the output density on $D$, the **privacy loss** at $\theta$ is $\ln(p_D(\theta)/p_{D'}(\theta))$. A mechanism is $(\varepsilon,\delta)$-DP if, for every ordered neighbouring pair, this loss exceeds $\varepsilon$ with probability at most $\delta$ when the output is drawn on $D$.
 
 ::: {#thm-erm-objective name="Objective perturbation"}
 Let $\Theta = \mathbb R^d$, and let $\ell$ be a generalized linear loss as above, with $|\phi'| \le L$, $0 \le \phi'' \le \beta$ and features of norm at most $1$. Let $\varepsilon \in (0, 4]$ and $\delta \in (0,1)$, and set
@@ -212,13 +212,13 @@ where the second step uses $\varepsilon \le 4$ and $1/(1+s)^2 \le 1/(1+s)$.
 8. The privacy loss criterion turns this bound into $(\varepsilon,\delta)$-DP.
 :::
 
-The theorem has a practical weakness. It holds only for the exact minimizer, and a real solver never returns one. Iterative solvers such as gradient descent only approach the minimizer. Floating-point arithmetic cannot represent most real numbers, and even a naive floating-point Laplace mechanism leaks the data through the low-order bits of its output (Mironov). Later versions of objective perturbation need only an approximate minimizer.
+The theorem requires the exact minimizer, which iterative solvers such as gradient descent only approximate. Floating-point arithmetic adds another concern: a naive floating-point Laplace mechanism can leak data through low-order output bits (Mironov). Later objective-perturbation methods allow approximate minimizers.
 
 ## Gradient perturbation {#sec-erm-gradient}
 
-The third method, now the standard one, runs gradient descent and adds noise to each gradient. Its analysis starts from the non-private algorithm. Write $\Pi_\Theta(u) = \arg\min_{\theta\in \Theta}\|\theta - u\|_2$ for the **projection** onto $\Theta$, the closest point of $\Theta$, which exists and is unique because $\Theta$ is closed and convex.
+The third method adds noise to each gradient-descent step. Define $\Pi_\Theta(u)=\arg\min_{\theta\in\Theta}\|\theta-u\|_2$, the **projection** onto $\Theta$. Since $\Theta$ is closed and convex, this closest point exists and is unique.
 
-The definition leaves the step direction $G_t$ random, so that one analysis covers exact gradients, gradients of one sampled record, and the noisy gradients of the private algorithm.
+Allowing random step directions $G_t$ lets one analysis cover full gradients, sampled-record gradients, and noisy gradients.
 
 ::: {#def-erm-sgd name="Projected stochastic gradient descent"}
 Fix a start $\theta_0 \in \Theta$, a number of steps $T$ and a learning rate $\eta > 0$, also called the step size. For $t = 1, \dots, T$, draw a random vector $G_t$ and set
@@ -279,7 +279,7 @@ Suppose that $\Theta$ has finite diameter $\|\Theta\|_2$ and that every loss $\e
 3. In both cases $G = nL$, and @thm-erm-sgd gives excess risk at most $\|\Theta\|_2 nL/\sqrt T \le \alpha$.
 :::
 
-For a constant $\alpha$, gradient descent costs about $n^3$ gradient evaluations and SGD about $n^2$. SGD is also easier to make private, because each step touches one record. Private SGD adds Gaussian noise to each sampled gradient, at the level $\sigma$ that the privacy proof below needs, and its learning rate allows for the extra noise.
+For constant $\alpha$, gradient descent uses about $n^3$ gradient evaluations, compared with about $n^2$ for SGD. SGD is easier to privatize because each step uses one record. Private SGD adds calibrated Gaussian noise to each sampled gradient and adjusts the learning rate for that noise.
 
 ::: {#def-erm-noisy name="Private SGD"}
 Let $\varepsilon \in (0,1]$ and $\delta \in (0,1)$. Run projected SGD for $T = n^2$ steps with
@@ -291,7 +291,7 @@ $$
 with fresh, independent indices $I_t$ and noise $b_t$, and learning rate $\eta = \|\Theta\|_2/(G\sqrt T)$ where $G^2 = n^2L^2 + d\sigma^2$.
 :::
 
-Accuracy is the easier half, because the noise has mean zero and only makes the second moment larger.
+The accuracy analysis uses the noise's zero mean and its contribution to the second moment.
 
 ::: {#thm-erm-noisy-utility}
 With $\ell(\cdot\,;z)$ convex and $L$-Lipschitz on $\mathbb R^d$, private SGD satisfies
@@ -311,7 +311,7 @@ The first term is bounded by @lem-erm-gradient. The middle term vanishes because
 3. @thm-erm-sgd with $T = n^2$ gives $\|\Theta\|_2 G/n$, which is the first bound. The second uses $\sqrt{a + b} \le \sqrt a + \sqrt b$ and the value of $\sigma$.
 :::
 
-Up to logarithmic factors, the excess risk is $O\big(\|\Theta\|_2 L\sqrt{d\ln(1/\delta)}/\varepsilon\big)$, so the average excess risk per record falls as $1/n$. The price of privacy is the factor $\sqrt d$, and Bassily, Smith and Thakurta proved that some dependence of this kind is unavoidable. But the constant $16$ comes from a loose chain of bounds. For example, with $n = 10{,}000$, $\varepsilon = 1$ and $\delta = 10^{-6}$, the noise is $\sigma = 299.9\,nL$. With $d = 100$, the bound per record is $\|\Theta\|_2L(1 + 2999)/10{,}000 = 0.30\,\|\Theta\|_2L$. The next chapter replaces this chain with a much tighter one.
+Up to logarithmic factors, excess risk is $O(\|\Theta\|_2L\sqrt{d\ln(1/\delta)}/\varepsilon)$, so average excess risk per record decreases as $1/n$. The $\sqrt d$ privacy cost is unavoidable in some settings (Bassily, Smith and Thakurta), but the constant $16$ reflects loose bounds. For $n=10{,}000$, $\varepsilon=1$, and $\delta=10^{-6}$, the noise is $\sigma=299.9\,nL$. At $d=100$, the bound per record is $\|\Theta\|_2L(1+2999)/10{,}000=0.30\,\|\Theta\|_2L$. The next chapter gives a tighter analysis.
 
 The privacy proof uses three tools. The first is the Gaussian mechanism, restated above. The second is **amplification by subsampling**, which says that a mechanism run on one random record is more private than the same mechanism run on a fixed record.
 

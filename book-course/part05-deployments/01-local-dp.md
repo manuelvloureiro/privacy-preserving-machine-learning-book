@@ -1,12 +1,12 @@
 # Local differential privacy
 
-Almost every mechanism so far ran on a trusted curator who saw the raw data. This chapter drops that trust, so that each person randomizes their own record before it leaves their device. We define this local model and show that, with $n$ people, it costs a factor of about $\sqrt n$ in accuracy on the simplest task. No noninteractive protocol can escape that cost.
+Previous mechanisms assumed a trusted curator with access to raw data. The local model removes that assumption: each person randomizes their record before sending it. This chapter defines the model and shows that, for a basic estimation task, accuracy costs a factor of about $\sqrt n$. No noninteractive protocol avoids this penalty.
 
-The rest of the chapter studies three large deployments of the local model, each of which solves a problem the textbook protocol ignores. Google's protects people who answer the same question every day, Apple's finds values that no one knew to ask about, and Microsoft's sends numbers in a single bit and copes with values that drift.
+The chapter then analyses three deployments that address limitations of the basic protocol. Google's RAPPOR protects repeated answers, Apple's protocol discovers previously unknown values, and Microsoft's protocol encodes numeric data in one bit and handles changing values.
 
 ## The local model {#sec-ldp-model}
 
-In the central model of [the first chapter on the definition](../part02-dp-basics/01-randomized-response.md), people send their data to a curator, and the trust barrier sits at the output of the curator. In the local model the barrier moves to each person. An adversary may see anything that leaves the device of a person, and the curator is now just an analyst who receives messages.
+In the central model from [the first chapter on the definition](../part02-dp-basics/01-randomized-response.md), people send raw data to a curator, and privacy constrains the curator's output. In the local model, each person randomizes their data before transmission. An adversary may observe every outgoing message; the curator only analyses those messages.
 
 ::: {#def-ldp-randomizer name="Local randomizer"}
 Let $\varepsilon \ge 0$. A randomized algorithm $R\colon \mathcal X \to \mathcal Y$ is an **$\varepsilon$-local randomizer** if for all inputs $x, x' \in \mathcal X$ and all events $S \subseteq \mathcal Y$,
@@ -16,13 +16,13 @@ $$
 $$
 :::
 
-This is the definition of differential privacy (DP) applied to a dataset with one record. In the simplest protocol, everyone speaks once and at the same time.
+This is differential privacy (DP) applied to a dataset with one record. The simplest protocol has each person send one message simultaneously.
 
 ::: {#def-ldp-protocol name="Noninteractive local protocol"}
 A **noninteractive $\varepsilon$-local protocol** gives each person $i$ an $\varepsilon$-local randomizer $R_i$. Person $i$ sends $Y_i = R_i(X_i)$, using randomness independent of everyone else's, and the analyst outputs a function of the messages $(Y_1, \dots, Y_n)$.
 :::
 
-Local privacy implies central privacy, because the view of the analyst is a vector of messages and only one of them depends on any one record.
+Local privacy implies central privacy: the analyst sees all messages, but only one message depends on any given record.
 
 ::: {#prp-ldp-central}
 The messages $(Y_1,\dots,Y_n)$ of a noninteractive $\varepsilon$-local protocol, viewed as the output of a mechanism on $D$, are $\varepsilon$-DP. So is any function of them that the analyst computes.
@@ -40,13 +40,13 @@ where the inequality applies @def-ldp-randomizer to each slice.
 3. The analyst's output is a post-processing of the messages, so it is $\varepsilon$-DP by the post-processing property of [the Laplace mechanism chapter](../part02-dp-basics/02-laplace-mechanism.md).
 :::
 
-Randomized response, with each person reporting their true bit with probability $e^\varepsilon/(1+e^\varepsilon)$, is an $\varepsilon$-local randomizer. So the first private algorithm of this book was a local protocol.
+Randomized response reports a true bit with probability $e^\varepsilon/(1+e^\varepsilon)$ and is therefore an $\varepsilon$-local randomizer. The book's first private algorithm was a local protocol.
 
-Protocols can also interact. In a **sequentially interactive** protocol the analyst addresses people one at a time, and the randomizer of person $i$ may depend on the messages before theirs, but each person speaks only once. In a **fully interactive** protocol the analyst may return to a person many times, and all the messages that person ever sends must together form an $\varepsilon$-local randomizer of their record. This chapter proves its bounds for noninteractive protocols only.
+Protocols may also be interactive. In a **sequentially interactive** protocol, the analyst contacts people in sequence; each person's randomizer may depend on earlier messages, but each person speaks once. In a **fully interactive** protocol, a person may answer repeatedly, and the entire message sequence must be an $\varepsilon$-local randomizer. This chapter proves bounds only for noninteractive protocols.
 
 ## Counting bits, central and local {#sec-ldp-bits}
 
-The cost of moving the barrier shows on the simplest task, in which each person holds a bit $X_i \in \{0,1\}$, and the analyst wants the mean $\mu = \frac1n\sum_{i=1}^n X_i$. Write $\mathrm{Lap}(b)$ for the Laplace distribution with density $\frac{1}{2b}e^{-|z|/b}$. [The Laplace mechanism](../part02-dp-basics/02-laplace-mechanism.md) adds $\mathrm{Lap}(\Delta f/\varepsilon)$ noise to a query $f$ whose value changes by at most $\Delta f$ between neighbours, and it is $\varepsilon$-DP. So a central curator, who sees the bits, can add Laplace noise to their mean.
+The cost of this trust change appears in bit-mean estimation. Each person holds $X_i\in\{0,1\}$, and the analyst wants $\mu=\frac1n\sum_iX_i$. Write $\mathrm{Lap}(b)$ for the Laplace distribution with density $\frac1{2b}e^{-|z|/b}$. The [Laplace mechanism](../part02-dp-basics/02-laplace-mechanism.md) adds $\mathrm{Lap}(\Delta f/\varepsilon)$ noise to a query with sensitivity $\Delta f$. A central curator can therefore privatize the mean directly.
 
 ::: {#prp-ldp-central-bits}
 For every $\varepsilon > 0$ and $\beta \in (0,1)$, the central estimate $\hat\mu = \mu + \mathrm{Lap}(1/(\varepsilon n))$ is $\varepsilon$-DP, and with probability at least $1-\beta$,
@@ -61,21 +61,21 @@ $$
 2. The Laplace tail is $\Pr[|\mathrm{Lap}(b)| > t] = 2\int_t^\infty \frac{1}{2b}e^{-z/b}\,dz = e^{-t/b}$. Setting $b = 1/(\varepsilon n)$ and $t = b\ln(1/\beta)$ makes the tail equal to $\beta$.
 :::
 
-In the local model each person runs randomized response and sends $Y_i$, equal to $X_i$ with probability $e^\varepsilon/(1+e^\varepsilon)$ and to $1 - X_i$ otherwise. A report equals $1$ with probability $(1 + (e^\varepsilon - 1)X_i)/(e^\varepsilon+1)$, which is linear in $X_i$. Solving for $X_i$ gives the unbiased estimate of the analyst,
+In the local model, each person applies randomized response and sends $Y_i$: it equals $X_i$ with probability $e^\varepsilon/(1+e^\varepsilon)$ and $1-X_i$ otherwise. Since $\Pr[Y_i=1]=(1+(e^\varepsilon-1)X_i)/(e^\varepsilon+1)$ is linear in $X_i$, inverting this relation gives the unbiased estimate
 
 
 $$
 \hat\mu = \frac1n\sum_{i=1}^n \frac{(e^\varepsilon+1)\,Y_i - 1}{e^\varepsilon - 1}.
 $$ {#eq-ldp-rr-estimator}
 
-This is the debiased estimator of [the randomized response chapter](../part02-dp-basics/01-randomized-response.md) with bias $2\kappa = (e^\varepsilon-1)/(e^\varepsilon+1)$, written in terms of $\varepsilon$. That chapter proved that, with probability at least $1-\beta$,
+This is the debiased estimator from [the randomized response chapter](../part02-dp-basics/01-randomized-response.md), expressed using $\varepsilon$ through $2\kappa=(e^\varepsilon-1)/(e^\varepsilon+1)$. That chapter proves that, with probability at least $1-\beta$,
 
 
 $$
 |\hat\mu - \mu| \le \coth\!\left(\frac\varepsilon2\right)\sqrt{\frac{\ln(2/\beta)}{2n}}, \qquad \coth\!\left(\frac\varepsilon2\right) \ge \frac2\varepsilon .
 $$ {#eq-ldp-rr-error}
 
-The two bounds reach an error of $\alpha$ at different sizes. The central bound does so once $n \ge \ln(1/\beta)/(\varepsilon\alpha)$. The local bound does so once $n \ge \coth^2(\varepsilon/2)\ln(2/\beta)/(2\alpha^2)$, a threshold of at least $2\ln(2/\beta)/(\varepsilon^2\alpha^2)$. So the local estimate needs quadratically more data in $1/\alpha$ and in $1/\varepsilon$, as @fig-ldp-gap shows.
+The central bound guarantees error $\alpha$ when $n\ge\ln(1/\beta)/(\varepsilon\alpha)$. The local bound requires $n\ge\coth^2(\varepsilon/2)\ln(2/\beta)/(2\alpha^2)$, at least $2\ln(2/\beta)/(\varepsilon^2\alpha^2)$. Thus, as @fig-ldp-gap shows, the local estimate is quadratically more costly in both $1/\alpha$ and $1/\varepsilon$.
 
 ::: {#exm-ldp-sizes}
 Take $\varepsilon = 1$, $\alpha = 0.01$ and $\beta = 0.05$. The central estimate needs $n \ge \ln 20/0.01$, that is, $300$ people. The local one needs $n \ge \coth^2(0.5)\ln 40/(2 \times 10^{-4})$, that is, $86{,}370$ people, about $288$ times as many.
@@ -83,11 +83,11 @@ Take $\varepsilon = 1$, $\alpha = 0.01$ and $\beta = 0.05$. The central estimate
 
 ![Error of the mean of $n$ bits at $\varepsilon = 1$. Solid lines are the 95th percentile of the error over 2,000 simulated runs with $\mu = 0.3$, dashed lines the bounds of @prp-ldp-central-bits and @eq-ldp-rr-error with $\beta = 0.05$. The central error falls as $1/n$ and the local one as $1/\sqrt n$, so the gap widens with $n$.](figures/ldp-gap.svg){#fig-ldp-gap}
 
-This gap is why only companies with hundreds of millions of users have deployed local privacy. With a few thousand users, a local protocol returns mostly noise.
+This gap helps explain why local privacy has been deployed mainly by companies with hundreds of millions of users. With only thousands of users, the estimate can be dominated by noise.
 
 ## The price is unavoidable {#sec-ldp-lower}
 
-The local estimator is not merely a poor choice, because no noninteractive local protocol can do better than error of order $1/(\varepsilon\sqrt n)$. The reason is that a local randomizer shrinks the difference between two input distributions by a factor that depends only on $\varepsilon$, and $n$ independent messages cannot recover more than $n$ such shrunken differences.
+This error is not specific to randomized response: every noninteractive local protocol has error at least order $1/(\varepsilon\sqrt n)$. Local randomization contracts differences between input distributions by a factor determined by $\varepsilon$, and $n$ independent messages cannot recover the lost information.
 
 Two distances between distributions $P$ and $Q$ on a countable set measure this. The **total variation distance** is $\mathrm{TV}(P,Q) = \frac12\sum_y |P(y) - Q(y)|$, the largest gap $P(S) - Q(S)$ over events $S$. The **chi-squared divergence** is
 

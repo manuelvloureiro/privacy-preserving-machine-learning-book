@@ -2,22 +2,22 @@
 
 ## Why this matters
 
-[Linkage and re-identification](07-linkage-reidentification.md) showed that a table without names is not anonymous. Quasi-identifiers such as age, postcode and sex single out many people. The classic answer is to coarsen the table until every person hides in a crowd. The definitions of this answer are **syntactic**, because you check each one by reading the published table. You will meet them in audits, because statistics offices and tools such as ARX and sdcMicro still use them. But each one holds for one table and for an adversary whose knowledge is fixed in advance. One unexpected fact, or a second release of the same people, breaks it.
+[Linkage and re-identification](07-linkage-reidentification.md) showed that removing names does not make a table anonymous. Combinations of age, postcode and sex can still identify people. A common response is to generalize the table until each person belongs to a group. These definitions are **syntactic** because they can be checked directly from the released table. Statistics offices and tools such as ARX and sdcMicro still use them. Each definition applies to one table and assumes fixed adversarial knowledge; additional information or another release can defeat it.
 
 ## What the adversary believes about a class {#sec-anon-posterior}
 
-To anonymize a table, the custodian, the organization that holds the data, applies a **generalization**. It turns an age into a range or a postcode into a prefix. Records with the same generalized quasi-identifiers form an **equivalence class**. An adversary who knows the target's quasi-identifiers finds the target's class $E$ but cannot tell its records apart. So its belief about the target's sensitive value, its **posterior**, is the share of the class with that value. Write $\lvert E\rvert$ for the size of the class and $n_E(v)$ for the number of its records with a sensitive value $v$. Then the posterior that the target's sensitive value, written $S_{\text{target}}$, equals $v$ is
+To anonymize a table, the custodian—the organization holding the data—applies **generalization**, such as replacing an age with a range or a postcode with a prefix. Records with identical generalized quasi-identifiers form an **equivalence class**. An adversary who knows the target's quasi-identifiers can identify the target's class $E$ but cannot distinguish its records. The adversary's **posterior** for a sensitive value is therefore the fraction of the class with that value. Let $\lvert E\rvert$ be the class size and $n_E(v)$ the number of records in it with sensitive value $v$. The posterior that the target's sensitive value $S_{\text{target}}$ equals $v$ is
 
 $$\Pr[S_{\text{target}} = v \mid \text{release}] = \frac{n_E(v)}{\lvert E\rvert}.$$ {#eq-anon-posterior}
-The adversary's background knowledge about the target works by elimination. A fact that rules out a value crosses out its records, and the adversary computes the posterior again over the records that remain. Every attack in this chapter is this calculation.
+An adversary can use background knowledge to eliminate values, then recompute the posterior over the remaining records. The attacks in this chapter use this calculation.
 
 ## k-anonymity and what it costs {#sec-anon-k}
 
-**k-anonymity** (Sweeney and Samarati, 1998) asks that every class hold at least $k$ records, for a crowd size $k$ that the custodian chooses. Generalization gets there, together with **suppression**, which deletes the records that still stand out. In the previous chapter, an adversary who knows the target is in the release links it with probability $J/n$, the number of classes $J$ over the number of records $n$. So with at least $k$ records per class, there are at most $n/k$ classes, and
+**k-anonymity** (Sweeney and Samarati, 1998) requires each class to contain at least $k$ records, where the custodian chooses $k$. Generalization and **suppression**—deleting records that remain distinguishable—can enforce the requirement. In the previous chapter, an adversary who knows the target is in the release links it with probability $J/n$, where $J$ is the number of classes and $n$ the number of records. If each class contains at least $k$ records, there are at most $n/k$ classes, so
 $$\Pr[\text{win}] = \frac{J}{n} \le \frac1k.$$ {#eq-anon-k-link}
-The guarantee covers names only, and only against an adversary who knows nothing beyond the quasi-identifiers. The choice of $k$ is a policy, and 5 is a common minimum.
+This bound concerns linkage and assumes the adversary knows only the quasi-identifiers. The choice of $k$ is a policy decision; 5 is a common minimum.
 
-Anonymizers such as **Mondrian** search for a generalization that loses little, but you can also generalize by hand and check again. The script [practitioner_table_risk.py](../../code/part02-attacks/practitioner_table_risk.py) takes the previous chapter's Adult census extract and its six quasi-identifiers. It puts age into 10-year bands, native country into US or other, and education into four levels. Then it counts the records alone in their class, and the different occupations in each class, with occupation as the sensitive attribute. Both are Polars counts, because no maintained Python package computes k-anonymity or distinct $\ell$.
+Anonymizers such as **Mondrian** search for a low-cost generalization. Alternatively, generalize the table manually and recheck it. The script [practitioner_table_risk.py](../../code/part02-attacks/practitioner_table_risk.py) uses the Adult census extract and six quasi-identifiers from the previous chapter. It groups age into 10-year bands, native country into US or other, and education into four levels. It then counts records alone in their class and the distinct occupations in each class, treating occupation as the sensitive attribute. The script uses Polars because no maintained Python package computes k-anonymity or distinct $\ell$.
 
 ```{.python excerpt="generalize-and-check"}
 general = df.with_columns(
@@ -47,29 +47,29 @@ age + sex + race + native-country + marital-status + education + hours-per-week:
   records in classes of size >=5 with l=1: 0.03%
 ```
 
-Generalization cut the unique share to 0.94%, from 14.64% before. Yet the smallest class still holds one record. So suppress the 3.31% of records in classes smaller than 5, or make the bands coarser. The result is fragile, because an adversary who also knows the hours worked finds 10.09% of the records unique again.
+Generalization reduced the unique share from 14.64% to 0.94%, but the smallest class still contains one record. Suppress the 3.31% of records in classes smaller than 5 or use broader bands. The result remains fragile: an adversary who also knows hours worked finds 10.09% of records unique.
 
 ## Homogeneity, background knowledge and l-diversity {#sec-anon-l}
 
-k-anonymity hides who a record belongs to, but not what it says (Machanavajjhala and colleagues, 2006). In the **homogeneity attack**, all three records of Alice's class say heart disease. Her posterior is then 1, and nobody has to find her record. In the **background knowledge attack**, Bob's class says cancer, cancer and flu. A neighbour who knows that Bob did not have flu crosses out that record and learns that Bob has cancer.
+k-anonymity obscures record identity but not sensitive values (Machanavajjhala et al., 2006). In a **homogeneity attack**, all three records in Alice's class report heart disease, so her posterior probability of heart disease is 1. In a **background knowledge attack**, Bob's class contains two cancer records and one flu record. A neighbour who knows Bob did not have flu can eliminate that record and infer cancer.
 
-**l-diversity** asks each class to hold enough different sensitive values. The distinct version asks for at least $\ell$ different values. It does not cap the most common value's share, so a class can be 3-diverse with one value in most of its records. The recursive version adds that cap, with a constant $c$ that the custodian picks. An adversary who rules out $\ell - 2$ values then keeps a posterior below $c/(1 + c)$. That cap is already one half at $c = 1$, so even this version protects against certainty, not likelihood.
+**l-diversity** requires each class to contain enough distinct sensitive values. Its distinct version requires at least $\ell$ values but does not limit the most common value's share; a class can be 3-diverse even if one value dominates. The recursive version also caps that share using a custodian-selected constant $c$. If an adversary rules out $\ell-2$ values, the posterior is below $c/(1+c)$. At $c=1$, this bound is one half, so the guarantee prevents certainty but not a high posterior.
 
-Suppression of the small classes also removes most homogeneous ones. On Adult, 1.20% of the generalized records sit in a class where everyone has the same occupation. Only 0.03% sit in such a class of 5 or more. On a synthetic hospital table of the full edition, distinct 3-diversity removed the certain disclosures at little cost. The recursive version forced some classes to grow to 641 patients.
+Suppressing small classes also removes most homogeneous classes. In Adult, 1.20% of generalized records are in a class where every record has the same occupation; only 0.03% are in such a class of at least 5 records. In the full edition's synthetic hospital table, distinct 3-diversity removed certain disclosures at little cost. The recursive version required some classes to grow to 641 patients.
 
 ## Measuring what a release teaches {#sec-anon-baseline}
 
-Compare every posterior with the **imputation baseline** of [Attribute inference and model inversion](03-attribute-inference.md), the best guess of a sensitive value from the population alone. Only the success beyond it is about the individual. On the hospital table, a guess of each patient's diagnosis from age alone is right for 53.6% of patients, and a 5-anonymous release raises that to 59.3%. Most of that gain is the link between age and diagnosis, which any useful study reports. Only the excess of 5.7 percentage points is a leak.
+Compare each posterior with the **imputation baseline** from [Attribute inference and model inversion](03-attribute-inference.md), the best population-only prediction of a sensitive value. Only improvement over this baseline reflects information about an individual. On the hospital table, age alone predicts each patient's diagnosis correctly for 53.6% of patients; a 5-anonymous release raises this to 59.3%. Most of the increase reflects the age-diagnosis association that the study reports. The additional 5.7 percentage points are leakage.
 
 ## Skewness, similarity and t-closeness {#sec-anon-t}
 
-l-diversity misses two attacks (Li, Li and Venkatasubramanian, 2007). In the **skewness attack**, a class that is half HIV is 2-diverse, yet in a table where 1% have HIV it raises its members' posterior fifty-fold. In the **similarity attack**, a class of three different stomach diseases is 3-diverse but still reveals a stomach disease.
+l-diversity does not prevent two attacks (Li, Li and Venkatasubramanian, 2007). In a **skewness attack**, a class that is half HIV-positive is 2-diverse, but if 1% of the full table is HIV-positive, membership in the class raises the posterior fifty-fold. In a **similarity attack**, a class containing three distinct stomach diseases is 3-diverse but still reveals that the person has a stomach disease.
 
-**t-closeness** answers both. It asks that the distribution of values in every class $E$ be within a distance $t$ of the whole table's. Write $P_E(A)$ and $P(A)$ for the chance that a value drawn from the class, or from the table, lands in a set $A$ of values. With the **total variation (TV)** distance, no such chance, and so no belief, moves by more than $t$,
+**t-closeness** addresses both attacks by requiring the sensitive-value distribution in every class $E$ to be within distance $t$ of the full table's distribution. Let $P_E(A)$ and $P(A)$ be the probabilities that a value drawn from the class or full table lies in set $A$. Under **total variation (TV)** distance, no such probability—and therefore no posterior belief—changes by more than $t$:
 $$\lvert P_E(A) - P(A)\rvert \le t.$$ {#eq-anon-tv}
-The bound is a difference, not a ratio, so it protects rare values badly. At $t = 0.15$, a value held by 1% of the table may rise to 16%. Against the similarity attack, Li and colleagues used the earth mover's distance instead, which counts similar values as close.
+The bound controls an absolute difference, not a ratio, so it gives weak protection for rare values. At $t = 0.15$, a value present in 1% of the table may reach 16% in a class. To address similarity attacks, Li and colleagues used earth mover's distance, which accounts for distances between values.
 
-t-closeness costs a lot. At $t = 0.15$, a guess of diagnoses from the hospital release was right for only 22.2% of patients, below the 53.6% from age alone. So the release told less about the population than no release.
+t-closeness reduces utility. At $t = 0.15$, a guess of diagnoses from the hospital release was correct for 22.2% of patients, below the 53.6% accuracy from age alone. The release therefore provided less information than age alone.
 
 ## The composition attack {#sec-anon-composition}
 
@@ -79,13 +79,13 @@ When one candidate is left, the diagnosis is **pinned down**.
 
 In the full edition's simulation, two hospitals share 6,649 patients. Together, their two 5-anonymous releases pin down the diagnosis of 9.9% of them, over three times what either pins alone. With distinct 3-diversity, neither release pins anyone, yet together they pin 18.
 
-No definition for a single table can stop this, because the intersection of two tables is a table that neither custodian checked. A definition that survives must compose across releases and hold whatever the adversary knows. It must also bound the ratio of beliefs, so that it protects rare values. [The definition of differential privacy](../part03-dp-foundations/01-definition.md) meets these needs, and statistics offices such as the US Census Bureau have moved towards it ([Reconstruction attacks](09-reconstruction.md)).
+A single-table definition cannot prevent this attack because neither custodian checks the intersection of two releases. A robust definition must compose across releases, hold under arbitrary adversarial knowledge and bound belief ratios to protect rare values. [The definition of differential privacy](../part03-dp-foundations/01-definition.md) has these properties; statistical agencies such as the US Census Bureau have adopted it ([Reconstruction attacks](09-reconstruction.md)).
 
 ## Choosing and running an anonymization {#sec-anon-workflow}
 
-Start from the quasi-identifiers of [Linkage and re-identification](07-linkage-reidentification.md), because a list that is too short is the most common failure. Use k-anonymity against linkage. Add distinct l-diversity when a class with one sensitive value is a disclosure. Use t-closeness, the costliest, only when the sensitive attribute is skewed or has similar values.
+Start with the quasi-identifiers described in [Linkage and re-identification](07-linkage-reidentification.md); an incomplete list is a common failure. Use k-anonymity to limit linkage. Add distinct l-diversity when a class containing one sensitive value is a disclosure. Use t-closeness when the sensitive attribute is skewed or contains similar values, because it can reduce utility substantially.
 
-Then audit the anonymizer's output yourself, in Polars as the excerpt does, or with pycanon, which reports $k$, $\ell$ and $t$ for a pandas table. [Pre-release privacy risk assessment](10-risk-assessment.md) turns these checks into a release decision. Move to differential privacy if other releases of the same people exist, if the sensitive attribute is rare, or if the data are sparse. For tables of counts and sums, [Release statistics with a library](../part03-dp-foundations/12-release-statistics.md) does the job end to end.
+Audit the anonymizer's output in Polars as the excerpt does, or use pycanon, which reports $k$, $\ell$ and $t$ for a pandas table. [Pre-release privacy risk assessment](10-risk-assessment.md) uses these results to inform the release decision. Use differential privacy when other releases of the same people exist, the sensitive attribute is rare or the data are sparse. For counts and sums, [Release statistics with a library](../part03-dp-foundations/12-release-statistics.md) provides an end-to-end workflow.
 
 ## Cheat sheet
 
@@ -101,8 +101,8 @@ Then audit the anonymizer's output yourself, in Polars as the excerpt does, or w
 
 **Rules of thumb**
 
-- k-anonymity protects names, not attributes, so check what each class's sensitive values reveal.
-- Assume another release exists, because a guarantee about one table is not a guarantee about a person.
+- k-anonymity limits linkage but does not protect sensitive attributes; inspect the values in each class.
+- Check for other releases of the same records; a guarantee for one table does not protect a person across releases.
 
 ## References
 

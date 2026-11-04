@@ -2,9 +2,9 @@
 
 ## Why this matters
 
-Every differential privacy (DP) guarantee in this part so far protects one record. Stochastic gradient descent (SGD) with clipping and noise, this part's [DP-SGD](02-dp-sgd.md), gives each person of its Adult run a privacy loss $\varepsilon$ of 3.98. But a messaging user contributes hundreds of messages, and together a person's records can reveal far more than any one of them.
+The differential privacy (DP) guarantees described so far protect one record. Stochastic gradient descent (SGD) with DP is called DP-SGD. In this part's [DP-SGD](02-dp-sgd.md) Adult run, record-level privacy loss is $\varepsilon=3.98$. A messaging user may contribute hundreds of messages, whose combined information can exceed the protection for any one message.
 
-A DP guarantee protects whatever differs between two neighbouring datasets, so **the neighbouring relation sets the privacy unit**. Adult has no household identifier, so to show what a larger unit costs, this chapter makes one up. It gives the 30,000 training rows to 3,000 households, very unevenly, each household a cluster of similar rows. The median household holds 4 rows and the largest 359. A household is the user of this chapter, and a row its record.
+A DP guarantee protects the changes defined by neighbouring datasets, so **the neighbouring relation determines the privacy unit**. Adult has no household identifier. To illustrate larger units, this chapter assigns its 30,000 training rows to 3,000 synthetic households, each containing similar rows. The median household has 4 rows and the largest has 359. Here a household is the user and a row is a record.
 
 ## The privacy unit and δ {#sec-ulvl-unit}
 
@@ -12,15 +12,15 @@ Take a mechanism $M$, and call two datasets neighbours, $D$ and $D'$, when they 
 $$\Pr[M(D) \in S] \le e^\varepsilon\Pr[M(D') \in S] + \delta.$$
 **Example-level** DP is the same inequality for datasets that differ in one record. So every property and accountant of [Part 4](../part04-privacy-accounting/00-introduction.md) holds for user-level DP unchanged. What changes is the sensitivity, because one user can move the computation with all of their records at once.
 
-The right unit, such as a record, a user, a household or a device, answers the question "whose participation do I want to hide?". Report it with every $\varepsilon$ ([Release and governance](12-release-governance.md#sec-relgov-statement)). The unit also sets the slack, because the book's rule for $\delta$ ([How small δ must be](../part03-dp-foundations/01-definition.md#sec-dpdef-small-delta)) now counts users. For 3,000 households it gives $10^{-4}$ (@sec-ulvl-code), so this chapter's $10^{-5}$ is stricter than it needs to be.
+Choose the privacy unit—record, user, household or device—to specify whose participation is protected. Report it with each $\varepsilon$ ([Release and governance](12-release-governance.md#sec-relgov-statement)). It also determines $\delta$: the book's rule ([How small δ must be](../part03-dp-foundations/01-definition.md#sec-dpdef-small-delta)) counts users. For 3,000 households it gives $10^{-4}$ (@sec-ulvl-code), so this chapter's $10^{-5}$ is stricter.
 
-The textbook answer for a person with $k$ records is **group privacy** ([Post-processing, group privacy and composition](../part03-dp-foundations/02-properties.md)). An example-level $(\varepsilon, \delta)$-DP mechanism is also user-level DP for users with at most $k$ records, at level $k\varepsilon$ and with slack
+The general guarantee for a user with $k$ records is **group privacy** ([Post-processing, group privacy and composition](../part03-dp-foundations/02-properties.md)). An example-level $(\varepsilon,\delta)$-DP mechanism also protects users with at most $k$ records at privacy level $k\varepsilon$ and slack
 $$\delta_k = \delta\,\frac{e^{k\varepsilon} - 1}{e^\varepsilon - 1}.$$ {#eq-ulvl-group}
-The fraction grows like $e^{(k-1)\varepsilon}$, so never read a record-level $\delta$ as a user's. To hold a user's slack at $10^{-5}$, the per-record $\delta$ must be much smaller, and so the per-record $\varepsilon$ larger. This chapter accounts with the full edition's Rényi accountant, which puts the Adult run at 4.50 per row. A household with two rows therefore gets $\varepsilon = 12.43$, not twice 4.50, and for ten rows no per-row $\delta$ is small enough.
+The slack grows roughly as $e^{(k-1)\varepsilon}$; a record-level $\delta$ is not a user-level $\delta$. To keep user-level slack at $10^{-5}$, per-record $\delta$ must be much smaller, which increases per-record $\varepsilon$. The full edition's Rényi accountant gives the Adult run $\varepsilon=4.50$ per row. A two-row household therefore has $\varepsilon=12.43$, not twice 4.50; for ten rows, no sufficiently small per-row $\delta$ is available.
 
 ## What an example-level model gives a user {#sec-ulvl-group-sgd}
 
-Group privacy treats DP-SGD as a black box, but you know how a user's records enter each step. Each step includes every record independently with the sampling rate $q$. So it sees some record of a user with $k$ records with probability about $kq$. While $kq$ is small, two of their records rarely share a batch. So **a user with $k$ records looks like one record sampled at rate $kq$**. To screen a user's exposure, rerun the record-level accountant at rate $kq$ (@sec-ulvl-code). An exact accountant for a user with $k$ records also exists (Charles et al. 2024).
+Group privacy treats DP-SGD as a black box, but its sampling process is known. Each record is independently included with probability $q$, so a user with $k$ records is represented in a step with probability about $kq$. When $kq$ is small, multiple records from that user rarely share a batch. Thus, **a user with $k$ records can be approximated as one record sampled at rate $kq$**. Screen exposure by rerunning the record-level accountant at rate $kq$ (@sec-ulvl-code). Charles et al. (2024) give an exact user accountant.
 
 | Rows of the household $k$ | 1 | 2 | 5 | 10 | 20 |
 | --- | --- | --- | --- | --- | --- |
@@ -29,9 +29,9 @@ Group privacy treats DP-SGD as a black box, but you know how a user's records en
 
 : The household-level $\varepsilon$ at $\delta = 10^{-5}$ of the Adult run's example-level DP-SGD ($q = 1/30$, $\sigma = 0.973$, 300 steps) for a household with $k$ rows, from the full edition's Rényi accountant (4.59 at one record comes from its coarser grid of orders). {#tbl-ulvl-k}
 
-Ten rows already cost 74.82, which protects nothing. Yet the exact accountant beats group privacy for every user with more than one record, so never use group privacy for DP-SGD.
+Ten rows cost 74.82, offering little practical protection. For every user with multiple records, the exact accountant is tighter than group privacy; do not use the generic group bound for DP-SGD.
 
-The rate-$kq$ screen is always low, by 8% at two rows and by 23% at ten. The reason is that it ignores steps that draw several of the household's rows together, and with $q = 1/30$ such steps are common. So report the exact value when you have an implementation. The libraries this book uses offer only the screen, so report its value, say how low it can be, and keep $kq$ small. It is not a pessimistic bound, because a person's similar records do push the gradient partly the same way.
+The rate-$kq$ screen underestimates the exact cost by 8% for two rows and 23% for ten. It ignores steps that sample multiple household rows, which are common at $q=1/30$. Report an exact value when an implementation is available. The libraries used here provide only the screen; report it with this limitation and keep $kq$ small. It is not a conservative bound because similar records can move gradients in the same direction.
 
 
 ## User-level DP-SGD {#sec-ulvl-dpsgd}

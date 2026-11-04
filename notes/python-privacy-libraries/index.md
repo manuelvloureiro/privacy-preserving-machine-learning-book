@@ -5,9 +5,9 @@ abstract: |
   You hold records about people and want to publish a few statistics, train a model, or check how much a model leaks. Which Python package should do the privacy part, and what does each one quietly assume? This note surveys the packages for differential privacy, privacy auditing, encrypted computation, federated learning and anonymization, as they stood on 23 October 2026, and runs the same three jobs in four of them. The libraries agree on the arithmetic. They differ in what they make you declare, what they refuse to do, and what they let you get wrong.
 ---
 
-Differential privacy (DP) is the standard guarantee for publishing a statistic or a model computed from personal data. More than a dozen Python packages implement it, and many more do related jobs, from encrypted computation to the measurement of what a finished model leaks. If you pick the wrong family of package, you lose days. If you pick the right family but misread its assumptions, you ship a guarantee that the code does not deliver.
+Differential privacy (DP) is the standard guarantee for publishing a statistic or model computed from personal data. More than a dozen Python packages implement it, and others support related tasks, from encrypted computation to measuring what a finished model leaks. A package from the wrong family may not support the task you need. Misreading a package's assumptions can also lead you to claim a guarantee its code does not provide.
 
-This note answers two questions: which packages exist, and how their differences show in code. For the second question, four packages are installed with pinned versions, and each does the same three jobs on the same data. The jobs are to release a count and a mean, to train a classifier, and to add up the privacy cost of one training run. The four are OpenDP 0.16.0 and diffprivlib 0.6.6 for statistics, Opacus 1.6.0 for training with stochastic gradient descent (SGD) made private, called DP-SGD, and dp-accounting 0.6.0 for the adding up. Every number that the note quotes comes from one script, [code/notes/python_privacy_libraries.py](https://github.com/manuelvloureiro/privacy-preserving-machine-learning-book/blob/main/code/notes/python_privacy_libraries.py):
+This note surveys the available packages and compares their behaviour in code. Four packages, installed at pinned versions, run the same three jobs on the same data: release a count and a mean, train a classifier, and account for one training run. OpenDP 0.16.0 and diffprivlib 0.6.6 handle statistics; Opacus 1.6.0 makes stochastic gradient descent (SGD), or DP-SGD, private; and dp-accounting 0.6.0 composes privacy costs. One script computes every number quoted in the note: [code/notes/python_privacy_libraries.py](https://github.com/manuelvloureiro/privacy-preserving-machine-learning-book/blob/main/code/notes/python_privacy_libraries.py).
 
 ```bash
 uv run python code/notes/python_privacy_libraries.py
@@ -44,7 +44,7 @@ You need basic probability to follow the note, and nothing about privacy. @tbl-m
 
 # What a privacy library has to get right {#sec-need}
 
-Before you compare packages, you need to know what you ask them to do. This section defines the guarantee that they all implement and proves the two results that all of them rely on. From those results come the four duties of a library, which the three jobs then compare.
+Package comparisons require a common definition of the guarantee. This section defines that guarantee and proves two results on which the packages rely. Those results imply four duties for a privacy library, which the three jobs compare.
 
 ## The guarantee
 
@@ -207,7 +207,7 @@ Opacus is the library of choice for PyTorch, and it keeps moving. TensorFlow Pri
 
 The first job is the release of two statistics, and it shows what each implementation makes you declare. Release how many patients the dataset holds and the average of the `mean radius` column, with a total budget of $\varepsilon = 1$ and no $\delta$, half to each query. The bounds of the column, 6.981 and 28.11, come from the dataset's published description, which lists the minimum and maximum of every feature. They stand in for the domain knowledge a hospital would have, such as the range of tumour sizes its instruments can measure. The stand-in is not perfect, because the published summary was computed from these very records, and a real release must take its bounds from knowledge that is independent of them.
 
-The scales follow from @thm-laplace. The count has sensitivity 1, so at $\varepsilon = 0.5$ its scale is 2. The mean has sensitivity $21.129/569$, the width of the bounds over the number of records, so its scale is $21.129/(569 \times 0.5) \approx 0.0743$. The baseline implementation is the textbook formula written by hand with NumPy, the standard numerical library of Python, because a library must offer something beyond this arithmetic to be worth its dependency:
+The scales follow from @thm-laplace. The count has sensitivity 1, so at $\varepsilon = 0.5$ its scale is 2. The mean has sensitivity $21.129/569$, the width of the bounds over the number of records, so its scale is $21.129/(569 \times 0.5) \approx 0.0743$. Use the textbook formula implemented with NumPy as the baseline for comparing the libraries:
 
 ```{.python excerpt="ppl-by-hand"}
 def by_hand(values: Array, bounds: tuple[float, float], eps: float, rng: np.random.Generator) -> Release:
@@ -236,9 +236,9 @@ def with_opendp(values: Array, bounds: tuple[float, float], eps: float) -> Relea
     return Release(count.release(), mean.release(), count.param(), mean.param())
 ```
 
-Two arguments matter here. The `domain` declares that the data are floats with no missing values, and OpenDP refuses to build the mean without it. A missing value, a `NaN` in floating point, would pass through clamping unchanged and break the proof. The `resize` step tells OpenDP the number of records $n$. It pads the data with a constant or truncates it to the declared size, so that the proofs can treat the size as fixed and the mean has the sensitivity $(u - \ell)/n$. The size is public here, since the published dataset has 569 records. Without that step OpenDP would not accept a Laplace mean at all, because a mean of an unknown number of records has no finite sensitivity.
+The `domain` declares that the data are floats with no missing values, and OpenDP refuses to build the mean without it. A missing value, or `NaN`, would pass through clamping unchanged and invalidate the proof. The `resize` step declares the number of records $n$. It pads the data with a constant or truncates it to that size, allowing the proof to treat the size as fixed and the mean's sensitivity to be $(u - \ell)/n$. Here the size is public because the dataset contains 569 published records. Without `resize`, OpenDP would reject a Laplace mean because a mean over an unknown number of records has no finite sensitivity.
 
-diffprivlib looks like NumPy. Each function, which its documentation calls a tool, takes its own $\varepsilon$, and an optional `BudgetAccountant` adds them up and refuses a call that would overspend. It writes the count of all records as a count of the records that meet a condition every record meets:
+diffprivlib has a NumPy-style interface. Each function, which its documentation calls a tool, takes its own $\varepsilon$. An optional `BudgetAccountant` composes the costs and rejects calls that would exceed the budget. For these finite data, the count call selects every record with the condition `values > -np.inf`:
 
 ```{.python excerpt="ppl-diffprivlib"}
 def with_diffprivlib(values: Array, bounds: tuple[float, float], eps: float, seed: int) -> Release:
@@ -259,7 +259,7 @@ Nothing tells diffprivlib what $n$ is. Its `mean` reads the length of the array 
 
 @tbl-release shows that all three implementations arrive at the same scales, 2 for the count and 0.0743 for the mean. OpenDP's scale for the mean is larger than the textbook value by a few parts in a trillion, which the table rounds away. Its floating-point mechanism rounds the scale up to cover the rounding of the arithmetic, as the duty to sample the noise correctly requires. OpenDP also reports the accuracy of a release before it makes it, and its 95% half-width for the count is 5.99, which is $2 \ln 20$.
 
-The noise itself is the next check. The script makes 2,000 releases with each implementation and measures the error, the released value minus the true one. It prints the mean absolute error of each query and the 95th percentile of the absolute error. For Laplace noise of scale $b$, the textbook values are $b$ and $b \ln 20$. OpenDP's noise cannot be seeded, so the output below is one run, and the OpenDP row changes from run to run within sampling error:
+The script next compares the noise across 2,000 releases from each implementation. It measures error as the released value minus the true value, then prints each query's mean absolute error and the 95th percentile of absolute error. For Laplace noise of scale $b$, the textbook values are $b$ and $b \ln 20$. OpenDP's noise cannot be seeded, so the output below shows one run; its row varies between runs within sampling error:
 
 ```text
 == empirical errors over 2000 releases (mean |error|, 95th percentile), textbook b and b ln 20
@@ -269,15 +269,15 @@ OpenDP           count 1.881 6.000  mean 0.0743 0.2225
 diffprivlib      count 0.969 5.000  mean 0.0736 0.2252
 ```
 
-The mean behaves the same in all three, but the count does not, because the libraries add different noise to it. OpenDP's count carries integer noise from the discrete Laplace distribution, whose mass at each integer $k$ is proportional to $e^{-\lvert k \rvert / b}$. So its quantiles are whole numbers, and its mean absolute value at scale 2 is $2e^{-1/2}/(1 - e^{-1}) \approx 1.92$ rather than 2, which the run's 1.88 matches within sampling error.
+The mean errors are similar across implementations, but the count errors differ because the libraries use different noise. OpenDP adds integer noise from the discrete Laplace distribution, whose mass at each integer $k$ is proportional to $e^{-\lvert k \rvert / b}$. Its quantiles are therefore whole numbers. At scale 2, its mean absolute noise is $2e^{-1/2}/(1 - e^{-1}) \approx 1.92$, rather than 2; the observed value of 1.88 is within sampling error.
 
 diffprivlib's count error is half of everyone else's, because its counting mechanism clips its output to the range from 0 to $n$. A count of every record sits exactly at $n$, so every positive noise draw is clipped back to the true value. Clipping the output is post-processing, so the guarantee holds. But the released count can never exceed the truth, and an analyst who assumes symmetric noise will misread it. The noise a library adds is a design decision that you have to read about, not a formula that you can assume.
 
 ## Where the libraries diverge: what they make you say
 
-The real difference between the implementations is in what they force you to declare. The hand-written version needed the formula and nothing else, so had its author forgotten to clamp, it would have used the wrong sensitivity and said nothing. diffprivlib needed the bounds, but it silently assumed $n$ public. OpenDP needed the bounds, $n$, the domain and the unit of privacy, and refused to continue without each.
+The implementations differ in which assumptions they require you to declare. The hand-written version needs only the formula. If its author forgot to clamp the data, it would use the wrong sensitivity without warning. diffprivlib requires bounds but silently assumes that $n$ is public. OpenDP requires the bounds, $n$, the domain and the privacy unit, and refuses to continue when any is missing.
 
-That strictness has a limit, because OpenDP checks that your declarations are consistent, not that they are true. Its Polars interface, which runs DP queries on dataframes, lets you state facts about the data that it may then use free of charge, such as the number of records. It calls such a fact an `invariant` of a `Margin`, its term for what is known about a group of rows. Here the size is already published, so the script declares it public and keeps one contribution per person:
+OpenDP checks that your declarations are consistent, but it cannot verify that they are true. Its Polars interface runs DP queries on dataframes and lets you declare public facts about the data, such as the number of records. OpenDP calls such a fact an `invariant` of a `Margin`, its term for known information about a group of rows. Here the record count is already published, so the script declares it public and limits each person to one contribution:
 
 ```{.python excerpt="ppl-opendp-length"}
 def opendp_public_length(values: Array, bounds: tuple[float, float], eps: float, contributions: int) -> float:
@@ -439,7 +439,7 @@ Both models give pure $\varepsilon$-DP. A guarantee with $\delta = 0$ is also a 
 
 {{< include figures/_training.md >}}
 
-The DP-SGD curve climbs from 0.720 at $\varepsilon = 0.1$ to 0.951 at $\varepsilon = 10$, against 0.967 without privacy. At $\varepsilon = 1$ it reaches 0.898, seven points below. On 455 records that is the expected price. The noise is added to the sum of a batch's gradients and then divided by the batch size, so a larger batch dilutes it. But a larger batch is a larger sampling rate, which costs more privacy per step, and a small dataset leaves little room. For every run calibrated to $\varepsilon = 1$, Opacus's accountant reports an $\varepsilon$ of 0.995, because the search for $\sigma$ stops within a tolerance of the target, and that reported value is the one to publish.
+The DP-SGD curve climbs from 0.720 at $\varepsilon = 0.1$ to 0.951 at $\varepsilon = 10$, compared with 0.967 without privacy. At $\varepsilon = 1$, it reaches 0.898, seven percentage points lower; this is the observed accuracy cost on the 455-record dataset. The noise is added to the sum of a batch's gradients and then divided by the batch size, so a larger batch dilutes it. However, a larger batch increases the sampling rate and therefore costs more privacy per step, while a small dataset leaves little room to increase batch size. For every run calibrated to $\varepsilon = 1$, Opacus's accountant reports $\varepsilon = 0.995$ because the search for $\sigma$ stops within a tolerance of the target. Publish that reported value.
 
 The naive Bayes model does badly at every privacy level. A classifier that always predicts the majority class scores 0.632 on this test set, and the private naive Bayes stays below that until $\varepsilon = 3$. The reason is how it spends the budget. diffprivlib gives one third of $\varepsilon$ to the class counts, one third to the feature means and one third to the feature variances, and divides each of the last two among the 30 features, so each mean and each variance gets $\varepsilon/90$. The two classes do not split it further, because each record belongs to one class, so the same budget covers both. That leaves sixty independent noise draws per class, many more things to protect than one model, which also makes its band the widest.
 

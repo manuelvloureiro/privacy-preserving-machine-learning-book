@@ -1,16 +1,16 @@
 # Threat models and attacks
 
-This part teaches you to break models before it teaches you to protect them. Every defence in the rest of the book is measured against an attack. A guarantee means only as much as the strongest adversary it stops, and an evaluation is only as honest as the attack it runs. So you start with the adversaries: what they see, what they want, and how well the best of them can do.
+This part defines what an attacker can observe and do, then measures how well specific attacks infer information from models and released data. Later privacy guarantees address these attack goals, so their threat models must be stated before their guarantees can be assessed.
 
 ## Who this part is for
 
-You are expected to know the content of the [Prerequisites](../part01-prerequisites/00-introduction.md). This part uses [hypothesis testing](../part01-prerequisites/04-hypothesis-testing.md) most: the Neyman–Pearson lemma, trade-off curves, and receiver operating characteristic (ROC) curves read at a low false positive rate. It also uses the total variation distance of [Divergences](../part01-prerequisites/03-divergences.md) and the link between [stability and generalization](../part01-prerequisites/07-stability-generalization.md). [Information theory](../part01-prerequisites/05-information-theory.md) appears in the chapters on attribute inference, memorization and linkage. You should be able to write logistic regression, the gradients of a small neural network and an n-gram language model in NumPy.
+This part assumes the [prerequisites](../part01-prerequisites/00-introduction.md). It uses [hypothesis testing](../part01-prerequisites/04-hypothesis-testing.md), especially the Neyman–Pearson lemma and trade-off and receiver operating characteristic (ROC) curves at low false positive rates. It also uses total variation distance from [Divergences](../part01-prerequisites/03-divergences.md), the link between [stability and generalization](../part01-prerequisites/07-stability-generalization.md), and information theory for attribute inference, memorization and linkage. You should be able to implement logistic regression, a small neural network's gradients, and an n-gram language model in NumPy.
 
-Differential privacy, the defence most of the book is about, starts in the [next part](../part03-dp-foundations/00-introduction.md), and it is designed against the games defined here. The only privacy definitions in this part are the syntactic ones of the last chapter, k-anonymity and its successors. They appear as targets: the chapter shows what each one promises and the attack that breaks it.
+The [next part](../part03-dp-foundations/00-introduction.md) introduces differential privacy, designed to limit the attacks defined here. The last chapter covers syntactic privacy definitions, including $k$-anonymity, and evaluates the protection they provide against attacks.
 
 ## The common thread
 
-Every attack in this part is a **game**. A challenger trains or releases something that depends on a hidden **secret**, and an adversary guesses the secret from what the **threat model** lets it see. Only the secret changes from chapter to chapter: one bit of membership, a sensitive attribute, a memorized string, the whole dataset, a client's input, a property of the population, or a person's name. @tbl-attacks-map lists them.
+Each attack is modeled as a **game**. A challenger trains or releases an object that depends on a hidden **secret**. An adversary uses the information allowed by the **threat model** to guess that secret. The chapters consider membership, sensitive attributes, memorized strings, datasets, client inputs, population properties and identities (@tbl-attacks-map).
 
 | Chapter | The question it answers | Builds on |
 | --- | --- | --- |

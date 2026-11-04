@@ -2,15 +2,15 @@
 
 ## Why this matters
 
-Every attack in [Threat models and attacks](../part02-attacks/00-introduction.md) runs an algorithm on one of two datasets that differ in one person, and guesses from the output which dataset it saw. **Differential privacy (DP)** makes the two outputs look alike against every test, including tests that nobody has invented yet. It is a property of the algorithm, not of the data, so you can check it before anyone touches the data.
+Attacks in [Threat models and attacks](../part02-attacks/00-introduction.md) compare outputs from datasets that differ in one person. **Differential privacy (DP)** bounds how much the output distribution changes between these datasets, including for tests not yet developed. DP is a property of the algorithm, not the data, so it can be checked before data access.
 
 ## Neighbouring datasets {#sec-dpdef-neighbours}
 
-The first question about a claim is what "differ in one record" means, and the **neighbouring relation** answers it. Under **add/remove**, two datasets are neighbours when one has a record that the other lacks, so the guarantee hides whether a person is in the data at all. Under **replace**, they have the same size and differ in the value of one record, so the guarantee hides only what the record says. A replacement is a removal and then an addition, and each step costs the privacy level $\varepsilon$ of @sec-dpdef-definition, so
+The **neighbouring relation** defines what it means for datasets to differ in one record. Under **add/remove**, neighbours differ by one record, so the guarantee hides whether a person is included. Under **replace**, neighbours have the same size but one record has a different value, so the guarantee hides the record's value. A replacement can be represented as a removal followed by an addition. Each step costs privacy level $\varepsilon$ from @sec-dpdef-definition, so
 $$\varepsilon\text{-DP under add/remove} \implies 2\varepsilon\text{-DP under replace}.$$ {#eq-dpdef-replace}
 The reverse fails, because replace never compares datasets of different sizes.
 
-You also choose the **unit of privacy**, what one record is. At the **example level**, it is one training record or one event, and at the **user level**, all the data of one person. A user who wrote 200 messages is then a group of 200 records under example-level DP, with protection only at $200\varepsilon$ ([Post-processing, group privacy and composition](02-properties.md)). So check that the claim protects the person. The guarantee must also hide every record that the data format allows, even a person aged 900, who could move an average a long way. So private algorithms clip each input to a fixed range before they add noise.
+Specify the **unit of privacy**, the entity represented by one record. At the **example level**, the unit is one training record or event. At the **user level**, it is all data from one person. A user with 200 messages is a group of 200 records under example-level DP, with a guarantee that scales to $200\varepsilon$ ([Post-processing, group privacy and composition](02-properties.md)). Confirm that the stated unit matches the intended protection. The guarantee must hold for every record allowed by the data format, including an age of 900 that could strongly affect an average. Private algorithms therefore clip each input to a fixed range before adding noise.
 
 ## The definition {#sec-dpdef-definition}
 
@@ -18,24 +18,24 @@ A **mechanism** $M$ is a randomized algorithm that takes a dataset and returns a
 $$\Pr[M(D) \in S] \le e^\varepsilon\,\Pr[M(D') \in S] + \delta.$$ {#eq-dpdef-def}
 The probabilities come only from the randomness of the mechanism, and the data stay fixed.
 
-When $\delta = 0$, the guarantee is **pure DP**, and otherwise it is **approximate DP**. In both cases, a private mechanism must be random. A deterministic one that answers differently on two neighbours gives that answer probability 1 on one and 0 on the other, which no factor $e^\varepsilon$ covers. So rounding, aggregation or the removal of small cells gives no guarantee by itself.
+When $\delta = 0$, the guarantee is **pure DP**; otherwise, it is **approximate DP**. A deterministic mechanism that returns different answers on neighbouring datasets assigns probability 1 to an answer on one dataset and 0 on the other. No finite factor $e^\varepsilon$ can bound this change. Rounding, aggregation and suppression of small cells therefore provide no guarantee by themselves.
 
 ## The privacy loss and δ {#sec-dpdef-divergences}
 
-For an output $y$, write $p_{M(D)}(y)$ for its probability, or its density, when the mechanism runs on $D$. The **privacy loss** of $y$ is the logarithm of how much more likely the output is on $D$ than on $D'$,
+For output $y$, let $p_{M(D)}(y)$ be its probability or density when the mechanism runs on $D$. The **privacy loss** of $y$ is the log-likelihood ratio between $D$ and $D'$:
 $$L(y) = \ln\frac{p_{M(D)}(y)}{p_{M(D')}(y)}.$$ {#eq-dpdef-loss}
-Independent outputs multiply their likelihood ratios, so their losses add, and that is why the accountants of Part 4 work with the loss. Pure $\varepsilon$-DP holds exactly when every output has a loss between $-\varepsilon$ and $\varepsilon$. Laplace noise meets that condition, but the loss of Gaussian noise has no limit in the far tail ([The Laplace and Gaussian mechanisms](03-laplace-gaussian.md)).
+Independent outputs multiply their likelihood ratios, so their privacy losses add. Part 4's accountants use this property. Pure $\varepsilon$-DP holds exactly when every output has privacy loss between $-\varepsilon$ and $\varepsilon$. Laplace noise meets this condition; Gaussian noise has unbounded privacy loss in the tail ([The Laplace and Gaussian mechanisms](03-laplace-gaussian.md)).
 
-Under approximate DP, $\delta$ pays for the outputs whose loss is more than $\varepsilon$. It counts only the part of each one's probability on $D$ above $e^\varepsilon$ times its probability on $D'$. So $\delta$ is not the chance that the loss is more than $\varepsilon$, and the total is the **hockey-stick divergence** ([Divergences](../part01-prerequisites/03-divergences.md#sec-div-hockey)). Each $\varepsilon$ has its own smallest $\delta$, and the function $\delta(\varepsilon)$ is the **privacy curve** of the mechanism. The noise parameters fix the whole curve, so report them with the pair, and others can recompute it ([Numerical accounting](../part04-privacy-accounting/06-numerical-accounting.md)).
+Under approximate DP, $\delta$ bounds the probability mass where privacy loss exceeds $\varepsilon$. It counts only the probability on $D$ above $e^\varepsilon$ times the corresponding probability on $D'$. Thus, $\delta$ is not the probability that privacy loss exceeds $\varepsilon$; the exact quantity is the **hockey-stick divergence** ([Divergences](../part01-prerequisites/03-divergences.md#sec-div-hockey)). Each $\varepsilon$ has a smallest corresponding $\delta$, and the function $\delta(\varepsilon)$ is the mechanism's **privacy curve**. Report the noise parameters with the guarantee so that others can reproduce the curve ([Numerical accounting](../part04-privacy-accounting/06-numerical-accounting.md)).
 
 ## Randomized response {#sec-dpdef-rr}
 
-In **randomized response**, a survey design, each person tells the truth with some probability $t$ and lies otherwise, so a single answer proves nothing. A person who tosses a coin, answers truthfully on heads and answers by a second toss on tails tells the truth with probability $\frac34$. So the true answer is three times as likely as the false one, which gives pure DP at $\varepsilon = \ln 3$. In general, randomized response at level $\varepsilon$ tells the truth with probability
+In **randomized response**, each survey respondent tells the truth with probability $t$ and otherwise lies. A respondent who answers truthfully on the first coin toss and uses a second toss on tails answers truthfully with probability $\frac34$. The true answer is then three times as likely as the false answer, giving pure DP at $\varepsilon = \ln 3$. In general, randomized response at level $\varepsilon$ tells the truth with probability
 $$t = \frac{e^\varepsilon}{1 + e^\varepsilon}.$$
 
-With independent coins, the guarantee is $\varepsilon$ per person for any number of people. But it holds only under replace, because under add/remove the number of reports shows who answered. Write $\bar y$ for the share of "yes" reports among the $n$ people. A correction with $t$ for the lies gives the estimate of the true fraction $\pi$ and its standard deviation,
+With independent randomization, the guarantee is $\varepsilon$ per person for any number of respondents. It holds only under replace: under add/remove, the number of reports reveals who participated. Let $\bar y$ be the fraction of "yes" reports among $n$ people. Correcting for false answers gives an estimate of the true fraction $\pi$ and its standard deviation:
 $$\hat\pi = \frac{\bar y - (1 - t)}{2t - 1}, \qquad \operatorname{sd}(\hat\pi) = \frac{e^{\varepsilon/2}}{(e^\varepsilon - 1)\sqrt n}.$$ {#eq-dpdef-rr-estimate}
-For 1,000 people, the two-coin scheme has a standard deviation of 0.0274. When the true fraction is 0.3, that is about twice the sampling error of 0.0145 that the survey already has. This doubling is the price of the **local** model, in which nobody sees a true answer ([Local, shuffle and distributed trust models](09-trust-models.md)).
+For 1,000 people, the two-coin scheme has a standard deviation of 0.0274. When the true fraction is 0.3, that is about twice the sampling error of 0.0145 that the survey already has. This increase is the cost of the **local** model, in which no party sees a true answer ([Local, shuffle and distributed trust models](09-trust-models.md)).
 
 OpenDP builds the mechanism from its truth probability, 0.75 for the two coins, and `map` turns one changed answer into its $\varepsilon$, $\ln 3$. The `contrib` feature turns on mechanisms that are not yet formally vetted.
 
@@ -49,19 +49,19 @@ print(f"{rr.map(1):.4f}")  # 1.0986
 
 ## What ε means for an attacker {#sec-dpdef-testing}
 
-A membership attacker looks at the output and decides whether to accuse the target of being in the data ([Hypothesis testing](../part01-prerequisites/04-hypothesis-testing.md)). Its **false positive rate (FPR)** is how often it accuses a target who is out. Its **true positive rate (TPR)** is how often it accuses one who is in. The outputs on which it accuses form a set, which the definition bounds, so under add/remove every attack satisfies
+A membership attacker observes the output and predicts whether the target was included in the data ([Hypothesis testing](../part01-prerequisites/04-hypothesis-testing.md)). Its **false positive rate (FPR)** is the fraction of non-members it flags; its **true positive rate (TPR)** is the fraction of members it flags. The flagged outputs form a set bounded by the definition, so under add/remove every attack satisfies
 $$\mathrm{TPR} \le e^\varepsilon\,\mathrm{FPR} + \delta.$$ {#eq-dpdef-testing}
 
-Use this form, because Part 2 judged attacks by their TPR at a low FPR. Take $\varepsilon = 1$ and the $\delta = 10^{-5}$ that @sec-dpdef-small-delta gives for 10,000 people. At an FPR of $10^{-3}$, no attack gets a TPR above $e \cdot 10^{-3} + 10^{-5} = 0.002728$. As the FPR goes to 0, so does the first term, and the guarantee then depends almost entirely on $\delta$.
+This form matches Part 2's evaluation of attacks by TPR at low FPR. For $\varepsilon = 1$ and $\delta = 10^{-5}$, the default in @sec-dpdef-small-delta for 10,000 people, an attack at FPR $10^{-3}$ has TPR at most $e \cdot 10^{-3} + 10^{-5} = 0.002728$. As FPR approaches 0, the bound depends almost entirely on $\delta$.
 
-Read backwards, the cap turns a measured attack into a lower bound on $\varepsilon$,
+Rearranging the cap gives a lower bound on $\varepsilon$ from a measured attack:
 $$\varepsilon \ge \ln\frac{\mathrm{TPR} - \delta}{\mathrm{FPR}}.$$
-Suppose that a model is claimed to be $(2, 10^{-5})$-DP, and an attack gets a TPR of 0.05 at an FPR of 0.001. If those rates were exact, $\varepsilon$ would be at least about $\ln 50 = 3.91$, so the claim would be false. A real audit puts confidence bounds on the rates and plants a **canary**, a record that is as easy to detect as possible ([Auditing](../part05-dp-ml/10-auditing.md)).
+Suppose a model is claimed to be $(2, 10^{-5})$-DP, and an attack has TPR 0.05 at FPR 0.001. If these rates were exact, then $\varepsilon$ would be at least $\ln 50 = 3.91$, contradicting the claim. A real audit uses confidence bounds on the rates and a **canary**, a record designed to be easy to detect ([Auditing](../part05-dp-ml/10-auditing.md)).
 
-Two summaries are easier to explain to a lawyer. The first, the **membership advantage**, is the TPR minus the FPR, how much better than a coin flip an attacker does. Under $(\varepsilon, \delta)$-DP, it is at most
+Two summaries aid interpretation. The **membership advantage** is TPR minus FPR, the attack's improvement over random guessing. Under $(\varepsilon, \delta)$-DP, it is at most
 $$\mathrm{TPR} - \mathrm{FPR} \le \frac{e^\varepsilon - 1 + 2\delta}{e^\varepsilon + 1}.$$ {#eq-dpdef-advantage}
 
-The second, the posterior bound, is about beliefs. Under pure DP, one output can multiply the odds of an adversary between two neighbours by at most $e^\varepsilon$. So a prior belief $p$ that the data are $D$ can rise at most to
+The second summary bounds posterior belief. Under pure DP, one output can multiply the adversary's odds between two neighbouring datasets by at most $e^\varepsilon$. A prior probability $p$ that the data are $D$ can therefore rise at most to
 $$\Pr[D \mid y] \le \frac{e^\varepsilon p}{e^\varepsilon p + 1 - p}.$$ {#eq-dpdef-posterior}
 @tbl-dpdef-epsilon turns a claimed $\varepsilon$ into both numbers.
 
@@ -74,25 +74,25 @@ $$\Pr[D \mid y] \le \frac{e^\varepsilon p}{e^\varepsilon p + 1 - p}.$$ {#eq-dpde
 
 : What a pure $\varepsilon$-DP guarantee promises against the strongest attacker. {#tbl-dpdef-epsilon}
 
-So an $\varepsilon$ of at most 1 is strong for any mechanism, because a 1% prior rises to less than 3%. Between 1 and 10, a claim needs the privacy curve of the mechanism as its justification. Above 10, where the bounds promise almost nothing, it needs an audit as well ([Choosing ε](../part05-dp-ml/09-choosing-epsilon.md)). For statistics, start from the error that you can accept and solve for $\varepsilon$ ([The Laplace and Gaussian mechanisms](03-laplace-gaussian.md#sec-lg-laplace)). The table is for pure DP, so for an $(\varepsilon, \delta)$ claim, quote the advantage bound and the cap on the TPR, which both include $\delta$.
+An $\varepsilon$ at most 1 gives a strong bound for any mechanism: a 1% prior rises to less than 3%. For $\varepsilon$ between 1 and 10, justify the claim with the mechanism's privacy curve. Above 10, the bounds provide little protection, so include an audit ([Choosing ε](../part05-dp-ml/09-choosing-epsilon.md)). For statistics, specify acceptable error and solve for $\varepsilon$ ([The Laplace and Gaussian mechanisms](03-laplace-gaussian.md#sec-lg-laplace)). The table assumes pure DP; for an $(\varepsilon, \delta)$ guarantee, report both the advantage bound and TPR cap, which include $\delta$.
 
 ## How small δ must be {#sec-dpdef-small-delta}
 
-A small $\delta$ almost does not change the advantage bound. But the advantage is an average, so it can hide total harm to a few people. Take a mechanism that publishes each record in full, independently with probability $\delta$. It is $(0, \delta)$-DP under add/remove, because a record changes the output only when its own coin publishes it. But over $n$ records, it publishes at least one with probability
+A small $\delta$ has little effect on the advantage bound, but an average can hide severe harm to a few people. Consider a mechanism that independently publishes each record in full with probability $\delta$. It is $(0, \delta)$-DP under add/remove because a record changes the output only when its own random draw publishes it. Across $n$ records, the probability of publishing at least one is
 $$1 - (1 - \delta)^n \approx 1 - e^{-n\delta}.$$
 With 10,000 records and $\delta = 1/n$, that is $1 - e^{-1} = 0.6321$.
 
-So treat $\delta$ as a budget per person for catastrophe, such as these total failures. The default of this book follows Ponomareva et al. (2023) and keeps $n\delta$, the expected number of people exposed this way, well below 1. Let $n$ count people, not records, and choose
+Treat $\delta$ as a per-person budget for catastrophic failures such as full record publication. Following Ponomareva et al. (2023), this book's default keeps $n\delta$, the expected number of people exposed this way, well below 1. Let $n$ count people, not records, and choose
 $$\delta \le \frac{1}{n^{1.1}},$$
 rounded down to a power of ten. For 10,000 people, the rule gives $10^{-5}$. The publishing mechanism then has $n\delta = 0.1$, and it exposes someone with probability only 0.0952.
 
 ## What differential privacy does not protect {#sec-dpdef-limits}
 
-DP compares a world with your record and a world without it, so the guarantee does not cover what someone can learn in both worlds. A study that never used Alice's record may show that smokers get cancer at a high rate. That changes what anyone believes about Alice, a smoker, yet the study is 0-DP with respect to her. So a harm is a DP violation only if the inference would be materially different without her record. Correlated records are a second gap, because a household of five that always answers alike is a group of five, unless the household is the unit of privacy. The third gap is the implementation ([Discrete and floating-point-safe mechanisms](08-discrete-mechanisms.md)).
+DP compares datasets with and without a record, so it does not prevent conclusions that hold in both datasets. A study that never used Alice's record may still show that smokers have a high cancer rate. This can affect beliefs about Alice, but the study is 0-DP with respect to her. A harm violates DP only if the inference would materially change without her record. Correlated records create a second limitation: a household of five whose members' records always change together is a group of five unless the household is the privacy unit. Implementation errors create a third limitation ([Discrete and floating-point-safe mechanisms](08-discrete-mechanisms.md)).
 
 ## Writing the guarantee down {#sec-dpdef-statement}
 
-A reviewer can check only what a claim writes down. So a guarantee names the unit of privacy with its neighbouring relation, and $\varepsilon$ and $\delta$ for the whole release, not per query. It also names the mechanism, the library version, the trust model and the data treated as public, which the guarantee does not protect. This example uses the **central model**, in which a trusted curator holds the raw data and adds the noise:
+A reviewer can check only a fully specified claim. State the privacy unit and neighbouring relation, and report $\varepsilon$ and $\delta$ for the whole release, not per query. Also name the mechanism, library version, trust model and data treated as public; DP does not protect public data. This example uses the **central model**, in which a trusted curator holds the raw data and adds noise:
 
 > This release satisfies $(1, 10^{-5})$-DP for adding or removing one customer and all their invoice lines, at most 100 per customer, under the central model, with Gaussian noise from OpenDP 0.16.0. The market list was fixed in advance.
 

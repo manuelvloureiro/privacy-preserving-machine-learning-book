@@ -2,19 +2,19 @@
 
 ## What it is {#sec-mfac-what}
 
-Gradient descent without momentum adds up its steps. So its weights after each step depend on the sum of all clipped gradients so far, a **prefix sum**. Stochastic gradient descent (SGD) with differential privacy (DP), [DP-SGD](02-dp-sgd.md), adds fresh noise at every step. So the noise in the prefix sums grows like a random walk. Matrix mechanisms correlate the noise across steps, so that each step's noise partly cancels earlier noise in the sums.
+Gradient descent without momentum accumulates clipped gradients, so weights after each step depend on their **prefix sum**. Differential privacy (DP) applied to stochastic gradient descent (SGD) yields [DP-SGD](02-dp-sgd.md), which adds fresh noise at every step. Prefix-sum noise then grows like a random walk. Matrix mechanisms correlate noise across steps so some noise cancels in later sums.
 
-Stack the gradient sums of the steps as the rows of a matrix $x$. The prefix sums are then $Ax$, where $A$ has ones on and below the diagonal. The **matrix factorization mechanism** writes $A$ as a decoder $L$ times an encoder $R$. It adds a matrix of Gaussian noise, written $z$, to the encoded gradients and decodes the result,
+Place the step gradients in the rows of matrix $x$. Their prefix sums are $Ax$, where $A$ has ones on and below its diagonal. The **matrix factorization mechanism** factors $A$ into decoder $L$ and encoder $R$, adds Gaussian noise $z$ to the encoded gradients, then decodes:
 $$\hat S = L(Rx + z) = Ax + Lz.$$
-A record enters only through the column of $R$ for its step, so privacy depends on the longest column of the encoder, its sensitivity. Accuracy depends on the decoder, whose row $t$ carries the noise into the $t$-th prefix sum.
+Each record affects only the encoder column for its step, so privacy depends on the encoder's largest column norm. Accuracy depends on the decoder: row $t$ determines how noise affects prefix sum $t$.
 
-The first such method ran the follow the regularized leader (FTRL) optimizer on sums from a binary tree, and is called DP-FTRL (Kairouz et al. 2021). Today's usual choice is the **square-root factorization**, which uses the lower-triangular square root of $A$ for both factors. At equal privacy over one epoch of 100 steps, it leaves about a quarter of independent noise's standard deviation in the final sum.
+The first method applied follow the regularized leader (FTRL) to binary-tree sums and is called DP-FTRL (Kairouz et al. 2021). The common **square-root factorization** uses the lower-triangular square root of $A$ for both factors. At equal privacy over 100 steps, its final-sum noise standard deviation is about one quarter that of independent noise.
 
 ## When you meet it {#sec-mfac-when}
 
-You meet matrix mechanisms when your pipeline cannot honestly claim Poisson sampling, the random batches that DP-SGD's accountant assumes. Examples are fixed batches cut from a shuffled order, data read in arrival order, and phones in federated learning that check in when they can. Accounting them as Poisson understates $\varepsilon$ ([Amplification by subsampling](../part04-privacy-accounting/05-subsampling.md#sec-sub-schemes)), while a matrix mechanism needs no sampling.
+Use matrix mechanisms when the pipeline cannot use the Poisson sampler assumed by DP-SGD accounting. Examples include fixed batches from a shuffled dataset, data processed in arrival order and federated devices that report when available. Treating these as Poisson understates $\varepsilon$ ([Amplification by subsampling](../part04-privacy-accounting/05-subsampling.md#sec-sub-schemes)); matrix mechanisms do not require subsampling.
 
-Without sampling, independent noise loses much accuracy, and correlated noise wins most of it back. On the full edition's synthetic task, trained in a fixed order for ten epochs at $\varepsilon = 2$, independent noise reaches a test accuracy of 0.8641. The banded square root of @sec-mfac-wrong reaches 0.9491, and DP-SGD with Poisson sampling 0.9493. So if you can implement Poisson sampling, use DP-SGD with Opacus. If you cannot, use a banded matrix mechanism, as Google did for its Gboard keyboard models (Xu et al. 2023).
+Without sampling, independent noise can sharply reduce accuracy; correlated noise can recover much of it. On the full edition's synthetic task, ten fixed-order epochs at $\varepsilon=2$ give test accuracy 0.8641 with independent noise, 0.9491 with the banded square root of @sec-mfac-wrong and 0.9493 with Poisson-sampled DP-SGD. Use Opacus with Poisson sampling when possible; otherwise consider a banded matrix mechanism, as Google did for Gboard models (Xu et al. 2023).
 
 ## How to use it {#sec-mfac-use}
 
@@ -35,17 +35,17 @@ config = BandMFExecutionPlanConfig.default(
 plan = config.plan       # calibrates the noise multiplier with dp_accounting
 ```
 
-The training loop draws each batch from `plan.batch_selection_strategy`, sums its clipped gradients with `plan.clipped_grad`, and adds the noise with `plan.noise_addition_transform`. A `dp_accounting` accountant turns `plan.dp_event` into the $\varepsilon$ you report. The module is marked experimental, so pin the version.
+The training loop samples batches with `plan.batch_selection_strategy`, clips and sums gradients with `plan.clipped_grad`, and adds noise with `plan.noise_addition_transform`. Use `dp_accounting` on `plan.dp_event` to calculate reported $\varepsilon$. The module is experimental; pin its version.
 
 ## What goes wrong {#sec-mfac-wrong}
 
-The pitfalls come from records that take part more than once. Over $E$ epochs a record enters through $E$ columns of the encoder. The square root's columns for nearby steps are nonzero in the same rows, so they add up and the sensitivity grows faster than $\sqrt E$. **Banding** keeps a number $b$ of the encoder's diagonals, the main one and those just below it. It needs every two participations of a record to be at least $b$ steps apart, a condition called **$b$-min-separation**. The record's columns then share no rows, so the sensitivity is at most $\sqrt E$ times the longest column, as for independent noise.
+Repeated participation creates the main risk. Across $E$ epochs, one record affects $E$ encoder columns. Nearby square-root columns overlap, increasing sensitivity faster than $\sqrt E$. **Banding** retains $b$ encoder diagonals: the main diagonal and $b-1$ below it. It requires each pair of a record's participations to be separated by at least $b$ steps (**$b$-min-separation**). The columns then share no rows, bounding sensitivity by $\sqrt E$ times the longest column, as with independent noise.
 
-So the data order is part of the mechanism. Fix it before training, independently of the data, and keep the same permutation every epoch, because a new shuffle can put a record at the end of one epoch and the start of the next.
+Data order is part of the mechanism. Fix it independently of private data and reuse the same permutation every epoch. Reshuffling can place a record at the end of one epoch and the start of the next, violating the separation condition.
 
-The neighbouring relation changes the numbers too. The analysis here leaves a neighbour's slot empty, so a step moves by at most the clipping norm. If a neighbour replaces the record with another instead, every sensitivity doubles, so state the relation next to every $\varepsilon$.
+The neighbouring relation also affects sensitivity. This analysis leaves a neighbour's slot empty, so one step changes by at most the clipping norm. Replacing a record with another doubles sensitivity; report the relation with each $\varepsilon$.
 
-`dp_accounting` 0.6.0 enforces this. Its tree-aggregation event works only in a Rényi differential privacy (RDP) accountant built with `NeighboringRelation.REPLACE_SPECIAL`, where a neighbour replaces the record with an empty one. Under add/remove, DP-SGD's default, it raises `UnsupportedEventError`, and the privacy loss distribution accountant rejects it too. So DP-FTRL and DP-SGD runs cannot share one add/remove ledger.
+`dp_accounting` 0.6.0 enforces this restriction. Its tree-aggregation event is supported only by a Rényi differential privacy (RDP) accountant using `NeighboringRelation.REPLACE_SPECIAL`, where a record is replaced by an empty slot. Under DP-SGD's default add/remove relation, it raises `UnsupportedEventError`; the privacy loss distribution (PLD) accountant also rejects it. Therefore, DP-FTRL and DP-SGD runs cannot share an add/remove ledger.
 
 ## References
 

@@ -2,19 +2,19 @@
 
 ## What it is {#sec-shuf-rr}
 
-In the [shuffle model](../part03-dp-foundations/09-trust-models.md), each of $n$ users randomizes their own data, so each report satisfies local differential privacy (DP) at a level $\varepsilon_0$. A **shuffler** removes identities and mixes the order, so each report hides among the others. The set of reports then satisfies central DP at a much smaller $\varepsilon$, which falls like $\sqrt{\ln(1/\delta)/n}$ for a slack $\delta$ above 0. All results here are for [replace-one neighbours](05-subsampling.md#sec-sub-schemes).
+In the [shuffle model](../part03-dp-foundations/09-trust-models.md), each of $n$ users randomizes their data, producing a report that satisfies local differential privacy (DP) at level $\varepsilon_0$. A **shuffler** removes identities and randomizes report order. The combined reports then satisfy central DP at a smaller $\varepsilon$, which scales as $\sqrt{\ln(1/\delta)/n}$ for $\delta>0$. Results here use [replace-one neighbours](05-subsampling.md#sec-sub-schemes).
 
-For binary [randomized response](../part03-dp-foundations/09-trust-models.md), the analyst learns only the count of 1-reports, so you can compute the shuffled guarantee exactly. For any other local randomizer, use the clone bound of Feldman, McMillan and Talwar (2021). With probability $e^{-\varepsilon_0}$, the report of another user looks exactly like one you could have sent, and such **clones** hide yours. The **numeric clone bound** computes this exactly, while the paper's closed form is looser and needs enough users.
+For binary [randomized response](../part03-dp-foundations/09-trust-models.md), the analyst observes only the count of 1-reports, allowing an exact shuffled guarantee. For other local randomizers, use the clone bound of Feldman, McMillan and Talwar (2021). Another user's report matches a possible target report with probability $e^{-\varepsilon_0}$; these **clones** conceal the target's report. The **numeric clone bound** computes the guarantee directly. The paper's closed form is looser and requires enough users.
 
 ## When you meet it
 
-You meet shuffling in telemetry systems such as Prochlo (Bittau et al. 2017), where the decision is how large $\varepsilon_0$ can be. No maintained library accounts for it, so use the full edition's [shuffling_iteration.py](../../code/part04-privacy-accounting/shuffling_iteration.py).
+Shuffling is used in telemetry systems such as Prochlo (Bittau et al. 2017), where you must choose $\varepsilon_0$. No maintained library supports this accounting, so use [shuffling_iteration.py](../../code/part04-privacy-accounting/shuffling_iteration.py) from the full edition.
 
-Two other things have the same name but get none of this amplification. A data loader that shuffles once per epoch is a sampler ([Match the sampler to the accountant](05-subsampling.md#sec-sub-schemes)). Federated clients that join rounds when available pass through no shuffler either, so account for them without amplification or with [matrix mechanisms](../part05-dp-ml/04-matrix-mechanisms.md).
+Two other uses of "shuffle" do not provide this amplification. A data loader that shuffles once per epoch is a sampler ([Match the sampler to the accountant](05-subsampling.md#sec-sub-schemes)). Federated clients that join when available do not pass through a shuffler; account for them without amplification or use [matrix mechanisms](../part05-dp-ml/04-matrix-mechanisms.md).
 
 ## How to use it {#sec-shuf-clones}
 
-Start from the central target. Compute the numeric clone bound for a few values of $\varepsilon_0$, and keep the largest value that meets the target.
+Start with the central target. Evaluate the numeric clone bound over candidate $\varepsilon_0$ values and select the largest value that meets the target.
 
 | $n$ | $\varepsilon_0$ | Exact, randomized response | Clones, numeric | Clones, closed form |
 | --- | --- | --- | --- | --- |
@@ -25,9 +25,9 @@ Start from the central target. Compute the numeric clone bound for a few values 
 
 : Central $\varepsilon$ at $\delta = 10^{-6}$ after shuffling the reports of $n$ users. "n/a" marks too few users for the closed form. {#tbl-shuf-compare}
 
-The choice of bound can decide whether a design is possible. For example, for 100,000 users and a target of 0.2, the closed form allows $\varepsilon_0$ up to 2 but the numeric bound allows 4, so use the numeric bound.
+The bound can determine whether a design is feasible. For 100,000 users and a target of 0.2, the closed form permits $\varepsilon_0$ up to 2, while the numeric bound permits 4. Use the tighter numeric bound.
 
-Before you report a shuffled $\varepsilon$, check the assumptions below. If one fails, for example if the order leaks, only $\varepsilon_0$ remains.
+Verify these assumptions before reporting shuffled $\varepsilon$. If any fail—for example, if report order leaks—only the local guarantee $\varepsilon_0$ remains.
 
 - The order is uniformly random and hidden, with no metadata such as arrival time or network address.
 - The shuffler does not collude with the analyst.
@@ -37,13 +37,13 @@ Before you report a shuffled $\varepsilon$, check the assumptions below. If one 
 
 ## What goes wrong {#sec-shuf-hidden}
 
-Shortcuts fail when users are few or $\varepsilon_0$ is large. For 1,000 users at $\varepsilon_0 = 4$, a normal approximation of the count of 1-reports gives 0.9667 against the exact 1.6910.
+Approximations become unreliable with few users or large $\varepsilon_0$. For 1,000 users at $\varepsilon_0=4$, a normal approximation to the count of 1-reports gives 0.9667, compared with the exact value 1.6910.
 
-In amplification by iteration, later training noise protects earlier records. It covers one pass of noisy stochastic gradient descent (SGD) that keeps the weights in a fixed convex set (Feldman et al. 2018). It has two conditions. You can release only the final model, and every step must be a contraction, which never moves two sets of weights further apart. That needs a convex, smooth loss and a small enough step.
+In amplification by iteration, later training noise also protects records used earlier. The result applies to one pass of noisy stochastic gradient descent (SGD) whose weights remain in a fixed convex set (Feldman et al. 2018). It requires releasing only the final model and making every step a contraction, meaning it cannot increase the distance between weight vectors. This requires a convex, smooth loss and a sufficiently small step size.
 
-Even then the gain depends on the record. Over 10,000 records with noise multiplier 1, the middle record gets $\varepsilon = 0.0707$ at $\delta = 10^{-5}$. But the last record gets 5.2985, the cost of one Gaussian step, so report the worst record's value.
+The privacy gain varies by record. For 10,000 records and noise multiplier 1, the middle record gets $\varepsilon=0.0707$ at $\delta=10^{-5}$, while the last record gets 5.2985, the cost of one Gaussian step. Report the worst-case value.
 
-Deep learning breaks both conditions. Checkpoints, logged models and a best checkpoint chosen from several all release more than the final model. Steps on a non-convex loss are not contractions, and Annamalai (2024) builds a loss whose final model leaks as much as all the intermediate models. So claim amplification by iteration only for convex models, such as logistic regression, that release only their final weights.
+Deep learning typically violates both conditions. Checkpoints, logged models and selecting the best of several checkpoints reveal more than the final model alone. Steps on non-convex losses need not be contractions; Annamalai (2024) constructs a loss where the final model leaks as much as all intermediate models. Claim iteration amplification only for convex models, such as logistic regression, when releasing only final weights.
 
 ## References
 

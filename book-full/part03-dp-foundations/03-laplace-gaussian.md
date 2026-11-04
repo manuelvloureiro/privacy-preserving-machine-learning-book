@@ -1,16 +1,16 @@
 # The Laplace and Gaussian mechanisms
 
-You run a hospital database and want to publish how many patients have diabetes, with a differential privacy (DP) guarantee. The [definition of differential privacy](01-definition.md) says what the release must satisfy: a change to one person's record must barely change the distribution of what you publish. It does not say how to build such a release. The two mechanisms of this chapter are the answer used almost everywhere. Both compute the exact answer $f(D)$ on the dataset $D$ and blur it with fresh random noise $Z$, so that you publish
+You run a hospital database and want to publish how many patients have diabetes, with a differential privacy (DP) guarantee. The [definition of differential privacy](01-definition.md) says what the release must satisfy: changing one person's record must barely change the distribution of the published answer. But the definition does not say how to build such a release. This chapter introduces two widely used mechanisms. Each computes the exact answer $f(D)$ on dataset $D$, then adds fresh random noise $Z$:
 $$M(D) = f(D) + Z.$$
-If the noise is wide compared with how far one person can move the answer, an observer cannot tell from the output whether that person was there.
+When the noise is wide compared with the largest change one person can cause, an observer cannot tell from the output whether that person was there.
 
-Three questions decide everything. The first is how much one record can move the answer, the **sensitivity** of $f$, which sets the scale of the noise. The second is which noise distribution to use. Laplace noise gives pure $\varepsilon$-DP, while Gaussian noise gives only $(\varepsilon, \delta)$-DP but scales better when you release many numbers at once. The third is how much noise exactly. For Laplace noise a one-line formula answers it. For Gaussian noise the textbook formula is loose, and the exact answer comes from one equation solved numerically.
+Three questions determine the release. First, how far can one record move the answer? This **sensitivity** of $f$ sets the noise scale. Second, which noise distribution should you use? Laplace noise gives pure $\varepsilon$-DP. Gaussian noise gives $(\varepsilon, \delta)$-DP, but scales better when you release many numbers at once. Third, how much noise do you need? A one-line formula gives the Laplace scale. The textbook Gaussian formula is loose, so the exact scale comes from solving one equation numerically.
 
 The running example is the hospital's count: 1,234 of its $n = 10{,}000$ patients have diabetes, and the count must be released under add/remove neighbours.
 
 ## Sensitivity {#sec-lg-sensitivity}
 
-To hide one record, the noise has to cover the largest change one record can make to the answer. That change is the sensitivity, the first thing to compute for any release. It depends on the query, on the norm that measures the change, and on the neighbouring relation of [the definition of differential privacy](01-definition.md). Under **add/remove** a neighbour has one record more or less, so the dataset size changes. Under **replace** one record is swapped for another, so the size $n$ is fixed and public.
+To hide one record, choose noise that covers the largest change it can cause to the answer. This largest change is the **sensitivity**, and it is the first quantity to compute for a release. Its value depends on the query, the norm used to measure changes, and the neighbouring relation from [the definition of differential privacy](01-definition.md). Under **add/remove**, neighbours differ by one record, so dataset size can change. Under **replace**, one record is swapped for another, so the size $n$ stays fixed and public.
 
 A change of a vector answer is measured in one of two norms. The $\ell_1$ norm $\|v\|_1 = \sum_i|v_i|$ is the total change summed over coordinates, and Laplace noise is calibrated to it. The $\ell_2$ norm $\|v\|_2 = \sqrt{\sum_iv_i^2}$ is the straight-line length, and Gaussian noise is calibrated to it.
 

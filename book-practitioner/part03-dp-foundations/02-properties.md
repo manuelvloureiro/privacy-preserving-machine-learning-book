@@ -2,25 +2,24 @@
 
 ## Why this matters
 
-A private mechanism is never the whole system. Its output is rounded or goes into a model, a person often owns many records, and an analyst seldom asks only one question. Three properties of differential privacy (DP) cover these cases, which are post-processing, group privacy and composition. With them you prove each building block once and keep a ledger of what you spend.
+A private mechanism is one component of a system. Its output may be rounded or used to fit a model; one person may contribute multiple records; and an analyst may ask multiple questions. Three properties of differential privacy (DP) address these cases: post-processing, group privacy and composition. They allow separate analysis of each mechanism and tracking of the total privacy budget.
 
 ## Post-processing {#sec-dpprop-post}
 
-Take a mechanism $M$ that is DP with privacy level $\varepsilon$ and [slack](01-definition.md#sec-dpdef-divergences) $\delta$.
- Apply to its output a function $f$ that never reads the data, although it can use random numbers of its own. Then the processed release is just as private,
+Let $M$ be a mechanism that is DP with privacy level $\varepsilon$ and [slack](01-definition.md#sec-dpdef-divergences) $\delta$. Apply a function $f$ to its output. The function may use additional randomness but must not access the data. The processed release remains equally private:
 $$f(M(D)) \text{ is } (\varepsilon, \delta)\text{-DP}.$$ {#eq-dpprop-post}
 
-So it costs nothing to round a noisy count, to clamp it at zero, or to make noisy subtotals agree with their noisy total. So a private system adds noise at one narrow point, such as counts or gradients, and treats everything after it as public. The rule also covers attackers, because a membership-inference attack is a function of the output. So [the definition's](01-definition.md#sec-dpdef-testing) limit on the success of an attack holds even for attacks invented after the release.
+Rounding a noisy count, clamping it at zero or reconciling noisy subtotals with their total therefore costs no additional privacy. A system can add noise to counts or gradients, then treat subsequent computations as post-processing. The rule also applies to attacks: membership inference is a function of the output, so [the definition's](01-definition.md#sec-dpdef-testing) limit on attack success applies to future attacks.
 
 
-The condition is that $f$ never reads the data. "Take the noisy top category, then report its exact count" breaks it, because the second step is a new and non-private mechanism.
+The condition is that $f$ never accesses the data. For example, selecting the noisy top category and then reporting its exact count violates post-processing because the second step is a new, non-private mechanism.
 
 ## Group privacy {#sec-dpprop-group}
 
-The definition protects one record, but a customer of an online shop has dozens of invoice lines. For a person with $k$ records, the guarantee must cover datasets that differ in $k$ records. You can go from one such dataset to the other in $k$ steps that each change one record and each cost $\varepsilon$. So under pure DP, where $\delta = 0$, $\varepsilon$-DP per record becomes $k\varepsilon$-DP for the group. But the slack grows much faster than $k$. For a group of $k$ records, an $(\varepsilon, \delta)$-DP mechanism is
+The definition protects one record, but an online-shop customer may have dozens of invoice lines. For a person with $k$ records, the guarantee must cover datasets that differ in $k$ records. Transforming one dataset into the other requires $k$ single-record changes, each costing $\varepsilon$. Under pure DP, where $\delta = 0$, per-record $\varepsilon$-DP therefore becomes group-level $k\varepsilon$-DP. Under approximate DP, the slack can grow faster than $k$. For a group of $k$ records, an $(\varepsilon, \delta)$-DP mechanism is
 $$\Big(k\varepsilon,\ \delta_k\Big)\text{-DP}, \qquad \delta_k = \delta\,\frac{e^{k\varepsilon} - 1}{e^\varepsilon - 1} \le k\,e^{(k-1)\varepsilon}\delta.$$ {#eq-dpprop-group}
 
-The form on the right is simpler but looser. With $\varepsilon = 0.5$ and $\delta = 10^{-5}$ per record, a person with 10 records gets a slack of $2.272\times10^{-3}$. That slack is too large, because the book chooses $\delta$ far below one over the number of people ([How small δ must be](01-definition.md#sec-dpdef-small-delta)).
+The right-hand form is simpler but looser. At $\varepsilon = 0.5$ and $\delta = 10^{-5}$ per record, a person with 10 records has slack $2.272\times10^{-3}$. This exceeds the book's default, which sets $\delta$ far below one divided by the number of people ([How small δ must be](01-definition.md#sec-dpdef-small-delta)).
 
 OpenDP calculates group guarantees from the mechanism itself. A measurement's `map(d_in=k)` gives its guarantee when neighbouring datasets differ in $k$ records, here for a Laplace count and a Gaussian count.
 
@@ -48,35 +47,32 @@ Gaussian count, group of 10: epsilon 6.43 at delta 1e-5
 Gaussian count, group of 10: epsilon 4.57 at delta 2.272e-03
 ```
 
-For the Laplace count, `map(d_in=10)` gives $k\varepsilon = 5.0$, the same as the formula. The Gaussian count, set to $(0.5, 10^{-5})$ per record, does better, because OpenDP gets the group's guarantee from the whole privacy curve of the mechanism. At the formula's slack of $2.272\times10^{-3}$, the group gets $\varepsilon = 4.57$, less than the formula's 5.0. So take a group guarantee from the library's map, and use the formula only for a mechanism that the library cannot map.
+For the Laplace count, `map(d_in=10)` gives $k\varepsilon = 5.0$, matching the formula. The Gaussian count, calibrated to $(0.5, 10^{-5})$ per record, gives a tighter group bound because OpenDP uses the mechanism's full privacy curve. At the formula's slack of $2.272\times10^{-3}$, the group has $\varepsilon = 4.57$, below the formula's 5.0. Use the library's group mapping when available; otherwise use the formula.
 
-Better still, make the person the unit of privacy. Then neighbouring datasets differ in all of one person's records. Bound the number of records that each person can contribute before you add noise,
- as [Release statistics with a library](12-release-statistics.md) does on real data. Use group privacy when you cannot do this, and for records of different people that reveal each other, such as a household with one address and one income.
+Prefer the person as the privacy unit, so neighbouring datasets differ in all of one person's records. Bound each person's contribution before adding noise, as in [Release statistics with a library](12-release-statistics.md). Use group privacy when a person-level guarantee is unavailable or when records from different people reveal information about each other, such as shared household address and income.
 
 ## Sequential composition {#sec-dpprop-comp}
 
-An analyst asks several queries of the same data, each with fresh noise, and an adversary sees all the answers together. For $k$ mechanisms, write $(\varepsilon_i, \delta_i)$ for the budget of the $i$-th. Then the release of all their outputs is
+Suppose an analyst asks several queries of the same data, each with fresh noise, and an adversary sees all answers. For $k$ mechanisms with budgets $(\varepsilon_i, \delta_i)$, the release of all outputs is
 $$\Big(\sum_{i=1}^k\varepsilon_i,\ \sum_{i=1}^k\delta_i\Big)\text{-DP}.$$ {#eq-dpprop-basic}
 This is **basic composition**. It needs every mechanism to draw fresh noise and to use the same [neighbouring relation](01-definition.md#sec-dpdef-neighbours), add/remove or replace.
 
-The rule also covers **adaptive** composition, where the analyst chooses each query from the earlier answers, but only if each budget is fixed in advance.
- A budget chosen from the answers, as in "continue until the estimate looks good", needs a privacy filter. That is a rule that decides when to stop ([Adaptive composition](../part04-privacy-accounting/08-adaptive-composition.md#sec-adapt-dp-filters)).
+The rule also covers **adaptive** composition, where each query depends on earlier answers, provided every query's budget is fixed in advance. If the budget depends on the answers—for example, continuing until an estimate meets a target—a privacy filter must determine when to stop ([Adaptive composition](../part04-privacy-accounting/08-adaptive-composition.md#sec-adapt-dp-filters)).
 
-For many releases, basic composition gives too much. Ten Gaussian counts at $(0.5, 10^{-5})$ each cost $(5, 10^{-4})$ by basic composition, but at that slack their exact $\varepsilon$ is only 1.504. So for more than a few releases, use an accountant. It calculates the total from the mechanisms themselves ([Advanced and optimal composition](04-composition.md), [Part 4](../part04-privacy-accounting/00-introduction.md)).
+For many releases, basic composition can be loose. Ten Gaussian counts at $(0.5, 10^{-5})$ each cost $(5, 10^{-4})$ under basic composition, but their exact $\varepsilon$ at that slack is 1.504. For multiple releases, use an accountant that composes the mechanisms themselves ([Advanced and optimal composition](04-composition.md), [Part 4](../part04-privacy-accounting/00-introduction.md)).
 
 ## Parallel composition {#sec-dpprop-parallel}
 
-Statistics per region use disjoint subsets of the data. When each person has one record, that record is in one region only. So each region can spend the full budget. To use this, fix in advance a public rule that puts every possible record in exactly one part. Then run a mechanism $M_i$ with independent noise on the $i$-th part. If each $M_i$ is $(\varepsilon_i, \delta_i)$-DP under add/remove, the whole release is
+Statistics by region use disjoint data subsets. If each person has one record, each record belongs to one region, so each region can use the full budget. The partition must follow a public rule fixed in advance that assigns every possible record to exactly one part. Run a mechanism $M_i$ with independent noise on each part. If each $M_i$ is $(\varepsilon_i, \delta_i)$-DP under add/remove, the full release is
 $$\big(\max_i\varepsilon_i,\ \max_i\delta_i\big)\text{-DP under add/remove}.$$ {#eq-dpprop-parallel}
 
-So a histogram with Laplace noise of scale $1/\varepsilon$ on every bin is $\varepsilon$-DP for any number of bins. Under replace, a record can move from one bin to another, so two bins change and the cost doubles to $2\varepsilon$. A person with records in several bins also breaks the rule. Then charge each bin as a separate query, or first bound the number of bins that a person can touch.
+A histogram with Laplace noise of scale $1/\varepsilon$ on each bin is therefore $\varepsilon$-DP for any number of bins. Under replace, a record can move between two bins, doubling the cost to $2\varepsilon$. The rule also fails when a person contributes records to multiple bins. Charge each bin as a separate query or bound the number of bins each person can affect.
 
-The condition that is easiest to break is the rule fixed in advance. A split into "the top 10% of earners and the rest" moves its boundary when one high earner is added, so both parts change. A split on the keys that appear in the data also fails, because a key that only one person's record contains reveals that person. So use fixed bins or a public list of keys. When the keys are not public, release only the keys whose noisy count is above a threshold, a step called **partition selection** ([Release statistics with a library](12-release-statistics.md)).
+The fixed-partition condition is easy to violate. A split into "the top 10% of earners and the rest" changes its boundary when one high earner is added, so both parts change. A partition based on observed keys also fails: a key present in only one person's record identifies that person. Use fixed bins or a public key list. If the keys are not public, release only keys whose noisy counts exceed a threshold, using **partition selection** ([Release statistics with a library](12-release-statistics.md)).
 
 ## Keeping a budget {#sec-dpprop-budget}
 
-Fix a total budget for a dataset before the first release, and charge every release against it.
- In the Python library diffprivlib, a `BudgetAccountant` holds the total, and each function that you give it charges its own $\varepsilon$ and $\delta$. A call that would go above the total raises a `BudgetError` and gives no answer. The script [practitioner_adult_statistics.py](../../code/part03-dp-foundations/practitioner_adult_statistics.py) uses it on the Adult census data, 48,842 people with one row each. For these people, the [default slack](01-definition.md#sec-dpdef-small-delta) is $10^{-6}$. It spends the budget on two queries and then asks for one more count.
+Set a total budget before the first release and charge every release against it. In diffprivlib, a `BudgetAccountant` tracks the total, and each function charges its $\varepsilon$ and $\delta$. A call that would exceed the total raises `BudgetError` and returns no answer. The script [practitioner_adult_statistics.py](../../code/part03-dp-foundations/practitioner_adult_statistics.py) uses it on Adult, a dataset with 48,842 people and one row per person. The [default slack](01-definition.md#sec-dpdef-small-delta) is $10^{-6}$. The script spends the budget on two queries, then attempts a third count.
 
 ```{.python excerpt="adult-ledger"}
 age = adult["age"].to_numpy()
@@ -100,10 +96,9 @@ refused: Privacy spend of (0.1,0) not permissible; will exceed remaining privacy
 ```
 
 
-The true values are 38.64 and 9,808. The two calls add Laplace noise, so they spend no $\delta$, and the $10^{-6}$ stays available for a Gaussian query. The ledger has two limits.
- First, it applies basic composition to every call, so it charges too much for calls on disjoint parts of the data. Second, it trusts the guarantee of each call, and diffprivlib's mean divides by the exact number of rows as if that number were public. The number is public only when neighbours have the same size, so this ledger holds only under replace neighbours.
+The true values are 38.64 and 9,808. Laplace noise uses no $\delta$, leaving $10^{-6}$ available for a Gaussian query. The ledger has two limitations. First, it applies basic composition to each call, overcharging calls on disjoint data subsets. Second, it trusts each call's guarantee. diffprivlib's mean divides by the exact row count, which is public only when neighbouring datasets have equal size. The ledger therefore holds only under replace neighbours.
 
-Most real failures break a condition of the three properties, and then the guarantee is usually lost completely (@tbl-dpprop-rules).
+Most composition failures violate a condition of one of these properties, often invalidating the guarantee (@tbl-dpprop-rules).
 
 | Situation | Composes? | What to do |
 | --- | --- | --- |
@@ -118,7 +113,7 @@ Most real failures break a condition of the three properties, and then the guara
 
 : What composes and what doesn't. {#tbl-dpprop-rules}
 
-Shared noise is the clearest case of a broken condition. Suppose that you release the number of smokers and the number of smokers aged 40 or more, with the same Laplace draw of scale 1 on each. Each release alone is 1-DP, but their difference cancels the noise and gives the exact number of smokers under 40. So the pair is not DP at all. In code, the bug hides in a shared random seed, a cached noise value or noise that several shards use. A fixed seed such as `random_state=0` above makes a book's numbers repeatable, but in production it makes the noise known and so removable. The same noisy answer to a repeated identical query is safe, because it is post-processing of one release.
+Shared noise violates the fresh-randomness condition. Suppose a release gives the number of smokers and the number of smokers aged 40 or more, using the same Laplace draw of scale 1 for both. Each release alone is 1-DP, but subtracting them cancels the noise and reveals the exact number of smokers under 40. The pair is not DP. Code can reuse noise through a shared random seed, cached value or shard-level draw. A fixed seed such as `random_state=0` makes examples reproducible, but in production it makes the noise known and removable. Releasing the same noisy answer to an identical query is safe because it is post-processing of one release.
 
 
 ## Cheat sheet

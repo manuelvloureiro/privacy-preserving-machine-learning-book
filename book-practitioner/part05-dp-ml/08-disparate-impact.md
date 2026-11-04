@@ -2,24 +2,24 @@
 
 ## Why this matters
 
-A private model's test accuracy is an average over everyone, so it cannot show which people lose the accuracy that privacy costs. Bagdasaryan, Poursaeed & Shmatikov (2019) trained networks with differential privacy (DP), using the private form of stochastic gradient descent (SGD) called [DP-SGD](02-dp-sgd.md). They found that the lost accuracy fell mostly on under-represented groups, and called this the **disparate impact** of DP.
+Average test accuracy can hide groups that bear more of privacy's accuracy cost. Differential privacy (DP) applied to stochastic gradient descent (SGD), called DP-SGD ([DP-SGD](02-dp-sgd.md)), can disproportionately reduce accuracy for under-represented groups. Bagdasaryan, Poursaeed & Shmatikov (2019) called this the **disparate impact** of DP.
 
-So a model that is a point worse on average can be ten points worse for one small group, often one that privacy should protect. Before you ship a private model, measure its cost for each group against a non-private baseline, with a confidence interval on every number.
+A one-point average loss can conceal a ten-point loss for a small group. Before release, compare each group's private-model accuracy with a non-private baseline and report confidence intervals.
 
 ## Evaluating a private model per group {#sec-fair-measure}
 
-Decide which groups matter before you look at any results, so that the results cannot steer the choice. Then train a non-private baseline with the same data and recipe, because a gap between groups may exist without privacy. DP is responsible only for how far each group's own accuracy drops when training becomes private.
+Specify relevant groups before examining results to avoid selecting groups based on outcomes. Train a non-private baseline with the same data and procedure; group differences may exist without privacy. Measure DP's cost as each group's accuracy change under private training.
 
-Write $\mathrm{acc}_g$ for a model's accuracy on the test records of group $g$. Private training is random, so its accuracy is averaged over several training runs, written $\mathbb E$. The **privacy cost** $\pi_g$ is the accuracy the group loses when the same data and hyperparameters are trained privately,
+Let $\mathrm{acc}_g$ be model accuracy on test records from group $g$. Since private training is random, average accuracy over multiple runs, denoted $\mathbb E$. The group's **privacy cost** $\pi_g$ is its accuracy loss under private rather than non-private training with the same data and hyperparameters:
 $$\pi_g = \mathrm{acc}_g(\text{non-private}) - \mathbb E\big[\mathrm{acc}_g(\text{private})\big].$$ {#eq-fair-cost}
 DP has disparate impact when groups have different privacy costs.
 
-Every accuracy needs an interval. Each test record is classified correctly or not, so a group's accuracy is a binomial proportion, and its exact Clopper–Pearson interval contains the true accuracy in at least 95% of test samples ([Hypothesis testing](../part01-prerequisites/04-hypothesis-testing.md)).
+Report an interval for each accuracy. Correct classifications are binomial outcomes, so the exact Clopper–Pearson interval covers the true group accuracy in at least 95% of samples ([Hypothesis testing](../part01-prerequisites/04-hypothesis-testing.md)).
 
-The gap between two groups needs its own interval. Write $\hat p_g$ for group $g$'s measured accuracy and $m_g$ for its number of test records. For two groups $a$ and $b$ measured on disjoint test records, the variances of the two estimates add. So for large counts an approximate 95% interval for the gap is
+Compute a separate interval for differences between groups. Let $\hat p_g$ be measured accuracy for group $g$, and let $m_g$ be the number of its test records. For disjoint test sets, the variances add. This gives the following approximate 95% interval when counts are sufficiently large:
 $$(\hat p_a - \hat p_b) \pm 1.96\sqrt{\frac{\hat p_a(1 - \hat p_a)}{m_a} + \frac{\hat p_b(1 - \hat p_b)}{m_b}}.$$ {#eq-fair-gap}
 
-These intervals are wider than most people expect. Suppose a test split holds only 100 records of a minority, and 88 of them are classified correctly. The majority gets 1,812 of its 1,900 records right, an accuracy of 0.954, so the measured gap is 0.074. SciPy gives the minority's interval, and @eq-fair-gap gives the gap's.
+Small test groups produce wide intervals. For example, suppose 88 of 100 minority-group records are classified correctly. The majority group has 1,812 correct predictions among 1,900 records, or accuracy 0.954; the measured gap is 0.074. SciPy gives the minority interval, and @eq-fair-gap gives the gap interval.
 
 ```python
 from math import sqrt
@@ -33,14 +33,14 @@ gap, se = 0.954 - 0.880, sqrt(0.954 * 0.046 / 1_900 + 0.880 * 0.120 / 100)
 print(f"{gap - 1.96 * se:.3f} {gap + 1.96 * se:.3f}")  # 0.010 0.138
 ```
 
-So the gap is real, since its interval excludes zero, but it could be anywhere from one point to fourteen. An interval separates a 5-point gap from zero only with a few hundred test records from the group, and a 1-point gap only with thousands.
+The gap's interval excludes zero, but its value could range from one to fourteen points. Distinguishing a five-point gap from zero requires hundreds of group test records; a one-point gap requires thousands.
 
-The privacy cost needs a different interval. Both models are scored on the same test records, so their accuracies are not independent and @eq-fair-gap does not apply. Pair them instead. Among group $g$'s $m_g$ test records, write $u$ for the number only the non-private model gets right, and $v$ for those only the private one gets right. One run's cost is then $(u - v)/m_g$, and for large counts an approximate 95% interval is
+Privacy cost needs a paired interval because both models use the same test records, so their accuracies are dependent and @eq-fair-gap does not apply. For group $g$, let $u$ count records only the non-private model classifies correctly. Let $v$ count records only the private model gets right, and let $m_g$ be the test-record count. One run's cost is $(u-v)/m_g$. For large counts, an approximate 95% interval is
 $$\frac{u - v}{m_g} \pm \frac{1.96}{m_g}\sqrt{u + v - \frac{(u - v)^2}{m_g}}.$$ {#eq-fair-paired}
 
-Training adds a second source of variation, which no test set removes. A small group's accuracy varies far more between training runs than a large group's, so a one-run comparison of two recipes can reverse. So train each recipe with several seeds, and report the mean cost and its spread.
+Training introduces additional variation that a larger test set cannot remove. Small-group accuracy varies more across training runs, so a one-run comparison can reverse. Train each procedure with multiple seeds and report mean cost and its spread.
 
-The evaluation can also leak, because per-group accuracies on private test data are statistics of that data. To publish them, add noise to each group's count of correct predictions and charge it to a budget of its own ([Release statistics with a library](../part03-dp-foundations/12-release-statistics.md)).
+Per-group accuracy on a private test set is itself a statistic of private data. To publish it, add noise to each group's correct-prediction count and allocate a separate privacy budget ([Release statistics with a library](../part03-dp-foundations/12-release-statistics.md)).
 
 ## Disparate impact, measured {#sec-fair-observed}
 
@@ -67,17 +67,19 @@ Small groups tell a different story at a smaller budget. Adult's `race` column h
 
 : Test accuracy on Adult by race, averaged over 3 runs ($\delta = 10^{-5}$, noise multiplier 0.973 at $\varepsilon = 4$ and 2.383 at $\varepsilon = 1$). Costs are fractions of accuracy. {#tbl-fair-eps}
 
-At $\varepsilon = 4$ no group loses more than 1.2 points. At $\varepsilon = 1$ the White group loses 0.37 points, while the Asian-Pac-Islander group loses 3.01 and the Other group 2.13. Black and Amer-Indian-Eskimo people lose nothing, although the second is one of the smallest groups. Nor does the share of high incomes explain it: about 12% of the Black, Amer-Indian-Eskimo and Other groups earn above \$50K, yet only the Other group pays. So no simple feature of a group predicts its cost, and every small group must be checked, whatever the overall accuracy says.
+At $\varepsilon = 4$, no group loses more than 1.2 points. At $\varepsilon = 1$, the White group loses 0.37 points. The Asian-Pac-Islander group loses 3.01 points, and the Other group loses 2.13. Black and Amer-Indian-Eskimo people lose nothing, although the latter is one of the smallest groups. The share of high incomes does not explain the pattern: about 12% of the Black, Amer-Indian-Eskimo and Other groups earn above \$50K. Only the Other group has a measured loss. No simple group feature predicts privacy cost, so check every small group regardless of overall accuracy.
 
-These numbers are only suggestive. At an accuracy of 0.85 the exact interval for 532 test rows is $[0.816, 0.879]$, three points on each side, and for 141 rows it is six. Three training runs do not remove that spread either, so a real check uses the paired interval of @eq-fair-paired and more runs.
+These results are suggestive, not conclusive. At accuracy 0.85, the exact interval for 532 test rows is $[0.816, 0.879]$, or about three points on each side. With 141 rows, the interval is about six points on each side. Three training runs do not remove this test-sampling uncertainty. A real check needs the paired interval of @eq-fair-paired and more runs.
 
 ## Why small groups pay: clipping and noise {#sec-fair-clipping}
 
-DP-SGD loses accuracy through two steps, clipping and noise, and both treat every record alike. Yet the clipping column of @tbl-fair-eps, which adds no noise and so gives no privacy, already costs the Asian-Pac-Islander group 0.57 points and the Other group 1.18, while the White group gains 0.08. So clipping by itself can treat the groups unequally.
+DP-SGD can lose accuracy through clipping and noise, and both steps treat every record alike. The clipping-only column of @tbl-fair-eps adds no noise and gives no privacy. Clipping alone costs the Asian-Pac-Islander group 0.57 points and the Other group 1.18 points. The White group gains 0.08 points, so clipping can affect groups unequally.
 
 Clipping caps every record's pull on the update at the clipping norm $C$, so it cuts back the groups with long gradients hardest. A group's gradients are long where the model fits it badly, as it does a rare pattern the rest of the data does not teach. So training gives such a group less weight than its share of the records.
 
-The noise is the same for every group, while a group's signal grows with its size. So a small group's signal is the weakest against the noise, and when the group needs a rule of its own, its privacy cost can grow like one over its share of the training records. On Adult, cutting the Asian-Pac-Islander group from 3.1% to 1% of the training rows leaves its cost at $\varepsilon = 1$ at 3.13 points, within the spread of three runs, so measure the cost instead of predicting it from the share. The two causes compound, because the noise acts on the weight that clipping has already shrunk. A group whose gradients clipping halves pays like a group half its size.
+The noise is the same for every group, while a group's signal grows with its size. A small group therefore has a weaker signal relative to the noise. When that group needs a rule of its own, its privacy cost can grow inversely with its share of the training records.
+
+On Adult, reducing the Asian-Pac-Islander share from 3.1% to 1% leaves its cost at $\varepsilon = 1$ within the spread of three runs. The measured cost is 3.13 points. Measure the cost rather than predicting it from group size. Clipping and noise compound because noise acts on the update after clipping has reduced it. If clipping halves a group's gradients, its signal is like that of a group half its size.
 
 To see which cause hurts your model, measure per-example gradient norms by group. Opacus's `GradSampleModule`, the wrapper DP-SGD training already uses, keeps one gradient per row in each parameter's `grad_sample`, so one backward pass gives the norms.
 
@@ -106,9 +108,11 @@ At a fixed budget, a change to the training recipe only moves the cost between t
 
 : Mitigations for disparate impact, and when to use them. {#tbl-fair-mitigation-guide}
 
-Oversampling costs the group's privacy, because a record's guarantee depends on its own chance of being sampled ([Amplification by subsampling](../part04-privacy-accounting/05-subsampling.md)). So run the accountant at the oversampled rate. On Adult, sampling the Asian-Pac-Islander rows four times as often at $\varepsilon = 1$ raises the noise multiplier from 2.383 to 8.828. Every group then loses, the oversampled group most: it falls from 0.8145 to 0.7657, and the White group from 0.8310 to 0.7860, against the same DP-SGD at the ordinary rate. That is **levelling down** with no gain for anyone.
+Oversampling costs the group's privacy because a record's guarantee depends on its chance of being sampled ([Amplification by subsampling](../part04-privacy-accounting/05-subsampling.md)). Run the accountant at the oversampled rate. On Adult, sampling the Asian-Pac-Islander rows four times as often at $\varepsilon = 1$ raises the noise multiplier from 2.383 to 8.828.
 
-No algorithm avoids some of the cost. Learning a small group's own rule means estimating it privately from that group's few records, and private estimation from few records has an error floor that no mechanism beats ([Lower bounds](../part03-dp-foundations/10-lower-bounds.md)).
+Every group then loses accuracy, with the largest loss in the oversampled group. Its accuracy falls from 0.8145 to 0.7657; the White group's falls from 0.8310 to 0.7860. These comparisons use the same DP-SGD at the ordinary sampling rate. This is **levelling down** with no gain for anyone.
+
+No algorithm avoids some privacy cost. A model that learns a small group's rule must estimate it privately from that group's records. With few records, private estimation has an error floor that no mechanism can beat ([Lower bounds](../part03-dp-foundations/10-lower-bounds.md)).
 
 ## Cheat sheet
 

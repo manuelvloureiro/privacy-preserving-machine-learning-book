@@ -1,10 +1,10 @@
 # Utilities and the Context API inside
 
-Every query in this book so far ended with a call such as `.laplace()` that named no scale, and the context filled the scale in. It used a few utilities that the framework also exposes on their own. Type descriptors say what kind of number a chain carries, a binary search turns a budget into a scale, and a serializer turns a measurement into text. The Context API is a thin layer over these utilities and the combinators of [the previous chapter](11-combinators.md). When you can see the layer, you can predict what a query will do, and rebuild any part of it by hand when the layer refuses.
+So far, each query ended with `.laplace()` and let the context choose a scale. The context uses framework utilities that are also available directly: type descriptors specify value types, binary search converts budgets to scales, and serializers convert measurements to text. The Context API wraps these utilities and the combinators in [the previous chapter](11-combinators.md). Understanding this layer helps predict query behaviour and reproduce queries manually when the API rejects them.
 
-The chapter ends by taking apart the count query of [the first chapter](../part01-getting-started/01-first-release.md), which gives the same scale of 3. At the end, you can read a type error, run the search a context runs, and store and reload a measurement. You can also say which framework object each line of a Context API program creates.
+The chapter dissects the count query from [the first chapter](../part01-getting-started/01-first-release.md), which returns the same scale of 3. It also shows how to interpret type errors, run the context's parameter search, serialize a measurement and identify the framework object created by each Context API call.
 
-The script [opendp_utilities.py](../../code/part03-framework/opendp_utilities.py) runs every step on OpenDP 0.16.0 with Polars 1.36.1. Its plain-data queries use the first chapter's hundred integers from a seeded generator, and its one Polars query counts the rows of the France Labour Force Survey (LFS) sample. The type descriptors, error messages, scales and privacy maps are the same on every run. The released counts change, because OpenDP's noise cannot be seeded, so they are in one block marked as one run.
+The script [opendp_utilities.py](../../code/part03-framework/opendp_utilities.py) runs on OpenDP 0.16.0 and Polars 1.36.1. Plain-data queries use the first chapter's hundred seeded integers; the Polars query counts rows in the France Labour Force Survey (LFS) sample. Type descriptors, errors, scales and privacy maps are deterministic. Released counts vary because OpenDP's noise cannot be seeded, so the page labels them as one run.
 
 ```bash
 uv run python code/part03-framework/opendp_utilities.py
@@ -12,9 +12,9 @@ uv run python code/part03-framework/opendp_utilities.py
 
 ## Types {#sec-utils-types}
 
-OpenDP's core is written in Rust, which has signed and unsigned integers from 8 to 128 bits and floats of two widths. The library keeps that precision, because the constants of a privacy proof depend on it. For example, a sum of 32-bit integers can overflow where a 64-bit sum cannot. So every domain, metric and measure carries a **type descriptor**, such as the `T=` arguments of [the framework chapter](08-a-framework-for-privacy.md). The library never casts one type to another on its own.
+OpenDP's Rust core supports signed and unsigned integers from 8 to 128 bits and two float widths. It preserves this precision because proof constants depend on the type; a 32-bit integer sum can overflow where a 64-bit sum cannot. Every domain, metric and measure therefore carries a **type descriptor**, such as the `T=` arguments in [the framework chapter](08-a-framework-for-privacy.md). OpenDP does not cast between types automatically.
 
-You can write a descriptor in three ways, and the snippet shows that they agree. The canonical form is a string such as `"i32"` or `"Vec<f64>"`. A Python type such as `int`, `float`, `str` or `bool` is an alias, and `list[int]` is an alias for a vector. The objects in `opendp.typing`, such as `dp.i32`, `dp.f64` and `dp.Vec[dp.i32]`, give the same strings with completion in an editor.
+Type descriptors have three equivalent forms. Canonical strings include `"i32"` and `"Vec<f64>"`. Python types such as `int`, `float`, `str` and `bool` are aliases; `list[int]` aliases a vector. Objects from `opendp.typing`, including `dp.i32`, `dp.f64` and `dp.Vec[dp.i32]`, provide the same types with editor completion.
 
 ```python
 import opendp.prelude as dp
@@ -25,7 +25,7 @@ print(dp.RuntimeType.parse(list[int]))  # Vec<i32>
 print(dp.Vec[dp.i32] == dp.RuntimeType.parse(list[int]))  # True
 ```
 
-The aliases hide one decision: a Python `int` means a 32-bit integer and a `float` a 64-bit float, and `dp.RuntimeType.infer` reads a value's type in the same way. But NumPy's default integer has 64 bits, so an integer from an array arrives as `i64` and does not meet a domain built with `T=int`. If all your integers have 64 bits, call `set_default_int_type` to change what the alias means.
+Python aliases have fixed widths: `int` means 32-bit and `float` means 64-bit. `dp.RuntimeType.infer` uses the same mapping. NumPy's default integer is 64-bit, so an array value has type `i64` and does not match a domain built with `T=int`. If your integers are 64-bit, use `set_default_int_type` to change the alias.
 
 ```python
 import numpy as np
@@ -57,20 +57,20 @@ float d_in on the count: TypeError: inferred type is f64, expected u32
 integer d_in on the count: 0.3333
 ```
 
-The message names the type the library inferred from your argument and the type the metric expects, so pass what it expects, here the integer 2. The second pair of lines shows the most common case. The count's input metric is the symmetric distance, whose distances are unsigned integers, so `map(1.0)` fails and `map(1)` succeeds. The documentation names one more cause, a scalar $\varepsilon$ given to a measure that expects $\varepsilon$ with the slack $\delta$ of approximate differential privacy. In 0.16.0 that message is different, as the script prints.
+The error reports the inferred and expected types; here, pass integer 2. The next lines show a common mismatch: symmetric distance uses unsigned integer distances, so `map(1.0)` fails and `map(1)` succeeds. Another mismatch occurs when a scalar $\varepsilon$ is passed to a measure that expects an $(\varepsilon,\delta)$ pair. Version 0.16.0 reports this differently from the documentation, as shown below.
 
 ```text
 scalar epsilon on an approximate measure: TypeError: Cannot coerce a non-tuple type to a tuple
 pair on an approximate measure: True
 ```
 
-[The chapter on limitations and troubleshooting](../part04-extending/15-limitations-and-troubleshooting.md) collects the other errors. For this one, read the expected type, then change your argument, your bounds or your data to match it. Do not change the domain to match the argument, because the library chose that type for the proof.
+[The chapter on limitations and troubleshooting](../part04-extending/15-limitations-and-troubleshooting.md) covers other errors. Read the expected type and adjust the argument, bounds or data. Do not change the domain to fit the argument; OpenDP chose that type for the proof.
 
 ## Parameter search {#sec-utils-search}
 
-A measurement has three kinds of parameter. The input distance `d_in` is the privacy unit's bound, the output distance `d_out` is the budget, and the constructor's own arguments include the noise scale. With all of them fixed, `check(d_in, d_out)` says whether the measurement is within the budget, as [the measurements chapter](10-measurements.md) showed. The answer is monotone: if a scale passes at a budget, every larger scale passes, and so does every larger budget. So the answer changes at one boundary, which a binary search finds, and you can solve for any one parameter from the others.
+A measurement has three parameter types: input distance `d_in` (the privacy-unit bound), output distance `d_out` (the budget) and constructor arguments such as noise scale. With these fixed, `check(d_in, d_out)` tests whether the measurement meets the budget, as explained in [the measurements chapter](10-measurements.md). The result is monotone: any larger scale or budget also passes. Binary search locates the boundary and solves for one parameter from the others.
 
-The library has three forms of the search. The function `dp.binary_search` takes a predicate on one number and returns the value nearest the boundary on the passing side. The function `dp.binary_search_param` takes a function that builds a chain from one number, with `d_in` and `d_out`, and uses `check` as the predicate. The function `dp.binary_search_chain` does the same and returns the chain at the value it found.
+OpenDP provides three searches. `dp.binary_search` takes a predicate and returns the value nearest the boundary on the passing side. `dp.binary_search_param` takes a function that builds a chain from one parameter and uses `check` with `d_in` and `d_out`. `dp.binary_search_chain` performs the same search and returns the chain at the selected value.
 
 ```python
 import opendp.prelude as dp

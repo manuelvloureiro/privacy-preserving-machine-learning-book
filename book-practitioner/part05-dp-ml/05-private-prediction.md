@@ -2,19 +2,19 @@
 
 ## What it is {#sec-pate-what}
 
-Private prediction applies differential privacy (DP) to each *answer* instead of to the model. You split the private records into disjoint shards and train an ordinary model, a **teacher**, on each one. The teachers stay secret. Each query gets the winner of their vote after noise is added to the counts, private at a level $\varepsilon$ with a small slack $\delta$. A record lives in one shard, so it can move one teacher's vote to another label. That changes the counts by at most $\sqrt2$ in Euclidean length.
+Private prediction applies differential privacy (DP) to each answer rather than to stochastic gradient descent (SGD) training. Split private records into disjoint shards and train an ordinary **teacher** model on each. Keep teachers private. For each query, add noise to vote counts and release the winning label. The privacy level is $\varepsilon$, and $\delta$ is the failure-probability allowance. Each record belongs to one shard and can change one vote from one label to another, changing the count vector by at most $\sqrt2$ in Euclidean norm.
 
-**GNMax** adds Gaussian noise with a standard deviation $\sigma$ to each count and releases only the label with the largest noisy count. In Rényi differential privacy (RDP), each answer costs a straight line of slope $1/\sigma^2$ in the order $\alpha$, and the slopes add ([Rényi DP](../part04-privacy-accounting/01-renyi-dp.md)). So write $\rho(\varepsilon, \delta)$ for the largest slope that still converts to your target. A fixed number $Q$ of answers, even adaptively chosen, then needs the noise
+Let $\sigma$ denote the standard deviation of the added Gaussian noise. **GNMax** adds this noise to each count and releases the label with the largest noisy count. In Rényi differential privacy (RDP), each answer costs a line with slope $1/\sigma^2$ at order $\alpha$, the Rényi order parameter. Slopes compose additively ([Rényi DP](../part04-privacy-accounting/01-renyi-dp.md)). Let $\rho(\varepsilon,\delta)$ be the largest slope that converts to the target guarantee. For a fixed number $Q$ of answers, including adaptively chosen queries, the required noise is
 $$\sigma = \sqrt{\frac{Q}{\rho(\varepsilon, \delta)}}.$$ {#eq-pate-sigma}
-For example, at $\delta = 10^{-5}$ a budget of $\varepsilon = 1$ allows a slope of 0.0306, so 1,000 answers need $\sigma = 181$.
+For example, set target privacy level $\varepsilon = 1$ and slack $\delta = 10^{-5}$. The allowed slope is 0.0306. Then 1,000 answers require $\sigma = 181$.
 
 ## When you meet it {#sec-pate-when}
 
-You meet private prediction when you cannot train a private model. The common case is a large language model (LLM) behind an interface, whose prompt holds private records that its answers leak. The fix splits the records into disjoint groups, prompts the model once per group, and releases the GNMax label (Duan et al. 2023). At $\varepsilon = 1$, Wu et al. (2024) answered 10,000 sentiment queries this way as accurately as one non-private prompt.
+Use private prediction when private model training is impractical. One example is a large language model (LLM) interface whose answers could expose records in prompts. Split records into disjoint groups, query the model once per group, and release a GNMax label (Duan et al. 2023). Wu et al. (2024) answered 10,000 sentiment queries with accuracy matching one non-private prompt. Their privacy level was $\varepsilon=1$.
 
-Otherwise the choice is between private answers and a private model, whose accuracy is fixed. The vote's noise grows with $\sqrt Q$, so answers win up to a **break-even** number of queries, and the model wins beyond it. On the full edition's 10,000-record synthetic task, the vote beats noisy stochastic gradient descent (SGD), [DP-SGD](02-dp-sgd.md), only on the first 18 queries at $\varepsilon = 1$. So compare the two at your budget and expected number of queries, with the DP-SGD baseline of [Train a model with DP-SGD](13-train-dp-sgd.md).
+The alternative is a private model with fixed accuracy. Vote noise grows as $\sqrt Q$, so private answers are preferable only up to a **break-even** query count. On the full edition's synthetic task, the data contains 10,000 records. Voting outperforms private SGD ([DP-SGD](02-dp-sgd.md)) only for the first 18 queries at privacy level $\varepsilon=1$. Compare both approaches at the expected query count and budget, using [Train a model with DP-SGD](13-train-dp-sgd.md) as the baseline.
 
-**PATE** (private aggregation of teacher ensembles) spends the budget once. It labels public, unlabelled inputs by GNMax and trains a new model, the **student**, on them. Only the student is released, at exactly the cost of its labels, so PATE needs public inputs from the private data's distribution. Papernot et al.'s MNIST student comes within a percentage point of non-private accuracy, but at a data-dependent $\varepsilon$ (@sec-pate-wrong). On the synthetic task, DP-SGD beats the best student at every budget.
+**PATE** (private aggregation of teacher ensembles) labels public, unlabelled inputs with GNMax and trains a **student** model on those labels. Only the student is released, at the privacy cost of its labels. PATE therefore requires public inputs from the private data distribution. Papernot et al.'s MNIST student comes within one percentage point of non-private accuracy, but its $\varepsilon$ is data-dependent (@sec-pate-wrong). On the synthetic task, DP-SGD outperforms the best student at every budget.
 
 ## How to use it {#sec-pate-use}
 
@@ -41,8 +41,8 @@ The guarantee needs each record in exactly one shard. So assign shards by a hash
 
 Noise this large wipes out close votes. With two labels and a gap $g$ between the counts, the vote returns the plurality with probability $\Phi(g/(\sqrt2\sigma))$, where $\Phi$ is the standard normal distribution function.
 
-For example, the noise for 1,000 answers at $\varepsilon = 4$ is $\sigma = 51.8$. Then a lopsided vote of 98 to 2 is right with probability 0.9051, but a close vote of 52 to 48 only about half the time.
-So measure the noiseless vote first, since no budget beats it. Adding teachers widens the gaps, because $\sigma$ does not depend on their number, until the shards get too small to train on.
+For example, 1,000 answers at privacy level $\varepsilon = 4$ require noise $\sigma = 51.8$. With that noise, a vote of 98 to 2 is correct with probability 0.9051. For a close vote of 52 to 48, accuracy is only about one half.
+Measure the noiseless vote first, because no privacy budget can improve it. Adding teachers widens vote gaps because $\sigma$ does not depend on the teacher count. This helps only until the shards become too small to train on.
 
 Finally, beware of a data-dependent $\varepsilon$. When teachers agree, a sharper analysis charges less, but that smaller $\varepsilon$ is computed from the votes and leaks them. Until it is released with noise, it is a measurement, not a guarantee.
 

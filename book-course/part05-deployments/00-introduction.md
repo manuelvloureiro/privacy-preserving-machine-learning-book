@@ -1,6 +1,6 @@
 # Deployments
 
-The earlier parts built differential privacy (DP) with a trusted curator who holds the data and releases noisy answers. This part asks what changes when the definition meets real systems with millions of users, daily data collection and outside analysts. The first chapter removes the curator, so that each person randomizes their own data, and measures the price in error. The second finds a middle ground with a shuffler, then returns to the central model to see how large deployments select, compose and budget.
+The earlier parts developed differential privacy (DP) with a trusted curator who holds the data and releases noisy answers. This part studies deployments with many users, repeated data collection, and external analysts. The first chapter removes the curator: each person randomizes their own data, and the chapter quantifies the resulting error. The second introduces the shuffle model, then examines selection, composition, and budget allocation in central deployments.
 
 | Chapter | Question it answers |
 | --- | --- |

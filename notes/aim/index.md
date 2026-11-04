@@ -2,12 +2,12 @@
 title: "AIM, Explained From Scratch"
 subtitle: "How a differentially private synthetic-data mechanism chooses, measures and fits marginals"
 abstract: |
-  AIM is one of the best algorithms for releasing a synthetic copy of a table of personal records under differential privacy. This note explains it step by step, for a reader who knows basic probability and nothing about privacy or graphical models. It follows AIM round by round on a toy dataset of a thousand people, with every number computed by a script, and proves that AIM keeps its privacy promise.
+  AIM is an algorithm for releasing a synthetic copy of a table of personal records under differential privacy. This note explains it for a reader who knows basic probability but not privacy or graphical models. It traces AIM on a toy dataset of a thousand people, computes every number with a script, and proves that AIM keeps its privacy promise.
 ---
 
 An organization holds a table of records about people, with attributes such as age group, occupation and a medical condition. Researchers want to study the table, but it cannot leave the building. One answer is **synthetic data**, a new table of made-up rows that gives nearly the same answers to the statistical questions that matter, but reveals almost nothing about any one real person. AIM, by McKenna, Mullins, Sheldon and Miklau (2022), is a way to build such a table, and in the paper's experiments it beat every competitor on most settings.
 
-The name stands for *adaptive and iterative mechanism*. AIM builds its model of the data one noisy statistic at a time, and each choice depends on what the earlier measurements taught it. So the note answers three questions. What does AIM promise, and how is that promise counted? How does a pile of noisy statistics become one dataset? And how does AIM decide what to measure next, and with how much noise? You need only expectations, the normal distribution and a little calculus. @tbl-map gives the question of each section, and @tbl-symbols lists the symbols. A script carries the running example, and every number in the note comes from it:
+The name stands for *adaptive and iterative mechanism*. AIM builds its model from noisy statistics, choosing each new statistic using earlier measurements. This note explains its privacy guarantee and how AIM accounts for it, how noisy statistics become a dataset, and how AIM selects and measures each statistic. You need only expectations, the normal distribution and basic calculus. @tbl-map lists each section's question, and @tbl-symbols defines the notation. A script carries the running example and computes every number in the note:
 
 ```bash
 uv run python code/notes/aim.py
@@ -72,7 +72,7 @@ So a marginal is a contingency table, flattened into a vector. @tbl-marginal sho
 
 {{< include figures/_marginal.md >}}
 
-Two facts about marginals drive everything that follows. First, a marginal over a set $r$ determines the marginals over every subset of $r$, because you can add up its cells, as the row sums of @tbl-marginal give the one-way marginal of smoker. Second, every marginal is a sum over the full table. Summing the full table over the attributes outside $r$ gives $\mu_r(D)$, and this sum is linear in the table, which is what lets @sec-pgm fit a table to noisy marginals.
+A marginal over a set $r$ determines the marginal over every subset of $r$: add the relevant cells, as the row sums of @tbl-marginal do to produce the one-way marginal of smoker. Every marginal is also a sum over the full table. Summing over the attributes outside $r$ gives $\mu_r(D)$. This sum is linear in the table, which lets @sec-pgm fit a table to noisy marginals.
 
 ## The workload and the error
 
@@ -194,9 +194,9 @@ Suppose that a sequence of marginals has been measured. The $i$-th measurement i
 
 $$\hat p = \arg\min_{p} \sum_{i} \frac{1}{\sigma_i} \bigl\| \mu_{r_i}(p) - \tilde y_i \bigr\|_2^2.$$ {#eq-pgm}
 
-Squared error is the natural choice because the noise is Gaussian. With weights $1/\sigma_i^2$, the minimizer would be the maximum-likelihood table. The paper uses $1/\sigma_i$, which worked better in practice.
+Squared error matches the Gaussian noise model. Weights of $1/\sigma_i^2$ would give the maximum-likelihood table, but the paper reports better results in its experiments with weights of $1/\sigma_i$.
 
-So the generation problem of @sec-smg goes away. The marginals of one table cannot disagree with each other, because they are all sums of the same numbers, and they cannot be negative, because the table is not. A table also answers the marginals never measured, by combining what the measured ones imply. For example, after the toy run has measured only the four one-way marginals, the model's marginal over smoker and condition keeps the measured row and column totals (@tbl-init). It spreads them as if the two attributes were independent, because nothing measured says otherwise.
+Fitting one table resolves two problems from @sec-smg. Its marginals are consistent because they sum the same table, and they are nonnegative because the table's entries are nonnegative. The fitted table also estimates marginals that AIM did not measure by combining the measured marginals. For example, after the toy run measures only the four one-way marginals, its estimate over smoker and condition preserves the measured row and column totals (@tbl-init). It treats the attributes as independent because no measurement captures their dependence.
 
 {{< include figures/_init.md >}}
 
@@ -225,7 +225,7 @@ The fitted table $\hat p$ has fractional entries, but a dataset needs whole reco
 
 # AIM, round by round {#sec-aim}
 
-With the generation step in hand, two problems of @sec-smg remain: what to measure, and with how much budget. AIM takes a dataset $D$, a workload $\mathcal Q$ of attribute sets with weights $c_s$, and a budget $\rho$, and returns a synthetic dataset. It has three fixed settings. It plans for a number of rounds $T = 16d$, where $d$ is the number of attributes. It gives nine tenths of each round's budget to the measurement and one tenth to the selection. And it caps the model's junction tree size at 80 megabytes.
+The generation method in @sec-pgm leaves two questions: which marginals should AIM measure, and how much budget should it spend on each? AIM takes a dataset $D$, a workload $\mathcal Q$ of attribute sets with weights $c_s$, and a budget $\rho$, then returns a synthetic dataset. It uses three fixed settings. It plans for $T = 16d$ rounds, where $d$ is the number of attributes, allocates nine tenths of each round's budget to measurement and one tenth to selection, and caps the model's junction tree size at 80 megabytes.
 
 ## The schedule
 
@@ -251,7 +251,7 @@ AIM may measure every marginal over a subset of a workload set, a collection the
 
 $$\mathcal Q_+ = \{\, r : r \subseteq s \text{ for some } s \in \mathcal Q \,\}.$$
 
-The reason is noise. A large marginal spreads the records over many cells, so the noise swamps each cell's count. Its sub-marginals have bigger counts, and the model combines them into an estimate of the large one. On the toy workload of six two-way marginals, the closure adds the four one-way marginals, for ten candidates in all.
+A large marginal spreads the records over many cells, so noise can swamp each cell's count. A sub-marginal has larger counts, and the model combines sub-marginals to estimate the larger marginal. On the toy workload of six two-way marginals, the closure adds the four one-way marginals, for ten candidates in all.
 
 Each candidate gets a weight that says how much of the workload it serves. It counts the attributes the candidate shares with each workload marginal, times that marginal's weight:
 
@@ -259,11 +259,11 @@ $$w_r = \sum_{s \in \mathcal Q} c_s\, |r \cap s|.$$ {#eq-weight}
 
 For example, a two-way candidate on the toy workload shares both attributes with itself and one attribute with four other workload marginals, so its weight is $6$. A one-way candidate shares its attribute with three workload marginals, for a weight of $3$.
 
-Last, in each round AIM drops the candidates that would make the model too big. A candidate $r$ stays only if the junction tree size of the measured sets plus $r$ is at most $(\rho_{\mathrm{used}}/\rho)$ times the 80 megabyte cap. So early rounds are kept to small models, and the full cap is available only near the end. Every model on the toy domain is tiny, so the script does not need this filter.
+In each round, AIM drops candidates that would make the model too large. A candidate $r$ stays only if the junction tree size of the measured sets plus $r$ is at most $(\rho_{\mathrm{used}}/\rho)$ times the 80-megabyte cap. Early rounds therefore use small models; the full cap becomes available only near the end. Every model on the toy domain is small enough that the script does not need this filter.
 
 ## Selection: the score
 
-AIM's first new idea is its score. MWEM scores a candidate by how wrong the current model is on it, the $L_1$ distance $\|\mu_r(D) - \mu_r(\hat p_{t-1})\|_1$ between the true marginal and the model's. That score favours large marginals, which have large errors simply by having many cells, even when the noise of a measurement would be larger still. So AIM subtracts the expected $L_1$ norm of the noise, which needs one lemma.
+AIM changes the candidate score used by MWEM. MWEM scores a candidate by the $L_1$ distance $\|\mu_r(D) - \mu_r(\hat p_{t-1})\|_1$ between the true marginal and the current model's estimate. This score favours large marginals because they have more cells and therefore larger errors, even when measurement noise would be larger still. AIM subtracts the expected $L_1$ norm of the noise; the next lemma gives that quantity.
 
 ::: {#lem-l1-noise name="Expected size of Gaussian noise"}
 Let $Z \sim \mathcal N(0, \sigma^2)$. Then
@@ -361,7 +361,7 @@ def anneal(
 
 ![The model's workload error after each round of the toy run. Round 0 is the independence model from the one-way marginals. Circled rounds annealed, so the round after each paid four times as much.](figures/rounds.svg){#fig-rounds}
 
-Round 1 measured smoker again and moved the model by one record, far below the penalty, so it annealed. Rounds 2 and 3, at twice the selection budget and half the noise, picked the two marginals with the most dependence to find, and the workload error fell by almost half. Round 4 picked exercise with condition and fixed it. Round 5 picked it again, learned nothing new, and annealed. Round 6, at four times the original stakes, found the dependence between age and condition, the last large error. Round 7, set by @eq-final to spend the rest, refined a marginal that was already close. The error fell from $0.141$ to $0.053$, and @tbl-final shows the smoker-and-condition marginal at the end.
+Round 1 measured smoker again and moved the model by one record, less than the penalty, so AIM annealed. Rounds 2 and 3 used twice the selection budget and half the noise. They selected the two marginals with the strongest remaining dependencies, and workload error fell by almost half. Round 4 measured exercise with condition and corrected that mismatch. Round 5 selected that pair again, made no new progress, and triggered annealing. Round 6, at four times the original budget, captured the dependence between age and condition, the last large error. Round 7 used @eq-final to spend the remaining budget and refined a marginal that was already close. Error fell from $0.141$ to $0.053$, and @tbl-final shows the final smoker-and-condition marginal.
 
 | smoker | true: no condition | true: condition | final model: no condition | final model: condition |
 |:---|---:|---:|---:|---:|
@@ -370,7 +370,7 @@ Round 1 measured smoker again and moved the model by one record, far below the p
 
 : The marginal over smoker and condition in the toy dataset and in AIM's final model. Compare @tbl-init, the model before any two-way marginal was measured. {#tbl-final}
 
-On this toy workload, a simpler method does better. If you measure all six marginals directly with the whole budget, at noise level $\sigma = 11.1$, and fit the model to them, the workload error is $0.035$, against AIM's $0.053$. The budget covers six marginals, and none is redundant, so the selection budget is wasted. AIM's advantage is on real workloads, where hundreds of marginals compete for the budget and a few others nearly imply most of them.
+On this toy workload, directly measuring all six marginals and fitting the model gives lower error than AIM: $0.035$ rather than $0.053$, using the whole budget at noise level $\sigma = 11.1$. None of the six marginals is redundant, so spending part of the budget on selection provides no benefit. AIM is designed for real workloads, where hundreds of marginals compete for the budget and a few can nearly determine many others.
 
 # Why AIM keeps its promise {#sec-privacy}
 

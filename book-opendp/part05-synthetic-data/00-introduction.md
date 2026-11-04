@@ -1,8 +1,8 @@
 # Synthetic data
 
-The last part releases a dataset instead of a statistic. A synthetic dataset is a table of made-up rows whose statistics match those of the real table as closely as a privacy budget allows. OpenDP makes one in two steps. First it releases a contingency table, which holds the noisy counts of every combination of a few columns at a time. Then it fits a model to those noisy marginals and samples rows from it, which is post-processing and costs no more budget.
+This part releases a dataset rather than a statistic. A synthetic dataset contains generated rows with statistics that approximate the real data, subject to a privacy budget. OpenDP first releases a contingency table of noisy counts for combinations of columns. It then fits a model to the noisy marginals and samples rows, a post-processing step that uses no additional budget.
 
-The thread of the part is that two choices decide the quality of the synthetic data: which marginals you measure, and how you split the budget among them. [Contingency tables](16-contingency-tables.md) releases the marginals of a fixed workload with the `Fixed` algorithm. It explains keys, cuts and thresholds, and the `ContingencyTable` object with its error estimates. [Synthetic data with AIM and MST](17-aim-and-mst.md) lets the library choose the marginals, one round at a time with AIM or along a spanning tree with MST, and generates the rows. [Evaluating and tuning synthetic data](18-evaluating-synthetic-data.md) compares the result with the real data on the marginals, on a query outside the workload and on a downstream model. It also shows how the budget and the workload change the result.
+Synthetic-data quality depends on the measured marginals and budget allocation. [Contingency tables](16-contingency-tables.md) releases fixed-workload marginals with the `Fixed` algorithm and explains keys, cuts, thresholds and `ContingencyTable` error estimates. [Synthetic data with AIM and MST](17-aim-and-mst.md) selects marginals iteratively with AIM or along a spanning tree with MST, then generates rows. [Evaluating and tuning synthetic data](18-evaluating-synthetic-data.md) compares synthetic and real data on measured marginals, an unmeasured query and a downstream model, and examines how the budget and workload affect accuracy.
 
 | Chapter | Question it answers |
 | --- | --- |
@@ -12,4 +12,4 @@ The thread of the part is that two choices decide the quality of the synthetic d
 
 : The chapters of this part and the questions they answer. {#tbl-p5-chapters}
 
-At the end of this part you can generate a private synthetic copy of a table, state its guarantee, and measure how far it is from the original.
+By the end of this part, you can generate a private synthetic dataset, state its guarantee and measure its differences from the source data.

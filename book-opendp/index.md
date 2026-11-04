@@ -1,19 +1,19 @@
 # Preface {.unnumbered}
 
-This book teaches the OpenDP library, from installing it and releasing one noisy number to generating a synthetic copy of a dataset. OpenDP is a library for differential privacy (DP), the guarantee that a release reveals almost nothing about any one person in the data. The library's documentation is a reference, organized by what the library contains. This book is a course, organized by what you learn next, and it follows the documentation closely enough that every chapter names the pages it covers, so you can read the two side by side.
+This book teaches the OpenDP library, from installation and a first noisy release to synthetic data generation. OpenDP implements differential privacy (DP), a guarantee that limits how much a release reveals about any one person. The documentation is organized by library components; this book is organized by learning sequence. Each chapter identifies the documentation pages it covers so readers can consult both.
 
-Every piece of code here has been run. A chapter is built around one script in the repository's `code/` directory, which a test runs and checks against every number the chapter quotes. A short block on a page is either a snippet that runs on its own or an excerpt of that script, so the code you read is the code that produced the output next to it. OpenDP draws its noise from a cryptographic generator that cannot be seeded, so a released value is different on every run. A chapter therefore quotes the numbers that are the same on every run, such as noise scales, error bars and thresholds, and shows released values in a block marked as one run.
+All code has been run. Each chapter uses a script in the repository's `code/` directory; tests check every number quoted in the text. Short code blocks are executable snippets or excerpts from the chapter script. OpenDP uses an unseeded cryptographic generator for noise, so releases vary between runs. Chapters quote reproducible values, such as noise scales, error bars and thresholds, and label sample releases as single runs.
 
-One dataset runs through the book: the sample of the French Labour Force Survey (LFS) that the OpenDP documentation uses in its own tutorials, about 3.8 million quarterly survey responses from 1.7 million people. Each chapter releases something new about it, so by the end you will have counted, summed, grouped, bounded and modelled it, and finally replaced it with a synthetic table.
+The book uses the French Labour Force Survey (LFS) sample from the OpenDP tutorials, with about 3.8 million quarterly responses from 1.7 million people. Chapters count, sum, group, bound and model the data, then generate a synthetic table.
 
-You need Python and enough NumPy or Polars to read a short query. You do not need to know differential privacy already. Each chapter says in a sentence what the results it uses mean, and links to [the full edition](../book-full/index.md) of *Privacy-Preserving Machine Learning* for their derivations, which this book never repeats.
+Readers need Python and basic familiarity with NumPy or Polars, but no prior knowledge of differential privacy. Each chapter defines the results it uses and links to [the full edition](../book-full/index.md) of *Privacy-Preserving Machine Learning* for derivations.
 
 ## How this book is organized {.unnumbered}
 
-1. **Getting started** installs the library, releases a first number, and sets up the context that mediates every later query to the data.
-2. **Tabular data** releases counts, sums, means, quantiles and grouped tables with Polars, bounds what one person can contribute, prepares the data inside the privacy guarantee, and reads error bars.
-3. **The framework** opens the box: domains, metrics and measures, transformations and measurements, how they chain and compose, and the utilities that search for parameters.
-4. **Extending the library** writes new transformations and measurements as plugins, fits regression and principal component models, and knows what the library does not promise.
-5. **Synthetic data** releases contingency tables and generates synthetic microdata with the AIM and MST algorithms, then measures how good the copy is.
+1. **Getting started** installs the library, releases a first number and creates a context for later queries.
+2. **Tabular data** releases statistics and grouped tables with Polars, bounds contributions, prepares data within the guarantee and interprets error bars.
+3. **The framework** defines domains, metrics, measures, transformations and measurements; explains chaining and composition; and covers parameter-search utilities.
+4. **Extending the library** implements transformations and measurements as plugins, fits regression and principal component models, and describes OpenDP's limitations.
+5. **Synthetic data** releases contingency tables, generates synthetic microdata with AIM and MST, and evaluates the results.
 
-The code runs on OpenDP 0.16.0 with Polars 1.36.1, pinned in the repository so that every number stays reproducible. To rerun a chapter, run `uv run python code/<part>/opendp_<topic>.py` from the repository's root.
+The repository pins OpenDP 0.16.0 and Polars 1.36.1. Rerun a chapter from the repository root with `uv run python code/<part>/opendp_<topic>.py`.

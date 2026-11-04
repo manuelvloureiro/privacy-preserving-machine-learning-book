@@ -5,7 +5,7 @@ abstract: |
   A bank's outside agency wants either a targeting model or the customer table itself, and the bank's policy requires differential privacy (DP) for anything that leaves. Someone other than the engineer has to choose how much privacy to buy and what to release. This note works through that choice on a public dataset, from a business count and a sentence a privacy officer can sign to one decision between a private model and a private synthetic table.
 ---
 
-How strict should a differential privacy (DP) guarantee be, what form should the private release take, and who decides? This note answers these questions for one use case, a bank's credit-card campaign, and ends with a decision that the people who own the risk and the revenue sign. You need basic probability to follow it, such as odds, averages and percentiles. @tbl-map gives the question each section answers, and @tbl-symbols lists the symbols.
+How strict should a differential privacy (DP) guarantee be, what form should a private release take, and who decides? This note answers these questions for a bank's credit-card campaign and ends with a decision signed by the people responsible for its risks and revenue. You need basic probability, including odds, averages and percentiles. @tbl-map lists each section's question, and @tbl-symbols defines the notation.
 
 | Section | The question it answers |
 |:---|:---|
@@ -57,7 +57,7 @@ uv run python code/notes/privacy_utility_tradeoff_synthetic.py
 
 # Step 1: state the business goal as counts {#sec-goal}
 
-Engineers usually measure a model by its accuracy or its area under the curve (AUC), and a synthetic table by how closely its statistics match the records. Neither tells the marketing team what it will get. The team cares about how many offers reach eligible customers, so this step fixes the number of offers and counts how many land well.
+Engineers usually measure a model by its accuracy or area under the curve (AUC), and a synthetic table by how closely its statistics match the records. Neither measure directly tells the marketing team how many eligible customers an offer campaign will reach. This step fixes the number of offers and counts the eligible customers among recipients.
 
 The bank can choose the number of offers from public data. The Census Bureau publishes the share of people who earn more than $50,000, about 24% in Adult. If the bank sends as many offers as it expects eligible customers, a perfect model wastes none. For the 16,281 campaign customers this rule gives 3,846 offers, the number of eligible customers among them, when the published share holds for the bank.
 
@@ -70,7 +70,7 @@ def reached(scores: Array, y: npt.NDArray[np.int64], offers: int) -> int:
     return int(y[top].sum())
 ```
 
-The metric needs a baseline, and the natural one is no model at all. If the bank sent the offers to customers picked at random, each would reach an eligible customer with probability 3,846 / 16,281, about 24%. So the expected number reached would be
+Use random selection as the baseline. If the bank sent the offers to customers picked at random, each would reach an eligible customer with probability 3,846 / 16,281, about 24%. The expected number reached would be
 
 $$3{,}846 \times \frac{3{,}846}{16{,}281} \approx 909.$$
 
@@ -123,7 +123,7 @@ The privacy officer signs this sentence, and in our use case they choose a ceili
 
 $$\frac{e^{\varepsilon}}{1+e^{\varepsilon}} \le 0.75 \quad\Longleftrightarrow\quad e^{\varepsilon} \le 3 \quad\Longleftrightarrow\quad \varepsilon \le \ln 3 \approx 1.10.$$
 
-The scripts hold both directions of this translation. The first function labels the top axis of every figure below with the ceiling, and `epsilon_for_belief(0.75)` returns the policy's limit of 1.10:
+The scripts convert between $\varepsilon$ and the belief ceiling. `belief_ceiling` labels the top axis of each figure, and `epsilon_for_belief(0.75)` returns the policy's limit of 1.10:
 
 ```{.python excerpt="put-belief"}
 def belief_ceiling(eps: float, prior: float = 0.5) -> float:
@@ -137,13 +137,13 @@ def epsilon_for_belief(belief: float, prior: float = 0.5) -> float:
     return math.log((belief / (1 - belief)) / (prior / (1 - prior)))
 ```
 
-The officer fixes the ceiling before anyone sees the results, because a ceiling chosen afterwards would drift to wherever the release does well. Both routes also have a second parameter, $\delta$, the small probability that the guarantee fails outright. A common rule sets $\delta$ below one over the number of people, so that the guarantee is not expected to fail for anyone. For 32,561 customers this gives $\delta = 10^{-5}$, and we use that value throughout.
+The officer fixes the ceiling before anyone sees the results. Choosing it afterwards would bias the policy toward a release that performs well. Both routes also use $\delta$, the small probability that the guarantee fails outright. A common rule sets $\delta$ below one over the number of people, so that the guarantee is not expected to fail for anyone. For 32,561 customers this gives $\delta = 10^{-5}$, which we use throughout.
 
 # Step 3: fix everything that must not be tuned on private data {#sec-fixed}
 
-A DP guarantee covers what the training run or the generator does with the data, but not choices made earlier by looking at it. If an engineer tried twenty settings on the customer records and kept the best one, that choice would itself leak information. So every choice outside the private run comes from public information.
+A DP guarantee covers data access during training or generation, but not choices made after examining the records outside that private computation. For example, trying twenty settings on the customer records and keeping the best one would itself leak information. Every choice outside the private run must therefore use public information.
 
-For the model route, the preprocessing comes from the survey's public codebook, not from the data. It scales ages within 17 to 90 and years of education within 1 to 16. It scales weekly hours within 1 to 99, and capital gains and losses on a log scale up to the survey's published cap of 99,999. Each category, such as an occupation, becomes a 0-or-1 column taken from the codebook's list. So every customer's row lies in a known range, which DP needs, because that range bounds how much one customer can change the training.
+For the model route, the preprocessing comes from the survey's public codebook, not from the data. It scales ages within 17 to 90 and years of education within 1 to 16. It scales weekly hours within 1 to 99, and capital gains and losses on a log scale up to the survey's published cap of 99,999. Each category, such as an occupation, becomes a 0-or-1 column from the codebook's list. Every customer's row therefore lies in a known range. DP needs this range to bound how much one customer can change the training.
 
 The preprocessing function reads only these public ranges and lists, never a statistic of the data:
 
@@ -236,7 +236,7 @@ with ProcessPoolExecutor(max_workers=WORKERS, initializer=_init, initargs=(data,
 
 ![Model quality against the privacy setting. Each line is a DP technique, averaged over 20 seeds, with its 10th–90th percentile band; each dashed line is the same model trained without DP.](figures/technical.svg){#fig-technical}
 
-DP-SGD is better than naive Bayes at every privacy level except the smallest, $\varepsilon = 0.01$, where the two are almost tied, so naive Bayes can be dropped. DP-SGD's curve is also flat over most of the range, so from about $\varepsilon = 0.3$ upwards it is almost as good as the model trained without DP. Its quality only falls away below $\varepsilon \approx 0.1$, where the attacker's ceiling is already within a few points of 50%.
+DP-SGD reaches higher AUC than naive Bayes at every privacy level except $\varepsilon = 0.01$, where their results are nearly tied. Naive Bayes therefore adds little at the other levels. DP-SGD's AUC changes little over most of the range; above about $\varepsilon = 0.3$, it nearly matches the model trained without DP. Its AUC declines below $\varepsilon \approx 0.1$, where the attacker's belief ceiling is already within a few percentage points of 50%.
 
 @fig-business shows them in the bank's terms. Its vertical axis is the number of eligible customers reached by the 3,846 offers. The upper dashed line is the best model without DP, the dotted line is no model at all, and the shaded region on the right is what the privacy policy forbids.
 
@@ -267,7 +267,7 @@ The flat curve in @fig-business depends on the bank having many customers. DP hi
 
 ![Eligible customers reached by DP-SGD trained on 2,000, 8,000 and 32,561 customers. Each dashed line is the same size without DP.](figures/sizes.svg){#fig-sizes}
 
-With fewer customers the curve bends down at a larger $\varepsilon$, and the gap to the model without DP is wider at every setting, as @tbl-sizes shows in numbers. For the smallest base the gap stays open even at $\varepsilon = 10$, where the noise is negligible. That part of the cost comes from the clipping settings, which suit the full dataset. So a bank in that position would first tune them on public or synthetic data. For a business this is often the most useful finding. It says whether the guarantee is cheap for this dataset, and whether more data would make a stricter policy affordable.
+With fewer customers, performance falls at larger $\varepsilon$, and the gap from the model without DP is wider at every setting, as @tbl-sizes shows. For the smallest dataset, a gap remains even at $\varepsilon = 10$, where noise is negligible. The clipping settings were chosen for the full dataset, so they contribute to this gap. A bank with fewer customers should first tune them on public or synthetic data. This comparison shows whether the guarantee is affordable for the dataset and whether more data would make a stricter policy feasible.
 
 {{< include figures/_sizes.md >}}
 
@@ -275,7 +275,7 @@ With fewer customers the curve bends down at a larger $\varepsilon$, and the gap
 
 ## Give the generators a privacy budget {#sec-syn-budget}
 
-The generators of this route add Gaussian noise many times over, and the natural way to add up Gaussian noise is not in $\varepsilon$. So each Gaussian measurement is accounted in *zero-concentrated differential privacy* (zCDP), which has one parameter, the budget $\rho$, and in which the costs of measurements simply add. Write $\sigma$ for the standard deviation of the noise added to a count that one customer changes by one. That measurement costs $\rho = 1 / (2\sigma^2)$, and two measurements cost the sum of their $\rho$.
+The generators add Gaussian noise repeatedly, and $\varepsilon$ does not compose those measurements tightly. Instead, each measurement is accounted for in *zero-concentrated differential privacy* (zCDP). Its budget $\rho$ has a single parameter, and measurement costs add. Let $\sigma$ be the standard deviation of noise added to a count that one customer can change by one. The measurement costs $\rho = 1 / (2\sigma^2)$, and the costs of multiple measurements sum.
 
 A total budget $\rho$ converts to $(\varepsilon, \delta)$ by a formula that gives the smallest $\delta$ for each $\varepsilon$. The script runs that conversion backwards, by bisection, and finds the largest $\rho$ that the policy's $\varepsilon$ and $\delta$ allow:
 
@@ -441,7 +441,7 @@ A measured table carries noise of a fixed size whatever the number of customers,
 
 ![Eligible customers reached by the campaign with an AIM table generated from 2,000, 8,000 and 32,561 customer records. Each dashed line is the agency's model trained on the real records of that size.](figures/synthetic/sizes.svg){#fig-syn-sizes}
 
-Fewer records cost more at the smallest budget. At $\varepsilon = 0.1$ AIM's table misses 784 eligible customers when it comes from 2,000 records, 709 from 8,000 and 388 from all 32,561, as @tbl-syn-sizes shows. At larger budgets the pattern is less clear, because the smaller sizes ran with two seeds each, and one run can be far from the average. The 767 missed at 8,000 records and $\varepsilon = 1$, more than the 460 at 2,000, is that kind of noise. So a bank with a few thousand customers should expect to pay about twice as much for the same guarantee, and it should run the sweep at its own size before it promises anything.
+Fewer records reduce campaign performance most at the smallest budget. At $\varepsilon = 0.1$, AIM's table misses 784 eligible customers with 2,000 training records, 709 with 8,000 and 388 with all 32,561, as @tbl-syn-sizes shows. Results at larger budgets are less certain because the smaller datasets used only two seeds each. For example, the run with 8,000 records misses 767 customers at $\varepsilon = 1$, compared with 460 for 2,000 records; this reversal may reflect variation between runs. A bank with only a few thousand customers should run the experiment at its own data size before committing to a guarantee.
 
 {{< include figures/synthetic/_sizes.md >}}
 

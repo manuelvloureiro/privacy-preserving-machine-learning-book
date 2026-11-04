@@ -1,10 +1,10 @@
 # Evaluating and tuning synthetic data
 
-[Synthetic data with AIM and MST](17-aim-and-mst.md) ended with a synthetic table and a privacy statement. The statement says how little the table reveals about any one person, but nothing about whether the table is any good. The one idea of this chapter is that "good" is three separate questions, and only the release itself can answer the first. You will compare an AIM release with the real data on the marginals it measured, on a table it never measured, and through a classifier trained on its rows. Then you will repeat the comparison at three budgets and for MST, and write down what to publish with the rows.
+[Synthetic data with AIM and MST](17-aim-and-mst.md) produced a synthetic table and privacy statement. The statement describes privacy, not data quality. This chapter evaluates quality in three ways: compare measured marginals with the real data, test an unmeasured table, and train a classifier on synthetic rows and test it on real rows. It repeats these checks at three budgets and with MST, then lists what to publish with the data.
 
-The documentation stops once the rows are generated, so this chapter goes further, with methods from the AIM paper and a benchmark of synthetic-data generators. The comparison is possible only because the Labour Force Survey (LFS) sample is public. On private data, run the same comparison on a public or historical stand-in before the release, never on the data you protect.
+The documentation ends after generating rows. This chapter adds evaluation methods from the AIM paper and a benchmark of synthetic-data generators. The Labour Force Survey (LFS) sample is public, so it can be compared with its source. For private data, use a public or historical stand-in, never the data being protected.
 
-The script [opendp_evaluating_synthetic_data.py](../../code/part05-synthetic-data/opendp_evaluating_synthetic_data.py) runs every step on OpenDP 0.16.0 with `mbi` 1.1.0, and imports the functions it shares with the script of the previous chapter. The budgets, noise scales, thresholds, conversions to the privacy parameter $\varepsilon$ and the classifier trained on real rows are the same on every run. OpenDP's noise cannot be seeded, so the releases, the fitted models and every distance to the truth change. The page shows them in blocks and tables marked as one run. The whole script, with four releases, took 55 seconds.
+The script [opendp_evaluating_synthetic_data.py](../../code/part05-synthetic-data/opendp_evaluating_synthetic_data.py) runs on OpenDP 0.16.0 and `mbi` 1.1.0, reusing functions from the previous chapter's script. Budgets, scales, thresholds, conversions to $\varepsilon$ and the classifier trained on real data are deterministic. OpenDP's noise cannot be seeded, so releases, fitted models and distances vary; the page labels them as one run. Four releases took 55 seconds.
 
 ```bash
 uv run python code/part05-synthetic-data/opendp_evaluating_synthetic_data.py
@@ -12,11 +12,11 @@ uv run python code/part05-synthetic-data/opendp_evaluating_synthetic_data.py
 
 ## What good means {#sec-eval-good}
 
-A synthetic table can be judged by three questions, the checks of the benchmark by Tao and coauthors. Do the marginals that the algorithm measured match the real ones? Do queries it never measured come out right, such as a count over all four columns or a share within a small group? And does a model trained on the synthetic rows work on real rows? Each check catches failures that the other two miss.
+The benchmark by Tao and coauthors evaluates synthetic data with three questions. Do measured marginals match the real ones? Do unmeasured queries, such as a count over all four columns or a share in a small group, remain accurate? Does a model trained on synthetic rows work on real rows? Each test can reveal failures missed by the others.
 
-Only the first question has an error bar from the release. Every measured marginal carried Gaussian noise of a known scale, so the `std` method of the table says how far its fitted counts should be from the truth ([Contingency tables](16-contingency-tables.md)). A table that no measurement covers has no such bar, and `std` refuses it, and a downstream model has none either. So you can answer the second and third questions only against real data. On a real release, that means public or historical data of the same kind ([the full edition's chapter on public data](../../book-full/part05-dp-ml/06-public-data.md)).
+Only measured marginals have release-based error bars. Their known Gaussian scales let the table's `std` method estimate how far fitted counts may be from truth ([Contingency tables](16-contingency-tables.md)). Unmeasured tables have no such bar, and neither do downstream models. Evaluate the second and third questions against real data. For private releases, use public or historical data of the same kind ([the full edition's chapter on public data](../../book-full/part05-dp-ml/06-public-data.md)).
 
-The release under evaluation is the AIM release of the previous chapter with its nulls filled. It has the same privacy unit of 36 contributions ([the data and the context](../part01-getting-started/02-the-data-and-the-context.md#sec-ctx-context)), the same four columns with their keys and cuts, and ten rounds. The budget is a privacy parameter $\rho$ of 0.1 under zero-concentrated differential privacy (zCDP), which bounds the privacy loss on average, with Gaussian noise. A slack $\delta$ of $10^{-7}$ pays for releasing the keys of `ILOSTAT`. Two functions build the context and the query from a budget, so that later sections can change it.
+The evaluation uses the previous chapter's AIM release with nulls filled. It uses the same 36-contribution privacy unit ([The data and the context](../part01-getting-started/02-the-data-and-the-context.md#sec-ctx-context)), four columns, keys and cuts, and ten rounds. The budget is a privacy parameter $\rho$ of 0.1 under zero-concentrated differential privacy (zCDP), with Gaussian noise; a slack $\delta$ of $10^{-7}$ pays for selecting `ILOSTAT` keys. Two functions build the context and query so later sections can vary the budget.
 
 ```{.python excerpt="eval-context"}
 def make_context(frame: pl.LazyFrame, rho: float) -> dp.Context:
@@ -38,7 +38,7 @@ def table_query(context: dp.Context, rho: float, algorithm: Algorithm) -> Contin
     )
 ```
 
-The release is one line. The next line puts the real rows through the same steps as the query, filling the nulls, cutting the numbers into bins and mapping codes outside the keys to null. So every real marginal has exactly the cells of the synthetic one.
+The first line releases the table. The next applies the same preparation to real rows: fill nulls, bin numeric values and map codes outside the keys to null. Thus real and synthetic marginals have identical cells.
 
 ```{.python excerpt="eval-release"}
 aim_query = table_query(make_context(frame, RHO), RHO, dp.mbi.AIM(rounds=ROUNDS))
@@ -59,13 +59,13 @@ aim rho=0.1 measured: ('SEX', 'AGE', 'ILOSTAT') std=379.47
 aim rho=0.1 measured: ('SEX', 'ILOSTAT') std=189.74
 ```
 
-The query is that of the previous chapter, so the scales are too, 227.68 for the one-way marginals and 379.47 for the marginal of each round. At a further $\delta$ of $10^{-7}$, the budget converts to $\varepsilon = 2.35$. In this run AIM measured all four three-way marginals and then a pair at half the scale.
+The query and scales match the previous chapter: 227.68 for one-way marginals and 379.47 for each round's marginal. At a further $\delta$ of $10^{-7}$, the budget converts to $\varepsilon = 2.35$. In this run, AIM measured all four three-way marginals and then a pair at half the scale.
 
 ## The workload error {#sec-eval-workload}
 
-The first question asks how far each measured marginal of the model is from the real one. The AIM paper calls the average of that distance over a workload the **workload error**, which AIM itself tries to make small. The distance is the total variation distance of the previous chapter, half the sum over cells of the absolute differences between the shares. It is also the largest difference between the shares that the two tables give to any set of cells. So the worst distance below, 0.00102, means that no question about those columns gets a share off by more than that.
+The first test measures each released marginal's distance from the real one. The AIM paper calls the workload-average distance the **workload error**, which AIM seeks to minimize. This is total variation distance: half the sum of absolute differences between cell shares. Equivalently, it is the largest share difference assigned to any set of cells. The worst distance below, 0.00102, bounds the share error for every query over those columns.
 
-The function below computes it for a list of cliques, the sets of columns that the marginals span. It reads the counts of the model with `project_melted` instead of drawing rows, because drawing rows adds noise of its own (@sec-eval-rows). Next to each distance it puts the bound of the previous chapter, the distance if every cell of the marginal were off by three standard deviations at once.
+The function computes this distance for a list of cliques, the column sets covered by the marginals. It reads model counts with `project_melted` rather than drawing rows, which would add sampling noise (@sec-eval-rows). It also reports the previous chapter's bound: the distance if every marginal cell were three standard deviations from truth.
 
 ```{.python excerpt="eval-errors"}
 def marginal_errors(
@@ -97,13 +97,13 @@ def marginal_errors(
 
 : The workload error of the AIM release at ρ = 0.1 in one run: the total variation distance between each one-way and each measured marginal of the model and the real one, the largest cell error, the table's own standard deviation, and the bound from it. {#tbl-eval-workload}
 
-Every distance is under its bound by a factor of three or more, and no cell is off by more than a few hundred rows out of 3.8 million. The one-way standard deviations are not the one-way scale of 227.68, because the model combines each one-way measurement with every measured marginal that contains the column. That is why `ILOSTAT`, which sits in four marginals, gets 201.0.
+Every distance is at least three times below its bound, and no cell differs by more than a few hundred of 3.8 million rows. One-way standard deviations are smaller than the 227.68 one-way scale because the model combines each one-way measurement with all measured marginals containing that column. Thus `ILOSTAT`, which appears in four marginals, has standard deviation 201.0.
 
-Read the table as a check of the pipeline, not only of the noise. A distance over its bound means something systematic, such as the nulls of the previous chapter. On private data you cannot fill in this table, because it needs the real marginals. You can fill in the `std` column, which comes from the release, and that is the error bar you publish.
+Use this table to check the pipeline as well as the noise. A distance above its bound signals a systematic problem, such as the null handling in the previous chapter. Private data cannot supply the true marginals needed for these distances. The release does supply the `std` column, which provides the publishable error bars.
 
 ## A query nobody measured {#sec-eval-unmeasured}
 
-The second question asks about a table that no measurement covers. The candidates of AIM have at most three columns, so it never measures the four-way table of `SEX`, `AGE`, `HWUSUAL` and `ILOSTAT`, whose 240 cells hold every combination. The model still answers, with the distribution that agrees with the measured marginals and assumes nothing else ([the full edition's chapter on query release](../../book-full/part03-dp-foundations/06-query-release.md)). But the table can no longer put a bar on the answer.
+The second test concerns an unmeasured table. AIM considers marginals of at most three columns, so it never measures the 240-cell table over `SEX`, `AGE`, `HWUSUAL` and `ILOSTAT`. The model can still answer the query using a distribution that matches measured marginals and assumes no further relationships ([the full edition's chapter on query release](../../book-full/part03-dp-foundations/06-query-release.md)). But the release provides no error bar for this answer.
 
 ```{.python excerpt="eval-unmeasured"}
 try:
@@ -120,15 +120,15 @@ cells of the share with at least 1,000 real rows: 26
 share working by SEX, AGE, HWUSUAL (aim rho=0.1, one run): largest error=2.05 points at {'SEX': 1, 'AGE': '(-inf, 20.0]', 'HWUSUAL': '(1.0, 20.0]'}  real=100.00%  model=97.95%
 ```
 
-In this run the four-way table is further from the truth than every measured marginal. Its error comes from the noise of the triples that make it up, and from any dependence of all four columns that no triple shows. Here the four measured triples overlap so much that little is left to guess, so the distance stays near the worst measured one. A release with fewer marginals leaves more to the assumptions of the model, as @sec-eval-tuning shows for MST.
+Here the four-way table is farther from truth than any measured marginal. Its error reflects noise in the measured triples and four-column dependence that no triple captures. The four measured triples overlap heavily, leaving little for the model to infer; therefore, the four-way distance stays near the worst measured distance. A release with fewer marginals relies more on model assumptions, as the MST results in @sec-eval-tuning show.
 
-A conditional share is a harder test, because it divides one small count by another. From the four-way table, the script reads the share of people at work in the 26 combinations of `SEX`, `AGE` band and `HWUSUAL` band with a thousand real rows or more. The largest error in this run was two points, for men under 20 who usually work 1 to 20 hours. Everyone in that cell works, since usual hours imply a job, but the model gave it a share of 97.95%. Noise is added per count, not per person, so a small group gets the largest relative error. If an analyst will ask about small groups, measure them, for example with `Fixed` inside `Sequential`.
+Conditional shares are harder to estimate because they divide one count by another. From the four-way table, the script computes the employment share in 26 combinations of `SEX`, `AGE` band and `HWUSUAL` band with at least a thousand real rows. The largest error here is two percentage points for men under 20 who usually work 1 to 20 hours. All people in this cell work, but the model estimates a share of 97.95%. Noise is added to counts, not individuals, so small groups have larger relative errors. If analysts need small-group estimates, measure those groups, for example with `Fixed` inside `Sequential`.
 
 ## Train on synthetic, test on real {#sec-eval-downstream}
 
-The third question is whether a model trained on the synthetic rows works on real rows, which the benchmark calls "train on synthetic, test on real". The task is to predict whether a person works, `ILOSTAT` equal to 1, from `SEX`, the `AGE` band and the `HWUSUAL` band. The model is a logistic regression from scikit-learn on eleven indicator columns, one per key of each feature.
+The third test asks whether a model trained on synthetic rows performs on real rows, the benchmark's "train on synthetic, test on real" task. The classifier predicts whether `ILOSTAT` equals 1 from `SEX`, `AGE` band and `HWUSUAL` band. It is a scikit-learn logistic regression with eleven indicator columns, one for each feature key.
 
-The script draws 200,000 synthetic rows with `method="sample"`, independently from the model, as a sample from the population would be. It also takes 400,000 real rows in one seeded Polars shuffle. The first 200,000 train the yardstick, a model on real rows, and the rest score both models.
+The script draws 200,000 synthetic rows independently with `method="sample"`. It also shuffles 400,000 real rows with a fixed seed. The first 200,000 train a real-data baseline; the remaining rows test both models.
 
 ```{.python excerpt="eval-synthesize"}
 rows = synth.synthesize(table, seed, rows=ROWS, method="sample")  # independent draws from the model
@@ -157,13 +157,13 @@ standard error of an accuracy on 200,000 rows: 0.0006
 train on synthetic (aim rho=0.1, one run), test on real: accuracy=0.9313  gap=+0.0000  mean probability difference=0.0015
 ```
 
-The model trained on real rows labels 93.13% of the held-out rows correctly, against 39.76% working. The model trained on synthetic rows scored the same in this run, so the gap is zero, well inside the standard error of 0.0006. The test allows a gap of one percentage point, the size of gap that a model would show if it got a few small cells wrong.
+The real-data model classifies 93.13% of held-out rows correctly, while 39.76% of those rows are working. In this run, the synthetic-data model has the same accuracy, so the gap is zero and well within the 0.0006 standard error. The test allows a one-percentage-point gap, which could result from errors in a few small cells.
 
-But accuracy is a coarse check, because two models that put the probability of every cell on the same side of one half make the same predictions. So the script also reports the mean difference between the predicted probabilities of the two models, 0.0015 in this run. For a single model, fitting it privately and directly ([Statistical modelling](../part04-extending/14-statistical-modelling.md)) is often better than training on synthetic rows.
+Accuracy is coarse: models make identical predictions whenever each cell's probability remains on the same side of one half. The script therefore also reports the models' mean predicted-probability difference, 0.0015 in this run. For a single model, direct private fitting ([Statistical modelling](../part04-extending/14-statistical-modelling.md)) is often preferable to training on synthetic data.
 
 ## What the budget and the algorithm buy {#sec-eval-tuning}
 
-Tuning means running the evaluation under different settings and choosing between them. The script repeats it with AIM at a fifth of the budget, $\rho = 0.02$, and at five times it, $\rho = 0.5$, then runs MST at the original budget. Each release gets a context of its own, because you would publish only one of them. Released from the same private data, the four would compose to $\rho = 0.72$, so tuning on private data spends budget too. Tune on a public stand-in, and release once.
+Tuning compares evaluation results across settings. The script runs AIM with one-fifth the budget, $\rho = 0.02$, and five times the budget, $\rho = 0.5$, then runs MST at the original budget. Each release has its own context because only one would be published. If all four used the same private data, they would compose to $\rho = 0.72$. Tuning on private data therefore spends budget; tune on a public stand-in and release once.
 
 ```{.python excerpt="eval-mst"}
 mst_query = table_query(make_context(frame, RHO), RHO, dp.mbi.MST())
@@ -182,7 +182,7 @@ share working by SEX, AGE, HWUSUAL (mst rho=0.1, one run): largest error=24.03 p
 budget the four contexts add up to if all were released from the same data: rho=0.72
 ```
 
-The scales follow the formula of the previous chapter, the sensitivity of 36 over the square root of twice the budget. So twenty-five times the budget divides every scale by five, from 509.12 to 101.82 for the one-way marginals. In $\varepsilon$, the smallest budget is 1.00 and the largest 5.67 ([the full edition's chapter on choosing epsilon](../../book-full/part05-dp-ml/09-choosing-epsilon.md) discusses which a release can defend).
+The previous chapter's scale formula uses sensitivity 36 divided by the square root of twice the budget. A 25-fold budget increase therefore divides each scale by five; one-way scales fall from 509.12 to 101.82. The smallest budget converts to $\varepsilon$ of 1.00 and the largest to 5.67 ([the full edition's chapter on choosing epsilon](../../book-full/part05-dp-ml/09-choosing-epsilon.md) discusses defensible choices).
 
 | Release | $\varepsilon$ | Seconds | Measured | One-way mean | Worst measured | Four-way | Share error (points) | Probability difference |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- |
@@ -193,17 +193,17 @@ The scales follow the formula of the previous chapter, the sensitivity of 36 ove
 
 : The same evaluation at three budgets with AIM and at one with MST, in one run: ε at δ = 10⁻⁷, the seconds the release took, the number of marginals measured, the total variation distances of the one-way marginals (mean), of the worst measured marginal and of the four-way table, the largest error of the share working, and the mean difference in predicted probability from the model trained on real rows. {#tbl-eval-tuning}
 
-The budget buys accuracy everywhere, but not evenly. Across the three budgets, the worst measured marginal and the four-way table improve steadily, though less than the scales shrink. The one-way marginals, already close at $\rho = 0.1$, improve least. The share error falls fastest at the low end, from 15.64 points to 2.05, because small groups are the first to drown in noise. A larger budget also lets AIM measure more marginals, four, five and six in this run. All four classifiers scored the same accuracy of 0.9313, so for this task the budget makes no visible difference.
+Larger budgets improve accuracy, but not uniformly. The worst measured marginal and four-way table improve across all three budgets, though less than the scales do. One-way marginals, already accurate at $\rho = 0.1$, improve least. Share error falls most at the low end, from 15.64 to 2.05 points, because noise affects small groups first. With more budget, AIM also measures more marginals: four, five and six in this run. All four classifiers have accuracy 0.9313, so budget changes are not visible in this task.
 
-The algorithm changes more than the budget does. MST measures three pairs, all with `ILOSTAT` in this run, so it treats `SEX`, `AGE` and `HWUSUAL` as independent once employment status is known. That is false, since hours depend on sex and age among those who work. So its four-way table is tens of times further from the truth than that of AIM at the same budget.
+The algorithm also matters. Here MST measures three pairs, each containing `ILOSTAT`. It therefore treats `SEX`, `AGE` and `HWUSUAL` as independent given employment status. This is false: among working people, hours depend on sex and age. As a result, MST's four-way table is tens of times farther from truth than AIM's at the same budget.
 
-The share error of MST reaches 24 points, for women under 20 who report at most one usual hour. The predicted probabilities move by 0.028 on average, but the accuracy still does not change. MST is the better choice when the questions are about pairs and the release must be fast, 3.3 seconds against 13.7 for AIM in this run.
+MST's share error reaches 24 points for women under 20 who report at most one usual hour. Predicted probabilities differ by 0.028 on average, although accuracy is unchanged. Choose MST when pairwise queries suffice and release speed matters: it took 3.3 seconds, compared with 13.7 for AIM in this run.
 
-The cuts and the number of rounds are the other two settings. Finer cuts multiply the cells of every marginal, each with noise of the same scale, so the bound on each marginal grows. More rounds give each round a smaller share, so AIM measures more marginals, each less precisely.
+The other settings are bin cuts and number of rounds. Finer cuts increase the number of cells in every marginal without changing noise scale, raising each marginal's error bound. More rounds divide the budget into smaller shares, allowing AIM to measure more marginals at lower precision.
 
 ## How many rows, and how to draw them {#sec-eval-rows}
 
-The evaluation of the marginals read the model, not the rows, because drawing a fixed number of rows independently adds a sampling error to the error of the model. The script computes its expected size for each one-way marginal from the shares of the table, at 200,000 rows and at the size of the real table.
+The marginal evaluation reads the model rather than synthetic rows. Drawing a fixed number of independent rows adds sampling error to model error. The script estimates this error for each one-way marginal using the table's shares, for both 200,000 rows and the real dataset's size.
 
 ```text
 sampling noise on one-way SEX: expected tv at 200,000 rows=0.00090  at 3,811,932 rows=0.00021
@@ -216,13 +216,13 @@ mst rho=0.1 four-way tv (one run): model=0.05610  round=0.18410  sample=0.05791
 mst rho=0.1 pair ('AGE', 'HWUSUAL') tv (one run): model=0.01504  round=0.12370  sample=0.01261
 ```
 
-At 200,000 sampled rows the sampling error of `SEX` is many times the model error of @tbl-eval-workload, so the rows are much worse than the release. Even at the size of the real table the sampling error stays above the model error, because the privacy noise at this budget is small against 3.8 million rows.
+With 200,000 sampled rows, `SEX` sampling error is many times larger than the model error in @tbl-eval-workload, so the sample is less accurate than the release. Sampling error still exceeds model error at the real dataset's size because privacy noise at this budget is small relative to 3.8 million rows.
 
-The default `method="round"` avoids the sampling error, and for AIM its marginals matched those of the model in this run. But in `mbi` 1.1.0 it draws each column by the rank of a row within the group of its parent columns. So two columns with the same parents are sorted together, which ties them. The star of MST makes `AGE` and `HWUSUAL` such a pair, and rounding moved their marginal from 0.01504 to 0.12370, while sampling left it near the model. So sample when the joint distribution of the rows matters, and draw as many rows as the total of the model if the marginals must be close. Check the pairs before you trust rounded rows.
+The default `method="round"` avoids sampling error; in this run, AIM's rounded marginals match the model. In `mbi` 1.1.0, however, each column is drawn by a row's rank within its parent-column group. Columns with the same parents are therefore sorted together and become dependent. In MST's star, `AGE` and `HWUSUAL` share parents; rounding changes their marginal distance from 0.01504 to 0.12370, while sampling keeps it near the model. Use sampling when joint row distributions matter. If marginal accuracy matters, draw as many rows as the model's total. Check pairwise marginals before trusting rounded rows.
 
 ## What to publish {#sec-eval-publish}
 
-A synthetic dataset needs a statement of its guarantee and enough description for a user to judge what it can answer. [The practitioner edition's chapter on release and governance](../../book-practitioner/part05-dp-ml/12-release-governance.md) builds such a statement for a trained model, and the same rules apply. The numbers come from the variables of the script, and the statement names what was public.
+A synthetic dataset needs a guarantee statement and enough information for users to judge what it supports. [The practitioner edition's chapter on release and governance](../../book-practitioner/part05-dp-ml/12-release-governance.md) gives the same guidance for trained models. The script supplies the numbers and identifies public information.
 
 ```{.python excerpt="eval-statement"}
 print(
@@ -241,7 +241,7 @@ print(
 This synthetic dataset of 200,000 rows was generated by AIM (OpenDP 0.16.0, mbi 1.1.0, rounds=10, queries up to 3 columns) from one contingency table over SEX, AGE, HWUSUAL, ILOSTAT released under (rho = 0.1, delta = 1e-07)-zero-concentrated differential privacy, which is (epsilon = 2.35, delta = 2e-07)-differential privacy, for adding or removing all of one person's survey responses, at most 36 of them, under the central model. The keys of SEX and the cuts of AGE and HWUSUAL were fixed in advance; nulls were recoded to {'AGE': 0.0, 'HWUSUAL': 99.0}; the keys of ILOSTAT were released with a threshold of 1364. Drawing the rows by independent sampling is post-processing and spent nothing.
 ```
 
-The statement covers the rows without a further term, because drawing rows from a released model is post-processing, which cannot weaken the guarantee ([the full edition's chapter on properties](../../book-full/part03-dp-foundations/02-properties.md)). It covers this one table only, and the other releases of this chapter, from the same people, would add to it.
+The statement covers the generated rows without an extra privacy cost because drawing from a released model is post-processing ([the full edition's chapter on properties](../../book-full/part03-dp-foundations/02-properties.md)). It covers this table only; other releases from the same people would compose with it.
 
 | Item | What to publish | In this chapter |
 | --- | --- | --- |
@@ -253,9 +253,9 @@ The statement covers the rows without a further term, because drawing rows from 
 
 : What to publish with a synthetic dataset, and where this chapter found each item. {#tbl-eval-publish}
 
-The last row is the one most often done wrong. A distance computed on the private data depends on that data, so publishing it is a new release that the statement does not cover. As [Limitations and troubleshooting](../part04-extending/15-limitations-and-troubleshooting.md) put it, the guarantee covers what passes through a measurement and nothing computed beside it. The error bars from `std` are safe to publish, and the distances in this chapter were safe only because the data are public.
+The utility row is easy to mishandle. A distance computed from private data depends on that data; publishing it creates a release not covered by this statement. As [Limitations and troubleshooting](../part04-extending/15-limitations-and-troubleshooting.md) explains, the guarantee covers measured outputs, not separate computations. The `std` error bars are safe to publish. The distances here are safe only because the dataset is public.
 
-This is the last chapter of the book. You can now release statistics, tables, models and synthetic rows through a context. You can also measure their quality on data you may look at, and publish them with a guarantee that says what it covers.
+This final chapter completes the workflow: release statistics, tables, models and synthetic rows through a context; evaluate quality on data you may inspect; and publish each release with a precise guarantee.
 
 ## Summary
 

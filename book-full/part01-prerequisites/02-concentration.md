@@ -1,14 +1,14 @@
 # Concentration inequalities
 
-Almost every number in machine learning is random. A test error depends on which examples happened to land in the test set, and the size of a randomly sampled minibatch changes from one step to the next. Before you rely on such a number, you need to know **how far a random quantity can be from what you expect, and with what probability**.
+A test error varies with the test sample. A minibatch varies between steps. Concentration bounds quantify both variation and tail probability.
 
-Concentration inequalities answer with one idea. To bound the chance that a quantity lands far out, you compare it with something whose average you know, and the more you know, the sharper the comparison. The mean alone gives Markov's inequality, whose bound decays like $1/t$ at a distance $t$ out, and the variance gives Chebyshev's, which decays like $1/t^2$. The **moment generating function (MGF)**, an average of an exponential of the quantity, gives the Chernoff bound, which decays exponentially. Later sections apply it to bounded variables, to random noise added to a number, and to sums of dependent terms.
+For a nonnegative random variable $X$ and $a>0$, Markov's inequality bounds $\Pr[X\ge a]$ by $\mathbb E[X]/a$. If $X$ has finite mean $\mu$ and variance $\sigma^2$, Chebyshev's inequality bounds $\Pr[|X-\mu|\ge t]$ by $\sigma^2/t^2$ for $t>0$. Chebyshev follows by applying Markov to $(X-\mu)^2$. Chernoff bounds also apply Markov, to $e^{\lambda X}$ for $\lambda>0$; the resulting bound uses the **moment generating function (MGF)** $\mathbb E[e^{\lambda X]}$ and can decay exponentially. Later sections apply Chernoff bounds to bounded variables, additive noise and sums of dependent terms.
 
-The running example is a classifier whose true error rate is 10%. You test it on $n = 200$ examples drawn independently, and its measured error rate is the fraction of them it gets wrong. How likely is the measured rate to reach 15%, half again its true value? A simulation of 200,000 test sets says $9.6\times10^{-3}$. The bounds of this chapter put that probability at most at 0.67 (Markov), 0.18 (Chebyshev), 0.37 (Hoeffding) and 0.135 (Chernoff), and each section explains one of these numbers.
+Consider a classifier with true error rate 10%, tested on $n = 200$ independent examples. Its measured error rate is the fraction of examples it classifies incorrectly. The probability that this rate reaches 15%, or 1.5 times the true rate, is $9.6\times10^{-3}$ in a simulation of 200,000 test sets. This chapter bounds that probability by 0.67 (Markov), 0.18 (Chebyshev), 0.37 (Hoeffding) and 0.135 (Chernoff). The sections derive these bounds.
 
 ## Markov and Chebyshev {#sec-conc-markov}
 
-Start with the crudest version of the question. If all you know about a quantity is its mean, or its mean and its variance, how often can it land far from where you expect? The answers are weak, but every stronger bound in this chapter is the same argument applied to a better function.
+Markov's inequality bounds $\Pr[X\ge a]$ for nonnegative $X$ from its mean. Chebyshev's inequality bounds two-sided deviations from the mean when the variance is finite. It follows by applying Markov's inequality to the squared deviation.
 
 The argument turns a probability into an average, and a die shows how. Write $\mathbf 1[A]$ for the **indicator** of an event $A$, the variable that is 1 on outcomes where $A$ happens and 0 elsewhere. Its average is $\Pr[A]$, because averaging a 0/1 variable counts the fraction of outcomes where the event happens. Averages also keep order: if one variable is at most another on every outcome, so is its average. Now roll a fair die, let $X$ be the roll, and compare $5\cdot\mathbf 1[X \ge 5]$ with $X$ itself, outcome by outcome (@tbl-conc-die-markov).
 
@@ -52,7 +52,7 @@ $$\Pr[X \ge t] \le \frac{\mathbb E[g(X)]}{g(t)}.$$
 2. The variable $g(X)$ is never negative and the threshold $g(t)$ is positive, so @thm-conc-markov applies to $g(X)$ at the threshold $a = g(t)$.
 :::
 
-The rest of the chapter searches for good functions $g$, which grow fast but keep $\mathbb E[g(X)]$ computable. The square gives Chebyshev's inequality below, and the exponential gives the Chernoff bound of @sec-conc-chernoff.
+The next bounds choose $g$ so that $\mathbb E[g(X)]$ is tractable: $g(x)=x^2$ gives Chebyshev's inequality, and $g(x)=e^{\lambda x}$ gives the Chernoff bound of @sec-conc-chernoff.
 
 A tail bound answers the question "how likely is a deviation of size $t$?". In practice you usually want the reverse: how large a deviation must you allow so that it is exceeded with probability at most $\beta$? That number is the **width** at failure probability $\beta$, and you find it by setting the bound equal to $\beta$ and solving for $t$. Most bounds here have the form $e^{-h(t)}$, so the lemma below does this once.
 

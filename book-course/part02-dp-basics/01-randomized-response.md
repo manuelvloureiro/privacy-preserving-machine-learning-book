@@ -1,6 +1,6 @@
 # Randomized response and the definition
 
-A group of people each hold one sensitive bit, and an analyst wants the fraction of ones without learning anyone's bit. This chapter solves the problem with a biased coin, the oldest private algorithm. It then turns the idea behind the coin, plausible deniability, into the definition of differential privacy (DP), on which the rest of the course builds.
+Each person holds one sensitive bit, and an analyst wants the fraction of ones without learning any individual's bit. Randomized response uses a biased coin to estimate that fraction. Its plausible-deniability guarantee also motivates differential privacy (DP), the subject of the rest of the course.
 
 ## Randomized response {#sec-rr-mechanism}
 
@@ -10,7 +10,7 @@ $$
 p = \frac{1}{n}\sum_{i=1}^n x_i .
 $$
 
-Each person sends the analyst one message $Y_i$, which may depend on $x_i$ and on coins that only person $i$ sees. At one extreme, if $Y_i = x_i$, the analyst computes $p$ exactly but sees every bit. At the other, if $Y_i$ is a fair coin independent of $x_i$, the analyst learns nothing about anyone. But the analyst also learns nothing about $p$, because the average of the reports has the distribution $\frac1n\mathrm{Bin}(n, \frac12)$ whatever the data. Randomized response goes between the two.
+Each person sends one message $Y_i$, determined by their bit $x_i$ and private randomness. Truthful reports reveal $p$ exactly but expose every bit. Fair-coin reports hide every bit but have the same distribution, $\frac1n\mathrm{Bin}(n,\frac12)$, for every dataset and therefore reveal nothing about $p$. Randomized response trades accuracy for privacy between these extremes.
 
 ::: {#def-rr-mechanism name="Randomized response"}
 For a bias $\kappa \in [0, 1/2]$, which sets the probability $\tfrac12 + \kappa$ of reporting the truth, person $i$ reports
@@ -22,15 +22,15 @@ $$
 with fresh, independent coins for each person.
 :::
 
-The value $\kappa = 1/2$ gives the honest protocol and $\kappa = 0$ the fair coin. In between, say at $\kappa = 1/4$, a person who reports $Y_i = 1$ can claim that their bit was $0$ and the coin flipped it, which happens with probability $1/4$. That plausible deniability is the privacy, and it grows as $\kappa$ gets smaller.
+At $\kappa=1/2$, reports are truthful; at $\kappa=0$, they are fair coins. For $\kappa=1/4$, a report of $1$ is consistent with a true bit of $0$, because the coin flips the bit with probability $1/4$. This ambiguity increases as $\kappa$ decreases.
 
-The reports lean towards the truth, so their average is not $p$. But the analyst knows the bias and can undo it, because the average of one report,
+The reports are biased toward the true bits, so their average does not estimate $p$ directly. The analyst can correct for the bias because the expected report is linear in $x_i$:
 
 $$
 \mathbb E[Y_i] = \left(\tfrac12+\kappa\right)x_i + \left(\tfrac12-\kappa\right)(1-x_i) = 2\kappa x_i + \tfrac12 - \kappa ,
 $$
 
-is linear in $x_i$. Solving for $x_i$ gives an unbiased estimate of each bit, and the average of those estimates is the estimator of $p$.
+Solving for $x_i$ gives an unbiased estimate of each bit; averaging these estimates gives an unbiased estimate of $p$.
 
 ::: {#def-rr-estimator name="Debiased estimator"}
 For $\kappa > 0$, the analyst outputs
@@ -40,7 +40,7 @@ $$
 $$ {#eq-rr-estimator}
 :::
 
-The next theorem checks that the estimator is right on average and measures, through its variance, how far it typically strays.
+The next theorem establishes unbiasedness and computes the estimator's variance.
 
 ::: {#thm-rr-variance}
 For every $\kappa \in (0, 1/2]$ and every input $D \in \{0,1\}^n$, the estimator is unbiased, $\mathbb E[\tilde p] = p$, and its variance is
@@ -61,7 +61,7 @@ $$
 $$
 :::
 
-By Chebyshev's inequality, the error is at most two standard deviations, $|\tilde p - p| \le 1/(2\kappa\sqrt n)$, with probability at least $3/4$. For a small failure probability $\beta$, Hoeffding's inequality does better, because each $Z_i$ takes only two values.
+Chebyshev's inequality gives $|\tilde p-p|\le 1/(2\kappa\sqrt n)$ with probability at least $3/4$. Hoeffding's inequality gives a sharper bound for failure probability $\beta$, because each $Z_i$ has a bounded range.
 
 ::: {#thm-rr-accuracy}
 For every $\kappa \in (0,1/2]$ and $\beta \in (0,1)$, with probability at least $1-\beta$ over the coins,
@@ -82,7 +82,7 @@ $$
 3. Setting the right-hand side equal to $\beta$ and solving for $t$ gives @eq-rr-accuracy.
 :::
 
-So the error is of order $1/(\kappa\sqrt n)$ and goes to $0$ as $n$ grows. Read the other way, an error of at most $\alpha$ with probability $1-\beta$ needs
+Thus the error decreases as $1/(\kappa\sqrt n)$. Equivalently, accuracy $\alpha$ with failure probability at most $\beta$ requires
 
 $$
 n \ge \frac{\ln(2/\beta)}{8\kappa^2\alpha^2}
@@ -92,13 +92,13 @@ people. A smaller $\kappa$ hides each bit better and needs more people for the s
 
 ## Differential privacy {#sec-rr-definition}
 
-The setting is the **central model**. Each of $n$ people sends their data point to a **trusted curator**, and they trust no one else. The curator runs an algorithm $M$ on the dataset $D = (x_1, \dots, x_n) \in \mathcal X^n$ and publishes the output, and anyone who sees the output may be an adversary. The guarantee is a property of the algorithm, called a **mechanism** in this field: no single person's data has a large effect on the distribution of the output. To make "one person's data" precise, compare two datasets that differ only in one person's record.
+In the **central model**, each person sends their record to a **trusted curator**. The curator runs an algorithm $M$ on $D=(x_1,\dots,x_n)\in\mathcal X^n$ and publishes its output, which an adversary may observe. The algorithm, called a **mechanism**, must ensure that changing one person's record has a limited effect on the output distribution. This requires comparing datasets that differ in one record.
 
 ::: {#def-rr-neighbours name="Neighbouring datasets"}
 Two datasets $D, D' \in \mathcal X^n$ are **neighbours**, written $D \sim D'$, if they differ in exactly one record. This is the **replace-one** relation.
 :::
 
-The definition asks that the distribution of the output barely change between neighbours. On every set of outputs, the probability may grow by at most a factor $e^\varepsilon$, where the privacy parameter $\varepsilon$ sets how much change is allowed.
+The definition bounds how much the output distribution can change between neighbours. For any event, its probability can increase by at most a factor of $e^\varepsilon$.
 
 ::: {#def-rr-dp name="Differential privacy"}
 Let $\varepsilon \ge 0$. A randomized algorithm $M \colon \mathcal X^n \to \mathcal Y$, which maps a dataset to an output in a set $\mathcal Y$, is **$\varepsilon$-differentially private** ($\varepsilon$-DP) if for all neighbours $D \sim D'$ and all events $S \subseteq \mathcal Y$,
@@ -110,17 +110,17 @@ $$ {#eq-rr-dp}
 The probability is over the coins of $M$ only. The datasets are fixed.
 :::
 
-Its other name is **pure** differential privacy, which sets it apart from the relaxation of a later chapter. Four of its features matter later.
+This guarantee is also called **pure** differential privacy, distinguishing it from the relaxation in a later chapter. Four properties are useful.
 
-First, the definition is quantitative. At $\varepsilon = 0$ the output distribution is the same on every dataset, which is perfect privacy and allows no accuracy. An algorithm that is not randomized is $\infty$-DP, which is no guarantee at all. Typical values of $\varepsilon$ lie between about $0.1$ and $5$, and smaller is more private. Because the bound is $e^\varepsilon$, privacy weakens quickly once $\varepsilon$ is above $1$.
+First, the guarantee is quantitative. At $\varepsilon=0$, the output distribution is identical on every dataset; this gives perfect privacy but no data-dependent accuracy. A deterministic algorithm is $\infty$-DP and provides no finite guarantee. Typical $\varepsilon$ values range from about $0.1$ to $5$; smaller values give stronger privacy. Since the bound is $e^\varepsilon$, it weakens rapidly when $\varepsilon>1$.
 
-Second, it is a worst-case guarantee: it holds for every pair of neighbours, however unlikely the data, with no distribution over datasets.
+Second, it is a worst-case guarantee over every neighbouring pair, including unlikely datasets. It assumes no probability distribution over datasets.
 
 Third, it is symmetric. Swapping $D$ and $D'$ in @eq-rr-dp gives the lower bound $\Pr[M(D)\in S] \ge e^{-\varepsilon}\Pr[M(D')\in S]$.
 
-Fourth, it bounds a ratio, not a difference. For small $\varepsilon$ the factor $e^\varepsilon$ is close to $1 + \varepsilon$. The exponential form makes factors multiply when guarantees are chained, $e^{\varepsilon_1}e^{\varepsilon_2} = e^{\varepsilon_1+\varepsilon_2}$, which the next chapter uses for group privacy. An additive notion of closeness, such as a small total variation distance, sounds natural but gives no meaningful guarantee.
+Fourth, it bounds a probability ratio rather than a difference. For small $\varepsilon$, $e^\varepsilon$ is close to $1+\varepsilon$. Ratios multiply across steps, so $e^{\varepsilon_1}e^{\varepsilon_2}=e^{\varepsilon_1+\varepsilon_2}$; the next chapter uses this fact for group privacy. A small additive distance, such as total variation, does not provide the same guarantee.
 
-DP with these neighbours, which replace one record, has the name **bounded** DP. The **add/remove** relation, or **unbounded** DP, instead adds or removes one record. A replacement is a removal followed by an addition. So, by the chaining argument of the next chapter's group privacy, $\varepsilon$-DP under add/remove neighbours gives $2\varepsilon$-DP under replace-one neighbours. The converse can fail, because under add/remove neighbours the size $n$ is itself private. The course uses replacement, which is more convenient mathematically, and you can compare two mechanisms only under the same relation.
+This replace-one relation defines **bounded** DP. The **add/remove**, or **unbounded**, relation instead adds or removes one record. A replacement takes two such changes, so group privacy from the next chapter gives $2\varepsilon$-DP under replace-one neighbours from an $\varepsilon$-DP add/remove guarantee. The converse may fail because the dataset size is private under add/remove adjacency. This course uses replace-one adjacency. Compare privacy guarantees only when they use the same relation.
 
 For discrete outputs it is enough to check single outcomes, because the probability of an event is the sum of the probabilities of its outcomes.
 
@@ -136,7 +136,7 @@ $$
 $$
 :::
 
-A first consequence of the definition is that privacy needs randomness.
+A finite privacy guarantee requires randomization.
 
 ::: {#prp-rr-randomized}
 For $\varepsilon < \infty$, a deterministic $\varepsilon$-DP algorithm is constant.
@@ -149,19 +149,19 @@ For $\varepsilon < \infty$, a deterministic $\varepsilon$-DP algorithm is consta
 
 ### Hypothesis testing {#sec-rr-testing}
 
-The definition has an operational meaning from the adversary's side. Suppose an adversary knows that the dataset is one of two neighbours, $D$ or $D'$, and sees the output of $M$. It must decide between the **null hypothesis** and the **alternative**,
+The definition also bounds an adversary's ability to distinguish neighbouring datasets. Suppose the adversary knows that the dataset is either $D$ or $D'$ and observes the output of $M$. It tests the **null hypothesis** against the **alternative**:
 
 $$
 H_0\colon \text{the dataset is } D, \qquad H_1\colon \text{the dataset is } D' .
 $$
 
-A test is a function $\phi\colon \mathcal Y \to [0,1]$, the probability of answering $H_1$ given the output, so a test can be random. The test's **false positive rate** $\mathrm{FPR}$ is the chance of answering $H_1$ when $H_0$ holds, and its **false negative rate** $\mathrm{FNR}$ is the chance of answering $H_0$ when $H_1$ holds:
+A test is a function $\phi\colon\mathcal Y\to[0,1]$ giving the probability of choosing $H_1$ after observing an output. Its **false positive rate** $\mathrm{FPR}$ is the probability of choosing $H_1$ when $H_0$ is true; its **false negative rate** $\mathrm{FNR}$ is the probability of choosing $H_0$ when $H_1$ is true:
 
 $$
 \mathrm{FPR} = \mathbb E[\phi(M(D))], \qquad \mathrm{FNR} = 1 - \mathbb E[\phi(M(D'))].
 $$
 
-A test takes values in $[0,1]$, while the definition bounds only probabilities of events. The proof of the next theorem needs the bound for such functions, which the following lemma gives.
+The definition bounds event probabilities, but a test can take any value in $[0,1]$. The following lemma extends the bound to these functions.
 
 ::: {#lem-rr-functions}
 Let $M$ be $\varepsilon$-DP and let $h\colon\mathcal Y \to [0,1]$. For all neighbours $D \sim D'$,
@@ -177,7 +177,7 @@ $$
 3. Integrating over $t \in [0,1]$ gives $e^\varepsilon\,\mathbb E[h(M(D'))]$.
 :::
 
-An adversary wants both error rates small. The next theorem says that differential privacy is exactly a limit on how small they can be together, for every test.
+An adversary wants both error rates to be small. The next theorem characterizes differential privacy by a lower bound on their joint values for every test.
 
 ::: {#thm-rr-testing}
 A mechanism $M$ is $\varepsilon$-DP if and only if, for every pair of neighbours and every test, the false positive rate $\mathrm{FPR}$ and the false negative rate $\mathrm{FNR}$ satisfy
@@ -193,17 +193,17 @@ $$ {#eq-rr-testing}
 3. *The inequalities imply DP.* Take an event $S$ and the test $\phi(y) = \mathbf 1[y \in S]$, which answers $H_1$ exactly when the output lands in $S$. Its error rates are $\mathrm{FPR} = \Pr[M(D)\in S]$ and $\mathrm{FNR} = 1 - \Pr[M(D')\in S]$. The second inequality says $e^\varepsilon\Pr[M(D)\in S] + 1 - \Pr[M(D')\in S] \ge 1$, that is, $\Pr[M(D')\in S] \le e^\varepsilon \Pr[M(D)\in S]$. The pair of neighbours was arbitrary, so the same holds with the roles of $D$ and $D'$ swapped, which is @eq-rr-dp.
 :::
 
-At $\varepsilon = 0$ the two inequalities force $\mathrm{FPR} + \mathrm{FNR} \ge 1$, which a test that ignores the output already achieves, such as a random guess ($\mathrm{FPR} = \mathrm{FNR} = 1/2$). As $\varepsilon$ grows, the region of possible error pairs gets larger, and the adversary can beat a blind guess by more.
+At $\varepsilon=0$, the inequalities require $\mathrm{FPR}+\mathrm{FNR}\ge1$, achieved by a test that ignores the output, such as a fair random guess. As $\varepsilon$ increases, lower error pairs become possible and the adversary can distinguish the datasets more accurately.
 
 ### What the definition promises {#sec-rr-meaning}
 
-In words, the probability of any event is about the same whether a given person's data is in the dataset or is replaced by someone else's. So a harm that comes from the output is not much more likely because the person took part. A linkage attack, for example, succeeds about as often without their record, whatever auxiliary data exists now or later. At $\varepsilon = 0.1$, the chance of any bad event grows by a factor of at most $e^{0.1} \approx 1.105$. The guarantee holds against an adversary with unlimited computation and side information, so it is information theoretic, unlike most of cryptography.
+The probability of any event changes by at most a factor $e^\varepsilon$ when one person's record is replaced. Thus participation cannot substantially increase the probability of an output-caused harm. For example, a linkage attack succeeds at nearly the same rate when that person's record is absent, regardless of auxiliary information. At $\varepsilon=0.1$, the probability can increase by at most $e^{0.1}\approx1.105$. This information-theoretic guarantee holds even against an adversary with unlimited computation and side information.
 
-The definition does not prevent inference from aggregate patterns. Suppose a study with differential privacy finds that smoking causes cancer, and an insurer then raises the premium of a smoker who took part. The study's conclusion would be the same without that person's record, so the harm comes from a fact about the population, not from their participation. Learning such facts is the purpose of statistics.
+The definition does not prevent inference from population patterns. If a private study finds an association between smoking and cancer, an insurer may raise a participant's premium. The study would reach the same conclusion without that person's record; the inference concerns the population, not participation. Statistical analysis is intended to reveal such population-level facts.
 
 ## Randomized response revisited {#sec-rr-privacy}
 
-Randomized response now gets a privacy guarantee. The theorem treats the whole vector of reports as the output, and the estimator @eq-rr-estimator, a function of that vector, inherits the guarantee by post-processing, which the next chapter proves.
+The next theorem gives randomized response a privacy guarantee. It treats the report vector as the output; the estimator @eq-rr-estimator inherits the same guarantee by post-processing, proved in the next chapter.
 
 ::: {#thm-rr-privacy}
 Randomized response with bias $\kappa \in [0,1/2)$, releasing $(Y_1,\dots,Y_n)$, is $\varepsilon$-DP for

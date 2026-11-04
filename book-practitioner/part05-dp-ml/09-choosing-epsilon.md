@@ -2,13 +2,13 @@
 
 ## Why this matters
 
-Every model trained with differential privacy (DP) ships with a privacy budget $\varepsilon$. The chapter on private stochastic gradient descent (SGD), [DP-SGD](02-dp-sgd.md), showed what each budget costs in accuracy. This chapter adds what it means for the people in the data, so that $\varepsilon$ is not chosen by habit ("everyone uses 8").
+Every model protected by differential privacy (DP) has a privacy budget $\varepsilon$. The differentially private version of stochastic gradient descent (SGD), [DP-SGD](02-dp-sgd.md), shows how this budget affects accuracy. This chapter relates $\varepsilon$ to risks for people in the data, providing a basis for choosing it rather than following convention.
 
-An attacker who wants to know whether a record was used for training runs a membership test. The test catches real members, its true positives, and wrongly flags non-members, its false positives. The budget $\varepsilon$ and its small slack $\delta$ cap the first rate in terms of the second ([The definition of differential privacy](../part03-dp-foundations/01-definition.md)). But each training run also has its own curve of the best rates an attacker can reach, usually far below the cap. So compute that curve, read it at the false positive rate of your threat, and set it beside the accuracy each budget buys.
+Membership tests assess whether a record appeared in training. Their true positive rate (TPR) measures correctly identified members; their false positive rate (FPR) measures non-members incorrectly flagged. The guarantee $(\varepsilon,\delta)$ bounds TPR in terms of FPR ([The definition of differential privacy](../part03-dp-foundations/01-definition.md)). Each run also has a tighter trade-off curve of achievable rates. Compute that curve, evaluate it at the threat's FPR and compare it with accuracy at each budget.
 
 ## Justifying a choice {#sec-epsc-justify}
 
-A defensible choice says what the budget protects before it picks the number.
+A defensible choice specifies what the budget protects before selecting its value.
 
 1. **Unit and period.** Say whether one unit is a record, a user or a device, and whether neighbouring datasets differ by adding or removing one unit or by replacing one. Say which runs the budget covers, since every tuning run spends budget too ([Hyperparameter tuning](03-hyperparameter-tuning.md)).
 2. **Threat.** Say whether the concern is membership, reconstruction or attribute inference, and what the attacker knows and sees. This sets the false positive rate at which you read the curve, a low one for an attacker who must rarely accuse a non-member.
@@ -17,7 +17,7 @@ A defensible choice says what the budget protects before it picks the number.
 5. **Utility.** Put accuracy against $\varepsilon$ next to the risk, and pick the smallest budget past the bend, where accuracy stops improving. Draw it on public or proxy data, because private runs that choose $\varepsilon$ are a search whose cost the reported $\varepsilon$ leaves out.
 6. **Comparison.** Only now compare with deployments (@sec-epsc-deployed) and with the tiers in the rules of thumb.
 
-Adult, a public census survey, shows step 5 on a real run. [Train a model with DP-SGD](13-train-dp-sgd.md) trains a small network on 30,000 of its people at five budgets, each with $\delta = 10^{-5}$. @tbl-epsc-adult sets their test accuracies beside a risk measure from @sec-epsc-curve. It is the largest true positive rate (TPR) that any membership test can reach at a false positive rate (FPR) of $10^{-3}$.
+The Adult public census survey illustrates step 5. [Train a model with DP-SGD](13-train-dp-sgd.md) trains a small network on 30,000 people at five privacy budgets, each with $\delta=10^{-5}$. @tbl-epsc-adult compares test accuracy with the maximum membership-test TPR at FPR $10^{-3}$, computed from @sec-epsc-curve.
 
 | $\varepsilon$ | Noise multiplier | Test accuracy | Largest TPR at FPR $10^{-3}$ |
 | --- | --- | --- | --- |
@@ -30,7 +30,7 @@ Adult, a public census survey, shows step 5 on a real run. [Train a model with D
 
 : Accuracy and worst-case membership risk on Adult, one seed. {#tbl-epsc-adult}
 
-Accuracy rises by five points from $\varepsilon = 0.25$ to 1, then stays within a few thousandths of the non-private model, which is noise on one seed. The risk grows faster with each doubling of the budget, from 0.0023 at $\varepsilon = 1$ to 0.0445 at $\varepsilon = 8$. So on Adult the bend sits at $\varepsilon = 1$, and a budget of 1 or 2 is the defensible choice. The script scored these runs on private rows, so the table only illustrates step 5. A real choice reads it from a public stand-in, and on a harder task, a larger model or a smaller dataset, expect the bend further right.
+Accuracy increases five points from $\varepsilon=0.25$ to 1, then remains within a few thousandths of the non-private result, comparable to one-seed variation. Risk increases from 0.0023 at $\varepsilon=1$ to 0.0445 at $\varepsilon=8$. For Adult, the utility curve bends near $\varepsilon=1$, making 1 or 2 defensible choices. Because these runs were scored on private rows, the table is illustrative only; choose budgets using public stand-in data. Harder tasks, larger models or smaller datasets may shift the bend to higher $\varepsilon$.
 
 ## The pair and the whole curve {#sec-epsc-curve}
 

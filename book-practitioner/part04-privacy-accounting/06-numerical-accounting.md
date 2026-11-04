@@ -2,16 +2,16 @@
 
 ## What it is {#sec-num-pld}
 
-A privacy loss distribution (PLD) accountant computes the privacy level $\varepsilon$ of a whole differential privacy (DP) run numerically. Take a dataset and a neighbour that differs in one record, and run the mechanism on the first. The **privacy loss** $L$ of that run is the logarithm of how much likelier the output is on the first dataset than on the second. The output is random, and the distribution of its loss is the PLD. Only outputs whose loss is more than $\varepsilon$ add to the slack $\delta$, so the smallest slack is the following, where $(\cdot)_+$ sets a negative value to 0:
+A privacy loss distribution (PLD) accountant numerically computes the privacy level $\varepsilon$ of a complete differential privacy (DP) run. Compare a dataset with a neighbour differing in one record. The **privacy loss** $L$ is the logarithm of the output likelihood ratio between these datasets. Because the output is random, $L$ has a distribution called the PLD. Outputs with loss above $\varepsilon$ contribute to slack $\delta$; the minimum slack is given below, where $(\cdot)_+$ sets negative values to 0:
 $$\delta(\varepsilon) = \mathbb E\big[(1 - e^{\varepsilon - L})_+\big].$$
 
-When steps draw their noise independently, their losses add, so the PLD of a run is the convolution of the steps' PLDs. All the error comes from the grid of losses that holds each PLD, with a spacing $h$ between points. To round every loss up can only make $\delta$ larger, so the $\varepsilon$ it gives is an upper bound, the **pessimistic** side. To round down gives a lower bound, the optimistic side. Each rounding moves a step's loss by at most $h$, so after $T$ steps the two values are at most $Th$ apart.
+With independent noise, step losses add, so the run's PLD is the convolution of the step PLDs. Numerical error comes from representing losses on a grid with spacing $h$. Rounding losses up can only increase $\delta$, so the resulting $\varepsilon$ is an upper bound, the **pessimistic** value. Rounding down gives the optimistic lower bound. Each step's loss shifts by at most $h$, so after $T$ steps the two bounds differ by at most $Th$.
 
 ## When you meet it
 
-You meet a PLD accountant each time you train with Opacus, whose default `"prv"` is the privacy loss random variable (PRV) accountant of Gopi, Lee and Wutschitz (2021). It rounds each loss to the nearest grid point, adds a proven error bound and reports the upper value. Google's `dp_accounting` has `PLDAccountant`, which by default rounds up with **connect the dots**, the tightest pessimistic rounding on a grid.
+Opacus uses a PLD accountant by default for training: `"prv"` is the privacy loss random variable (PRV) accountant of Gopi, Lee and Wutschitz (2021). It rounds each loss to a grid point, adds a proven error bound and reports the upper value. Google's `dp_accounting` provides `PLDAccountant`; its default **connect the dots** method gives the tightest pessimistic rounding on a grid.
 
-@tbl-num-dpsgd compares a PLD with Rényi differential privacy (RDP) and with the central limit theorem (CLT) estimate of Gaussian differential privacy (GDP). The run is the part's example of the private form of stochastic gradient descent (SGD), called DP-SGD, with sampling rate 0.01 and noise multiplier 1.
+@tbl-num-dpsgd compares PLD accounting with Rényi differential privacy (RDP) and the central limit theorem (CLT) estimate of Gaussian differential privacy (GDP). The example is stochastic gradient descent (SGD) with differential privacy, per-step clipping and noise, using sampling rate 0.01 and noise multiplier 1.
 
 | Steps | PLD upper | PLD lower | RDP | GDP CLT |
 | --- | --- | --- | --- | --- |
@@ -21,11 +21,11 @@ You meet a PLD accountant each time you train with Opacus, whose default `"prv"`
 
 : $\varepsilon$ at $\delta = 10^{-5}$, for the running example. The PLD columns round up and down on the grid $h = 10^{-5}$, without connect the dots. {#tbl-num-dpsgd}
 
-RDP gives a valid but loose bound ([Rényi DP](01-renyi-dp.md)). The CLT estimate is below the PLD's lower bound at every length, so it claims a guarantee the run lacks ([f-DP and Gaussian DP](04-gaussian-dp.md)).
+RDP gives a valid but loose bound ([Rényi DP](01-renyi-dp.md)). At every run length, the CLT estimate is below the PLD lower bound and therefore overstates privacy ([f-DP and Gaussian DP](04-gaussian-dp.md)).
 
 ## How to use it
 
-In `dp_accounting`, compose the run as an event and read $\varepsilon$ at your $\delta$. The method `get_delta` goes the other way, from a claimed $\varepsilon$ to a bound on its $\delta$.
+In `dp_accounting`, compose the run as an event and request $\varepsilon$ at the desired $\delta$. The `get_delta` method instead returns a bound on $\delta$ for a chosen $\varepsilon$.
 
 ```python
 from dp_accounting import GaussianDpEvent, PoissonSampledDpEvent, SelfComposedDpEvent
@@ -42,17 +42,17 @@ prv.history = [(1.0, 0.01, 10_000)]  # (noise multiplier, sample rate, steps)
 print(f"{prv.get_epsilon(delta=1e-5):.4f}")  # 6.1980
 ```
 
-Both answers are upper bounds inside the bracket of @tbl-num-dpsgd, so you can report either. A reviewer can use `get_delta` to confirm the claim $(6.24, 10^{-5})$, because it bounds the run's slack at that $\varepsilon$ by $8.5\times10^{-6}$.
+Both answers are upper bounds within @tbl-num-dpsgd's bracket. A reviewer can use `get_delta` to verify the $(6.24,10^{-5})$ claim: it bounds the run's slack at that $\varepsilon$ by $8.5\times10^{-6}$.
 
-Each library has one accuracy setting. In `dp_accounting` it is the grid spacing `value_discretization_interval`, and a grid ten times finer makes the bracket ten times narrower, for about ten times the memory. In Opacus it is `eps_error`, the error allowed in $\varepsilon$. The error grows with the steps, so set either for your longest run.
+Each library exposes one accuracy setting. In `dp_accounting`, `value_discretization_interval` sets grid spacing; making the grid ten times finer narrows the bracket tenfold and uses about ten times more memory. In Opacus, `eps_error` sets the allowed error in $\varepsilon$. Since error grows with the number of steps, configure either setting for the longest planned run.
 
 ## What goes wrong
 
-The most frequent mistake is to report the wrong side of the bracket. Only the pessimistic value, or the PRV accountant's upper value, is a guarantee. The optimistic value and the midpoint are estimates.
+The main reporting error is to use the wrong side of the bracket. Only the pessimistic value, or the PRV accountant's upper value, is a guarantee; the optimistic value and midpoint are estimates.
 
-Under add/remove neighbours, a subsampled step has one PLD for an added record and another for a removed one, and neither is larger in general. So an accountant must compose both and report the larger, as `dp_accounting` does by default. The PRV accountant of Opacus models only removal, which is the larger direction in the running example. Both libraries assume Poisson sampling, and shuffled or fixed-size batches break it ([Amplification by subsampling](05-subsampling.md#sec-sub-schemes)).
+Under add/remove adjacency, a subsampled step has separate PLDs for adding and removing a record; neither direction is always larger. An accountant must compose both and report the larger, as `dp_accounting` does by default. Opacus's PRV accountant models removal only, which is the larger direction in this example. Both libraries assume Poisson sampling; shuffled or fixed-size batches violate that assumption ([Amplification by subsampling](05-subsampling.md#sec-sub-schemes)).
 
-A run that adapts its steps or noise to the outputs needs a filter instead ([Adaptive composition](08-adaptive-composition.md)).
+For a run that adapts its steps or noise to earlier outputs, use a filter ([Adaptive composition](08-adaptive-composition.md)).
 
 ## References
 

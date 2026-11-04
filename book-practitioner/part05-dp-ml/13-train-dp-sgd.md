@@ -97,7 +97,7 @@ The target is a privacy level of $\varepsilon = 4$ at the slack $\delta = 10^{-5
 
 ## Train {#sec-trainwf-train}
 
-The privacy engine wraps the model, the optimizer and the data loader. Its optimizer clips each record's gradient and adds the noise. Its loader draws Poisson batches, in which each row joins each batch independently with probability $q$, as the accountant assumes. The script's own loader cuts fixed batches, so `make_private` must replace it.
+The privacy engine wraps the model, optimizer and data loader. Its optimizer clips per-record gradients and adds noise. Its loader draws Poisson batches, independently including each row with probability $q$, matching the accountant. Because the script initially uses fixed batches, `make_private` must replace its loader.
 
 ```{.python excerpt="dpsgd-setup"}
 engine = PrivacyEngine(accountant="prv")
@@ -130,17 +130,17 @@ epsilon (Opacus PRV) = 3.99
 test accuracy at epsilon=4: 0.846
 ```
 
-The script leaves `secure_mode` off, so that its noise is seeded and its numbers repeat, and its record says so. For a model you release, pass `secure_mode=True` to `PrivacyEngine`. It draws the noise from a secure generator and guards against the floating-point flaws of ordinary Gaussian samples ([Discrete and floating-point-safe mechanisms](../part03-dp-foundations/08-discrete-mechanisms.md)).
+The script disables `secure_mode` to seed noise and reproduce results; the run record documents this. For production releases, set `secure_mode=True` in `PrivacyEngine`. It uses a secure generator and addresses floating-point weaknesses in ordinary Gaussian sampling ([Discrete and floating-point-safe mechanisms](../part03-dp-foundations/08-discrete-mechanisms.md)).
 
 ## Cross-check ε {#sec-trainwf-crosscheck}
 
-An $\varepsilon$ from one library is a claim about that library's arithmetic. So the script recomputes it with Google's `dp_accounting`, whose privacy loss distribution (PLD) accountant gives 3.98 against Opacus's 3.99. The looser Rényi differential privacy (RDP) accountant gives 4.50, so a statement must name its accountant. [Calibrate and account a DP-SGD run](../part04-privacy-accounting/10-calibrate-dp-sgd.md#sec-calib-crosscheck) runs this check and says what a disagreement means.
+An $\varepsilon$ depends on an accountant's implementation. The script independently recomputes it with Google's `dp_accounting`: the privacy loss distribution (PLD) accountant gives 3.98, compared with Opacus's 3.99. The looser Rényi differential privacy (RDP) accountant gives 4.50. Name the accountant in every statement. [Calibrate and account a DP-SGD run](../part04-privacy-accounting/10-calibrate-dp-sgd.md#sec-calib-crosscheck) explains this check and potential discrepancies.
 
 ## Tune honestly {#sec-trainwf-tune}
 
-This run chose every hyperparameter on a public stand-in, so tuning cost nothing. Without public data, tuning runs on the private rows, and every private run that influences the release costs privacy, the discarded ones too ([Hyperparameter tuning](03-hyperparameter-tuning.md)).
+This run selected all hyperparameters using public stand-in data, so tuning incurred no privacy cost. Without public data, every private run that affects the release consumes privacy, including discarded runs ([Hyperparameter tuning](03-hyperparameter-tuning.md)).
 
-The tuning script measures that cost for six learning rates at a total $\varepsilon$ of 4. A grid runs all six rates and pays for each by composition. A random search runs a Poisson number of models with mean 4, each at a rate drawn from the six, and releases only the best. Only RDP handles a random number of runs, so the script uses it throughout, and its single-run $\sigma$ is larger than the PRV value above.
+The tuning script compares six learning rates under total $\varepsilon=4$. A grid evaluates all six and composes their costs. Random search draws a Poisson number of models with mean 4, selects each rate from the six candidates, and releases only the best. Since only RDP supports a random run count, the script uses it throughout; its single-run $\sigma$ exceeds the PRV value above.
 
 ```{.python excerpt="tuning-cost"}
 def random_search(sigma: float) -> dp_accounting.DpEvent:
@@ -166,13 +166,13 @@ naive grid of 6 at sigma=1.029: reports epsilon=4.00
 naive grid, true epsilon of all 6 runs = 9.84
 ```
 
-The naive grid is the common mistake. It trains six models at the single-run noise, reports the $\varepsilon$ of one, and actually spends 9.84. The random search costs a modest rise in $\sigma$, from 1.029 to 1.256.
+The naive grid illustrates a common error: it trains six models at single-run noise, reports one model's $\varepsilon$, but spends 9.84. Random search requires only a moderate increase in $\sigma$, from 1.029 to 1.256.
 
-With seed 0, the search drew only two runs, both at the learning rate 0.05. So its model reaches only 0.828 on the test set, against 0.846 for the run tuned on public data. Do not redraw until you like the answer, because the guarantee depends on the randomness of the draw. So spend private runs on tuning only when no public data can stand in.
+With seed 0, the search draws two runs, both at learning rate 0.05, and reaches test accuracy 0.828, compared with 0.846 for the publicly tuned run. Do not rerun the search until a preferred result appears; the guarantee depends on the draw. Use private-data tuning only when public data cannot provide a suitable substitute.
 
 ## Measure utility and groups {#sec-trainwf-utility}
 
-Train at several budgets with everything else fixed, and compare against the baselines. Fix the released budget beforehand, as the script does with $\varepsilon = 4$, because the script scores these runs on private rows that no $\varepsilon$ counts ([Choosing ε](09-choosing-epsilon.md)).
+Train at several privacy budgets while holding other settings fixed, then compare with the baselines. Set the release budget in advance, as the script does at $\varepsilon=4$. The script evaluates on private rows, and that evaluation is not included in the training $\varepsilon$ ([Choosing ε](09-choosing-epsilon.md)).
 
 
 | Run | Noise multiplier | Test accuracy |

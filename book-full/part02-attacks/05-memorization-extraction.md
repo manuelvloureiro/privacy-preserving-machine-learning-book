@@ -85,7 +85,7 @@ Sampling gives a graded version of the same picture. At order 5, where greedy de
 
 @exm-memo-migule showed one line becoming memorized as the model grew. This section asks which lines get memorized in general, because that decides which data a defence must protect first. At scale, Carlini et al. (2023) prompted GPT-Neo and GPT-J models with training prefixes, and the largest, with 6 billion parameters, reproduced at least 1% of its training data. They found that discoverable memorization grows linearly in the logarithm of how often a string is duplicated, of model size and of prompt length. Kandpal, Wallace & Raffel (2022) found that a sequence repeated 10 times is generated about 1,000 times more often than one seen once. The $n$-gram toy lets you derive why from the counts.
 
-The idea is a vote. Greedy decoding follows the largest count at each step, and each copy of a line adds one vote for the line's own next symbol in every context the line passes through. The next lemma states how copies change the counts and which symbol wins a step, which the proof of @thm-memo-kstar needs. It also gives the size of one copy's effect, which the canary of @sec-memo-exposure uses.
+Greedy decoding selects the most frequent next symbol. Each copy of a line adds one count for its next symbol to every context along that line. The next lemma quantifies these count changes and identifies the symbol selected at each step; @thm-memo-kstar uses the counts, and @sec-memo-exposure uses the bound on one copy's effect.
 
 ::: {#lem-memo-ngram name="What counting implies"}
 In an order-$n$ model with add-$\alpha$ smoothing (@def-memo-ngram), the following hold.

@@ -1,12 +1,12 @@
 # Adaptive data analysis
 
-A lab tests hypothesis after hypothesis on one dataset, each suggested by the earlier results, until one is significant. Often, fresh data does not reproduce that result. Each test may be sound alone, but the sequence used the same data to choose the questions and to answer them. So the answers describe the sample instead of the population.
+A laboratory may test successive hypotheses on one dataset, choosing each question from earlier results, until one is significant. Fresh data often fails to reproduce that finding. The individual tests may be valid, but reusing the data to select and answer questions makes the results fit the sample rather than the population.
 
-This chapter makes that failure precise for averages of predicates, called statistical queries, and shows how differential privacy (DP) prevents it. Queries fixed in advance need a sample size logarithmic in the number $k$ of queries, and adaptively chosen queries can overfit unless it is of order $k$. A mechanism that answers through a DP algorithm needs only about $\sqrt k$, because a private algorithm cannot find a query on which the sample and the population disagree.
+This chapter formalizes the failure for averages of predicates, called statistical queries, and shows how differential privacy (DP) limits it. Queries fixed in advance require sample size logarithmic in their number $k$. Adaptive queries can overfit unless the sample size is of order $k$. A DP answering mechanism needs only about $\sqrt{k}$ samples, because privacy limits its ability to select queries where sample and population disagree.
 
 ## Statistical queries {#sec-ada-setup}
 
-The data is a sample from an unknown distribution $\mathcal D$ on a universe $\mathcal X$, and the analyst cares about the distribution, not the sample. Each question asks for the fraction of records with a yes-or-no property, so it has a value on the sample and a value on the distribution.
+The dataset is sampled from an unknown distribution $\mathcal D$ on universe $\mathcal X$. Each query asks for the population fraction with a binary property and has both a distribution value and a sample value.
 
 ::: {#def-ada-query name="Statistical query"}
 A **statistical query** is a function $q \colon \mathcal X \to \{0,1\}$. Its value on the distribution and its empirical value on a dataset $D = (X_1, \dots, X_n)$ are
@@ -16,7 +16,7 @@ q(\mathcal D) = \mathbb E_{x \sim \mathcal D}[q(x)], \qquad q(D) = \frac1n \sum_
 $$
 :::
 
-So $q(\mathcal D)$ is the fraction of the population with the property $q$, such as red hair, and $q(D)$ is the fraction in the sample. These are the counting queries of earlier chapters, divided by $n$. If the records are independent draws from $\mathcal D$, the empirical value is an unbiased estimate of the population value. For a fixed list of queries, a sample whose size is logarithmic in the length of the list is enough.
+Thus, $q(\mathcal D)$ is the population fraction with property $q$, and $q(D)$ is the sample fraction. These are the earlier chapters' counting queries divided by $n$. For independent samples, $q(D)$ is unbiased for $q(\mathcal D)$. A fixed list of queries requires sample size logarithmic in its length.
 
 ::: {#prp-ada-nonadaptive}
 Let $\alpha > 0$ be the allowed error and $\beta \in (0,1)$ the allowed failure probability. Let $q_1, \dots, q_k$ be statistical queries fixed before the sample is drawn, and let $X_1, \dots, X_n$ be independent draws from $\mathcal D$. If
@@ -37,17 +37,17 @@ $$
 2. A union bound over the $k$ queries gives failure probability at most $2k e^{-2\alpha^2 n}$, which the condition on $n$ makes at most $\beta$.
 :::
 
-So a sample of size $n$ supports about $e^{2\alpha^2 n}$ queries. But step 1 needs the query to be independent of the sample, and adaptivity breaks that step.
+A sample of size $n$ therefore supports about $e^{2\alpha^2n}$ fixed queries. The proof requires each query to be independent of the sample; adaptivity violates that condition.
 
 ## Adaptivity breaks the bound {#sec-ada-adaptivity}
 
-In an adaptive analysis, each query may depend on the answers to the earlier ones. The definition sets up this interaction, and says when the mechanism that answers is private whatever the analyst does.
+In an adaptive analysis, each query may depend on previous answers. The definition specifies this interaction and the corresponding privacy guarantee.
 
 ::: {#def-ada-interaction name="Adaptive analysis"}
 An **analyst** $\mathcal A$ and a **mechanism** $M$ interact for $k$ rounds. In round $i$, the analyst chooses a statistical query $q_i$ as a function of the earlier answers $a_1, \dots, a_{i-1}$ and its own random bits, called its coins. The mechanism returns an answer $a_i$, computed from the dataset $D$, its own coins and the history. The mechanism is **$(\varepsilon,\delta)$-DP against adaptive analysts** if for every analyst $\mathcal A$ the map from $D$ to the transcript $(q_1, a_1, \dots, q_k, a_k)$ is $(\varepsilon, \delta)$-DP.
 :::
 
-The empirical mechanism $a_i = q_i(D)$ answers every query exactly on the sample, and an adaptive analyst makes it fail badly.
+The empirical mechanism $a_i=q_i(D)$ answers each query exactly on the sample, but an adaptive analyst can use it to overfit.
 
 ::: {#prp-ada-overfit}
 Let $\mathcal X = \{1, \dots, N\}$, let $\mathcal D$ be uniform on $\mathcal X$, and let the mechanism answer $a_i = q_i(D)$. Some analyst with $k = N+1$ queries ends with a query $q_k$ such that, for every sample,
@@ -63,9 +63,9 @@ $$
 3. The set $S$ has at most $n$ elements, so $q_k(\mathcal D) = |S|/N \le n/N = n/(k-1)$.
 :::
 
-The first $N$ queries are harmless one at a time, and each could be fixed in advance. The analyst builds the last one from their answers, and on it the sample and the population disagree by almost $1$ unless $n$ is of order $k$. So the number of queries that a sample supports drops from exponential in $n$ to linear in $n$.
+Each of the first $N$ queries could be fixed in advance. The analyst constructs the final query from their answers; its sample and population values differ by nearly $1$ unless $n$ is of order $k$. Adaptivity therefore reduces the supported query count from exponential to linear in sample size.
 
-A simple defence is to give each query fresh data. The analyst can still choose adaptively, but each answer comes from records that no earlier answer has seen.
+Sample splitting assigns fresh data to each query. Queries remain adaptive, but each answer uses records unseen by earlier answers.
 
 ::: {#prp-ada-split name="Sample splitting"}
 Let $k$ divide $n$. Split $D$ into $k$ disjoint parts $D^{(1)}, \dots, D^{(k)}$ of $n/k$ records each, and answer $a_i = q_i(D^{(i)})$. If the records are independent draws from $\mathcal D$ and
@@ -83,17 +83,17 @@ then for every analyst $\Pr\big[\exists i \colon |a_i - q_i(\mathcal D)| \ge \al
 3. A union bound over $i$ gives at most $2k e^{-2\alpha^2 n/k}$, which the condition makes at most $\beta$.
 :::
 
-Sample splitting is valid but expensive, because it needs $k$ times the data of the non-adaptive case. A DP mechanism does much better. With Gaussian noise, a sample of size
+Sample splitting is valid but needs about $k$ times the nonadaptive sample size. Differential privacy can reduce this cost. With Gaussian noise, sample size
 
 $$
 n = O\!\left(\frac{\sqrt{k}\,\ln^{3/2}(k/(\alpha\beta))}{\alpha^2}\right)
 $$
 
-is enough for error $\alpha$ (@cor-ada-gaussian). Under a standard cryptographic assumption, no computationally efficient mechanism can do better than $\sqrt k$ in general.
+suffices for error $\alpha$ (@cor-ada-gaussian). Under a standard cryptographic assumption, no computationally efficient mechanism can generally improve the $\sqrt{k}$ dependence.
 
 ## Privacy implies generalization {#sec-ada-transfer}
 
-To overfit, the analyst must learn too much about individual records, as the analyst of @prp-ada-overfit did. If every answer passes through a DP mechanism, no answer reveals much about one record, so the analyst can learn only about the population. A **transfer theorem** makes this precise. It turns accuracy on the sample and privacy into accuracy on the population.
+The overfitting analyst in @prp-ada-overfit learned information about individual records. If every answer passes through a DP mechanism, each answer reveals little about any one record. A **transfer theorem** formalizes how sample accuracy and privacy imply population accuracy.
 
 ::: {#thm-ada-transfer name="Transfer theorem"}
 Let $\alpha, \beta \in (0, 0.1)$, and let $M$ answer $k$ adaptively chosen statistical queries. Suppose that
@@ -109,7 +109,7 @@ $$
 :::
 <!-- proof: cited -->
 
-This is Theorem 3.4 of Bassily, Nissim, Smith, Steinke, Stemmer and Ullman (2016), for queries of sensitivity $1/n$. The failure probability on the sample must be of order $\alpha\beta$, not $\beta$, for the conclusion to hold with failure probability $\beta$. The proof runs about $1/\beta$ independent copies of the interaction, each on its own sample. A monitor, which knows $\mathcal D$ and exists only in the proof, picks the copy and the query with the largest error on the population. Its choice post-processes DP outputs, so it is DP, and a version of @lem-ada-key below for several samples shows that it cannot find a large population error on average.
+This is Theorem 3.4 of Bassily, Nissim, Smith, Steinke, Stemmer and Ullman (2016), for queries of sensitivity $1/n$. The sample failure probability must be order $\alpha\beta$ to obtain population failure probability $\beta$. The proof runs about $1/\beta$ independent interactions, each on a separate sample. A proof-only monitor, which knows $\mathcal D$, selects the query with the largest population error. This selection post-processes DP outputs and remains private. The multi-sample version of @lem-ada-key below shows that the monitor cannot find a large population error on average.
 
 Two results from earlier chapters apply the theorem. The [Gaussian mechanism](../part02-dp-basics/03-approximate-dp.md) answers a query $f$ with Gaussian noise, and the sensitivity $\Delta f$ sets the standard deviation. With $\sigma = \Delta f\sqrt{2\ln(1/\delta_0) + \varepsilon_0}/\varepsilon_0$, the mechanism is $(\varepsilon_0, \delta_0)$-DP for every $\varepsilon_0 > 0$ and $\delta_0 \in (0,1)$. A corollary of [advanced composition](../part02-dp-basics/04-advanced-composition.md) says that, for $\varepsilon \in (0,1]$ and $\delta' \in (0, 1/2]$, $k$ adaptively chosen mechanisms that are each $(\varepsilon_0, \delta_0)$-DP with
 

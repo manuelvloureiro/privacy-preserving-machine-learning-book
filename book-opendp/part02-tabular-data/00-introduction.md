@@ -1,8 +1,8 @@
 # Tabular data
 
-This part does the everyday work of a private analysis: statistics on a table. OpenDP reads the lazy queries of Polars, a dataframe library, before they run. So every filter, cast and aggregation is part of the privacy guarantee. The thread of the part is that every statistic needs two things from you: a bound on what one person can contribute, and a share of the budget. The library turns them into a noise scale, which you read before a release.
+This part covers private statistics on tables. OpenDP analyses Polars lazy queries before execution, so filters, casts and aggregations are included in the privacy guarantee. Each statistic needs a bound on each person's contribution and a budget share. OpenDP uses both to set the noise scale.
 
-The chapters follow the documentation's tutorial on tabular data. [Essential statistics](03-essential-statistics.md) releases counts, sums, means, medians and quantiles, with the noise scale and error bar that `summarize` reports. [Grouping](04-grouping.md) releases one row per group, with public keys or keys that the library selects privately. [Identifier truncation and bounds](05-identifier-truncation.md) truncates the rows of a person who owns many, and bounds the groups that the person touches. [Preparing microdata](06-preparing-microdata.md) covers the expressions that OpenDP allows before an aggregation, and the data types it knows. [Assessing utility and choosing the noise](07-utility-and-noise.md) turns scales into error bars and back, and compares Laplace with Gaussian noise under zero-concentrated differential privacy.
+The chapters follow the documentation's tabular-data tutorial. [Essential statistics](03-essential-statistics.md) releases counts, sums, means, medians and quantiles, then interprets the scales and error bars from `summarize`. [Grouping](04-grouping.md) releases one row per group, using public or privately selected keys. [Identifier truncation and bounds](05-identifier-truncation.md) limits each person's rows and affected groups. [Preparing microdata](06-preparing-microdata.md) covers supported pre-aggregation expressions and data types. [Assessing utility and choosing the noise](07-utility-and-noise.md) converts scales to error bars and compares Laplace and Gaussian noise under zero-concentrated differential privacy.
 
 | Chapter | Question it answers |
 | --- | --- |
@@ -14,4 +14,4 @@ The chapters follow the documentation's tutorial on tabular data. [Essential sta
 
 : The chapters of this part and the questions they answer. {#tbl-p2-chapters}
 
-At the end of this part, you can release a table of statistics on a dataset in which each person owns many rows. Each cell has an error bar, and the whole table has a guarantee.
+By the end of this part, you can release statistics on data with multiple rows per person, interpret cell-level error bars and state the table's privacy guarantee.
