@@ -412,7 +412,7 @@ window.Quarto = {
     <div>
     <div class="quarto-title-meta-heading">Published</div>
     <div class="quarto-title-meta-contents">
-      <p class="date">Version 2026-11-02</p>
+      <p class="date">Version 2026-11-04</p>
     </div>
   </div>
   
@@ -424,20 +424,20 @@ window.Quarto = {
 </header>
 
 
-<p>Suppose you hold the scores of a hundred people. You want to publish their number and their average, so that nobody can work out any one person’s score. This chapter does that with OpenDP, and it introduces the idea that the whole library is built on. A <strong>differentially private</strong> release is a randomized computation whose noise is calibrated to how much one person can change the answer. OpenDP does the calibration, refuses a computation that it cannot calibrate, and keeps count of what you spend.</p>
-<p>The chapter follows the documentation’s quickstart and its typical workflow. You build a Laplace mechanism by hand and read its guarantee. Then the Context API does the work. You state the privacy unit and the budget, give the data once, and release a count and a mean.</p>
+<p>Suppose you hold the scores of a hundred people. You want to publish their number and average without letting anyone work out an individual’s score. This chapter makes those releases with OpenDP and introduces the idea behind the library. A <strong>differentially private</strong> release is a randomized computation whose noise is calibrated to how much one person can change the answer. OpenDP does that calibration, refuses computations it cannot calibrate, and tracks the privacy budget you spend.</p>
+<p>Following the documentation’s quickstart, the chapter first builds a Laplace mechanism by hand and reads its guarantee. It then uses an OpenDP context to release a count and a mean.</p>
 <p>The script <a href="https://github.com/manuelvloureiro/privacy-preserving-machine-learning-book/blob/main/code/part01-getting-started/opendp_first_release.py">opendp_first_release.py</a> runs every step on OpenDP 0.16.0, with a hundred integers from a seeded generator in place of the scores. The noise scales, the error bars and the privacy maps that it prints are the same on every run. The released values are not, because OpenDP’s noise comes from a cryptographic generator without a seed. So this page shows them in one block, marked as one run.</p>
 <div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb1"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="ex">uv</span> run python code/part01-getting-started/opendp_first_release.py</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <section id="sec-first-install" class="level2" data-number="1.1">
 <h2 data-number="1.1" class="anchored" data-anchor-id="sec-first-install"><span class="header-section-number">1.1</span> Install the library</h2>
-<p>OpenDP is a Python package with a Rust core, and it reads tables through Polars, so install it with the Polars extra.</p>
+<p>OpenDP is a Python package with a Rust core. It reads tables through Polars, so install the Polars extra:</p>
 <div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb2"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="ex">pip</span> install <span class="st">'opendp[polars]'</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-<p>Every number in this book comes from <code>opendp[polars]==0.16.0</code> with Polars 1.36.1, which the repository pins. Then import the prelude, which gathers the library’s modules under one name, and switch on the <code>contrib</code> feature.</p>
+<p>The repository pins <code>opendp[polars]==0.16.0</code> and Polars 1.36.1; all numbers in this book use those versions. Next, import the prelude, which gathers the library’s modules under one name, and enable the <code>contrib</code> feature.</p>
 <div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb3"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> opendp.prelude <span class="im">as</span> dp</span>
 <span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a>dp.enable_features(<span class="st">"contrib"</span>)</span>
 <span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(dp.__version__)  <span class="co"># 0.16.0</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-<p>The feature flag is about trust. Each component of OpenDP must come with a written proof that it does what it claims, and a review of that proof. Until the review is complete, the component is marked <code>contrib</code>, and the library runs it only if you opt in. In version 0.16.0, almost everything in this book is still <code>contrib</code>, so the line goes at the top of every script.</p>
+<p>The feature flag marks components whose proofs have not completed review. Every component needs a written proof that it does what it claims, and that proof must be reviewed. Until then, OpenDP marks the component <code>contrib</code> and runs it only if you opt in. In version 0.16.0, almost everything in this book is still <code>contrib</code>, so every script enables the feature.</p>
 </section>
 <section id="sec-first-number" class="level2" data-number="1.2">
 <h2 data-number="1.2" class="anchored" data-anchor-id="sec-first-number"><span class="header-section-number">1.2</span> One noisy number</h2>
@@ -459,7 +459,7 @@ laplace scale 2: map(1.0)=0.5</code></pre>
 </section>
 <section id="sec-first-steps" class="level2" data-number="1.3">
 <h2 data-number="1.3" class="anchored" data-anchor-id="sec-first-steps"><span class="header-section-number">1.3</span> The five steps of an analysis</h2>
-<p>Every analysis in this book follows the five steps of the documentation’s typical workflow. The first three are decisions that you make before you touch the data. The fourth gives the data to the library, and the fifth asks it questions.</p>
+<p>The documentation’s typical workflow has five steps. Before accessing the data, decide on the privacy unit, the budget and the public information you will use. Then give the data to the library through a context, and submit queries through that context.</p>
 <p>The first step is to identify the <strong>privacy unit</strong>, which is what the guarantee protects. The documentation calls it the unit of privacy. Here each person contributes one row, so the unit is one row. Two datasets are <strong>neighbours</strong> when one is the other with one more or one less row. OpenDP writes this as a distance of 1 under the symmetric distance.</p>
 <div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb6"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> opendp.prelude <span class="im">as</span> dp</span>
 <span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a></span>

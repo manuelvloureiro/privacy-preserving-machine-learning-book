@@ -594,7 +594,7 @@ window.Quarto = {
     <div>
     <div class="quarto-title-meta-heading">Published</div>
     <div class="quarto-title-meta-contents">
-      <p class="date">Version 2026-11-02</p>
+      <p class="date">Version 2026-11-04</p>
     </div>
   </div>
   
@@ -608,7 +608,7 @@ window.Quarto = {
 
 <section id="why-this-matters" class="level2" data-number="15.1">
 <h2 data-number="15.1" class="anchored" data-anchor-id="why-this-matters"><span class="header-section-number">15.1</span> Why this matters</h2>
-<p>Suppose that a hospital wants to publish, with a differential privacy (DP) guarantee, how many of its patients have diabetes. Almost every such release, and every noisy gradient of private training, uses one of the two mechanisms of this chapter. Both calculate the exact answer of a query <span class="math inline">\(f\)</span> on the dataset <span class="math inline">\(D\)</span>, add fresh random noise, written <span class="math inline">\(Z\)</span>, and publish <span id="eq-auto-03laplacegaussian-1"><span class="math display">\[M(D) = f(D) + Z. \tag{15.1}\]</span></span> Three decisions fix such a mechanism. The noise must hide the <strong>sensitivity</strong>, which is how far one record can move the answer. The noise distribution sets the kind of guarantee, because Laplace noise gives pure DP and Gaussian noise needs a small slack <span class="math inline">\(\delta\)</span>. And a calibration formula sets the amount of noise for a target <span class="math inline">\(\varepsilon\)</span>, through the privacy loss of <a href="../part03-dp-foundations/01-definition.html#sec-dpdef-divergences">the definition of differential privacy</a>.</p>
+<p>Suppose a hospital wants to publish how many patients have diabetes, with a differential privacy (DP) guarantee. Almost every such release uses one of the two mechanisms in this chapter. Private training uses them too, adding noise to each gradient. In both cases, the mechanism calculates a query <span class="math inline">\(f\)</span> on dataset <span class="math inline">\(D\)</span>, adds fresh random noise <span class="math inline">\(Z\)</span>, and publishes <span id="eq-auto-03laplacegaussian-1"><span class="math display">\[M(D) = f(D) + Z. \tag{15.1}\]</span></span> Three decisions determine the mechanism. First, the noise must hide the <strong>sensitivity</strong>, the largest change one record can cause to the answer. Second, choose a noise distribution: Laplace gives pure DP, while Gaussian needs a small slack <span class="math inline">\(\delta\)</span>. Third, use a calibration formula to find the noise needed for a target <span class="math inline">\(\varepsilon\)</span>. The formula follows from the privacy loss in <a href="../part03-dp-foundations/01-definition.html#sec-dpdef-divergences">the definition of differential privacy</a>.</p>
 </section>
 <section id="sec-lg-sensitivity" class="level2" data-number="15.2">
 <h2 data-number="15.2" class="anchored" data-anchor-id="sec-lg-sensitivity"><span class="header-section-number">15.2</span> Sensitivity</h2>

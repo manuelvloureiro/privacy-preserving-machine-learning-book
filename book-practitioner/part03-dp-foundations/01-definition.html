@@ -597,7 +597,7 @@ window.Quarto = {
     <div>
     <div class="quarto-title-meta-heading">Published</div>
     <div class="quarto-title-meta-contents">
-      <p class="date">Version 2026-11-02</p>
+      <p class="date">Version 2026-11-04</p>
     </div>
   </div>
   
@@ -611,11 +611,11 @@ window.Quarto = {
 
 <section id="why-this-matters" class="level2" data-number="13.1">
 <h2 data-number="13.1" class="anchored" data-anchor-id="why-this-matters"><span class="header-section-number">13.1</span> Why this matters</h2>
-<p>Every attack in <a href="../part02-attacks/00-introduction.html">Threat models and attacks</a> runs an algorithm on one of two datasets that differ in one person, and guesses from the output which dataset it saw. <strong>Differential privacy (DP)</strong> makes the two outputs look alike against every test, including tests that nobody has invented yet. It is a property of the algorithm, not of the data, so you can check it before anyone touches the data.</p>
+<p>Every attack in <a href="../part02-attacks/00-introduction.html">Threat models and attacks</a> compares two datasets that differ in one person. It guesses which dataset it saw from the algorithm’s output. <strong>Differential privacy (DP)</strong> makes those outputs look alike under every test, even tests nobody has invented yet. DP is a property of the algorithm, not the data, so you can check it before anyone accesses the data.</p>
 </section>
 <section id="sec-dpdef-neighbours" class="level2" data-number="13.2">
 <h2 data-number="13.2" class="anchored" data-anchor-id="sec-dpdef-neighbours"><span class="header-section-number">13.2</span> Neighbouring datasets</h2>
-<p>The first question about a claim is what “differ in one record” means, and the <strong>neighbouring relation</strong> answers it. Under <strong>add/remove</strong>, two datasets are neighbours when one has a record that the other lacks, so the guarantee hides whether a person is in the data at all. Under <strong>replace</strong>, they have the same size and differ in the value of one record, so the guarantee hides only what the record says. A replacement is a removal and then an addition, and each step costs the privacy level <span class="math inline">\(\varepsilon\)</span> of <a href="#sec-dpdef-definition" class="quarto-xref"><span>Section 13.3</span></a>, so <span id="eq-dpdef-replace"><span class="math display">\[\varepsilon\text{-DP under add/remove} \implies 2\varepsilon\text{-DP under replace}. \tag{13.1}\]</span></span> The reverse fails, because replace never compares datasets of different sizes.</p>
+<p>First ask what it means for datasets to “differ in one record.” The <strong>neighbouring relation</strong> gives the answer. Under <strong>add/remove</strong>, neighbours differ by one record, so the guarantee hides whether a person is in the data at all. Under <strong>replace</strong>, they have the same size but one record has a different value, so the guarantee hides what that record says. A replacement can be viewed as a removal followed by an addition. Each step costs the privacy level <span class="math inline">\(\varepsilon\)</span> from <a href="#sec-dpdef-definition" class="quarto-xref"><span>Section 13.3</span></a>, so <span id="eq-dpdef-replace"><span class="math display">\[\varepsilon\text{-DP under add/remove} \implies 2\varepsilon\text{-DP under replace}. \tag{13.1}\]</span></span> The reverse fails, because replace never compares datasets of different sizes.</p>
 <p>You also choose the <strong>unit of privacy</strong>, what one record is. At the <strong>example level</strong>, it is one training record or one event, and at the <strong>user level</strong>, all the data of one person. A user who wrote 200 messages is then a group of 200 records under example-level DP, with protection only at <span class="math inline">\(200\varepsilon\)</span> (<a href="../part03-dp-foundations/02-properties.html">Post-processing, group privacy and composition</a>). So check that the claim protects the person. The guarantee must also hide every record that the data format allows, even a person aged 900, who could move an average a long way. So private algorithms clip each input to a fixed range before they add noise.</p>
 </section>
 <section id="sec-dpdef-definition" class="level2" data-number="13.3">

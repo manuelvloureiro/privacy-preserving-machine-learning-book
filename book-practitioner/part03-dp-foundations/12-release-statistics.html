@@ -597,7 +597,7 @@ window.Quarto = {
     <div>
     <div class="quarto-title-meta-heading">Published</div>
     <div class="quarto-title-meta-contents">
-      <p class="date">Version 2026-11-02</p>
+      <p class="date">Version 2026-11-04</p>
     </div>
   </div>
   
@@ -611,10 +611,10 @@ window.Quarto = {
 
 <section id="why-this-matters" class="level2" data-number="24.1">
 <h2 data-number="24.1" class="anchored" data-anchor-id="why-this-matters"><span class="header-section-number">24.1</span> Why this matters</h2>
-<p>Suppose that you are the analytics engineer of an online shop. The business wants a dashboard of purchase lines, revenue and the typical sale, overall and per country, and of how many customers bought each product. The figures describe customers, so they need a differential privacy (DP) guarantee. But one customer has many rows, and a guarantee for one row protects a single purchase, not the person behind a hundred. This chapter does the job with OpenDP, from the unit to the written guarantee.</p>
+<p>Suppose you are the analytics engineer of an online shop. The business wants a dashboard showing purchase lines, revenue and typical sale, overall and by country. It also wants to know how many customers bought each product. Because these figures describe customers, they need a differential privacy (DP) guarantee. One customer may have many rows, however. A guarantee for one row protects a purchase, not the person behind a hundred. This chapter uses OpenDP to build the release, from choosing the privacy unit to writing down the guarantee.</p>
 <p>The data are the Online Retail set from the University of California, Irvine (UCI) Machine Learning Repository, with 541,909 invoice lines of a British online shop. Each line records one product on one invoice, with its quantity, unit price, customer and country. The script <a href="https://github.com/manuelvloureiro/privacy-preserving-machine-learning-book/blob/main/code/part03-dp-foundations/practitioner_release_statistics.py">practitioner_release_statistics.py</a> does every step in less than a minute, with OpenDP 0.16.0 and Polars 1.36.1.</p>
 <div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb1"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="ex">uv</span> run python code/part03-dp-foundations/practitioner_release_statistics.py</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-<p>OpenDP takes its noise from a cryptographic generator that has no seed, so the released values change on every run. So this page quotes scales, error bars and thresholds, which contain no noise, and shows released values only in a block marked as one run.</p>
+<p>OpenDP draws noise from a cryptographic generator that has no seed, so released values change on every run. This page therefore quotes deterministic scales, error bars and thresholds. It shows released values only in a block marked as one run.</p>
 </section>
 <section id="sec-relstat-library" class="level2" data-number="24.2">
 <h2 data-number="24.2" class="anchored" data-anchor-id="sec-relstat-library"><span class="header-section-number">24.2</span> Choose the library</h2>

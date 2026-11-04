@@ -593,7 +593,7 @@ window.Quarto = {
     <div>
     <div class="quarto-title-meta-heading">Published</div>
     <div class="quarto-title-meta-contents">
-      <p class="date">Version 2026-11-02</p>
+      <p class="date">Version 2026-11-04</p>
     </div>
   </div>
   
@@ -607,12 +607,12 @@ window.Quarto = {
 
 <section id="why-this-matters" class="level2" data-number="14.1">
 <h2 data-number="14.1" class="anchored" data-anchor-id="why-this-matters"><span class="header-section-number">14.1</span> Why this matters</h2>
-<p>A private mechanism is never the whole system. Its output is rounded or goes into a model, a person often owns many records, and an analyst seldom asks only one question. Three properties of differential privacy (DP) cover these cases, which are post-processing, group privacy and composition. With them you prove each building block once and keep a ledger of what you spend.</p>
+<p>A private mechanism is only one part of a system. You may round its output or use it to fit a model. One person may own many records, and an analyst may ask many questions. Three properties of differential privacy (DP) cover these cases: post-processing, group privacy and composition. They let you prove each building block once and track the privacy budget you spend.</p>
 </section>
 <section id="sec-dpprop-post" class="level2" data-number="14.2">
 <h2 data-number="14.2" class="anchored" data-anchor-id="sec-dpprop-post"><span class="header-section-number">14.2</span> Post-processing</h2>
-<p>Take a mechanism <span class="math inline">\(M\)</span> that is DP with privacy level <span class="math inline">\(\varepsilon\)</span> and <a href="../part03-dp-foundations/01-definition.html#sec-dpdef-divergences">slack</a> <span class="math inline">\(\delta\)</span>. Apply to its output a function <span class="math inline">\(f\)</span> that never reads the data, although it can use random numbers of its own. Then the processed release is just as private, <span id="eq-dpprop-post"><span class="math display">\[f(M(D)) \text{ is } (\varepsilon, \delta)\text{-DP}. \tag{14.1}\]</span></span></p>
-<p>So it costs nothing to round a noisy count, to clamp it at zero, or to make noisy subtotals agree with their noisy total. So a private system adds noise at one narrow point, such as counts or gradients, and treats everything after it as public. The rule also covers attackers, because a membership-inference attack is a function of the output. So <a href="../part03-dp-foundations/01-definition.html#sec-dpdef-testing">the definition’s</a> limit on the success of an attack holds even for attacks invented after the release.</p>
+<p>Take a mechanism <span class="math inline">\(M\)</span> that is DP with privacy level <span class="math inline">\(\varepsilon\)</span> and <a href="../part03-dp-foundations/01-definition.html#sec-dpdef-divergences">slack</a> <span class="math inline">\(\delta\)</span>. Now apply a function <span class="math inline">\(f\)</span> to its output. The function must not read the data, but it may use its own random numbers. The processed release stays just as private: <span id="eq-dpprop-post"><span class="math display">\[f(M(D)) \text{ is } (\varepsilon, \delta)\text{-DP}. \tag{14.1}\]</span></span></p>
+<p>Rounding a noisy count, clamping it at zero or reconciling noisy subtotals with their total therefore costs nothing. A private system can add noise at one narrow point, such as counts or gradients, and treat later computations as public. The same rule covers attackers: a membership-inference attack is a function of the output. So <a href="../part03-dp-foundations/01-definition.html#sec-dpdef-testing">the definition’s</a> limit on attack success also applies to attacks invented after the release.</p>
 <p>The condition is that <span class="math inline">\(f\)</span> never reads the data. “Take the noisy top category, then report its exact count” breaks it, because the second step is a new and non-private mechanism.</p>
 </section>
 <section id="sec-dpprop-group" class="level2" data-number="14.3">

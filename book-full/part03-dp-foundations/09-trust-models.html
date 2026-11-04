@@ -680,7 +680,7 @@ window.Quarto = {
     <div>
     <div class="quarto-title-meta-heading">Published</div>
     <div class="quarto-title-meta-contents">
-      <p class="date">Version 2026-11-02</p>
+      <p class="date">Version 2026-11-04</p>
     </div>
   </div>
   
@@ -692,8 +692,8 @@ window.Quarto = {
 </header>
 
 
-<p>Every mechanism so far in this part assumed a <strong>trusted curator</strong>, who holds the raw data, runs the mechanism and releases only its output. The guarantee of differential privacy (DP) is about that output. It says nothing about the curator’s database, the engineer who can read it or the court order that can demand it. As <a href="../part02-attacks/01-threat-models.html">Threat models</a> put it, trust decides who the adversary is. A browser vendor collecting usage statistics is exactly the party its users do not want to see their data.</p>
-<p>How much accuracy does each weaker trust assumption cost, and what do you trust instead? There are four answers (<a href="#fig-trust-models" class="quarto-xref">Figure&nbsp;<span>26.1</span></a>). In the <strong>central</strong> model the curator is trusted, and the noise is added once, to the answer. In the <strong>local</strong> model nobody is trusted, and each person randomizes their own record before it leaves their device. In the <strong>shuffle</strong> model a shuffler is trusted only to unlink reports from senders. In the <strong>distributed</strong> model cryptography is trusted, and each person adds a share of the noise to a sum that a protocol reveals only in total.</p>
+<p>So far, every mechanism in this part has assumed a <strong>trusted curator</strong>. The curator holds the raw data, runs the mechanism and releases only its output. Differential privacy (DP) protects that output, not the curator’s database, an engineer who can read it or a court order that can demand it. As <a href="../part02-attacks/01-threat-models.html">Threat models</a> explains, trust determines who the adversary is. For example, users may not want a browser vendor collecting usage statistics to see their data.</p>
+<p>What accuracy does each weaker trust assumption cost, and what must you trust instead? <a href="#fig-trust-models" class="quarto-xref">Figure&nbsp;<span>26.1</span></a> shows four models. The <strong>central</strong> model trusts the curator and adds noise once to the answer. The <strong>local</strong> model trusts nobody; each person randomizes their record before it leaves their device. The <strong>shuffle</strong> model trusts a shuffler only to unlink reports from senders. The <strong>distributed</strong> model trusts cryptography: each person adds part of the noise, and a protocol reveals only the total.</p>
 <p>The models differ in where the noise enters. The further upstream it enters, the fewer parties you trust and the more noise reaches the answer. That is because <span class="math inline">\(n\)</span> independent noises of one size add up to about <span class="math inline">\(\sqrt n\)</span> times that size. The running example is the telemetry of an app, starting with one yes/no question put to <span class="math inline">\(n = 10{,}000\)</span> users, of whom 3,000 hold a 1. At <span class="math inline">\(\varepsilon = \ln 3\)</span>, a trusted curator answers with standard deviation 1.287 on the count, while randomized response on every device has 86.6. The chapter proves that no local protocol avoids that factor of 67.3, and shows how shuffling and distributed noise win the accuracy back.</p>
 <div id="tbl-trust-symbols" class="quarto-float quarto-figure quarto-figure-center anchored">
 <figure class="quarto-float quarto-float-tbl figure">

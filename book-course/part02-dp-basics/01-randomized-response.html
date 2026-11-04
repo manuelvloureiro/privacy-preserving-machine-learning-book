@@ -379,7 +379,7 @@ window.Quarto = {
     <div>
     <div class="quarto-title-meta-heading">Published</div>
     <div class="quarto-title-meta-contents">
-      <p class="date">Version 2026-11-02</p>
+      <p class="date">Version 2026-11-04</p>
     </div>
   </div>
   
@@ -391,14 +391,14 @@ window.Quarto = {
 </header>
 
 
-<p>A group of people each hold one sensitive bit, and an analyst wants the fraction of ones without learning anyone’s bit. This chapter solves the problem with a biased coin, the oldest private algorithm. It then turns the idea behind the coin, plausible deniability, into the definition of differential privacy (DP), on which the rest of the course builds.</p>
+<p>Each person in a group holds one sensitive bit. An analyst wants the fraction of ones without learning anyone’s bit. This chapter solves the problem with a biased coin, the oldest private algorithm. That method is randomized response. Its idea of plausible deniability also leads to the definition of differential privacy (DP), which the rest of the course builds on.</p>
 <section id="sec-rr-mechanism" class="level2" data-number="3.1">
 <h2 data-number="3.1" class="anchored" data-anchor-id="sec-rr-mechanism"><span class="header-section-number">3.1</span> Randomized response</h2>
 <p>Write <span class="math inline">\(n\)</span> for the number of people. Person number <span class="math inline">\(i\)</span> holds a bit <span class="math inline">\(x_i \in \{0,1\}\)</span>, for instance whether they cheated on an exam, and the analyst wants the fraction of ones,</p>
 <p><span id="eq-auto-01randomizedresponse-1"><span class="math display">\[
 p = \frac{1}{n}\sum_{i=1}^n x_i .
 \tag{3.1}\]</span></span></p>
-<p>Each person sends the analyst one message <span class="math inline">\(Y_i\)</span>, which may depend on <span class="math inline">\(x_i\)</span> and on coins that only person <span class="math inline">\(i\)</span> sees. At one extreme, if <span class="math inline">\(Y_i = x_i\)</span>, the analyst computes <span class="math inline">\(p\)</span> exactly but sees every bit. At the other, if <span class="math inline">\(Y_i\)</span> is a fair coin independent of <span class="math inline">\(x_i\)</span>, the analyst learns nothing about anyone. But the analyst also learns nothing about <span class="math inline">\(p\)</span>, because the average of the reports has the distribution <span class="math inline">\(\frac1n\mathrm{Bin}(n, \frac12)\)</span> whatever the data. Randomized response goes between the two.</p>
+<p>Each person sends the analyst one message <span class="math inline">\(Y_i\)</span>, determined by their bit <span class="math inline">\(x_i\)</span> and private coins. If everyone reports <span class="math inline">\(Y_i = x_i\)</span>, the analyst computes <span class="math inline">\(p\)</span> exactly but sees every bit. If each report is instead a fair coin, independent of <span class="math inline">\(x_i\)</span>, the analyst learns nothing about anyone. But then the reports reveal nothing about <span class="math inline">\(p\)</span> either: their average has distribution <span class="math inline">\(\frac1n\mathrm{Bin}(n, \frac12)\)</span> for every dataset. Randomized response balances these two extremes.</p>
 <div id="def-rr-mechanism" class="theorem definition">
 <p><span class="theorem-title"><strong>Definition 3.1 (Randomized response)</strong></span> For a bias <span class="math inline">\(\kappa \in [0, 1/2]\)</span>, which sets the probability <span class="math inline">\(\tfrac12 + \kappa\)</span> of reporting the truth, person <span class="math inline">\(i\)</span> reports</p>
 <p><span id="eq-auto-01randomizedresponse-2"><span class="math display">\[

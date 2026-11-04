@@ -678,7 +678,7 @@ window.Quarto = {
     <div>
     <div class="quarto-title-meta-heading">Published</div>
     <div class="quarto-title-meta-contents">
-      <p class="date">Version 2026-11-02</p>
+      <p class="date">Version 2026-11-04</p>
     </div>
   </div>
   
@@ -690,8 +690,8 @@ window.Quarto = {
 </header>
 
 
-<p>Every privacy proof so far was a statement about real numbers, such as the proof in <a href="../part03-dp-foundations/03-laplace-gaussian.html">the Laplace and Gaussian mechanisms</a> that compares two densities on the real line. A computer has only floating-point numbers, a finite set with uneven gaps, and random bits. So the program that “samples <span class="math inline">\(\mathrm{Lap}(b)\)</span>” produces a distribution that the proof says nothing about. Mironov (2012) showed that the gap matters: the textbook Laplace sampler has outputs that only one of two neighbouring datasets can produce, and an observer who sees one knows which dataset was used.</p>
-<p>The one idea of this chapter is that <strong>differential privacy (DP) is a property of the output distribution the code actually produces</strong>, so the code must produce exactly the distribution the proof is about. One way there keeps floating point and rounds the output to a coarse grid, so that every output is reachable from every input. The other way samples integer noise for integer-valued queries exactly, from uniform random integers, which gives the discrete Laplace and the discrete Gaussian mechanisms.</p>
+<p>The privacy proofs so far describe real-valued distributions. For example, the proof in <a href="../part03-dp-foundations/03-laplace-gaussian.html">the Laplace and Gaussian mechanisms</a> compares densities on the real line. A computer instead uses floating-point numbers, a finite set with uneven gaps, and random bits. So a program that “samples <span class="math inline">\(\mathrm{Lap}(b)\)</span>” may produce a distribution the proof does not cover. Mironov (2012) showed that this matters: the textbook Laplace sampler can produce outputs from one neighbouring dataset but not the other. Such an output reveals which dataset was used.</p>
+<p>The key idea is that <strong>differential privacy (DP) applies to the output distribution the code actually produces</strong>. The code must therefore produce the distribution covered by the proof. One solution keeps floating point but rounds outputs to a coarse grid, making every output reachable from every input. Another uses integer-valued queries and samples integer noise exactly from uniform random integers, giving the discrete Laplace and discrete Gaussian mechanisms.</p>
 <p>The running example is a hospital’s count of patients with a rare diagnosis, with sensitivity <span class="math inline">\(\Delta_1 f = 1\)</span> under add/remove neighbours, released at <span class="math inline">\(\varepsilon = 1\)</span>. In a toy floating-point model of the Laplace mechanism, almost half of the releases name the true count with certainty. The discrete Laplace releases the exact count with probability 0.4621, yet no output identifies the count, and the discrete Gaussian at <span class="math inline">\(\sigma = 1\)</span> has <span class="math inline">\(\delta = 0.1414\)</span> at <span class="math inline">\(\varepsilon = 1\)</span>, close to the continuous Gaussian’s 0.1269.</p>
 <section id="sec-discrete-float" class="level2" data-number="25.1">
 <h2 data-number="25.1" class="anchored" data-anchor-id="sec-discrete-float"><span class="header-section-number">25.1</span> Floating-point Laplace breaks differential privacy</h2>
